@@ -3,23 +3,24 @@
 (() => {
   const entryLayer = document.getElementById('entryLayer');
   const entryVideo = document.getElementById('entryVideo');
-  const backgroundMusic = document.getElementById('backgroundMusic');
+  const SAKE_BINKS_URL = 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/sake_binks.mp3';
 
   function closeEntry() {
     if (entryLayer) entryLayer.hidden = true;
     document.body.classList.remove('entry-open');
   }
 
-  function playBackgroundMusic() {
-    if (!backgroundMusic) return;
-    backgroundMusic.currentTime = 0;
+  function startSakeDeBinks() {
+    const backgroundMusic = new Audio(SAKE_BINKS_URL);
+    backgroundMusic.loop = true;
     backgroundMusic.volume = 0.45;
     backgroundMusic.play().catch(() => {});
+    window.invitationBackgroundMusic = backgroundMusic;
   }
 
   function onEntryEnded() {
     closeEntry();
-    playBackgroundMusic();
+    startSakeDeBinks();
   }
 
   function onEntryError() {
