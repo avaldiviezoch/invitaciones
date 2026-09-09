@@ -468,21 +468,35 @@ body.entry-open{overflow:hidden}
   box-shadow:0 5px 12px rgba(92,75,57,.12);
   z-index:4;
   -webkit-tap-highlight-color:transparent;
-  transition:transform .18s ease,background .18s ease,box-shadow .18s ease;
+  transition:transform .2s cubic-bezier(.2,.7,.2,1),background .2s ease,box-shadow .2s ease,border-color .2s ease;
+  animation:locationButtonGlow 2.8s ease-in-out infinite;
+}
+
+@keyframes locationButtonGlow{
+  0%,100%{
+    box-shadow:0 5px 12px rgba(92,75,57,.12),0 0 0 0 rgba(119,129,101,0);
+  }
+  50%{
+    box-shadow:0 7px 16px rgba(92,75,57,.16),0 0 0 7px rgba(119,129,101,.10);
+  }
 }
 
 .location-map-button:hover,
 .location-map-button:focus-visible{
-  transform:translateX(-50%) translateY(-2px);
-  background:rgba(247,238,225,.98);
-  box-shadow:0 8px 16px rgba(92,75,57,.16),inset 0 0 0 3px rgba(255,255,255,.26);
+  animation:none;
+  transform:translateX(-50%) translateY(-3px);
+  background:rgba(249,241,229,.99);
+  border-color:rgba(91,101,78,.88);
+  box-shadow:0 10px 20px rgba(92,75,57,.18),0 0 0 4px rgba(255,255,255,.30);
   outline:none;
 }
 
 .location-map-button:active{
-  transform:translateX(-50%) translateY(1px) scale(.99);
-  background:rgba(236,224,207,.98);
-  box-shadow:0 2px 6px rgba(92,75,57,.12);
+  animation:none;
+  transform:translateX(-50%) translateY(2px) scale(.96);
+  background:rgba(229,217,199,.99);
+  border-color:rgba(82,92,69,.95);
+  box-shadow:0 1px 3px rgba(92,75,57,.16),inset 0 3px 7px rgba(91,101,78,.15);
 }
 
 @media(max-width:540px){
@@ -609,4 +623,5 @@ body.entry-open{overflow:hidden}
 
 @media(prefers-reduced-motion:reduce){
   .first-entrance-note-line{animation:none;clip-path:none}
+  .location-map-button{animation:none}
 }
