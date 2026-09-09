@@ -249,18 +249,110 @@ body.entry-open{overflow:hidden}
 }
 
 .invite-card-asset{
+  position:relative;
   width:100%;
   margin:0;
   padding:0;
   background:var(--first-entrance-bg);
 }
 
-.invite-card-asset img{
+.invite-card-image{
   display:block;
   width:100%;
   height:auto;
   margin:0;
   border:0;
+}
+
+.invite-card-copy{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:2;
+  width:76%;
+  margin:0;
+  padding:0;
+  text-align:center;
+  color:#4b5137;
+  pointer-events:none;
+}
+
+.invite-card-kicker{
+  top:44.5%;
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(13px,3.4vw,23px);
+  line-height:1.35;
+  letter-spacing:.16em;
+  font-weight:600;
+  text-transform:uppercase;
+}
+
+.invite-card-title{
+  top:52%;
+  font-family:'Great Vibes',cursive;
+  font-weight:400;
+  line-height:.78;
+  color:#465034;
+  text-shadow:0 1px 0 rgba(255,255,255,.32);
+}
+
+.invite-card-title span{
+  display:block;
+  font-size:clamp(56px,16.2vw,112px);
+}
+
+.invite-card-month{
+  top:69.4%;
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(15px,4vw,27px);
+  letter-spacing:.22em;
+  font-weight:600;
+}
+
+.invite-card-month::after{
+  content:'';
+  display:block;
+  width:46%;
+  height:1px;
+  margin:9px auto 0;
+  background:linear-gradient(90deg,transparent,rgba(173,136,73,.78),transparent);
+}
+
+.invite-card-date{
+  top:75.1%;
+  display:grid;
+  grid-template-columns:1fr 1px auto 1px 1fr;
+  align-items:center;
+  gap:16px;
+  width:60%;
+  font-family:'Cormorant Garamond',serif;
+}
+
+.invite-card-date span{
+  font-size:clamp(15px,4.3vw,29px);
+  font-weight:500;
+}
+
+.invite-card-date strong{
+  font-size:clamp(48px,13vw,88px);
+  line-height:1;
+  font-weight:300;
+  color:#a88743;
+}
+
+.invite-card-date i{
+  display:block;
+  width:1px;
+  height:58px;
+  background:rgba(168,135,67,.66);
+}
+
+.invite-card-ornament{
+  top:83.5%;
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(20px,5vw,32px);
+  color:#a88743;
+  opacity:.82;
 }
 
 @media(max-width:540px){
@@ -318,6 +410,42 @@ body.entry-open{overflow:hidden}
   .celebration-copy-script{
     margin-top:40px;
     font-size:clamp(23px,6.8vw,31px);
+  }
+
+  .invite-card-kicker{
+    top:44.3%;
+    font-size:clamp(12px,3.5vw,16px);
+  }
+
+  .invite-card-title{
+    top:52.3%;
+  }
+
+  .invite-card-title span{
+    font-size:clamp(54px,16vw,74px);
+  }
+
+  .invite-card-month{
+    top:69.6%;
+    font-size:clamp(14px,3.8vw,18px);
+  }
+
+  .invite-card-date{
+    top:75.3%;
+    width:66%;
+    gap:12px;
+  }
+
+  .invite-card-date span{
+    font-size:clamp(14px,4vw,18px);
+  }
+
+  .invite-card-date strong{
+    font-size:clamp(44px,12.5vw,58px);
+  }
+
+  .invite-card-date i{
+    height:46px;
   }
 }
 
