@@ -832,6 +832,10 @@ body.entry-open{overflow:hidden}
     font-size:clamp(15px,4.3vw,19px);
   }
 
+  .crew-adventure{
+    margin-top:-42px;
+  }
+
   .crew-adventure-title{
     top:16.2%;
     width:58%;
