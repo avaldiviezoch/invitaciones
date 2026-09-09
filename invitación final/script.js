@@ -6,6 +6,7 @@
   const firstEntrance = document.getElementById('firstEntrance');
   const petals = document.getElementById('petals');
   const SAKE_BINKS_URL = 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/sake_binks.mp3';
+  const WEDDING_DATE = new Date('2027-01-16T00:00:00-05:00').getTime();
 
   function createPetals() {
     if (!petals) return;
@@ -30,6 +31,26 @@
 
       petals.appendChild(petal);
     }
+  }
+
+  function renderCountdown() {
+    const remaining = Math.max(0, WEDDING_DATE - Date.now());
+    const totalSeconds = Math.floor(remaining / 1000);
+    const days = Math.floor(totalSeconds / 86400);
+    const hours = Math.floor((totalSeconds % 86400) / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+    const pad = value => String(value).padStart(2, '0');
+
+    const daysElement = document.querySelector('[data-countdown-days]');
+    const hoursElement = document.querySelector('[data-countdown-hours]');
+    const minutesElement = document.querySelector('[data-countdown-minutes]');
+    const secondsElement = document.querySelector('[data-countdown-seconds]');
+
+    if (daysElement) daysElement.textContent = String(days);
+    if (hoursElement) hoursElement.textContent = pad(hours);
+    if (minutesElement) minutesElement.textContent = pad(minutes);
+    if (secondsElement) secondsElement.textContent = pad(seconds);
   }
 
   function closeEntry() {
@@ -61,6 +82,8 @@
   }
 
   createPetals();
+  renderCountdown();
+  window.setInterval(renderCountdown, 1000);
 
   if (entryVideo) {
     entryVideo.controls = false;
