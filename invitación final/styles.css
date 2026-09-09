@@ -592,11 +592,11 @@ body.entry-open{overflow:hidden}
 .couple-photo-collage{
   position:relative;
   width:100%;
-  height:clamp(500px,105vw,710px);
+  height:clamp(500px,104vw,710px);
   margin:0;
   padding:0;
   overflow:hidden;
-  background:#eee5d1;
+  background:var(--first-entrance-bg);
 }
 
 .couple-photo-collage img{
@@ -605,18 +605,22 @@ body.entry-open{overflow:hidden}
   width:46%;
   height:auto;
   margin:0;
+  padding:0;
   border:0;
-  box-shadow:0 8px 22px rgba(0,0,0,.09);
+  box-shadow:none;
+  object-fit:contain;
 }
 
 .couple-photo-left{
-  left:0;
+  left:5%;
   top:5%;
+  z-index:1;
 }
 
 .couple-photo-right{
-  right:0;
-  top:17%;
+  right:4%;
+  top:16%;
+  z-index:2;
 }
 
 @media(max-width:540px){
