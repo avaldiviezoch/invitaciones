@@ -3,6 +3,7 @@
 (() => {
   const entryLayer = document.getElementById('entryLayer');
   const entryVideo = document.getElementById('entryVideo');
+  const firstEntrance = document.getElementById('firstEntrance');
   const petals = document.getElementById('petals');
   const SAKE_BINKS_URL = 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/sake_binks.mp3';
 
@@ -36,6 +37,10 @@
     document.body.classList.remove('entry-open');
   }
 
+  function startFirstEntrance() {
+    firstEntrance?.classList.add('is-active');
+  }
+
   function startSakeDeBinks() {
     const backgroundMusic = new Audio(SAKE_BINKS_URL);
     backgroundMusic.loop = true;
@@ -46,11 +51,13 @@
 
   function onEntryEnded() {
     closeEntry();
+    startFirstEntrance();
     startSakeDeBinks();
   }
 
   function onEntryError() {
     closeEntry();
+    startFirstEntrance();
   }
 
   function startEntry() {
@@ -67,6 +74,7 @@
     entryVideo.addEventListener('error', onEntryError, { once: true });
   } else {
     closeEntry();
+    startFirstEntrance();
   }
 
   entryLayer?.addEventListener('click', startEntry);
