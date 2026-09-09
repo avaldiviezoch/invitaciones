@@ -323,8 +323,8 @@ body.entry-open{overflow:hidden}
   display:grid;
   grid-template-columns:1fr 1px auto 1px 1fr;
   align-items:center;
-  gap:16px;
-  width:54%;
+  gap:8px;
+  width:48%;
   font-family:'Cormorant Garamond',serif;
 }
 
@@ -432,8 +432,8 @@ body.entry-open{overflow:hidden}
 
   .invite-card-date{
     top:75.3%;
-    width:58%;
-    gap:12px;
+    width:50%;
+    gap:7px;
   }
 
   .invite-card-date span{
