@@ -1004,7 +1004,7 @@ body.entry-open{overflow:hidden}
   }
 
   .dress-card-content{
-    padding:28% 9% 6%;
+    padding:calc(28% + 15px) 9% 6%;
   }
 
   .dress-card-heading{
