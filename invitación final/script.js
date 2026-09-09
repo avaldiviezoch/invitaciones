@@ -4,7 +4,17 @@
   const entryLayer = document.getElementById('entryLayer');
   const entryVideo = document.getElementById('entryVideo');
   const backgroundMusic = document.getElementById('backgroundMusic');
+
   let entryStarted = false;
+  let entryFinished = false;
+
+  function stopBackgroundMusic() {
+    if (!backgroundMusic) return;
+    backgroundMusic.pause();
+    try {
+      backgroundMusic.currentTime = 0;
+    } catch (error) {}
+  }
 
   function closeEntry() {
     if (!entryLayer || entryLayer.hidden) return;
@@ -12,20 +22,28 @@
     document.body.classList.remove('entry-open');
   }
 
-  function startBackgroundMusic() {
-    if (!backgroundMusic) return;
-    backgroundMusic.currentTime = 0;
+  async function startBackgroundMusic() {
+    if (!backgroundMusic || !entryFinished) return;
+
     backgroundMusic.volume = 0.45;
-    const playback = backgroundMusic.play();
-    playback?.catch(() => {});
+    try {
+      backgroundMusic.currentTime = 0;
+    } catch (error) {}
+
+    try {
+      await backgroundMusic.play();
+    } catch (error) {}
   }
 
   function finishEntryNormally() {
+    entryFinished = true;
     closeEntry();
     startBackgroundMusic();
   }
 
   function prepareEntry() {
+    stopBackgroundMusic();
+
     if (!entryVideo) {
       closeEntry();
       return;
@@ -51,6 +69,8 @@
 
   function startEntry() {
     if (!entryVideo || entryStarted) return;
+
+    stopBackgroundMusic();
     entryStarted = true;
 
     const playback = entryVideo.play();
@@ -58,6 +78,10 @@
       entryStarted = false;
     });
   }
+
+  backgroundMusic?.addEventListener('play', () => {
+    if (!entryFinished) stopBackgroundMusic();
+  });
 
   prepareEntry();
 
