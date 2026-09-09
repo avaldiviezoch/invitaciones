@@ -248,6 +248,21 @@ body.entry-open{overflow:hidden}
   color:#252525;
 }
 
+.invite-card-asset{
+  width:100%;
+  margin:0;
+  padding:0;
+  background:var(--first-entrance-bg);
+}
+
+.invite-card-asset img{
+  display:block;
+  width:100%;
+  height:auto;
+  margin:0;
+  border:0;
+}
+
 @media(max-width:540px){
   .first-entrance-note{
     top:2%;
