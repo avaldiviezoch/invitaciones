@@ -6,31 +6,22 @@
   <meta name="theme-color" content="#f1e5da">
   <meta name="description" content="Invitación de boda de Antonio y Lucero">
   <title>Antonio & Lucero</title>
+  <link rel="preload" href="https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/video_entrada.mp4" as="video" type="video/mp4" fetchpriority="high">
   <link rel="preload" href="https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/assets/Primera_entrada_6.png" as="image" fetchpriority="high">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="entry-open">
-  <div id="entryLayer" class="entry-layer is-loading" role="button" tabindex="0" aria-label="Toca la puerta para entrar" aria-busy="true">
-    <div id="entryLoader" class="entry-loader" aria-hidden="true">
-      <span class="entry-loader-ring"></span>
-      <span class="entry-loader-text">Preparando nuestra invitación</span>
-    </div>
-
-    <video id="entryVideo" playsinline webkit-playsinline preload="metadata" aria-hidden="true"></video>
+  <div id="entryLayer" class="entry-layer" role="button" tabindex="0" aria-label="Toca la puerta para entrar">
+    <video id="entryVideo" playsinline webkit-playsinline preload="auto">
+      <source src="https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/video_entrada.mp4" type="video/mp4">
+    </video>
   </div>
 
   <div id="petals" class="petals" aria-hidden="true"></div>
 
   <main id="app" class="invitation" aria-label="Invitación de Antonio y Lucero">
     <section id="firstEntrance" class="first-entrance" aria-label="Portada de Antonio y Lucero">
-      <img
-        class="first-entrance-image"
-        src="https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/assets/Primera_entrada_6.png"
-        alt="Antonio y Lucero"
-        decoding="async"
-        fetchpriority="high"
-      >
-
+      <img class="first-entrance-image" src="https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/assets/Primera_entrada_6.png" alt="Antonio y Lucero" decoding="async" fetchpriority="high">
       <div class="first-entrance-note" aria-label="mi presente y todo mi futuro, contigo hasta el Laugh Tale">
         <span class="first-entrance-note-line first-entrance-note-line-1">mi presente y todo mi futuro, contigo</span>
         <span class="first-entrance-note-line first-entrance-note-line-2">hasta el Laugh Tale</span>
