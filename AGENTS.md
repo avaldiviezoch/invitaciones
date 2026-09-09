@@ -59,6 +59,11 @@ La invitación debe construirse con **código limpio, directo y definitivo**. No
     - Revisar que no existan duplicaciones accidentales.
     - Verificar la página en móvil antes de considerar terminado un cambio visual.
 
+11. **NO USAR AMSTERDAM.**
+    - La tipografía Amsterdam Four queda descartada para esta invitación.
+    - No agregar, reintroducir ni usar archivos, `@font-face`, fallbacks o reglas CSS de Amsterdam Four en ninguna sección nueva o existente.
+    - Para reproducir tipografías de la Invitación 7, verificar primero cuál fue la fuente final realmente aplicada en su código antes de implementarla.
+
 ## Flujo obligatorio antes de programar
 
 Antes de realizar cualquier cambio:
