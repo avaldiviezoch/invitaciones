@@ -1004,8 +1004,8 @@ body.entry-open{overflow:hidden}
   }
 
   .dress-card-content{
-    padding:28% 9% 6%;
-    transform:translateY(30px);
+    inset:calc(28% + 30px) 0 0 0;
+    padding:0 9% 6%;
   }
 
   .dress-card-heading{
