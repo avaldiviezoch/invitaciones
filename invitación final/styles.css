@@ -6,14 +6,6 @@
   font-display:swap;
 }
 
-@font-face{
-  font-family:'Amsterdam Four';
-  src:url('https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/Amsterdam%20Four_ttf%20400.ttf') format('truetype');
-  font-style:normal;
-  font-weight:400;
-  font-display:swap;
-}
-
 :root{
   --cream:#f1e5da;
   --first-entrance-bg:#e9e1cc;
@@ -159,8 +151,8 @@ body.entry-open{overflow:hidden}
 
 .wedding-announcement-couple{
   margin-top:8px;
-  font-family:'Amsterdam Four',cursive;
-  font-size:clamp(44px,11vw,82px);
+  font-family:'Inv6EyesomeReal',cursive;
+  font-size:clamp(45px,10.8vw,80px);
   line-height:.92;
   font-weight:400;
   color:#74794f;
@@ -235,8 +227,8 @@ body.entry-open{overflow:hidden}
   }
 
   .wedding-announcement-couple{
-    margin-top:6px;
-    font-size:clamp(40px,12.5vw,60px);
+    margin-top:9px;
+    font-size:clamp(40px,12.2vw,58px);
   }
 
   .wedding-announcement-date{
