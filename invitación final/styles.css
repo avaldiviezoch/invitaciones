@@ -10,8 +10,6 @@
   --cream:#f1e5da;
   --first-entrance-bg:#e9e1cc;
   --content-width:680px;
-  --loader-olive:#7b8260;
-  --loader-gold:#b79a72;
 }
 
 *{box-sizing:border-box}
@@ -23,71 +21,19 @@ body.entry-open{overflow:hidden}
   position:fixed;
   inset:0;
   z-index:9999;
-  display:grid;
-  place-items:center;
   background:var(--cream);
   overflow:hidden;
-  cursor:default;
+  cursor:pointer;
 }
 
 .entry-layer[hidden]{display:none}
 
-.entry-layer.is-ready{
-  cursor:pointer;
-}
-
 .entry-layer video{
-  position:absolute;
-  inset:0;
   display:block;
   width:100%;
   height:100%;
   object-fit:cover;
   background:var(--cream);
-  opacity:0;
-}
-
-.entry-layer.is-ready video{
-  opacity:1;
-}
-
-.entry-loader{
-  position:relative;
-  z-index:2;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:16px;
-  color:#6b6f56;
-  text-align:center;
-  transition:opacity .24s ease;
-}
-
-.entry-layer.is-ready .entry-loader{
-  opacity:0;
-  pointer-events:none;
-}
-
-.entry-loader-ring{
-  width:46px;
-  height:46px;
-  border:2px solid rgba(123,130,96,.18);
-  border-top-color:var(--loader-olive);
-  border-right-color:var(--loader-gold);
-  border-radius:50%;
-  animation:entryLoaderSpin 1.05s linear infinite;
-  box-shadow:0 0 0 5px rgba(183,154,114,.05);
-}
-
-.entry-loader-text{
-  font-family:'Inv6EyesomeReal',cursive;
-  font-size:clamp(22px,5.6vw,30px);
-  line-height:1;
-  color:#777a5a;
-}
-
-@keyframes entryLoaderSpin{
-  to{transform:rotate(360deg)}
 }
 
 .petals{
@@ -113,18 +59,9 @@ body.entry-open{overflow:hidden}
   box-shadow:0 1px 2px rgba(154,111,125,.12);
 }
 
-@keyframes fall{
-  to{transform:translateY(120vh)}
-}
-
-@keyframes sway{
-  0%,100%{margin-left:-8px}
-  50%{margin-left:10px}
-}
-
-@keyframes spin{
-  to{rotate:360deg}
-}
+@keyframes fall{to{transform:translateY(120vh)}}
+@keyframes sway{0%,100%{margin-left:-8px}50%{margin-left:10px}}
+@keyframes spin{to{rotate:360deg}}
 
 .invitation{
   width:min(100%,var(--content-width));
@@ -205,9 +142,5 @@ body.entry-open{overflow:hidden}
 }
 
 @media(prefers-reduced-motion:reduce){
-  .entry-loader-ring{animation-duration:1.8s}
-  .first-entrance-note-line{
-    animation:none;
-    clip-path:none;
-  }
+  .first-entrance-note-line{animation:none;clip-path:none}
 }
