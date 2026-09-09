@@ -711,8 +711,9 @@ body.entry-open{overflow:hidden}
 
 .dress-card{
   position:relative;
-  width:91%;
-  margin:0 auto;
+  width:116%;
+  margin-left:-8%;
+  margin-right:-8%;
 }
 
 .dress-card-bg{
@@ -997,7 +998,9 @@ body.entry-open{overflow:hidden}
   }
 
   .dress-card{
-    width:92%;
+    width:116%;
+    margin-left:-8%;
+    margin-right:-8%;
   }
 
   .dress-card-content{
