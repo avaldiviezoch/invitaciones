@@ -57,10 +57,7 @@
 
   function startEntry() {
     if (!entryVideo || !entryVideo.paused) return;
-    entryLayer?.classList.add('is-playing');
-    entryVideo.play().catch(() => {
-      entryLayer?.classList.remove('is-playing');
-    });
+    entryVideo.play().catch(() => {});
   }
 
   createPetals();
