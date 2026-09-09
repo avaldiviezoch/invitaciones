@@ -6,20 +6,28 @@
   const backgroundMusic = document.getElementById('backgroundMusic');
   let entryStarted = false;
 
-  function finishEntry() {
+  function closeEntry() {
     if (!entryLayer || entryLayer.hidden) return;
     entryLayer.hidden = true;
     document.body.classList.remove('entry-open');
+  }
 
+  function startBackgroundMusic() {
     if (!backgroundMusic) return;
+    backgroundMusic.currentTime = 0;
     backgroundMusic.volume = 0.45;
     const playback = backgroundMusic.play();
     playback?.catch(() => {});
   }
 
+  function finishEntryNormally() {
+    closeEntry();
+    startBackgroundMusic();
+  }
+
   function prepareEntry() {
     if (!entryVideo) {
-      finishEntry();
+      closeEntry();
       return;
     }
 
@@ -36,8 +44,8 @@
       entryVideo.currentTime = 0.001;
     } catch (error) {}
 
-    entryVideo.addEventListener('ended', finishEntry, { once:true });
-    entryVideo.addEventListener('error', finishEntry, { once:true });
+    entryVideo.addEventListener('ended', finishEntryNormally, { once:true });
+    entryVideo.addEventListener('error', closeEntry, { once:true });
     entryVideo.load();
   }
 
