@@ -5,85 +5,40 @@
   const entryVideo = document.getElementById('entryVideo');
   const backgroundMusic = document.getElementById('backgroundMusic');
 
-  let entryStarted = false;
-  let entryFinished = false;
-
-  function stopBackgroundMusic() {
-    if (!backgroundMusic) return;
-    backgroundMusic.pause();
-    try {
-      backgroundMusic.currentTime = 0;
-    } catch (error) {}
-  }
-
   function closeEntry() {
-    if (!entryLayer || entryLayer.hidden) return;
-    entryLayer.hidden = true;
+    if (entryLayer) entryLayer.hidden = true;
     document.body.classList.remove('entry-open');
   }
 
-  async function startBackgroundMusic() {
-    if (!backgroundMusic || !entryFinished) return;
-
+  function playBackgroundMusic() {
+    if (!backgroundMusic) return;
+    backgroundMusic.currentTime = 0;
     backgroundMusic.volume = 0.45;
-    try {
-      backgroundMusic.currentTime = 0;
-    } catch (error) {}
-
-    try {
-      await backgroundMusic.play();
-    } catch (error) {}
+    backgroundMusic.play().catch(() => {});
   }
 
-  function finishEntryNormally() {
-    entryFinished = true;
+  function onEntryEnded() {
     closeEntry();
-    startBackgroundMusic();
+    playBackgroundMusic();
   }
 
-  function prepareEntry() {
-    stopBackgroundMusic();
-
-    if (!entryVideo) {
-      closeEntry();
-      return;
-    }
-
-    entryVideo.autoplay = false;
-    entryVideo.controls = false;
-    entryVideo.muted = false;
-    entryVideo.defaultMuted = false;
-    entryVideo.removeAttribute('muted');
-    entryVideo.setAttribute('playsinline', '');
-    entryVideo.setAttribute('webkit-playsinline', '');
-    entryVideo.pause();
-
-    try {
-      entryVideo.currentTime = 0.001;
-    } catch (error) {}
-
-    entryVideo.addEventListener('ended', finishEntryNormally, { once:true });
-    entryVideo.addEventListener('error', closeEntry, { once:true });
-    entryVideo.load();
+  function onEntryError() {
+    closeEntry();
   }
 
   function startEntry() {
-    if (!entryVideo || entryStarted) return;
-
-    stopBackgroundMusic();
-    entryStarted = true;
-
-    const playback = entryVideo.play();
-    playback?.catch(() => {
-      entryStarted = false;
-    });
+    if (!entryVideo || !entryVideo.paused) return;
+    entryVideo.play().catch(() => {});
   }
 
-  backgroundMusic?.addEventListener('play', () => {
-    if (!entryFinished) stopBackgroundMusic();
-  });
-
-  prepareEntry();
+  if (entryVideo) {
+    entryVideo.controls = false;
+    entryVideo.muted = false;
+    entryVideo.addEventListener('ended', onEntryEnded, { once: true });
+    entryVideo.addEventListener('error', onEntryError, { once: true });
+  } else {
+    closeEntry();
+  }
 
   entryLayer?.addEventListener('click', startEntry);
   entryLayer?.addEventListener('keydown', event => {
