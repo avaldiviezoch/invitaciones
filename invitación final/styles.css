@@ -527,7 +527,7 @@ body.entry-open{overflow:hidden}
   text-align:center;
   padding:105px 32px 120px;
   color:#fbf8ef;
-  transform:translateY(20px);
+  transform:translateY(30px);
 }
 
 .venue-details-kicker{
@@ -712,7 +712,7 @@ body.entry-open{overflow:hidden}
 
   .venue-details-copy{
     padding:78px 22px 72px;
-    transform:translateY(12px);
+    transform:translateY(22px);
   }
 
   .venue-details-kicker{
