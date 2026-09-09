@@ -589,6 +589,36 @@ body.entry-open{overflow:hidden}
   color:rgba(251,248,239,.88);
 }
 
+.couple-photo-collage{
+  position:relative;
+  width:100%;
+  height:clamp(500px,105vw,710px);
+  margin:0;
+  padding:0;
+  overflow:hidden;
+  background:#eee5d1;
+}
+
+.couple-photo-collage img{
+  position:absolute;
+  display:block;
+  width:46%;
+  height:auto;
+  margin:0;
+  border:0;
+  box-shadow:0 8px 22px rgba(0,0,0,.09);
+}
+
+.couple-photo-left{
+  left:0;
+  top:5%;
+}
+
+.couple-photo-right{
+  right:0;
+  top:17%;
+}
+
 @media(max-width:540px){
   .first-entrance-note{
     top:2%;
