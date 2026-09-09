@@ -7,6 +7,14 @@
 }
 
 @font-face{
+  font-family:'Inv6SeasonsReal';
+  src:url('https://raw.githubusercontent.com/avaldiviezoch/Wedding/6b6fa65d2a36d583f3fa20889edf1ca2a5d137ca/invitaciones/invitacion_6/assets/The%20Seasons%20Regular.ttf') format('truetype');
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+}
+
+@font-face{
   font-family:'Amsterdam Four';
   src:url('https://raw.githubusercontent.com/avaldiviezoch/Wedding/main/invitaciones/invitacion_7/Amsterdam%20Four_ttf%20400.ttf') format('truetype');
   font-style:normal;
@@ -675,6 +683,131 @@ body.entry-open{overflow:hidden}
   margin:0 0 12px;
 }
 
+.crew-bottom-photo,
+.dress-bottom-photo{
+  width:100%;
+  margin:0;
+  padding:0;
+  overflow:hidden;
+  background:var(--first-entrance-bg);
+}
+
+.crew-bottom-photo img,
+.dress-bottom-photo img{
+  display:block;
+  width:100%;
+  height:auto;
+  margin:0;
+  padding:0;
+  border:0;
+}
+
+.dress-code{
+  width:100%;
+  margin:0;
+  padding:48px 0 54px;
+  background:var(--first-entrance-bg);
+}
+
+.dress-card{
+  position:relative;
+  width:91%;
+  margin:0 auto;
+}
+
+.dress-card-bg{
+  display:block;
+  width:100%;
+  height:auto;
+  margin:0;
+  padding:0;
+  border:0;
+}
+
+.dress-card-content{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  padding:24% 10% 7%;
+  color:#59634f;
+}
+
+.dress-card-heading{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin:0 0 18px;
+}
+
+.dress-card-title{
+  font-family:'Inv6SeasonsReal',Georgia,serif;
+  font-size:clamp(48px,10vw,82px);
+  line-height:.9;
+  font-weight:500;
+  color:#59634f;
+}
+
+.dress-card-formal{
+  margin-top:-2px;
+  font-family:'Inv6EyesomeReal',cursive;
+  font-size:34px;
+  line-height:1;
+  font-weight:400;
+  color:#697650;
+}
+
+.dress-card-intro,
+.dress-card-copy,
+.dress-card-white{
+  font-family:Georgia,'Times New Roman',serif;
+  font-size:13px;
+  line-height:1.35;
+  font-weight:400;
+  color:#59634f;
+}
+
+.dress-card-intro{
+  margin:0 0 22px;
+}
+
+.dress-card-copy{
+  margin:0 0 18px;
+}
+
+.dress-card-palette{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:10px 12px;
+  width:78%;
+  margin:0 auto 22px;
+}
+
+.dress-card-palette span{
+  display:block;
+  width:48px;
+  height:25px;
+  border-radius:7px;
+  box-shadow:0 2px 6px rgba(74,67,61,.11);
+}
+
+.dress-card-white{
+  margin:0 0 18px;
+}
+
+.dress-card-gif{
+  display:block;
+  width:clamp(150px,42vw,240px);
+  max-width:240px;
+  height:auto;
+  margin:0 auto;
+  border:0;
+  object-fit:contain;
+}
+
 @media(max-width:540px){
   .first-entrance-note{
     top:2%;
@@ -853,6 +986,69 @@ body.entry-open{overflow:hidden}
     font-size:clamp(12px,3.4vw,15px);
     line-height:1.4;
     font-weight:700;
+  }
+
+  .crew-bottom-photo{
+    margin-top:-70px;
+  }
+
+  .dress-code{
+    padding:42px 0 48px;
+  }
+
+  .dress-card{
+    width:92%;
+  }
+
+  .dress-card-content{
+    padding:25% 9% 6%;
+  }
+
+  .dress-card-heading{
+    margin-bottom:14px;
+  }
+
+  .dress-card-title{
+    font-size:clamp(44px,13vw,60px);
+  }
+
+  .dress-card-formal{
+    font-size:clamp(31px,9vw,40px);
+  }
+
+  .dress-card-intro,
+  .dress-card-copy,
+  .dress-card-white{
+    font-size:clamp(12px,3.25vw,14px);
+  }
+
+  .dress-card-intro{
+    margin-bottom:17px;
+  }
+
+  .dress-card-copy{
+    margin-bottom:16px;
+  }
+
+  .dress-card-palette{
+    width:82%;
+    gap:9px 10px;
+    margin-bottom:17px;
+  }
+
+  .dress-card-palette span{
+    width:clamp(36px,10vw,46px);
+    height:clamp(22px,5.6vw,26px);
+    border-radius:6px;
+  }
+
+  .dress-card-white{
+    margin-bottom:13px;
+  }
+
+  .dress-card-gif{
+    width:clamp(140px,46vw,210px);
+    max-width:210px;
   }
 }
 
