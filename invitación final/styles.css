@@ -1,5 +1,14 @@
+@font-face{
+  font-family:'Inv6EyesomeReal';
+  src:url('https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_6/assets/Eyesome-Script.otf') format('opentype');
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+}
+
 :root{
   --cream:#f1e5da;
+  --first-entrance-bg:#e9e1cc;
   --content-width:680px;
 }
 
@@ -67,5 +76,83 @@ body.entry-open{overflow:hidden}
   width:min(100%,var(--content-width));
   min-height:100vh;
   margin:0 auto;
-  background:var(--cream);
+  background:var(--first-entrance-bg);
+}
+
+.first-entrance{
+  position:relative;
+  width:100%;
+  margin:0;
+  padding:0;
+  background:var(--first-entrance-bg);
+}
+
+.first-entrance-image{
+  display:block;
+  width:100%;
+  height:auto;
+  margin:0;
+  padding:0;
+  border:0;
+  background:transparent;
+}
+
+.first-entrance-note{
+  position:absolute;
+  z-index:5;
+  top:2.2%;
+  right:4.8%;
+  width:69%;
+  color:#4a433d;
+  text-align:right;
+  font-family:'Inv6EyesomeReal',cursive;
+  font-size:clamp(15px,3.15vw,24px);
+  line-height:1.03;
+  font-weight:400;
+  pointer-events:none;
+  transform:rotate(4deg);
+  transform-origin:center center;
+  text-shadow:0 0 .5px rgba(255,255,255,.95),0 0 1px rgba(255,255,255,.55);
+  filter:drop-shadow(0 1px 0 rgba(255,255,255,.15));
+}
+
+.first-entrance-note-line{
+  display:block;
+  width:max-content;
+  max-width:100%;
+  margin-left:auto;
+  overflow:hidden;
+  white-space:nowrap;
+  clip-path:inset(0 100% 0 0);
+  will-change:clip-path;
+}
+
+.first-entrance.is-active .first-entrance-note-line-1{
+  animation:firstEntranceWriting 2.65s cubic-bezier(.22,.61,.36,1) .45s forwards;
+}
+
+.first-entrance.is-active .first-entrance-note-line-2{
+  margin-top:1px;
+  animation:firstEntranceWriting 1.75s cubic-bezier(.22,.61,.36,1) 2.85s forwards;
+}
+
+@keyframes firstEntranceWriting{
+  from{clip-path:inset(0 100% 0 0);opacity:.72}
+  to{clip-path:inset(0 0 0 0);opacity:1}
+}
+
+@media(max-width:540px){
+  .first-entrance-note{
+    top:2%;
+    right:4.4%;
+    width:71%;
+    font-size:clamp(14px,4.15vw,18px);
+  }
+}
+
+@media(prefers-reduced-motion:reduce){
+  .first-entrance-note-line{
+    animation:none;
+    clip-path:none;
+  }
 }
