@@ -324,7 +324,7 @@ body.entry-open{overflow:hidden}
   grid-template-columns:1fr 1px auto 1px 1fr;
   align-items:center;
   gap:16px;
-  width:60%;
+  width:54%;
   font-family:'Cormorant Garamond',serif;
 }
 
@@ -432,7 +432,7 @@ body.entry-open{overflow:hidden}
 
   .invite-card-date{
     top:75.3%;
-    width:66%;
+    width:58%;
     gap:12px;
   }
 
