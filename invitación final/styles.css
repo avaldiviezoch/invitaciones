@@ -265,7 +265,7 @@ body.entry-open{overflow:hidden}
 .music-request-panel[hidden]{display:none}
 .music-native-host{width:100%}
 .music-warning-band{width:calc(100% + 32px);min-height:250px;margin:24px -16px 0;display:flex;align-items:center;justify-content:center;padding:70px 34px;background:url('https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/assets/papel_roto_6_1.png') center/100% 100% no-repeat}
-.music-warning-band p{max-width:540px;margin:0 auto;font-family:Georgia,'Times New Roman',serif;font-size:clamp(17px,4vw,25px);line-height:1.45;font-weight:400;color:#fff;text-align:center}
+.music-warning-band p{max-width:540px;margin:0 auto;font-family:'Cormorant Garamond',serif;font-size:clamp(18px,4vw,24px);line-height:1.45;font-weight:400;color:#fff;text-align:center}
 
 @media(max-width:540px){
   .program-header{margin-bottom:-62px}
@@ -302,7 +302,7 @@ body.entry-open{overflow:hidden}
   .music-hint{font-size:clamp(12px,3.5vw,15px)}
   .music-request-panel{margin-top:12px}
   .music-warning-band{width:calc(100% + 24px);min-height:220px;margin:24px -12px 0;padding:58px 26px}
-  .music-warning-band p{font-size:clamp(17px,4.8vw,22px)}
+  .music-warning-band p{font-size:18px}
 }
 
 @media(prefers-reduced-motion:reduce){
