@@ -8,6 +8,8 @@
   const rsvpButton = document.getElementById('openRsvpBtn');
   const rsvpPanel = document.getElementById('rsvp-panel');
   const rsvpHost = document.querySelector('[data-mgd-rsvp-token]');
+  const giftButton = document.getElementById('giftToggle');
+  const giftDetails = document.getElementById('giftDetails');
   const SAKE_BINKS_URL = 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/sake_binks.mp3';
   const RSVP_TOKEN = '8c7e5b5c261e4b85ad15a220ca70e0cc66d1336feee740c08027d0c324646167';
   const RSVP_WIDGET_URL = 'https://avaldiviezoch.github.io/Wedding/app_integral/js/modules/invitados/rsvp-native-widget.js?v=20260820-5b2';
@@ -93,6 +95,29 @@
     rsvpButton.setAttribute('aria-expanded', String(willOpen));
   }
 
+  function toggleGiftDetails() {
+    if (!giftButton || !giftDetails) return;
+    const willOpen = giftDetails.hidden;
+    giftDetails.hidden = !willOpen;
+    giftButton.setAttribute('aria-expanded', String(willOpen));
+  }
+
+  async function copyGiftValue(button) {
+    const value = button.dataset.copy;
+    if (!value) return;
+
+    try {
+      await navigator.clipboard.writeText(value);
+      const original = button.textContent;
+      button.textContent = 'COPIADO';
+      window.setTimeout(() => {
+        button.textContent = original;
+      }, 1000);
+    } catch (error) {
+      console.error('[Invitación] No se pudo copiar el dato del regalo.', error);
+    }
+  }
+
   createPetals();
   renderCountdown();
   window.setInterval(renderCountdown, 1000);
@@ -115,6 +140,10 @@
 
   if (rsvpHost) rsvpHost.setAttribute('data-mgd-rsvp-token', RSVP_TOKEN);
   rsvpButton?.addEventListener('click', toggleRsvp);
+  giftButton?.addEventListener('click', toggleGiftDetails);
+  document.querySelectorAll('[data-copy]').forEach(button => {
+    button.addEventListener('click', () => copyGiftValue(button));
+  });
 
   if (rsvpHost) {
     import(RSVP_WIDGET_URL).catch(error => {
