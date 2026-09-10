@@ -267,6 +267,26 @@ body.entry-open{overflow:hidden}
 .music-warning-band{width:calc(100% + 32px);min-height:250px;margin:24px -16px 0;display:flex;align-items:center;justify-content:center;padding:70px 34px;background:url('https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/assets/papel_roto_6_1.png') center/100% 100% no-repeat}
 .music-warning-band p{max-width:540px;margin:0 auto;font-family:'Cormorant Garamond',serif;font-size:clamp(18px,4vw,24px);line-height:1.45;font-weight:400;color:#fff;text-align:center}
 
+.faq-section{width:100%;margin:0;padding:56px 20px 0;background:var(--first-entrance-bg);color:#5b4830;overflow:hidden}
+.faq-heading{width:100%;margin:0 auto 24px;text-align:center}
+.faq-heading h2{margin:0;font-family:'Inv6SeasonsReal',Georgia,serif;font-size:clamp(44px,13vw,72px);line-height:.9;font-weight:400;letter-spacing:.01em;color:#5b4830;white-space:nowrap}
+.faq-heading p{margin:-5px auto 0;transform:translateX(8%);font-family:'Inv6EyesomeReal',cursive;font-size:clamp(28px,8.7vw,46px);line-height:.95;font-weight:400;color:#6d7559;white-space:nowrap}
+.faq-list{width:min(100%,560px);margin:0 auto;border-top:1px solid rgba(138,129,109,.55)}
+.faq-item{margin:0;border-bottom:1px solid rgba(138,129,109,.55)}
+.faq-item summary{position:relative;display:flex;align-items:center;justify-content:space-between;gap:16px;width:100%;margin:0;padding:18px 6px;list-style:none;cursor:pointer;font-family:Georgia,'Times New Roman',serif;font-size:clamp(16px,3.9vw,24px);line-height:1.22;font-weight:400;color:#5b4830;-webkit-tap-highlight-color:transparent}
+.faq-item summary::-webkit-details-marker{display:none}
+.faq-item summary span{flex:0 0 auto;font-family:Georgia,'Times New Roman',serif;font-size:1.15em;line-height:1;font-weight:400;color:#6d7559;transition:transform .28s ease}
+.faq-item[open] summary span{transform:rotate(45deg)}
+.faq-answer{padding:0 6px 18px;color:#5b4830}
+.faq-answer p{margin:0 auto 14px;font-family:Georgia,'Times New Roman',serif;font-size:clamp(14px,3.2vw,18px);line-height:1.4;font-weight:400;color:#5b4830}
+.faq-answer img{display:block;width:min(100%,250px);max-width:250px;height:auto;margin:0 auto;border:0;background:transparent;box-shadow:none;transform-origin:50% 80%}
+.faq-item[open] .faq-answer{animation:faqReveal .68s cubic-bezier(.22,.86,.28,1.12) both}
+.faq-item[open] .faq-answer img{animation:faqFloat 4.4s ease-in-out .72s infinite}
+@keyframes faqReveal{0%{opacity:0;transform:translateY(17px) scale(.97) rotate(1.8deg)}70%{opacity:1;transform:translateY(-2px) scale(1.01) rotate(-.7deg)}100%{opacity:1;transform:translateY(0) scale(1) rotate(0)}}
+@keyframes faqFloat{0%,100%{transform:translateY(0) rotate(-1deg)}50%{transform:translateY(-4px) rotate(1deg)}}
+.faq-tip{width:100%;margin:0;padding:18px 6px 26px;border-bottom:1px solid rgba(138,129,109,.55);font-family:Georgia,'Times New Roman',serif;font-size:clamp(14px,3.2vw,18px);line-height:1.35;font-style:italic;color:#5b4830}
+.faq-bottom-photo{display:block;width:calc(100% + 40px);height:auto;margin:38px -20px 0;border:0;object-fit:cover}
+
 @media(max-width:540px){
   .program-header{margin-bottom:-62px}
   .program-monogram{left:4%;top:5%;width:27%}
@@ -303,6 +323,15 @@ body.entry-open{overflow:hidden}
   .music-request-panel{margin-top:12px}
   .music-warning-band{width:calc(100% + 24px);min-height:220px;margin:24px -12px 0;padding:58px 26px}
   .music-warning-band p{font-size:18px}
+  .faq-section{padding:44px 20px 0}
+  .faq-heading{margin-bottom:22px}
+  .faq-heading h2{font-size:clamp(44px,13vw,60px)}
+  .faq-heading p{font-size:clamp(28px,8.7vw,40px)}
+  .faq-item summary{padding:16px 6px;font-size:clamp(16px,4.4vw,20px)}
+  .faq-answer p{font-size:13px}
+  .faq-answer img{width:min(100%,220px);max-width:220px}
+  .faq-tip{padding:17px 6px 24px;font-size:13px}
+  .faq-bottom-photo{width:calc(100% + 40px);margin:34px -20px 0}
 }
 
 @media(prefers-reduced-motion:reduce){
@@ -310,4 +339,5 @@ body.entry-open{overflow:hidden}
   .location-map-button{animation:none}
   .music-image-button img{transition:none}
   .music-burst svg{display:none;animation:none}
+  .faq-item[open] .faq-answer,.faq-item[open] .faq-answer img{animation:none}
 }
