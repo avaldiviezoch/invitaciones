@@ -224,8 +224,8 @@ body.entry-open{overflow:hidden}
 
 .gift-animation{width:100%;margin:0;padding:52px 0 0;background:var(--first-entrance-bg);text-align:center;overflow:hidden}
 .gift-animation img{display:block;width:min(76%,420px);height:auto;margin:0 auto;border:0;object-fit:contain}
-.gift-paper{width:100%;margin:0;padding:66px 34px 70px;background:url('https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/assets/fondo_verde_de_regalo.png') center/100% 100% no-repeat;color:#fff;text-align:center}
-.gift-content{width:min(100%,470px);margin:0 auto}
+.gift-paper{width:100%;margin:0;padding:0;background:#5d6140;color:#fff;text-align:center}
+.gift-content{width:100%;margin:0 auto;padding:66px 34px 70px;background:url('https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/assets/fondo_verde_de_regalo.png') center/100% 100% no-repeat}
 .gift-kicker{margin:0;font-family:'Inv6SeasonsReal',Georgia,serif;font-size:clamp(39px,8.7vw,62px);line-height:.92;font-weight:400;letter-spacing:.015em;color:#fff}
 .gift-script{margin:2px 0 0;font-family:'Inv6EyesomeReal',cursive;font-size:clamp(46px,10vw,72px);line-height:.88;font-weight:400;color:#fff}
 .gift-copy{width:min(100%,410px);margin:20px auto 0;font-family:Georgia,'Times New Roman',serif;font-size:clamp(13px,3.15vw,16px);line-height:1.48;font-weight:400;color:#fff}
@@ -265,7 +265,7 @@ body.entry-open{overflow:hidden}
   .rsvp-panel{width:94%;padding:13px}
   .gift-animation{padding-top:46px}
   .gift-animation img{width:min(80%,340px);max-width:340px}
-  .gift-paper{padding:58px 24px 60px}
+  .gift-content{padding:58px 24px 60px}
   .gift-copy{font-size:13px;line-height:1.44}
   .gift-details{padding:16px 24px 64px}
 }
