@@ -710,10 +710,15 @@ body.entry-open{overflow:hidden}
 }
 
 .dress-card{
-  position:relative;
+  display:grid;
   width:116%;
   margin-left:-8%;
   margin-right:-8%;
+}
+
+.dress-card-bg,
+.dress-card-content{
+  grid-area:1 / 1;
 }
 
 .dress-card-bg{
@@ -726,8 +731,8 @@ body.entry-open{overflow:hidden}
 }
 
 .dress-card-content{
-  position:absolute;
-  inset:0;
+  position:relative;
+  z-index:1;
   display:flex;
   flex-direction:column;
   align-items:center;
@@ -1004,11 +1009,7 @@ body.entry-open{overflow:hidden}
   }
 
   .dress-card-content{
-    top:calc(28% + 10px);
-    right:0;
-    bottom:0;
-    left:0;
-    padding:0 9% 6%;
+    padding:calc(28% + 5px) 9% 6%;
   }
 
   .dress-card-heading{
