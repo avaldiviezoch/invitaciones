@@ -14,6 +14,7 @@
   const musicPanel = document.getElementById('music-request-panel');
   const musicHost = document.querySelector('[data-mgd-music-token]');
   const musicBurst = document.getElementById('musicBurst');
+  const closingWriting = document.getElementById('closingWriting');
   const SAKE_BINKS_URL = 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/sake_binks.mp3';
   const RSVP_TOKEN = '8c7e5b5c261e4b85ad15a220ca70e0cc66d1336feee740c08027d0c324646167';
   const RSVP_WIDGET_URL = 'https://avaldiviezoch.github.io/Wedding/app_integral/js/modules/invitados/rsvp-native-widget.js?v=20260820-5b2';
@@ -97,6 +98,37 @@
     entryVideo.play().catch(() => {});
   }
 
+  function initClosingWriting() {
+    if (!closingWriting || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    closingWriting.style.clipPath = 'inset(0 100% 0 0)';
+    closingWriting.style.willChange = 'clip-path';
+
+    const observer = new IntersectionObserver(entries => {
+      const entry = entries[0];
+      if (!entry?.isIntersecting) return;
+
+      observer.disconnect();
+      const animation = closingWriting.animate(
+        [
+          { clipPath:'inset(0 100% 0 0)' },
+          { clipPath:'inset(0 0 0 0)' }
+        ],
+        {
+          duration:2600,
+          easing:'cubic-bezier(.22,.61,.36,1)',
+          fill:'forwards'
+        }
+      );
+      animation.addEventListener('finish', () => {
+        closingWriting.style.clipPath = 'none';
+        closingWriting.style.willChange = 'auto';
+      }, { once:true });
+    }, { threshold:0.65 });
+
+    observer.observe(closingWriting);
+  }
+
   function toggleRsvp() {
     if (!rsvpButton || !rsvpPanel) return;
     const willOpen = rsvpPanel.hidden;
@@ -163,6 +195,7 @@
 
   createPetals();
   renderCountdown();
+  initClosingWriting();
   window.setInterval(renderCountdown, 1000);
 
   if (entryVideo) {
