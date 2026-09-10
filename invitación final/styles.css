@@ -335,6 +335,117 @@ body.entry-open{overflow:hidden}
   .faq-bottom-photo{width:calc(100% + 40px);margin:34px -20px 0}
 }
 
+@media(min-width:900px){
+  body{padding:36px 0 56px;background:#e5dccd}
+  body.entry-open{padding:0}
+  .invitation{width:min(calc(100% - 72px),920px);box-shadow:0 18px 58px rgba(76,65,52,.13)}
+  .first-entrance{width:760px;max-width:100%;margin:0 auto}
+  .first-entrance-note{top:2.4%;right:5%;font-size:24px}
+  .wedding-announcement{width:760px;max-width:100%;margin:0 auto;padding:72px 6% 92px}
+  .wedding-announcement-title{font-size:42px}
+  .wedding-announcement-couple{font-size:76px}
+  .wedding-announcement-date{font-size:44px}
+  .wedding-countdown{width:600px;max-width:92%;margin-top:84px}
+  .wedding-countdown-time strong{font-size:58px}
+  .wedding-countdown-time span{font-size:18px}
+  .celebration-copy{width:760px;max-width:100%;margin:0 auto;padding-bottom:28px}
+  .celebration-copy-lead{font-size:19px}
+  .celebration-copy-script{font-size:35px}
+  .invite-card-asset{width:760px;max-width:100%;margin:0 auto}
+  .invite-card-kicker{font-size:20px}
+  .invite-card-title span{font-size:98px}
+  .invite-card-month{font-size:24px}
+  .invite-card-date span{font-size:25px}
+  .invite-card-date strong{font-size:78px}
+  .floating-hat{width:760px;max-width:100%;margin-top:14px;margin-bottom:18px}
+  .torn-green-message-copy{width:72%}
+  .torn-green-message-copy p{font-size:22px;line-height:1.32}
+  .location-card{width:760px;max-width:100%;margin:0 auto}
+  .location-map-button{min-width:300px;padding:15px 30px 14px;font-size:15px}
+  .venue-details-copy{padding:118px 48px 124px;transform:translateY(16px)}
+  .venue-details-kicker{font-size:14px}
+  .venue-details-copy h2{font-size:72px}
+  .venue-details-main{max-width:420px;font-size:23px}
+  .venue-details-place{font-size:62px}
+  .venue-details-address{font-size:22px}
+  .venue-details-note{max-width:420px;font-size:20px}
+  .couple-photo-collage{height:700px}
+  .couple-photo-collage img{width:38%}
+  .couple-photo-left{left:8%;top:6%}
+  .couple-photo-right{right:8%;top:17%}
+  .crew-adventure{width:820px;max-width:100%;margin:0 auto}
+  .crew-adventure-title{top:17%;max-width:330px;font-size:24px;font-weight:700}
+  .crew-adventure-copy{top:34%;max-width:350px;font-size:18px;font-weight:600}
+  .crew-bottom-photo img,.dress-bottom-photo img{max-height:640px;object-fit:cover}
+  .dress-code{padding:64px 0 70px}
+  .dress-card{width:86%;margin:0 auto}
+  .dress-card-content{padding:25% 12% 8%}
+  .dress-card-title{font-size:72px}
+  .dress-card-formal{font-size:42px}
+  .dress-card-intro,.dress-card-copy,.dress-card-white{font-size:15px;line-height:1.5}
+  .dress-card-palette{width:72%;gap:12px 14px}
+  .dress-card-palette span{width:52px;height:28px}
+  .dress-card-gif{width:230px;max-width:230px}
+  .program-header{width:860px;max-width:100%;margin:0 auto -90px}
+  .program-monogram{left:7%;top:7%;width:23%}
+  .program-header-copy{left:42%}
+  .program-header-copy span{font-size:56px}
+  .program-header-copy strong{font-size:66px}
+  .timeline-section{width:860px;max-width:100%;margin:0 auto;padding:138px 58px 72px;background-size:100% 100%}
+  .timeline-line{top:172px;bottom:92px}
+  .timeline-item{grid-template-columns:minmax(0,1fr) 36px minmax(0,1fr);min-height:154px;column-gap:18px}
+  .timeline-item>img{width:min(100%,170px)}
+  .timeline-item time{font-size:52px}
+  .timeline-item p{font-size:17px}
+  .rsvp-section{padding:86px 40px 12px}
+  .rsvp-bird{width:122px;top:-12px;left:calc(50% + 118px)}
+  .rsvp-heading{margin-bottom:34px}
+  .rsvp-title{font-size:76px}
+  .rsvp-script{font-size:58px}
+  .rsvp-copy{margin-top:70px;font-size:16px}
+  .rsvp-button{min-width:340px;margin-top:24px;padding:18px 30px 17px;font-size:14px}
+  .rsvp-panel{width:min(70%,520px);padding:18px}
+  .gift-animation{padding-top:68px}
+  .gift-animation img{width:380px}
+  .gift-content{padding:82px 60px 84px}
+  .gift-kicker{font-size:60px}
+  .gift-script{font-size:70px}
+  .gift-copy{width:500px;max-width:72%;font-size:16px}
+  .gift-toggle{margin-top:28px;padding:15px 28px;font-size:11px}
+  .gift-details{padding:24px 120px 76px}
+  .gift-details-intro{font-size:14px}
+  .gift-method{padding:20px 0}
+  .gift-method h3{font-size:24px}
+  .gift-row{padding:13px 15px}
+  .gift-label{font-size:9px}
+  .gift-value{font-size:13px}
+  .gift-copy-button{font-size:9px;padding:8px 11px}
+  .gift-qr{width:132px}
+  .music-section{padding:76px 42px 0}
+  .music-heading{margin-bottom:34px}
+  .music-title{font-size:76px}
+  .music-script{font-size:54px;transform:translateX(16%)}
+  .music-diagonal{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.25fr);align-items:center;gap:48px;max-width:760px}
+  .music-copy-block{width:100%;margin:0;text-align:center}
+  .music-copy-block p{font-size:17px;line-height:1.35}
+  .music-copy-block p+p{margin-top:28px}
+  .music-visual-block{width:100%;max-width:390px;margin:0;justify-self:center}
+  .music-hint{margin-top:12px;font-size:15px}
+  .music-request-panel{width:min(72%,540px);margin-top:22px}
+  .music-warning-band{width:calc(100% + 84px);min-height:280px;margin:44px -42px 0;padding:82px 90px}
+  .music-warning-band p{font-size:22px}
+  .faq-section{padding:72px 70px 0}
+  .faq-heading{margin-bottom:36px}
+  .faq-heading h2{font-size:68px}
+  .faq-heading p{font-size:44px;transform:translateX(6%)}
+  .faq-list{width:680px;max-width:100%;margin-bottom:34px}
+  .faq-item summary{padding:20px 46px 20px 8px;font-size:20px}
+  .faq-answer{padding:0 8px 22px}
+  .faq-answer p{max-width:580px;font-size:16px}
+  .faq-answer img{width:230px}
+  .faq-tip{padding:20px 8px 30px;font-size:15px}
+}
+
 @media(prefers-reduced-motion:reduce){
   .first-entrance-note-line{animation:none;clip-path:none}
   .location-map-button{animation:none}
