@@ -328,7 +328,7 @@ body.entry-open{overflow:hidden}
   .faq-heading{margin-bottom:22px}
   .faq-heading h2{font-size:clamp(42px,11.6vw,56px)}
   .faq-heading p{font-size:clamp(28px,8.7vw,40px)}
-  .faq-item summary{padding:16px 34px 16px 6px;font-size:clamp(16px,4.4vw,20px)}
+  .faq-item summary{padding:16px 34px 16px 6px;font-size:clamp(15px,calc(4.4vw - 1px),19px)}
   .faq-answer p{font-size:13px}
   .faq-answer img{width:min(100%,220px);max-height:240px}
   .faq-tip{padding:17px 6px 24px;font-size:13px}
