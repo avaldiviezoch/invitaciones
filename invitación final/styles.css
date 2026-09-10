@@ -216,7 +216,7 @@ body.entry-open{overflow:hidden}
 .rsvp-title{margin:0;font-family:'Inv6SeasonsReal',Georgia,serif;font-size:clamp(52px,11vw,80px);line-height:.84;font-weight:400;color:#59634f}
 .rsvp-script{margin:2px 0 0;font-family:'Inv6EyesomeReal',cursive;font-size:clamp(40px,9vw,62px);line-height:.9;font-weight:400;color:#697650}
 .rsvp-copy{max-width:430px;margin:62px auto 0;font-family:Georgia,'Times New Roman',serif;font-size:clamp(13px,3.2vw,17px);line-height:1.45;font-style:italic;color:#8a8e74}
-.rsvp-button{display:inline-flex;align-items:center;justify-content:center;gap:14px;min-width:min(72%,390px);margin:18px auto 0;padding:17px 28px 16px;border:0;border-radius:999px;background:#71813f;color:#fff;font-family:Georgia,'Times New Roman',serif;font-size:clamp(11px,2.7vw,15px);line-height:1;letter-spacing:.14em;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.rsvp-button{display:inline-flex;align-items:center;justify-content:center;gap:14px;min-width:min(72%,390px);margin:18px auto 0;padding:17px 28px 16px;border:0;border-radius:999px;background:#5D6140;color:#fff;font-family:Georgia,'Times New Roman',serif;font-size:clamp(11px,2.7vw,15px);line-height:1;letter-spacing:.14em;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .rsvp-button span{font-size:1.2em;line-height:1}
 .rsvp-panel{width:min(90%,480px);margin:22px auto 0;padding:16px;border:1px solid rgba(109,117,89,.18);border-radius:18px;background:rgba(255,255,255,.25);text-align:left}
 .rsvp-panel[hidden]{display:none}
