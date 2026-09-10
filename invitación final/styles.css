@@ -122,7 +122,7 @@ body.entry-open{overflow:hidden}
 .crew-bottom-photo,.dress-bottom-photo{width:100%;margin:0;padding:0;overflow:hidden;background:var(--first-entrance-bg)}
 .crew-bottom-photo img,.dress-bottom-photo img{display:block;width:100%;height:auto;margin:0;padding:0;border:0}
 
-.dress-code{width:100%;margin:0;padding:48px 0 54px;background:var(--first-entrance-bg)}
+.dress-code{width:100%;margin:0;padding:48px 0 54px;background:var(--first-entrance-bg);overflow:hidden}
 .dress-card{display:grid;width:116%;margin-left:-8%;margin-right:-8%}
 .dress-card-bg,.dress-card-content{grid-area:1 / 1}
 .dress-card-bg{display:block;width:100%;height:auto;margin:0;padding:0;border:0}
