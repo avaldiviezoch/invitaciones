@@ -5,7 +5,12 @@
   const entryVideo = document.getElementById('entryVideo');
   const firstEntrance = document.getElementById('firstEntrance');
   const petals = document.getElementById('petals');
+  const rsvpButton = document.getElementById('openRsvpBtn');
+  const rsvpPanel = document.getElementById('rsvp-panel');
+  const rsvpHost = document.querySelector('[data-mgd-rsvp-token]');
   const SAKE_BINKS_URL = 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/sake_binks.mp3';
+  const RSVP_TOKEN = '8c7e5b5c261e4b85ad15a220ca70e0cc66d1336feee740c08027d0c324646167';
+  const RSVP_WIDGET_URL = 'https://avaldiviezoch.github.io/Wedding/app_integral/js/modules/invitados/rsvp-native-widget.js?v=20260820-5b2';
   const WEDDING_DATE = new Date('2027-01-16T00:00:00-05:00').getTime();
 
   function createPetals() {
@@ -81,6 +86,13 @@
     entryVideo.play().catch(() => {});
   }
 
+  function toggleRsvp() {
+    if (!rsvpButton || !rsvpPanel) return;
+    const willOpen = rsvpPanel.hidden;
+    rsvpPanel.hidden = !willOpen;
+    rsvpButton.setAttribute('aria-expanded', String(willOpen));
+  }
+
   createPetals();
   renderCountdown();
   window.setInterval(renderCountdown, 1000);
@@ -100,4 +112,13 @@
     event.preventDefault();
     startEntry();
   });
+
+  if (rsvpHost) rsvpHost.setAttribute('data-mgd-rsvp-token', RSVP_TOKEN);
+  rsvpButton?.addEventListener('click', toggleRsvp);
+
+  if (rsvpHost) {
+    import(RSVP_WIDGET_URL).catch(error => {
+      console.error('[Invitación] No se pudo cargar el RSVP nativo.', error);
+    });
+  }
 })();
