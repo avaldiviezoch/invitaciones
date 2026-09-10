@@ -212,7 +212,7 @@ body.entry-open{overflow:hidden}
 
 @media(max-width:540px){
   .program-header{margin-bottom:-62px}
-  .program-monogram{left:4%;top:5%;width:29%}
+  .program-monogram{left:4%;top:5%;width:27%}
   .program-header-copy{left:40%;top:50%}
   .program-header-copy span{font-size:clamp(31px,9vw,43px)}
   .program-header-copy strong{margin-left:14px;font-size:clamp(38px,10.5vw,52px)}
