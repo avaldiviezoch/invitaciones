@@ -210,6 +210,18 @@ body.entry-open{overflow:hidden}
 .timeline-item time{display:block;font-family:'Inv6SeasonsReal',Georgia,serif;font-size:clamp(34px,8.6vw,54px);line-height:.9;font-weight:400;color:#59634f}
 .timeline-item p{margin:5px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:clamp(13px,3.7vw,17px);line-height:1.12;color:#59634f}
 
+.rsvp-section{width:100%;margin:0;padding:58px 24px 0;background:var(--first-entrance-bg);text-align:center;color:#59634f;overflow:hidden}
+.rsvp-heading{width:100%;margin:0 auto 28px}
+.rsvp-title{margin:0;font-family:'Inv6SeasonsReal',Georgia,serif;font-size:clamp(52px,11vw,80px);line-height:.84;font-weight:400;color:#59634f}
+.rsvp-script{margin:2px 0 0;font-family:'Inv6EyesomeReal',cursive;font-size:clamp(40px,9vw,62px);line-height:.9;font-weight:400;color:#697650}
+.rsvp-copy{max-width:430px;margin:62px auto 0;font-family:Georgia,'Times New Roman',serif;font-size:clamp(13px,3.2vw,17px);line-height:1.45;font-style:italic;color:#8a8e74}
+.rsvp-button{display:inline-flex;align-items:center;justify-content:center;gap:14px;min-width:min(72%,390px);margin:18px auto 0;padding:17px 28px 16px;border:0;border-radius:999px;background:#71813f;color:#fff;font-family:Georgia,'Times New Roman',serif;font-size:clamp(11px,2.7vw,15px);line-height:1;letter-spacing:.14em;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.rsvp-button span{font-size:1.2em;line-height:1}
+.rsvp-panel{width:min(90%,480px);margin:22px auto 0;padding:16px;border:1px solid rgba(109,117,89,.18);border-radius:18px;background:rgba(255,255,255,.25);text-align:left}
+.rsvp-panel[hidden]{display:none}
+.rsvp-native-host{width:100%}
+.rsvp-illustration{display:block;width:min(100%,560px);height:auto;margin:54px auto 0;border:0;object-fit:contain}
+
 @media(max-width:540px){
   .program-header{margin-bottom:-62px}
   .program-monogram{left:4%;top:5%;width:27%}
@@ -222,6 +234,14 @@ body.entry-open{overflow:hidden}
   .timeline-item>img{width:min(100%,132px)}
   .timeline-item time{font-size:clamp(32px,10vw,44px)}
   .timeline-item p{font-size:clamp(12px,3.5vw,15px)}
+  .rsvp-section{padding:54px 16px 0}
+  .rsvp-heading{margin-bottom:26px}
+  .rsvp-title{font-size:clamp(48px,13.5vw,62px)}
+  .rsvp-script{font-size:clamp(37px,10.5vw,48px)}
+  .rsvp-copy{margin-top:58px;font-size:clamp(12px,3.5vw,15px)}
+  .rsvp-button{min-width:76%;margin-top:18px;padding:16px 22px 15px;font-size:clamp(10px,3vw,13px)}
+  .rsvp-panel{width:94%;padding:13px}
+  .rsvp-illustration{width:100%;margin-top:46px}
 }
 
 @media(prefers-reduced-motion:reduce){
