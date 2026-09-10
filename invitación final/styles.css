@@ -234,7 +234,7 @@ body.entry-open{overflow:hidden}
   .timeline-item>img{width:min(100%,132px)}
   .timeline-item time{font-size:clamp(32px,10vw,44px)}
   .timeline-item p{font-size:clamp(12px,3.5vw,15px)}
-  .rsvp-section{padding:54px 16px 0}
+  .rsvp-section{padding:78px 16px 0}
   .rsvp-heading{margin-bottom:26px}
   .rsvp-title{font-size:clamp(48px,13.5vw,62px)}
   .rsvp-script{font-size:clamp(37px,10.5vw,48px)}
