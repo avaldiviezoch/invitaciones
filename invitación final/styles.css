@@ -363,7 +363,7 @@ body.entry-open{overflow:hidden}
   .torn-green-message-copy p{font-size:22px;line-height:1.32}
   .location-card{width:760px;max-width:100%;margin:0 auto}
   .location-map-button{min-width:300px;padding:15px 30px 14px;font-size:15px}
-  .venue-details-copy{padding:118px 48px 124px;transform:translateY(16px)}
+  .venue-details-copy{justify-content:center;padding:48px;transform:none}
   .venue-details-kicker{font-size:14px}
   .venue-details-copy h2{font-size:72px}
   .venue-details-main{max-width:420px;font-size:23px}
