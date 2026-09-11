@@ -10,6 +10,7 @@
   const rsvpHost = document.querySelector('[data-mgd-rsvp-token]');
   const giftButton = document.getElementById('giftToggle');
   const giftDetails = document.getElementById('giftDetails');
+  const handsSection = document.getElementById('handsSection');
   const musicButton = document.getElementById('openMusicBtn');
   const musicPanel = document.getElementById('music-request-panel');
   const musicHost = document.querySelector('[data-mgd-music-token]');
@@ -96,6 +97,24 @@
   function startEntry() {
     if (!entryVideo || !entryVideo.paused) return;
     entryVideo.play().catch(() => {});
+  }
+
+  function initHandsReveal() {
+    if (!handsSection) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      handsSection.classList.add('is-visible');
+      return;
+    }
+
+    const observer = new IntersectionObserver(entries => {
+      const entry = entries[0];
+      if (!entry?.isIntersecting) return;
+      handsSection.classList.add('is-visible');
+      observer.disconnect();
+    }, { threshold:0.45 });
+
+    observer.observe(handsSection);
   }
 
   function initClosingWriting() {
@@ -195,6 +214,7 @@
 
   createPetals();
   renderCountdown();
+  initHandsReveal();
   initClosingWriting();
   window.setInterval(renderCountdown, 1000);
 
