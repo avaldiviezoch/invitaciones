@@ -175,7 +175,7 @@ body.entry-open{overflow:hidden}
   .crew-adventure-title{top:24.5%;width:58%;max-width:230px;font-size:clamp(15px,4.6vw,19px);font-weight:700}
   .crew-adventure-copy{top:35.5%;width:58%;max-width:255px;font-size:clamp(12px,3.4vw,15px);line-height:1.4;font-weight:700}
   .crew-bottom-photo{margin-top:-70px}
-  .dress-code{padding:14px 0 16px}
+  .dress-code{margin:-110px 0 -110px;padding:0}
   .dress-card{width:116%;margin-left:-8%;margin-right:-8%}
   .dress-card-content{padding:39% 9% 6%}
   .dress-card-heading{margin-bottom:14px}
