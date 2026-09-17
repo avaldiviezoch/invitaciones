@@ -1,71 +1,30 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="robots" content="noindex,nofollow">
-  <title>Mi Gran Día · DEV</title>
-  <link rel="stylesheet" href="dev-ui.css?v=4">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="robots" content="noindex,nofollow">
+  <title>Mi Gran Día · DEV</title><link rel="stylesheet" href="dev-ui.css?v=5">
 </head>
-<body>
-  <main class="app-shell">
-    <video class="hero-video" autoplay muted loop playsinline preload="auto">
-      <source src="https://avaldiviezoch.github.io/Wedding/anillo_loop_planifcador.mp4" type="video/mp4">
-    </video>
-    <div class="video-shade" aria-hidden="true"></div>
+<body><main class="app-shell">
+  <video class="hero-video" autoplay muted loop playsinline preload="auto"><source src="https://avaldiviezoch.github.io/Wedding/anillo_loop_planifcador.mp4" type="video/mp4"></video><div class="video-shade" aria-hidden="true"></div>
 
-    <!-- SOLO KPIs: el video original sigue visible detrás. Datos DEV simulados. -->
-    <section class="stats-stage" aria-label="Resumen de la boda">
-      <article class="stat-card stat-guests">
-        <div class="stat-head"><span class="stat-icon">♙</span><span class="stat-label">Invitados</span></div>
-        <div class="stat-main"><strong>120 <em>/ 180</em></strong><span class="stat-percent">67%</span></div>
-        <small>Confirmados</small><div class="progress"><i style="width:67%"></i></div>
-      </article>
-      <article class="stat-card stat-checklist">
-        <div class="stat-head"><span class="stat-icon">✓</span><span class="stat-label">Checklist</span></div>
-        <div class="stat-main"><strong>24 <em>/ 36</em></strong><span class="stat-percent">67%</span></div>
-        <small>Tareas completadas</small><div class="progress"><i style="width:67%"></i></div>
-      </article>
-      <article class="stat-card stat-budget">
-        <div class="stat-head"><span class="stat-icon">S/</span><span class="stat-label">Presupuesto</span></div>
-        <div class="stat-main"><strong>S/ 28,500</strong><span class="stat-percent">81%</span></div>
-        <small>de S/ 35,000</small><div class="progress"><i style="width:81%"></i></div>
-      </article>
-      <article class="stat-card stat-vendors">
-        <div class="stat-head"><span class="stat-icon">◇</span><span class="stat-label">Proveedores</span></div>
-        <div class="stat-main"><strong>12 <em>/ 18</em></strong><span class="stat-percent">67%</span></div>
-        <small>Contratados</small><div class="progress"><i style="width:67%"></i></div>
-      </article>
-      <article class="stat-card stat-layout">
-        <div class="stat-head"><span class="stat-icon">⌑</span><span class="stat-label">Distribución</span></div>
-        <div class="stat-main"><strong>10 <em>/ 12</em></strong><span class="stat-percent">83%</span></div>
-        <small>Mesas ubicadas</small><div class="progress"><i style="width:83%"></i></div>
-      </article>
-      <article class="stat-card stat-schedule">
-        <div class="stat-head"><span class="stat-icon">□</span><span class="stat-label">Cronograma</span></div>
-        <div class="stat-main"><strong>18</strong></div><small>Actividades programadas</small>
-      </article>
-      <article class="stat-card stat-music">
-        <div class="stat-head"><span class="stat-icon">♪</span><span class="stat-label">Música</span></div>
-        <div class="stat-main"><strong>32</strong></div><small>Canciones agregadas</small>
-      </article>
-      <article class="stat-card stat-invites">
-        <div class="stat-head"><span class="stat-icon">✉</span><span class="stat-label">Invitaciones</span></div>
-        <div class="stat-main"><strong>5</strong></div><small>Diseños disponibles</small>
-      </article>
-    </section>
+  <!-- Composición KPI orgánica. Solo datos simulados del entorno DEV. -->
+  <section class="stats-stage" aria-label="Resumen de la boda">
+    <article class="kpi kpi-guests"><span class="kpi-kicker">INVITADOS</span><div class="kpi-number">120 <i>de 180</i></div><div class="kpi-foot"><span>Confirmados</span><b>67%</b></div><div class="track"><i style="width:67%"></i></div></article>
+    <article class="kpi kpi-check"><span class="kpi-kicker">CHECKLIST</span><div class="kpi-number">24 <i>de 36</i></div><div class="kpi-foot"><span>Tareas listas</span><b>67%</b></div><div class="track"><i style="width:67%"></i></div></article>
+    <article class="kpi kpi-budget"><span class="kpi-kicker">PRESUPUESTO</span><div class="kpi-number money">S/ 28,500</div><div class="kpi-foot"><span>de S/ 35,000</span><b>81%</b></div><div class="track"><i style="width:81%"></i></div></article>
+    <article class="kpi kpi-vendors"><span class="kpi-kicker">PROVEEDORES</span><div class="kpi-number">12 <i>de 18</i></div><div class="kpi-foot"><span>Contratados</span><b>67%</b></div></article>
+    <article class="kpi kpi-layout"><span class="kpi-kicker">DISTRIBUCIÓN</span><div class="kpi-number">10 <i>de 12</i></div><div class="kpi-foot"><span>Mesas ubicadas</span><b>83%</b></div></article>
+    <article class="kpi kpi-music"><span class="kpi-kicker">MÚSICA</span><div class="kpi-number">32</div><div class="kpi-foot"><span>Canciones agregadas</span><b>♪</b></div></article>
+    <article class="kpi kpi-schedule"><span class="kpi-kicker">CRONOGRAMA</span><div class="kpi-number">18</div><div class="kpi-foot"><span>Actividades</span><b>→</b></div></article>
+    <article class="kpi kpi-invites"><span class="kpi-kicker">INVITACIONES</span><div class="kpi-number">5</div><div class="kpi-foot"><span>Diseños</span><b>✉</b></div></article>
+  </section>
 
-    <button class="open-panel" id="openPanel" type="button" aria-expanded="true" aria-controls="plannerPanel">Menú</button>
-    <aside class="planner-panel is-open" id="plannerPanel">
-      <header class="panel-title"><span>GESTIÓN INTEGRAL</span><h1>PLANIFICADOR DE<br>BODAS</h1><p>Organiza cada detalle desde un solo lugar.</p></header>
-      <section class="profile-card"><div class="avatar">AV</div><div><strong>Antonio Valdiviezo</strong><small>Usuario DEV · datos simulados</small><span>● Entorno seguro</span></div></section>
-      <section class="wedding-card"><small>BODA ACTUAL</small><strong>Boda de Antonio & Lucero</strong><span>Administrador</span></section>
-      <section class="count-card"><div class="count-head"><strong>Cuenta regresiva</strong><small>16.01.2027</small></div><div class="count-grid"><div><b>121</b><span>DÍAS</span></div><div><b>03</b><span>HORAS</span></div><div><b>11</b><span>MINUTOS</span></div><div><b>45</b><span>SEGUNDOS</span></div></div></section>
-      <nav class="sections"><button><b>01</b><span><strong>Planificación</strong><small>Tareas, presupuesto y proveedores.</small></span><i>⌄</i></button><button><b>02</b><span><strong>Espacio de la boda</strong><small>Invitados, distribución, cronograma e invitaciones.</small></span><i>⌄</i></button><button><b>03</b><span><strong>En la boda</strong><small>Música y fotografías.</small></span><i>⌄</i></button></nav>
-      <footer>Antonio Valdiviezo © Derechos reservados</footer>
-    </aside>
-  </main>
-  <script src="dev-guard.js?v=2"></script>
-  <script src="dev-ui.js?v=4"></script>
-</body>
-</html>
+  <button class="open-panel" id="openPanel" type="button" aria-expanded="true" aria-controls="plannerPanel">Menú</button>
+  <aside class="planner-panel is-open" id="plannerPanel">
+    <header class="panel-title"><span>GESTIÓN INTEGRAL</span><h1>PLANIFICADOR DE<br>BODAS</h1><p>Organiza cada detalle desde un solo lugar.</p></header>
+    <section class="profile-card"><div class="avatar">AV</div><div><strong>Antonio Valdiviezo</strong><small>Usuario DEV · datos simulados</small><span>● Entorno seguro</span></div></section>
+    <section class="wedding-card"><small>BODA ACTUAL</small><strong>Boda de Antonio & Lucero</strong><span>Administrador</span></section>
+    <section class="count-card"><div class="count-head"><strong>Cuenta regresiva</strong><small>16.01.2027</small></div><div class="count-grid"><div><b>121</b><span>DÍAS</span></div><div><b>03</b><span>HORAS</span></div><div><b>11</b><span>MINUTOS</span></div><div><b>45</b><span>SEGUNDOS</span></div></div></section>
+    <nav class="sections"><button><b>01</b><span><strong>Planificación</strong><small>Tareas, presupuesto y proveedores.</small></span><i>⌄</i></button><button><b>02</b><span><strong>Espacio de la boda</strong><small>Invitados, distribución, cronograma e invitaciones.</small></span><i>⌄</i></button><button><b>03</b><span><strong>En la boda</strong><small>Música y fotografías.</small></span><i>⌄</i></button></nav><footer>Antonio Valdiviezo © Derechos reservados</footer>
+  </aside>
+</main><script src="dev-guard.js?v=2"></script><script src="dev-ui.js?v=5"></script></body></html>
