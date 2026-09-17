@@ -24,4 +24,44 @@
   .table-summary{margin:8px 0}
   .tables-scroll{grid-auto-rows:70px}
   .mini-table{width:61px;height:61px}
+}/* v17: efecto flotante premium */
+@media(min-width:761px){
+  .visual-stage .glass{
+    animation:mgd-float 6s ease-in-out infinite;
+    will-change:transform,box-shadow;
+    box-shadow:
+      inset 0 1px rgba(255,255,255,.16),
+      0 22px 55px rgba(0,0,0,.28),
+      0 0 22px rgba(211,190,157,.08);
+    transition:transform .35s ease,box-shadow .35s ease,border-color .35s ease;
+  }
+  .visual-stage .glass::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    pointer-events:none;
+    background:linear-gradient(135deg,rgba(255,255,255,.16),transparent 24%,transparent 72%,rgba(202,181,147,.08));
+    opacity:.55;
+  }
+  .visual-stage .glass:hover{
+    animation-play-state:paused;
+    transform:translateY(-7px) scale(1.008);
+    border-color:rgba(224,205,175,.28);
+    box-shadow:
+      inset 0 1px rgba(255,255,255,.2),
+      0 30px 70px rgba(0,0,0,.34),
+      0 0 30px rgba(211,190,157,.13);
+  }
+  .guests-visual{animation-delay:-1.1s!important}
+  .tables-visual{animation-delay:-3.8s!important}
+  .checklist-visual{animation-delay:-2.4s!important}
+  .budget-visual{animation-delay:-4.9s!important}
+}
+@keyframes mgd-float{
+  0%,100%{transform:translate3d(0,0,0)}
+  50%{transform:translate3d(0,-7px,0)}
+}
+@media(prefers-reduced-motion:reduce){
+  .visual-stage .glass{animation:none!important;transition:none!important}
 }
