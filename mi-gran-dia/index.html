@@ -4,20 +4,42 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
-  <title>Mi Gran Día · DEV aislado</title>
-  <link rel="stylesheet" href="dev-ui.css?v=2">
+  <title>Mi Gran Día · DEV</title>
+  <link rel="stylesheet" href="dev-ui.css?v=3">
 </head>
 <body>
-  <main class="dev-safe-shell">
-    <section class="dev-safe-card">
-      <span class="dev-safe-badge">DEV AISLADO</span>
-      <h1>Mi Gran Día</h1>
-      <p>Entorno de desarrollo independiente. Este sitio no carga ni inicializa Firebase, Firestore, Storage o Auth del aplicativo de producción.</p>
-      <p><strong>Producción protegida:</strong> ningún dato de usuarios reales se lee, crea, actualiza o elimina desde este entorno.</p>
-      <div id="devApp" aria-live="polite"></div>
+  <main class="app-shell">
+    <video class="hero-video" autoplay muted loop playsinline preload="auto">
+      <source src="https://avaldiviezoch.github.io/Wedding/anillo_loop_planifcador.mp4" type="video/mp4">
+    </video>
+    <div class="video-shade" aria-hidden="true"></div>
+
+    <section class="stats-stage" aria-label="Resumen de la boda">
+      <article class="stat-card stat-wide">
+        <div><span class="stat-label">Invitados</span><strong>180</strong><small>120 confirmados · 67%</small></div>
+        <div class="donut" style="--p:67"><span>67%</span></div>
+      </article>
+      <article class="stat-card"><span class="stat-label">Checklist</span><strong>67%</strong><small>24 de 36 tareas listas</small><div class="progress"><i style="width:67%"></i></div></article>
+      <article class="stat-card"><span class="stat-label">Presupuesto</span><strong>S/ 28,500</strong><small>de S/ 35,000 · 81%</small><div class="progress"><i style="width:81%"></i></div></article>
+      <article class="stat-card"><span class="stat-label">Proveedores</span><strong>12 <em>/ 18</em></strong><small>contratados</small><div class="progress"><i style="width:67%"></i></div></article>
+      <article class="stat-card"><span class="stat-label">Distribución</span><strong>10 <em>/ 12</em></strong><small>mesas ubicadas</small><div class="progress"><i style="width:83%"></i></div></article>
+      <article class="stat-card"><span class="stat-label">Cronograma</span><strong>18</strong><small>actividades programadas</small></article>
+      <article class="stat-card"><span class="stat-label">Música</span><strong>32</strong><small>canciones agregadas</small></article>
+      <article class="stat-card"><span class="stat-label">Invitaciones</span><strong>5</strong><small>diseños disponibles</small></article>
     </section>
+
+    <button class="open-panel" id="openPanel" type="button" aria-expanded="true" aria-controls="plannerPanel">Menú</button>
+
+    <aside class="planner-panel is-open" id="plannerPanel">
+      <header class="panel-title"><span>GESTIÓN INTEGRAL</span><h1>PLANIFICADOR DE<br>BODAS</h1><p>Organiza cada detalle desde un solo lugar.</p></header>
+      <section class="profile-card"><div class="avatar">AV</div><div><strong>Antonio Valdiviezo</strong><small>Usuario DEV · datos simulados</small><span>● Entorno seguro</span></div></section>
+      <section class="wedding-card"><small>BODA ACTUAL</small><strong>Boda de Antonio & Lucero</strong><span>Administrador</span></section>
+      <section class="count-card"><div class="count-head"><strong>Cuenta regresiva</strong><small>16.01.2027</small></div><div class="count-grid"><div><b>121</b><span>DÍAS</span></div><div><b>03</b><span>HORAS</span></div><div><b>11</b><span>MINUTOS</span></div><div><b>45</b><span>SEGUNDOS</span></div></div></section>
+      <nav class="sections"><button><b>01</b><span><strong>Planificación</strong><small>Tareas, presupuesto y proveedores.</small></span><i>⌄</i></button><button><b>02</b><span><strong>Espacio de la boda</strong><small>Invitados, distribución, cronograma e invitaciones.</small></span><i>⌄</i></button><button><b>03</b><span><strong>En la boda</strong><small>Música y fotografías.</small></span><i>⌄</i></button></nav>
+      <footer>Antonio Valdiviezo © Derechos reservados</footer>
+    </aside>
   </main>
   <script src="dev-guard.js?v=2"></script>
-  <script src="dev-ui.js?v=2"></script>
+  <script src="dev-ui.js?v=3"></script>
 </body>
 </html>
