@@ -1,0 +1,48 @@
+name: Migrate Distribucion
+
+on:
+  push:
+    paths:
+      - '.github/workflows/migrate-distribucion.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout invitaciones
+        uses: actions/checkout@v4
+        with:
+          path: invitaciones
+      - name: Checkout Wedding source
+        uses: actions/checkout@v4
+        with:
+          repository: avaldiviezoch/Wedding
+          ref: main
+          path: Wedding
+      - name: Copy restructured Distribution
+        run: |
+          rm -rf invitaciones/mi-gran-dia/distribucion
+          mkdir -p invitaciones/mi-gran-dia/distribucion
+          cp -a Wedding/pruebas/distribucion-reestructura/. invitaciones/mi-gran-dia/distribucion/
+          # Make the migrated lab independent of the /Wedding Pages path for its base image when possible.
+          if [ -f Wedding/distribucion_base.png ]; then
+            cp Wedding/distribucion_base.png invitaciones/mi-gran-dia/distribucion/distribucion_base.png
+            sed -i 's#/Wedding/distribucion_base.png?v=20260904-bgdrag1#./distribucion_base.png?v=20260917-migrated-1#g' invitaciones/mi-gran-dia/distribucion/index.html
+          fi
+          sed -i 's#pruebas/distribucion-reestructura/#mi-gran-dia/distribucion/#g' invitaciones/mi-gran-dia/distribucion/README.md
+      - name: Commit migration
+        working-directory: invitaciones
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add mi-gran-dia/distribucion
+          if git diff --cached --quiet; then
+            echo 'No changes to commit'
+          else
+            git commit -m 'feat: migrar distribucion reestructurada al laboratorio'
+            git push
+          fi
