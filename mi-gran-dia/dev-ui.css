@@ -1,0 +1,13 @@
+/*
+ * MI GRAN DÍA · CAPA DEV VISUAL
+ * -----------------------------------------------
+ * Este archivo es el lugar principal para cambios estéticos.
+ * Puede modificar layout, colores, tipografía, responsive,
+ * componentes, animaciones y presentación.
+ *
+ * NO incluir aquí lógica de Firebase/Firestore/Storage/Auth.
+ */
+
+:root {
+  --dev-environment: 1;
+}
