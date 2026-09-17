@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mi Gran Día · Distribución reestructurada</title>
+  <link rel="stylesheet" href="css/modules/distribucion.css?v=20260905-cursor-hit-testing-1">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="brand">
+        <span class="eyebrow">ESPACIO DE LA BODA · LABORATORIO</span>
+        <h1>Distribución del espacio</h1>
+        <p>Diseña el salón, organiza las mesas y asigna a tus invitados.</p>
+      </div>
+      <div class="top-actions" aria-label="Acciones del plano">
+        <div class="memory-state" title="Este laboratorio no guarda información">
+          <span class="status-dot"></span>
+          <span><strong id="proposalNameTop">Propuesta principal</strong><small>Solo memoria temporal</small></span>
+        </div>
+        <button id="btnProposals" type="button">▤ <span>Propuestas</span></button>
+        <button id="btnUndo" type="button" title="Deshacer">↶ <span>Deshacer</span></button>
+        <button id="btnRedo" type="button" title="Rehacer">↷ <span>Rehacer</span></button>
+        <button id="btnPresentation" type="button">▣ <span>Presentación</span></button>
+        <button id="resetLab" class="primary" type="button">Restablecer</button>
+      </div>
+    </header>
+
+    <main class="workspace">
+      <aside class="panel tools-panel" aria-label="Herramientas de distribución">
+        <div class="panel-heading">
+          <div><span class="section-kicker">CONSTRUYE TU PLANO</span><h2>Herramientas</h2></div>
+          <span class="count-chip" id="elementCount">1 elemento</span>
+        </div>
+
+        <section class="panel-section first-section tool-catalog" aria-label="Catálogo de elementos">
+          <div class="tool-accordion-list">
+            <details class="tool-accordion" open>
+              <summary><span>Mesas</span><b>⌄</b></summary>
+              <div class="tool-list">
+                <button class="tool" type="button" data-add="table" title="Mesa redonda" aria-label="Mesa redonda"><strong>◉</strong><span>Mesa redonda<small>10 personas · Ø 1.50 m</small></span></button>
+                <button class="tool" type="button" data-add="couple" title="Mesa de novios" aria-label="Mesa de novios"><strong>♡</strong><span>Mesa de novios<small>3.00 × 1.20 m</small></span></button>
+                <button class="tool" type="button" data-add="cake" title="Mesa de torta" aria-label="Mesa de torta"><strong>○</strong><span>Mesa de torta<small>Ø 1.80 m</small></span></button>
+                <button class="tool" type="button" data-add="gift" title="Mesa de regalos" aria-label="Mesa de regalos"><strong>▤</strong><span>Mesa de regalos<small>1.80 × 0.75 m</small></span></button>
+                <button class="tool" type="button" data-add="guestbook" title="Mesa de firmas" aria-label="Mesa de firmas"><strong>✎</strong><span>Mesa de firmas<small>1.20 × 0.60 m</small></span></button>
+                <button class="tool" type="button" data-add="welcome" title="Mesa de bienvenida" aria-label="Mesa de bienvenida"><strong>⌂</strong><span>Mesa de bienvenida<small>1.80 × 0.75 m</small></span></button>
+                <button class="tool" type="button" data-add="favors" title="Mesa de recuerdos" aria-label="Mesa de recuerdos"><strong>✧</strong><span>Mesa de recuerdos<small>1.50 × 0.70 m</small></span></button>
+                <button class="tool" type="button" data-add="cocktail" title="Mesa alta / cóctel" aria-label="Mesa alta / cóctel"><strong>●</strong><span>Mesa alta / cóctel<small>Ø 0.80 m</small></span></button>
+              </div>
+            </details>
+
+            <details class="tool-accordion">
+              <summary><span>Asientos</span><b>⌄</b></summary>
+              <div class="tool-list">
+                <button class="tool" type="button" data-add="chair" title="Silla suelta" aria-label="Silla suelta"><strong>▱</strong><span>Silla suelta<small>0.50 × 0.50 m</small></span></button>
+              </div>
+            </details>
+
+            <details class="tool-accordion">
+              <summary><span>Servicios</span><b>⌄</b></summary>
+              <div class="tool-list">
+                <button class="tool" type="button" data-add="dance" title="Pista de baile" aria-label="Pista de baile"><strong>◇</strong><span>Pista de baile<small>5.00 × 5.00 m</small></span></button>
+                <button class="tool" type="button" data-add="bar" title="Barra" aria-label="Barra"><strong>▰</strong><span>Barra<small>4.00 × 1.20 m</small></span></button>
+                <button class="tool" type="button" data-add="buffet" title="Buffet" aria-label="Buffet"><strong>▥</strong><span>Buffet<small>3.00 × 0.90 m</small></span></button>
+                <button class="tool" type="button" data-add="drinks" title="Estación de bebidas" aria-label="Estación de bebidas"><strong>♨</strong><span>Estación de bebidas<small>2.00 × 0.80 m</small></span></button>
+                <button class="tool" type="button" data-add="desserts" title="Estación de postres" aria-label="Estación de postres"><strong>♢</strong><span>Estación de postres<small>2.40 × 0.80 m</small></span></button>
+                <button class="tool" type="button" data-add="snacks" title="Carrito de dulces / snacks" aria-label="Carrito de dulces / snacks"><strong>▧</strong><span>Carrito de snacks<small>1.50 × 0.80 m</small></span></button>
+                <button class="tool" type="button" data-add="supplier" title="Mesa de proveedores" aria-label="Mesa de proveedores"><strong>▦</strong><span>Mesa proveedores<small>1.80 × 0.75 m</small></span></button>
+              </div>
+            </details>
+
+            <details class="tool-accordion">
+              <summary><span>Foto / música</span><b>⌄</b></summary>
+              <div class="tool-list">
+                <button class="tool" type="button" data-add="dj" title="DJ / sonido" aria-label="DJ / sonido"><strong>♫</strong><span>DJ / sonido<small>3.00 × 2.00 m</small></span></button>
+                <button class="tool" type="button" data-add="stage" title="Escenario" aria-label="Escenario"><strong>▔</strong><span>Escenario<small>4.00 × 2.50 m</small></span></button>
+                <button class="tool" type="button" data-add="screen" title="Pantalla / proyector" aria-label="Pantalla / proyector"><strong>▭</strong><span>Pantalla / proyector<small>2.50 × 0.50 m</small></span></button>
+                <button class="tool" type="button" data-add="photo" title="Photobooth" aria-label="Photobooth"><strong>▣</strong><span>Photobooth<small>3.00 × 2.00 m</small></span></button>
+                <button class="tool" type="button" data-add="booth360" title="Cabina 360" aria-label="Cabina 360"><strong>◎</strong><span>Cabina 360<small>2.50 × 2.50 m</small></span></button>
+                <button class="tool" type="button" data-add="mirror" title="Espejo selfie" aria-label="Espejo selfie"><strong>│</strong><span>Espejo selfie<small>1.00 × 0.20 m</small></span></button>
+              </div>
+            </details>
+
+            <details class="tool-accordion">
+              <summary><span>Decoración</span><b>⌄</b></summary>
+              <div class="tool-list">
+                <button class="tool" type="button" data-add="altar" title="Altar" aria-label="Altar"><strong>✦</strong><span>Altar<small>4.00 × 2.00 m</small></span></button>
+                <button class="tool" type="button" data-add="arch" title="Arco decorativo" aria-label="Arco decorativo"><strong>⌒</strong><span>Arco decorativo<small>2.40 × 0.80 m</small></span></button>
+                <button class="tool" type="button" data-add="backdrop" title="Panel floral / backdrop" aria-label="Panel floral / backdrop"><strong>▤</strong><span>Panel floral<small>2.50 × 0.60 m</small></span></button>
+                <button class="tool" type="button" data-add="sign" title="Tótem / letrero" aria-label="Tótem / letrero"><strong>¶</strong><span>Tótem / letrero<small>0.80 × 0.50 m</small></span></button>
+                <button class="tool" type="button" data-add="planter" title="Macetero / decoración" aria-label="Macetero / decoración"><strong>✿</strong><span>Macetero<small>0.60 × 0.60 m</small></span></button>
+                <button class="tool" type="button" data-add="divider" title="Separador / biombo" aria-label="Separador / biombo"><strong>║</strong><span>Separador / biombo<small>2.00 × 0.40 m</small></span></button>
+              </div>
+            </details>
+
+            <details class="tool-accordion">
+              <summary><span>Infraestructura</span><b>⌄</b></summary>
+              <div class="tool-list">
+                <button class="tool" type="button" data-add="entrance" title="Entrada" aria-label="Entrada"><strong>⇥</strong><span>Entrada<small>2.00 × 1.20 m</small></span></button>
+                <button class="tool" type="button" data-add="exit" title="Salida" aria-label="Salida"><strong>⇤</strong><span>Salida<small>2.00 × 1.20 m</small></span></button>
+                <button class="tool" type="button" data-add="restroom" title="Baños" aria-label="Baños"><strong>WC</strong><span>Baños<small>2.50 × 2.00 m</small></span></button>
+                <button class="tool" type="button" data-add="kitchen" title="Cocina / servicio" aria-label="Cocina / servicio"><strong>⌑</strong><span>Cocina / servicio<small>3.00 × 2.50 m</small></span></button>
+                <button class="tool" type="button" data-add="technical" title="Zona técnica" aria-label="Zona técnica"><strong>⚙</strong><span>Zona técnica<small>2.00 × 1.50 m</small></span></button>
+                <button class="tool" type="button" data-add="column" title="Columna" aria-label="Columna"><strong>■</strong><span>Columna<small>0.50 × 0.50 m</small></span></button>
+                <button class="tool" type="button" data-add="extinguisher" title="Extintor / seguridad" aria-label="Extintor / seguridad"><strong>!</strong><span>Extintor<small>0.40 × 0.40 m</small></span></button>
+              </div>
+            </details>
+
+            <details class="tool-accordion">
+              <summary><span>Dibujo</span><b>⌄</b></summary>
+              <div class="tool-list">
+                <button class="tool" id="btnDrawTent" type="button" data-draw-area="tent" title="Dibujar toldo" aria-label="Dibujar toldo"><strong>⌂</strong><span>Dibujar toldo<small>Polígono libre</small></span></button>
+                <button class="tool" type="button" data-draw-area="stage" title="Dibujar área de escenario" aria-label="Dibujar área de escenario"><strong>▔</strong><span>Área escenario<small>Ref. 4.00 × 2.50 m</small></span></button>
+                <button class="tool" type="button" data-draw-area="lounge" title="Dibujar área lounge" aria-label="Dibujar área lounge"><strong>⌁</strong><span>Área lounge<small>Ref. 3.00 × 2.50 m</small></span></button>
+                <button class="tool" type="button" data-draw-area="kids" title="Dibujar área infantil" aria-label="Dibujar área infantil"><strong>☆</strong><span>Área infantil<small>Ref. 3.00 × 3.00 m</small></span></button>
+                <button class="tool" type="button" data-draw-area="buffet" title="Dibujar área de buffet" aria-label="Dibujar área de buffet"><strong>▥</strong><span>Área buffet<small>Ref. 3.00 × 0.90 m</small></span></button>
+                <button class="tool" type="button" data-draw-area="technical" title="Dibujar zona técnica" aria-label="Dibujar zona técnica"><strong>⚙</strong><span>Zona técnica<small>Ref. 2.00 × 1.50 m</small></span></button>
+                <button class="tool" type="button" data-draw-area="restricted" title="Dibujar zona restringida" aria-label="Dibujar zona restringida"><strong>⊘</strong><span>Zona restringida<small>Ref. 2.00 × 2.00 m</small></span></button>
+                <button class="tool" type="button" data-draw-area="circulation" title="Dibujar circulación" aria-label="Dibujar circulación"><strong>⇢</strong><span>Circulación<small>Ancho ref. 1.20 m</small></span></button>
+                <button class="tool" type="button" data-draw-area="custom" title="Dibujar otros" aria-label="Dibujar otros"><strong>＋</strong><span>Dibujar otros<small>Área libre</small></span></button>
+              </div>
+              <div id="tentDrawHint" class="mode-hint" hidden>Haz clic para marcar vértices. Doble clic o Enter para terminar; Esc cancela.</div>
+            </details>
+          </div>
+        </section>
+
+        <section class="panel-section guest-manager-section" hidden aria-hidden="true">
+          <div class="section-title-row">
+            <div><h3>Invitados</h3><p><span id="guestCountText">10 invitados</span> · <span id="guestPendingText">0 sin asignar</span></p></div>
+          </div>
+          <p class="guest-drag-help">Arrastra un invitado y suéltalo sobre una silla libre del plano.</p>
+          <label class="field"><span>Buscar</span><input id="guestSearch" type="search" placeholder="Buscar invitado…"></label>
+          <div id="guestList" class="guest-list" aria-label="Lista de invitados para asignar"></div>
+          <div class="guest-add-row" hidden>
+            <input id="newGuestName" type="text" placeholder="Nombre del invitado">
+            <button id="btnAddGuest" type="button">Agregar</button>
+          </div>
+          <details class="bulk-box" hidden>
+            <summary>Agregar varios invitados</summary>
+            <textarea id="bulkGuests" rows="4" placeholder="Un nombre por línea"></textarea>
+            <button id="btnAddBulkGuests" type="button">Agregar lista</button>
+          </details>
+          <div class="action-grid guest-actions" hidden>
+            <button id="btnAssignSequential" type="button">Asignar en orden</button>
+            <button id="btnClearAssignments" type="button">Limpiar asignaciones</button>
+          </div>
+        </section>
+
+        
+
+        
+
+        
+
+      </aside>
+
+      <section class="canvas-card" aria-label="Plano de distribución">
+        <div class="canvas-head">
+          <div>
+            <span class="section-kicker">PLANO DEL SALÓN</span>
+            <strong id="proposalNameCanvas">Propuesta principal · laboratorio</strong>
+          </div>
+          <div class="canvas-toolbar">
+            <button id="btnZoomOut" type="button" aria-label="Alejar">−</button>
+            <button id="zoomReset" type="button">100%</button>
+            <button id="btnZoomIn" type="button" aria-label="Acercar">＋</button>
+            <span class="toolbar-divider"></span>
+            <span class="text-size-control" role="group" aria-label="Tamaño de texto">
+              <button id="btnTextSmaller" type="button" aria-label="Reducir texto">A−</button>
+              <button id="textSizeReset" type="button" title="Restaurar tamaño de texto">110%</button>
+              <button id="btnTextLarger" type="button" aria-label="Aumentar texto">A＋</button>
+            </span>
+            <span class="toolbar-divider"></span>
+            <button id="btnMeasure" type="button">⌁ Medir</button>
+            <button id="btnClearMeasures" type="button">Limpiar medidas</button>
+            <button id="btnFit" type="button">⊡ Encajar</button>
+          </div>
+        </div>
+        <div class="toolbar-chip-row">
+          <span id="multiToolbarChip" class="toolbar-chip" hidden></span>
+          <span id="measureToolbarChip" class="toolbar-chip" hidden>Modo medición activo</span>
+        </div>
+        <div class="canvas-wrap" id="canvasWrap">
+          <svg id="planner" viewBox="0 0 1448 1086" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Plano de distribución de prueba">
+            <defs>
+              <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+                <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#748065" stroke-opacity=".12" stroke-width="1"/>
+              </pattern>
+              <pattern id="floorPattern" width="48" height="48" patternUnits="userSpaceOnUse">
+                <rect width="48" height="48" fill="#faf8f3"/>
+                <path d="M0 48L48 0M-12 12L12-12M36 60L60 36" stroke="#e9e4da" stroke-width="1" opacity=".55"/>
+              </pattern>
+              <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+                <feDropShadow dx="0" dy="4" stdDeviation="4" flood-color="#000" flood-opacity=".13"/>
+              </filter>
+            </defs>
+            <rect class="floor" width="1448" height="1086" rx="8"/>
+            <image id="bgImage" x="0" y="0" width="1448" height="1086" href="./distribucion_base.png?v=20260917-migrated-1" xlink:href="./distribucion_base.png?v=20260917-migrated-1" preserveAspectRatio="xMidYMid slice" opacity="1" pointer-events="none"/>
+            <rect id="gridLayer" width="1448" height="1086" fill="url(#grid)"/>
+            <g id="guideLayer"></g>
+            <g id="drawLayer"></g>
+            <g id="itemsLayer"></g>
+            <g id="measureLayer"></g>
+          </svg>
+          <div class="floating-legend">
+            <span><i class="legend-dot table-dot"></i>Mesa</span>
+            <span><i class="legend-dot clearance-dot"></i>Circulación</span>
+            <span><i class="legend-dot danger-dot"></i>Superposición</span>
+            <span><i class="legend-dot selected-dot"></i>Seleccionado</span>
+          </div>
+          <div class="measure-note" id="measureNote" hidden>Modo medición · haz clic en dos puntos del plano</div>
+        </div>
+        <footer class="canvas-footer">
+          <span><b>Tip:</b> Ctrl/Cmd + clic selecciona varios. Ctrl/Cmd + C/V copia y pega.</span>
+          <span id="cursorCoords">x 0.00 m · y 0.00 m</span>
+        </footer>
+      </section>
+
+      <aside class="panel properties-panel" aria-label="Propiedades del elemento seleccionado">
+        <div class="panel-heading">
+          <div><span class="section-kicker">INSPECTOR</span><h2>Propiedades</h2></div>
+          <span class="selection-tag" id="selectionTag" hidden></span>
+        </div>
+
+        <div id="selectionEmpty" class="selection-empty">
+          <div class="empty-icon">↖</div>
+          <strong>Selecciona un elemento</strong>
+          <p>Haz clic sobre una mesa u objeto del plano para editarlo.</p>
+        </div>
+
+        <form id="selectionForm" autocomplete="off" hidden>
+          <section class="panel-section first-section">
+            <div id="lockedNote" class="locked-note" hidden>Este elemento está bloqueado. Desbloquéalo para editarlo.</div>
+            <label class="field"><span>Nombre / etiqueta</span><input id="selLabel" type="text"></label>
+            <div class="two-col">
+              <label class="field"><span>X (m)</span><input id="selX" type="number" step="0.1"></label>
+              <label class="field"><span>Y (m)</span><input id="selY" type="number" step="0.1"></label>
+            </div>
+            <div class="two-col">
+              <label class="field"><span>Ancho (m)</span><input id="selW" type="number" min="0.2" max="5" step="0.1"></label>
+              <label class="field"><span>Alto (m)</span><input id="selH" type="number" min="0.2" max="5" step="0.1"></label>
+            </div>
+            <p id="dimensionLimitNote" class="field-note">Máximo permitido para este elemento: 5 m por lado.</p>
+            <label class="field"><span>Rotación</span><div class="input-suffix"><input id="selRot" type="number" min="-180" max="180" step="1"><b>°</b></div></label>
+            <label class="field"><span>Color</span><input id="selColor" class="color-input" type="color"></label>
+
+            <div id="tentStyleFields" class="tent-style" hidden>
+              <label class="field"><span>Color del área</span><input id="tentFillColor" class="color-input" type="color" value="#d8c9a6"></label>
+              <label class="field"><span>Transparencia</span><div class="range-row"><input id="tentTransparencyRange" type="range" min="0" max="90" step="1" value="45"><input id="tentTransparencyNumber" type="number" min="0" max="90" step="1" value="45"></div></label>
+            </div>
+
+            <div class="action-grid inspector-actions">
+              <button id="btnDuplicate" type="button">Duplicar</button>
+              <button id="btnToggleLock" type="button">🔒 Bloquear</button>
+              <button id="btnBringFront" type="button">Al frente</button>
+              <button id="btnSendBack" type="button">Al fondo</button>
+              <button id="btnAlignNow" type="button">Alinear</button>
+              <button id="btnDelete" class="danger" type="button">Eliminar</button>
+            </div>
+          </section>
+
+          <section id="seatEditorWrap" class="panel-section seat-section" hidden>
+            <div class="section-title-row"><div><h3>Asientos de la mesa</h3><p>Sillas y etiquetas mantienen la estética estable.</p></div><span class="count-chip" id="seatCount">10</span></div>
+            <div id="seatEditor" class="seat-editor"></div>
+          </section>
+
+          <section class="panel-section">
+            <div class="section-title-row"><h3>Acciones rápidas</h3></div>
+            <div class="action-grid">
+              <button id="btnCenter" type="button">Centrar</button>
+              <button id="btnRotateLeft" type="button">↶ 15°</button>
+              <button id="btnRotateRight" type="button">↷ 15°</button>
+              <button id="btnClearSeats" type="button">Vaciar mesa</button>
+            </div>
+          </section>
+        </form>
+
+<section class="panel-section">
+          <div class="section-title-row"><h3>Vista del plano</h3><button class="text-button" id="btnDefaultView" type="button">Restaurar</button></div>
+          <div class="fixed-scale-contract">
+            <span>Escala física</span>
+            <strong>32 px/m</strong>
+            <small>Fija · el zoom solo cambia la vista</small>
+          </div>
+          <input id="scaleInput" type="hidden" value="32">
+          <div class="toggle-list">
+            <label><input id="showGrid" type="checkbox" checked><span>Rejilla</span></label>
+            <label><input id="showClearance" type="checkbox" checked><span>Circulación</span></label>
+            <label><input id="showLabels" type="checkbox" checked><span>Etiquetas de elementos</span></label>
+            <label><input id="showNames" type="checkbox" checked><span>Nombres de invitados</span></label>
+          </div>
+          <button class="wide-button" id="toggleBg" type="button">Ocultar plano</button><button class="wide-button" id="btnMoveBackground" type="button" aria-pressed="false">Mover fondo</button><p class="field-note bg-drag-note">Arrastra el plano para desplazarte. Activa “Mover fondo” solo cuando quieras reposicionar la imagen base.</p>
+        </section>
+
+<section class="panel-section">
+          <div class="section-title-row"><h3>Capas</h3><div class="mini-actions"><button class="text-button" id="btnShowAllLayers" type="button">Mostrar todas</button><button class="text-button" id="btnUnlockAllLayers" type="button">Desbloquear</button></div></div>
+          <div id="layerList" class="layer-list" aria-live="polite"></div>
+        </section>
+
+<section class="panel-section validation-section" hidden aria-hidden="true">
+          <div class="section-title-row"><div><h3>Validación y riesgos</h3><p>Las mismas comprobaciones del Distribución estable.</p></div></div>
+          <div id="validationBox" class="validation-box" aria-live="polite"></div>
+        </section>
+
+        <div class="lab-warning">
+          <strong>Entorno aislado · memory-only</strong>
+          <span>Invitados se administran fuera de Distribución. Este laboratorio no escribe en storage ni datos reales.</span>
+        </div>
+
+
+        <section class="panel-section summary-section">
+          <h3>Resumen del plano</h3>
+          <dl class="summary-list">
+            <div><dt>Mesas</dt><dd id="summaryTables">1</dd></div>
+            <div><dt>Asientos</dt><dd id="summarySeats">10</dd></div>
+            <div><dt>Asignados</dt><dd id="summaryAssigned">10</dd></div>
+            <div><dt>Elementos</dt><dd id="summaryElements">1</dd></div>
+          </dl>
+        </section>
+      </aside>
+    </main>
+  </div>
+
+  <div class="presentation-overlay" id="presentationOverlay" hidden>
+    <div class="presentation-card">
+      <div class="presentation-header"><span>Vista de presentación</span><button id="closePresentation" type="button">×</button></div>
+      <div id="presentationMount"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="proposalModal" hidden>
+    <div class="modal-card">
+      <div class="modal-header"><div><span class="section-kicker">LABORATORIO</span><h2>Propuestas</h2></div><button id="closeProposalModal" type="button">×</button></div>
+      <p class="modal-copy">Estas propuestas existen solo durante esta sesión de prueba.</p>
+      <div class="proposal-toolbar"><button id="btnNewProposal" type="button">Nueva propuesta</button><button id="btnDuplicateProposal" type="button">Duplicar actual</button></div>
+      <div id="proposalList" class="proposal-list"></div>
+    </div>
+  </div>
+
+  <script src="js/modules/distribucion/index.js?v=20260905-bg-event-contract-1"></script>
+  <script src="js/modules/distribucion/engine.js?v=20260905-table-shapes-authoritative-1"></script>
+  <script src="js/modules/distribucion/adapter.js?v=20260904-appintegral-1"></script>
+  <script src="js/modules/distribucion/renderer.js?v=20260904-appintegral-1"></script>
+  <script src="js/modules/distribucion/export.js?v=20260904-appintegral-1"></script>
+</body>
+</html>
