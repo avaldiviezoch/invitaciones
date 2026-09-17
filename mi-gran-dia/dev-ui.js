@@ -1,22 +1,15 @@
-/*
- * MI GRAN DÍA · CAPA DEV DE INTERFAZ
- * -----------------------------------------------
- * Usar únicamente para UI, navegación, componentes y comportamiento visual.
- *
- * PROHIBIDO DESDE ESTA CAPA:
- * - inicializar/reconfigurar Firebase
- * - cambiar colecciones/documentos Firestore
- * - cambiar rutas de Storage
- * - alterar contratos de persistencia
- * - modificar localStorage/sessionStorage/IndexedDB existentes
- */
-
+/* MI GRAN DÍA · UI DEV. Sin Firebase/Firestore/Storage/Auth. */
 (() => {
   'use strict';
   document.documentElement.dataset.environment = 'development';
-  window.MI_GRAN_DIA_DEV = Object.freeze({
-    environment: 'development',
-    source: 'Wedding/app_integral',
-    persistencePolicy: 'protected'
-  });
+  window.MI_GRAN_DIA_DEV = Object.freeze({environment:'development',persistencePolicy:'protected'});
+
+  const button = document.getElementById('openPanel');
+  const panel = document.getElementById('plannerPanel');
+  if (button && panel) {
+    button.addEventListener('click', () => {
+      const open = panel.classList.toggle('is-open');
+      button.setAttribute('aria-expanded', String(open));
+    });
+  }
 })();
