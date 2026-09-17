@@ -3,39 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Mi Gran Día · DEV</title>
-  <script>
-    /**
-     * ENTORNO DE DESARROLLO VISUAL
-     * La aplicación base se obtiene de Wedding/app_integral.
-     * Firebase, Firestore, Auth, Storage y persistencia NO se copian ni modifican aquí.
-     * Los cambios visuales/nuevos componentes deben vivir en este repositorio.
-     */
-    (async () => {
-      const PROD_BASE = 'https://avaldiviezoch.github.io/Wedding/app_integral/';
-      try {
-        const response = await fetch(PROD_BASE + 'applu.html', { cache: 'no-store' });
-        if (!response.ok) throw new Error('No se pudo cargar la base de producción: ' + response.status);
-        let html = await response.text();
-
-        // Hace que todos los CSS/JS/assets relativos sigan viniendo de Wedding.
-        html = html.replace('<head>', '<head><base href="' + PROD_BASE + '">');
-
-        // Capa DEV: se carga al final para poder sobrescribir estética sin tocar producción.
-        html = html.replace('</head>', '<link rel="stylesheet" href="https://avaldiviezoch.github.io/invitaciones/mi-gran-dia/dev-ui.css?v=1"></head>');
-        html = html.replace('</body>', '<script src="https://avaldiviezoch.github.io/invitaciones/mi-gran-dia/dev-ui.js?v=1"><\/script></body>');
-
-        document.open();
-        document.write(html);
-        document.close();
-      } catch (error) {
-        document.body.innerHTML = '<main style="font-family:system-ui;padding:32px"><h1>Mi Gran Día · DEV</h1><p>No se pudo cargar la aplicación base.</p><pre></pre></main>';
-        document.querySelector('pre').textContent = String(error);
-      }
-    })();
-  </script>
+  <meta name="robots" content="noindex,nofollow">
+  <title>Mi Gran Día · DEV aislado</title>
+  <link rel="stylesheet" href="dev-ui.css?v=2">
 </head>
 <body>
-  <p style="font-family:system-ui;padding:24px">Cargando Mi Gran Día…</p>
+  <main class="dev-safe-shell">
+    <section class="dev-safe-card">
+      <span class="dev-safe-badge">DEV AISLADO</span>
+      <h1>Mi Gran Día</h1>
+      <p>Entorno de desarrollo independiente. Este sitio no carga ni inicializa Firebase, Firestore, Storage o Auth del aplicativo de producción.</p>
+      <p><strong>Producción protegida:</strong> ningún dato de usuarios reales se lee, crea, actualiza o elimina desde este entorno.</p>
+      <div id="devApp" aria-live="polite"></div>
+    </section>
+  </main>
+  <script src="dev-guard.js?v=2"></script>
+  <script src="dev-ui.js?v=2"></script>
 </body>
 </html>
