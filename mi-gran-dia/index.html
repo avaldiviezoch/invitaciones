@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="robots" content="noindex,nofollow">
   <title>Mi Gran Día · DEV</title>
-  <link rel="stylesheet" href="dev-ui.css?v=3">
+  <link rel="stylesheet" href="dev-ui.css?v=4">
 </head>
 <body>
   <main class="app-shell">
@@ -14,22 +14,48 @@
     </video>
     <div class="video-shade" aria-hidden="true"></div>
 
+    <!-- SOLO KPIs: el video original sigue visible detrás. Datos DEV simulados. -->
     <section class="stats-stage" aria-label="Resumen de la boda">
-      <article class="stat-card stat-wide">
-        <div><span class="stat-label">Invitados</span><strong>180</strong><small>120 confirmados · 67%</small></div>
-        <div class="donut" style="--p:67"><span>67%</span></div>
+      <article class="stat-card stat-guests">
+        <div class="stat-head"><span class="stat-icon">♙</span><span class="stat-label">Invitados</span></div>
+        <div class="stat-main"><strong>120 <em>/ 180</em></strong><span class="stat-percent">67%</span></div>
+        <small>Confirmados</small><div class="progress"><i style="width:67%"></i></div>
       </article>
-      <article class="stat-card"><span class="stat-label">Checklist</span><strong>67%</strong><small>24 de 36 tareas listas</small><div class="progress"><i style="width:67%"></i></div></article>
-      <article class="stat-card"><span class="stat-label">Presupuesto</span><strong>S/ 28,500</strong><small>de S/ 35,000 · 81%</small><div class="progress"><i style="width:81%"></i></div></article>
-      <article class="stat-card"><span class="stat-label">Proveedores</span><strong>12 <em>/ 18</em></strong><small>contratados</small><div class="progress"><i style="width:67%"></i></div></article>
-      <article class="stat-card"><span class="stat-label">Distribución</span><strong>10 <em>/ 12</em></strong><small>mesas ubicadas</small><div class="progress"><i style="width:83%"></i></div></article>
-      <article class="stat-card"><span class="stat-label">Cronograma</span><strong>18</strong><small>actividades programadas</small></article>
-      <article class="stat-card"><span class="stat-label">Música</span><strong>32</strong><small>canciones agregadas</small></article>
-      <article class="stat-card"><span class="stat-label">Invitaciones</span><strong>5</strong><small>diseños disponibles</small></article>
+      <article class="stat-card stat-checklist">
+        <div class="stat-head"><span class="stat-icon">✓</span><span class="stat-label">Checklist</span></div>
+        <div class="stat-main"><strong>24 <em>/ 36</em></strong><span class="stat-percent">67%</span></div>
+        <small>Tareas completadas</small><div class="progress"><i style="width:67%"></i></div>
+      </article>
+      <article class="stat-card stat-budget">
+        <div class="stat-head"><span class="stat-icon">S/</span><span class="stat-label">Presupuesto</span></div>
+        <div class="stat-main"><strong>S/ 28,500</strong><span class="stat-percent">81%</span></div>
+        <small>de S/ 35,000</small><div class="progress"><i style="width:81%"></i></div>
+      </article>
+      <article class="stat-card stat-vendors">
+        <div class="stat-head"><span class="stat-icon">◇</span><span class="stat-label">Proveedores</span></div>
+        <div class="stat-main"><strong>12 <em>/ 18</em></strong><span class="stat-percent">67%</span></div>
+        <small>Contratados</small><div class="progress"><i style="width:67%"></i></div>
+      </article>
+      <article class="stat-card stat-layout">
+        <div class="stat-head"><span class="stat-icon">⌑</span><span class="stat-label">Distribución</span></div>
+        <div class="stat-main"><strong>10 <em>/ 12</em></strong><span class="stat-percent">83%</span></div>
+        <small>Mesas ubicadas</small><div class="progress"><i style="width:83%"></i></div>
+      </article>
+      <article class="stat-card stat-schedule">
+        <div class="stat-head"><span class="stat-icon">□</span><span class="stat-label">Cronograma</span></div>
+        <div class="stat-main"><strong>18</strong></div><small>Actividades programadas</small>
+      </article>
+      <article class="stat-card stat-music">
+        <div class="stat-head"><span class="stat-icon">♪</span><span class="stat-label">Música</span></div>
+        <div class="stat-main"><strong>32</strong></div><small>Canciones agregadas</small>
+      </article>
+      <article class="stat-card stat-invites">
+        <div class="stat-head"><span class="stat-icon">✉</span><span class="stat-label">Invitaciones</span></div>
+        <div class="stat-main"><strong>5</strong></div><small>Diseños disponibles</small>
+      </article>
     </section>
 
     <button class="open-panel" id="openPanel" type="button" aria-expanded="true" aria-controls="plannerPanel">Menú</button>
-
     <aside class="planner-panel is-open" id="plannerPanel">
       <header class="panel-title"><span>GESTIÓN INTEGRAL</span><h1>PLANIFICADOR DE<br>BODAS</h1><p>Organiza cada detalle desde un solo lugar.</p></header>
       <section class="profile-card"><div class="avatar">AV</div><div><strong>Antonio Valdiviezo</strong><small>Usuario DEV · datos simulados</small><span>● Entorno seguro</span></div></section>
@@ -40,6 +66,6 @@
     </aside>
   </main>
   <script src="dev-guard.js?v=2"></script>
-  <script src="dev-ui.js?v=3"></script>
+  <script src="dev-ui.js?v=4"></script>
 </body>
 </html>
