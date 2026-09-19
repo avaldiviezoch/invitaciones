@@ -410,15 +410,14 @@
   }
 
   function installToolButton() {
-    const circular = document.querySelector('[data-add="table"]');
-    if (!circular || document.getElementById('btnAddSquareTable')) return;
-    const button = circular.cloneNode(true);
-    button.id = 'btnAddSquareTable';
-    button.removeAttribute('data-add');
-    button.querySelector('strong').textContent = '□';
-    button.querySelector('span').innerHTML = 'Mesa cuadrada<small>10 personas · 1.80 m</small>';
-    button.addEventListener('click', (event) => { event.preventDefault(); event.stopImmediatePropagation(); addSquareTable(); }, true);
-    circular.insertAdjacentElement('afterend', button);
+    const button = document.getElementById('btnAddSquareTable');
+    if (!button || button.dataset.mgdBound === 'square') return;
+    button.dataset.mgdBound = 'square';
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      addSquareTable();
+    }, true);
   }
 
   function installShapeControls() {
@@ -623,17 +622,14 @@
   }
 
   function installToolButton() {
-    const square = document.getElementById('btnAddSquareTable');
-    const circular = document.querySelector('[data-add="table"]');
-    const anchor = square || circular;
-    if (!anchor || document.getElementById('btnAddRectangularTable')) return;
-    const button = anchor.cloneNode(true);
-    button.id = 'btnAddRectangularTable';
-    button.removeAttribute('data-add');
-    button.querySelector('strong').textContent = '▭';
-    button.querySelector('span').innerHTML = 'Mesa rectangular<small>10 personas · 2.40 × 0.75 m</small>';
-    button.addEventListener('click', (event) => { event.preventDefault(); event.stopImmediatePropagation(); addRectangularTable(); }, true);
-    anchor.insertAdjacentElement('afterend', button);
+    const button = document.getElementById('btnAddRectangularTable');
+    if (!button || button.dataset.mgdBound === 'rectangular') return;
+    button.dataset.mgdBound = 'rectangular';
+    button.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      addRectangularTable();
+    }, true);
   }
 
   function installShapeControl() {
