@@ -221,6 +221,11 @@ body.entry-open{overflow:hidden}
 .rsvp-panel{width:min(90%,480px);margin:22px auto 0;padding:16px;border:1px solid rgba(109,117,89,.18);border-radius:18px;background:rgba(255,255,255,.25);text-align:left}
 .rsvp-panel[hidden]{display:none}
 .rsvp-native-host{width:100%}
+.rsvp-nominal-passes{width:100%;margin:0 0 14px;padding:14px;border:1px solid rgba(109,117,89,.18);border-radius:14px;background:rgba(255,255,255,.3);text-align:left}
+.rsvp-passes-title{margin:0 0 10px;font-family:Georgia,'Times New Roman',serif;font-size:13px;font-weight:700;color:#5d644f;text-align:center}
+.rsvp-pass-person{display:flex;align-items:center;gap:10px;padding:10px 4px;border-top:1px solid rgba(109,117,89,.14);font-family:Georgia,'Times New Roman',serif;font-size:13px;line-height:1.3;color:#5b4830;cursor:pointer}
+.rsvp-pass-person:first-of-type{border-top:0}
+.rsvp-pass-person input{width:20px;height:20px;flex:0 0 20px;accent-color:#6d7559}
 
 .gift-animation{width:100%;margin:0;padding:52px 0 0;background:var(--first-entrance-bg);text-align:center;overflow:hidden}
 .gift-animation img{display:block;width:min(76%,420px);height:auto;margin:0 auto;border:0;object-fit:contain}
