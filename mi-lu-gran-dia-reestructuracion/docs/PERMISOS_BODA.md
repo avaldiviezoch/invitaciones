@@ -36,3 +36,7 @@ Esta fase NO modifica Firebase, Firestore, Storage, Authentication, reglas, cole
 
 ## Fail closed
 Sin contexto válido: `viewer`. Sin permiso explícito: no editar. Sin boda activa: no escribir. Si contexto y backend discrepan, prevalece el permiso más restrictivo hasta resolver la inconsistencia.
+
+## Microcopy y visibilidad de roles
+
+El rol sigue siendo parte obligatoria del contrato de autorización, pero no debe mostrarse como ruido permanente en el Inicio. Consultar `docs/MICROCOPY_SHELL.md`. Los permisos se aplican aunque la etiqueta del rol no sea visible.

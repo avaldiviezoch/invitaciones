@@ -76,3 +76,7 @@ Hasta entonces, esta carpeta trabaja con datos mock o estado en memoria.
 ## Boda activa y permisos
 
 Todo desarrollo debe cumplir `docs/PERMISOS_BODA.md`. Ningún módulo puede implementar escritura sin declarar su vínculo con la boda activa y la capacidad requerida.
+
+## Microcopy del shell
+
+Toda interfaz del shell debe cumplir `docs/MICROCOPY_SHELL.md`: no mostrar estados técnicos obvios de conexión ni roles como decoración permanente. El título de la boda es la identidad principal del espacio compartido.
