@@ -8,6 +8,7 @@ import {
   deleteDoc,
   query,
   where,
+  writeBatch,
   updateDoc
 } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
 import { auth, db } from './firebase-client.js';
@@ -90,6 +91,52 @@ async function updateWeddingIdentity(context, changes = {}) {
   return { ...context, ...changes };
 }
 
+
+
+async function createWedding({ name, date = '' } = {}) {
+  const user = auth.currentUser;
+  if (!user) throw new Error('Debes iniciar sesión.');
+  const cleanName = String(name || '').trim();
+  if (!cleanName) throw new Error('Escribe un nombre para la boda.');
+  const weddingRef = doc(collection(db, 'weddings'));
+  const weddingId = weddingRef.id;
+  const cleanDate = String(date || '');
+  const batch = writeBatch(db);
+  batch.set(weddingRef, { name: cleanName, date: cleanDate, ownerUid: user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp(), version: 1 });
+  batch.set(doc(db, 'weddings', weddingId, 'members', user.uid), { uid: user.uid, email: String(user.email || '').toLowerCase(), displayName: user.displayName || '', role: 'owner', status: 'active', weddingName: cleanName, joinedAt: serverTimestamp() });
+  batch.set(doc(db, 'users', user.uid, 'weddings', weddingId), { weddingId, name: cleanName, date: cleanDate, role: 'owner', ownerUid: user.uid, addedAt: serverTimestamp() });
+  batch.set(doc(db, 'users', user.uid), { activeWeddingId: weddingId, lastSeenAt: serverTimestamp() }, { merge: true });
+  await batch.commit();
+  return { id: weddingId, name: cleanName, date: cleanDate, role: 'owner' };
+}
+
+async function listPendingInvitations() {
+  const user = auth.currentUser;
+  if (!user?.email) return [];
+  const snapshots = await getDocs(query(collection(db, 'invitations'), where('email', '==', String(user.email).toLowerCase())));
+  return snapshots.docs.map((snapshot) => ({ id: snapshot.id, ...snapshot.data() })).filter((item) => item.status === 'pending');
+}
+
+async function acceptWeddingInvitation(inviteId) {
+  const user = auth.currentUser;
+  if (!user?.email) throw new Error('Debes iniciar sesión.');
+  const inviteRef = doc(db, 'invitations', String(inviteId || ''));
+  const snapshot = await getDoc(inviteRef);
+  if (!snapshot.exists()) throw new Error('La invitación ya no existe.');
+  const invite = snapshot.data() || {};
+  if (String(invite.email || '').toLowerCase() !== String(user.email).toLowerCase()) throw new Error('Esta invitación pertenece a otra cuenta.');
+  if (invite.status !== 'pending') throw new Error('Esta invitación ya fue utilizada.');
+  const weddingId = String(invite.weddingId || '');
+  const role = normalizeWeddingRole(invite.role);
+  const weddingName = String(invite.weddingName || 'Boda compartida');
+  const batch = writeBatch(db);
+  batch.set(doc(db, 'weddings', weddingId, 'members', user.uid), { uid: user.uid, email: String(user.email).toLowerCase(), displayName: user.displayName || '', role, status: 'active', weddingName, joinedAt: serverTimestamp() }, { merge: true });
+  batch.set(doc(db, 'users', user.uid, 'weddings', weddingId), { weddingId, name: weddingName, role, ownerUid: invite.invitedBy || '', addedAt: serverTimestamp() }, { merge: true });
+  batch.set(inviteRef, { status: 'accepted', acceptedBy: user.uid, acceptedAt: serverTimestamp(), updatedAt: serverTimestamp() }, { merge: true });
+  batch.set(doc(db, 'users', user.uid), { activeWeddingId: weddingId, lastSeenAt: serverTimestamp() }, { merge: true });
+  await batch.commit();
+  return { id: weddingId, name: weddingName, role };
+}
 
 function invitationId(weddingId, email) {
   return `${weddingId}__${String(email || '').trim().toLowerCase()}`;
@@ -180,6 +227,7 @@ async function cancelWeddingInvitation(context, inviteId) {
 
 export {
   listWeddingContexts, loadActiveWeddingContext, selectActiveWedding, updateWeddingIdentity,
+  createWedding, listPendingInvitations, acceptWeddingInvitation,
   listWeddingMembers, listWeddingInvitations, inviteWeddingMember,
   updateWeddingMemberRole, removeWeddingMember, cancelWeddingInvitation
 };

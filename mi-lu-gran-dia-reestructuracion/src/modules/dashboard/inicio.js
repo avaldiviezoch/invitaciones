@@ -10,7 +10,10 @@ import {
   inviteWeddingMember,
   updateWeddingMemberRole,
   removeWeddingMember,
-  cancelWeddingInvitation
+  cancelWeddingInvitation,
+  createWedding,
+  listPendingInvitations,
+  acceptWeddingInvitation
 } from '../../services/wedding-context.js';
 import {
   GoogleAuthProvider,
@@ -39,6 +42,7 @@ const accessManager = $('accessManager');
 const accessMembers = $('accessMembers');
 const accessPending = $('accessPending');
 const accessStatus = $('accessStatus');
+const receivedInvitesList = $('receivedInvitesList');
 
 let weddingContext = null;
 let weddingDate = '';
@@ -110,9 +114,28 @@ function setWeddingSwitcher(open) {
   weddingSwitcher.setAttribute('aria-hidden', String(!open));
 }
 
+
+async function renderReceivedInvitations() {
+  try {
+    const invitations = await listPendingInvitations();
+    $('receivedInvitesCount').textContent = String(invitations.length);
+    receivedInvitesList.innerHTML = invitations.length ? invitations.map((invite) => `<article class="wedding-option wedding-invite-option"><span><strong>${escapeHtml(invite.weddingName || 'Boda compartida')}</strong><small>Te invitaron como ${escapeHtml(roleLabel(invite.role))}</small></span><button type="button" data-accept-invite="${escapeHtml(invite.id)}">Aceptar</button></article>`).join('') : '<div class="wedding-empty">No tienes invitaciones pendientes.</div>';
+  } catch (error) {
+    receivedInvitesList.innerHTML = '<div class="wedding-empty">No se pudieron cargar tus invitaciones.</div>';
+  }
+}
+
+function setWeddingView(view) {
+  document.querySelectorAll('[data-wedding-view]').forEach((button) => button.classList.toggle('is-active', button.dataset.weddingView === view));
+  document.querySelectorAll('[data-wedding-pane]').forEach((pane) => { pane.hidden = pane.dataset.weddingPane !== view; });
+  $('createWeddingForm').hidden = true;
+}
+
 async function openWeddingSwitcher() {
   if (!auth.currentUser) return;
   weddingsList.innerHTML = '<div class="wedding-list-empty">Cargando…</div>';
+  setWeddingView('mine');
+  await renderReceivedInvitations();
   setWeddingSwitcher(true);
   try {
     const weddings = await listWeddingContexts(auth.currentUser);
@@ -376,6 +399,47 @@ $('saveWeddingTitleButton').onclick = async () => {
 };
 
 $('activeWeddingButton').onclick = openWeddingSwitcher;
+
+document.querySelectorAll('[data-wedding-view]').forEach((button) => {
+  button.onclick = () => setWeddingView(button.dataset.weddingView);
+});
+$('newWeddingButton').onclick = () => {
+  $('createWeddingForm').hidden = false;
+  $('createWeddingStatus').textContent = '';
+  $('newWeddingName').focus();
+};
+$('cancelCreateWedding').onclick = () => { $('createWeddingForm').hidden = true; };
+$('createWeddingForm').onsubmit = async (event) => {
+  event.preventDefault();
+  $('createWeddingStatus').textContent = 'Creando boda…';
+  try {
+    const context = await createWedding({ name: $('newWeddingName').value, date: $('newWeddingDate').value });
+    weddingContexts = await listWeddingContexts();
+    applyWeddingContext(context);
+    $('createWeddingForm').reset();
+    $('createWeddingForm').hidden = true;
+    setWeddingSwitcher(false);
+  } catch (error) {
+    $('createWeddingStatus').textContent = error?.message || 'No se pudo crear la boda.';
+  }
+};
+receivedInvitesList.onclick = async (event) => {
+  const button = event.target.closest('[data-accept-invite]');
+  if (!button) return;
+  button.disabled = true;
+  button.textContent = 'Aceptando…';
+  try {
+    const context = await acceptWeddingInvitation(button.dataset.acceptInvite);
+    weddingContexts = await listWeddingContexts();
+    applyWeddingContext(context);
+    setWeddingSwitcher(false);
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = 'Aceptar';
+    receivedInvitesList.insertAdjacentHTML('afterbegin', `<div class="wedding-empty">${escapeHtml(error?.message || 'No se pudo aceptar la invitación.')}</div>`);
+  }
+};
+
 document.querySelectorAll('[data-close-weddings]').forEach((button) => {
   button.onclick = () => setWeddingSwitcher(false);
 });
