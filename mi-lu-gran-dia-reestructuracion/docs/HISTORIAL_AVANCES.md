@@ -52,3 +52,9 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Si una boda todavía no tiene `date`, la interfaz muestra “Sin fecha”; el owner puede establecerla mediante “Editar” y el valor queda guardado en ese documento de boda.
 - Cambiar de boda cambia inmediatamente la fecha y la cuenta regresiva porque ambas se obtienen del contexto Firebase de esa boda.
 - No se creó una colección nueva ni un identificador paralelo para la fecha: el identificador estable es el `weddingId` y `date` es un atributo de esa boda. Esto evita duplicar fuentes de verdad.
+
+## 2026-09-22 — Calendario propio para fecha de boda
+- Se reemplazó el selector nativo `input[type=date]` por un calendario propio integrado al lenguaje visual de la carátula.
+- Permite navegar mes a mes, seleccionar un día, visualizar la fecha elegida y guardar/cancelar explícitamente.
+- El cambio es exclusivamente de interfaz: al guardar continúa usando el mismo campo canónico `weddings/{weddingId}.date` y el mismo control owner-only de Firestore.
+- No se modificaron reglas, Storage ni otros datos de la boda.

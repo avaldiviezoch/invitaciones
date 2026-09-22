@@ -22,7 +22,9 @@ const status = $('authStatus');
 const email = $('authEmail');
 const password = $('authPassword');
 const dateEditor = $('dateEditor');
-const dateInput = $('weddingDateInput');
+const calendarGrid = $('calendarGrid');
+const calendarMonthLabel = $('calendarMonthLabel');
+const calendarSelectedLabel = $('calendarSelectedLabel');
 const titleEditor = $('weddingTitleEditor');
 const titleInput = $('weddingTitleInput');
 const weddingSwitcher = $('weddingSwitcher');
@@ -30,6 +32,8 @@ const weddingsList = $('weddingsList');
 
 let weddingContext = null;
 let weddingDate = '';
+let calendarSelectedDate = '';
+let calendarCursor = new Date();
 
 function setMenu(open) {
   document.body.classList.toggle('menu-open', open);
@@ -60,7 +64,7 @@ function applyWeddingContext(context) {
 
   weddingDate = context?.date || '';
   $('weddingDateLabel').textContent = formatDate(weddingDate);
-  dateInput.value = weddingDate;
+  calendarSelectedDate = weddingDate;
   document.body.dataset.weddingRole = capabilities.role;
   tick();
 }
@@ -105,6 +109,54 @@ function errorText(error) {
   return String(error?.code || '').includes('invalid-credential')
     ? 'Correo o contraseña incorrectos.'
     : 'No se pudo iniciar sesión.';
+}
+
+const MONTHS = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+
+function isoDate(year, month, day) {
+  return `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+}
+
+function calendarDateLabel(value) {
+  if (!value) return 'Elige un día';
+  const [year, month, day] = value.split('-');
+  return `${day} de ${MONTHS[Number(month) - 1].toLowerCase()} de ${year}`;
+}
+
+function renderCalendar() {
+  const year = calendarCursor.getFullYear();
+  const month = calendarCursor.getMonth();
+  calendarMonthLabel.textContent = `${MONTHS[month]} ${year}`;
+  calendarSelectedLabel.textContent = calendarDateLabel(calendarSelectedDate);
+  const firstDay = (new Date(year, month, 1).getDay() + 6) % 7;
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = new Date();
+  const todayIso = isoDate(today.getFullYear(), today.getMonth(), today.getDate());
+  const cells = [];
+  for (let i = 0; i < firstDay; i += 1) cells.push('<span class="calendar-blank"></span>');
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    const value = isoDate(year, month, day);
+    const classes = ['calendar-day'];
+    if (value === todayIso) classes.push('is-today');
+    if (value === calendarSelectedDate) classes.push('is-selected');
+    cells.push(`<button type="button" class="${classes.join(' ')}" data-calendar-date="${value}" aria-pressed="${value === calendarSelectedDate}">${day}</button>`);
+  }
+  calendarGrid.innerHTML = cells.join('');
+}
+
+function openDateCalendar() {
+  if (!weddingContext) return;
+  calendarSelectedDate = weddingDate;
+  const base = weddingDate ? new Date(`${weddingDate}T00:00:00`) : new Date();
+  calendarCursor = new Date(base.getFullYear(), base.getMonth(), 1);
+  renderCalendar();
+  dateEditor.classList.add('show');
+  dateEditor.setAttribute('aria-hidden', 'false');
+}
+
+function closeDateCalendar() {
+  dateEditor.classList.remove('show');
+  dateEditor.setAttribute('aria-hidden', 'true');
 }
 
 function tick() {
@@ -184,21 +236,29 @@ onAuthStateChanged(auth, async (user) => {
   await hydrateWedding(user);
 });
 
-$('editWeddingDateButton').onclick = () => {
-  if (!weddingContext) return;
-  dateInput.value = weddingDate;
-  dateEditor.classList.add('show');
+$('editWeddingDateButton').onclick = openDateCalendar;
+$('cancelWeddingDateButton').onclick = closeDateCalendar;
+$('calendarPrevButton').onclick = () => {
+  calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() - 1, 1);
+  renderCalendar();
+};
+$('calendarNextButton').onclick = () => {
+  calendarCursor = new Date(calendarCursor.getFullYear(), calendarCursor.getMonth() + 1, 1);
+  renderCalendar();
+};
+calendarGrid.onclick = (event) => {
+  const day = event.target.closest('[data-calendar-date]');
+  if (!day) return;
+  calendarSelectedDate = day.dataset.calendarDate;
+  renderCalendar();
 };
 
-$('cancelWeddingDateButton').onclick = () => dateEditor.classList.remove('show');
-
 $('saveWeddingDateButton').onclick = async () => {
-  if (!dateInput.value || !weddingContext) return;
+  if (!calendarSelectedDate || !weddingContext) return;
   try {
-    weddingContext = await updateWeddingIdentity(weddingContext, { date: dateInput.value });
+    weddingContext = await updateWeddingIdentity(weddingContext, { date: calendarSelectedDate });
     applyWeddingContext(weddingContext);
-    dateEditor.classList.remove('show');
-    tick();
+    closeDateCalendar();
   } catch (error) {
     console.error('No se pudo guardar la fecha:', error);
     status.textContent = error?.message || 'No se pudo guardar la fecha.';

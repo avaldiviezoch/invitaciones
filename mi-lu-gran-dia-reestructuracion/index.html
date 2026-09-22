@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Planificador de bodas</title>
-<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=12">
+<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=13">
 </head>
 <body class="auth-locked">
 <main class="app">
@@ -95,14 +95,21 @@ Editar
 </button>
 </div>
 </div>
-<div class="date-editor" id="dateEditor">
-<input id="weddingDateInput" type="date">
-<button class="date-save" id="saveWeddingDateButton">
-Guardar
-</button>
-<button class="date-cancel" id="cancelWeddingDateButton">
-Cancelar
-</button>
+<div class="date-editor" id="dateEditor" aria-hidden="true">
+<div class="date-calendar">
+<div class="date-calendar-head">
+<button id="calendarPrevButton" type="button" aria-label="Mes anterior">‹</button>
+<strong id="calendarMonthLabel"></strong>
+<button id="calendarNextButton" type="button" aria-label="Mes siguiente">›</button>
+</div>
+<div class="date-calendar-week" aria-hidden="true"><span>L</span><span>M</span><span>M</span><span>J</span><span>V</span><span>S</span><span>D</span></div>
+<div class="date-calendar-grid" id="calendarGrid"></div>
+<div class="date-calendar-selected">Fecha elegida <strong id="calendarSelectedLabel">—</strong></div>
+<div class="date-calendar-actions">
+<button class="date-cancel" id="cancelWeddingDateButton" type="button">Cancelar</button>
+<button class="date-save" id="saveWeddingDateButton" type="button">Guardar fecha</button>
+</div>
+</div>
 </div>
 <div class="countdown">
 <div class="time-box">
@@ -425,7 +432,7 @@ Cancelar
 </button>
 </div>
 </section>
-<script type="module" src="src/modules/dashboard/inicio.js?v=9">
+<script type="module" src="src/modules/dashboard/inicio.js?v=10">
 </script>
 </body>
 </html>
