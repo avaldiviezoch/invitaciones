@@ -72,3 +72,7 @@ Debe existir:
 - plan de rollback.
 
 Hasta entonces, esta carpeta trabaja con datos mock o estado en memoria.
+
+## Boda activa y permisos
+
+Todo desarrollo debe cumplir `docs/PERMISOS_BODA.md`. Ningún módulo puede implementar escritura sin declarar su vínculo con la boda activa y la capacidad requerida.
