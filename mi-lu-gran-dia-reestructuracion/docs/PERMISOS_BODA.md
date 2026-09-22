@@ -4,7 +4,7 @@
 Toda funcionalidad privada de Mi Gran Día pertenece a una boda concreta. Ningún módulo puede decidir permisos por su cuenta ni escribir datos sin conocer primero el contexto de boda y el rol efectivo del usuario.
 
 ## Contexto canónico
-La aplicación trabaja con un único contexto activo: `{ id, name, role }`. Los módulos consumen ese contexto; no inventan ni duplican `weddingId`, nombre o rol. Cambiar de boda deberá sustituir el contexto completo antes de cargar datos del nuevo espacio.
+La aplicación trabaja con un único contexto activo: `{ id, name, date, role, ownerUid }`. Los módulos consumen ese contexto; no inventan ni duplican `weddingId`, nombre o rol. Cambiar de boda deberá sustituir el contexto completo antes de cargar datos del nuevo espacio.
 
 ## Roles
 - `owner` — Propietario: lectura, edición, administración del equipo y asignación de administradores.

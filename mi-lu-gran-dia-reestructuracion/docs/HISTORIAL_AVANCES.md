@@ -58,3 +58,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Permite navegar mes a mes, seleccionar un día, visualizar la fecha elegida y guardar/cancelar explícitamente.
 - El cambio es exclusivamente de interfaz: al guardar continúa usando el mismo campo canónico `weddings/{weddingId}.date` y el mismo control owner-only de Firestore.
 - No se modificaron reglas, Storage ni otros datos de la boda.
+
+## 2026-09-22 — Cierre y auditoría de seguridad del Inicio
+- Se auditó la carátula, autenticación, contexto de boda, selector de bodas, edición de nombre/fecha y calendario antes de cerrar el hito.
+- Se corrigió un vector de XSS en “Mis bodas”: el nombre de boda proveniente de Firestore ya no se inserta sin escapar dentro de HTML dinámico.
+- Se verificó que nombre y fecha siguen protegidos por rol owner tanto en UI/adaptador como por las reglas Firestore existentes.
+- La configuración web de Firebase permanece en cliente; no se trata como secreto. La seguridad depende de Authentication + Firestore Rules.
+- No se detectaron escrituras de módulos, Storage, localStorage/sessionStorage/IndexedDB, migraciones, borrados ni creación automática de bodas en el Inicio.
+- Queda como endurecimiento de despliegue recomendado definir CSP/headers de seguridad cuando la aplicación deje de depender de GitHub Pages o disponga de una capa que permita encabezados HTTP controlados.
+- Se cierra el hito “Intro / Inicio” sobre el commit de auditoría correspondiente.

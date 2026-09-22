@@ -83,6 +83,15 @@ function roleLabel(role) {
   return ({ owner: 'Propietario', admin: 'Administrador', editor: 'Editor', provider: 'Proveedor', viewer: 'Solo lectura' })[role] || '';
 }
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#039;');
+}
+
 function setWeddingSwitcher(open) {
   weddingSwitcher.classList.toggle('show', open);
   weddingSwitcher.setAttribute('aria-hidden', String(!open));
@@ -96,7 +105,7 @@ async function openWeddingSwitcher() {
     const weddings = await listWeddingContexts(auth.currentUser);
     weddingsList.innerHTML = weddings.length ? weddings.map((item) => `
       <button type="button" class="wedding-list-item ${item.id === weddingContext?.id ? 'is-current' : ''}" data-wedding-id="${item.id}">
-        <span><strong>${item.name}</strong><small>${roleLabel(item.role)}${item.date ? ` · ${formatDate(item.date)}` : ''}</small></span>
+        <span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(roleLabel(item.role))}${item.date ? ` · ${escapeHtml(formatDate(item.date))}` : ''}</small></span>
         <b>${item.id === weddingContext?.id ? 'Actual' : 'Abrir'}</b>
       </button>`).join('') : '<div class="wedding-list-empty">No hay otras bodas disponibles.</div>';
   } catch (error) {

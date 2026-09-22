@@ -25,5 +25,10 @@ ESTADO:
 ARQUITECTURA:
 Firebase actual -> services/firebase-client.js -> services/wedding-context.js -> UI
 
+CIERRE INTRO / INICIO:
+- Hito auditado y cerrado el 2026-09-22.
+- Corregido escape de contenido Firestore en HTML dinámico del selector de bodas.
+- Sin cambios en reglas, Storage ni datos de módulos.
+
 PRÓXIMO:
-Acciones funcionales de la carátula y luego módulos, uno por uno.
+Reconstruir módulos uno por uno sobre el contexto de boda ya validado.
