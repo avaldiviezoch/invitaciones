@@ -67,3 +67,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - No se detectaron escrituras de módulos, Storage, localStorage/sessionStorage/IndexedDB, migraciones, borrados ni creación automática de bodas en el Inicio.
 - Queda como endurecimiento de despliegue recomendado definir CSP/headers de seguridad cuando la aplicación deje de depender de GitHub Pages o disponga de una capa que permita encabezados HTTP controlados.
 - Se cierra el hito “Intro / Inicio” sobre el commit de auditoría correspondiente.
+
+
+## 2026-09-22 — Barra canónica de módulos
+- Se implementó una única barra responsive para todos los módulos: horizontal en escritorio y vertical en celular.
+- La barra define accesos preparados para Checklist, Presupuesto, Proveedores, Invitados, Distribución, Cronograma, Invitaciones, Música, Documentos y Configuración sin duplicar navegación desktop/mobile.
+- El primer acceso funcional es Checklist: el botón “Checklist de boda” de la carátula abre el workspace y marca Checklist como módulo activo.
+- El botón “Mi Gran Día” de la barra vuelve al Inicio.
+- Los demás accesos quedan estructurados para conectar sus módulos posteriormente, pero todavía no ejecutan navegación ni escrituras.
+- La barra reutiliza el contexto de boda ya cargado; no agrega lecturas/escrituras de Firebase, Storage ni datos de módulos.

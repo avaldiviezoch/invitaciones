@@ -32,3 +32,10 @@ CIERRE INTRO / INICIO:
 
 PRÓXIMO:
 Reconstruir módulos uno por uno sobre el contexto de boda ya validado.
+
+
+HITO BARRA DE MÓDULOS:
+- Barra única responsive implementada: horizontal en escritorio, vertical en celular.
+- Checklist conectado como primer módulo de revisión.
+- Resto de accesos preparados para conexión progresiva sin duplicar navegación.
+- Sin cambios en Firebase, Storage ni datos de módulos.

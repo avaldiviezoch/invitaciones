@@ -58,6 +58,7 @@ function applyWeddingContext(context) {
 
   $('activeWeddingName').textContent = name;
   $('mainWeddingTitle').textContent = name;
+  $('appNavWeddingName').textContent = name;
   $('shareWeddingButton').hidden = !capabilities.canManageTeam;
   $('editMainWeddingTitleButton').hidden = !capabilities.canEditWeddingIdentity;
   $('editWeddingDateButton').hidden = !context || !capabilities.canEditWeddingIdentity;
@@ -243,6 +244,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   await hydrateWedding(user);
+  if (location.hash === '#checklist') openModule('checklist');
 });
 
 $('editWeddingDateButton').onclick = openDateCalendar;
@@ -334,9 +336,43 @@ document.querySelectorAll('.module-toggle').forEach((button) => {
   });
 });
 
-document.querySelectorAll('.module-link').forEach((link) => {
-  link.addEventListener('click', (event) => event.preventDefault());
+const moduleWorkspace = $('moduleWorkspace');
+
+function openModule(moduleId) {
+  if (moduleId !== 'checklist') return;
+  setMenu(false);
+  document.body.classList.add('module-open');
+  moduleWorkspace.setAttribute('aria-hidden', 'false');
+  document.querySelectorAll('[data-app-module]').forEach((button) => {
+    const active = button.dataset.appModule === moduleId;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-current', active ? 'page' : 'false');
+  });
+  history.replaceState(null, '', '#checklist');
+}
+
+function closeModuleWorkspace() {
+  document.body.classList.remove('module-open');
+  moduleWorkspace.setAttribute('aria-hidden', 'true');
+  history.replaceState(null, '', location.pathname + location.search);
+}
+
+$('appNavHome').onclick = closeModuleWorkspace;
+
+document.querySelectorAll('[data-app-module]').forEach((button) => {
+  button.addEventListener('click', () => {
+    if (button.dataset.appModule === 'checklist') openModule('checklist');
+  });
 });
+
+document.querySelectorAll('.module-link').forEach((link) => {
+  link.addEventListener('click', (event) => {
+    event.preventDefault();
+    if (link.dataset.module === 'checklist') openModule('checklist');
+  });
+});
+
+if (location.hash === '#checklist' && auth.currentUser) openModule('checklist');
 
 applyWeddingContext(null);
 tick();
