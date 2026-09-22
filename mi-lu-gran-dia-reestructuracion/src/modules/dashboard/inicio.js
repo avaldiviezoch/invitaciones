@@ -60,6 +60,7 @@ function applyWeddingContext(context) {
   $('mainWeddingTitle').textContent = name;
   $('appNavWeddingName').textContent = name;
   $('appNavRole').textContent = capabilities.label || 'Mi acceso';
+  $('appNavPopoverWedding').textContent = name;
   $('shareWeddingButton').hidden = !capabilities.canManageTeam;
   $('editMainWeddingTitleButton').hidden = !capabilities.canEditWeddingIdentity;
   $('editWeddingDateButton').hidden = !context || !capabilities.canEditWeddingIdentity;
@@ -236,6 +237,8 @@ onAuthStateChanged(auth, async (user) => {
 
   $('accountName').textContent = user.displayName || 'Mi Gran Día';
   $('appNavAccountName').textContent = user.displayName || 'Mi Gran Día';
+  $('appNavPopoverName').textContent = user.displayName || 'Mi Gran Día';
+  $('appNavPopoverEmail').textContent = user.email || '';
   $('appNavInitials').textContent = (user.displayName || 'MGD').trim().split(/\\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
   $('accountEmail').textContent = user.email || '';
   const avatar = $('accountAvatar');
@@ -341,6 +344,27 @@ document.querySelectorAll('.module-toggle').forEach((button) => {
       button.setAttribute('aria-expanded', 'true');
     }
   });
+});
+
+const appNavAccountWrap = $('appNavAccountWrap');
+$('appNavAccountButton').onclick = () => {
+  const open = !appNavAccountWrap.classList.contains('is-open');
+  appNavAccountWrap.classList.toggle('is-open', open);
+  $('appNavAccountButton').setAttribute('aria-expanded', String(open));
+};
+$('appNavWeddingButton').onclick = () => {
+  appNavAccountWrap.classList.remove('is-open');
+  $('appNavAccountButton').setAttribute('aria-expanded', 'false');
+  openWeddingSwitcher();
+};
+$('appNavLogout').onclick = async () => {
+  appNavAccountWrap.classList.remove('is-open');
+  await signOut(auth);
+};
+document.addEventListener('click', (event) => {
+  if (!appNavAccountWrap.classList.contains('is-open') || appNavAccountWrap.contains(event.target)) return;
+  appNavAccountWrap.classList.remove('is-open');
+  $('appNavAccountButton').setAttribute('aria-expanded', 'false');
 });
 
 const moduleWorkspace = $('moduleWorkspace');
