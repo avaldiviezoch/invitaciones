@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Planificador de bodas</title>
-<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=19">
+<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=20">
 </head>
 <body class="auth-locked">
 <main class="app">
@@ -77,13 +77,7 @@ Gestionar acceso</span>
 Cerrar sesión
 </button>
 </section>
-<section class="wedding-switcher" id="weddingSwitcher" aria-hidden="true">
-<div class="wedding-switcher-backdrop" data-close-weddings></div>
-<div class="wedding-switcher-panel" role="dialog" aria-modal="true" aria-labelledby="weddingSwitcherTitle">
-<header><div><span>MI GRAN DÍA</span><h2 id="weddingSwitcherTitle">Mis bodas</h2><p>Elige la boda sobre la que quieres trabajar.</p></div><button type="button" data-close-weddings aria-label="Cerrar">×</button></header>
-<div class="weddings-list" id="weddingsList"></div>
-</div>
-</section>
+
 <section class="countdown-card">
 <div class="countdown-head">
 <strong>
@@ -450,6 +444,12 @@ Cancelar
   <main class="module-stage" id="moduleStage">
     <section class="checklist-review" data-module-view="checklist"><span>PLANIFICACIÓN</span><h2>Checklist de boda</h2><p>La barra está vinculada al primer módulo. El Checklist funcional se construirá aquí sobre su adaptador Firebase auditado.</p></section>
   </main>
+</section><section class="wedding-switcher" id="weddingSwitcher" aria-hidden="true">
+<div class="wedding-switcher-backdrop" data-close-weddings></div>
+<div class="wedding-switcher-panel" role="dialog" aria-modal="true" aria-labelledby="weddingSwitcherTitle">
+<header><div><span>MI GRAN DÍA</span><h2 id="weddingSwitcherTitle">Mis bodas</h2><p>Elige la boda sobre la que quieres trabajar.</p></div><button type="button" data-close-weddings aria-label="Cerrar">×</button></header>
+<div class="weddings-list" id="weddingsList"></div>
+</div>
 </section>
 <script type="module" src="src/modules/dashboard/inicio.js?v=14">
 </script>
