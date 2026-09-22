@@ -1,0 +1,26 @@
+MI LU GRAN DÍA — ESTADO DEL PROYECTO
+Actualizado: 2026-09-22
+
+FUENTE DETALLADA:
+docs/HISTORIAL_AVANCES.md
+
+DIRECTIVA PRINCIPAL:
+La aplicación nueva se adapta al Firebase existente. No se migran, renombran,
+limpian ni reinicializan usuarios ni datos existentes.
+
+ESTADO:
+- Carátula reconstruida.
+- Autenticación conectada a usuarios existentes.
+- Boda activa conectada mediante un único adaptador.
+- Título y fecha leen la boda existente.
+- Owner puede guardar título y fecha en el documento de su boda.
+- No se modificaron reglas Firestore.
+- No se tocaron invitados, checklist, presupuesto, mesas, cronograma, música
+  ni confirmaciones.
+- No se auto-crean bodas ni membresías desde la aplicación nueva.
+
+ARQUITECTURA:
+Firebase actual -> services/firebase-client.js -> services/wedding-context.js -> UI
+
+PRÓXIMO:
+Acciones funcionales de la carátula y luego módulos, uno por uno.

@@ -80,3 +80,7 @@ Todo desarrollo debe cumplir `docs/PERMISOS_BODA.md`. Ningún módulo puede impl
 ## Microcopy del shell
 
 Toda interfaz del shell debe cumplir `docs/MICROCOPY_SHELL.md`: no mostrar estados técnicos obvios de conexión ni roles como decoración permanente. El título de la boda es la identidad principal del espacio compartido.
+
+## Bitácora obligatoria
+
+Actualizar `docs/HISTORIAL_AVANCES.md` al cerrar cada hito estructural o funcional. `ESTADO_PROYECTO.txt` es el resumen rápido. La bitácora nunca autoriza migraciones: la directiva principal sigue siendo adaptar la aplicación al Firebase y a los datos existentes.
