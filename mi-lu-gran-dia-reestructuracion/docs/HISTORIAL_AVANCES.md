@@ -44,3 +44,11 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Cambiar de boda valida primero la membresía y luego actualiza únicamente `users/{uid}.activeWeddingId` y `lastSeenAt`, igual que el contrato existente; no crea ni elimina datos.
 - Se confirmó que la cuenta regresiva antigua mostraba `16.01.2027` en el HTML, pero el documento principal de una boda puede no tener `date` si esa boda fue creada antes de que ese campo existiera. La nueva app no inventa ni migra esa fecha silenciosamente.
 - Nombre y fecha solo pueden escribirse en `weddings/{weddingId}` por el propietario porque las reglas actuales de Firestore reservan la actualización del documento raíz al owner.
+
+## 2026-09-22 — Fecha de boda como dato persistente
+- Se eliminó definitivamente `16.01.2027` / `2027-01-16` del HTML de la carátula.
+- La cuenta regresiva ya no tiene ninguna fecha fija ni fallback codificado.
+- Cada boda usa exclusivamente su propio campo `weddings/{weddingId}.date` como fuente de verdad.
+- Si una boda todavía no tiene `date`, la interfaz muestra “Sin fecha”; el owner puede establecerla mediante “Editar” y el valor queda guardado en ese documento de boda.
+- Cambiar de boda cambia inmediatamente la fecha y la cuenta regresiva porque ambas se obtienen del contexto Firebase de esa boda.
+- No se creó una colección nueva ni un identificador paralelo para la fecha: el identificador estable es el `weddingId` y `date` es un atributo de esa boda. Esto evita duplicar fuentes de verdad.

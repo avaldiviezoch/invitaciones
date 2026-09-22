@@ -56,11 +56,13 @@ function applyWeddingContext(context) {
   $('mainWeddingTitle').textContent = name;
   $('shareWeddingButton').hidden = !capabilities.canManageTeam;
   $('editMainWeddingTitleButton').hidden = !capabilities.canEditWeddingIdentity;
-  $('editWeddingDateButton').hidden = !capabilities.canEditWeddingIdentity;
+  $('editWeddingDateButton').hidden = !context || !capabilities.canEditWeddingIdentity;
 
   weddingDate = context?.date || '';
   $('weddingDateLabel').textContent = formatDate(weddingDate);
+  dateInput.value = weddingDate;
   document.body.dataset.weddingRole = capabilities.role;
+  tick();
 }
 
 async function hydrateWedding(user) {

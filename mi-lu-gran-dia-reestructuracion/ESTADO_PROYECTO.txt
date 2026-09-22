@@ -14,7 +14,8 @@ ESTADO:
 - Boda activa conectada mediante un único adaptador.
 - Selector “Mis bodas” conectado a bodas/membresías existentes.
 - Cambio de boda conserva el contrato activeWeddingId existente.
-- Título y fecha leen la boda existente.
+- Título y fecha leen exclusivamente la boda existente.
+- La fecha ya no existe fija en HTML/JS: cada weddings/{weddingId}.date es la fuente de verdad.
 - Owner puede guardar título y fecha en el documento de su boda.
 - No se modificaron reglas Firestore.
 - No se tocaron invitados, checklist, presupuesto, mesas, cronograma, música
