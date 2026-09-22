@@ -59,6 +59,7 @@ function applyWeddingContext(context) {
   $('activeWeddingName').textContent = name;
   $('mainWeddingTitle').textContent = name;
   $('appNavWeddingName').textContent = name;
+  $('appNavRole').textContent = capabilities.label || 'Mi acceso';
   $('shareWeddingButton').hidden = !capabilities.canManageTeam;
   $('editMainWeddingTitleButton').hidden = !capabilities.canEditWeddingIdentity;
   $('editWeddingDateButton').hidden = !context || !capabilities.canEditWeddingIdentity;
@@ -234,13 +235,19 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   $('accountName').textContent = user.displayName || 'Mi Gran Día';
+  $('appNavAccountName').textContent = user.displayName || 'Mi Gran Día';
+  $('appNavInitials').textContent = (user.displayName || 'MGD').trim().split(/\\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
   $('accountEmail').textContent = user.email || '';
   const avatar = $('accountAvatar');
   if (user.photoURL) {
     avatar.src = user.photoURL;
     avatar.style.display = '';
+    $('appNavAvatar').src = user.photoURL;
+    $('appNavAvatar').classList.add('show');
   } else {
     avatar.style.display = 'none';
+    $('appNavAvatar').removeAttribute('src');
+    $('appNavAvatar').classList.remove('show');
   }
 
   await hydrateWedding(user);

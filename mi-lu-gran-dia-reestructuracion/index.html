@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Planificador de bodas</title>
-<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=14">
+<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=15">
 </head>
 <body class="auth-locked">
 <main class="app">
@@ -433,30 +433,25 @@ Cancelar
 </div>
 </section>
 <section class="module-workspace" id="moduleWorkspace" aria-hidden="true">
-  <nav class="app-module-nav" id="appModuleNav" aria-label="Navegación de módulos">
-    <button class="app-nav-home" id="appNavHome" type="button" aria-label="Volver al inicio"><span class="app-nav-brand">MGD</span><span><strong>Mi Gran Día</strong><small id="appNavWeddingName">Mi boda</small></span></button>
-    <div class="app-nav-modules">
-      <button class="app-nav-item is-active" type="button" data-app-module="checklist"><span class="app-nav-icon">✓</span><span>Checklist</span></button>
-      <button class="app-nav-item" type="button" data-app-module="presupuesto"><span class="app-nav-icon">S/</span><span>Presupuesto</span></button>
-      <button class="app-nav-item" type="button" data-app-module="proveedores"><span class="app-nav-icon">◇</span><span>Proveedores</span></button>
-      <button class="app-nav-item" type="button" data-app-module="invitados"><span class="app-nav-icon">◎</span><span>Invitados</span></button>
-      <button class="app-nav-item" type="button" data-app-module="distribucion"><span class="app-nav-icon">▦</span><span>Distribución</span></button>
-      <button class="app-nav-item" type="button" data-app-module="cronograma"><span class="app-nav-icon">◷</span><span>Cronograma</span></button>
-      <button class="app-nav-item" type="button" data-app-module="invitaciones"><span class="app-nav-icon">✉</span><span>Invitaciones</span></button>
-      <button class="app-nav-item" type="button" data-app-module="musica"><span class="app-nav-icon">♫</span><span>Música</span></button>
+  <nav class="app-module-nav" id="appModuleNav" aria-label="Navegación de Mi Gran Día">
+    <button class="app-nav-home" id="appNavHome" type="button" aria-label="Volver al inicio"><span class="mgd-brand-mark">MGD</span><span class="mgd-brand-copy"><strong>Mi Gran Día</strong><small id="appNavWeddingName">Mi boda</small></span></button>
+    <div class="app-nav-modules" aria-label="Cambiar de módulo">
+      <button class="app-nav-item is-active" type="button" data-app-module="checklist"><img src="../mi-gran-dia/barra/icons/checklist.svg" alt=""><span>Checklist</span></button>
+      <button class="app-nav-item" type="button" data-app-module="presupuesto"><img src="../mi-gran-dia/barra/icons/presupuesto.svg" alt=""><span>Presupuesto</span></button>
+      <button class="app-nav-item" type="button" data-app-module="proveedores"><img src="../mi-gran-dia/barra/icons/proveedores.svg" alt=""><span>Proveedores</span></button>
+      <button class="app-nav-item" type="button" data-app-module="invitados"><img src="../mi-gran-dia/barra/icons/invitados.svg" alt=""><span>Invitados</span></button>
+      <button class="app-nav-item" type="button" data-app-module="distribucion"><img src="../mi-gran-dia/barra/icons/distribucion.svg" alt=""><span>Distribución</span></button>
+      <button class="app-nav-item" type="button" data-app-module="cronograma"><img src="../mi-gran-dia/barra/icons/cronograma.svg" alt=""><span>Cronograma</span></button>
+      <button class="app-nav-item" type="button" data-app-module="invitaciones"><img src="../mi-gran-dia/barra/icons/invitaciones.svg" alt=""><span>Invitaciones</span></button>
+      <button class="app-nav-item" type="button" data-app-module="musica"><img src="../mi-gran-dia/barra/icons/musica.svg" alt=""><span>Música</span></button>
     </div>
-    <div class="app-nav-secondary">
-      <button class="app-nav-item" type="button" data-app-module="documentos"><span class="app-nav-icon">▤</span><span>Documentos</span></button>
-      <button class="app-nav-item" type="button" data-app-module="configuracion"><span class="app-nav-icon">⚙</span><span>Configuración</span></button>
-    </div>
+    <div class="app-nav-account"><img id="appNavAvatar" alt="Foto de perfil"><span id="appNavInitials">MGD</span><div><strong id="appNavAccountName">Mi cuenta</strong><small id="appNavRole">Mi acceso</small></div></div>
   </nav>
   <main class="module-stage" id="moduleStage">
-    <section class="checklist-review" data-module-view="checklist">
-      <span>PLANIFICACIÓN</span><h2>Checklist de boda</h2><p>La barra de navegación ya está vinculada a este primer módulo. Aquí construiremos el Checklist sobre su adaptador de datos.</p>
-    </section>
+    <section class="checklist-review" data-module-view="checklist"><span>PLANIFICACIÓN</span><h2>Checklist de boda</h2><p>La barra está vinculada al primer módulo. El Checklist funcional se construirá aquí sobre su adaptador Firebase auditado.</p></section>
   </main>
 </section>
-<script type="module" src="src/modules/dashboard/inicio.js?v=11">
+<script type="module" src="src/modules/dashboard/inicio.js?v=12">
 </script>
 </body>
 </html>
