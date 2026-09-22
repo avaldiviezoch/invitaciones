@@ -40,3 +40,7 @@ Sin contexto válido: `viewer`. Sin permiso explícito: no editar. Sin boda acti
 ## Microcopy y visibilidad de roles
 
 El rol sigue siendo parte obligatoria del contrato de autorización, pero no debe mostrarse como ruido permanente en el Inicio. Consultar `docs/MICROCOPY_SHELL.md`. Los permisos se aplican aunque la etiqueta del rol no sea visible.
+
+## Edición del título y fecha en la fase de shell
+
+El título visible de la boda es el encabezado principal del Inicio. La UI de edición de título y fecha debe poder abrirse para el usuario autenticado durante esta fase, sin depender de un contexto de boda aún no hidratado. La persistencia real seguirá bloqueada hasta integrar y validar el `weddingId` y rol reales mediante el adaptador correspondiente. No se deben crear permisos ficticios ni escrituras Firebase desde la UI.
