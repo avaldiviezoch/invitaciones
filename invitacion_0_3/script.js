@@ -18,7 +18,7 @@
   const closingWriting = document.getElementById('closingWriting');
   const SAKE_BINKS_URL = 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/sake_binks.mp3';
   const RSVP_TOKEN = '8c7e5b5c261e4b85ad15a220ca70e0cc66d1336feee740c08027d0c324646167';
-  const RSVP_WIDGET_URL = './rsvp-nominal-widget.js?v=20260921-2128';
+  const RSVP_WIDGET_URL = 'https://avaldiviezoch.github.io/Wedding/app_integral/js/modules/invitados/rsvp-native-widget.js?v=20260820-5b2';
   const WEDDING_DATE = new Date('2027-01-16T00:00:00-05:00').getTime();
   const SVG_NS = 'http://www.w3.org/2000/svg';
   const MUSIC_NOTE_PATHS = [
@@ -234,7 +234,31 @@
     startEntry();
   });
 
-  if (rsvpHost) rsvpHost.setAttribute('data-mgd-rsvp-token', RSVP_TOKEN);
+  if (rsvpHost) {
+    rsvpHost.setAttribute('data-mgd-rsvp-token', RSVP_TOKEN);
+    const invitees = String(rsvpHost.dataset.mgdInvitees || '').split('|').map(v => v.trim()).filter(Boolean);
+    if (invitees.length) {
+      rsvpHost.removeAttribute('data-mgd-rsvp-token');
+      rsvpHost.innerHTML = '<form class="rsvp-direct-form"><p class="rsvp-passes-title">Invitación con ' + invitees.length + ' pases</p>' +
+        invitees.map((name, i) => '<label class="rsvp-pass-person"><input type="checkbox" data-direct-invitee value="' + name.replace(/"/g,'&quot;') + '"><span>' + name + '</span></label>').join('') +
+        '<button class="rsvp-direct-submit" type="submit">Enviar confirmación</button><div class="rsvp-direct-status"></div></form>';
+      const form = rsvpHost.querySelector('.rsvp-direct-form');
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        const selected = [...form.querySelectorAll('[data-direct-invitee]:checked')].map(input => input.value);
+        const status = form.querySelector('.rsvp-direct-status');
+        status.textContent = selected.length ? 'Registrando ' + selected.length + ' de ' + invitees.length + ' pases…' : 'Selecciona al menos una persona o indícanos que no asistirán.';
+        if (!selected.length) return;
+        const native = document.createElement('div');
+        native.dataset.mgdRsvpToken = RSVP_TOKEN;
+        native.dataset.mgdAttendanceStyle = 'buttons';
+        native.dataset.mgdQuantityStyle = 'select';
+        native.style.display = 'none';
+        document.body.appendChild(native);
+        status.textContent = 'Selección lista: ' + selected.join(', ') + '.';
+      });
+    }
+  }
   if (musicHost) musicHost.setAttribute('data-mgd-music-token', RSVP_TOKEN);
   rsvpButton?.addEventListener('click', toggleRsvp);
   giftButton?.addEventListener('click', toggleGiftDetails);
@@ -243,7 +267,7 @@
     button.addEventListener('click', () => copyGiftValue(button));
   });
 
-  if (rsvpHost || musicHost) {
+  if (musicHost || (rsvpHost && rsvpHost.hasAttribute('data-mgd-rsvp-token'))) {
     import(RSVP_WIDGET_URL).catch(error => {
       console.error('[Invitación] No se pudo cargar el widget nativo.', error);
     });
