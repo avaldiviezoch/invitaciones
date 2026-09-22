@@ -84,3 +84,7 @@ Toda interfaz del shell debe cumplir `docs/MICROCOPY_SHELL.md`: no mostrar estad
 ## Bitácora obligatoria
 
 Actualizar `docs/HISTORIAL_AVANCES.md` al cerrar cada hito estructural o funcional. `ESTADO_PROYECTO.txt` es el resumen rápido. La bitácora nunca autoriza migraciones: la directiva principal sigue siendo adaptar la aplicación al Firebase y a los datos existentes.
+
+## Regla de simplicidad y mantenibilidad
+
+Antes de crear archivos, listeners, eventos, abstracciones o implementaciones nuevas, cumplir `docs/REGLA_SIMPLICIDAD_MANTENIBILIDAD.md`. La prioridad es mantener una sola ruta vigente por funcionalidad, pocos archivos y responsabilidades localizables.
