@@ -1133,7 +1133,7 @@ body.menu-open .menu-button svg {
 
 /* Barra global: réplica limpia de la barra original, sin duplicar su implementación. */
 .module-workspace{position:fixed;inset:0;z-index:70;display:none;background:#f7f5f1;color:#413d38}
-.module-open .module-workspace{display:block}.module-open .app{visibility:hidden}
+.module-open .module-workspace{display:block}
 .app-module-nav{box-sizing:border-box;position:fixed;z-index:72;top:14px;left:16px;right:16px;height:86px;padding:8px 13px 5px 14px;display:flex;align-items:center;gap:16px;border:1px solid rgba(255,255,255,.78);border-radius:25px;background:rgba(255,255,255,.82);box-shadow:0 14px 40px rgba(69,58,48,.11),inset 0 1px rgba(255,255,255,.9);backdrop-filter:blur(22px) saturate(115%);color:#413d38;animation:mgdBarArrival .72s cubic-bezier(.22,.85,.32,1) both;transform-origin:50% 0}
 @keyframes mgdBarArrival{0%{opacity:0;transform:translate3d(0,-115px,0) scale(.985);filter:blur(5px)}68%{opacity:1;transform:translate3d(0,5px,0);filter:blur(0)}100%{opacity:1;transform:translate3d(0,0,0);filter:blur(0)}}
 .app-nav-home{box-sizing:border-box;height:65px;min-width:210px;padding:0 12px 0 4px;display:flex;align-items:center;gap:12px;border:0;border-right:1px solid rgba(80,67,56,.1);background:transparent;color:inherit;text-align:left;cursor:pointer}
