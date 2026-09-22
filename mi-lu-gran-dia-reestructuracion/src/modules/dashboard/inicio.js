@@ -232,6 +232,10 @@ onAuthStateChanged(auth, async (user) => {
   document.body.classList.toggle('auth-locked', !user);
   if (!user) {
     applyWeddingContext(null);
+    setWeddingSwitcher(false);
+    closeModuleWorkspace();
+    setMenu(false);
+    setAuth(true);
     return;
   }
 
@@ -316,9 +320,13 @@ weddingsList.onclick = async (event) => {
   const button = event.target.closest('[data-wedding-id]');
   if (!button || button.dataset.weddingId === weddingContext?.id) return;
   try {
+    const activeModule = document.body.classList.contains('module-open')
+      ? (location.hash.replace(/^#/, '') || 'checklist')
+      : '';
     const context = await selectActiveWedding(button.dataset.weddingId);
     applyWeddingContext(context);
     setWeddingSwitcher(false);
+    if (activeModule === 'checklist') openModule('checklist');
   } catch (error) {
     console.error('No se pudo cambiar de boda:', error);
   }
