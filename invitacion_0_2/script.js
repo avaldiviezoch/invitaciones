@@ -18,7 +18,7 @@
   const closingWriting = document.getElementById('closingWriting');
   const SAKE_BINKS_URL = 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/sake_binks.mp3';
   const RSVP_TOKEN = '8c7e5b5c261e4b85ad15a220ca70e0cc66d1336feee740c08027d0c324646167';
-  const RSVP_WIDGET_URL = './rsvp-nominal-widget.js?v=20260922-1142';
+  const RSVP_WIDGET_URL = './rsvp-nominal-widget.js?v=20260922-1150';
   const WEDDING_DATE = new Date('2027-01-16T00:00:00-05:00').getTime();
   const SVG_NS = 'http://www.w3.org/2000/svg';
   const MUSIC_NOTE_PATHS = [
