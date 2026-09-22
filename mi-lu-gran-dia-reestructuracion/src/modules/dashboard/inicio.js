@@ -1,7 +1,9 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { auth } from '../../services/firebase-client.js';
 import {
+  listWeddingContexts,
   loadActiveWeddingContext,
+  selectActiveWedding,
   updateWeddingIdentity
 } from '../../services/wedding-context.js';
 import {
@@ -23,6 +25,8 @@ const dateEditor = $('dateEditor');
 const dateInput = $('weddingDateInput');
 const titleEditor = $('weddingTitleEditor');
 const titleInput = $('weddingTitleInput');
+const weddingSwitcher = $('weddingSwitcher');
+const weddingsList = $('weddingsList');
 
 let weddingContext = null;
 let weddingDate = '';
@@ -66,6 +70,32 @@ async function hydrateWedding(user) {
   } catch (error) {
     console.error('No se pudo cargar la boda activa:', error);
     applyWeddingContext(null);
+  }
+}
+
+function roleLabel(role) {
+  return ({ owner: 'Propietario', admin: 'Administrador', editor: 'Editor', provider: 'Proveedor', viewer: 'Solo lectura' })[role] || '';
+}
+
+function setWeddingSwitcher(open) {
+  weddingSwitcher.classList.toggle('show', open);
+  weddingSwitcher.setAttribute('aria-hidden', String(!open));
+}
+
+async function openWeddingSwitcher() {
+  if (!auth.currentUser) return;
+  weddingsList.innerHTML = '<div class="wedding-list-empty">Cargando…</div>';
+  setWeddingSwitcher(true);
+  try {
+    const weddings = await listWeddingContexts(auth.currentUser);
+    weddingsList.innerHTML = weddings.length ? weddings.map((item) => `
+      <button type="button" class="wedding-list-item ${item.id === weddingContext?.id ? 'is-current' : ''}" data-wedding-id="${item.id}">
+        <span><strong>${item.name}</strong><small>${roleLabel(item.role)}${item.date ? ` · ${formatDate(item.date)}` : ''}</small></span>
+        <b>${item.id === weddingContext?.id ? 'Actual' : 'Abrir'}</b>
+      </button>`).join('') : '<div class="wedding-list-empty">No hay otras bodas disponibles.</div>';
+  } catch (error) {
+    console.error('No se pudieron listar las bodas:', error);
+    weddingsList.innerHTML = '<div class="wedding-list-empty">No se pudieron cargar tus bodas.</div>';
   }
 }
 
@@ -169,6 +199,7 @@ $('saveWeddingDateButton').onclick = async () => {
     tick();
   } catch (error) {
     console.error('No se pudo guardar la fecha:', error);
+    status.textContent = error?.message || 'No se pudo guardar la fecha.';
   }
 };
 
@@ -190,6 +221,23 @@ $('saveWeddingTitleButton').onclick = async () => {
     titleEditor.classList.remove('show');
   } catch (error) {
     console.error('No se pudo guardar el nombre:', error);
+    status.textContent = error?.message || 'No se pudo guardar el nombre.';
+  }
+};
+
+$('activeWeddingButton').onclick = openWeddingSwitcher;
+document.querySelectorAll('[data-close-weddings]').forEach((button) => {
+  button.onclick = () => setWeddingSwitcher(false);
+});
+weddingsList.onclick = async (event) => {
+  const button = event.target.closest('[data-wedding-id]');
+  if (!button || button.dataset.weddingId === weddingContext?.id) return;
+  try {
+    const context = await selectActiveWedding(button.dataset.weddingId);
+    applyWeddingContext(context);
+    setWeddingSwitcher(false);
+  } catch (error) {
+    console.error('No se pudo cambiar de boda:', error);
   }
 };
 

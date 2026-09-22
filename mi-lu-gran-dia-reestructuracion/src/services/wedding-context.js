@@ -23,7 +23,6 @@ async function readWeddingContextById(weddingId, uid, indexData = {}) {
     getDoc(doc(db, 'weddings', weddingId))
   ]);
   if (!membership || !weddingSnapshot.exists()) return null;
-
   const wedding = weddingSnapshot.data() || {};
   return {
     id: weddingId,
@@ -34,43 +33,44 @@ async function readWeddingContextById(weddingId, uid, indexData = {}) {
   };
 }
 
+async function listWeddingContexts(user = auth.currentUser) {
+  if (!user) return [];
+  const snapshots = await getDocs(collection(db, 'users', user.uid, 'weddings'));
+  const contexts = await Promise.all(snapshots.docs.map((snapshot) =>
+    readWeddingContextById(snapshot.id, user.uid, snapshot.data() || {})
+  ));
+  return contexts.filter(Boolean);
+}
+
 async function loadActiveWeddingContext(user = auth.currentUser) {
   if (!user) return null;
-
   const profileSnapshot = await getDoc(doc(db, 'users', user.uid));
   const profile = profileSnapshot.exists() ? profileSnapshot.data() || {} : {};
   const requestedId = String(profile.activeWeddingId || '');
-
   if (requestedId) {
     const indexSnapshot = await getDoc(doc(db, 'users', user.uid, 'weddings', requestedId));
-    const context = await readWeddingContextById(
-      requestedId,
-      user.uid,
-      indexSnapshot.exists() ? indexSnapshot.data() || {} : {}
-    );
+    const context = await readWeddingContextById(requestedId, user.uid, indexSnapshot.exists() ? indexSnapshot.data() || {} : {});
     if (context) return context;
   }
+  return (await listWeddingContexts(user))[0] || null;
+}
 
-  const indexSnapshots = await getDocs(collection(db, 'users', user.uid, 'weddings'));
-  for (const indexSnapshot of indexSnapshots.docs) {
-    const context = await readWeddingContextById(
-      indexSnapshot.id,
-      user.uid,
-      indexSnapshot.data() || {}
-    );
-    if (context) return context;
-  }
-
-  return null;
+async function selectActiveWedding(weddingId, user = auth.currentUser) {
+  if (!user) throw new Error('Debes iniciar sesión.');
+  const indexSnapshot = await getDoc(doc(db, 'users', user.uid, 'weddings', weddingId));
+  const context = await readWeddingContextById(weddingId, user.uid, indexSnapshot.exists() ? indexSnapshot.data() || {} : {});
+  if (!context) throw new Error('No tienes acceso a esa boda.');
+  await updateDoc(doc(db, 'users', user.uid), {
+    activeWeddingId: weddingId,
+    lastSeenAt: serverTimestamp()
+  });
+  return context;
 }
 
 async function updateWeddingIdentity(context, changes = {}) {
   const user = auth.currentUser;
   if (!user || !context?.id) throw new Error('No hay una boda activa.');
-  if (normalizeWeddingRole(context.role) !== 'owner') {
-    throw new Error('Solo el propietario puede modificar el nombre o la fecha de esta boda.');
-  }
-
+  if (normalizeWeddingRole(context.role) !== 'owner') throw new Error('Solo el propietario puede modificar el nombre o la fecha de esta boda.');
   const patch = { updatedAt: serverTimestamp() };
   if (Object.hasOwn(changes, 'name')) {
     const name = String(changes.name || '').trim();
@@ -82,9 +82,8 @@ async function updateWeddingIdentity(context, changes = {}) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) throw new Error('La fecha no es válida.');
     patch.date = date;
   }
-
   await updateDoc(doc(db, 'weddings', context.id), patch);
   return { ...context, ...changes };
 }
 
-export { loadActiveWeddingContext, updateWeddingIdentity };
+export { listWeddingContexts, loadActiveWeddingContext, selectActiveWedding, updateWeddingIdentity };
