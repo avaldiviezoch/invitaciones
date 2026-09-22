@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Planificador de bodas</title>
-<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=20">
+<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=21">
 </head>
 <body class="auth-locked">
 <main class="app">
@@ -444,6 +444,15 @@ Cancelar
   <main class="module-stage" id="moduleStage">
     <section class="checklist-review" data-module-view="checklist"><span>PLANIFICACIÓN</span><h2>Checklist de boda</h2><p>La barra está vinculada al primer módulo. El Checklist funcional se construirá aquí sobre su adaptador Firebase auditado.</p></section>
   </main>
+</section><section class="access-manager" id="accessManager" aria-hidden="true">
+<div class="access-manager-backdrop" data-close-access></div>
+<div class="access-manager-panel" role="dialog" aria-modal="true" aria-labelledby="accessManagerTitle">
+<header class="access-manager-head"><div><span>ACCESOS DE LA BODA</span><h2 id="accessManagerTitle">Gestionar personas</h2><p id="accessManagerWedding">Mi boda</p></div><button type="button" data-close-access aria-label="Cerrar">×</button></header>
+<form class="access-invite" id="accessInviteForm"><label><span>Correo</span><input id="accessInviteEmail" type="email" autocomplete="email" placeholder="persona@correo.com" required></label><label><span>Rol</span><select id="accessInviteRole"><option value="admin">Administrador</option><option value="editor">Editor</option><option value="provider">Proveedor</option><option value="viewer">Solo lectura</option></select></label><button type="submit">Invitar</button></form>
+<p class="access-status" id="accessStatus" aria-live="polite"></p>
+<div class="access-section"><div class="access-section-title"><strong>Personas con acceso</strong><span id="accessMembersCount"></span></div><div class="access-list" id="accessMembers"></div></div>
+<div class="access-section" id="accessPendingSection"><div class="access-section-title"><strong>Invitaciones pendientes</strong><span id="accessPendingCount"></span></div><div class="access-list" id="accessPending"></div></div>
+</div>
 </section><section class="wedding-switcher" id="weddingSwitcher" aria-hidden="true">
 <div class="wedding-switcher-backdrop" data-close-weddings></div>
 <div class="wedding-switcher-panel" role="dialog" aria-modal="true" aria-labelledby="weddingSwitcherTitle">
@@ -451,7 +460,7 @@ Cancelar
 <div class="weddings-list" id="weddingsList"></div>
 </div>
 </section>
-<script type="module" src="src/modules/dashboard/inicio.js?v=14">
+<script type="module" src="src/modules/dashboard/inicio.js?v=15">
 </script>
 </body>
 </html>

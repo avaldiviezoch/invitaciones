@@ -4,7 +4,13 @@ import {
   listWeddingContexts,
   loadActiveWeddingContext,
   selectActiveWedding,
-  updateWeddingIdentity
+  updateWeddingIdentity,
+  listWeddingMembers,
+  listWeddingInvitations,
+  inviteWeddingMember,
+  updateWeddingMemberRole,
+  removeWeddingMember,
+  cancelWeddingInvitation
 } from '../../services/wedding-context.js';
 import {
   GoogleAuthProvider,
@@ -29,6 +35,10 @@ const titleEditor = $('weddingTitleEditor');
 const titleInput = $('weddingTitleInput');
 const weddingSwitcher = $('weddingSwitcher');
 const weddingsList = $('weddingsList');
+const accessManager = $('accessManager');
+const accessMembers = $('accessMembers');
+const accessPending = $('accessPending');
+const accessStatus = $('accessStatus');
 
 let weddingContext = null;
 let weddingDate = '';
@@ -115,6 +125,59 @@ async function openWeddingSwitcher() {
     console.error('No se pudieron listar las bodas:', error);
     weddingsList.innerHTML = '<div class="wedding-list-empty">No se pudieron cargar tus bodas.</div>';
   }
+}
+
+
+function setAccessManager(open) {
+  accessManager.classList.toggle('show', open);
+  accessManager.setAttribute('aria-hidden', String(!open));
+  if (!open) accessStatus.textContent = '';
+}
+
+function roleOptions(selected, canAssignAdmin) {
+  return [
+    ['admin', 'Administrador'], ['editor', 'Editor'], ['provider', 'Proveedor'], ['viewer', 'Solo lectura']
+  ].filter(([value]) => value !== 'admin' || canAssignAdmin || selected === 'admin')
+   .map(([value, label]) => `<option value="${value}" ${value === selected ? 'selected' : ''}>${label}</option>`).join('');
+}
+
+async function renderAccessManager() {
+  if (!weddingContext) return;
+  const capabilities = weddingCapabilities(weddingContext.role);
+  $('accessManagerWedding').textContent = weddingContext.name;
+  $('accessInviteRole').querySelector('option[value="admin"]').hidden = !capabilities.canAssignAdmin;
+  if (!capabilities.canAssignAdmin && $('accessInviteRole').value === 'admin') $('accessInviteRole').value = 'editor';
+  accessMembers.innerHTML = '<div class="access-empty">Cargando personas…</div>';
+  accessPending.innerHTML = '<div class="access-empty">Cargando invitaciones…</div>';
+  setAccessManager(true);
+  try {
+    const [members, invitations] = await Promise.all([
+      listWeddingMembers(weddingContext),
+      listWeddingInvitations(weddingContext)
+    ]);
+    $('accessMembersCount').textContent = String(members.length);
+    $('accessPendingCount').textContent = String(invitations.length);
+    accessMembers.innerHTML = members.length ? members.map((member) => {
+      const isOwner = member.role === 'owner';
+      const isSelf = member.uid === auth.currentUser?.uid;
+      const lockedAdmin = weddingContext.role === 'admin' && member.role === 'admin';
+      const canEdit = !isOwner && !isSelf && !lockedAdmin;
+      const name = escapeHtml(member.displayName || member.email || 'Usuario');
+      const emailText = escapeHtml(member.email || '');
+      return `<article class="access-person" data-member-uid="${escapeHtml(member.uid)}"><span class="access-person-avatar">${escapeHtml((member.displayName || member.email || '?').trim().charAt(0).toUpperCase())}</span><span class="access-person-copy"><strong>${name}</strong><small>${emailText}</small></span>${canEdit ? `<select class="access-role" aria-label="Rol de ${name}">${roleOptions(member.role, capabilities.canAssignAdmin)}</select><button class="access-remove" type="button">Retirar</button>` : `<span class="access-role-label">${escapeHtml(roleLabel(member.role))}${isSelf ? ' · Tú' : ''}</span>`}</article>`;
+    }).join('') : '<div class="access-empty">Todavía no hay personas con acceso.</div>';
+    accessPending.innerHTML = invitations.length ? invitations.map((invite) => `<article class="access-person access-pending" data-invite-id="${escapeHtml(invite.id)}"><span class="access-person-avatar">✉</span><span class="access-person-copy"><strong>${escapeHtml(invite.email)}</strong><small>Invitación pendiente · ${escapeHtml(roleLabel(invite.role))}</small></span><button class="access-cancel" type="button">Cancelar</button></article>`).join('') : '<div class="access-empty">No hay invitaciones pendientes.</div>';
+  } catch (error) {
+    console.error('No se pudieron cargar los accesos:', error);
+    accessMembers.innerHTML = '<div class="access-empty">No se pudieron cargar los accesos.</div>';
+    accessPending.innerHTML = '';
+    accessStatus.textContent = error?.message || 'No se pudieron cargar los accesos.';
+  }
+}
+
+async function openAccessManager() {
+  if (!weddingContext || !weddingCapabilities(weddingContext.role).canManageTeam) return;
+  await renderAccessManager();
 }
 
 function errorText(error) {
@@ -332,11 +395,61 @@ weddingsList.onclick = async (event) => {
   }
 };
 
-$('shareWeddingButton').onclick = () => {
-  if (!weddingContext || !weddingCapabilities(weddingContext.role).canManageTeam) return;
-  window.dispatchEvent(new CustomEvent('migrandia:share-wedding-request', {
-    detail: { ...weddingContext }
-  }));
+$('shareWeddingButton').onclick = openAccessManager;
+document.querySelectorAll('[data-close-access]').forEach((button) => {
+  button.onclick = () => setAccessManager(false);
+});
+$('accessInviteForm').onsubmit = async (event) => {
+  event.preventDefault();
+  accessStatus.textContent = 'Enviando invitación…';
+  try {
+    await inviteWeddingMember(weddingContext, $('accessInviteEmail').value, $('accessInviteRole').value);
+    $('accessInviteEmail').value = '';
+    accessStatus.textContent = 'Invitación creada.';
+    await renderAccessManager();
+  } catch (error) {
+    accessStatus.textContent = error?.message || 'No se pudo crear la invitación.';
+  }
+};
+accessMembers.onchange = async (event) => {
+  const select = event.target.closest('.access-role');
+  if (!select) return;
+  const row = select.closest('[data-member-uid]');
+  accessStatus.textContent = 'Actualizando permiso…';
+  try {
+    await updateWeddingMemberRole(weddingContext, row.dataset.memberUid, select.value);
+    accessStatus.textContent = 'Permiso actualizado.';
+    await renderAccessManager();
+  } catch (error) {
+    accessStatus.textContent = error?.message || 'No se pudo actualizar el permiso.';
+    await renderAccessManager();
+  }
+};
+accessMembers.onclick = async (event) => {
+  const button = event.target.closest('.access-remove');
+  if (!button) return;
+  const row = button.closest('[data-member-uid]');
+  accessStatus.textContent = 'Retirando acceso…';
+  try {
+    await removeWeddingMember(weddingContext, row.dataset.memberUid);
+    accessStatus.textContent = 'Acceso retirado.';
+    await renderAccessManager();
+  } catch (error) {
+    accessStatus.textContent = error?.message || 'No se pudo retirar el acceso.';
+  }
+};
+accessPending.onclick = async (event) => {
+  const button = event.target.closest('.access-cancel');
+  if (!button) return;
+  const row = button.closest('[data-invite-id]');
+  accessStatus.textContent = 'Cancelando invitación…';
+  try {
+    await cancelWeddingInvitation(weddingContext, row.dataset.inviteId);
+    accessStatus.textContent = 'Invitación cancelada.';
+    await renderAccessManager();
+  } catch (error) {
+    accessStatus.textContent = error?.message || 'No se pudo cancelar la invitación.';
+  }
 };
 
 document.querySelectorAll('.module-toggle').forEach((button) => {

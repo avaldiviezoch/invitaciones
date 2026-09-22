@@ -4,10 +4,14 @@ import {
   getDoc,
   getDocs,
   serverTimestamp,
+  setDoc,
+  deleteDoc,
+  query,
+  where,
   updateDoc
 } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
 import { auth, db } from './firebase-client.js';
-import { normalizeWeddingRole } from '../core/app/permissions.js';
+import { normalizeWeddingRole, weddingCapabilities } from '../core/app/permissions.js';
 
 async function readMembership(weddingId, uid) {
   if (!weddingId || !uid) return null;
@@ -86,4 +90,96 @@ async function updateWeddingIdentity(context, changes = {}) {
   return { ...context, ...changes };
 }
 
-export { listWeddingContexts, loadActiveWeddingContext, selectActiveWedding, updateWeddingIdentity };
+
+function invitationId(weddingId, email) {
+  return `${weddingId}__${String(email || '').trim().toLowerCase()}`;
+}
+
+async function listWeddingMembers(context) {
+  if (!auth.currentUser || !context?.id) return [];
+  const snapshots = await getDocs(collection(db, 'weddings', context.id, 'members'));
+  return snapshots.docs
+    .map((snapshot) => ({ uid: snapshot.id, ...snapshot.data() }))
+    .filter((member) => member.status !== 'removed')
+    .sort((a, b) => {
+      if (a.role === 'owner') return -1;
+      if (b.role === 'owner') return 1;
+      return String(a.displayName || a.email || '').localeCompare(String(b.displayName || b.email || ''), 'es');
+    });
+}
+
+async function listWeddingInvitations(context) {
+  if (!auth.currentUser || !context?.id || !weddingCapabilities(context.role).canManageTeam) return [];
+  const snapshots = await getDocs(query(collection(db, 'invitations'), where('weddingId', '==', context.id)));
+  return snapshots.docs.map((snapshot) => ({ id: snapshot.id, ...snapshot.data() }))
+    .filter((item) => item.status === 'pending')
+    .sort((a, b) => String(a.email || '').localeCompare(String(b.email || ''), 'es'));
+}
+
+async function inviteWeddingMember(context, email, role = 'viewer') {
+  const user = auth.currentUser;
+  const capabilities = weddingCapabilities(context?.role);
+  if (!user || !context?.id || !capabilities.canManageTeam) throw new Error('No tienes permiso para gestionar accesos.');
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  if (!normalizedEmail || !normalizedEmail.includes('@')) throw new Error('Escribe un correo válido.');
+  if (normalizedEmail === String(user.email || '').toLowerCase()) throw new Error('Tu cuenta ya pertenece a esta boda.');
+  const cleanRole = normalizeWeddingRole(role);
+  if (cleanRole === 'owner') throw new Error('El rol Propietario no se puede asignar.');
+  if (cleanRole === 'admin' && !capabilities.canAssignAdmin) throw new Error('Solo el propietario puede asignar administradores.');
+  const id = invitationId(context.id, normalizedEmail);
+  await setDoc(doc(db, 'invitations', id), {
+    weddingId: context.id,
+    weddingName: context.name || 'Mi boda',
+    email: normalizedEmail,
+    role: cleanRole,
+    status: 'pending',
+    invitedBy: user.uid,
+    invitedByEmail: String(user.email || '').toLowerCase(),
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  }, { merge: true });
+}
+
+async function updateWeddingMemberRole(context, uid, role) {
+  const user = auth.currentUser;
+  const capabilities = weddingCapabilities(context?.role);
+  if (!user || !context?.id || !capabilities.canManageTeam) throw new Error('No tienes permiso para gestionar accesos.');
+  if (!uid || uid === user.uid) throw new Error('No puedes cambiar tu propio rol.');
+  const memberRef = doc(db, 'weddings', context.id, 'members', uid);
+  const snapshot = await getDoc(memberRef);
+  if (!snapshot.exists()) throw new Error('Ese usuario ya no pertenece a la boda.');
+  const currentRole = normalizeWeddingRole(snapshot.data()?.role);
+  const cleanRole = normalizeWeddingRole(role);
+  if (currentRole === 'owner' || cleanRole === 'owner') throw new Error('El rol del propietario no se puede modificar.');
+  if (!capabilities.canAssignAdmin && (currentRole === 'admin' || cleanRole === 'admin')) throw new Error('Solo el propietario puede administrar el rol Administrador.');
+  await setDoc(memberRef, { role: cleanRole, updatedAt: serverTimestamp() }, { merge: true });
+}
+
+async function removeWeddingMember(context, uid) {
+  const user = auth.currentUser;
+  const capabilities = weddingCapabilities(context?.role);
+  if (!user || !context?.id || !capabilities.canManageTeam) throw new Error('No tienes permiso para gestionar accesos.');
+  if (!uid || uid === user.uid) throw new Error('No puedes retirar tu propio acceso.');
+  const memberRef = doc(db, 'weddings', context.id, 'members', uid);
+  const snapshot = await getDoc(memberRef);
+  if (!snapshot.exists()) return;
+  const currentRole = normalizeWeddingRole(snapshot.data()?.role);
+  if (currentRole === 'owner') throw new Error('No se puede retirar al propietario.');
+  if (!capabilities.canAssignAdmin && currentRole === 'admin') throw new Error('Solo el propietario puede retirar a otro administrador.');
+  await setDoc(memberRef, { status: 'removed', removedAt: serverTimestamp(), updatedAt: serverTimestamp() }, { merge: true });
+}
+
+async function cancelWeddingInvitation(context, inviteId) {
+  if (!auth.currentUser || !context?.id || !weddingCapabilities(context.role).canManageTeam) throw new Error('No tienes permiso para gestionar accesos.');
+  const ref = doc(db, 'invitations', String(inviteId || ''));
+  const snapshot = await getDoc(ref);
+  if (!snapshot.exists()) return;
+  if (String(snapshot.data()?.weddingId || '') !== context.id) throw new Error('La invitación no pertenece a esta boda.');
+  await deleteDoc(ref);
+}
+
+export {
+  listWeddingContexts, loadActiveWeddingContext, selectActiveWedding, updateWeddingIdentity,
+  listWeddingMembers, listWeddingInvitations, inviteWeddingMember,
+  updateWeddingMemberRole, removeWeddingMember, cancelWeddingInvitation
+};
