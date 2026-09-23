@@ -119,7 +119,9 @@
 .table-visual-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:1px 2px 3px}
 .table-visual-card-head strong{display:block;color:#4b4844;font:500 16px Georgia,serif}
 .table-visual-card-head span{display:block;margin-top:3px;color:#918b85;font-size:7px}
-.table-visual-card-head button{width:30px;height:30px;border:1px solid #e0dad4;border-radius:50%;background:#fff;color:#77716c;font-size:13px;cursor:pointer}
+.table-order-actions{display:flex;align-items:center;gap:4px}
+.table-order-actions button{width:30px;height:30px;padding:0;border:1px solid #e0dad4;border-radius:50%;background:#fff;color:#77716c;font-size:13px;font-weight:700;cursor:pointer}
+.table-order-actions button:hover{border-color:#b9c3a9;background:#f8faf5;color:#68735d}
 .table-visual-warning{margin:5px 2px 0;padding:5px 8px;border-radius:9px;background:#f7ecef;color:#9c6470;font-size:7px;font-weight:700}
 .table-visual-canvas{position:relative;margin:2px auto 0;max-width:100%}
 .table-visual-body{position:absolute;left:50%;top:50%;width:var(--table-body-w);height:var(--table-body-h);transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;padding:10px;border:1px solid #d8c9bd;background:linear-gradient(145deg,#eee3d7,#faf1e8);color:#575048;text-align:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 8px 20px rgba(86,73,61,.07);cursor:pointer;transition:border-color .14s ease,box-shadow .14s ease,transform .14s ease}
@@ -199,7 +201,10 @@
 .table-card-title>span{flex:0 0 auto;padding:3px 6px;border-radius:999px;background:#f1eee9;color:#7e7872;font-size:7px;font-weight:750}
 .table-card-copy p{margin:6px 0 0;color:#73706c;font-size:9px}
 .table-card-copy small{display:block;margin-top:5px;overflow:hidden;color:#96908a;font-size:8px;text-overflow:ellipsis;white-space:nowrap}
-.table-card>button{min-height:34px;padding:0 11px;border:1px solid #d9d3cd;border-radius:9px;background:#fff;color:#626a53;font-size:8px;font-weight:750;cursor:pointer}
+.table-card-actions{display:flex;align-items:center;gap:7px}
+.table-card-actions>.table-order-actions{gap:3px}
+.table-card-actions>.table-order-actions button{width:28px;height:28px;font-size:12px}
+.table-card-actions>[data-table-manage]{min-height:34px;padding:0 11px;border:1px solid #d9d3cd;border-radius:9px;background:#fff;color:#626a53;font-size:8px;font-weight:750;cursor:pointer}
 .table-dialog{width:min(780px,calc(100vw - 28px));max-height:min(90vh,860px);padding:0;border:1px solid #ded8d2;border-radius:20px;background:#fff;color:#383531;box-shadow:0 24px 70px rgba(50,44,40,.18)}
 .table-dialog::backdrop{background:rgba(37,34,31,.28);backdrop-filter:blur(2px)}
 .table-guest-detail-dialog{width:min(500px,calc(100vw - 28px));padding:0;border:1px solid #ded8d2;border-radius:20px;background:#fff;color:#383531;box-shadow:0 24px 70px rgba(50,44,40,.18)}
