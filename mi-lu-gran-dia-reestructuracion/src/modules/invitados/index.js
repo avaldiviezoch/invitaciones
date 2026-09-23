@@ -1,7 +1,7 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { loadInvitadosSnapshot, saveInvitadosSnapshot } from './invitados-data.js?v=3';
 import { createRsvpController } from './rsvp-controller.js?v=1';
-import { createTablesController } from './tables-controller.js?v=10';
+import { createTablesController } from './tables-controller.js?v=11';
 
 let activeContext = null;
 let snapshot = null;
