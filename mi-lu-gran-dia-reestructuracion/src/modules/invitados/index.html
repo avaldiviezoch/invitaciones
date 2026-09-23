@@ -101,10 +101,12 @@
       </div>
       <label class="guests-field"><span>Familia / grupo visible</span><input name="familyLabel" maxlength="100" placeholder="Ej. Familia Pérez"></label>
       <div class="rsvp-link-head"><div><strong>Vincular con invitados existentes</strong><span>Selecciona una o más personas. No se crearán invitados automáticamente.</span></div><small data-rsvp-suggestion-label></small></div>
+      <div class="rsvp-companion-status" data-rsvp-companion-status></div>
       <div class="rsvp-guest-picker" data-rsvp-guest-picker></div>
     </form>
     <div class="guests-dialog-actions rsvp-dialog-actions">
-      <span></span><span></span>
+      <button class="rsvp-unlink" type="button" data-rsvp-unlink hidden>Desvincular respuesta</button>
+      <span></span>
       <button type="button" data-rsvp-close>Cancelar</button>
       <button class="guests-save" type="submit" form="rsvpReviewForm" data-rsvp-apply>Aplicar a invitados</button>
     </div>
