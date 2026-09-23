@@ -209,6 +209,28 @@
     </div>
   </dialog>
 
+  <dialog class="table-guest-detail-dialog" data-table-guest-detail-dialog>
+    <div class="guests-dialog-head">
+      <div><span>INVITADO UBICADO</span><h2 data-table-guest-detail-name>Invitado</h2></div>
+      <button type="button" data-table-guest-detail-close aria-label="Cerrar">×</button>
+    </div>
+    <div class="table-guest-detail-body">
+      <div class="table-guest-detail-status">
+        <span class="tables-guest-avatar" data-table-guest-detail-avatar></span>
+        <div><strong data-table-guest-detail-assignment></strong><span data-table-guest-detail-rsvp></span></div>
+      </div>
+      <div class="table-guest-detail-grid">
+        <div><small>Estado</small><strong data-table-guest-detail-status></strong></div>
+        <div><small>Grupo</small><strong data-table-guest-detail-group></strong></div>
+      </div>
+    </div>
+    <div class="table-guest-detail-actions">
+      <button type="button" data-table-guest-detail-close>Cerrar</button>
+      <button type="button" data-table-guest-detail-unassign>Dejar sin mesa</button>
+      <button class="guests-save" type="button" data-table-guest-detail-move>Mover de silla</button>
+    </div>
+  </dialog>
+
   <dialog class="guests-dialog" data-guests-dialog>
     <div class="guests-dialog-head">
       <div><span>INVITADOS</span><h2 data-guests-dialog-title>Nuevo invitado</h2></div>
