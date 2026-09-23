@@ -1,5 +1,5 @@
 MI LU GRAN DÍA — ESTADO DEL PROYECTO
-Actualizado: 2026-09-22
+Actualizado: 2026-09-23
 
 FUENTE DETALLADA:
 docs/HISTORIAL_AVANCES.md
@@ -18,8 +18,8 @@ ESTADO:
 - La fecha ya no existe fija en HTML/JS: cada weddings/{weddingId}.date es la fuente de verdad.
 - Owner puede guardar título y fecha en el documento de su boda.
 - No se modificaron reglas Firestore.
-- No se tocaron invitados, checklist, presupuesto, mesas, cronograma, música
-  ni confirmaciones.
+- Presupuesto ya está conectado mediante services/planner-cloud.js y conserva su clave existente.
+- No se modificaron invitados, mesas, cronograma, música ni confirmaciones desde este hito.
 - No se auto-crean bodas ni membresías desde la aplicación nueva.
 
 ARQUITECTURA:
@@ -39,3 +39,11 @@ HITO BARRA DE MÓDULOS:
 - Checklist conectado como primer módulo de revisión.
 - Resto de accesos preparados para conexión progresiva sin duplicar navegación.
 - Sin cambios en Firebase, Storage ni datos de módulos.
+
+HITO PRESUPUESTO:
+- Módulo funcional conectado a la boda activa mediante adaptador existente.
+- Moneda, invitados, categorías, gastos, etiquetas y paquetes integrales habilitados según permisos.
+- Biblioteca visual de iconos para categorías.
+- Sin cambios de esquema, claves, reglas, Storage, Authentication ni usuarios.
+- Auditoría 2026-09-23: XSS revisado, color de etiquetas saneado, CSV endurecido y responsive corregido.
+- Pendiente para cierre total: tests de invariantes/no-pérdida y resolver, con autorización explícita, el riesgo de concurrencia del backup agregado de planner-cloud.
