@@ -6,8 +6,6 @@ const SHAPE_LABELS = Object.freeze({
   square: 'Cuadrada',
   rectangular: 'Rectangular'
 });
-const CAPACITY_PRESETS = Object.freeze([4, 6, 8, 10, 12, 14, 16]);
-
 function createTablesController(api) {
   let displayMode = 'visual';
   let guestFilter = 'unassigned';
