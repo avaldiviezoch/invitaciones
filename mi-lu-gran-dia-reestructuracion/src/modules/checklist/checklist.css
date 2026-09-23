@@ -76,3 +76,11 @@
   .ck-original-search{grid-column:1 / -1}
   .ck-select{grid-column:auto}
 }
+
+/* Acordeón de grupos */
+.ck-group .ck-group-tasks{display:block}
+.ck-group.is-collapsed .ck-group-tasks{display:none}
+.ck-group.is-collapsed>header{border-bottom:0}
+.ck-collapse{transition:transform .18s ease}
+.ck-group.is-collapsed .ck-collapse{transform:rotate(-90deg)}
+.ck-group>header{cursor:pointer}
