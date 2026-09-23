@@ -1,5 +1,5 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js';
+import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=2';
 
 const STORAGE_KEY = 'planificador_bodas_checklist_v1';
 let activeContext = null;
