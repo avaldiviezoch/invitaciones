@@ -568,6 +568,21 @@ document.addEventListener('click', (event) => {
 });
 
 const moduleWorkspace = $('moduleWorkspace');
+const moduleLoader = $('moduleLoader');
+let moduleLoadEpoch = 0;
+
+function setModuleLoading(loading) {
+  if (!moduleLoader) return;
+  if (loading) {
+    moduleLoader.hidden = false;
+    moduleLoader.classList.remove('is-leaving');
+    return;
+  }
+  moduleLoader.classList.add('is-leaving');
+  window.setTimeout(() => {
+    if (moduleLoader.classList.contains('is-leaving')) moduleLoader.hidden = true;
+  }, 420);
+}
 
 const ACTIVE_MODULES = new Set(['checklist', 'presupuesto']);
 
@@ -582,8 +597,9 @@ function openModuleFromHash() {
   if (moduleId) openModule(moduleId, { updateHash: false });
 }
 
-function openModule(moduleId, { updateHash = true } = {}) {
+async function openModule(moduleId, { updateHash = true } = {}) {
   if (!auth.currentUser || !weddingContext || !ACTIVE_MODULES.has(moduleId)) return;
+  const loadEpoch = ++moduleLoadEpoch;
   document.documentElement.classList.add('module-route');
   heroVideo?.pause();
   setMenu(false);
@@ -596,8 +612,13 @@ function openModule(moduleId, { updateHash = true } = {}) {
     button.setAttribute('aria-current', active ? 'page' : 'false');
   });
   if (updateHash && location.hash !== '#' + moduleId) history.replaceState(null, '', '#' + moduleId);
-  if (moduleId === 'checklist') mountChecklist(weddingContext);
-  if (moduleId === 'presupuesto') mountPresupuesto(weddingContext);
+  setModuleLoading(true);
+  try {
+    if (moduleId === 'checklist') await mountChecklist(weddingContext);
+    if (moduleId === 'presupuesto') await mountPresupuesto(weddingContext);
+  } finally {
+    if (loadEpoch === moduleLoadEpoch) setModuleLoading(false);
+  }
 }
 
 function closeModuleWorkspace() {
