@@ -96,3 +96,19 @@
 }
 
 @media(max-width:430px){.ck-original-task{grid-template-columns:14px 24px minmax(0,1fr) 78px 30px;gap:5px}.ck-task-status{width:78px;height:28px;padding:0 4px;font-size:8px}.ck-task-plus{width:28px;height:28px;font-size:16px}}
+
+/* Creación de grupos padre y tareas hijas */
+.ck-group-controls{display:flex;align-items:center;justify-content:flex-end;gap:4px}
+.ck-group-add{width:30px;height:30px;border:1px solid #ebe4df;border-radius:50%;background:#fff;color:#87936d;font-size:17px;line-height:1;cursor:pointer}
+.ck-group-empty{margin:0;padding:18px 4px 8px;color:#aaa39c;font-size:10px}
+.ck-create-kind{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:0 0 18px;padding:4px;border:1px solid #ebe5df;border-radius:13px;background:#f7f5f2}
+.ck-create-kind button{height:38px;border:0;border-radius:10px;background:transparent;color:#77716b;font-size:11px;font-weight:650;cursor:pointer}
+.ck-create-kind button.is-active{background:#fff;color:#66734e;box-shadow:0 2px 8px rgba(56,48,42,.08)}
+.ck-form-help{margin:8px 0 0;color:#938d86;font-size:10px;line-height:1.45}
+.ck-dialog [hidden]{display:none}
+@media(max-width:760px){
+  .ck-group header{grid-template-columns:48px minmax(0,1fr) auto}
+  .ck-group-controls{gap:2px}
+  .ck-group-add{width:28px;height:28px;font-size:16px}
+  .ck-create-kind{margin-bottom:14px}
+}
