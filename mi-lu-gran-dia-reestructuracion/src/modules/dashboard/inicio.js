@@ -50,6 +50,21 @@ let weddingContext = null;
 let weddingDate = '';
 let calendarSelectedDate = '';
 let calendarCursor = new Date();
+const heroVideo = $('heroVideo');
+
+function syncEntrySurface() {
+  const directModule = ['#checklist', '#presupuesto'].includes(location.hash);
+  document.documentElement.classList.toggle('module-route', directModule);
+  if (directModule) {
+    heroVideo?.pause();
+    heroVideo?.removeAttribute('autoplay');
+    return;
+  }
+  if (heroVideo && auth.currentUser) {
+    heroVideo.preload = 'auto';
+    heroVideo.play().catch(() => {});
+  }
+}
 
 function setMenu(open) {
   document.body.classList.toggle('menu-open', open);
@@ -569,6 +584,8 @@ function openModuleFromHash() {
 
 function openModule(moduleId, { updateHash = true } = {}) {
   if (!auth.currentUser || !weddingContext || !ACTIVE_MODULES.has(moduleId)) return;
+  document.documentElement.classList.add('module-route');
+  heroVideo?.pause();
   setMenu(false);
   document.body.classList.add('module-open');
   moduleWorkspace.setAttribute('aria-hidden', 'false');
@@ -584,9 +601,11 @@ function openModule(moduleId, { updateHash = true } = {}) {
 }
 
 function closeModuleWorkspace() {
+  document.documentElement.classList.remove('module-route');
   document.body.classList.remove('module-open');
   moduleWorkspace.setAttribute('aria-hidden', 'true');
   history.replaceState(null, '', location.pathname + location.search);
+  syncEntrySurface();
 }
 
 $('appNavHome').onclick = closeModuleWorkspace;
@@ -605,12 +624,14 @@ document.querySelectorAll('.module-link').forEach((link) => {
 });
 
 window.addEventListener('hashchange', () => {
+  syncEntrySurface();
   if (!auth.currentUser) return;
   const moduleId = moduleFromHash();
   if (moduleId) openModule(moduleId, { updateHash: false });
   else if (document.body.classList.contains('module-open')) closeModuleWorkspace();
 });
 
+syncEntrySurface();
 applyWeddingContext(null);
 tick();
 setInterval(tick, 1000);
