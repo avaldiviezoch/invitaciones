@@ -167,45 +167,17 @@ async function inviteWeddingMember(context, email, role = 'viewer') {
   const user = auth.currentUser;
   const capabilities = weddingCapabilities(context?.role);
   if (!user || !context?.id || !capabilities.canManageTeam) throw new Error('No tienes permiso para gestionar accesos.');
+
   const normalizedEmail = String(email || '').trim().toLowerCase();
   if (!normalizedEmail || !normalizedEmail.includes('@')) throw new Error('Escribe un correo válido.');
   if (normalizedEmail === String(user.email || '').toLowerCase()) throw new Error('Tu cuenta ya pertenece a esta boda.');
+
   const cleanRole = normalizeWeddingRole(role);
   if (cleanRole === 'owner') throw new Error('El rol Propietario no se puede asignar.');
   if (cleanRole === 'admin' && !capabilities.canAssignAdmin) throw new Error('Solo el propietario puede asignar administradores.');
 
   const inviteRef = doc(db, 'invitations', invitationId(context.id, normalizedEmail));
-  let inviteSnapshot;
-  try {
-    inviteSnapshot = await getDoc(inviteRef);
-  } catch (error) {
-    console.error('Gestionar personas · lectura de invitación:', error);
-    throw new Error('INVITE_READ: ' + (error?.message || 'No se pudo leer la invitación.'));
-  }
-
-  if (inviteSnapshot.exists()) {
-    const existing = inviteSnapshot.data() || {};
-    if (existing.status === 'pending' && normalizeWeddingRole(existing.role) === cleanRole) {
-      throw new Error('Ese correo ya tiene una invitación pendiente.');
-    }
-    try {
-      await updateDoc(inviteRef, {
-      weddingName: context.name || existing.weddingName || 'Mi boda',
-      role: cleanRole,
-      status: 'pending',
-      invitedBy: user.uid,
-      invitedByEmail: String(user.email || '').toLowerCase(),
-        updatedAt: serverTimestamp()
-      });
-    } catch (error) {
-      console.error('Gestionar personas · actualización de invitación:', error);
-      throw new Error('INVITE_UPDATE: ' + (error?.message || 'No se pudo actualizar la invitación.'));
-    }
-    return;
-  }
-
-  try {
-    await setDoc(inviteRef, {
+  const invitation = {
     weddingId: context.id,
     weddingName: context.name || 'Mi boda',
     email: normalizedEmail,
@@ -213,12 +185,14 @@ async function inviteWeddingMember(context, email, role = 'viewer') {
     status: 'pending',
     invitedBy: user.uid,
     invitedByEmail: String(user.email || '').toLowerCase(),
-    createdAt: serverTimestamp(),
-      updatedAt: serverTimestamp()
-    });
+    updatedAt: serverTimestamp()
+  };
+
+  try {
+    await updateDoc(inviteRef, invitation);
   } catch (error) {
-    console.error('Gestionar personas · creación de invitación:', error);
-    throw new Error('INVITE_CREATE: ' + (error?.message || 'No se pudo crear la invitación.'));
+    if (error?.code !== 'not-found') throw error;
+    await setDoc(inviteRef, { ...invitation, createdAt: serverTimestamp() });
   }
 }
 async function updateWeddingMemberRole(context, uid, role) {
