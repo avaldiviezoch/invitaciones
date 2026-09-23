@@ -7,12 +7,13 @@
 <script>
 (function(){
   var moduleId=location.hash.replace(/^#/,'');
-  if(moduleId==='checklist'||moduleId==='presupuesto') document.documentElement.classList.add('module-route');
+  if(moduleId==='checklist'||moduleId==='presupuesto'||moduleId==='proveedores') document.documentElement.classList.add('module-route');
 })();
 </script>
 <link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=32">
 <link rel="stylesheet" href="src/modules/checklist/checklist.css?v=14">
 <link rel="stylesheet" href="src/modules/presupuesto/presupuesto.css?v=26">
+<link rel="stylesheet" href="src/modules/proveedores/proveedores.css?v=1">
 </head>
 <body class="auth-locked">
 <main class="app">
@@ -458,6 +459,7 @@ Cancelar
     </div>
     <section class="checklist-review" data-module-view="checklist"><div class="module-loading" role="status" aria-live="polite">Cargando…</div></section>
     <section class="budget-review" data-module-view="presupuesto" hidden></section>
+    <section class="provider-review" data-module-view="proveedores" hidden></section>
   </main>
 </section><section class="access-manager" id="accessManager" aria-hidden="true">
 <div class="access-manager-backdrop" data-close-access></div>
@@ -478,7 +480,7 @@ Cancelar
 <form class="create-wedding-card" id="createWeddingForm" hidden><h3>Crear una nueva boda</h3><label><span>Nombre de la boda</span><input id="newWeddingName" type="text" maxlength="90" placeholder="Ej. Antonio & Lucero" required></label><label><span>Fecha</span><input id="newWeddingDate" type="date"></label><div><button type="button" id="cancelCreateWedding">Cancelar</button><button type="submit">Crear y abrir</button></div><p id="createWeddingStatus" aria-live="polite"></p></form>
 </div>
 </section>
-<script type="module" src="src/modules/dashboard/inicio.js?v=56">
+<script type="module" src="src/modules/dashboard/inicio.js?v=57">
 </script>
 </body>
 </html>
