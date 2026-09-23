@@ -173,14 +173,8 @@ async function inviteWeddingMember(context, email, role = 'viewer') {
   const cleanRole = normalizeWeddingRole(role);
   if (cleanRole === 'owner') throw new Error('El rol Propietario no se puede asignar.');
   if (cleanRole === 'admin' && !capabilities.canAssignAdmin) throw new Error('Solo el propietario puede asignar administradores.');
-  const inviteRef = doc(db, 'invitations', invitationId(context.id, normalizedEmail));
-  const existingInvite = await getDoc(inviteRef);
-  if (existingInvite.exists()) {
-    const previous = existingInvite.data() || {};
-    if (previous.status === 'pending' && normalizeWeddingRole(previous.role) === cleanRole) throw new Error('Ese correo ya tiene una invitación pendiente.');
-    await deleteDoc(inviteRef);
-  }
-  await setDoc(inviteRef, {
+
+  await setDoc(doc(db, 'invitations', invitationId(context.id, normalizedEmail)), {
     weddingId: context.id,
     weddingName: context.name || 'Mi boda',
     email: normalizedEmail,
@@ -188,11 +182,9 @@ async function inviteWeddingMember(context, email, role = 'viewer') {
     status: 'pending',
     invitedBy: user.uid,
     invitedByEmail: String(user.email || '').toLowerCase(),
-    createdAt: serverTimestamp(),
     updatedAt: serverTimestamp()
-  });
+  }, { merge: true });
 }
-
 async function updateWeddingMemberRole(context, uid, role) {
   const user = auth.currentUser;
   const capabilities = weddingCapabilities(context?.role);
@@ -218,19 +210,15 @@ async function removeWeddingMember(context, uid) {
   const snapshot = await getDoc(memberRef);
   if (!snapshot.exists()) return;
 
-  const member = snapshot.data() || {};
-  const currentRole = normalizeWeddingRole(member.role);
+  const currentRole = normalizeWeddingRole(snapshot.data()?.role);
   if (currentRole === 'owner') throw new Error('No se puede retirar al propietario.');
   if (!capabilities.canAssignAdmin && currentRole === 'admin') throw new Error('Solo el propietario puede retirar a otro administrador.');
 
-  const memberEmail = String(member.email || '').trim().toLowerCase();
-  await deleteDoc(memberRef);
-
-  if (memberEmail) {
-    const inviteRef = doc(db, 'invitations', invitationId(context.id, memberEmail));
-    const inviteSnapshot = await getDoc(inviteRef);
-    if (inviteSnapshot.exists()) await deleteDoc(inviteRef);
-  }
+  await setDoc(memberRef, {
+    status: 'removed',
+    removedAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  }, { merge: true });
 }
 async function cancelWeddingInvitation(context, inviteId) {
   if (!auth.currentUser || !context?.id || !weddingCapabilities(context.role).canManageTeam) throw new Error('No tienes permiso para gestionar accesos.');
