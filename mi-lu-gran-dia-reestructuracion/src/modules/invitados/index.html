@@ -5,7 +5,7 @@
       <div class="guests-title-icon" aria-hidden="true">♟</div>
       <div>
         <h1>Invitados</h1>
-        <p>Consulta la lista real de personas, confirmaciones y asignaciones de la boda.</p>
+        <p>Gestiona las personas, confirmaciones y asignaciones de la boda.</p>
       </div>
       <div class="guests-hero-total"><strong data-guests-total>0</strong><span>personas registradas</span></div>
     </div>
@@ -20,6 +20,7 @@
   </section>
 
   <section class="guests-toolbar">
+    <button class="guests-new" type="button" data-guests-add hidden><b>＋</b><span>Nuevo invitado</span></button>
     <label class="guests-search"><span aria-hidden="true">⌕</span><input type="search" data-guests-search placeholder="Buscar invitado, relación, familia o mesa"></label>
     <div class="guests-segments" aria-label="Filtrar invitados">
       <button type="button" data-guests-filter="all" class="is-active">Todos</button>
@@ -31,10 +32,35 @@
   </section>
 
   <section class="guests-list-head">
-    <div><h2>Lista de invitados</h2><p>Lectura directa de los datos existentes. En esta fase no se realiza ninguna escritura.</p></div>
+    <div><h2>Lista de invitados</h2><p>Una sola persona mantiene la misma identidad en Invitados, RSVP y Mesas.</p></div>
     <span data-guests-results>0 invitados</span>
   </section>
 
   <section class="guests-list" data-guests-list></section>
-  <p class="guests-read-state" data-guests-state>Datos de la boda activa · solo lectura</p>
+  <p class="guests-read-state" data-guests-state>Datos de la boda activa</p>
+
+  <dialog class="guests-dialog" data-guests-dialog>
+    <div class="guests-dialog-head">
+      <div><span>INVITADOS</span><h2 data-guests-dialog-title>Nuevo invitado</h2></div>
+      <button type="button" data-guests-close aria-label="Cerrar">×</button>
+    </div>
+    <form class="guests-form" id="guestsEditorForm" data-guests-form>
+      <input type="hidden" name="guestId">
+      <label class="guests-field guests-field-wide"><span>Nombre completo</span><input name="name" maxlength="120" required></label>
+      <div class="guests-form-grid">
+        <label class="guests-field"><span>Estado</span><select name="status"><option value="pending">Pendiente</option><option value="confirmed">Confirmado</option><option value="tentative">Por confirmar</option><option value="declined">No asistirá</option></select></label>
+        <label class="guests-field"><span>Lado</span><select name="side"><option value="ambos">De ambos</option><option value="novio">Del novio</option><option value="novia">De la novia</option></select></label>
+        <label class="guests-field"><span>Relación</span><input name="relation" maxlength="120" placeholder="Ej. Familia, amigo, trabajo"></label>
+        <label class="guests-field"><span>Restricción</span><input name="restriction" maxlength="160" placeholder="Ninguna"></label>
+      </div>
+      <label class="guests-check"><input type="checkbox" name="invitationSent"><span>Invitación enviada</span></label>
+      <label class="guests-field guests-field-wide"><span>Notas</span><textarea name="notes" rows="4" maxlength="700"></textarea></label>
+    </form>
+    <div class="guests-dialog-actions">
+      <button class="guests-delete" type="button" data-guests-delete hidden>Eliminar</button>
+      <span></span>
+      <button type="button" data-guests-close>Cancelar</button>
+      <button class="guests-save" type="submit" form="guestsEditorForm" data-guests-save>Guardar cambios</button>
+    </div>
+  </dialog>
 </div>
