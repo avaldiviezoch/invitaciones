@@ -98,6 +98,46 @@
 .rsvp-companion-status .is-ok{background:#eef3e8;color:#66734e}
 .rsvp-companion-status .is-pending{background:#f7ecef;color:#9c6470}
 
+.tables-pane{padding-bottom:8px}
+.tables-overview{width:min(94%,1580px);display:grid;grid-template-columns:repeat(4,1fr);margin:0 auto 14px;border:1px solid #e2dcd7;border-radius:18px;background:#fff;overflow:hidden}
+.tables-overview article{padding:14px 18px;border-right:1px solid #e8e2dd}
+.tables-overview article:last-child{border-right:0}
+.tables-overview span{display:block;color:#89848a;font-size:8px;font-weight:700}
+.tables-overview strong{display:block;margin-top:7px;font:600 22px Georgia,serif}
+.tables-head{width:min(94%,1580px);display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0 auto 10px}
+.tables-head h2{margin:0;font:500 19px Georgia,serif}
+.tables-head p{margin:5px 0 0;color:#898991;font-size:10px;line-height:1.4}
+.tables-head button{min-height:40px;padding:0 14px;border:0;border-radius:11px;background:#7d8866;color:#fff;font-size:9px;font-weight:750;cursor:pointer}
+.tables-list{width:min(94%,1580px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:0 auto}
+.table-card{display:grid;grid-template-columns:72px minmax(0,1fr) auto;align-items:center;gap:14px;min-height:96px;padding:14px 15px;border:1px solid #e2dcd7;border-radius:17px;background:#fff}
+.table-card-shape{width:58px;height:58px;display:grid;place-items:center;border:1px solid #dcd6cf;background:#f8f5f1;color:#747c62}
+.table-card-shape.is-round{border-radius:50%}
+.table-card-shape.is-square{border-radius:12px}
+.table-card-shape.is-rectangular{width:68px;height:44px;border-radius:12px}
+.table-card-shape span{font:700 11px Georgia,serif}
+.table-card-copy{min-width:0}
+.table-card-title{display:flex;align-items:center;gap:7px;min-width:0}
+.table-card-title h3{min-width:0;margin:0;overflow:hidden;font:500 17px Georgia,serif;text-overflow:ellipsis;white-space:nowrap}
+.table-card-title>span{flex:0 0 auto;padding:3px 6px;border-radius:999px;background:#f1eee9;color:#7e7872;font-size:7px;font-weight:750}
+.table-card-copy p{margin:6px 0 0;color:#73706c;font-size:9px}
+.table-card-copy small{display:block;margin-top:5px;overflow:hidden;color:#96908a;font-size:8px;text-overflow:ellipsis;white-space:nowrap}
+.table-card>button{min-height:34px;padding:0 11px;border:1px solid #d9d3cd;border-radius:9px;background:#fff;color:#626a53;font-size:8px;font-weight:750;cursor:pointer}
+.table-dialog{width:min(780px,calc(100vw - 28px));max-height:min(90vh,860px);padding:0;border:1px solid #ded8d2;border-radius:20px;background:#fff;color:#383531;box-shadow:0 24px 70px rgba(50,44,40,.18)}
+.table-dialog::backdrop{background:rgba(37,34,31,.28);backdrop-filter:blur(2px)}
+.table-form{display:grid;gap:16px;padding:18px 22px;overflow:auto}
+.table-seats-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:2px}
+.table-seats-head strong{display:block;color:#514d49;font-size:10px}
+.table-seats-head span{display:block;margin-top:4px;color:#918b86;font-size:8px}
+.table-seats-editor{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;max-height:360px;overflow:auto;padding:2px}
+.table-seat-row{display:grid;grid-template-columns:38px minmax(0,1fr);align-items:center;gap:9px;padding:9px 10px;border:1px solid #e5dfda;border-radius:12px;background:#fff}
+.table-seat-index{width:34px;height:34px;display:grid;place-items:center;border-radius:50%;background:#f1eee9;color:#70795e}
+.table-seat-index span{font-size:10px;font-weight:800}
+.table-seat-index small{display:none}
+.table-seat-row label{display:grid;gap:5px}
+.table-seat-row label>span{color:#77716c;font-size:7px;font-weight:700}
+.table-seat-row select{width:100%;height:36px;border:1px solid #dfd9d3;border-radius:9px;background:#fff;color:#403d39;padding:0 8px;font-size:9px;outline:0}
+.table-seat-row select:focus{border-color:#98a27f;box-shadow:0 0 0 3px rgba(125,136,102,.1)}
+.table-dialog-actions{grid-template-columns:auto 1fr auto auto}
 .guests-new{min-height:44px;display:inline-flex;align-items:center;gap:7px;padding:0 14px;border:0;border-radius:12px;background:#7d8866;color:#fff;font-size:10px;font-weight:750;cursor:pointer;white-space:nowrap}
 .guests-new b{font-size:17px;font-weight:400}
 .guests-dialog{width:min(720px,calc(100vw - 28px));max-height:min(86vh,760px);padding:0;border:1px solid #ded8d2;border-radius:20px;background:#fff;color:#383531;box-shadow:0 24px 70px rgba(50,44,40,.18)}
@@ -124,6 +164,12 @@
 .guest-card-action{position:absolute;top:12px;right:12px;width:32px;height:32px;border:1px solid #e5dfda;border-radius:10px;background:#fff;color:#6f7760;font-size:15px;cursor:pointer}
 .guest-card.is-editable{padding-right:58px}
 @media(max-width:900px){
+.tables-overview{grid-template-columns:repeat(2,1fr)}
+.tables-overview article{border-bottom:1px solid #e8e2dd}
+.tables-overview article:nth-child(2n){border-right:0}
+.tables-overview article:nth-child(n+3){border-bottom:0}
+.tables-list{grid-template-columns:1fr}
+
 .rsvp-overview{grid-template-columns:repeat(2,1fr)}
 .rsvp-overview article{border-bottom:1px solid #e8e2dd}
 .rsvp-overview article:nth-child(2n){border-right:0}
@@ -140,6 +186,23 @@
 .guests-segments{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible}
 }
 @media(max-width:600px){
+.tables-overview,.tables-head,.tables-list{width:calc(100% - 24px)}
+.tables-overview article{padding:12px 10px;text-align:center}
+.tables-head{align-items:stretch;flex-direction:column}
+.tables-head button{width:100%}
+.table-card{grid-template-columns:54px minmax(0,1fr);padding:12px}
+.table-card-shape{width:46px;height:46px}
+.table-card-shape.is-rectangular{width:50px;height:36px}
+.table-card>button{grid-column:2;justify-self:start}
+.table-dialog{width:calc(100vw - 16px);max-height:92vh;border-radius:16px}
+.table-form{padding:14px}
+.table-seats-editor{grid-template-columns:1fr;max-height:330px}
+.table-dialog-actions{grid-template-columns:1fr 1fr}
+.table-dialog-actions>span{display:none}
+.table-dialog-actions .guests-delete{grid-column:1}
+.table-dialog-actions button[data-table-close]{grid-column:1}
+.table-dialog-actions .guests-save{grid-column:2;grid-row:2}
+
 .guests-view-tabs{width:calc(100% - 24px);margin-bottom:12px}
 .guests-view-tabs button{padding:0 8px;font-size:8px}
 .rsvp-overview,.rsvp-head,.rsvp-list{width:calc(100% - 24px)}
