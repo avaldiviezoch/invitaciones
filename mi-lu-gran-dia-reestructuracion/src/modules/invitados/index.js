@@ -196,6 +196,8 @@ function renderRsvp() {
   const unreviewed = responses.filter((item) => !reviewed.has(String(item.id))).length;
 
   root.querySelector('[data-rsvp-tab-count]').textContent = String(responses.length);
+  const mainResponses = root.querySelector('[data-guests-kpi-responses]');
+  if (mainResponses) mainResponses.textContent = String(responses.length);
   root.querySelector('[data-rsvp-total]').textContent = String(responses.length);
   root.querySelector('[data-rsvp-people]').textContent = String(people);
   root.querySelector('[data-rsvp-unreviewed]').textContent = String(unreviewed);
