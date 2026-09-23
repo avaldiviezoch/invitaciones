@@ -188,6 +188,27 @@
     </div>
   </dialog>
 
+  <dialog class="table-seat-conflict-dialog" data-seat-conflict-dialog>
+    <div class="guests-dialog-head">
+      <div><span>SILLA OCUPADA</span><h2>¿Qué deseas hacer?</h2></div>
+      <button type="button" data-seat-conflict-cancel aria-label="Cerrar">×</button>
+    </div>
+    <div class="table-seat-conflict-body">
+      <p data-seat-conflict-summary></p>
+      <button type="button" class="table-seat-conflict-option is-swap" data-seat-conflict-action="swap">
+        <span aria-hidden="true">⇄</span>
+        <div><strong>Intercambiar lugares</strong><small data-seat-conflict-swap-copy></small></div>
+      </button>
+      <button type="button" class="table-seat-conflict-option is-replace" data-seat-conflict-action="replace">
+        <span aria-hidden="true">→</span>
+        <div><strong>Reemplazar</strong><small data-seat-conflict-replace-copy></small></div>
+      </button>
+    </div>
+    <div class="table-seat-conflict-actions">
+      <button type="button" data-seat-conflict-cancel>Cancelar</button>
+    </div>
+  </dialog>
+
   <dialog class="guests-dialog" data-guests-dialog>
     <div class="guests-dialog-head">
       <div><span>INVITADOS</span><h2 data-guests-dialog-title>Nuevo invitado</h2></div>
