@@ -235,6 +235,20 @@
 .table-shape-preview.is-rectangular i:nth-child(2){right:0}
 .table-shape-preview.is-rectangular i:nth-child(4){left:0}
 
+.table-editor-preview{display:grid;gap:8px;padding:11px 12px 8px;border:1px solid #e5dfda;border-radius:15px;background:#fbfaf8}
+.table-editor-preview-head{display:flex;align-items:flex-end;justify-content:space-between;gap:10px}
+.table-editor-preview-head strong{display:block;color:#514d49;font-size:10px}
+.table-editor-preview-head span{display:block;margin-top:3px;color:#918b86;font-size:7px}
+.table-editor-preview-head small{color:#7d8866;font-size:7px;font-weight:700}
+.table-editor-preview-stage{min-height:220px;display:grid;place-items:center;overflow:hidden}
+.table-editor-preview-canvas{position:relative;transform:scale(.72);transform-origin:center}
+.table-editor-preview-body{position:absolute;left:50%;top:50%;width:var(--table-body-w);height:var(--table-body-h);transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:1px solid #d8c9bd;background:linear-gradient(145deg,#eee3d7,#faf1e8);color:#575048;box-shadow:inset 0 1px 0 rgba(255,255,255,.8),0 8px 20px rgba(86,73,61,.06)}
+.table-editor-preview-body.is-round{border-radius:50%}
+.table-editor-preview-body.is-square{border-radius:14px}
+.table-editor-preview-body.is-rectangular{border-radius:17px}
+.table-editor-preview-body strong{font:600 11px Georgia,serif}
+.table-editor-preview-body span{color:#756c64;font-size:8px}
+.table-editor-preview-seat{position:absolute;left:0;top:0;width:28px;height:28px;margin:-14px 0 0 -14px;display:grid;place-items:center;border:1px solid #cfd7c4;border-radius:50%;background:#eef3e8;color:#68735d;font-size:7px;font-weight:800;box-shadow:0 3px 8px rgba(58,65,52,.06)}
 .table-seats-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:2px}
 .table-seats-head strong{display:block;color:#514d49;font-size:10px}
 .table-seats-head span{display:block;margin-top:4px;color:#918b86;font-size:8px}
@@ -297,6 +311,8 @@
 }
 @media(max-width:600px){
 .table-editor-fields{grid-template-columns:1fr}
+.table-editor-preview-stage{min-height:190px}
+.table-editor-preview-canvas{transform:scale(.62)}
 .table-capacity-options{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
 .table-capacity-options>button{min-height:52px}
 .table-shape-options{grid-template-columns:1fr 1fr 1fr;gap:6px}
