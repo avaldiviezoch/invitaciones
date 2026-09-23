@@ -24,16 +24,16 @@
 .budget-dialog:has([data-kind="package"]) .budget-form-field>span{font-size:10px}
 .budget-dialog:has([data-kind="package"]) .budget-form-field input,.budget-dialog:has([data-kind="package"]) .budget-form-field select,.budget-dialog:has([data-kind="package"]) .budget-form-field textarea{min-height:38px;padding:7px 10px;border-radius:10px;font-size:11px}
 .budget-dialog:has([data-kind="package"]) .budget-form-grid{gap:8px}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker{max-height:168px;display:grid;gap:6px;padding:3px;overflow:auto;border:1px solid #ebe5df;border-radius:12px;background:#faf9f7}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker label{position:relative;min-height:44px;display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid transparent;border-radius:9px;background:#fff;cursor:pointer;transition:border-color .15s ease,background .15s ease}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker label:hover{border-color:#ddd8cf}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker input{appearance:none;width:17px;height:17px;min-height:17px;flex:0 0 17px;margin:0;padding:0;border:1px solid #cfc9c1;border-radius:5px;background:#fff;box-shadow:none;cursor:pointer}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker input:checked{border-color:#849168;background:#849168}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker input:checked:after{content:"✓";display:grid;place-items:center;height:15px;color:#fff;font-size:11px;font-weight:800;line-height:1}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker label:has(input:checked){border-color:#d9dfcc;background:#f8faf4}
+.budget-dialog:has([data-kind="package"]) .budget-package-picker{max-height:176px;display:grid;gap:6px;padding:6px;overflow:auto;border:1px solid #e5e0da;border-radius:12px;background:#f8f7f5}
+.budget-dialog:has([data-kind="package"]) .budget-package-picker label{min-height:46px;display:grid;grid-template-columns:18px minmax(0,1fr);align-items:center;gap:10px;margin:0;padding:8px 10px;border:1px solid #e9e5df;border-radius:9px;background:#fff;cursor:pointer}
+.budget-dialog:has([data-kind="package"]) .budget-package-picker label:hover{border-color:#d5d8c9;background:#fbfcf9}
+.budget-dialog:has([data-kind="package"]) .budget-package-picker input[type="checkbox"]{appearance:none;-webkit-appearance:none;box-sizing:border-box;width:17px;height:17px;min-width:17px;min-height:17px;margin:0;padding:0;border:1px solid #c9c5be;border-radius:4px;background:#fff;box-shadow:none;cursor:pointer}
+.budget-dialog:has([data-kind="package"]) .budget-package-picker input[type="checkbox"]:checked{border-color:#7f8962;background:#7f8962}
+.budget-dialog:has([data-kind="package"]) .budget-package-picker input[type="checkbox"]:checked::after{content:"";display:block;width:7px;height:4px;margin:4px 0 0 4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg)}
+.budget-dialog:has([data-kind="package"]) .budget-package-picker label:has(input:checked){border-color:#d5dcc6;background:#f6f8f2}
 .budget-dialog:has([data-kind="package"]) .budget-package-picker span{min-width:0;display:block}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker b{display:block;overflow:hidden;color:#484640;font-size:11px;font-weight:650;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker small{display:block;margin-top:3px;color:#96918a;font-size:9px;line-height:1.2}
+.budget-dialog:has([data-kind="package"]) .budget-package-picker b{display:block;overflow:hidden;color:#45423e;font-size:11px;font-weight:650;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}
+.budget-dialog:has([data-kind="package"]) .budget-package-picker small{display:block;margin-top:2px;overflow:hidden;color:#918d86;font-size:9px;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}
 .budget-dialog:has([data-kind="package"]) textarea[name="notes"]{min-height:58px}
 .budget-dialog:has([data-kind="package"]) footer{padding:10px 20px 14px}
 .budget-dialog:has([data-kind="package"]) footer button{min-height:38px}
