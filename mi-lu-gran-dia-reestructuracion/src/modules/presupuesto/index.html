@@ -1,0 +1,33 @@
+<div class="budget-shell">
+  <section class="budget-hero">
+    <div><p class="budget-eyebrow">Módulo · Planificación</p><div class="budget-title-row"><div class="budget-title-icon" aria-hidden="true">＄</div><div><h1>Presupuesto</h1><p>Controla lo planificado, cotizado y pagado por cada categoría.</p></div></div></div>
+    <div class="budget-hero-total"><span>Saldo disponible</span><strong data-budget-available>—</strong></div>
+  </section>
+  <main class="budget-content">
+    <section class="budget-toolbar">
+      <div><button class="budget-button budget-primary" type="button" data-budget-new-item>＋ Nuevo gasto</button><button class="budget-button" type="button" data-budget-new-category>Nueva categoría</button></div>
+      <button class="budget-button budget-quiet" type="button" data-budget-export>Exportar CSV</button>
+    </section>
+    <section class="budget-overview">
+      <article class="budget-main">
+        <div class="budget-main-top"><div class="budget-total-block"><span>Presupuesto total de la boda</span><div class="budget-total-value"><b data-budget-symbol>S/</b><strong data-budget-total>—</strong></div></div>
+        <div class="budget-config"><label><span>Moneda</span><strong data-budget-currency>—</strong></label><label><span>Invitados</span><strong data-budget-guests>—</strong></label></div></div>
+        <div class="budget-progress"><i data-budget-progress></i></div><div class="budget-progress-meta"><span data-budget-progress-text>—</span><span data-budget-per-guest>—</span></div>
+      </article>
+      <article class="budget-metric"><span>Presupuestado</span><strong data-budget-planned>—</strong><small data-budget-planned-note>—</small></article>
+      <article class="budget-metric"><span>Cotizado</span><strong data-budget-quoted>—</strong><small data-budget-quoted-note>—</small></article>
+      <article class="budget-metric"><span>Adelantos / pagado</span><strong data-budget-paid>—</strong><small data-budget-paid-note>—</small></article>
+      <article class="budget-metric"><span>Garantías</span><strong data-budget-guarantee>—</strong><small data-budget-guarantee-note>—</small></article>
+    </section>
+    <section class="budget-analysis" data-budget-analysis>Define el presupuesto total y registra los gastos para ver el análisis.</section>
+    <section class="budget-workspace">
+      <aside class="budget-tags"><div class="budget-tags-head"><h2>Etiquetas</h2><button type="button" data-budget-new-tag aria-label="Nueva etiqueta">＋</button></div><div data-budget-tags></div><p>Las etiquetas existentes se muestran tal como están guardadas en tu presupuesto.</p></aside>
+      <div class="budget-items">
+        <div class="budget-section-head"><div><h2>Presupuesto por categoría</h2><p>Abre una categoría para revisar sus gastos específicos.</p></div><label class="budget-search">⌕<input type="search" data-budget-search placeholder="Buscar categoría, gasto o proveedor"></label></div>
+        <div class="budget-categories" data-budget-categories></div>
+      </div>
+    </section>
+    <p class="budget-read-state" data-budget-state>Datos de la boda activa</p>
+  </main>
+  <dialog class="budget-dialog" data-budget-dialog><form method="dialog"><header><div><span>PRESUPUESTO</span><h2 data-budget-dialog-title>Detalle</h2></div><button type="button" data-budget-close>×</button></header><div class="budget-dialog-body" data-budget-dialog-body></div><footer><button type="button" data-budget-close>Cerrar</button></footer></form></dialog>
+</div>
