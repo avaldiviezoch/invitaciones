@@ -108,6 +108,11 @@ async function saveRsvpManagement(context, token, responseId, input = {}) {
   return payload;
 }
 
+async function deleteRsvpManagement(context, token, responseId) {
+  requireEditor(context);
+  await deleteDoc(doc(db, 'weddings', context.id, 'rsvpManagement', managementDocId(token, responseId)));
+}
+
 async function restoreRsvpManagement(context, token, responseId, previous) {
   requireEditor(context);
   const ref = doc(db, 'weddings', context.id, 'rsvpManagement', managementDocId(token, responseId));
@@ -119,4 +124,4 @@ async function restoreRsvpManagement(context, token, responseId, previous) {
   await deleteDoc(ref);
 }
 
-export { loadRsvpAdminSnapshot, saveRsvpManagement, restoreRsvpManagement };
+export { loadRsvpAdminSnapshot, saveRsvpManagement, deleteRsvpManagement, restoreRsvpManagement };
