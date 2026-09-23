@@ -174,7 +174,26 @@ async function inviteWeddingMember(context, email, role = 'viewer') {
   if (cleanRole === 'owner') throw new Error('El rol Propietario no se puede asignar.');
   if (cleanRole === 'admin' && !capabilities.canAssignAdmin) throw new Error('Solo el propietario puede asignar administradores.');
 
-  await setDoc(doc(db, 'invitations', invitationId(context.id, normalizedEmail)), {
+  const inviteRef = doc(db, 'invitations', invitationId(context.id, normalizedEmail));
+  const inviteSnapshot = await getDoc(inviteRef);
+
+  if (inviteSnapshot.exists()) {
+    const existing = inviteSnapshot.data() || {};
+    if (existing.status === 'pending' && normalizeWeddingRole(existing.role) === cleanRole) {
+      throw new Error('Ese correo ya tiene una invitación pendiente.');
+    }
+    await updateDoc(inviteRef, {
+      weddingName: context.name || existing.weddingName || 'Mi boda',
+      role: cleanRole,
+      status: 'pending',
+      invitedBy: user.uid,
+      invitedByEmail: String(user.email || '').toLowerCase(),
+      updatedAt: serverTimestamp()
+    });
+    return;
+  }
+
+  await setDoc(inviteRef, {
     weddingId: context.id,
     weddingName: context.name || 'Mi boda',
     email: normalizedEmail,
@@ -182,8 +201,9 @@ async function inviteWeddingMember(context, email, role = 'viewer') {
     status: 'pending',
     invitedBy: user.uid,
     invitedByEmail: String(user.email || '').toLowerCase(),
+    createdAt: serverTimestamp(),
     updatedAt: serverTimestamp()
-  }, { merge: true });
+  });
 }
 async function updateWeddingMemberRole(context, uid, role) {
   const user = auth.currentUser;
