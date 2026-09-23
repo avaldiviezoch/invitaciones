@@ -1,10 +1,12 @@
-import { loadInvitadosSnapshot } from './invitados-data.js?v=1';
+import { weddingCapabilities } from '../../core/app/permissions.js';
+import { loadInvitadosSnapshot, saveInvitadosSnapshot } from './invitados-data.js?v=2';
 
 let activeContext = null;
 let snapshot = null;
 let mountEpoch = 0;
 let filter = 'all';
 let search = '';
+let saving = false;
 
 const esc = (value) => String(value ?? '')
   .replaceAll('&','&amp;')
@@ -15,6 +17,15 @@ const esc = (value) => String(value ?? '')
 
 function text(value) {
   return String(value ?? '').trim();
+}
+
+function canEdit() {
+  return weddingCapabilities(activeContext?.role).canEdit;
+}
+
+function deepClone(value) {
+  if (typeof structuredClone === 'function') return structuredClone(value);
+  return JSON.parse(JSON.stringify(value));
 }
 
 function guestStatus(guest) {
@@ -79,8 +90,9 @@ function guestCard(guest, tables) {
   const invitation = Boolean(guest?.invitationSent);
   const rsvpLinked = Boolean(text(guest?.rsvpResponseId));
   const meta = [relation, side && side !== 'ambos' ? side : '', family].filter(Boolean);
+  const editable = canEdit();
 
-  return `<article class="guest-card">
+  return `<article class="guest-card${editable ? ' is-editable' : ''}" data-guest-id="${esc(guest?.id)}">
     <div class="guest-main">
       <span class="guest-avatar">${esc(initials(guest?.name))}</span>
       <div class="guest-copy">
@@ -101,6 +113,7 @@ function guestCard(guest, tables) {
       <strong>${table ? esc(table) : 'Sin mesa'}</strong>
       <small>${table && seat ? `Silla ${esc(seat)}` : text(guest?.seatId) ? esc(guest.seatId) : '—'}</small>
     </div>
+    ${editable ? '<button class="guest-card-action" type="button" data-guest-edit aria-label="Editar invitado">✎</button>' : ''}
   </article>`;
 }
 
@@ -120,6 +133,9 @@ function render() {
   root.querySelector('[data-guests-kpi-seated]').textContent = String(seated);
   root.querySelector('[data-guests-kpi-unseated]').textContent = String(Math.max(0, guests.length - seated));
 
+  const addButton = root.querySelector('[data-guests-add]');
+  if (addButton) addButton.hidden = !canEdit();
+
   const needle = search.trim().toLocaleLowerCase('es');
   const rows = guests.filter((guest) => matchesFilter(guest) && (!needle || guestSearchText(guest, tables).includes(needle)));
   root.querySelector('[data-guests-results]').textContent = `${rows.length} ${rows.length === 1 ? 'invitado' : 'invitados'}`;
@@ -132,15 +148,181 @@ function render() {
   });
 }
 
+function findGuest(id) {
+  return snapshot?.canonical?.guests.find((guest) => String(guest?.id) === String(id)) || null;
+}
+
+function newGuestId() {
+  const value = typeof crypto?.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `${Date.now().toString(36)}_${Math.random().toString(36).slice(2,10)}`;
+  return `guest_${value}`;
+}
+
+function openEditor(guest = null) {
+  const root = document.querySelector('[data-module-view="invitados"]');
+  const dialog = root?.querySelector('[data-guests-dialog]');
+  const form = root?.querySelector('[data-guests-form]');
+  if (!dialog || !form || !canEdit()) return;
+
+  form.reset();
+  form.elements.guestId.value = guest ? String(guest.id ?? '') : '';
+  form.elements.name.value = guest ? text(guest.name) : '';
+  form.elements.status.value = guest ? guestStatus(guest) : 'pending';
+  form.elements.side.value = ['novio','novia','ambos'].includes(text(guest?.side)) ? text(guest.side) : 'ambos';
+  form.elements.relation.value = guest ? text(guest.relation) : '';
+  form.elements.restriction.value = guest ? text(guest.restriction || 'Ninguna') : 'Ninguna';
+  form.elements.notes.value = guest ? text(guest.notes) : '';
+  form.elements.invitationSent.checked = Boolean(guest?.invitationSent);
+
+  root.querySelector('[data-guests-dialog-title]').textContent = guest ? 'Editar invitado' : 'Nuevo invitado';
+  const deleteButton = root.querySelector('[data-guests-delete]');
+  deleteButton.hidden = !guest;
+  deleteButton.dataset.guestId = guest ? String(guest.id ?? '') : '';
+  dialog.showModal();
+  if (!window.matchMedia('(max-width:760px)').matches) form.elements.name.focus();
+}
+
+function closeEditor() {
+  document.querySelector('[data-module-view="invitados"] [data-guests-dialog]')?.close();
+}
+
+async function persistMutation(previous, message) {
+  const root = document.querySelector('[data-module-view="invitados"]');
+  const state = root?.querySelector('[data-guests-state]');
+  saving = true;
+  if (state) state.textContent = 'Guardando en Firebase…';
+  render();
+
+  try {
+    await saveInvitadosSnapshot(activeContext, snapshot.canonical);
+    snapshot.shared = {
+      guests: snapshot.canonical.guests.map((guest) => ({ ...guest })),
+      tables: snapshot.canonical.tables.map((table) => ({ ...table }))
+    };
+    if (state) state.textContent = message;
+    window.dispatchEvent(new CustomEvent('migrandia:datachange', {
+      detail: {
+        source: 'invitados',
+        module: 'invitados',
+        weddingId: activeContext.id,
+        guests: snapshot.canonical.guests.length
+      }
+    }));
+  } catch (error) {
+    snapshot = previous;
+    render();
+    const restoredState = root?.querySelector('[data-guests-state]');
+    if (restoredState) restoredState.textContent = error?.message || 'No se pudo guardar en Firebase.';
+    throw error;
+  } finally {
+    saving = false;
+  }
+}
+
+async function handleSubmit(event) {
+  if (!event.target.matches('[data-guests-form]')) return;
+  event.preventDefault();
+  if (!canEdit() || saving) return;
+
+  const form = event.target;
+  const data = new FormData(form);
+  const name = text(data.get('name'));
+  if (!name) return;
+
+  const previous = deepClone(snapshot);
+  const guestId = text(data.get('guestId'));
+  const patch = {
+    name,
+    status: text(data.get('status')) || 'pending',
+    side: text(data.get('side')) || 'ambos',
+    relation: text(data.get('relation')),
+    restriction: text(data.get('restriction')) || 'Ninguna',
+    notes: text(data.get('notes')),
+    invitationSent: form.elements.invitationSent.checked
+  };
+
+  if (guestId) {
+    const index = snapshot.canonical.guests.findIndex((guest) => String(guest?.id) === guestId);
+    if (index < 0) return;
+    snapshot.canonical.guests[index] = { ...snapshot.canonical.guests[index], ...patch };
+  } else {
+    snapshot.canonical.guests.push({
+      id: newGuestId(),
+      ...patch,
+      tableId: '',
+      seatId: '',
+      seatNumber: null,
+      photoId: '',
+      photoThumb: '',
+      rsvpResponseId: '',
+      rsvpResponseName: '',
+      rsvpGroup: '',
+      rsvpFamilyLabel: '',
+      rsvpTags: []
+    });
+  }
+
+  closeEditor();
+  render();
+  await persistMutation(previous, guestId ? 'Invitado actualizado' : 'Invitado agregado');
+}
+
+async function deleteGuest(guestId) {
+  if (!canEdit() || saving) return;
+  const guest = findGuest(guestId);
+  if (!guest) return;
+
+  if (text(guest.rsvpResponseId)) {
+    window.alert('Este invitado está vinculado a una respuesta RSVP. La vinculación debe resolverse antes de eliminarlo para no dejar relaciones incompletas.');
+    return;
+  }
+
+  const table = tableName(guest, snapshot.canonical.tables);
+  const detail = table ? ` Está asignado a ${table}; su asiento quedará libre.` : '';
+  if (!window.confirm(`¿Eliminar a “${text(guest.name) || 'este invitado'}”? Esta acción elimina a la persona de la lista.${detail}`)) return;
+
+  const previous = deepClone(snapshot);
+  snapshot.canonical.guests = snapshot.canonical.guests.filter((item) => String(item?.id) !== String(guestId));
+  closeEditor();
+  render();
+  await persistMutation(previous, 'Invitado eliminado');
+}
+
 function bind(root) {
   if (root.dataset.guestsBound === 'true') return;
   root.dataset.guestsBound = 'true';
 
-  root.addEventListener('click', (event) => {
-    const button = event.target.closest('[data-guests-filter]');
-    if (!button) return;
-    filter = button.dataset.guestsFilter || 'all';
-    render();
+  root.addEventListener('click', async (event) => {
+    const filterButton = event.target.closest('[data-guests-filter]');
+    if (filterButton) {
+      filter = filterButton.dataset.guestsFilter || 'all';
+      render();
+      return;
+    }
+
+    if (event.target.closest('[data-guests-add]')) {
+      openEditor();
+      return;
+    }
+
+    if (event.target.closest('[data-guests-close]')) {
+      closeEditor();
+      return;
+    }
+
+    const editButton = event.target.closest('[data-guest-edit]');
+    if (editButton) {
+      const card = editButton.closest('[data-guest-id]');
+      const guest = findGuest(card?.dataset.guestId);
+      if (guest) openEditor(guest);
+      return;
+    }
+
+    const deleteButton = event.target.closest('[data-guests-delete]');
+    if (deleteButton) {
+      await deleteGuest(deleteButton.dataset.guestId);
+    }
   });
 
   root.addEventListener('input', (event) => {
@@ -151,6 +333,8 @@ function bind(root) {
     input?.focus();
     input?.setSelectionRange(search.length, search.length);
   });
+
+  root.addEventListener('submit', handleSubmit);
 }
 
 async function mountInvitados(context) {
@@ -162,7 +346,7 @@ async function mountInvitados(context) {
 
   try {
     const [template, loaded] = await Promise.all([
-      fetch(new URL('./index.html?v=1', import.meta.url)).then((response) => {
+      fetch(new URL('./index.html?v=2', import.meta.url)).then((response) => {
         if (!response.ok) throw new Error('No se pudo cargar la interfaz de Invitados.');
         return response.text();
       }),
@@ -174,6 +358,7 @@ async function mountInvitados(context) {
     snapshot = loaded;
     filter = 'all';
     search = '';
+    saving = false;
     bind(root);
     render();
 
@@ -181,8 +366,8 @@ async function mountInvitados(context) {
     if (state) {
       const sharedCount = loaded.shared.guests.length;
       state.textContent = sharedCount && sharedCount !== loaded.canonical.guests.length
-        ? `Datos de la boda activa · solo lectura · representación compartida: ${sharedCount}`
-        : 'Datos de la boda activa · solo lectura';
+        ? `Datos de la boda activa · representación compartida: ${sharedCount}`
+        : 'Datos de la boda activa';
     }
   } catch (error) {
     if (epoch !== mountEpoch) return;
