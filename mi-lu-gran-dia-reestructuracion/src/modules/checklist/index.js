@@ -10,6 +10,7 @@ let responsibleFilter = 'all';
 let priorityFilter = 'all';
 let saving = false;
 let mountEpoch = 0;
+const collapsedGroups = new Set();
 
 const esc = (value) => String(value ?? '').replace(/[&<>"']/g, (char) => ({
   '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
@@ -203,7 +204,7 @@ function render() {
       ${groups.size ? [...groups.entries()].map(([name, items]) => {
         const done = items.filter(({task})=>isCompleted(task)).length;
         const pct = items.length ? Math.round(done*100/items.length) : 0;
-        return `<article class="ck-group"><header><div class="ck-group-ring" style="--p:${pct}"><span>${pct}%</span></div><div><h2>${esc(name)}</h2><div class="ck-group-line"><i style="width:${pct}%"></i></div><small>${done} / ${items.length}</small></div><button type="button" class="ck-collapse" aria-label="Contraer">⌄</button></header><div class="ck-group-tasks">${items.map(({task,index})=>taskMarkup(task,index,editable)).join('')}</div></article>`;
+        const collapsed = collapsedGroups.has(name);\n        return `<article class="ck-group${collapsed ? ' is-collapsed' : ''}" data-group-name="${esc(name)}"><header><div class="ck-group-ring" style="--p:${pct}"><span>${pct}%</span></div><div><h2>${esc(name)}</h2><div class="ck-group-line"><i style="width:${pct}%"></i></div><small>${done} / ${items.length}</small></div><button type="button" class="ck-collapse" data-group-toggle aria-expanded="${collapsed ? 'false' : 'true'}" aria-label="${collapsed ? 'Abrir' : 'Cerrar'} ${esc(name)}">⌄</button></header><div class="ck-group-tasks">${items.map(({task,index})=>taskMarkup(task,index,editable)).join('')}</div></article>`;
       }).join('') : '<div class="ck-empty">No hay tareas para mostrar con este filtro.</div>'}
     </section>
     <p class="ck-save-state" data-checklist-status>${saving ? 'Guardando en Firebase…' : 'Datos de la boda activa'}</p>
@@ -257,6 +258,16 @@ function openForm(index = -1) {
 
 async function handleClick(event) {
   const root = event.currentTarget;
+  const groupToggle = event.target.closest('[data-group-toggle]');
+  if (groupToggle) {
+    const group = groupToggle.closest('[data-group-name]');
+    const name = group?.dataset.groupName;
+    if (!name) return;
+    if (collapsedGroups.has(name)) collapsedGroups.delete(name);
+    else collapsedGroups.add(name);
+    render();
+    return;
+  }
   const filterButton = event.target.closest('[data-checklist-filter]');
   if (filterButton) {
     filter = filterButton.dataset.checklistFilter;
