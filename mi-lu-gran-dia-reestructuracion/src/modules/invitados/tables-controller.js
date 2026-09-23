@@ -413,6 +413,28 @@ function createTablesController(api) {
     });
   }
 
+  function renderTablePreview() {
+    const root = api.getRoot();
+    const form = root?.querySelector('[data-table-form]');
+    const previewRoot = root?.querySelector('[data-table-preview]');
+    const summary = root?.querySelector('[data-table-preview-summary]');
+    if (!form || !previewRoot) return;
+
+    const shape = normalizeTableShape(form.elements.type?.value);
+    const capacity = normalizeCapacity(form.elements.capacity?.value);
+    const geometry = tableSeatGeometry(shape, capacity);
+    const shapeLabel = SHAPE_LABELS[shape] || 'Mesa';
+
+    previewRoot.innerHTML = `<div class="table-editor-preview-canvas" style="width:${geometry.visualWidth}px;height:${geometry.visualHeight}px;--table-body-w:${geometry.table.width}px;--table-body-h:${geometry.table.height}px">
+      <div class="table-editor-preview-body is-${shape}">
+        <strong>${esc(shapeLabel)}</strong>
+        <span>${capacity} sillas</span>
+      </div>
+      ${geometry.positions.map((position, index) => `<span class="table-editor-preview-seat" style="left:${position.x}px;top:${position.y}px" aria-hidden="true">${index + 1}</span>`).join('')}
+    </div>`;
+    if (summary) summary.textContent = `${shapeLabel} · ${capacity} lugares`;
+  }
+
   function openTable(table = null) {
     const root = api.getRoot();
     const dialog = root?.querySelector('[data-table-dialog]');
@@ -428,6 +450,7 @@ function createTablesController(api) {
     syncShapePicker(form.elements.type.value);
 
     syncCapacityPicker(capacity);
+    renderTablePreview();
 
     [...form.elements].forEach((control) => {
       if (control.name !== 'tableId') control.disabled = !api.canEdit();
@@ -666,6 +689,7 @@ function createTablesController(api) {
     if (capacityButton) {
       if (!api.canEdit()) return true;
       syncCapacityPicker(capacityButton.dataset.tableCapacity);
+      renderTablePreview();
       const form = capacityButton.closest('[data-table-form]');
       const tableId = text(form?.elements.tableId?.value);
       renderSeats(tableById(tableId));
@@ -676,6 +700,7 @@ function createTablesController(api) {
     if (shapeButton) {
       if (!api.canEdit()) return true;
       syncShapePicker(shapeButton.dataset.tableShape);
+      renderTablePreview();
       return true;
     }
 
