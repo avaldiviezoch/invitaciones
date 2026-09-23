@@ -174,12 +174,17 @@ async function renderAccessManager() {
   accessPending.innerHTML = '<div class="access-empty">Cargando invitaciones…</div>';
   setAccessManager(true);
   try {
-    const [members, invitations] = await Promise.all([
-      listWeddingMembers(weddingContext),
-      listWeddingInvitations(weddingContext)
-    ]);
+    const members = await listWeddingMembers(weddingContext);
     $('accessMembersCount').textContent = String(members.length);
-    $('accessPendingCount').textContent = String(invitations.length);
+    let invitations = [];
+    try {
+      invitations = await listWeddingInvitations(weddingContext);
+      $('accessPendingCount').textContent = String(invitations.length);
+    } catch (error) {
+      console.error('No se pudieron listar las invitaciones:', error);
+      $('accessPendingCount').textContent = '—';
+      accessPending.innerHTML = '<div class="access-empty">No se pudieron cargar las invitaciones pendientes.</div>';
+    }
     accessMembers.innerHTML = members.length ? members.map((member) => {
       const isOwner = member.role === 'owner';
       const isSelf = member.uid === auth.currentUser?.uid;
@@ -189,7 +194,7 @@ async function renderAccessManager() {
       const emailText = escapeHtml(member.email || '');
       return `<article class="access-person" data-member-uid="${escapeHtml(member.uid)}"><span class="access-person-avatar">${escapeHtml((member.displayName || member.email || '?').trim().charAt(0).toUpperCase())}</span><span class="access-person-copy"><strong>${name}</strong><small>${emailText}</small></span>${canEdit ? `<select class="access-role" aria-label="Rol de ${name}">${roleOptions(member.role, capabilities.canAssignAdmin)}</select><button class="access-remove" type="button">Retirar</button>` : `<span class="access-role-label">${escapeHtml(roleLabel(member.role))}${isSelf ? ' · Tú' : ''}</span>`}</article>`;
     }).join('') : '<div class="access-empty">Todavía no hay personas con acceso.</div>';
-    accessPending.innerHTML = invitations.length ? invitations.map((invite) => `<article class="access-person access-pending" data-invite-id="${escapeHtml(invite.id)}"><span class="access-person-avatar">✉</span><span class="access-person-copy"><strong>${escapeHtml(invite.email)}</strong><small>Invitación pendiente · ${escapeHtml(roleLabel(invite.role))}</small></span><button class="access-cancel" type="button">Cancelar</button></article>`).join('') : '<div class="access-empty">No hay invitaciones pendientes.</div>';
+    if ($('accessPendingCount').textContent !== '—') accessPending.innerHTML = invitations.length ? invitations.map((invite) => `<article class="access-person access-pending" data-invite-id="${escapeHtml(invite.id)}"><span class="access-person-avatar">✉</span><span class="access-person-copy"><strong>${escapeHtml(invite.email)}</strong><small>Invitación pendiente · ${escapeHtml(roleLabel(invite.role))}</small></span><button class="access-cancel" type="button">Cancelar</button></article>`).join('') : '<div class="access-empty">No hay invitaciones pendientes.</div>';
   } catch (error) {
     console.error('No se pudieron cargar los accesos:', error);
     accessMembers.innerHTML = '<div class="access-empty">No se pudieron cargar los accesos.</div>';
