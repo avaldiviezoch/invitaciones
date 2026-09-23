@@ -43,9 +43,10 @@ function createTablesController(api) {
 
   function tableCapacity(table) {
     const direct = Number(table?.capacity);
-    if (CAPACITIES.includes(direct)) return direct;
+    if (Number.isInteger(direct) && direct >= 4 && direct <= 16) return direct;
     const seatCount = Array.isArray(table?.seats) ? table.seats.length : 0;
-    return CAPACITIES.includes(seatCount) ? seatCount : 10;
+    if (Number.isInteger(seatCount) && seatCount >= 4 && seatCount <= 16) return seatCount;
+    return 10;
   }
 
   function ensureSeats(table, capacity) {
@@ -194,6 +195,14 @@ function createTablesController(api) {
     form.elements.tableId.value = table ? String(table.id) : '';
     form.elements.name.value = table ? text(table.name) : nextTableName();
     form.elements.type.value = table ? normalizeShape(table.type || table.shape) : 'round';
+    [...form.elements.capacity.options].filter((option) => option.dataset.legacyCapacity === 'true').forEach((option) => option.remove());
+    if (![...form.elements.capacity.options].some((option) => Number(option.value) === capacity)) {
+      const option = document.createElement('option');
+      option.value = String(capacity);
+      option.textContent = `${capacity} sillas · valor existente`;
+      option.dataset.legacyCapacity = 'true';
+      form.elements.capacity.appendChild(option);
+    }
     form.elements.capacity.value = String(capacity);
 
     [...form.elements].forEach((control) => {
@@ -352,6 +361,7 @@ function createTablesController(api) {
     if (!Number.isInteger(seatIndex) || seatIndex < 0 || seatIndex >= capacity) return true;
 
     const previous = deepClone(api.getSnapshot());
+    table.seats = ensureSeats(table, capacity);
     const current = guestAtSeat(table.id, seatIndex);
     const nextGuest = guestId ? guestById(guestId) : null;
 
@@ -371,7 +381,7 @@ function createTablesController(api) {
 
       nextGuest.tableId = table.id;
       nextGuest.seatNumber = seatIndex + 1;
-      nextGuest.seatId = ensureSeats(table, capacity)[seatIndex].id;
+      nextGuest.seatId = table.seats[seatIndex].id;
     }
 
     await persist(
@@ -406,6 +416,13 @@ function createTablesController(api) {
 
     const chosenId = text(select.value);
     const chosen = chosenId ? guestById(chosenId) : null;
+    const current = guestAtSeat(tableId, seatIndex);
+    if (current && chosen && String(current.id) !== String(chosen.id)) {
+      if (!window.confirm(`La silla ${seatIndex + 1} está ocupada por ${text(current.name) || 'otro invitado'}. Si continúas, esa persona quedará sin mesa. ¿Reemplazarla?`)) {
+        renderSeats(tableById(tableId));
+        return true;
+      }
+    }
     if (chosen && text(chosen.tableId) && !(String(chosen.tableId) === String(tableId) && Number(chosen.seatNumber) === seatIndex + 1)) {
       const currentTable = tableById(chosen.tableId);
       const currentLabel = currentTable ? `${text(currentTable.name)} · silla ${chosen.seatNumber || '—'}` : 'otra mesa';
