@@ -33,8 +33,8 @@ function tableSeatGeometry(type, capacity) {
   const shape = normalizeTableShape(type);
   const count = clamp(capacity, MIN_CAPACITY, MAX_CAPACITY);
   const table = tableVisualSize(shape, count);
-  const visualWidth = table.width + 116;
-  const visualHeight = table.height + 126;
+  const visualWidth = table.width + 172;
+  const visualHeight = table.height + 188;
   const centerX = visualWidth / 2;
   const centerY = visualHeight / 2;
   const positions = [];
@@ -49,12 +49,12 @@ function tableSeatGeometry(type, capacity) {
       positions.push({
         x: centerX + cos * radiusX,
         y: centerY + sin * radiusY,
-        labelX: centerX + cos * (radiusX + 38),
-        labelY: centerY + sin * (radiusY + 38),
-        labelMediumX: centerX + cos * (radiusX + 30),
-        labelMediumY: centerY + sin * (radiusY + 30),
-        labelCompactX: centerX + cos * (radiusX + 23),
-        labelCompactY: centerY + sin * (radiusY + 23),
+        labelX: centerX + cos * (radiusX + 34),
+        labelY: centerY + sin * (radiusY + 34),
+        labelMediumX: centerX + cos * (radiusX + 28),
+        labelMediumY: centerY + sin * (radiusY + 28),
+        labelCompactX: centerX + cos * (radiusX + 22),
+        labelCompactY: centerY + sin * (radiusY + 22),
         labelAlign: cos > 0.28 ? 'left' : cos < -0.28 ? 'right' : 'center'
       });
     }
@@ -94,12 +94,12 @@ function tableSeatGeometry(type, capacity) {
     positions.push({
       x,
       y,
-      labelX: x + ux * 40,
-      labelY: y + uy * 40,
-      labelMediumX: x + ux * 31,
-      labelMediumY: y + uy * 31,
-      labelCompactX: x + ux * 24,
-      labelCompactY: y + uy * 24,
+      labelX: x + ux * 34,
+      labelY: y + uy * 34,
+      labelMediumX: x + ux * 28,
+      labelMediumY: y + uy * 28,
+      labelCompactX: x + ux * 22,
+      labelCompactY: y + uy * 22,
       labelAlign: ux > 0.32 ? 'left' : ux < -0.32 ? 'right' : 'center'
     });
   }
