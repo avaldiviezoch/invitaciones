@@ -51,3 +51,28 @@
   .ck-actions button{font-size:9px}
   .ck-segments button{padding:0 10px}
 }
+
+/* Acciones integradas a filtros: sin barra de acciones separada. */
+.ck-original-toolbar{grid-template-columns:auto auto minmax(220px,1fr) 185px 185px 44px}
+.ck-toolbar-new{height:44px;padding:0 14px;display:flex;align-items:center;gap:7px;border:0;border-radius:13px;background:#849168;color:#fff;font-size:10px;font-weight:750;white-space:nowrap;cursor:pointer}
+.ck-toolbar-new b{font-size:18px;font-weight:400;line-height:1}
+.ck-export-icon{width:44px;height:44px;padding:0;border:1px solid #e4ded9;border-radius:13px;background:#fff;color:#66734e;font-size:20px;line-height:1;cursor:pointer}
+.ck-export-icon:hover{background:#f4f4ef}
+@media(max-width:1100px){
+  .ck-original-toolbar{grid-template-columns:auto minmax(0,1fr) 44px}
+  .ck-toolbar-new{grid-column:1}
+  .ck-segments{grid-column:2}
+  .ck-export-icon{grid-column:3}
+  .ck-original-search{grid-column:1 / -1}
+  .ck-select{grid-column:auto}
+}
+@media(max-width:760px){
+  .ck-original-toolbar{grid-template-columns:auto minmax(0,1fr) 40px;padding:9px;gap:7px}
+  .ck-toolbar-new{height:40px;padding:0 11px;border-radius:11px;font-size:9px}
+  .ck-toolbar-new b{font-size:16px}
+  .ck-export-icon{width:40px;height:40px;border-radius:11px;font-size:18px}
+  .ck-segments{grid-column:1 / -1;overflow-x:auto;scrollbar-width:none}
+  .ck-segments::-webkit-scrollbar{display:none}
+  .ck-original-search{grid-column:1 / -1}
+  .ck-select{grid-column:auto}
+}
