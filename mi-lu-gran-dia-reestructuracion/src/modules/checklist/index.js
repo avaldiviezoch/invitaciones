@@ -33,9 +33,22 @@ function taskCategory(task) {
   return String(task?.category || task?.categoria || task?.group || '');
 }
 
+function taskStatus(task) {
+  const raw = String(task?.status || '').trim().toLowerCase();
+  if (['completed','complete','done','completada','completado','finalizada','finalizado'].includes(raw)) return 'completed';
+  if (['progress','in-progress','in_progress','en progreso','progreso'].includes(raw)) return 'progress';
+  return 'pending';
+}
+
 function isCompleted(task) {
-  const status = String(task?.status || '').trim().toLowerCase();
-  return Boolean(status && !['pending', 'pendiente'].includes(status));
+  return taskStatus(task) === 'completed';
+}
+
+function isOverdue(task) {
+  const date = taskDate(task);
+  if (!date || isCompleted(task)) return false;
+  const due = new Date(date + 'T23:59:59');
+  return Number.isFinite(due.getTime()) && due.getTime() < Date.now();
 }
 
 function normalizedState(value) {
@@ -60,12 +73,17 @@ function visibleTasks() {
 function summary() {
   const total = state.tasks.length;
   const completed = state.tasks.filter(isCompleted).length;
-  return { total, completed, pending: Math.max(0, total - completed), percent: total ? Math.round(completed * 100 / total) : 0 };
+  const progress = state.tasks.filter((task) => taskStatus(task) === 'progress').length;
+  const overdue = state.tasks.filter(isOverdue).length;
+  const pending = Math.max(0, total - completed - progress);
+  return { total, completed, progress, overdue, pending, percent: total ? Math.round(completed * 100 / total) : 0 };
 }
 
 function taskMarkup(task, index, editable) {
   const id = taskId(task, index);
   const done = isCompleted(task);
+  const status = taskStatus(task);
+  const overdue = isOverdue(task);
   const responsible = taskResponsible(task);
   const date = taskDate(task);
   const category = taskCategory(task);
@@ -79,7 +97,7 @@ function taskMarkup(task, index, editable) {
       <div class="ck-task-meta">
         ${responsible ? `<span>Responsable · ${esc(responsible)}</span>` : ''}
         ${date ? `<span>Fecha · ${esc(date)}</span>` : ''}
-        <span>${done ? 'Completada' : 'Pendiente'}</span>
+        <span class="ck-status-dot ck-status-${overdue ? 'overdue' : status}"><i></i>${overdue ? 'Vencida' : status === 'completed' ? 'Completada' : status === 'progress' ? 'En progreso' : 'Pendiente'}</span>
       </div>
     </div>
     ${editable ? `<div class="ck-task-actions"><button type="button" data-task-edit aria-label="Editar ${esc(taskTitle(task))}">Editar</button><button type="button" data-task-delete aria-label="Eliminar ${esc(taskTitle(task))}">Eliminar</button></div>` : ''}
@@ -100,9 +118,20 @@ function render() {
       ${editable ? '<button class="ck-primary" type="button" data-checklist-add>+ Nueva tarea</button>' : '<span class="ck-readonly">Solo lectura</span>'}
     </header>
     <section class="ck-summary" aria-label="Resumen del checklist">
-      <div class="ck-progress-copy"><strong>${stats.percent}%</strong><span>completado</span></div>
-      <div class="ck-progress"><i style="width:${stats.percent}%"></i></div>
-      <div class="ck-stats"><span><b>${stats.total}</b>Total</span><span><b>${stats.completed}</b>Completadas</span><span><b>${stats.pending}</b>Pendientes</span></div>
+      <div class="ck-mini-pies">
+        <div class="ck-pie-card"><div class="ck-pie" style="--value:${stats.percent};--pie-color:#7f8962"><span>${stats.percent}%</span></div><div><strong>Avance</strong><small>${stats.completed} de ${stats.total} tareas</small></div></div>
+        <div class="ck-pie-card"><div class="ck-pie ck-pie-status" style="--done:${stats.total ? stats.completed * 100 / stats.total : 0};--progress:${stats.total ? (stats.completed + stats.progress) * 100 / stats.total : 0}"><span>${stats.pending}</span></div><div><strong>Pendientes</strong><small>${stats.progress} en progreso</small></div></div>
+      </div>
+      <div class="ck-summary-main">
+        <div class="ck-progress-head"><span>Progreso general</span><b>${stats.percent}%</b></div>
+        <div class="ck-progress"><i style="width:${stats.percent}%"></i></div>
+        <div class="ck-indicators">
+          <span class="is-completed"><i></i><b>${stats.completed}</b> Completadas</span>
+          <span class="is-progress"><i></i><b>${stats.progress}</b> En progreso</span>
+          <span class="is-pending"><i></i><b>${stats.pending}</b> Pendientes</span>
+          <span class="is-overdue"><i></i><b>${stats.overdue}</b> Vencidas</span>
+        </div>
+      </div>
     </section>
     <section class="ck-toolbar">
       <div class="ck-filters" role="group" aria-label="Filtrar tareas">
