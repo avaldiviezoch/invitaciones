@@ -48,6 +48,13 @@ function serializeCanonical(canonical) {
   };
 }
 
+function deriveTableGuestIds(tableId, guests) {
+  return guests
+    .filter((guest) => String(guest.tableId || '') === String(tableId || ''))
+    .sort((a, b) => (a.seatNumber || 999) - (b.seatNumber || 999))
+    .map((guest) => guest.id);
+}
+
 function buildSharedState(canonical) {
   const guests = canonical.guests;
   const tables = canonical.tables;
@@ -77,10 +84,7 @@ function buildSharedState(canonical) {
     })),
     tables: tables.map((table) => ({
       ...table,
-      guestIds: guests
-        .filter((guest) => String(guest.tableId || '') === String(table.id || ''))
-        .sort((a, b) => (a.seatNumber || 999) - (b.seatNumber || 999))
-        .map((guest) => guest.id)
+      guestIds: deriveTableGuestIds(table.id, guests)
     }))
   };
 }
