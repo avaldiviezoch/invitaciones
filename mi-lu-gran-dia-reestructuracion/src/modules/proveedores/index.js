@@ -1,5 +1,5 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js';
+import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=2';
 
 const STORAGE_KEY = 'planificador_bodas_proveedores_v1';
 
@@ -112,7 +112,12 @@ function paidValue(record) {
 }
 
 function normalizeStored(value) {
-  if (Array.isArray(value)) return { mode: 'array', containerKey: '', root: null, records: value.map(item => item && typeof item === 'object' ? { ...item } : {}) };
+  if (value === null || value === undefined || value === '') {
+    return { mode: 'array', containerKey: '', root: null, records: [] };
+  }
+  if (Array.isArray(value)) {
+    return { mode: 'array', containerKey: '', root: null, records: value.map(item => item && typeof item === 'object' ? { ...item } : {}) };
+  }
   if (value && typeof value === 'object') {
     const key = ['providers','proveedores','items','vendors'].find(candidate => Array.isArray(value[candidate]));
     if (key) return {
@@ -121,8 +126,9 @@ function normalizeStored(value) {
       root: { ...value },
       records: value[key].map(item => item && typeof item === 'object' ? { ...item } : {})
     };
+    throw new Error('La data existente de Proveedores tiene un formato no reconocido. No se modificó ni sobrescribió.');
   }
-  return { mode: 'array', containerKey: '', root: null, records: [] };
+  throw new Error('La data existente de Proveedores no tiene un formato válido. No se modificó ni sobrescribió.');
 }
 
 function serializedState() {
