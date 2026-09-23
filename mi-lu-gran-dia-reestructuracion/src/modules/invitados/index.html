@@ -23,6 +23,7 @@
   <nav class="guests-view-tabs" aria-label="Vistas de Invitados">
     <button type="button" class="is-active" data-guests-view="list">Lista de invitados</button>
     <button type="button" data-guests-view="rsvp">Confirmaciones RSVP <span data-rsvp-tab-count>0</span></button>
+    <button type="button" data-guests-view="tables">Mesas y sillas <span data-tables-tab-count>0</span></button>
   </nav>
 
   <div data-guests-pane="list">
@@ -61,6 +62,44 @@
     <section class="rsvp-list" data-rsvp-list></section>
     <p class="guests-read-state" data-rsvp-state></p>
   </div>
+
+  <div class="tables-pane" data-guests-pane="tables" hidden>
+    <section class="tables-overview">
+      <article><span>Mesas</span><strong data-tables-total>0</strong></article>
+      <article><span>Sillas</span><strong data-tables-seats>0</strong></article>
+      <article><span>Ocupadas</span><strong data-tables-occupied>0</strong></article>
+      <article><span>Sin mesa</span><strong data-tables-unassigned>0</strong></article>
+    </section>
+    <section class="tables-head">
+      <div><h2>Mesas y sillas</h2><p>La mesa conserva su identidad. Cada invitado ocupa una sola silla mediante tableId, seatId y seatNumber.</p></div>
+      <button type="button" data-table-add hidden>+ Nueva mesa</button>
+    </section>
+    <section class="tables-list" data-tables-list></section>
+    <p class="guests-read-state" data-tables-state></p>
+  </div>
+
+  <dialog class="table-dialog" data-table-dialog>
+    <div class="guests-dialog-head">
+      <div><span>MESAS Y SILLAS</span><h2 data-table-dialog-title>Nueva mesa</h2></div>
+      <button type="button" data-table-close aria-label="Cerrar">×</button>
+    </div>
+    <form class="table-form" id="tableEditorForm" data-table-form>
+      <input type="hidden" name="tableId">
+      <div class="guests-form-grid">
+        <label class="guests-field"><span>Nombre de mesa</span><input name="name" maxlength="80" required></label>
+        <label class="guests-field"><span>Forma</span><select name="type"><option value="round">Redonda</option><option value="square">Cuadrada</option><option value="rectangular">Rectangular</option></select></label>
+        <label class="guests-field"><span>Capacidad</span><select name="capacity"><option value="4">4 sillas</option><option value="6">6 sillas</option><option value="8">8 sillas</option><option value="10">10 sillas</option><option value="12">12 sillas</option><option value="14">14 sillas</option><option value="16">16 sillas</option></select></label>
+      </div>
+      <div class="table-seats-head"><div><strong>Asignación de sillas</strong><span>Los cambios de silla se guardan inmediatamente.</span></div></div>
+      <div class="table-seats-editor" data-table-seats-editor></div>
+    </form>
+    <div class="guests-dialog-actions table-dialog-actions">
+      <button class="guests-delete" type="button" data-table-delete hidden>Eliminar mesa</button>
+      <span></span>
+      <button type="button" data-table-close>Cancelar</button>
+      <button class="guests-save" type="submit" form="tableEditorForm" data-table-save>Guardar mesa</button>
+    </div>
+  </dialog>
 
   <dialog class="guests-dialog" data-guests-dialog>
     <div class="guests-dialog-head">
