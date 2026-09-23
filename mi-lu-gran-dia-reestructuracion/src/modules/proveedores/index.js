@@ -408,7 +408,7 @@ async function mountProveedores(context) {
 
   try {
     const [template, stored] = await Promise.all([
-      fetch(new URL('./index.html?v=1', import.meta.url)).then(response => {
+      fetch(new URL('./index.html?v=2', import.meta.url)).then(response => {
         if (!response.ok) throw new Error('No se pudo cargar la interfaz.');
         return response.text();
       }),
