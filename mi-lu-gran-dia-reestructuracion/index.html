@@ -6,11 +6,17 @@
 <title>Planificador de bodas</title>
 <link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=29">
 <link rel="stylesheet" href="src/modules/checklist/checklist.css?v=13">
-<link rel="stylesheet" href="src/modules/presupuesto/presupuesto.css?v=7">
+<link rel="stylesheet" href="src/modules/presupuesto/presupuesto.css?v=8">
 </head>
+<script>
+(function(){
+  var moduleId=location.hash.replace(/^#/,'');
+  if(moduleId==='checklist'||moduleId==='presupuesto') document.documentElement.classList.add('module-route');
+})();
+</script>
 <body class="auth-locked">
 <main class="app">
-<video class="hero-video" id="heroVideo" autoplay muted loop playsinline preload="auto">
+<video class="hero-video" id="heroVideo" muted loop playsinline preload="none">
 <source src="https://avaldiviezoch.github.io/Wedding/anillo_loop_planifcador.mp4" type="video/mp4">
 <source src="https://raw.githubusercontent.com/avaldiviezoch/Wedding/main/anillo_loop_planifcador.mp4" type="video/mp4">
 </video>
@@ -466,7 +472,7 @@ Cancelar
 <form class="create-wedding-card" id="createWeddingForm" hidden><h3>Crear una nueva boda</h3><label><span>Nombre de la boda</span><input id="newWeddingName" type="text" maxlength="90" placeholder="Ej. Antonio & Lucero" required></label><label><span>Fecha</span><input id="newWeddingDate" type="date"></label><div><button type="button" id="cancelCreateWedding">Cancelar</button><button type="submit">Crear y abrir</button></div><p id="createWeddingStatus" aria-live="polite"></p></form>
 </div>
 </section>
-<script type="module" src="src/modules/dashboard/inicio.js?v=45">
+<script type="module" src="src/modules/dashboard/inicio.js?v=46">
 </script>
 </body>
 </html>
