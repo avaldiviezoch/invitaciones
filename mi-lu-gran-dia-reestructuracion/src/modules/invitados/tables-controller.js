@@ -783,8 +783,31 @@ function createTablesController(api) {
 
   function clearDropState() {
     const root = api.getRoot();
-    root?.querySelectorAll('.is-drag-over,.is-drag-source').forEach((node) => {
-      node.classList.remove('is-drag-over','is-drag-source');
+    root?.classList.remove('is-guest-dragging');
+    root?.querySelectorAll('.is-drag-over,.is-drag-source,.is-drop-free,.is-drop-occupied,.is-drop-full').forEach((node) => {
+      node.classList.remove('is-drag-over','is-drag-source','is-drop-free','is-drop-occupied','is-drop-full');
+    });
+  }
+
+  function showDropTargets(guestId) {
+    const root = api.getRoot();
+    const moving = guestById(guestId);
+    if (!root || !moving) return;
+    root.classList.add('is-guest-dragging');
+
+    root.querySelectorAll('[data-seat-drop]').forEach((seat) => {
+      const occupantId = text(seat.dataset.dragGuest);
+      const isSelf = occupantId && String(occupantId) === String(guestId);
+      seat.classList.toggle('is-drop-free', !occupantId || isSelf);
+      seat.classList.toggle('is-drop-occupied', Boolean(occupantId && !isSelf));
+    });
+
+    root.querySelectorAll('[data-table-drop]').forEach((body) => {
+      const table = tableById(body.dataset.tableDrop);
+      if (!table) return;
+      const freeSeat = firstFreeSeat(table, guestId);
+      body.classList.toggle('is-drop-free', freeSeat >= 0);
+      body.classList.toggle('is-drop-full', freeSeat < 0);
     });
   }
 
@@ -1000,6 +1023,8 @@ function createTablesController(api) {
 
     draggingGuestId = guestId;
     selectedGuestId = guestId;
+    clearDropState();
+    showDropTargets(guestId);
     source.classList.add('is-drag-source');
     try {
       event.dataTransfer.effectAllowed = 'move';
