@@ -142,8 +142,8 @@ function taskMarkup(task, index, editable) {
   const responsible = taskResponsible(task);
   const date = taskDate(task);
   const priority = priorityClass(task, index);
-  return `<div class="ck-original-task ${done ? 'is-done' : ''}${overdue ? ' is-overdue' : ''}" data-task-index="${index}" draggable="${editable ? 'true' : 'false'}">
-    <span class="ck-drag" aria-hidden="true">⠿</span>
+  return `<div class="ck-original-task ${done ? 'is-done' : ''}${overdue ? ' is-overdue' : ''}" data-task-index="${index}">
+    <span class="ck-drag" draggable="${editable ? 'true' : 'false'}" aria-label="${editable ? 'Arrastrar tarea' : ''}" aria-hidden="${editable ? 'false' : 'true'}">⠿</span>
     <label class="ck-square-check" aria-label="${done ? 'Marcar pendiente' : 'Marcar completada'}">
       <input type="checkbox" data-task-toggle ${done ? 'checked' : ''} ${editable ? '' : 'disabled'}><span>✓</span>
     </label>
@@ -384,8 +384,9 @@ async function handleSubmit(event) {
 
 let draggedTaskIndex = null;
 function handleDragStart(event) {
-  const row = event.target.closest('[data-task-index]');
-  if (!row || !weddingCapabilities(activeContext?.role).canEdit) return;
+  const handle = event.target.closest('.ck-drag');
+  const row = handle?.closest('[data-task-index]');
+  if (!handle || !row || !weddingCapabilities(activeContext?.role).canEdit) return;
   draggedTaskIndex = Number(row.dataset.taskIndex);
   event.dataTransfer.effectAllowed = 'move';
   event.dataTransfer.setData('text/plain', String(draggedTaskIndex));
@@ -400,7 +401,8 @@ function handleDragOver(event) {
   row.classList.add('is-drag-over');
 }
 function handleDragLeave(event) {
-  event.target.closest('[data-task-index]')?.classList.remove('is-drag-over');
+  const row = event.target.closest('[data-task-index]');
+  if (row && !row.contains(event.relatedTarget)) row.classList.remove('is-drag-over');
 }
 async function handleDrop(event) {
   const target = event.target.closest('[data-task-index]');
