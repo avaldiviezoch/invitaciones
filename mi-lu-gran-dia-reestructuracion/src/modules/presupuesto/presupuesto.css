@@ -24,16 +24,25 @@
 .budget-dialog:has([data-kind="package"]) .budget-form-field>span{font-size:10px}
 .budget-dialog:has([data-kind="package"]) .budget-form-field input,.budget-dialog:has([data-kind="package"]) .budget-form-field select,.budget-dialog:has([data-kind="package"]) .budget-form-field textarea{min-height:38px;padding:7px 10px;border-radius:10px;font-size:11px}
 .budget-dialog:has([data-kind="package"]) .budget-form-grid{gap:8px}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker{max-height:176px;display:grid;gap:6px;padding:6px;overflow:auto;border:1px solid #e5e0da;border-radius:12px;background:#f8f7f5}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker label{min-height:46px;display:grid;grid-template-columns:18px minmax(0,1fr);align-items:center;gap:10px;margin:0;padding:8px 10px;border:1px solid #e9e5df;border-radius:9px;background:#fff;cursor:pointer}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker label:hover{border-color:#d5d8c9;background:#fbfcf9}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker input[type="checkbox"]{appearance:none;-webkit-appearance:none;box-sizing:border-box;width:17px;height:17px;min-width:17px;min-height:17px;margin:0;padding:0;border:1px solid #c9c5be;border-radius:4px;background:#fff;box-shadow:none;cursor:pointer}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker input[type="checkbox"]:checked{border-color:#7f8962;background:#7f8962}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker input[type="checkbox"]:checked::after{content:"";display:block;width:7px;height:4px;margin:4px 0 0 4px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg)}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker label:has(input:checked){border-color:#d5dcc6;background:#f6f8f2}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker span{min-width:0;display:block}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker b{display:block;overflow:hidden;color:#45423e;font-size:11px;font-weight:650;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}
-.budget-dialog:has([data-kind="package"]) .budget-package-picker small{display:block;margin-top:2px;overflow:hidden;color:#918d86;font-size:9px;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}
+.budget-package-concepts{margin:4px 0 12px;padding:12px;border:1px solid #e4dfd9;border-radius:14px;background:#fbfaf8}
+.budget-package-concepts>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 0 10px}
+.budget-package-concepts>header>div{display:flex;align-items:center;gap:9px;min-width:0}
+.budget-package-concepts-icon{width:30px;height:30px;display:grid;place-items:center;flex:0 0 30px;border-radius:9px;background:#eef1e8;color:#697553;font-size:16px}
+.budget-package-concepts header b{display:block;color:#47433f;font:600 13px Georgia,serif}
+.budget-package-concepts header small{display:block;margin-top:3px;color:#918c85;font-size:9px;font-weight:400}
+.budget-package-concepts header>strong{flex:0 0 auto;color:#6f785c;font-size:9px;font-weight:700}
+.budget-package-picker{max-height:184px;display:grid;gap:5px;overflow:auto;padding:1px 3px 1px 1px;scrollbar-width:thin}
+.budget-package-picker label{min-height:46px;display:grid;grid-template-columns:18px 18px minmax(0,1fr) auto;align-items:center;gap:9px;margin:0;padding:7px 10px;border:1px solid #e8e3de;border-radius:10px;background:#fff;cursor:pointer;transition:border-color .15s ease,background .15s ease}
+.budget-package-picker label:hover{border-color:#d5dacb;background:#fcfcfa}
+.budget-package-picker input[type="checkbox"]{position:absolute;opacity:0;pointer-events:none}
+.budget-package-check{box-sizing:border-box;width:17px;height:17px;display:grid;place-items:center;border:1px solid #bbb8b2;border-radius:4px;background:#fff}
+.budget-package-picker input:checked+.budget-package-check{border-color:#7f8962;background:#7f8962}
+.budget-package-picker input:checked+.budget-package-check::after{content:"";width:7px;height:4px;margin-top:-2px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(-45deg)}
+.budget-package-picker label:has(input:checked){border-color:#d7ddca;background:#f7f9f3}
+.budget-package-concept-copy{min-width:0;display:block}
+.budget-package-concept-copy b{display:block;overflow:hidden;color:#4c4945;font-size:10.5px;font-weight:650;line-height:1.25;text-overflow:ellipsis;white-space:nowrap}
+.budget-package-concept-copy small{display:block;margin-top:2px;overflow:hidden;color:#96918b;font-size:8.5px;line-height:1.2;text-overflow:ellipsis;white-space:nowrap}
+.budget-package-picker label>strong{color:#66635f;font-size:9.5px;font-weight:650;white-space:nowrap}
 .budget-dialog:has([data-kind="package"]) textarea[name="notes"]{min-height:58px}
 .budget-dialog:has([data-kind="package"]) footer{padding:10px 20px 14px}
 .budget-dialog:has([data-kind="package"]) footer button{min-height:38px}
