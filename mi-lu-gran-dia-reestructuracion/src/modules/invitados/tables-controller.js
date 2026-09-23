@@ -1,5 +1,5 @@
 import { saveInvitadosSnapshot } from './invitados-data.js?v=3';
-import { normalizeTableShape, tableSeatGeometry } from './table-geometry.js?v=2';
+import { normalizeTableShape, tableSeatGeometry } from './table-geometry.js?v=3';
 
 const SHAPE_LABELS = Object.freeze({
   round: 'Redonda',
