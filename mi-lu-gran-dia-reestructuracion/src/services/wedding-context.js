@@ -210,15 +210,26 @@ async function removeWeddingMember(context, uid) {
   const capabilities = weddingCapabilities(context?.role);
   if (!user || !context?.id || !capabilities.canManageTeam) throw new Error('No tienes permiso para gestionar accesos.');
   if (!uid || uid === user.uid) throw new Error('No puedes retirar tu propio acceso.');
+
   const memberRef = doc(db, 'weddings', context.id, 'members', uid);
   const snapshot = await getDoc(memberRef);
   if (!snapshot.exists()) return;
-  const currentRole = normalizeWeddingRole(snapshot.data()?.role);
+
+  const member = snapshot.data() || {};
+  const currentRole = normalizeWeddingRole(member.role);
   if (currentRole === 'owner') throw new Error('No se puede retirar al propietario.');
   if (!capabilities.canAssignAdmin && currentRole === 'admin') throw new Error('Solo el propietario puede retirar a otro administrador.');
-  await setDoc(memberRef, { status: 'removed', removedAt: serverTimestamp(), updatedAt: serverTimestamp() }, { merge: true });
-}
 
+  const memberEmail = String(member.email || '').trim().toLowerCase();
+  const batch = writeBatch(db);
+  batch.delete(memberRef);
+
+  if (memberEmail) {
+    batch.delete(doc(db, 'invitations', invitationId(context.id, memberEmail)));
+  }
+
+  await batch.commit();
+}
 async function cancelWeddingInvitation(context, inviteId) {
   if (!auth.currentUser || !context?.id || !weddingCapabilities(context.role).canManageTeam) throw new Error('No tienes permiso para gestionar accesos.');
   const ref = doc(db, 'invitations', String(inviteId || ''));
