@@ -9,10 +9,13 @@ No crea mesas ni cambia asientos automáticamente.
 ## Invitados
 Fuente lógica de personas y sus referencias de asignación.
 `guestId` debe ser estable.
+La asignación vigente de una persona se expresa en `guest.tableId + guest.seatId + guest.seatNumber`.
+Editar datos personales o RSVP no debe modificar esos tres campos salvo una operación explícita de Mesas.
 
 ## Mesas
 Fuente lógica de `tableId`, forma, capacidad y `seatId`.
 Mover o rotar una mesa no cambia su identidad.
+`table.guestIds` es una representación derivada de las asignaciones de Invitados; no es una segunda fuente maestra y no debe editarse independientemente.
 
 ## Distribución
 Dueño de posición, rotación y elementos físicos del plano por propuesta.
