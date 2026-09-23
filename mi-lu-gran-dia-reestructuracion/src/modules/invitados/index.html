@@ -19,25 +19,47 @@
     <article><span>Sin mesa</span><strong data-guests-kpi-unseated>0</strong><small>por ubicar</small></article>
   </section>
 
-  <section class="guests-toolbar">
-    <button class="guests-new" type="button" data-guests-add hidden><b>＋</b><span>Nuevo invitado</span></button>
-    <label class="guests-search"><span aria-hidden="true">⌕</span><input type="search" data-guests-search placeholder="Buscar invitado, relación, familia o mesa"></label>
-    <div class="guests-segments" aria-label="Filtrar invitados">
-      <button type="button" data-guests-filter="all" class="is-active">Todos</button>
-      <button type="button" data-guests-filter="confirmed">Confirmados</button>
-      <button type="button" data-guests-filter="pending">Pendientes</button>
-      <button type="button" data-guests-filter="seated">Con mesa</button>
-      <button type="button" data-guests-filter="unseated">Sin mesa</button>
-    </div>
-  </section>
+  <nav class="guests-view-tabs" aria-label="Vistas de Invitados">
+    <button type="button" class="is-active" data-guests-view="list">Lista de invitados</button>
+    <button type="button" data-guests-view="rsvp">Confirmaciones RSVP <span data-rsvp-tab-count>0</span></button>
+  </nav>
 
-  <section class="guests-list-head">
-    <div><h2>Lista de invitados</h2><p>Una sola persona mantiene la misma identidad en Invitados, RSVP y Mesas.</p></div>
-    <span data-guests-results>0 invitados</span>
-  </section>
+  <div data-guests-pane="list">
+    <section class="guests-toolbar">
+      <button class="guests-new" type="button" data-guests-add hidden><b>＋</b><span>Nuevo invitado</span></button>
+      <label class="guests-search"><span aria-hidden="true">⌕</span><input type="search" data-guests-search placeholder="Buscar invitado, relación, familia o mesa"></label>
+      <div class="guests-segments" aria-label="Filtrar invitados">
+        <button type="button" data-guests-filter="all" class="is-active">Todos</button>
+        <button type="button" data-guests-filter="confirmed">Confirmados</button>
+        <button type="button" data-guests-filter="pending">Pendientes</button>
+        <button type="button" data-guests-filter="seated">Con mesa</button>
+        <button type="button" data-guests-filter="unseated">Sin mesa</button>
+      </div>
+    </section>
 
-  <section class="guests-list" data-guests-list></section>
-  <p class="guests-read-state" data-guests-state>Datos de la boda activa</p>
+    <section class="guests-list-head">
+      <div><h2>Lista de invitados</h2><p>Una sola persona mantiene la misma identidad en Invitados, RSVP y Mesas.</p></div>
+      <span data-guests-results>0 invitados</span>
+    </section>
+
+    <section class="guests-list" data-guests-list></section>
+    <p class="guests-read-state" data-guests-state>Datos de la boda activa</p>
+  </div>
+
+  <div class="rsvp-pane" data-guests-pane="rsvp" hidden>
+    <section class="rsvp-overview">
+      <article><span>Respuestas</span><strong data-rsvp-total>0</strong></article>
+      <article><span>Personas confirmadas</span><strong data-rsvp-people>0</strong></article>
+      <article><span>Por revisar</span><strong data-rsvp-unreviewed>0</strong></article>
+      <article><span>No asistirán</span><strong data-rsvp-declined>0</strong></article>
+    </section>
+    <section class="rsvp-head">
+      <div><h2>Confirmaciones recibidas</h2><p>Las coincidencias por nombre son sugerencias. Solo se vinculan cuando eliges los invitados y aplicas la respuesta.</p></div>
+      <button type="button" data-rsvp-refresh>Actualizar</button>
+    </section>
+    <section class="rsvp-list" data-rsvp-list></section>
+    <p class="guests-read-state" data-rsvp-state></p>
+  </div>
 
   <dialog class="guests-dialog" data-guests-dialog>
     <div class="guests-dialog-head">
@@ -61,6 +83,29 @@
       <span></span>
       <button type="button" data-guests-close>Cancelar</button>
       <button class="guests-save" type="submit" form="guestsEditorForm" data-guests-save>Guardar cambios</button>
+    </div>
+  </dialog>
+
+  <dialog class="rsvp-dialog" data-rsvp-dialog>
+    <div class="guests-dialog-head">
+      <div><span>CONFIRMACIÓN RSVP</span><h2 data-rsvp-dialog-title>Revisar respuesta</h2></div>
+      <button type="button" data-rsvp-close aria-label="Cerrar">×</button>
+    </div>
+    <form class="rsvp-review-form" id="rsvpReviewForm" data-rsvp-form>
+      <input type="hidden" name="responseId">
+      <div class="rsvp-response-summary" data-rsvp-response-summary></div>
+      <div class="guests-form-grid">
+        <label class="guests-field"><span>Grupo</span><select name="group"><option value="">Sin grupo</option><option value="familia">Familia</option><option value="amigos">Amigos</option><option value="trabajo">Trabajo</option><option value="otros">Otros</option></select></label>
+        <label class="guests-field"><span>Lado</span><select name="side"><option value="">Sin cambio</option><option value="ambos">De ambos</option><option value="novio">Del novio</option><option value="novia">De la novia</option></select></label>
+      </div>
+      <label class="guests-field"><span>Familia / grupo visible</span><input name="familyLabel" maxlength="100" placeholder="Ej. Familia Pérez"></label>
+      <div class="rsvp-link-head"><div><strong>Vincular con invitados existentes</strong><span>Selecciona una o más personas. No se crearán invitados automáticamente.</span></div><small data-rsvp-suggestion-label></small></div>
+      <div class="rsvp-guest-picker" data-rsvp-guest-picker></div>
+    </form>
+    <div class="guests-dialog-actions rsvp-dialog-actions">
+      <span></span><span></span>
+      <button type="button" data-rsvp-close>Cancelar</button>
+      <button class="guests-save" type="submit" form="rsvpReviewForm" data-rsvp-apply>Aplicar a invitados</button>
     </div>
   </dialog>
 </div>
