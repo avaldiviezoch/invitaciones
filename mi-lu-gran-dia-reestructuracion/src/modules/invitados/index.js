@@ -1,5 +1,5 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { loadRsvpAdminSnapshot, saveRsvpManagement, restoreRsvpManagement } from '../../services/rsvp-admin.js?v=2';
+import { loadRsvpAdminSnapshot, saveRsvpManagement, deleteRsvpManagement, restoreRsvpManagement } from '../../services/rsvp-admin.js?v=3';
 import { loadInvitadosSnapshot, saveInvitadosSnapshot } from './invitados-data.js?v=2';
 
 let activeContext = null;
@@ -351,7 +351,22 @@ function openRsvpReview(response) {
     ? `${suggestions.length} coincidencia${suggestions.length === 1 ? '' : 's'} sugerida${suggestions.length === 1 ? '' : 's'}`
     : 'Sin coincidencias automáticas';
 
+  const declaredNames = [response?.name, ...(Array.isArray(response?.companions) ? response.companions : [])]
+    .map(text)
+    .filter(Boolean);
+  const guestNames = new Set(snapshot.canonical.guests.map((guest) => normalizeName(guest.name)));
+  const matchedNames = declaredNames.filter((name) => guestNames.has(normalizeName(name)));
+  const missingNames = declaredNames.filter((name) => !guestNames.has(normalizeName(name)));
+  const companionState = root.querySelector('[data-rsvp-companion-status]');
+  companionState.innerHTML = [
+    matchedNames.length ? `<span class="is-ok">${matchedNames.length} nombre${matchedNames.length === 1 ? '' : 's'} encontrado${matchedNames.length === 1 ? '' : 's'} en Invitados</span>` : '',
+    missingNames.length ? `<span class="is-pending">No encontrados: ${esc(missingNames.join(', '))}</span>` : ''
+  ].filter(Boolean).join('');
+
   root.querySelector('[data-rsvp-apply]').hidden = !canEdit();
+  const unlinkButton = root.querySelector('[data-rsvp-unlink]');
+  unlinkButton.hidden = !canEdit() || !management || !Array.isArray(management.linkedGuestIds) || !management.linkedGuestIds.length;
+  unlinkButton.dataset.responseId = String(response.id);
   dialog.showModal();
 }
 
@@ -474,6 +489,11 @@ function applyResponseLocally(response, meta, previousManagement) {
       delete next.rsvpFamilyLabel;
       delete next.rsvpTags;
       delete next.rsvpLinkedAt;
+      next.notes = String(next.notes || '')
+        .split('\n')
+        .filter((line) => !line.trim().startsWith('[RSVP]'))
+        .join('\n')
+        .trim();
     }
 
     if (!selected.has(id)) return next;
@@ -573,6 +593,74 @@ async function handleRsvpSubmit(event) {
   }
 }
 
+async function unlinkRsvpResponse(responseId) {
+  if (!canEdit() || saving || !rsvpSnapshot.token) return;
+  const response = findResponse(responseId);
+  const management = managementFor(responseId);
+  if (!response || !management) return;
+
+  const linkedGuestIds = Array.isArray(management.linkedGuestIds) ? management.linkedGuestIds.map(String) : [];
+  if (!linkedGuestIds.length) return;
+  if (!window.confirm(`¿Desvincular esta respuesta RSVP de ${linkedGuestIds.length} invitado${linkedGuestIds.length === 1 ? '' : 's'}? No se eliminarán personas ni mesas.`)) return;
+
+  const previousGuests = deepClone(snapshot);
+  const previousManagement = { ...management };
+  const root = document.querySelector('[data-module-view="invitados"]');
+  const state = root?.querySelector('[data-rsvp-state]');
+  saving = true;
+  if (state) state.textContent = 'Desvinculando respuesta…';
+
+  try {
+    await deleteRsvpManagement(activeContext, rsvpSnapshot.token, responseId);
+
+    snapshot.canonical.guests = snapshot.canonical.guests.map((guest) => {
+      if (String(guest.rsvpResponseId || '') !== String(responseId)) return guest;
+      const next = { ...guest };
+      delete next.rsvpResponseId;
+      delete next.rsvpResponseName;
+      delete next.rsvpGroup;
+      delete next.rsvpFamilyLabel;
+      delete next.rsvpTags;
+      delete next.rsvpLinkedAt;
+      next.notes = String(next.notes || '')
+        .split('\n')
+        .filter((line) => !line.trim().startsWith('[RSVP]'))
+        .join('\n')
+        .trim();
+      return next;
+    });
+
+    try {
+      await saveInvitadosSnapshot(activeContext, snapshot.canonical);
+    } catch (guestError) {
+      snapshot = previousGuests;
+      await restoreRsvpManagement(activeContext, rsvpSnapshot.token, responseId, previousManagement).catch(() => {});
+      throw guestError;
+    }
+
+    rsvpSnapshot.management = rsvpSnapshot.management.filter((item) => String(item.responseId || '') !== String(responseId));
+    closeRsvpReview();
+    render();
+    const currentState = root?.querySelector('[data-rsvp-state]');
+    if (currentState) currentState.textContent = 'Respuesta desvinculada. Los invitados y sus mesas se conservaron.';
+    window.dispatchEvent(new CustomEvent('migrandia:datachange', {
+      detail: {
+        source: 'rsvp-unlinked',
+        module: 'invitados',
+        weddingId: activeContext.id,
+        guests: snapshot.canonical.guests.length
+      }
+    }));
+  } catch (error) {
+    snapshot = previousGuests;
+    render();
+    const currentState = root?.querySelector('[data-rsvp-state]');
+    if (currentState) currentState.textContent = error?.message || 'No se pudo desvincular la respuesta RSVP.';
+  } finally {
+    saving = false;
+  }
+}
+
 async function deleteGuest(guestId) {
   if (!canEdit() || saving) return;
   const guest = findGuest(guestId);
@@ -643,6 +731,12 @@ function bind(root) {
 
     if (event.target.closest('[data-rsvp-refresh]')) {
       await refreshRsvp();
+      return;
+    }
+
+    const unlinkButton = event.target.closest('[data-rsvp-unlink]');
+    if (unlinkButton) {
+      await unlinkRsvpResponse(unlinkButton.dataset.responseId);
       return;
     }
 
