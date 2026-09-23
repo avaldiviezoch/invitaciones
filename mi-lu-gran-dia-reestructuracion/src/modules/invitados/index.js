@@ -1,5 +1,5 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { loadRsvpAdminSnapshot, saveRsvpManagement, restoreRsvpManagement } from '../../services/rsvp-admin.js?v=1';
+import { loadRsvpAdminSnapshot, saveRsvpManagement, restoreRsvpManagement } from '../../services/rsvp-admin.js?v=2';
 import { loadInvitadosSnapshot, saveInvitadosSnapshot } from './invitados-data.js?v=2';
 
 let activeContext = null;
