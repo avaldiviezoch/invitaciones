@@ -1,5 +1,5 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js';
+import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=2';
 
 const STORAGE_KEY='planificador_bodas_presupuesto_v5_etiquetas';
 let activeContext=null,state=null,search='',mountEpoch=0,saving=false,pendingSave=null,draggedItemId='';
