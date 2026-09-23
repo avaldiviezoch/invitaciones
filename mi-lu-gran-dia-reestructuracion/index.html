@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Planificador de bodas</title>
-<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=30">
+<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=31">
 <link rel="stylesheet" href="src/modules/checklist/checklist.css?v=13">
 <link rel="stylesheet" href="src/modules/presupuesto/presupuesto.css?v=18">
 </head>
@@ -450,6 +450,12 @@ Cancelar
     <div class="app-nav-account-wrap" id="appNavAccountWrap"><button class="app-nav-account" id="appNavAccountButton" type="button" aria-haspopup="true" aria-expanded="false"><span class="app-nav-account-avatar"><img id="appNavAvatar" alt="Foto de perfil"><span id="appNavInitials">MGD</span></span><span class="app-nav-account-copy"><strong id="appNavAccountName">Mi cuenta</strong><small id="appNavRole">Mi acceso</small></span><span class="app-nav-chevron">⌄</span></button><div class="app-nav-account-popover" role="dialog" aria-label="Cuenta activa"><strong id="appNavPopoverName">Mi cuenta</strong><span id="appNavPopoverEmail"></span><button class="app-nav-wedding" id="appNavWeddingButton" type="button"><span>Boda activa</span><strong id="appNavPopoverWedding">Mi boda</strong><small>Ver mis bodas y accesos</small></button><button class="app-nav-logout" id="appNavLogout" type="button">Cerrar sesión</button></div></div>
   </nav>
   <main class="module-stage" id="moduleStage">
+    <div class="module-loader" id="moduleLoader" role="status" aria-live="polite" aria-label="Cargando módulo">
+      <div class="module-loader-mark" aria-hidden="true"><span>MGD</span><i></i></div>
+      <strong>Preparando tu espacio</strong>
+      <span class="module-loader-copy">Cargando información de tu boda</span>
+      <div class="module-loader-dots" aria-hidden="true"><i></i><i></i><i></i></div>
+    </div>
     <section class="checklist-review" data-module-view="checklist"><div class="module-loading" role="status" aria-live="polite">Cargando…</div></section>
     <section class="budget-review" data-module-view="presupuesto" hidden></section>
   </main>
@@ -472,7 +478,7 @@ Cancelar
 <form class="create-wedding-card" id="createWeddingForm" hidden><h3>Crear una nueva boda</h3><label><span>Nombre de la boda</span><input id="newWeddingName" type="text" maxlength="90" placeholder="Ej. Antonio & Lucero" required></label><label><span>Fecha</span><input id="newWeddingDate" type="date"></label><div><button type="button" id="cancelCreateWedding">Cancelar</button><button type="submit">Crear y abrir</button></div><p id="createWeddingStatus" aria-live="polite"></p></form>
 </div>
 </section>
-<script type="module" src="src/modules/dashboard/inicio.js?v=49">
+<script type="module" src="src/modules/dashboard/inicio.js?v=50">
 </script>
 </body>
 </html>
