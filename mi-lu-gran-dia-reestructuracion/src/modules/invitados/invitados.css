@@ -53,6 +53,17 @@
 .guests-view-tabs button.is-active{background:#f7ecef;color:#9c6470}
 .guests-view-tabs button span{min-width:20px;padding:3px 6px;border-radius:999px;background:#eeeae5;color:#77716c;font-size:7px}
 .guests-view-tabs button.is-active span{background:#fff;color:#ad7480}
+.guests-view-tabs .guests-music-tab{color:#68735d}
+.guests-view-tabs .guests-music-tab.is-active{background:#eef3e8;color:#66734e}
+.music-pane{padding-bottom:8px}
+.music-overview{width:min(94%,1580px);display:grid;grid-template-columns:repeat(3,1fr);margin:0 auto 14px;border:1px solid #e2dcd7;border-radius:18px;background:#fff;overflow:hidden}
+.music-overview article{padding:14px 18px;border-right:1px solid #e8e2dd}.music-overview article:last-child{border-right:0}
+.music-overview span{display:block;color:#89848a;font-size:8px;font-weight:700}.music-overview strong{display:block;margin-top:7px;font:600 22px Georgia,serif}.music-overview small{display:block;margin-top:3px;color:#99938e;font-size:7px}
+.music-head{width:min(94%,1580px);margin:0 auto 10px}.music-head h2{margin:0;font:500 19px Georgia,serif}.music-head p{margin:5px 0 0;color:#898991;font-size:10px}
+.music-request-list{width:min(94%,1580px);display:grid;gap:9px;margin:0 auto}
+.music-request-card{display:grid;grid-template-columns:38px minmax(0,1fr) minmax(180px,.7fr);align-items:center;gap:12px;padding:12px 14px;border:1px solid #e1e5d8;border-radius:15px;background:#fff}
+.music-request-icon{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:#eef3e8;color:#66734e;font-size:16px}
+.music-request-song strong,.music-request-person strong{display:block;color:#4f5449;font-size:10px}.music-request-song span,.music-request-person span{display:block;margin-top:3px;color:#8c9187;font-size:8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rsvp-pane{padding-bottom:8px}
 .rsvp-overview{width:min(94%,1580px);display:grid;grid-template-columns:repeat(4,1fr);margin:0 auto 14px;border:1px solid #e2dcd7;border-radius:18px;background:#fff;overflow:hidden}
 .rsvp-overview article{padding:14px 18px;border-right:1px solid #e8e2dd}
@@ -415,8 +426,11 @@
 .table-dialog-actions button[data-table-close]{grid-column:1}
 .table-dialog-actions .guests-save{grid-column:2;grid-row:2}
 
-.guests-view-tabs{width:calc(100% - 24px);margin-bottom:12px}
-.guests-view-tabs button{padding:0 8px;font-size:8px}
+.guests-view-tabs{width:calc(100% - 24px);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;margin-bottom:12px}
+.guests-view-tabs button{width:100%;min-height:42px;padding:0 8px;font-size:8px}
+.music-overview,.music-head,.music-request-list{width:calc(100% - 24px)}
+.music-overview{grid-template-columns:repeat(3,minmax(0,1fr))}.music-overview article{padding:12px 8px;text-align:center}
+.music-request-card{grid-template-columns:34px minmax(0,1fr);gap:9px;padding:11px}.music-request-person{grid-column:2}.music-request-icon{width:34px;height:34px}
 .rsvp-overview,.rsvp-head,.rsvp-list{width:calc(100% - 24px)}
 .rsvp-overview article{padding:12px 10px;text-align:center}
 .rsvp-head{align-items:stretch;flex-direction:column}
