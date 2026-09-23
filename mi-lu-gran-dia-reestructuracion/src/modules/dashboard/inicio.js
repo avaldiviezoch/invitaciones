@@ -14,7 +14,7 @@ import {
   createWedding,
   listPendingInvitations,
   acceptWeddingInvitation
-} from '../../services/wedding-context.js';
+} from '../../services/wedding-context.js?v=24';
 import {
   GoogleAuthProvider,
   onAuthStateChanged,
