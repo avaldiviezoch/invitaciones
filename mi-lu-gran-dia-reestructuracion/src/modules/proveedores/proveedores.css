@@ -67,15 +67,18 @@
 .provider-dialog footer .provider-save{border-color:#778263;background:#778263;color:#fff}
 .provider-dialog footer .provider-delete{border-color:#ead9dc;color:#a4616f;background:#fffafb}
 .provider-dialog-spacer{flex:1}
-.provider-form-field{display:grid;gap:7px;margin:13px 0 0}
-.provider-form-field:first-child{margin-top:0}
-.provider-form-field>span{font-size:10px;font-weight:700}
+.provider-form{display:grid;gap:20px}
+.provider-form-section{display:grid;gap:12px}
+.provider-form-section+ .provider-form-section{padding-top:18px;border-top:1px solid #f0ece8}
+.provider-form-section h3{margin:0;color:#778263;font:800 9px/1 Arial,sans-serif;letter-spacing:.12em;text-transform:uppercase}
+.provider-form-field{display:grid;gap:7px;margin:0;color:#383531}
+.provider-form-field>span{display:block;color:#383531;font-size:10px;font-weight:700;line-height:1.2}
 .provider-form-field input,.provider-form-field select,.provider-form-field textarea{box-sizing:border-box;width:100%;border:1px solid #dfd9d2;border-radius:11px;background:#fff;color:#383531;font:13px Arial,sans-serif;outline:0}
 .provider-form-field input,.provider-form-field select{height:42px;padding:0 11px}
 .provider-form-field textarea{min-height:78px;padding:10px 11px;resize:vertical;line-height:1.4}
 .provider-form-field input:focus,.provider-form-field select:focus,.provider-form-field textarea:focus{border-color:#9aa47b;box-shadow:0 0 0 3px rgba(127,137,98,.1)}
-.provider-form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.provider-form-money{grid-template-columns:repeat(3,1fr)}
+.provider-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.provider-form-money{grid-template-columns:repeat(3,minmax(0,1fr))}
 .provider-details{margin:0;display:grid;gap:0}
 .provider-details>div{display:grid;grid-template-columns:150px minmax(0,1fr);gap:14px;padding:11px 0;border-bottom:1px solid #f0ece8}
 .provider-details>div:last-child{border-bottom:0}
@@ -126,8 +129,12 @@
 .provider-dialog-body{flex:1 1 auto;min-height:0;max-height:none;padding:0 16px 12px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 .provider-dialog footer{flex:0 0 auto;padding:10px 16px max(10px,env(safe-area-inset-bottom))}
 .provider-dialog footer button{min-height:38px;padding:0 12px;border-radius:10px;font-size:10px}
+.provider-form{gap:16px}
+.provider-form-section{gap:9px}
+.provider-form-section+ .provider-form-section{padding-top:14px}
+.provider-form-section h3{font-size:8px}
 .provider-form-grid,.provider-form-money{grid-template-columns:1fr 1fr;gap:8px}
-.provider-form-field{gap:4px;margin-top:8px}
+.provider-form-field{gap:4px}
 .provider-form-field>span{font-size:9px}
 .provider-form-field input,.provider-form-field select{height:38px;padding:0 10px;border-radius:10px;font-size:16px}
 .provider-form-field textarea{min-height:66px;max-height:100px;padding:8px 10px;border-radius:10px;font-size:16px}
