@@ -92,6 +92,12 @@
 .rsvp-guest-option small{display:block;margin-top:3px;color:#938d87;font-size:7px}
 .rsvp-dialog-actions{grid-template-columns:1fr 1fr auto auto}
 .rsvp-dialog-actions .guests-save{border-color:#ad7480;background:#ad7480;color:#fff}
+.rsvp-dialog-actions .rsvp-unlink{border-color:#e3c6cc;background:#f7ecef;color:#9c6470}
+.rsvp-companion-status{display:flex;flex-wrap:wrap;gap:6px;margin-top:-2px}
+.rsvp-companion-status span{padding:5px 8px;border-radius:999px;font-size:7px;font-weight:700}
+.rsvp-companion-status .is-ok{background:#eef3e8;color:#66734e}
+.rsvp-companion-status .is-pending{background:#f7ecef;color:#9c6470}
+
 .guests-new{min-height:44px;display:inline-flex;align-items:center;gap:7px;padding:0 14px;border:0;border-radius:12px;background:#7d8866;color:#fff;font-size:10px;font-weight:750;cursor:pointer;white-space:nowrap}
 .guests-new b{font-size:17px;font-weight:400}
 .guests-dialog{width:min(720px,calc(100vw - 28px));max-height:min(86vh,760px);padding:0;border:1px solid #ded8d2;border-radius:20px;background:#fff;color:#383531;box-shadow:0 24px 70px rgba(50,44,40,.18)}
