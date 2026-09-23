@@ -1,14 +1,20 @@
 import { saveInvitadosSnapshot } from './invitados-data.js?v=3';
+import { normalizeTableShape, tableSeatGeometry } from './table-geometry.js?v=1';
 
-const SHAPES = Object.freeze(['round', 'square', 'rectangular']);
 const SHAPE_LABELS = Object.freeze({
   round: 'Redonda',
   square: 'Cuadrada',
   rectangular: 'Rectangular'
 });
-const CAPACITIES = Object.freeze([4, 6, 8, 10, 12, 14, 16]);
+const CAPACITY_PRESETS = Object.freeze([4, 6, 8, 10, 12, 14, 16]);
 
 function createTablesController(api) {
+  let displayMode = 'visual';
+  let guestFilter = 'unassigned';
+  let guestSearch = '';
+  let selectedGuestId = '';
+  let draggingGuestId = '';
+
   const text = (value) => String(value ?? '').trim();
   const esc = (value) => String(value ?? '')
     .replaceAll('&','&amp;')
@@ -16,6 +22,14 @@ function createTablesController(api) {
     .replaceAll('>','&gt;')
     .replaceAll('"','&quot;')
     .replaceAll("'","&#039;");
+
+  function normalizeText(value) {
+    return String(value ?? '')
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .trim();
+  }
 
   function deepClone(value) {
     if (typeof structuredClone === 'function') return structuredClone(value);
@@ -29,16 +43,9 @@ function createTablesController(api) {
     return `${prefix}_${value}`;
   }
 
-  function normalizeShape(value) {
-    const clean = text(value).toLowerCase();
-    if (['rect','rectangle','rectangular'].includes(clean)) return 'rectangular';
-    if (['square','cuadrada','cuadrado'].includes(clean)) return 'square';
-    return 'round';
-  }
-
   function normalizeCapacity(value) {
     const number = Number(value);
-    return CAPACITIES.includes(number) ? number : 10;
+    return Number.isInteger(number) && number >= 4 && number <= 16 ? number : 10;
   }
 
   function tableCapacity(table) {
@@ -47,6 +54,11 @@ function createTablesController(api) {
     const seatCount = Array.isArray(table?.seats) ? table.seats.length : 0;
     if (Number.isInteger(seatCount) && seatCount >= 4 && seatCount <= 16) return seatCount;
     return 10;
+  }
+
+  function seatAt(table, index) {
+    const seat = Array.isArray(table?.seats) ? table.seats[index] : null;
+    return seat && typeof seat === 'object' ? seat : { id: '', index };
   }
 
   function ensureSeats(table, capacity) {
@@ -77,7 +89,7 @@ function createTablesController(api) {
   function guestsAtTable(tableId) {
     return guests()
       .filter((guest) => String(guest.tableId || '') === String(tableId || ''))
-      .sort((a,b) => (Number(a.seatNumber) || 999) - (Number(b.seatNumber) || 999));
+      .sort((a, b) => (Number(a.seatNumber) || 999) - (Number(b.seatNumber) || 999));
   }
 
   function guestAtSeat(tableId, seatIndex) {
@@ -94,9 +106,16 @@ function createTablesController(api) {
     return `Mesa ${number}`;
   }
 
+  function initials(name) {
+    return text(name).split(/\s+/).filter(Boolean).slice(0, 2)
+      .map((part) => part.charAt(0).toUpperCase()).join('') || '?';
+  }
+
   function assignmentWarnings() {
     const warnings = [];
-    const tableMap = new Map(tables().filter((table) => text(table?.id)).map((table) => [String(table.id), table]));
+    const tableMap = new Map(
+      tables().filter((table) => text(table?.id)).map((table) => [String(table.id), table])
+    );
     const occupied = new Map();
 
     guests().forEach((guest) => {
@@ -118,8 +137,8 @@ function createTablesController(api) {
       } else {
         occupied.set(key, guest.id);
       }
-      const seat = Array.isArray(table.seats) ? table.seats[seatNumber - 1] : null;
-      if (seat && text(guest.seatId) && text(seat.id) && String(guest.seatId) !== String(seat.id)) {
+      const seat = seatAt(table, seatNumber - 1);
+      if (text(guest.seatId) && text(seat.id) && String(guest.seatId) !== String(seat.id)) {
         warnings.push(`${text(guest.name) || 'Invitado'} tiene un seatId distinto al de su silla ${seatNumber}`);
       }
     });
@@ -127,47 +146,128 @@ function createTablesController(api) {
     return warnings;
   }
 
-  function render() {
-    const root = api.getRoot();
-    if (!root) return;
-    const list = root.querySelector('[data-tables-list]');
-    const total = root.querySelector('[data-tables-total]');
-    const seatsTotal = root.querySelector('[data-tables-seats]');
-    const occupiedTotal = root.querySelector('[data-tables-occupied]');
-    const unassignedTotal = root.querySelector('[data-tables-unassigned]');
-    if (!list) return;
-
-    const tableRows = tables();
-    const guestRows = guests();
-    const seatCount = tableRows.reduce((sum, table) => sum + tableCapacity(table), 0);
-    const occupied = guestRows.filter((guest) => text(guest.tableId)).length;
-    const unassigned = guestRows.length - occupied;
-
-    if (total) total.textContent = String(tableRows.length);
-    if (seatsTotal) seatsTotal.textContent = String(seatCount);
-    if (occupiedTotal) occupiedTotal.textContent = String(occupied);
-    if (unassignedTotal) unassignedTotal.textContent = String(unassigned);
-    const tabCount = root.querySelector('[data-tables-tab-count]');
-    if (tabCount) tabCount.textContent = String(tableRows.length);
-
-    const warnings = assignmentWarnings();
-    const state = root.querySelector('[data-tables-state]');
-    if (state && !api.isSaving()) {
-      state.textContent = warnings.length
-        ? `Revisión necesaria: ${warnings[0]}${warnings.length > 1 ? ` · +${warnings.length - 1} observación${warnings.length - 1 === 1 ? '' : 'es'}` : ''}`
-        : '';
+  function firstFreeSeat(table, movingGuestId = '') {
+    const capacity = tableCapacity(table);
+    const occupied = new Set(
+      guestsAtTable(table.id)
+        .filter((guest) => String(guest.id) !== String(movingGuestId || ''))
+        .map((guest) => Number(guest.seatNumber) - 1)
+        .filter((index) => Number.isInteger(index) && index >= 0 && index < capacity)
+    );
+    for (let index = 0; index < capacity; index += 1) {
+      if (!occupied.has(index)) return index;
     }
-
-    const add = root.querySelector('[data-table-add]');
-    if (add) add.hidden = !api.canEdit();
-
-    list.innerHTML = tableRows.length
-      ? tableRows.map((table) => tableCard(table)).join('')
-      : '<div class="guests-empty"><strong>Aún no hay mesas</strong><span>Crea la primera mesa cuando estés listo para ubicar invitados.</span></div>';
+    return -1;
   }
 
-  function tableCard(table) {
-    const shape = normalizeShape(table.type || table.shape);
+  function guestFilterMatch(guest) {
+    if (guestFilter === 'unassigned' && text(guest.tableId)) return false;
+    if (guestFilter === 'assigned' && !text(guest.tableId)) return false;
+    if (guestFilter === 'confirmed' && text(guest.status) !== 'confirmed') return false;
+    if (guestFilter === 'pending' && text(guest.status) === 'confirmed') return false;
+    if (guestSearch && !normalizeText(guest.name).includes(normalizeText(guestSearch))) return false;
+    return true;
+  }
+
+  function guestAssignmentLabel(guest) {
+    if (!text(guest.tableId)) return 'Sin mesa';
+    const table = tableById(guest.tableId);
+    return table
+      ? `${text(table.name) || 'Mesa'} · silla ${guest.seatNumber || '—'}`
+      : 'Mesa no encontrada';
+  }
+
+  function guestPanelItem(guest) {
+    const selected = String(selectedGuestId) === String(guest.id);
+    const declined = text(guest.status) === 'declined';
+    const draggable = api.canEdit() ? 'draggable="true"' : '';
+    return `<button class="tables-guest-item${selected ? ' is-selected' : ''}${declined ? ' is-declined' : ''}"
+      type="button"
+      data-table-guest-item="${esc(guest.id)}"
+      data-drag-guest="${esc(guest.id)}"
+      ${draggable}>
+      <span class="tables-guest-avatar">${esc(initials(guest.name))}</span>
+      <span class="tables-guest-copy">
+        <strong>${esc(text(guest.name) || 'Sin nombre')}</strong>
+        <span>${esc(guestAssignmentLabel(guest))}</span>
+      </span>
+      ${declined ? '<span class="tables-guest-warning" title="Marcado como No asistirá">!</span>' : ''}
+      <span class="tables-guest-drag" aria-hidden="true">⋮⋮</span>
+    </button>`;
+  }
+
+  function visualSeatMarkup(table, geometry, seatIndex) {
+    const position = geometry.positions[seatIndex];
+    const guest = guestAtSeat(table.id, seatIndex);
+    const declined = guest && text(guest.status) === 'declined';
+    const selected = guest && String(selectedGuestId) === String(guest.id);
+    const align = position.labelAlign === 'left'
+      ? 'is-label-left'
+      : position.labelAlign === 'right'
+        ? 'is-label-right'
+        : 'is-label-center';
+
+    const seat = `<button
+      class="table-visual-seat${guest ? ' is-occupied' : ''}${declined ? ' is-declined' : ''}${selected ? ' is-selected' : ''}"
+      type="button"
+      data-seat-drop
+      data-table-id="${esc(table.id)}"
+      data-seat-index="${seatIndex}"
+      ${guest ? `data-drag-guest="${esc(guest.id)}" draggable="${api.canEdit() ? 'true' : 'false'}"` : ''}
+      style="left:${position.x}px;top:${position.y}px"
+      aria-label="${esc(guest ? `${guest.name || 'Invitado'}, silla ${seatIndex + 1}` : `Silla ${seatIndex + 1} libre`)}"
+      title="${esc(guest ? `${guest.name || 'Invitado'} · silla ${seatIndex + 1}` : `Silla ${seatIndex + 1} libre`)}"
+    >${guest ? esc(initials(guest.name)) : '<i></i>'}</button>`;
+
+    if (!guest) return seat;
+
+    return `${seat}<button
+      class="table-seat-label ${align}${declined ? ' is-declined' : ''}"
+      type="button"
+      data-seat-label
+      data-drag-guest="${esc(guest.id)}"
+      draggable="${api.canEdit() ? 'true' : 'false'}"
+      style="left:${position.labelX}px;top:${position.labelY}px"
+      title="${esc(guestAssignmentLabel(guest))}">
+      <span>${esc(text(guest.name) || 'Invitado')}</span>
+      ${declined ? '<small>No asistirá</small>' : ''}
+    </button>`;
+  }
+
+  function visualTableCard(table) {
+    const shape = normalizeTableShape(table.type || table.shape);
+    const capacity = tableCapacity(table);
+    const assigned = guestsAtTable(table.id);
+    const declinedCount = assigned.filter((guest) => text(guest.status) === 'declined').length;
+    const geometry = tableSeatGeometry(shape, capacity);
+    const fill = capacity ? Math.round((assigned.length / capacity) * 100) : 0;
+
+    return `<article class="table-visual-card${assigned.length >= capacity ? ' is-full' : ''}" data-table-id="${esc(table.id)}">
+      <header class="table-visual-card-head">
+        <div>
+          <strong>${esc(text(table.name) || 'Mesa')}</strong>
+          <span>${esc(SHAPE_LABELS[shape])} · ${assigned.length}/${capacity}</span>
+        </div>
+        <button type="button" data-table-manage aria-label="Administrar ${esc(text(table.name) || 'mesa')}">•••</button>
+      </header>
+      ${declinedCount ? `<div class="table-visual-warning">${declinedCount} invitado${declinedCount === 1 ? '' : 's'} marcado${declinedCount === 1 ? '' : 's'} como “No asistirá”</div>` : ''}
+      <div class="table-visual-canvas" style="width:${geometry.visualWidth}px;height:${geometry.visualHeight}px;--table-body-w:${geometry.table.width}px;--table-body-h:${geometry.table.height}px">
+        <button class="table-visual-body is-${shape}" type="button" data-table-drop="${esc(table.id)}">
+          <strong>${esc(text(table.name) || 'Mesa')}</strong>
+          <span>${assigned.length} / ${capacity}</span>
+          <small>${Math.max(0, capacity - assigned.length)} libres</small>
+        </button>
+        ${geometry.positions.map((_, index) => visualSeatMarkup(table, geometry, index)).join('')}
+      </div>
+      <footer class="table-visual-footer">
+        <div class="table-occupancy"><i style="width:${fill}%"></i></div>
+        <span>${assigned.length >= capacity ? 'Mesa completa' : `${capacity - assigned.length} lugar${capacity - assigned.length === 1 ? '' : 'es'} libre${capacity - assigned.length === 1 ? '' : 's'}`}</span>
+      </footer>
+    </article>`;
+  }
+
+  function listTableCard(table) {
+    const shape = normalizeTableShape(table.type || table.shape);
     const capacity = tableCapacity(table);
     const assigned = guestsAtTable(table.id);
     const free = Math.max(0, capacity - assigned.length);
@@ -183,6 +283,97 @@ function createTablesController(api) {
     </article>`;
   }
 
+  function renderGuestPanel() {
+    const root = api.getRoot();
+    const list = root?.querySelector('[data-table-guest-list]');
+    if (!list) return;
+    const visible = guests().filter(guestFilterMatch);
+    const count = root.querySelector('[data-tables-guests-visible]');
+    if (count) count.textContent = String(visible.length);
+
+    list.innerHTML = visible.length
+      ? visible.map(guestPanelItem).join('')
+      : '<div class="tables-guests-empty">No hay invitados en este filtro.</div>';
+
+    root.querySelectorAll('[data-table-guest-filter]').forEach((button) => {
+      button.classList.toggle('is-active', button.dataset.tableGuestFilter === guestFilter);
+    });
+
+    const hint = root.querySelector('[data-tables-selection-hint]');
+    const selected = guestById(selectedGuestId);
+    if (hint) {
+      hint.hidden = !selected;
+      hint.textContent = selected
+        ? `${text(selected.name) || 'Invitado'} seleccionado · toca una silla libre o una mesa`
+        : '';
+    }
+  }
+
+  function render() {
+    const root = api.getRoot();
+    if (!root) return;
+
+    const tableRows = tables();
+    const guestRows = guests();
+    const seatCount = tableRows.reduce((sum, table) => sum + tableCapacity(table), 0);
+    const occupied = guestRows.filter((guest) => text(guest.tableId)).length;
+    const unassigned = guestRows.length - occupied;
+
+    const total = root.querySelector('[data-tables-total]');
+    const seatsTotal = root.querySelector('[data-tables-seats]');
+    const occupiedTotal = root.querySelector('[data-tables-occupied]');
+    const unassignedTotal = root.querySelector('[data-tables-unassigned]');
+    if (total) total.textContent = String(tableRows.length);
+    if (seatsTotal) seatsTotal.textContent = String(seatCount);
+    if (occupiedTotal) occupiedTotal.textContent = String(occupied);
+    if (unassignedTotal) unassignedTotal.textContent = String(unassigned);
+
+    const tabCount = root.querySelector('[data-tables-tab-count]');
+    if (tabCount) tabCount.textContent = String(tableRows.length);
+
+    const stageSummary = root.querySelector('[data-tables-stage-summary]');
+    if (stageSummary) {
+      stageSummary.textContent = `${tableRows.length} mesa${tableRows.length === 1 ? '' : 's'} · ${occupied} persona${occupied === 1 ? '' : 's'} ubicada${occupied === 1 ? '' : 's'}`;
+    }
+
+    const warnings = assignmentWarnings();
+    const stateNode = root.querySelector('[data-tables-state]');
+    if (stateNode && !api.isSaving()) {
+      stateNode.textContent = warnings.length
+        ? `Revisión necesaria: ${warnings[0]}${warnings.length > 1 ? ` · +${warnings.length - 1} observación${warnings.length - 1 === 1 ? '' : 'es'}` : ''}`
+        : '';
+      stateNode.classList.toggle('has-warning', Boolean(warnings.length));
+    }
+
+    const add = root.querySelector('[data-table-add]');
+    if (add) add.hidden = !api.canEdit();
+
+    root.querySelectorAll('[data-tables-display]').forEach((button) => {
+      button.classList.toggle('is-active', button.dataset.tablesDisplay === displayMode);
+    });
+
+    const visualView = root.querySelector('[data-tables-visual-view]');
+    const listView = root.querySelector('[data-tables-list-view]');
+    if (visualView) visualView.hidden = displayMode !== 'visual';
+    if (listView) listView.hidden = displayMode !== 'list';
+
+    const visualGrid = root.querySelector('[data-tables-visual-grid]');
+    if (visualGrid) {
+      visualGrid.innerHTML = tableRows.length
+        ? tableRows.map(visualTableCard).join('')
+        : '<div class="tables-stage-empty"><strong>Aún no hay mesas</strong><span>Crea una mesa para comenzar la distribución de invitados.</span></div>';
+    }
+
+    const list = root.querySelector('[data-tables-list]');
+    if (list) {
+      list.innerHTML = tableRows.length
+        ? tableRows.map(listTableCard).join('')
+        : '<div class="guests-empty"><strong>Aún no hay mesas</strong><span>Crea la primera mesa cuando estés listo para ubicar invitados.</span></div>';
+    }
+
+    renderGuestPanel();
+  }
+
   function openTable(table = null) {
     const root = api.getRoot();
     const dialog = root?.querySelector('[data-table-dialog]');
@@ -194,8 +385,11 @@ function createTablesController(api) {
     form.reset();
     form.elements.tableId.value = table ? String(table.id) : '';
     form.elements.name.value = table ? text(table.name) : nextTableName();
-    form.elements.type.value = table ? normalizeShape(table.type || table.shape) : 'round';
-    [...form.elements.capacity.options].filter((option) => option.dataset.legacyCapacity === 'true').forEach((option) => option.remove());
+    form.elements.type.value = table ? normalizeTableShape(table.type || table.shape) : 'round';
+
+    [...form.elements.capacity.options]
+      .filter((option) => option.dataset.legacyCapacity === 'true')
+      .forEach((option) => option.remove());
     if (![...form.elements.capacity.options].some((option) => Number(option.value) === capacity)) {
       const option = document.createElement('option');
       option.value = String(capacity);
@@ -231,9 +425,9 @@ function createTablesController(api) {
     const tableId = text(form.elements.tableId.value);
     const capacity = normalizeCapacity(form.elements.capacity.value);
     const currentTable = table || tableById(tableId);
-    const seatModels = currentTable ? ensureSeats(currentTable, capacity) : ensureSeats({}, capacity);
 
-    seatsRoot.innerHTML = seatModels.map((seat, index) => {
+    seatsRoot.innerHTML = Array.from({ length: capacity }, (_, index) => {
+      const seat = currentTable ? seatAt(currentTable, index) : { id: '', index };
       const occupant = currentTable ? guestAtSeat(currentTable.id, index) : null;
       return `<div class="table-seat-row" data-seat-index="${index}">
         <div class="table-seat-index"><span>${index + 1}</span><small>${esc(text(seat.id))}</small></div>
@@ -244,7 +438,7 @@ function createTablesController(api) {
             ${guests().map((guest) => {
               const assignedElsewhere = text(guest.tableId) &&
                 !(String(guest.tableId) === String(currentTable?.id) && Number(guest.seatNumber) === index + 1);
-              return `<option value="${esc(guest.id)}" ${occupant && String(occupant.id) === String(guest.id) ? 'selected' : ''} ${assignedElsewhere ? 'data-assigned="true"' : ''}>${esc(text(guest.name) || 'Sin nombre')}${assignedElsewhere ? ' · asignado' : ''}</option>`;
+              return `<option value="${esc(guest.id)}" ${occupant && String(occupant.id) === String(guest.id) ? 'selected' : ''}>${esc(text(guest.name) || 'Sin nombre')}${assignedElsewhere ? ' · asignado' : ''}</option>`;
             }).join('')}
           </select>
         </label>
@@ -254,14 +448,17 @@ function createTablesController(api) {
 
   async function persist(previous, message, source) {
     const context = api.getContext();
-    const state = api.getRoot()?.querySelector('[data-tables-state]');
+    const stateNode = api.getRoot()?.querySelector('[data-tables-state]');
     api.setSaving(true);
-    if (state) state.textContent = 'Guardando en Firebase…';
+    if (stateNode) {
+      stateNode.textContent = 'Guardando en Firebase…';
+      stateNode.classList.remove('has-warning');
+    }
     render();
 
     try {
       await saveInvitadosSnapshot(context, api.getSnapshot().canonical);
-      if (state) state.textContent = message;
+      if (stateNode) stateNode.textContent = message;
       api.emitDataChange(source);
       api.renderMain();
     } catch (error) {
@@ -283,8 +480,8 @@ function createTablesController(api) {
     const form = event.target;
     const data = new FormData(form);
     const tableId = text(data.get('tableId'));
-    const name = text(data.get('name')).slice(0,80);
-    const type = normalizeShape(data.get('type'));
+    const name = text(data.get('name')).slice(0, 80);
+    const type = normalizeTableShape(data.get('type'));
     const capacity = normalizeCapacity(data.get('capacity'));
     if (!name) return true;
 
@@ -348,113 +545,167 @@ function createTablesController(api) {
       guest.seatNumber = null;
     });
     api.getSnapshot().canonical.tables = tables().filter((item) => String(item.id) !== String(table.id));
+    if (String(selectedGuestId) && !guestById(selectedGuestId)) selectedGuestId = '';
     closeTable();
     await persist(previous, 'Mesa eliminada. Sus invitados quedaron sin mesa.', 'table-deleted');
     return true;
   }
 
-  async function assignSeat(tableId, seatIndex, guestId) {
-    if (!api.canEdit() || api.isSaving()) return true;
+  async function assignGuestToSeat(guestId, tableId, seatIndex, { confirmReplacement = true } = {}) {
+    if (!api.canEdit() || api.isSaving()) return false;
     const table = tableById(tableId);
-    if (!table) return true;
+    const guest = guestById(guestId);
+    if (!table || !guest) return false;
+
     const capacity = tableCapacity(table);
-    if (!Number.isInteger(seatIndex) || seatIndex < 0 || seatIndex >= capacity) return true;
+    if (!Number.isInteger(seatIndex) || seatIndex < 0 || seatIndex >= capacity) return false;
+
+    const current = guestAtSeat(table.id, seatIndex);
+    if (current && String(current.id) !== String(guest.id) && confirmReplacement) {
+      const ok = window.confirm(
+        `La silla ${seatIndex + 1} está ocupada por ${text(current.name) || 'otro invitado'}. Si continúas, esa persona quedará sin mesa. ¿Reemplazarla?`
+      );
+      if (!ok) return false;
+    }
 
     const previous = deepClone(api.getSnapshot());
     table.seats = ensureSeats(table, capacity);
-    const current = guestAtSeat(table.id, seatIndex);
-    const nextGuest = guestId ? guestById(guestId) : null;
 
-    if (current && (!nextGuest || String(current.id) !== String(nextGuest.id))) {
+    if (current && String(current.id) !== String(guest.id)) {
       current.tableId = '';
       current.seatId = '';
       current.seatNumber = null;
     }
 
-    if (nextGuest) {
-      const targetOccupied = guestAtSeat(table.id, seatIndex);
-      if (targetOccupied && String(targetOccupied.id) !== String(nextGuest.id)) {
-        api.setSnapshot(previous);
-        window.alert('Esa silla ya está ocupada.');
-        return true;
-      }
-
-      nextGuest.tableId = table.id;
-      nextGuest.seatNumber = seatIndex + 1;
-      nextGuest.seatId = table.seats[seatIndex].id;
-    }
-
+    guest.tableId = table.id;
+    guest.seatNumber = seatIndex + 1;
+    guest.seatId = table.seats[seatIndex].id;
+    selectedGuestId = '';
     await persist(
       previous,
-      nextGuest ? `${text(nextGuest.name) || 'Invitado'} asignado a ${text(table.name)} · silla ${seatIndex + 1}` : `Silla ${seatIndex + 1} liberada`,
-      nextGuest ? 'table-guest-assigned' : 'table-guest-unassigned'
+      `${text(guest.name) || 'Invitado'} · ${text(table.name) || 'Mesa'} · silla ${seatIndex + 1}`,
+      'table-guest-assigned'
     );
-    renderSeats(tableById(table.id));
     return true;
   }
 
-  function handleCapacityPreview(event) {
-    if (!event.target.matches('[name="capacity"]')) return false;
-    const form = event.target.closest('[data-table-form]');
-    const tableId = text(form?.elements.tableId?.value);
-    renderSeats(tableById(tableId));
+  async function assignGuestToTable(guestId, tableId) {
+    const table = tableById(tableId);
+    const guest = guestById(guestId);
+    if (!table || !guest) return false;
+    const seatIndex = firstFreeSeat(table, guest.id);
+    if (seatIndex < 0) {
+      window.alert(`${text(table.name) || 'Esta mesa'} ya está completa.`);
+      return false;
+    }
+    return assignGuestToSeat(guest.id, table.id, seatIndex, { confirmReplacement: false });
+  }
+
+  async function unassignGuest(guestId) {
+    if (!api.canEdit() || api.isSaving()) return false;
+    const guest = guestById(guestId);
+    if (!guest || !text(guest.tableId)) {
+      selectedGuestId = '';
+      render();
+      return false;
+    }
+    const previous = deepClone(api.getSnapshot());
+    const name = text(guest.name) || 'Invitado';
+    guest.tableId = '';
+    guest.seatId = '';
+    guest.seatNumber = null;
+    selectedGuestId = '';
+    await persist(previous, `${name} quedó sin mesa`, 'table-guest-unassigned');
     return true;
   }
 
-  async function handleChange(event) {
-    if (event.target.matches('[name="capacity"]')) {
-      handleCapacityPreview(event);
-      return true;
-    }
-    const select = event.target.closest('[data-seat-guest]');
-    if (!select) return false;
-    const row = select.closest('[data-seat-index]');
-    const form = select.closest('[data-table-dialog]')?.querySelector('[data-table-form]');
-    const tableId = text(form?.elements.tableId?.value);
-    const seatIndex = Number(row?.dataset.seatIndex);
-    if (!tableId || !Number.isInteger(seatIndex)) return true;
+  function clearDropState() {
+    const root = api.getRoot();
+    root?.querySelectorAll('.is-drag-over,.is-drag-source').forEach((node) => {
+      node.classList.remove('is-drag-over','is-drag-source');
+    });
+  }
 
-    const chosenId = text(select.value);
-    const chosen = chosenId ? guestById(chosenId) : null;
-    const current = guestAtSeat(tableId, seatIndex);
-    if (current && chosen && String(current.id) !== String(chosen.id)) {
-      if (!window.confirm(`La silla ${seatIndex + 1} está ocupada por ${text(current.name) || 'otro invitado'}. Si continúas, esa persona quedará sin mesa. ¿Reemplazarla?`)) {
-        renderSeats(tableById(tableId));
-        return true;
-      }
-    }
-    if (chosen && text(chosen.tableId) && !(String(chosen.tableId) === String(tableId) && Number(chosen.seatNumber) === seatIndex + 1)) {
-      const currentTable = tableById(chosen.tableId);
-      const currentLabel = currentTable ? `${text(currentTable.name)} · silla ${chosen.seatNumber || '—'}` : 'otra mesa';
-      if (!window.confirm(`${text(chosen.name) || 'Este invitado'} ya está en ${currentLabel}. ¿Moverlo a esta silla?`)) {
-        renderSeats(tableById(tableId));
-        return true;
-      }
-    }
-    await assignSeat(tableId, seatIndex, chosenId);
-    return true;
+  function setSelectedGuest(guestId) {
+    selectedGuestId = String(selectedGuestId) === String(guestId || '') ? '' : String(guestId || '');
+    render();
   }
 
   async function handleClick(event) {
+    const display = event.target.closest('[data-tables-display]');
+    if (display) {
+      displayMode = display.dataset.tablesDisplay === 'list' ? 'list' : 'visual';
+      render();
+      return true;
+    }
+
+    const filterButton = event.target.closest('[data-table-guest-filter]');
+    if (filterButton) {
+      guestFilter = filterButton.dataset.tableGuestFilter || 'unassigned';
+      render();
+      return true;
+    }
+
     if (event.target.closest('[data-table-close]')) {
       closeTable();
       return true;
     }
+
     if (event.target.closest('[data-table-add]')) {
       openTable();
       return true;
     }
+
     const manage = event.target.closest('[data-table-manage]');
     if (manage) {
       const card = manage.closest('[data-table-id]');
       openTable(tableById(card?.dataset.tableId));
       return true;
     }
+
     const deleteButton = event.target.closest('[data-table-delete]');
     if (deleteButton) {
       await deleteTable(deleteButton.dataset.tableId);
       return true;
     }
+
+    const guestItem = event.target.closest('[data-table-guest-item]');
+    if (guestItem) {
+      setSelectedGuest(guestItem.dataset.tableGuestItem);
+      return true;
+    }
+
+    const seat = event.target.closest('[data-seat-drop]');
+    if (seat) {
+      const tableId = seat.dataset.tableId;
+      const seatIndex = Number(seat.dataset.seatIndex);
+      const occupantId = seat.dataset.dragGuest || '';
+      if (selectedGuestId) {
+        await assignGuestToSeat(selectedGuestId, tableId, seatIndex);
+      } else if (occupantId) {
+        setSelectedGuest(occupantId);
+      }
+      return true;
+    }
+
+    const label = event.target.closest('[data-seat-label]');
+    if (label) {
+      setSelectedGuest(label.dataset.dragGuest);
+      return true;
+    }
+
+    const body = event.target.closest('[data-table-drop]');
+    if (body && selectedGuestId) {
+      await assignGuestToTable(selectedGuestId, body.dataset.tableDrop);
+      return true;
+    }
+
+    const unassigned = event.target.closest('[data-table-unassigned-drop]');
+    if (unassigned && selectedGuestId) {
+      await unassignGuest(selectedGuestId);
+      return true;
+    }
+
     return false;
   }
 
@@ -464,10 +715,125 @@ function createTablesController(api) {
   }
 
   function handleInput(event) {
-    return handleCapacityPreview(event);
+    if (event.target.matches('[data-table-guest-search]')) {
+      guestSearch = event.target.value;
+      renderGuestPanel();
+      const input = api.getRoot()?.querySelector('[data-table-guest-search]');
+      if (input) {
+        input.value = guestSearch;
+        input.focus();
+        input.setSelectionRange(guestSearch.length, guestSearch.length);
+      }
+      return true;
+    }
+    if (event.target.matches('[name="capacity"]')) {
+      const form = event.target.closest('[data-table-form]');
+      const tableId = text(form?.elements.tableId?.value);
+      renderSeats(tableById(tableId));
+      return true;
+    }
+    return false;
+  }
+
+  async function handleChange(event) {
+    if (event.target.matches('[name="capacity"]')) {
+      handleInput(event);
+      return true;
+    }
+
+    const select = event.target.closest('[data-seat-guest]');
+    if (!select) return false;
+    const row = select.closest('[data-seat-index]');
+    const form = select.closest('[data-table-dialog]')?.querySelector('[data-table-form]');
+    const tableId = text(form?.elements.tableId?.value);
+    const seatIndex = Number(row?.dataset.seatIndex);
+    if (!tableId || !Number.isInteger(seatIndex)) return true;
+
+    const chosenId = text(select.value);
+    const current = guestAtSeat(tableId, seatIndex);
+    if (!chosenId) {
+      if (current) await unassignGuest(current.id);
+      renderSeats(tableById(tableId));
+      return true;
+    }
+
+    const chosen = guestById(chosenId);
+    if (!chosen) return true;
+    await assignGuestToSeat(chosen.id, tableId, seatIndex);
+    renderSeats(tableById(tableId));
+    return true;
+  }
+
+  function handleDragStart(event) {
+    if (!api.canEdit()) return false;
+    const source = event.target.closest('[data-drag-guest]');
+    if (!source) return false;
+    const guestId = text(source.dataset.dragGuest);
+    if (!guestId || !guestById(guestId)) return false;
+
+    draggingGuestId = guestId;
+    selectedGuestId = guestId;
+    source.classList.add('is-drag-source');
+    try {
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/mgd-guest-id', guestId);
+      event.dataTransfer.setData('text/plain', guestId);
+    } catch (_) {}
+    return true;
+  }
+
+  function handleDragOver(event) {
+    if (!draggingGuestId) return false;
+    const target = event.target.closest('[data-seat-drop],[data-table-drop],[data-table-unassigned-drop]');
+    if (!target) return false;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = 'move';
+    const root = api.getRoot();
+    root?.querySelectorAll('.is-drag-over').forEach((node) => {
+      if (node !== target) node.classList.remove('is-drag-over');
+    });
+    target.classList.add('is-drag-over');
+    return true;
+  }
+
+  async function handleDrop(event) {
+    if (!draggingGuestId) return false;
+    const target = event.target.closest('[data-seat-drop],[data-table-drop],[data-table-unassigned-drop]');
+    if (!target) return false;
+    event.preventDefault();
+
+    const guestId = draggingGuestId;
+    draggingGuestId = '';
+    clearDropState();
+
+    if (target.matches('[data-table-unassigned-drop]')) {
+      await unassignGuest(guestId);
+      return true;
+    }
+    if (target.matches('[data-seat-drop]')) {
+      await assignGuestToSeat(guestId, target.dataset.tableId, Number(target.dataset.seatIndex));
+      return true;
+    }
+    if (target.matches('[data-table-drop]')) {
+      await assignGuestToTable(guestId, target.dataset.tableDrop);
+      return true;
+    }
+    return false;
+  }
+
+  function handleDragEnd() {
+    draggingGuestId = '';
+    clearDropState();
+    render();
+    return true;
   }
 
   function beginContext() {
+    displayMode = 'visual';
+    guestFilter = 'unassigned';
+    guestSearch = '';
+    selectedGuestId = '';
+    draggingGuestId = '';
     render();
   }
 
@@ -477,7 +843,11 @@ function createTablesController(api) {
     handleClick,
     handleSubmit,
     handleChange,
-    handleInput
+    handleInput,
+    handleDragStart,
+    handleDragOver,
+    handleDrop,
+    handleDragEnd
   });
 }
 
