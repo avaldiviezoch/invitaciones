@@ -203,7 +203,16 @@
 .table-dialog{width:min(780px,calc(100vw - 28px));max-height:min(90vh,860px);padding:0;border:1px solid #ded8d2;border-radius:20px;background:#fff;color:#383531;box-shadow:0 24px 70px rgba(50,44,40,.18)}
 .table-dialog::backdrop{background:rgba(37,34,31,.28);backdrop-filter:blur(2px)}
 .table-form{display:grid;gap:16px;padding:18px 22px;overflow:auto}
-.table-editor-fields{display:grid;grid-template-columns:minmax(0,1fr) 180px;gap:12px}
+.table-editor-fields{display:grid;grid-template-columns:1fr;gap:12px}
+.table-capacity-picker{margin:0;padding:0;border:0}
+.table-capacity-picker legend{margin-bottom:8px;color:#55514d;font-size:9px;font-weight:700}
+.table-capacity-options{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
+.table-capacity-options>button{min-height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:7px 4px;border:1px solid #e1dbd5;border-radius:12px;background:#fff;color:#68625d;cursor:pointer;transition:border-color .15s ease,background .15s ease,box-shadow .15s ease,transform .15s ease}
+.table-capacity-options>button:hover{border-color:#bcc5ad;transform:translateY(-1px)}
+.table-capacity-options>button.is-active{border-color:#9daa88;background:#f4f7f0;box-shadow:0 0 0 3px rgba(125,136,102,.08);color:#596047}
+.table-capacity-options>button:disabled{cursor:default;opacity:.7;transform:none}
+.table-capacity-options strong{font:600 17px Georgia,serif}
+.table-capacity-options small{color:#918b85;font-size:7px}
 .table-shape-picker{margin:0;padding:0;border:0}
 .table-shape-picker legend{margin-bottom:8px;color:#55514d;font-size:9px;font-weight:700}
 .table-shape-options{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
@@ -288,6 +297,8 @@
 }
 @media(max-width:600px){
 .table-editor-fields{grid-template-columns:1fr}
+.table-capacity-options{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.table-capacity-options>button{min-height:52px}
 .table-shape-options{grid-template-columns:1fr 1fr 1fr;gap:6px}
 .table-shape-options>button{min-height:112px;padding:8px 4px}
 .table-shape-preview{transform:scale(.86)}
