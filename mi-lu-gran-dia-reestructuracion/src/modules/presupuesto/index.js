@@ -2,7 +2,7 @@ import { weddingCapabilities } from '../../core/app/permissions.js';
 import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js';
 
 const STORAGE_KEY='planificador_bodas_presupuesto_v5_etiquetas';
-let activeContext=null,state=null,search='',mountEpoch=0,saving=false;
+let activeContext=null,state=null,search='',mountEpoch=0,saving=false,pendingSave=null;
 const fallbackTags=[{id:'tag_urgent',name:'Urgente',color:'#d9485f'},{id:'tag_wait',name:'Puede esperar',color:'#d5a72c'},{id:'tag_later',name:'No es necesario',color:'#2fa36b'}];
 const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
 const n=v=>Number.isFinite(Number(v))?Math.max(0,Number(v)):0;
@@ -14,7 +14,28 @@ function tagById(id){return state.tags.find(t=>String(t.id)===String(id))}
 function itemMeta(item){return[item.provider,item.paymentDate,({pending:'Pendiente',quoted:'Cotizado',partial:'Pago parcial',paid:'Pagado'})[item.status]].filter(Boolean).join(' · ')}function packageBalance(p){return Math.max(0,(n(p.quoted)||n(p.planned))-n(p.paid))}
 const makeId=prefix=>prefix+'_'+(crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2));
 function canEdit(){return weddingCapabilities(activeContext?.role).canEdit}
-async function persist(message='Guardado en Firebase'){if(!activeContext||saving||!canEdit())return;saving=true;const root=document.querySelector('[data-module-view="presupuesto"]'),status=root?.querySelector('[data-budget-state]');if(status)status.textContent='Guardando en Firebase…';try{await writePlannerStorageKey(activeContext,STORAGE_KEY,state);if(status)status.textContent=message;window.dispatchEvent(new CustomEvent('migrandia:datachange',{detail:{module:'presupuesto',weddingId:activeContext.id}}))}catch(error){if(status)status.textContent=error?.message||'No se pudo guardar en Firebase.';throw error}finally{saving=false}}
+async function persist(message='Guardado en Firebase'){
+ if(!activeContext||!canEdit())return;
+ if(saving){pendingSave=message;return}
+ saving=true;
+ const root=document.querySelector('[data-module-view="presupuesto"]'),status=root?.querySelector('[data-budget-state]');
+ if(status)status.textContent='Guardando en Firebase…';
+ try{
+  await writePlannerStorageKey(activeContext,STORAGE_KEY,state);
+  if(status)status.textContent=message;
+  window.dispatchEvent(new CustomEvent('migrandia:datachange',{detail:{module:'presupuesto',weddingId:activeContext.id}}));
+ }catch(error){
+  if(status)status.textContent=error?.message||'No se pudo guardar en Firebase.';
+  throw error;
+ }finally{
+  saving=false;
+  if(pendingSave){
+   const nextMessage=pendingSave;
+   pendingSave=null;
+   void persist(nextMessage);
+  }
+ }
+}
 function categoryName(id){return state.categories.find(c=>String(c.id)===String(id))?.name||'—'}
 function itemBalance(item){return Math.max(0,(n(item.quoted)||n(item.planned))-n(item.paid))}
 function tagIds(item){return Array.isArray(item.tagIds)?item.tagIds.map(String):[]}
@@ -43,7 +64,38 @@ async function handleSubmit(event){if(!event.target.matches('[data-budget-edit-f
  if(kind==='package'){const patch={name:String(data.get('name')||'').trim(),provider:String(data.get('provider')||'').trim(),pricingMode:String(data.get('pricingMode')||'package'),planned:n(data.get('planned')),quoted:n(data.get('quoted')),paid:n(data.get('paid')),guarantee:n(data.get('guarantee')),notes:String(data.get('notes')||'').trim()};if(!patch.name)return;let packageId=id,index=state.packages.findIndex(x=>String(x.id)===String(id));if(index>=0)state.packages[index]={...state.packages[index],...patch};else{packageId=makeId('pack');state.packages.push({id:packageId,...patch})}const selected=new Set(data.getAll('itemIds').map(String));state.items=state.items.map(item=>String(item.packageId||'')===String(packageId)||selected.has(String(item.id))?{...item,packageId:selected.has(String(item.id))?packageId:''}:item)}
  if(kind==='tag'){const patch={name:String(data.get('name')||'').trim(),color:String(data.get('color')||'#7f8962')};if(!patch.name)return;const index=state.tags.findIndex(x=>String(x.id)===String(id));if(index>=0)state.tags[index]={...state.tags[index],...patch};else state.tags.push({id:makeId('tag'),...patch});}
  form.closest('dialog')?.close();render();await persist(kind==='item'?'Gasto guardado':kind==='category'?'Categoría guardada':kind==='package'?'Paquete guardado':'Etiqueta guardada')}
-function bind(root){if(root.dataset.budgetBound)return;root.dataset.budgetBound='true';root.addEventListener('submit',handleSubmit);root.addEventListener('input',e=>{if(e.target.matches('[data-budget-search]')){search=e.target.value;render();const input=root.querySelector('[data-budget-search]');input.focus();input.setSelectionRange(search.length,search.length);return}if(e.target.matches('[data-budget-guests]')){state.settings.guestCount=Math.max(0,Math.floor(n(e.target.value)));render();persist('Número de invitados actualizado')}});root.addEventListener('change',e=>{if(e.target.matches('[data-budget-currency]')){state.settings.currency=['PEN','USD','EUR'].includes(e.target.value)?e.target.value:'PEN';render();persist('Moneda actualizada')}});root.addEventListener('click',e=>{if(e.target.closest('[data-budget-close]')){root.querySelector('[data-budget-dialog]')?.close();return}
+function bind(root){
+ if(root.dataset.budgetBound)return;
+ root.dataset.budgetBound='true';
+ root.addEventListener('submit',handleSubmit);
+ root.addEventListener('input',e=>{
+  if(e.target.matches('[data-budget-search]')){
+   search=e.target.value;
+   render();
+   const input=root.querySelector('[data-budget-search]');
+   input.focus();
+   input.setSelectionRange(search.length,search.length);
+   return;
+  }
+  if(e.target.matches('[data-budget-guests]')){
+   state.settings.guestCount=Math.max(0,Math.floor(n(e.target.value)));
+   render();
+  }
+ });
+ root.addEventListener('change',e=>{
+  if(e.target.matches('[data-budget-guests]')){
+   state.settings.guestCount=Math.max(0,Math.floor(n(e.target.value)));
+   render();
+   void persist('Número de invitados actualizado');
+   return;
+  }
+  if(e.target.matches('[data-budget-currency]')){
+   state.settings.currency=['PEN','USD','EUR'].includes(e.target.value)?e.target.value:'PEN';
+   render();
+   void persist('Moneda actualizada');
+  }
+ });
+ root.addEventListener('click',e=>{if(e.target.closest('[data-budget-close]')){root.querySelector('[data-budget-dialog]')?.close();return}
  const packageCard=e.target.closest('[data-package-id]');if(packageCard&&e.target.closest('[data-budget-edit-package]')){const pack=packageById(packageCard.dataset.packageId);if(pack)openEditor('package',{package:pack});return}if(packageCard&&e.target.closest('[data-budget-package-toggle]')){const id=packageCard.dataset.packageId,list=new Set(state.openPackages.map(String));list.has(id)?list.delete(id):list.add(id);state.openPackages=[...list];render();return}if(packageCard&&e.target.closest('[data-budget-unpack-item]')){const child=e.target.closest('[data-item-id]'),item=state.items.find(i=>String(i.id)===String(child?.dataset.itemId));if(item){item.packageId='';render();persist('Concepto retirado del paquete')}return}if(e.target.closest('[data-budget-new-package]')){openEditor('package');return}
  const row=e.target.closest('[data-item-id]');if(row&&e.target.closest('[data-budget-view-item]')){const item=state.items.find(i=>String(i.id)===row.dataset.itemId);if(item)(canEdit()?openEditor('item',{item}):showDetails(item));return}
  const tag=e.target.closest('[data-budget-edit-tag]');if(tag){const value=state.tags.find(t=>String(t.id)===String(tag.dataset.tagId));if(value)openEditor('tag',{tag:value});return}
@@ -52,5 +104,5 @@ function bind(root){if(root.dataset.budgetBound)return;root.dataset.budgetBound=
  if(card&&e.target.closest('[data-budget-toggle]')){const id=card.dataset.categoryId,list=new Set(state.openCategories.map(String));list.has(id)?list.delete(id):list.add(id);state.openCategories=[...list];render();return}
  if(e.target.closest('[data-budget-new-item]')){openEditor('item');return}if(e.target.closest('[data-budget-new-category]')){openEditor('category');return}if(e.target.closest('[data-budget-new-tag]')){openEditor('tag');return}
  if(e.target.closest('[data-budget-export]')){const rows=[['Categoría','Gasto','Presupuestado','Cotizado','Pagado','Garantía','Proveedor','Estado']];state.items.forEach(i=>rows.push([categoryName(i.categoryId),i.name,n(i.planned),n(i.quoted),n(i.paid),n(i.guarantee),i.provider||'',i.status||'']));const csv='\uFEFF'+rows.map(r=>r.map(v=>'"'+String(v??'').replaceAll('"','""')+'"').join(';')).join('\r\n');const url=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),a=document.createElement('a');a.href=url;a.download='presupuesto-boda.csv';a.click();URL.revokeObjectURL(url)}})}
-async function mountPresupuesto(context){const root=document.querySelector('[data-module-view="presupuesto"]');if(!root||!context?.id)return;const epoch=++mountEpoch;activeContext=context;root.innerHTML='<div class="budget-empty">Cargando Presupuesto desde Firebase…</div>';try{const [template,stored]=await Promise.all([fetch(new URL('./index.html',import.meta.url)).then(r=>{if(!r.ok)throw new Error('No se pudo cargar la interfaz.');return r.text()}),readPlannerStorageKey(context,STORAGE_KEY)]);if(epoch!==mountEpoch||activeContext?.id!==context.id)return;root.innerHTML=template;state=normalized(stored);search='';bind(root);render();const editable=weddingCapabilities(context.role).canEdit;root.querySelector('[data-budget-state]').textContent=editable?'Datos de la boda activa · edición habilitada':'Datos reales de Firebase · solo lectura';}catch(error){if(epoch!==mountEpoch)return;root.innerHTML='<div class="budget-empty">No se pudo cargar el Presupuesto: '+esc(error?.message||'Error de lectura')+'</div>'}}
+async function mountPresupuesto(context){const root=document.querySelector('[data-module-view="presupuesto"]');if(!root||!context?.id)return;const epoch=++mountEpoch;activeContext=context;pendingSave=null;root.innerHTML='<div class="budget-empty">Cargando Presupuesto desde Firebase…</div>';try{const [template,stored]=await Promise.all([fetch(new URL('./index.html',import.meta.url)).then(r=>{if(!r.ok)throw new Error('No se pudo cargar la interfaz.');return r.text()}),readPlannerStorageKey(context,STORAGE_KEY)]);if(epoch!==mountEpoch||activeContext?.id!==context.id)return;root.innerHTML=template;state=normalized(stored);search='';bind(root);render();const editable=weddingCapabilities(context.role).canEdit;root.querySelector('[data-budget-state]').textContent=editable?'Datos de la boda activa · edición habilitada':'Datos reales de Firebase · solo lectura';}catch(error){if(epoch!==mountEpoch)return;root.innerHTML='<div class="budget-empty">No se pudo cargar el Presupuesto: '+esc(error?.message||'Error de lectura')+'</div>'}}
 export{mountPresupuesto};
