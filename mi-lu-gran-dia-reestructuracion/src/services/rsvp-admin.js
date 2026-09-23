@@ -50,11 +50,11 @@ function managementDocId(token, responseId) {
 async function loadRsvpAdminSnapshot(context) {
   requireContext(context);
   const configSnap = await getDoc(doc(db, 'weddings', context.id, 'rsvpConfig', 'main'));
-  if (!configSnap.exists()) return { config: null, token: '', responses: [], management: [] };
+  if (!configSnap.exists()) return { config: null, token: '', responses: [], musicResponses: [], management: [] };
 
   const config = { ...(configSnap.data() || {}) };
   const token = cleanText(config.token, 160);
-  if (!token) return { config, token: '', responses: [], management: [] };
+  if (!token) return { config, token: '', responses: [], musicResponses: [], management: [] };
 
   let responseSnaps;
   try {
@@ -64,8 +64,8 @@ async function loadRsvpAdminSnapshot(context) {
   }
 
   const managementSnaps = await getDocs(collection(db, 'weddings', context.id, 'rsvpManagement'));
-  const responses = responseSnaps.docs
-    .map(responseFromSnap)
+  const allResponses = responseSnaps.docs.map(responseFromSnap);
+  const responses = allResponses
     .filter((item) => !isMusicOnlyResponse(item))
     .sort((a, b) => {
       const ta = a.submittedAtDate?.getTime?.() || a.updatedAtDate?.getTime?.() || new Date(a.clientDate || 0).getTime() || 0;
@@ -77,7 +77,9 @@ async function loadRsvpAdminSnapshot(context) {
     .map((snap) => ({ id: snap.id, ...(snap.data() || {}) }))
     .filter((item) => item.token === token);
 
-  return { config, token, responses, management };
+  const musicResponses = allResponses.filter((item) => Boolean(item?.customData?.mgdMusic) && (item?.attendance === 'confirmed' || item?.source === 'music-widget'));
+
+  return { config, token, responses, musicResponses, management };
 }
 
 async function saveRsvpManagement(context, token, responseId, input = {}) {
