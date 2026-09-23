@@ -70,11 +70,53 @@
       <article><span>Ocupadas</span><strong data-tables-occupied>0</strong></article>
       <article><span>Sin mesa</span><strong data-tables-unassigned>0</strong></article>
     </section>
+
     <section class="tables-head">
-      <div><h2>Mesas y sillas</h2><p>La mesa conserva su identidad. Cada invitado ocupa una sola silla mediante tableId, seatId y seatNumber.</p></div>
-      <button type="button" data-table-add hidden>+ Nueva mesa</button>
+      <div>
+        <h2>Mesas y sillas</h2>
+        <p>Organiza visualmente a tus invitados. La posición física de las mesas se definirá después en Distribución.</p>
+      </div>
+      <div class="tables-head-actions">
+        <div class="tables-display-toggle" aria-label="Cambiar vista de mesas">
+          <button type="button" class="is-active" data-tables-display="visual">Visual</button>
+          <button type="button" data-tables-display="list">Lista</button>
+        </div>
+        <button type="button" class="tables-add-button" data-table-add hidden>+ Nueva mesa</button>
+      </div>
     </section>
-    <section class="tables-list" data-tables-list></section>
+
+    <section class="tables-workspace" data-tables-visual-view>
+      <div class="tables-stage">
+        <div class="tables-stage-head">
+          <div><strong>Plano de mesas</strong><span>Arrastra invitados a una silla o al centro de una mesa.</span></div>
+          <small data-tables-stage-summary></small>
+        </div>
+        <div class="tables-visual-grid" data-tables-visual-grid></div>
+      </div>
+
+      <aside class="tables-guests-panel">
+        <div class="tables-guests-head">
+          <div><strong>Invitados</strong><span>Arrastra o selecciona una persona</span></div>
+          <b data-tables-guests-visible>0</b>
+        </div>
+        <label class="tables-guest-search"><span aria-hidden="true">⌕</span><input type="search" data-table-guest-search placeholder="Buscar invitado"></label>
+        <div class="tables-guest-filters">
+          <button type="button" class="is-active" data-table-guest-filter="unassigned">Sin mesa</button>
+          <button type="button" data-table-guest-filter="assigned">Asignados</button>
+          <button type="button" data-table-guest-filter="confirmed">Confirmados</button>
+          <button type="button" data-table-guest-filter="pending">Pendientes</button>
+          <button type="button" data-table-guest-filter="all">Todos</button>
+        </div>
+        <div class="tables-selection-hint" data-tables-selection-hint hidden></div>
+        <div class="tables-unassigned-drop" data-table-unassigned-drop>Arrastra aquí para dejar sin mesa</div>
+        <div class="tables-guest-list" data-table-guest-list></div>
+      </aside>
+    </section>
+
+    <section class="tables-list-view" data-tables-list-view hidden>
+      <div class="tables-list" data-tables-list></div>
+    </section>
+
     <p class="guests-read-state" data-tables-state></p>
   </div>
 
