@@ -563,6 +563,7 @@ function openModule(moduleId) {
     button.setAttribute('aria-current', active ? 'page' : 'false');
   });
   history.replaceState(null, '', '#checklist');
+  mountChecklist(weddingContext);
 }
 
 function closeModuleWorkspace() {
