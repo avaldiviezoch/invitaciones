@@ -372,6 +372,19 @@ function createTablesController(api) {
     renderGuestPanel();
   }
 
+  function syncShapePicker(shape) {
+    const root = api.getRoot();
+    const normalized = normalizeTableShape(shape);
+    const form = root?.querySelector('[data-table-form]');
+    if (form?.elements?.type) form.elements.type.value = normalized;
+    root?.querySelectorAll('[data-table-shape]').forEach((button) => {
+      const active = button.dataset.tableShape === normalized;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+      button.disabled = !api.canEdit();
+    });
+  }
+
   function openTable(table = null) {
     const root = api.getRoot();
     const dialog = root?.querySelector('[data-table-dialog]');
@@ -384,6 +397,7 @@ function createTablesController(api) {
     form.elements.tableId.value = table ? String(table.id) : '';
     form.elements.name.value = table ? text(table.name) : nextTableName();
     form.elements.type.value = table ? normalizeTableShape(table.type || table.shape) : 'round';
+    syncShapePicker(form.elements.type.value);
 
     [...form.elements.capacity.options]
       .filter((option) => option.dataset.legacyCapacity === 'true')
@@ -630,6 +644,13 @@ function createTablesController(api) {
   }
 
   async function handleClick(event) {
+    const shapeButton = event.target.closest('[data-table-shape]');
+    if (shapeButton) {
+      if (!api.canEdit()) return true;
+      syncShapePicker(shapeButton.dataset.tableShape);
+      return true;
+    }
+
     const display = event.target.closest('[data-tables-display]');
     if (display) {
       displayMode = display.dataset.tablesDisplay === 'list' ? 'list' : 'visual';
