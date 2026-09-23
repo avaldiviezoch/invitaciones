@@ -102,7 +102,18 @@ function isOverdue(task) {
 
 function normalizedState(value) {
   const source = value && typeof value === 'object' ? value : {};
-  return { ...source, tasks: Array.isArray(source.tasks) ? source.tasks : [] };
+  return {
+    ...source,
+    tasks: Array.isArray(source.tasks) ? source.tasks : [],
+    groups: Array.isArray(source.groups) ? source.groups.filter((name) => typeof name === 'string' && name.trim()).map((name) => name.trim()) : []
+  };
+}
+
+function checklistGroups() {
+  const names = new Set(BASE_GROUPS.map(([name]) => name));
+  state.groups.forEach((name) => names.add(name));
+  state.tasks.forEach((task, index) => names.add(taskCategory(task, index)));
+  return [...names];
 }
 
 function visibleTasks() {
@@ -162,6 +173,7 @@ function render() {
   const stats = summary();
   const rows = visibleTasks();
   const groups = new Map();
+  checklistGroups().forEach((name) => groups.set(name, []));
   rows.forEach(({ task, index }) => {
     const name = taskCategory(task, index);
     if (!groups.has(name)) groups.set(name, []);
@@ -205,19 +217,24 @@ function render() {
         const done = items.filter(({task})=>isCompleted(task)).length;
         const pct = items.length ? Math.round(done*100/items.length) : 0;
         const collapsed = collapsedGroups.has(name);
-        return `<article class="ck-group${collapsed ? ' is-collapsed' : ''}" data-group-name="${esc(name)}"><header><div class="ck-group-ring" style="--p:${pct}"><span>${pct}%</span></div><div><h2>${esc(name)}</h2><div class="ck-group-line"><i style="width:${pct}%"></i></div><small>${done} / ${items.length}</small></div><button type="button" class="ck-collapse" data-group-toggle aria-expanded="${collapsed ? 'false' : 'true'}" aria-label="${collapsed ? 'Abrir' : 'Cerrar'} ${esc(name)}">⌄</button></header><div class="ck-group-tasks">${items.map(({task,index})=>taskMarkup(task,index,editable)).join('')}</div></article>`;
+        return `<article class="ck-group${collapsed ? ' is-collapsed' : ''}" data-group-name="${esc(name)}"><header><div class="ck-group-ring" style="--p:${pct}"><span>${pct}%</span></div><div><h2>${esc(name)}</h2><div class="ck-group-line"><i style="width:${pct}%"></i></div><small>${done} / ${items.length}</small></div><div class="ck-group-controls">${editable ? `<button type="button" class="ck-group-add" data-group-add aria-label="Agregar tarea a ${esc(name)}">＋</button>` : ''}<button type="button" class="ck-collapse" data-group-toggle aria-expanded="${collapsed ? 'false' : 'true'}" aria-label="${collapsed ? 'Abrir' : 'Cerrar'} ${esc(name)}">⌄</button></div></header><div class="ck-group-tasks">${items.length ? items.map(({task,index})=>taskMarkup(task,index,editable)).join('') : '<p class="ck-group-empty">Aún no hay tareas en este grupo.</p>'}</div></article>`;
       }).join('') : '<div class="ck-empty">No hay tareas para mostrar con este filtro.</div>'}
     </section>
     <p class="ck-save-state" data-checklist-status>${saving ? 'Guardando en Firebase…' : 'Datos de la boda activa'}</p>
     <dialog class="ck-dialog" data-checklist-dialog>
       <form method="dialog" data-checklist-form>
         <input type="hidden" name="index" value="">
+        <input type="hidden" name="mode" value="task">
         <div class="ck-dialog-head"><div><span>CHECKLIST</span><h2>Nueva tarea</h2></div><button type="button" data-dialog-close aria-label="Cerrar">×</button></div>
-        <label><span>Tarea</span><input name="title" maxlength="160" required></label>
-        <div class="ck-form-grid"><label><span>Responsable</span><input name="responsible" maxlength="100"></label><label><span>Fecha</span><input name="dueDate" type="date"></label></div>
-        <div class="ck-form-grid"><label><span>Categoría</span><input name="category" maxlength="80"></label><label><span>Prioridad</span><select name="priority"><option value="">Normal</option><option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option></select></label></div>
-        <label><span>Notas</span><textarea name="notes" maxlength="700" rows="3"></textarea></label>
-        <div class="ck-dialog-actions"><button type="button" data-dialog-close>Cancelar</button><button class="ck-primary" type="submit">Guardar tarea</button></div>
+        <div class="ck-create-kind" data-create-kind><button type="button" class="is-active" data-create-mode="task">Tarea</button><button type="button" data-create-mode="group">Nuevo grupo</button></div>
+        <div data-task-fields>
+          <label><span>Tarea</span><input name="title" maxlength="160"></label>
+          <div class="ck-form-grid"><label><span>Responsable</span><input name="responsible" maxlength="100"></label><label><span>Fecha</span><input name="dueDate" type="date"></label></div>
+          <div class="ck-form-grid"><label><span>Grupo</span><select name="category">${checklistGroups().map((name)=>`<option value="${esc(name)}">${esc(name)}</option>`).join('')}</select></label><label><span>Prioridad</span><select name="priority"><option value="">Normal</option><option value="alta">Alta</option><option value="media">Media</option><option value="baja">Baja</option></select></label></div>
+          <label><span>Notas</span><textarea name="notes" maxlength="700" rows="3"></textarea></label>
+        </div>
+        <div data-group-fields hidden><label><span>Nombre del nuevo grupo</span><input name="groupName" maxlength="80" placeholder="Ej. Luna de miel"></label><p class="ck-form-help">El grupo se crea vacío. Luego podrás agregar sus tareas desde el botón + del acordeón.</p></div>
+        <div class="ck-dialog-actions"><button type="button" data-dialog-close>Cancelar</button><button class="ck-primary" type="submit" data-submit-label>Guardar tarea</button></div>
       </form>
     </dialog>
   </div>`;
@@ -240,25 +257,56 @@ async function persist(message = 'Guardado en Firebase') {
   }
 }
 
-function openForm(index = -1) {
+function setCreateMode(form, mode) {
+  const isGroup = mode === 'group';
+  form.elements.mode.value = isGroup ? 'group' : 'task';
+  form.querySelector('[data-task-fields]').hidden = isGroup;
+  form.querySelector('[data-group-fields]').hidden = !isGroup;
+  form.querySelectorAll('[data-create-mode]').forEach((button) => button.classList.toggle('is-active', button.dataset.createMode === mode));
+  form.querySelector('[data-submit-label]').textContent = isGroup ? 'Crear grupo' : 'Guardar tarea';
+  form.querySelector('h2').textContent = isGroup ? 'Nuevo grupo' : 'Nueva tarea';
+}
+
+function openForm(index = -1, category = '') {
   const dialog = document.querySelector('[data-checklist-dialog]');
   const form = document.querySelector('[data-checklist-form]');
   if (!dialog || !form) return;
   const task = index >= 0 ? state.tasks[index] || {} : {};
+  form.reset();
   form.elements.index.value = index >= 0 ? String(index) : '';
+  setCreateMode(form, 'task');
+  form.querySelector('[data-create-kind]').hidden = index >= 0;
   form.elements.title.value = index >= 0 ? taskTitle(task) : '';
   form.elements.responsible.value = index >= 0 ? taskResponsible(task) : '';
   form.elements.dueDate.value = index >= 0 ? taskDate(task) : '';
-  form.elements.category.value = index >= 0 ? explicitTaskCategory(task) : '';
+  const selectedCategory = index >= 0 ? taskCategory(task, index) : category;
+  if (selectedCategory && [...form.elements.category.options].some((option) => option.value === selectedCategory)) {
+    form.elements.category.value = selectedCategory;
+  }
   form.elements.priority.value = index >= 0 ? taskPriority(task) : '';
   form.elements.notes.value = String(task?.notes || task?.nota || '');
   form.querySelector('h2').textContent = index >= 0 ? 'Editar tarea' : 'Nueva tarea';
+  form.querySelector('[data-submit-label]').textContent = index >= 0 ? 'Guardar cambios' : 'Guardar tarea';
   dialog.showModal();
   form.elements.title.focus();
 }
-
 async function handleClick(event) {
   const root = event.currentTarget;
+  const createMode = event.target.closest('[data-create-mode]');
+  if (createMode) {
+    const form = createMode.closest('[data-checklist-form]');
+    if (form) {
+      setCreateMode(form, createMode.dataset.createMode);
+      (createMode.dataset.createMode === 'group' ? form.elements.groupName : form.elements.title)?.focus();
+    }
+    return;
+  }
+  const groupAdd = event.target.closest('[data-group-add]');
+  if (groupAdd) {
+    const group = groupAdd.closest('[data-group-name]');
+    if (group?.dataset.groupName) openForm(-1, group.dataset.groupName);
+    return;
+  }
   const groupToggle = event.target.closest('[data-group-toggle]');
   if (groupToggle) {
     const group = groupToggle.closest('[data-group-name]');
@@ -361,15 +409,30 @@ async function handleSubmit(event) {
   event.preventDefault();
   const form = event.target;
   const data = new FormData(form);
+  const mode = String(data.get('mode') || 'task');
+
+  if (mode === 'group') {
+    const groupName = String(data.get('groupName') || '').trim();
+    if (!groupName) return;
+    const exists = checklistGroups().some((name) => name.toLocaleLowerCase('es') === groupName.toLocaleLowerCase('es'));
+    if (!exists) state.groups.push(groupName);
+    collapsedGroups.delete(groupName);
+    form.closest('dialog')?.close();
+    render();
+    if (!exists) await persist('Grupo creado');
+    return;
+  }
+
   const title = String(data.get('title') || '').trim();
   if (!title) return;
   const indexText = String(data.get('index') || '');
   const index = indexText === '' ? -1 : Number(indexText);
+  const category = String(data.get('category') || '').trim() || checklistGroups()[0] || 'Sin categoría';
   const patch = {
     title,
     responsible: String(data.get('responsible') || '').trim(),
     dueDate: String(data.get('dueDate') || ''),
-    category: String(data.get('category') || '').trim(),
+    category,
     priority: String(data.get('priority') || '').trim(),
     notes: String(data.get('notes') || '').trim()
   };
@@ -382,7 +445,6 @@ async function handleSubmit(event) {
   render();
   await persist(index >= 0 ? 'Tarea actualizada' : 'Tarea agregada');
 }
-
 let draggedTaskIndex = null;
 function handleDragStart(event) {
   const handle = event.target.closest('.ck-drag');
