@@ -177,6 +177,48 @@ function createTablesController(api) {
       : 'Mesa no encontrada';
   }
 
+  function guestStatusLabel(guest) {
+    const status = text(guest?.status).toLowerCase();
+    if (status === 'confirmed') return 'Confirmado';
+    if (status === 'declined') return 'No asistirá';
+    if (status === 'tentative') return 'Por confirmar';
+    return 'Pendiente';
+  }
+
+  function closeGuestDetail() {
+    const dialog = api.getRoot()?.querySelector('[data-table-guest-detail-dialog]');
+    if (dialog?.open) dialog.close();
+  }
+
+  function openGuestDetail(guestId) {
+    const root = api.getRoot();
+    const dialog = root?.querySelector('[data-table-guest-detail-dialog]');
+    const guest = guestById(guestId);
+    if (!dialog || !guest || !text(guest.tableId)) return;
+
+    const name = text(guest.name) || 'Invitado';
+    const group = text(guest.rsvpFamilyLabel || guest.rsvpGroup || guest.relation) || 'Sin grupo';
+    const rsvp = text(guest.rsvpResponseId)
+      ? `RSVP vinculado${text(guest.rsvpResponseName) ? ` · ${text(guest.rsvpResponseName)}` : ''}`
+      : 'Sin respuesta RSVP vinculada';
+
+    root.querySelector('[data-table-guest-detail-name]').textContent = name;
+    root.querySelector('[data-table-guest-detail-avatar]').textContent = initials(name);
+    root.querySelector('[data-table-guest-detail-assignment]').textContent = guestAssignmentLabel(guest);
+    root.querySelector('[data-table-guest-detail-rsvp]').textContent = rsvp;
+    root.querySelector('[data-table-guest-detail-status]').textContent = guestStatusLabel(guest);
+    root.querySelector('[data-table-guest-detail-group]').textContent = group;
+
+    const move = root.querySelector('[data-table-guest-detail-move]');
+    const unassign = root.querySelector('[data-table-guest-detail-unassign]');
+    [move, unassign].forEach((button) => {
+      if (!button) return;
+      button.dataset.guestId = String(guest.id);
+      button.hidden = !api.canEdit();
+    });
+    dialog.showModal();
+  }
+
   function guestPanelItem(guest) {
     const selected = String(selectedGuestId) === String(guest.id);
     const declined = text(guest.status) === 'declined';
@@ -746,6 +788,25 @@ function createTablesController(api) {
   }
 
   async function handleClick(event) {
+    if (event.target.closest('[data-table-guest-detail-close]')) {
+      closeGuestDetail();
+      return true;
+    }
+    const moveGuest = event.target.closest('[data-table-guest-detail-move]');
+    if (moveGuest) {
+      closeGuestDetail();
+      selectedGuestId = String(moveGuest.dataset.guestId || '');
+      render();
+      return true;
+    }
+    const unassignDetail = event.target.closest('[data-table-guest-detail-unassign]');
+    if (unassignDetail) {
+      const guestId = String(unassignDetail.dataset.guestId || '');
+      closeGuestDetail();
+      await unassignGuest(guestId);
+      return true;
+    }
+
     const conflictAction = event.target.closest('[data-seat-conflict-action]');
     if (conflictAction) {
       closeSeatConflict(conflictAction.dataset.seatConflictAction);
@@ -826,14 +887,20 @@ function createTablesController(api) {
       if (selectedGuestId) {
         await assignGuestToSeat(selectedGuestId, tableId, seatIndex);
       } else if (occupantId) {
-        setSelectedGuest(occupantId);
+        openGuestDetail(occupantId);
       }
       return true;
     }
 
     const label = event.target.closest('[data-seat-label]');
     if (label) {
-      setSelectedGuest(label.dataset.dragGuest);
+      if (selectedGuestId && String(selectedGuestId) !== String(label.dataset.dragGuest)) {
+        const guest = guestById(label.dataset.dragGuest);
+        const location = guestSeatLocation(guest);
+        if (location) await assignGuestToSeat(selectedGuestId, location.table.id, location.seatIndex);
+      } else {
+        openGuestDetail(label.dataset.dragGuest);
+      }
       return true;
     }
 
