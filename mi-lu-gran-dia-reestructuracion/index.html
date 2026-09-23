@@ -450,7 +450,7 @@ Cancelar
     <div class="app-nav-account-wrap" id="appNavAccountWrap"><button class="app-nav-account" id="appNavAccountButton" type="button" aria-haspopup="true" aria-expanded="false"><span class="app-nav-account-avatar"><img id="appNavAvatar" alt="Foto de perfil"><span id="appNavInitials">MGD</span></span><span class="app-nav-account-copy"><strong id="appNavAccountName">Mi cuenta</strong><small id="appNavRole">Mi acceso</small></span><span class="app-nav-chevron">⌄</span></button><div class="app-nav-account-popover" role="dialog" aria-label="Cuenta activa"><strong id="appNavPopoverName">Mi cuenta</strong><span id="appNavPopoverEmail"></span><button class="app-nav-wedding" id="appNavWeddingButton" type="button"><span>Boda activa</span><strong id="appNavPopoverWedding">Mi boda</strong><small>Ver mis bodas y accesos</small></button><button class="app-nav-logout" id="appNavLogout" type="button">Cerrar sesión</button></div></div>
   </nav>
   <main class="module-stage" id="moduleStage">
-    <section class="checklist-review" data-module-view="checklist"><span>PLANIFICACIÓN</span><h2>Checklist de boda</h2><p>La barra está vinculada al primer módulo. El Checklist funcional se construirá aquí sobre su adaptador Firebase auditado.</p></section>
+    <section class="checklist-review" data-module-view="checklist"><div class="module-loading" role="status" aria-live="polite">Cargando…</div></section>
     <section class="budget-review" data-module-view="presupuesto" hidden></section>
   </main>
 </section><section class="access-manager" id="accessManager" aria-hidden="true">
@@ -472,7 +472,7 @@ Cancelar
 <form class="create-wedding-card" id="createWeddingForm" hidden><h3>Crear una nueva boda</h3><label><span>Nombre de la boda</span><input id="newWeddingName" type="text" maxlength="90" placeholder="Ej. Antonio & Lucero" required></label><label><span>Fecha</span><input id="newWeddingDate" type="date"></label><div><button type="button" id="cancelCreateWedding">Cancelar</button><button type="submit">Crear y abrir</button></div><p id="createWeddingStatus" aria-live="polite"></p></form>
 </div>
 </section>
-<script type="module" src="src/modules/dashboard/inicio.js?v=47">
+<script type="module" src="src/modules/dashboard/inicio.js?v=48">
 </script>
 </body>
 </html>
