@@ -8,3 +8,46 @@
 @media(max-width:760px){.checklist-review{margin-top:76px}.ck-original-hero{padding:24px 18px 18px}.ck-original-title-row{grid-template-columns:52px 1fr}.ck-title-icon{width:50px;height:50px;border-radius:14px}.ck-original-title-row h1{font-size:39px}.ck-original-title-row p{font-size:12px;line-height:1.45}.ck-hero-percent{grid-column:1/-1;display:flex;align-items:baseline;gap:10px;text-align:left}.ck-hero-percent strong{font-size:44px}.ck-hero-percent span{margin:0}.ck-actions{margin-top:16px}.ck-actions,.ck-actions-left,.ck-actions-right{display:grid;grid-template-columns:1fr 1fr}.ck-actions-left,.ck-actions-right{grid-column:1/-1}.ck-actions button{padding:0 10px;min-height:45px}.ck-kpis{display:grid;grid-template-columns:repeat(5,120px);overflow-x:auto}.ck-kpis article{min-height:72px;padding:14px}.ck-original-toolbar{grid-template-columns:1fr;padding:12px}.ck-segments{width:100%;box-sizing:border-box;overflow-x:auto}.ck-original-search,.ck-select{height:48px}.ck-group{padding:15px}.ck-group header{grid-template-columns:48px 1fr 28px}.ck-group-ring{width:45px;height:45px}.ck-original-task{grid-template-columns:16px 26px minmax(0,1fr) 36px;gap:7px}.ck-task-plus{width:32px;height:32px}.ck-form-grid{grid-template-columns:1fr}}
 @media(max-width:430px){.ck-original-title-row h1{font-size:34px}.ck-original-eyebrow{font-size:10px}.ck-actions button span{margin-left:3px}.ck-segments button{padding:0 12px}.ck-group header h2{font-size:18px}.ck-original-task-copy strong{font-size:12px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
+
+/* Mobile refinement: cabecera y controles más delicados; listas se conservan */
+@media(max-width:760px){
+  .ck-original-hero{padding:18px 16px 14px}
+  .ck-original-eyebrow{margin-bottom:10px;font-size:8px;letter-spacing:.13em}
+  .ck-original-title-row{grid-template-columns:40px minmax(0,1fr);gap:11px}
+  .ck-title-icon{width:38px;height:38px;border-radius:12px;font-size:18px}
+  .ck-original-title-row h1{font-size:30px;font-weight:400;letter-spacing:-.035em}
+  .ck-original-title-row p{margin-top:7px;font-size:10.5px;line-height:1.4}
+  .ck-hero-percent{margin-top:4px;gap:8px}
+  .ck-hero-percent strong{font-size:35px;font-weight:400}
+  .ck-hero-percent span{font-size:9.5px}
+  .ck-hero-progress{height:4px;margin-top:12px}
+
+  .ck-actions{padding:10px;gap:7px;border-radius:16px}
+  .ck-actions,.ck-actions-left,.ck-actions-right{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ck-actions-left,.ck-actions-right{gap:7px}
+  .ck-actions button{min-height:39px;padding:0 8px;border-radius:11px;font-size:9.5px;font-weight:650}
+  .ck-actions .ck-new{gap:5px}
+  .ck-new b{font-size:16px}
+
+  .ck-kpis{margin-top:12px;border-radius:16px;grid-template-columns:repeat(5,96px)}
+  .ck-kpis article{min-height:61px;padding:11px 12px}
+  .ck-kpis span{margin-bottom:7px;font-size:8px}
+  .ck-kpis strong{font-size:21px;font-weight:600}
+
+  .ck-original-toolbar{margin-top:12px;padding:9px;border-radius:16px;gap:8px}
+  .ck-segments{padding:3px;border-width:2px;border-radius:20px}
+  .ck-segments button{min-height:31px;padding:0 11px;font-size:8.5px;border-radius:17px}
+  .ck-original-search{height:42px;padding:0 11px;gap:8px;border-radius:12px}
+  .ck-original-search span{font-size:17px}
+  .ck-original-search input{height:34px;border-radius:10px;font-size:10px}
+  .ck-select{height:42px;padding:0 10px;border-radius:12px}
+  .ck-select b{font-size:7px}
+  .ck-select select{height:27px;font-size:10px}
+
+  .ck-groups{padding-top:13px}
+}
+@media(max-width:430px){
+  .ck-original-title-row h1{font-size:28px}
+  .ck-actions button{font-size:9px}
+  .ck-segments button{padding:0 10px}
+}
