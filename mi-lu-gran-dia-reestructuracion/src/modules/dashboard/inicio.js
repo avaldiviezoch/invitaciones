@@ -1,4 +1,5 @@
-import { weddingCapabilities } from '../../core/app/permissions.js';\nimport { mountChecklist } from '../checklist/index.js';
+import { weddingCapabilities } from '../../core/app/permissions.js';
+import { mountChecklist } from '../checklist/index.js';
 import { auth } from '../../services/firebase-client.js';
 import {
   listWeddingContexts,
