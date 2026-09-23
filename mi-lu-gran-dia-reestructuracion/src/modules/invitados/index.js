@@ -399,6 +399,22 @@ function bind(root) {
     await ensureTablesController().handleChange(event);
   });
 
+  root.addEventListener('dragstart', (event) => {
+    ensureTablesController().handleDragStart(event);
+  });
+
+  root.addEventListener('dragover', (event) => {
+    ensureTablesController().handleDragOver(event);
+  });
+
+  root.addEventListener('drop', async (event) => {
+    await ensureTablesController().handleDrop(event);
+  });
+
+  root.addEventListener('dragend', () => {
+    ensureTablesController().handleDragEnd();
+  });
+
   root.addEventListener('submit', async (event) => {
     if (event.target.matches('[data-guests-form]')) {
       await handleGuestSubmit(event);
