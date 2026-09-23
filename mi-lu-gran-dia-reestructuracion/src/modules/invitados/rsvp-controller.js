@@ -4,7 +4,7 @@ import {
   deleteRsvpManagement,
   restoreRsvpManagement
 } from '../../services/rsvp-admin.js?v=3';
-import { saveInvitadosSnapshot } from './invitados-data.js?v=2';
+import { saveInvitadosSnapshot } from './invitados-data.js?v=3';
 
 function createRsvpController(api) {
   let state = { config: null, token: '', responses: [], management: [] };
