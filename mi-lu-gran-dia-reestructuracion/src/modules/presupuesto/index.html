@@ -32,5 +32,14 @@
     </section>
     <p class="budget-read-state" data-budget-state>Datos de la boda activa</p>
   </main>
-  <dialog class="budget-dialog" data-budget-dialog><form method="dialog"><header><div><span>PRESUPUESTO</span><h2 data-budget-dialog-title>Detalle</h2></div><button type="button" data-budget-close>×</button></header><div class="budget-dialog-body" data-budget-dialog-body></div><footer data-budget-dialog-footer><button type="button" data-budget-close>Cerrar</button></footer></form></dialog>
+  <dialog class="budget-dialog" data-budget-dialog>
+    <div class="budget-dialog-frame">
+      <header>
+        <div><span>PRESUPUESTO</span><h2 data-budget-dialog-title>Detalle</h2></div>
+        <button type="button" data-budget-close aria-label="Cerrar">×</button>
+      </header>
+      <div class="budget-dialog-body" data-budget-dialog-body></div>
+      <footer data-budget-dialog-footer><button type="button" data-budget-close>Cerrar</button></footer>
+    </div>
+  </dialog>
 </div>
