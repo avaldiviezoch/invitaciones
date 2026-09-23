@@ -619,7 +619,7 @@ async function openModule(moduleId, { updateHash = true } = {}) {
     if (moduleId === 'presupuesto') await mountPresupuesto(weddingContext);
     if (moduleId === 'proveedores') await mountProveedores(weddingContext);
     if (moduleId === 'invitados') {
-      const { mountInvitados } = await import('../invitados/index.js?v=13');
+      const { mountInvitados } = await import('../invitados/index.js?v=14');
       await mountInvitados(weddingContext);
     }
   } finally {
