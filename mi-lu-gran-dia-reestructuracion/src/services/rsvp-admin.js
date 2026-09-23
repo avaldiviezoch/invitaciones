@@ -112,7 +112,8 @@ async function restoreRsvpManagement(context, token, responseId, previous) {
   requireEditor(context);
   const ref = doc(db, 'weddings', context.id, 'rsvpManagement', managementDocId(token, responseId));
   if (previous && typeof previous === 'object') {
-    await setDoc(ref, { ...previous, updatedAt: serverTimestamp() }, { merge: false });
+    const { id: _memoryId, ...stored } = previous;
+    await setDoc(ref, { ...stored, updatedAt: serverTimestamp() }, { merge: false });
     return;
   }
   await deleteDoc(ref);
