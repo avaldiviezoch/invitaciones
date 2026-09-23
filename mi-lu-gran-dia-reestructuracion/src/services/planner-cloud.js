@@ -2,7 +2,7 @@ import {
   doc,
   getDoc,
   serverTimestamp,
-  writeBatch
+  runTransaction
 } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
 import { auth, db } from './firebase-client.js';
 import { weddingCapabilities } from '../core/app/permissions.js';
@@ -57,48 +57,60 @@ async function writePlannerStorageKey(context, key, value) {
   if (!auth.currentUser || !context?.id) throw new Error('No hay una boda activa.');
   if (!weddingCapabilities(context.role).canEdit) throw new Error('Tu acceso es de solo lectura.');
 
-  const { backup: currentBackup, chunkCount: oldCount } = await readPlannerBackup(context);
-  const backup = currentBackup && typeof currentBackup === 'object'
-    ? { ...currentBackup }
-    : { type: 'migrandia_cloud_backup', version: 1, localStorage: {} };
-
-  backup.localStorage = backup.localStorage && typeof backup.localStorage === 'object'
-    ? { ...backup.localStorage }
-    : {};
-  backup.localStorage[key] = JSON.stringify(value);
-
-  const raw = JSON.stringify(backup);
-  const chunks = chunkText(raw);
+  const metaRef = doc(db, 'weddings', context.id, 'cloudSync', 'main');
   const chunkRef = (index) => doc(db, 'weddings', context.id, 'cloudChunks', String(index).padStart(5, '0'));
 
-  let batch = writeBatch(db);
-  let operations = 0;
-  const flush = async (force = false) => {
-    if (operations >= 420 || (force && operations)) {
-      await batch.commit();
-      batch = writeBatch(db);
-      operations = 0;
+  await runTransaction(db, async (transaction) => {
+    const metaSnapshot = await transaction.get(metaRef);
+    const oldCount = metaSnapshot.exists() ? Number(metaSnapshot.data()?.chunkCount || 0) : 0;
+    if (!Number.isInteger(oldCount) || oldCount < 0 || oldCount > 500) {
+      throw new Error('La copia de Firebase tiene un formato no válido.');
     }
-  };
 
-  for (let index = 0; index < chunks.length; index += 1) {
-    batch.set(chunkRef(index), { index, data: chunks[index] });
-    operations += 1;
-    await flush();
-  }
-  for (let index = chunks.length; index < oldCount; index += 1) {
-    batch.delete(chunkRef(index));
-    operations += 1;
-    await flush();
-  }
-  batch.set(doc(db, 'weddings', context.id, 'cloudSync', 'main'), {
-    chunkCount: chunks.length,
-    bytes: raw.length,
-    updatedAt: serverTimestamp(),
-    version: Number(backup.version || 1)
-  }, { merge: true });
-  operations += 1;
-  await flush(true);
+    const oldChunks = [];
+    for (let index = 0; index < oldCount; index += 1) {
+      oldChunks.push(await transaction.get(chunkRef(index)));
+    }
+
+    const currentRaw = oldChunks.map((snapshot) => snapshot.exists() ? String(snapshot.data()?.data || '') : '').join('');
+    let currentBackup = null;
+    if (currentRaw) {
+      try {
+        currentBackup = JSON.parse(currentRaw);
+      } catch {
+        throw new Error('No se pudo interpretar la copia de Firebase de esta boda.');
+      }
+    }
+
+    const backup = currentBackup && typeof currentBackup === 'object'
+      ? { ...currentBackup }
+      : { type: 'migrandia_cloud_backup', version: 1, localStorage: {} };
+
+    backup.localStorage = backup.localStorage && typeof backup.localStorage === 'object'
+      ? { ...backup.localStorage }
+      : {};
+    backup.localStorage[key] = JSON.stringify(value);
+
+    const raw = JSON.stringify(backup);
+    const chunks = chunkText(raw);
+    const operations = Math.max(oldCount, chunks.length) + 1;
+    if (operations > 500) {
+      throw new Error('La copia de Firebase es demasiado grande para guardarse de forma atómica.');
+    }
+
+    for (let index = 0; index < chunks.length; index += 1) {
+      transaction.set(chunkRef(index), { index, data: chunks[index] });
+    }
+    for (let index = chunks.length; index < oldCount; index += 1) {
+      transaction.delete(chunkRef(index));
+    }
+    transaction.set(metaRef, {
+      chunkCount: chunks.length,
+      bytes: raw.length,
+      updatedAt: serverTimestamp(),
+      version: Number(backup.version || 1)
+    }, { merge: true });
+  });
 }
 
 export { readPlannerStorageKey, writePlannerStorageKey };
