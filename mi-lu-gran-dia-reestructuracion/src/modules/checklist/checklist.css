@@ -112,3 +112,57 @@
   .ck-group-add{width:28px;height:28px;font-size:16px}
   .ck-create-kind{margin-bottom:14px}
 }
+
+/* Diálogo Checklist compacto en móvil */
+@media(max-width:760px){
+  .ck-dialog{
+    width:calc(100% - 20px);
+    max-height:min(86dvh,640px);
+    margin:auto;
+    border-radius:18px;
+    overflow:hidden
+  }
+  .ck-dialog form{
+    box-sizing:border-box;
+    max-height:min(86dvh,640px);
+    padding:16px;
+    overflow-y:auto;
+    overscroll-behavior:contain
+  }
+  .ck-dialog-head{align-items:center;margin-bottom:12px}
+  .ck-dialog-head span{font-size:8px;letter-spacing:.13em}
+  .ck-dialog-head h2{margin-top:2px;font-size:24px;line-height:1.05}
+  .ck-dialog-head button{width:32px;height:32px;flex:0 0 32px}
+  .ck-create-kind{margin-bottom:10px;padding:3px;border-radius:11px}
+  .ck-create-kind button{height:34px;border-radius:8px;font-size:10px}
+  .ck-dialog label{gap:4px;margin-top:8px}
+  .ck-dialog label>span{font-size:9px}
+  .ck-dialog input,.ck-dialog select{
+    height:38px;
+    padding:0 10px;
+    border-radius:10px;
+    font-size:16px
+  }
+  .ck-dialog textarea{
+    min-height:58px;
+    max-height:88px;
+    padding:8px 10px;
+    border-radius:10px;
+    font-size:16px
+  }
+  .ck-form-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .ck-dialog-actions{
+    position:sticky;
+    bottom:-16px;
+    margin:12px -16px -16px;
+    padding:10px 16px max(10px,env(safe-area-inset-bottom));
+    background:rgba(255,255,255,.96);
+    backdrop-filter:blur(8px)
+  }
+  .ck-dialog-actions button{min-height:38px;padding:0 12px;border-radius:10px;font-size:10px}
+}
+@media(max-width:390px){
+  .ck-dialog form{padding:14px}
+  .ck-dialog-actions{bottom:-14px;margin:10px -14px -14px;padding:9px 14px max(9px,env(safe-area-inset-bottom))}
+  .ck-dialog-head h2{font-size:22px}
+}
