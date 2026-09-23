@@ -53,9 +53,12 @@ async function readPlannerStorageKey(context, key) {
   return parseStoredJson(backup?.localStorage?.[key]);
 }
 
-async function writePlannerStorageKey(context, key, value) {
+async function writePlannerStorageKeys(context, entries) {
   if (!auth.currentUser || !context?.id) throw new Error('No hay una boda activa.');
   if (!weddingCapabilities(context.role).canEdit) throw new Error('Tu acceso es de solo lectura.');
+  if (!entries || typeof entries !== 'object' || Array.isArray(entries) || !Object.keys(entries).length) {
+    throw new Error('No hay datos para guardar.');
+  }
 
   const metaRef = doc(db, 'weddings', context.id, 'cloudSync', 'main');
   const chunkRef = (index) => doc(db, 'weddings', context.id, 'cloudChunks', String(index).padStart(5, '0'));
@@ -89,7 +92,10 @@ async function writePlannerStorageKey(context, key, value) {
     backup.localStorage = backup.localStorage && typeof backup.localStorage === 'object'
       ? { ...backup.localStorage }
       : {};
-    backup.localStorage[key] = JSON.stringify(value);
+
+    Object.entries(entries).forEach(([key, value]) => {
+      backup.localStorage[key] = JSON.stringify(value);
+    });
 
     const raw = JSON.stringify(backup);
     const chunks = chunkText(raw);
@@ -113,4 +119,8 @@ async function writePlannerStorageKey(context, key, value) {
   });
 }
 
-export { readPlannerStorageKey, writePlannerStorageKey };
+async function writePlannerStorageKey(context, key, value) {
+  return writePlannerStorageKeys(context, { [key]: value });
+}
+
+export { readPlannerStorageKey, writePlannerStorageKey, writePlannerStorageKeys };
