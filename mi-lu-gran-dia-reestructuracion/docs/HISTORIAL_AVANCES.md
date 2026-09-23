@@ -76,3 +76,17 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - El botón “Mi Gran Día” de la barra vuelve al Inicio.
 - Los demás accesos quedan estructurados para conectar sus módulos posteriormente, pero todavía no ejecutan navegación ni escrituras.
 - La barra reutiliza el contexto de boda ya cargado; no agrega lecturas/escrituras de Firebase, Storage ni datos de módulos.
+
+## 2026-09-23 — Presupuesto conectado y auditado
+- Presupuesto se integró a la boda activa usando exclusivamente `services/planner-cloud.js`; el módulo no importa SDK de Firebase ni escribe directamente en Firestore.
+- La clave existente `planificador_bodas_presupuesto_v5_etiquetas` se conserva sin renombrar, migrar ni crear almacenamiento paralelo.
+- Se habilitaron edición de moneda e invitados, categorías, gastos, etiquetas y paquetes integrales respetando `weddingCapabilities(context.role).canEdit`.
+- Los paquetes reutilizan `item.packageId`; no se creó una segunda relación ni colección.
+- Se incorporó biblioteca visual de iconos para categorías manteniendo el mismo campo `icon`.
+- Se auditó XSS/HTML dinámico: valores provenientes del estado se escapan antes de insertarse en HTML; además se sanea el color de etiquetas antes de usarlo en estilos inline.
+- Se endureció la exportación CSV contra formula injection al abrir archivos en hojas de cálculo.
+- Se corrigió una regla responsive contradictoria del selector de etiquetas.
+- No se modificaron Firebase, Firestore Rules, Storage, Authentication, usuarios, IDs ni contratos de sincronización.
+- Riesgo pendiente no resuelto en esta tarea: `planner-cloud.js` realiza read-modify-write del backup agregado; escrituras simultáneas de distintas sesiones o módulos pueden producir pérdida de actualización. No se modifica sin autorización explícita porque pertenece a persistencia.
+- Las carpetas de tests siguen sin pruebas ejecutables para Presupuesto; antes de declarar el módulo completamente cerrado deben añadirse invariantes/no-pérdida y validación responsive en 360, 390–430, 768, 1024 y 1440 px.
+
