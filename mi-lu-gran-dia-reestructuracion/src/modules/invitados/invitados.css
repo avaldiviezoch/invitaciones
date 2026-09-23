@@ -355,7 +355,6 @@
 .guests-segments{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));overflow:visible}
 }
 @media(max-width:600px){
-.table-seat-label{max-width:78px}
 .table-visual-card{padding-left:12px;padding-right:12px}
 .table-visual-footer{margin-top:5px}
 .table-guest-detail-dialog{width:calc(100vw - 16px);border-radius:16px}
@@ -384,7 +383,7 @@
 .tables-stage-head{align-items:flex-start;flex-direction:column}
 .table-visual-card{padding:9px 4px 10px}
 .table-visual-canvas{transform:scale(.86);transform-origin:top center;margin-bottom:-38px}
-.table-seat-label{max-width:82px}
+.table-seat-label{max-width:74px}
 .tables-guests-panel{border-radius:16px}
 .tables-guest-list{max-height:280px}
 
