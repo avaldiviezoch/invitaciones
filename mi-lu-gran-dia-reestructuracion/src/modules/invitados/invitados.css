@@ -50,9 +50,9 @@
 .guests-empty span,.guests-error span{display:block;margin-top:7px;font-size:10px}
 .guests-view-tabs{width:min(94%,1580px);display:flex;gap:5px;margin:0 auto 14px;padding:5px;border:1px solid #e2dcd7;border-radius:14px;background:#fff}
 .guests-view-tabs button{min-height:38px;display:flex;align-items:center;justify-content:center;gap:7px;flex:1;padding:0 14px;border:0;border-radius:10px;background:transparent;color:#77726e;font-size:9px;font-weight:750;cursor:pointer}
-.guests-view-tabs button.is-active{background:#f1f3eb;color:#596047}
+.guests-view-tabs button.is-active{background:#fcf7f8;color:#9c6470}
 .guests-view-tabs button span{min-width:20px;padding:3px 6px;border-radius:999px;background:#eeeae5;color:#77716c;font-size:7px}
-.guests-view-tabs button.is-active span{background:#fff;color:#697454}
+.guests-view-tabs button.is-active span{background:#fff;color:#ad7480}
 .rsvp-pane{padding-bottom:8px}
 .rsvp-overview{width:min(94%,1580px);display:grid;grid-template-columns:repeat(4,1fr);margin:0 auto 14px;border:1px solid #e2dcd7;border-radius:18px;background:#fff;overflow:hidden}
 .rsvp-overview article{padding:14px 18px;border-right:1px solid #e8e2dd}
@@ -72,25 +72,26 @@
 .rsvp-card-review{text-align:right}
 .rsvp-card-review>span{display:block;color:#918b86;font-size:7px;font-weight:700;text-transform:uppercase}
 .rsvp-card-review>strong{display:block;margin-top:5px;color:#595650;font-size:10px}
-.rsvp-card-review button{min-height:34px;margin-top:8px;padding:0 11px;border:1px solid #d9d3cd;border-radius:9px;background:#fff;color:#626a53;font-size:8px;font-weight:750;cursor:pointer}
+.rsvp-card-review button{min-height:34px;margin-top:8px;padding:0 11px;border:1px solid #ead6da;border-radius:9px;background:#fcf7f8;color:#9c6470;font-size:8px;font-weight:750;cursor:pointer}
 .rsvp-dialog{width:min(760px,calc(100vw - 28px));max-height:min(88vh,800px);padding:0;border:1px solid #ded8d2;border-radius:20px;background:#fff;color:#383531;box-shadow:0 24px 70px rgba(50,44,40,.18)}
 .rsvp-dialog::backdrop{background:rgba(37,34,31,.28);backdrop-filter:blur(2px)}
 .rsvp-review-form{display:grid;gap:14px;padding:18px 22px;overflow:auto}
 .rsvp-response-summary{display:grid;gap:4px;padding:12px 14px;border:1px solid #e6e0da;border-radius:12px;background:#faf8f5}
-.rsvp-response-summary strong{color:#5d674e;font-size:11px}
+.rsvp-response-summary strong{color:#9c6470;font-size:11px}
 .rsvp-response-summary span,.rsvp-response-summary small{color:#85807a;font-size:9px}
 .rsvp-link-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding-top:5px}
 .rsvp-link-head strong{display:block;color:#514d49;font-size:10px}
 .rsvp-link-head span{display:block;margin-top:4px;color:#918b86;font-size:8px}
-.rsvp-link-head small{color:#778263;font-size:8px;font-weight:700}
+.rsvp-link-head small{color:#ad7480;font-size:8px;font-weight:700}
 .rsvp-guest-picker{max-height:290px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:auto;padding:2px}
 .rsvp-guest-option{display:grid;grid-template-columns:auto 38px minmax(0,1fr);align-items:center;gap:9px;padding:9px 10px;border:1px solid #e5dfda;border-radius:12px;background:#fff;cursor:pointer}
-.rsvp-guest-option.is-suggested{border-color:#bcc6a8;background:#f8faf4}
+.rsvp-guest-option.is-suggested{border-color:#c89aa3;background:#fcf7f8}
 .rsvp-guest-option input{width:16px;height:16px;margin:0}
 .rsvp-guest-option .guest-avatar{width:38px;height:38px}
 .rsvp-guest-option strong{display:block;overflow:hidden;color:#4f4c48;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
 .rsvp-guest-option small{display:block;margin-top:3px;color:#938d87;font-size:7px}
 .rsvp-dialog-actions{grid-template-columns:1fr 1fr auto auto}
+.rsvp-dialog-actions .guests-save{border-color:#ad7480;background:#ad7480;color:#fff}
 .guests-new{min-height:44px;display:inline-flex;align-items:center;gap:7px;padding:0 14px;border:0;border-radius:12px;background:#7d8866;color:#fff;font-size:10px;font-weight:750;cursor:pointer;white-space:nowrap}
 .guests-new b{font-size:17px;font-weight:400}
 .guests-dialog{width:min(720px,calc(100vw - 28px));max-height:min(86vh,760px);padding:0;border:1px solid #ded8d2;border-radius:20px;background:#fff;color:#383531;box-shadow:0 24px 70px rgba(50,44,40,.18)}
