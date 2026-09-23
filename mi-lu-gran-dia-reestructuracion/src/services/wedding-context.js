@@ -173,10 +173,14 @@ async function inviteWeddingMember(context, email, role = 'viewer') {
   const cleanRole = normalizeWeddingRole(role);
   if (cleanRole === 'owner') throw new Error('El rol Propietario no se puede asignar.');
   if (cleanRole === 'admin' && !capabilities.canAssignAdmin) throw new Error('Solo el propietario puede asignar administradores.');
-  const id = invitationId(context.id, normalizedEmail);
-  const inviteRef = doc(db, 'invitations', id);
+  const inviteRef = doc(db, 'invitations', invitationId(context.id, normalizedEmail));
   const existingInvite = await getDoc(inviteRef);
-  const invitation = {
+  if (existingInvite.exists()) {
+    const previous = existingInvite.data() || {};
+    if (previous.status === 'pending' && normalizeWeddingRole(previous.role) === cleanRole) throw new Error('Ese correo ya tiene una invitación pendiente.');
+    await deleteDoc(inviteRef);
+  }
+  await setDoc(inviteRef, {
     weddingId: context.id,
     weddingName: context.name || 'Mi boda',
     email: normalizedEmail,
@@ -184,10 +188,9 @@ async function inviteWeddingMember(context, email, role = 'viewer') {
     status: 'pending',
     invitedBy: user.uid,
     invitedByEmail: String(user.email || '').toLowerCase(),
+    createdAt: serverTimestamp(),
     updatedAt: serverTimestamp()
-  };
-  if (!existingInvite.exists()) invitation.createdAt = serverTimestamp();
-  await setDoc(inviteRef, invitation, { merge: true });
+  });
 }
 
 async function updateWeddingMemberRole(context, uid, role) {
