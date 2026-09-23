@@ -176,14 +176,6 @@ function render() {
       <div class="ck-hero-progress"><i style="width:${stats.percent}%"></i></div>
     </header>
 
-    <section class="ck-actions">
-      <div class="ck-actions-left">
-        ${editable ? '<button class="ck-primary ck-new" type="button" data-checklist-add><b>＋</b>Nueva tarea</button>' : ''}
-        <button type="button" data-apply-date>▣ <span>Aplicar fecha</span></button>
-      </div>
-      <div class="ck-actions-right"><button type="button" data-export-csv>Exportar CSV</button></div>
-    </section>
-
     <section class="ck-kpis">
       <article><span>Total de tareas</span><strong>${stats.total}</strong></article>
       <article><span>Pendientes</span><strong>${stats.pending}</strong></article>
@@ -193,6 +185,7 @@ function render() {
     </section>
 
     <section class="ck-original-toolbar">
+      ${editable ? '<button class="ck-toolbar-new" type="button" data-checklist-add><b>＋</b><span>Nueva tarea</span></button>' : ''}
       <div class="ck-segments">
         <button data-checklist-filter="all" class="${filter==='all'?'is-active':''}">Todas</button>
         <button data-checklist-filter="pending" class="${filter==='pending'?'is-active':''}">Pendientes</button>
@@ -203,6 +196,7 @@ function render() {
       <label class="ck-original-search"><span>⌕</span><input type="search" data-checklist-search value="${esc(search)}" placeholder="Buscar tarea, proveedor o nota"></label>
       <label class="ck-select"><b>RESPONSABLE</b><select data-responsible-filter><option value="all">Todos</option>${responsibleOptions.map(v=>`<option ${responsibleFilter===v?'selected':''}>${esc(v)}</option>`).join('')}</select></label>
       <label class="ck-select"><b>PRIORIDAD</b><select data-priority-filter><option value="all">Todas</option>${priorityOptions.map(v=>`<option ${priorityFilter===v?'selected':''}>${esc(v)}</option>`).join('')}</select></label>
+      <button class="ck-export-icon" type="button" data-export-csv title="Exportar CSV" aria-label="Exportar Checklist a CSV">⇩</button>
     </section>
 
     <section class="ck-groups">
@@ -273,6 +267,23 @@ async function handleClick(event) {
     openForm();
     return;
   }
+  if (event.target.closest('[data-export-csv]')) {
+    const csvCell = (value) => '"' + String(value ?? '').replaceAll('"', '""') + '"';
+    const rows = [['Tarea','Grupo','Responsable','Fecha','Prioridad','Estado','Notas']];
+    state.tasks.forEach((task, index) => rows.push([
+      taskTitle(task), taskCategory(task, index), taskResponsible(task), taskDate(task),
+      priorityLabel(task), taskStatus(task), String(task?.notes || task?.nota || '')
+    ]));
+    const csv = '\uFEFF' + rows.map((row) => row.map(csvCell).join(',')).join('\r\n');
+    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'checklist-boda.csv';
+    link.click();
+    URL.revokeObjectURL(url);
+    return;
+  }
+
   if (event.target.closest('[data-dialog-close]')) {
     root.querySelector('[data-checklist-dialog]')?.close();
     return;
