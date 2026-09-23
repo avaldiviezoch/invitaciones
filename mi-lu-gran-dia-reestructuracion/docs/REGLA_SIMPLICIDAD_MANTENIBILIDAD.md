@@ -51,6 +51,18 @@ Una corrección debe:
 
 Está prohibido solucionar un problema agregando una capa que simplemente tape el comportamiento anterior.
 
+## Homogeneización visual general
+Mientras no exista un sistema visual definitivo, las superficies generales de Mi Lu Gran Día deben conservar una apariencia coherente entre módulos.
+
+- Cada módulo nuevo o modificado debe comparar sus superficies generales con los módulos ya consolidados y mantener la misma familia visual.
+- La homogeneización aplica a elementos de ambiente general: tipografía de interfaz, escalas y jerarquías de texto, botones, banners y cabeceras, contenedores, tarjetas, formularios, campos, modales, barras de herramientas, filtros, espaciados, bordes, radios, sombras y comportamiento responsive.
+- No se fijan aquí una fuente, tamaño, color o medida definitiva. Esos valores podrán cambiar cuando se defina formalmente el sistema visual de la aplicación.
+- Hasta entonces, no introducir arbitrariamente una segunda escala tipográfica, otra familia de botones, otra estructura de modal o patrones generales distintos si ya existe un referente consolidado.
+- Los elementos específicos de un módulo pueden tener una presentación propia cuando su función lo requiera, pero deben convivir con el lenguaje visual general y no redefinirlo.
+- Una diferencia visual debe responder a una necesidad funcional o semántica, no a que el módulo haya sido desarrollado en otro momento.
+- Cuando se cambie posteriormente la fuente, escala, botones, banners u otros patrones generales definitivos, deberán declararse de forma común para que los módulos los consuman sin mantener versiones visuales paralelas.
+- Antes de cerrar un módulo, comparar al menos sus superficies generales de escritorio y móvil con el referente vigente y retirar reglas antiguas que compitan con la implementación homologada.
+
 ## Persistencia y vinculación
 Firebase y los datos existentes son la fuente real. Los módulos se adaptan a sus contratos auditados. No crear almacenes paralelos para facilitar una pantalla. En especial, usuarios/membresías, invitados, mesas, asientos, distribución y confirmaciones deben mantener relaciones explícitas y estables.
 
