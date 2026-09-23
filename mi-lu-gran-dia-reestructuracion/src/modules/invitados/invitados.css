@@ -50,7 +50,7 @@
 .guests-empty span,.guests-error span{display:block;margin-top:7px;font-size:10px}
 .guests-view-tabs{width:min(94%,1580px);display:flex;gap:5px;margin:0 auto 14px;padding:5px;border:1px solid #e2dcd7;border-radius:14px;background:#fff}
 .guests-view-tabs button{min-height:38px;display:flex;align-items:center;justify-content:center;gap:7px;flex:1;padding:0 14px;border:0;border-radius:10px;background:transparent;color:#77726e;font-size:9px;font-weight:750;cursor:pointer}
-.guests-view-tabs button.is-active{background:#fcf7f8;color:#9c6470}
+.guests-view-tabs button.is-active{background:#f7ecef;color:#9c6470}
 .guests-view-tabs button span{min-width:20px;padding:3px 6px;border-radius:999px;background:#eeeae5;color:#77716c;font-size:7px}
 .guests-view-tabs button.is-active span{background:#fff;color:#ad7480}
 .rsvp-pane{padding-bottom:8px}
@@ -72,7 +72,7 @@
 .rsvp-card-review{text-align:right}
 .rsvp-card-review>span{display:block;color:#918b86;font-size:7px;font-weight:700;text-transform:uppercase}
 .rsvp-card-review>strong{display:block;margin-top:5px;color:#595650;font-size:10px}
-.rsvp-card-review button{min-height:34px;margin-top:8px;padding:0 11px;border:1px solid #ead6da;border-radius:9px;background:#fcf7f8;color:#9c6470;font-size:8px;font-weight:750;cursor:pointer}
+.rsvp-card-review button{min-height:34px;margin-top:8px;padding:0 11px;border:1px solid #e3c6cc;border-radius:9px;background:#f7ecef;color:#9c6470;font-size:8px;font-weight:750;cursor:pointer}
 .rsvp-dialog{width:min(760px,calc(100vw - 28px));max-height:min(88vh,800px);padding:0;border:1px solid #ded8d2;border-radius:20px;background:#fff;color:#383531;box-shadow:0 24px 70px rgba(50,44,40,.18)}
 .rsvp-dialog::backdrop{background:rgba(37,34,31,.28);backdrop-filter:blur(2px)}
 .rsvp-review-form{display:grid;gap:14px;padding:18px 22px;overflow:auto}
@@ -85,7 +85,7 @@
 .rsvp-link-head small{color:#ad7480;font-size:8px;font-weight:700}
 .rsvp-guest-picker{max-height:290px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:auto;padding:2px}
 .rsvp-guest-option{display:grid;grid-template-columns:auto 38px minmax(0,1fr);align-items:center;gap:9px;padding:9px 10px;border:1px solid #e5dfda;border-radius:12px;background:#fff;cursor:pointer}
-.rsvp-guest-option.is-suggested{border-color:#c89aa3;background:#fcf7f8}
+.rsvp-guest-option.is-suggested{border-color:#bd8994;background:#f7ecef}
 .rsvp-guest-option input{width:16px;height:16px;margin:0}
 .rsvp-guest-option .guest-avatar{width:38px;height:38px}
 .rsvp-guest-option strong{display:block;overflow:hidden;color:#4f4c48;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
