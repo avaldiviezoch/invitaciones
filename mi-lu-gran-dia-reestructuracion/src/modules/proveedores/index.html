@@ -1,0 +1,66 @@
+<div class="provider-shell">
+  <section class="provider-hero">
+    <div>
+      <p class="provider-eyebrow">Módulo · Planificación</p>
+      <div class="provider-title-row">
+        <div class="provider-title-icon" aria-hidden="true">▦</div>
+        <div>
+          <h1>Proveedores</h1>
+          <p>Organiza contactos, cotizaciones, contratos y pagos de cada servicio.</p>
+        </div>
+      </div>
+    </div>
+    <div class="provider-hero-total">
+      <span>Contratados</span>
+      <strong data-provider-contracted-count>0</strong>
+    </div>
+  </section>
+
+  <main class="provider-content">
+    <section class="provider-toolbar">
+      <button class="provider-button provider-primary" type="button" data-provider-new>
+        <b aria-hidden="true">＋</b><span>Nuevo proveedor</span>
+      </button>
+      <div class="provider-toolbar-filters">
+        <label class="provider-search">⌕<input type="search" data-provider-search placeholder="Buscar proveedor, servicio o contacto"></label>
+        <label class="provider-filter"><span>Estado</span><select data-provider-status-filter>
+          <option value="all">Todos</option>
+          <option value="pending">Pendientes</option>
+          <option value="quoting">Cotizando</option>
+          <option value="contracted">Contratados</option>
+          <option value="completed">Completados</option>
+          <option value="discarded">Descartados</option>
+        </select></label>
+      </div>
+    </section>
+
+    <section class="provider-overview">
+      <article><span>Proveedores</span><strong data-provider-total>0</strong><small>registrados</small></article>
+      <article><span>Cotizando</span><strong data-provider-quoting>0</strong><small>en evaluación</small></article>
+      <article><span>Contratados</span><strong data-provider-contracted>0</strong><small>confirmados</small></article>
+      <article><span>Total pagado</span><strong data-provider-paid>—</strong><small>registrado</small></article>
+    </section>
+
+    <section class="provider-list-head">
+      <div><h2>Directorio de proveedores</h2><p>Revisa el estado comercial y los datos principales de cada proveedor.</p></div>
+      <span data-provider-results>0 proveedores</span>
+    </section>
+
+    <section class="provider-list" data-provider-list></section>
+    <p class="provider-read-state" data-provider-state>Datos de la boda activa</p>
+  </main>
+
+  <dialog class="provider-dialog" data-provider-dialog>
+    <div class="provider-dialog-frame">
+      <header>
+        <div><span>PROVEEDORES</span><h2 data-provider-dialog-title>Proveedor</h2></div>
+        <button type="button" data-provider-close aria-label="Cerrar">×</button>
+      </header>
+      <div class="provider-dialog-body" data-provider-dialog-body></div>
+      <footer data-provider-dialog-footer>
+        <button type="button" data-provider-close>Cancelar</button>
+        <button class="provider-save" type="submit" form="providerEditorForm" data-provider-save>Guardar cambios</button>
+      </footer>
+    </div>
+  </dialog>
+</div>
