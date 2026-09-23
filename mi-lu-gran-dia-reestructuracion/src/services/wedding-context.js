@@ -175,25 +175,37 @@ async function inviteWeddingMember(context, email, role = 'viewer') {
   if (cleanRole === 'admin' && !capabilities.canAssignAdmin) throw new Error('Solo el propietario puede asignar administradores.');
 
   const inviteRef = doc(db, 'invitations', invitationId(context.id, normalizedEmail));
-  const inviteSnapshot = await getDoc(inviteRef);
+  let inviteSnapshot;
+  try {
+    inviteSnapshot = await getDoc(inviteRef);
+  } catch (error) {
+    console.error('Gestionar personas · lectura de invitación:', error);
+    throw new Error('INVITE_READ: ' + (error?.message || 'No se pudo leer la invitación.'));
+  }
 
   if (inviteSnapshot.exists()) {
     const existing = inviteSnapshot.data() || {};
     if (existing.status === 'pending' && normalizeWeddingRole(existing.role) === cleanRole) {
       throw new Error('Ese correo ya tiene una invitación pendiente.');
     }
-    await updateDoc(inviteRef, {
+    try {
+      await updateDoc(inviteRef, {
       weddingName: context.name || existing.weddingName || 'Mi boda',
       role: cleanRole,
       status: 'pending',
       invitedBy: user.uid,
       invitedByEmail: String(user.email || '').toLowerCase(),
-      updatedAt: serverTimestamp()
-    });
+        updatedAt: serverTimestamp()
+      });
+    } catch (error) {
+      console.error('Gestionar personas · actualización de invitación:', error);
+      throw new Error('INVITE_UPDATE: ' + (error?.message || 'No se pudo actualizar la invitación.'));
+    }
     return;
   }
 
-  await setDoc(inviteRef, {
+  try {
+    await setDoc(inviteRef, {
     weddingId: context.id,
     weddingName: context.name || 'Mi boda',
     email: normalizedEmail,
@@ -202,8 +214,12 @@ async function inviteWeddingMember(context, email, role = 'viewer') {
     invitedBy: user.uid,
     invitedByEmail: String(user.email || '').toLowerCase(),
     createdAt: serverTimestamp(),
-    updatedAt: serverTimestamp()
-  });
+      updatedAt: serverTimestamp()
+    });
+  } catch (error) {
+    console.error('Gestionar personas · creación de invitación:', error);
+    throw new Error('INVITE_CREATE: ' + (error?.message || 'No se pudo crear la invitación.'));
+  }
 }
 async function updateWeddingMemberRole(context, uid, role) {
   const user = auth.currentUser;
