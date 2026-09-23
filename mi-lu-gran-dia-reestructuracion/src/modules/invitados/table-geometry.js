@@ -51,6 +51,10 @@ function tableSeatGeometry(type, capacity) {
         y: centerY + sin * radiusY,
         labelX: centerX + cos * (radiusX + 38),
         labelY: centerY + sin * (radiusY + 38),
+        labelMediumX: centerX + cos * (radiusX + 30),
+        labelMediumY: centerY + sin * (radiusY + 30),
+        labelCompactX: centerX + cos * (radiusX + 23),
+        labelCompactY: centerY + sin * (radiusY + 23),
         labelAlign: cos > 0.28 ? 'left' : cos < -0.28 ? 'right' : 'center'
       });
     }
@@ -92,6 +96,10 @@ function tableSeatGeometry(type, capacity) {
       y,
       labelX: x + ux * 40,
       labelY: y + uy * 40,
+      labelMediumX: x + ux * 31,
+      labelMediumY: y + uy * 31,
+      labelCompactX: x + ux * 24,
+      labelCompactY: y + uy * 24,
       labelAlign: ux > 0.32 ? 'left' : ux < -0.32 ? 'right' : 'center'
     });
   }
