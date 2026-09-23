@@ -51,10 +51,10 @@ function tableSeatGeometry(type, capacity) {
         y: centerY + sin * radiusY,
         labelX: centerX + cos * (radiusX + 34),
         labelY: centerY + sin * (radiusY + 34),
-        labelMediumX: centerX + cos * (radiusX + 28),
-        labelMediumY: centerY + sin * (radiusY + 28),
-        labelCompactX: centerX + cos * (radiusX + 22),
-        labelCompactY: centerY + sin * (radiusY + 22),
+        labelMediumX: centerX + cos * (radiusX + 34),
+        labelMediumY: centerY + sin * (radiusY + 34),
+        labelCompactX: centerX + cos * (radiusX + 34),
+        labelCompactY: centerY + sin * (radiusY + 34),
         labelAlign: cos > 0.28 ? 'left' : cos < -0.28 ? 'right' : 'center'
       });
     }
@@ -96,10 +96,10 @@ function tableSeatGeometry(type, capacity) {
       y,
       labelX: x + ux * 34,
       labelY: y + uy * 34,
-      labelMediumX: x + ux * 28,
-      labelMediumY: y + uy * 28,
-      labelCompactX: x + ux * 22,
-      labelCompactY: y + uy * 22,
+      labelMediumX: x + ux * 34,
+      labelMediumY: y + uy * 34,
+      labelCompactX: x + ux * 34,
+      labelCompactY: y + uy * 34,
       labelAlign: ux > 0.32 ? 'left' : ux < -0.32 ? 'right' : 'center'
     });
   }
