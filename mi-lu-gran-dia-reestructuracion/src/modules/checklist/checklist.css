@@ -84,3 +84,13 @@
 .ck-collapse{transition:transform .18s ease}
 .ck-group.is-collapsed .ck-collapse{transform:rotate(-90deg)}
 .ck-group>header{cursor:pointer}
+
+/* Estados y reordenamiento funcional */
+.ck-original-task[draggable="true"] .ck-drag{cursor:grab}
+.ck-original-task.is-dragging{opacity:.45}
+.ck-original-task.is-drag-over{outline:2px solid #9aa77d;outline-offset:-2px}
+.ck-original-task.is-overdue .ck-original-task-copy small{color:#a35f69;font-weight:700}
+.ck-task-status{margin-left:auto;max-width:104px;height:30px;padding:0 7px;border:1px solid #e5dfda;border-radius:9px;background:#fff;color:#666;font-size:9px;outline:0}
+@media(max-width:760px){
+  .ck-task-status{max-width:88px;height:28px;padding:0 5px;font-size:8px}
+}
