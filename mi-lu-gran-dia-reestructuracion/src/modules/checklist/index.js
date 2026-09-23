@@ -180,10 +180,8 @@ function render() {
       <div class="ck-actions-left">
         ${editable ? '<button class="ck-primary ck-new" type="button" data-checklist-add><b>＋</b>Nueva tarea</button>' : ''}
         <button type="button" data-apply-date>▣ <span>Aplicar fecha</span></button>
-        <button type="button" data-save-template>▣ <span>Guardar como</span></button>
-        <button type="button" data-open-template>▱ <span>Abrir</span></button>
       </div>
-      <div class="ck-actions-right"><button type="button" data-export-csv>Exportar CSV</button><button class="ck-reset" type="button" data-reset-base>Restablecer base</button></div>
+      <div class="ck-actions-right"><button type="button" data-export-csv>Exportar CSV</button></div>
     </section>
 
     <section class="ck-kpis">
