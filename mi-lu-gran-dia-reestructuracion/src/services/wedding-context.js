@@ -9,7 +9,8 @@ import {
   query,
   where,
   writeBatch,
-  updateDoc
+  updateDoc,
+  setDoc
 } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
 import { auth, db } from './firebase-client.js';
 import { normalizeWeddingRole, weddingCapabilities } from '../core/app/permissions.js';
