@@ -536,6 +536,14 @@ async function handleRsvpSubmit(event) {
     return;
   }
 
+  const conflictingGuests = linkedGuestIds
+    .map((id) => findGuest(id))
+    .filter((guest) => guest && text(guest.rsvpResponseId) && String(guest.rsvpResponseId) !== String(response.id));
+  if (conflictingGuests.length) {
+    window.alert(`No se puede aplicar esta respuesta porque ${conflictingGuests.map((guest) => text(guest.name) || 'un invitado').join(', ')} ya está vinculado a otra respuesta RSVP. Primero revisa y desvincula esa relación.`);
+    return;
+  }
+
   const meta = {
     linkedGuestIds,
     group: text(data.get('group')),
@@ -786,7 +794,7 @@ async function mountInvitados(context) {
 
   try {
     const [template, loaded] = await Promise.all([
-      fetch(new URL('./index.html?v=3', import.meta.url)).then((response) => {
+      fetch(new URL('./index.html?v=4', import.meta.url)).then((response) => {
         if (!response.ok) throw new Error('No se pudo cargar la interfaz de Invitados.');
         return response.text();
       }),
