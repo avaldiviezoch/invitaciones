@@ -1,5 +1,6 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { mountChecklist } from '../checklist/index.js?v=13';
+import { mountPresupuesto } from '../presupuesto/index.js?v=1';
 import { auth } from '../../services/firebase-client.js';
 import {
   listWeddingContexts,
@@ -554,17 +555,19 @@ document.addEventListener('click', (event) => {
 const moduleWorkspace = $('moduleWorkspace');
 
 function openModule(moduleId) {
-  if (moduleId !== 'checklist') return;
+  if (!['checklist', 'presupuesto'].includes(moduleId)) return;
   setMenu(false);
   document.body.classList.add('module-open');
   moduleWorkspace.setAttribute('aria-hidden', 'false');
+  document.querySelectorAll('[data-module-view]').forEach((view) => { view.hidden = view.dataset.moduleView !== moduleId; });
   document.querySelectorAll('[data-app-module]').forEach((button) => {
     const active = button.dataset.appModule === moduleId;
     button.classList.toggle('is-active', active);
     button.setAttribute('aria-current', active ? 'page' : 'false');
   });
-  history.replaceState(null, '', '#checklist');
-  mountChecklist(weddingContext);
+  history.replaceState(null, '', '#' + moduleId);
+  if (moduleId === 'checklist') mountChecklist(weddingContext);
+  if (moduleId === 'presupuesto') mountPresupuesto(weddingContext);
 }
 
 function closeModuleWorkspace() {
@@ -577,18 +580,18 @@ $('appNavHome').onclick = closeModuleWorkspace;
 
 document.querySelectorAll('[data-app-module]').forEach((button) => {
   button.addEventListener('click', () => {
-    if (button.dataset.appModule === 'checklist') openModule('checklist');
+    if (['checklist', 'presupuesto'].includes(button.dataset.appModule)) openModule(button.dataset.appModule);
   });
 });
 
 document.querySelectorAll('.module-link').forEach((link) => {
   link.addEventListener('click', (event) => {
     event.preventDefault();
-    if (link.dataset.module === 'checklist') openModule('checklist');
+    if (['checklist', 'presupuesto'].includes(link.dataset.module)) openModule(link.dataset.module);
   });
 });
 
-if (location.hash === '#checklist' && auth.currentUser) openModule('checklist');
+if (['#checklist', '#presupuesto'].includes(location.hash) && auth.currentUser) openModule(location.hash.slice(1));
 
 applyWeddingContext(null);
 tick();
