@@ -2,6 +2,7 @@ import { db } from './firebase-client.js';
 import { weddingCapabilities } from '../core/app/permissions.js';
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -114,18 +115,7 @@ async function restoreRsvpManagement(context, token, responseId, previous) {
     await setDoc(ref, { ...previous, updatedAt: serverTimestamp() }, { merge: false });
     return;
   }
-  await setDoc(ref, {
-    version: 1,
-    token: cleanText(token, 160),
-    responseId: cleanText(responseId, 180),
-    weddingId: context.id,
-    side: '',
-    group: '',
-    familyLabel: '',
-    linkedGuestIds: [],
-    reviewed: false,
-    updatedAt: serverTimestamp()
-  }, { merge: false });
+  await deleteDoc(ref);
 }
 
 export { loadRsvpAdminSnapshot, saveRsvpManagement, restoreRsvpManagement };
