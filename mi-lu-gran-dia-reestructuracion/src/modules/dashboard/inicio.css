@@ -13,15 +13,21 @@ html,body {
   margin:0;
   overflow:hidden
 }
+html {
+  background:#0b0b0b
+}
 body {
   background:#0b0b0b;
   color:#fff;
   font-family:Inter,Segoe UI,Arial,sans-serif
 }
+html.module-route,
+.module-route body {
+  background:#f7f5f1
+}
 .module-route .app{display:none}
 .module-route .module-workspace{display:block}
 .module-route body.auth-locked .module-workspace{visibility:hidden}
-.module-route body:not(.auth-locked){background:#f7f5f1}
 .app {
   position:relative;
   width:100%;
