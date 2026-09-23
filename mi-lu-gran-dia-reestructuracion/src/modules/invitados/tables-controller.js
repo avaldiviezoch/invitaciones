@@ -161,8 +161,9 @@ function createTablesController(api) {
   function guestFilterMatch(guest) {
     if (guestFilter === 'unassigned' && text(guest.tableId)) return false;
     if (guestFilter === 'assigned' && !text(guest.tableId)) return false;
-    if (guestFilter === 'confirmed' && text(guest.status) !== 'confirmed') return false;
-    if (guestFilter === 'pending' && text(guest.status) === 'confirmed') return false;
+    const status = text(guest.status).toLowerCase();
+    if (guestFilter === 'confirmed' && status !== 'confirmed') return false;
+    if (guestFilter === 'pending' && (status === 'confirmed' || status === 'declined')) return false;
     if (guestSearch && !normalizeText(guest.name).includes(normalizeText(guestSearch))) return false;
     return true;
   }
