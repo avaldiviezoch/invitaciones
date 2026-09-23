@@ -1,6 +1,7 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { loadInvitadosSnapshot, saveInvitadosSnapshot } from './invitados-data.js?v=3';
 import { createRsvpController } from './rsvp-controller.js?v=1';
+import { createTablesController } from './tables-controller.js?v=1';
 
 let activeContext = null;
 let snapshot = null;
@@ -10,6 +11,7 @@ let search = '';
 let activeView = 'list';
 let saving = false;
 let rsvpController = null;
+let tablesController = null;
 
 const esc = (value) => String(value ?? '')
   .replaceAll('&','&amp;')
@@ -151,6 +153,23 @@ function ensureRsvpController() {
   return rsvpController;
 }
 
+function ensureTablesController() {
+  if (tablesController) return tablesController;
+  tablesController = createTablesController({
+    getRoot,
+    getContext: () => activeContext,
+    getSnapshot: () => snapshot,
+    setSnapshot: (value) => { snapshot = value; },
+    canEdit,
+    isSaving: () => saving,
+    setSaving: (value) => { saving = Boolean(value); },
+    renderMain: render,
+    emitDataChange
+  });
+  return tablesController;
+}
+
+
 function render() {
   const root = getRoot();
   if (!root || !snapshot) return;
@@ -187,6 +206,7 @@ function render() {
     pane.hidden = pane.dataset.guestsPane !== activeView;
   });
   ensureRsvpController().render();
+  ensureTablesController().render();
 }
 
 function findGuest(id) {
@@ -361,10 +381,12 @@ function bind(root) {
       return;
     }
 
+    if (await ensureTablesController().handleClick(event)) return;
     await ensureRsvpController().handleClick(event);
   });
 
   root.addEventListener('input', (event) => {
+    if (ensureTablesController().handleInput(event)) return;
     if (!event.target.matches('[data-guests-search]')) return;
     search = event.target.value;
     render();
@@ -373,11 +395,16 @@ function bind(root) {
     input?.setSelectionRange(search.length, search.length);
   });
 
+  root.addEventListener('change', async (event) => {
+    await ensureTablesController().handleChange(event);
+  });
+
   root.addEventListener('submit', async (event) => {
     if (event.target.matches('[data-guests-form]')) {
       await handleGuestSubmit(event);
       return;
     }
+    if (await ensureTablesController().handleSubmit(event)) return;
     await ensureRsvpController().handleSubmit(event);
   });
 }
@@ -407,7 +434,9 @@ async function mountInvitados(context) {
     saving = false;
 
     const rsvp = ensureRsvpController();
+    const tables = ensureTablesController();
     rsvp.beginContext();
+    tables.beginContext();
     bind(root);
     render();
 
