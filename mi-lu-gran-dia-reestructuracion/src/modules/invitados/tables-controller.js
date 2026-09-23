@@ -290,7 +290,10 @@ function createTablesController(api) {
           <strong>${esc(text(table.name) || 'Mesa')}</strong>
           <span>${esc(SHAPE_LABELS[shape])} · ${assigned.length}/${capacity}</span>
         </div>
-        <button type="button" data-table-manage aria-label="Administrar ${esc(text(table.name) || 'mesa')}">•••</button>
+        <div class="table-order-actions" aria-label="Orden de ${esc(text(table.name) || 'mesa')}">
+          ${api.canEdit() ? '<button type="button" data-table-order="-1" aria-label="Mover mesa antes">‹</button><button type="button" data-table-order="1" aria-label="Mover mesa después">›</button>' : ''}
+          <button type="button" data-table-manage aria-label="Administrar ${esc(text(table.name) || 'mesa')}">•••</button>
+        </div>
       </header>
       ${declinedCount ? `<div class="table-visual-warning">${declinedCount} invitado${declinedCount === 1 ? '' : 's'} marcado${declinedCount === 1 ? '' : 's'} como “No asistirá”</div>` : ''}
       <div class="table-visual-canvas" style="width:${geometry.visualWidth}px;height:${geometry.visualHeight}px;--table-body-w:${geometry.table.width}px;--table-body-h:${geometry.table.height}px">
@@ -321,7 +324,10 @@ function createTablesController(api) {
         <p>${assigned.length} de ${capacity} lugares ocupados · ${free} libres</p>
         <small>${preview || 'Sin invitados asignados'}${assigned.length > 4 ? ` y ${assigned.length - 4} más` : ''}</small>
       </div>
-      <button type="button" data-table-manage>${api.canEdit() ? 'Administrar' : 'Ver'}</button>
+      <div class="table-card-actions">
+        ${api.canEdit() ? '<div class="table-order-actions" aria-label="Orden de mesa"><button type="button" data-table-order="-1" aria-label="Mover mesa antes">‹</button><button type="button" data-table-order="1" aria-label="Mover mesa después">›</button></div>' : ''}
+        <button type="button" data-table-manage>${api.canEdit() ? 'Administrar' : 'Ver'}</button>
+      </div>
     </article>`;
   }
 
@@ -787,6 +793,21 @@ function createTablesController(api) {
     render();
   }
 
+  async function reorderTable(tableId, direction) {
+    if (!api.canEdit() || api.isSaving()) return false;
+    const rows = tables();
+    const from = rows.findIndex((table) => String(table?.id) === String(tableId));
+    const step = Number(direction) < 0 ? -1 : 1;
+    const to = from + step;
+    if (from < 0 || to < 0 || to >= rows.length) return false;
+
+    const previous = deepClone(api.getSnapshot());
+    const [table] = rows.splice(from, 1);
+    rows.splice(to, 0, table);
+    await persist(previous, `${text(table.name) || 'Mesa'} reordenada`, 'table-reordered');
+    return true;
+  }
+
   async function handleClick(event) {
     if (event.target.closest('[data-table-guest-detail-close]')) {
       closeGuestDetail();
@@ -857,6 +878,13 @@ function createTablesController(api) {
 
     if (event.target.closest('[data-table-add]')) {
       openTable();
+      return true;
+    }
+
+    const orderButton = event.target.closest('[data-table-order]');
+    if (orderButton) {
+      const card = orderButton.closest('[data-table-id]');
+      await reorderTable(card?.dataset.tableId, orderButton.dataset.tableOrder);
       return true;
     }
 
