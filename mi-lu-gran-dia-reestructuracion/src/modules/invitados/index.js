@@ -1,6 +1,6 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { loadInvitadosSnapshot, saveInvitadosSnapshot } from './invitados-data.js?v=3';
-import { createRsvpController } from './rsvp-controller.js?v=2';
+import { createRsvpController } from './rsvp-controller.js?v=3';
 import { createTablesController } from './tables-controller.js?v=15';
 
 let activeContext = null;
@@ -434,7 +434,7 @@ async function mountInvitados(context) {
 
   try {
     const [template, loaded] = await Promise.all([
-      fetch(new URL('./index.html?v=11', import.meta.url)).then((response) => {
+      fetch(new URL('./index.html?v=12', import.meta.url)).then((response) => {
         if (!response.ok) throw new Error('No se pudo cargar la interfaz de Invitados.');
         return response.text();
       }),
