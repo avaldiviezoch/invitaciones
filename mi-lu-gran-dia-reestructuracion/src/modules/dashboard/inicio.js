@@ -54,7 +54,7 @@ let calendarCursor = new Date();
 const heroVideo = $('heroVideo');
 
 function syncEntrySurface() {
-  const directModule = ['#checklist', '#presupuesto', '#proveedores'].includes(location.hash);
+  const directModule = ['#checklist', '#presupuesto', '#proveedores', '#invitados'].includes(location.hash);
   document.documentElement.classList.toggle('module-route', directModule);
   if (directModule) {
     heroVideo?.pause();
@@ -469,7 +469,7 @@ weddingsList.onclick = async (event) => {
     const context = await selectActiveWedding(button.dataset.weddingId);
     applyWeddingContext(context);
     setWeddingSwitcher(false);
-    if (['checklist', 'presupuesto', 'proveedores'].includes(activeModule)) openModule(activeModule);
+    if (ACTIVE_MODULES.has(activeModule)) openModule(activeModule);
   } catch (error) {
     console.error('No se pudo cambiar de boda:', error);
   }
@@ -585,7 +585,7 @@ function setModuleLoading(loading) {
   }, 420);
 }
 
-const ACTIVE_MODULES = new Set(['checklist', 'presupuesto', 'proveedores']);
+const ACTIVE_MODULES = new Set(['checklist', 'presupuesto', 'proveedores', 'invitados']);
 
 function moduleFromHash() {
   const moduleId = location.hash.replace(/^#/, '');
@@ -618,6 +618,10 @@ async function openModule(moduleId, { updateHash = true } = {}) {
     if (moduleId === 'checklist') await mountChecklist(weddingContext);
     if (moduleId === 'presupuesto') await mountPresupuesto(weddingContext);
     if (moduleId === 'proveedores') await mountProveedores(weddingContext);
+    if (moduleId === 'invitados') {
+      const { mountInvitados } = await import('../invitados/index.js?v=1');
+      await mountInvitados(weddingContext);
+    }
   } finally {
     if (loadEpoch === moduleLoadEpoch) setModuleLoading(false);
   }
@@ -635,14 +639,14 @@ $('appNavHome').onclick = closeModuleWorkspace;
 
 document.querySelectorAll('[data-app-module]').forEach((button) => {
   button.addEventListener('click', () => {
-    if (['checklist', 'presupuesto', 'proveedores'].includes(button.dataset.appModule)) openModule(button.dataset.appModule);
+    if (ACTIVE_MODULES.has(button.dataset.appModule)) openModule(button.dataset.appModule);
   });
 });
 
 document.querySelectorAll('.module-link').forEach((link) => {
   link.addEventListener('click', (event) => {
     event.preventDefault();
-    if (['checklist', 'presupuesto', 'proveedores'].includes(link.dataset.module)) openModule(link.dataset.module);
+    if (ACTIVE_MODULES.has(link.dataset.module)) openModule(link.dataset.module);
   });
 });
 
