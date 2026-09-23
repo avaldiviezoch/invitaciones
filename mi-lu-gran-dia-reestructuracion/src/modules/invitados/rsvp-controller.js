@@ -78,6 +78,31 @@ function createRsvpController(api) {
     return tags;
   }
 
+  function responseMusic(response) {
+    let value = response?.customData?.mgdMusic;
+    if (!value) return { songs: [], message: '' };
+    if (typeof value === 'string') {
+      try { value = JSON.parse(value); } catch (_) { return { songs: [], message: '' }; }
+    }
+    const songs = Array.isArray(value?.songs)
+      ? value.songs.map((item) => ({
+        title: text(item?.title).slice(0, 140),
+        artist: text(item?.artist).slice(0, 140)
+      })).filter((item) => item.title || item.artist).slice(0, 10)
+      : [];
+    return { songs, message: text(value?.message).slice(0, 500) };
+  }
+
+  function musicMarkup(response) {
+    const music = responseMusic(response);
+    if (!music.songs.length && !music.message) return '';
+    return `<div class="rsvp-music-response">
+      <div class="rsvp-music-response-head"><span aria-hidden="true">♫</span><strong>Música solicitada</strong><small>${music.songs.length} ${music.songs.length === 1 ? 'canción' : 'canciones'}</small></div>
+      ${music.songs.length ? `<ol class="rsvp-music-response-list">${music.songs.map((song) => `<li><strong>${esc(song.title || 'Canción sin título')}</strong>${song.artist ? `<span>${esc(song.artist)}</span>` : ''}</li>`).join('')}</ol>` : ''}
+      ${music.message ? `<p class="rsvp-music-response-message"><b>Dedicatoria:</b> ${esc(music.message)}</p>` : ''}
+    </div>`;
+  }
+
   function rsvpCard(response) {
     const management = managementFor(response.id);
     const companions = Array.isArray(response.companions) ? response.companions.map(text).filter(Boolean) : [];
@@ -92,6 +117,7 @@ function createRsvpController(api) {
           <p>${esc(responseDate(response))} · ${quantity} ${quantity === 1 ? 'persona' : 'personas'}</p>
           ${companions.length ? `<small>Acompañantes: ${esc(companions.join(', '))}</small>` : '<small>Sin acompañantes declarados</small>'}
           <div class="guest-tags">${responseTags(response).map((tag) => `<span>${esc(tag)}</span>`).join('')}</div>
+          ${musicMarkup(response)}
         </div>
       </div>
       <div class="rsvp-card-review">
