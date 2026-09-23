@@ -238,26 +238,39 @@ function openDialog(record = null, index = -1) {
   root.querySelector('[data-provider-dialog-title]').textContent = editing ? 'Editar proveedor' : 'Nuevo proveedor';
 
   const body = root.querySelector('[data-provider-dialog-body]');
-  body.innerHTML = `<form id="providerEditorForm" data-provider-form data-index="${editing ? index : ''}">
-    ${field('Proveedor / empresa', `<input name="name" required maxlength="120" value="${esc(values.name)}">`)}
-    <div class="provider-form-grid">
-      ${field('Servicio / categoría', `<input name="service" maxlength="100" value="${esc(values.service)}">`)}
-      ${field('Estado', `<select name="status">${Object.entries(STATUS_LABELS).map(([value,label]) => `<option value="${value}"${values.status === value ? ' selected' : ''}>${label}</option>`).join('')}</select>`)}
-    </div>
-    <div class="provider-form-grid">
-      ${field('Persona de contacto', `<input name="contact" maxlength="100" value="${esc(values.contact)}">`)}
-      ${field('Teléfono / WhatsApp', `<input name="phone" inputmode="tel" maxlength="40" value="${esc(values.phone)}">`)}
-    </div>
-    <div class="provider-form-grid">
-      ${field('Correo', `<input name="email" type="email" maxlength="140" value="${esc(values.email)}">`)}
-      ${field('Web / red social', `<input name="website" maxlength="180" value="${esc(values.website)}">`)}
-    </div>
-    <div class="provider-form-grid provider-form-money">
-      ${field('Cotizado', `<input name="quote" type="number" min="0" step="0.01" value="${values.quote}">`)}
-      ${field('Contratado', `<input name="contracted" type="number" min="0" step="0.01" value="${values.contracted}">`)}
-      ${field('Pagado', `<input name="paid" type="number" min="0" step="0.01" value="${values.paid}">`)}
-    </div>
-    ${field('Notas', `<textarea name="notes" rows="4" maxlength="900">${esc(values.notes)}</textarea>`)}
+  body.innerHTML = `<form id="providerEditorForm" class="provider-form" data-provider-form data-index="${editing ? index : ''}">
+    <section class="provider-form-section">
+      <h3>Proveedor</h3>
+      ${field('Proveedor / empresa', `<input name="name" required maxlength="120" value="${esc(values.name)}">`)}
+      <div class="provider-form-grid">
+        ${field('Servicio / categoría', `<input name="service" maxlength="100" value="${esc(values.service)}">`)}
+        ${field('Estado', `<select name="status">${Object.entries(STATUS_LABELS).map(([value,label]) => `<option value="${value}"${values.status === value ? ' selected' : ''}>${label}</option>`).join('')}</select>`)}
+      </div>
+    </section>
+
+    <section class="provider-form-section">
+      <h3>Contacto</h3>
+      <div class="provider-form-grid">
+        ${field('Persona de contacto', `<input name="contact" maxlength="100" value="${esc(values.contact)}">`)}
+        ${field('Teléfono / WhatsApp', `<input name="phone" inputmode="tel" maxlength="40" value="${esc(values.phone)}">`)}
+        ${field('Correo', `<input name="email" type="email" maxlength="140" value="${esc(values.email)}">`)}
+        ${field('Web / red social', `<input name="website" maxlength="180" value="${esc(values.website)}">`)}
+      </div>
+    </section>
+
+    <section class="provider-form-section">
+      <h3>Comercial</h3>
+      <div class="provider-form-grid provider-form-money">
+        ${field('Cotizado', `<input name="quote" type="number" min="0" step="0.01" value="${values.quote}">`)}
+        ${field('Contratado', `<input name="contracted" type="number" min="0" step="0.01" value="${values.contracted}">`)}
+        ${field('Pagado', `<input name="paid" type="number" min="0" step="0.01" value="${values.paid}">`)}
+      </div>
+    </section>
+
+    <section class="provider-form-section">
+      <h3>Notas</h3>
+      ${field('Observaciones', `<textarea name="notes" rows="4" maxlength="900">${esc(values.notes)}</textarea>`)}
+    </section>
   </form>`;
 
   const footer = root.querySelector('[data-provider-dialog-footer]');
