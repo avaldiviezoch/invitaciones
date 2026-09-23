@@ -18,6 +18,10 @@ body {
   color:#fff;
   font-family:Inter,Segoe UI,Arial,sans-serif
 }
+.module-route .app{display:none}
+.module-route .module-workspace{display:block}
+.module-route body.auth-locked .module-workspace{visibility:hidden}
+.module-route body:not(.auth-locked){background:#f7f5f1}
 .app {
   position:relative;
   width:100%;
