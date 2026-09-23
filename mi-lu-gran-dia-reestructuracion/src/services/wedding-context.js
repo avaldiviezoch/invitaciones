@@ -221,14 +221,13 @@ async function removeWeddingMember(context, uid) {
   if (!capabilities.canAssignAdmin && currentRole === 'admin') throw new Error('Solo el propietario puede retirar a otro administrador.');
 
   const memberEmail = String(member.email || '').trim().toLowerCase();
-  const batch = writeBatch(db);
-  batch.delete(memberRef);
+  await deleteDoc(memberRef);
 
   if (memberEmail) {
-    batch.delete(doc(db, 'invitations', invitationId(context.id, memberEmail)));
+    const inviteRef = doc(db, 'invitations', invitationId(context.id, memberEmail));
+    const inviteSnapshot = await getDoc(inviteRef);
+    if (inviteSnapshot.exists()) await deleteDoc(inviteRef);
   }
-
-  await batch.commit();
 }
 async function cancelWeddingInvitation(context, inviteId) {
   if (!auth.currentUser || !context?.id || !weddingCapabilities(context.role).canManageTeam) throw new Error('No tienes permiso para gestionar accesos.');
