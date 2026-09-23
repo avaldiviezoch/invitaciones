@@ -1,5 +1,5 @@
 import { saveInvitadosSnapshot } from './invitados-data.js?v=3';
-import { normalizeTableShape, tableSeatGeometry } from './table-geometry.js?v=1';
+import { normalizeTableShape, tableSeatGeometry } from './table-geometry.js?v=2';
 
 const SHAPE_LABELS = Object.freeze({
   round: 'Redonda',
@@ -225,7 +225,7 @@ function createTablesController(api) {
       data-seat-label
       data-drag-guest="${esc(guest.id)}"
       draggable="${api.canEdit() ? 'true' : 'false'}"
-      style="left:${position.labelX}px;top:${position.labelY}px"
+      style="--label-x:${position.labelX}px;--label-y:${position.labelY}px;--label-x-medium:${position.labelMediumX}px;--label-y-medium:${position.labelMediumY}px;--label-x-compact:${position.labelCompactX}px;--label-y-compact:${position.labelCompactY}px"
       title="${esc(guestAssignmentLabel(guest))}">
       <span>${esc(text(guest.name) || 'Invitado')}</span>
       ${declined ? '<small>No asistirá</small>' : ''}
