@@ -127,11 +127,37 @@
     </div>
     <form class="table-form" id="tableEditorForm" data-table-form>
       <input type="hidden" name="tableId">
-      <div class="guests-form-grid">
+      <div class="table-editor-fields">
         <label class="guests-field"><span>Nombre de mesa</span><input name="name" maxlength="80" required></label>
-        <label class="guests-field"><span>Forma</span><select name="type"><option value="round">Redonda</option><option value="square">Cuadrada</option><option value="rectangular">Rectangular</option></select></label>
         <label class="guests-field"><span>Capacidad</span><select name="capacity"><option value="4">4 sillas</option><option value="6">6 sillas</option><option value="8">8 sillas</option><option value="10">10 sillas</option><option value="12">12 sillas</option><option value="14">14 sillas</option><option value="16">16 sillas</option></select></label>
       </div>
+      <fieldset class="table-shape-picker" data-table-shape-picker>
+        <legend>Forma de la mesa</legend>
+        <input type="hidden" name="type" value="round">
+        <div class="table-shape-options">
+          <button type="button" class="is-active" data-table-shape="round" aria-pressed="true">
+            <span class="table-shape-preview is-round" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><b></b>
+            </span>
+            <strong>Redonda</strong>
+            <small>Distribución circular</small>
+          </button>
+          <button type="button" data-table-shape="square" aria-pressed="false">
+            <span class="table-shape-preview is-square" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><b></b>
+            </span>
+            <strong>Cuadrada</strong>
+            <small>Lados equilibrados</small>
+          </button>
+          <button type="button" data-table-shape="rectangular" aria-pressed="false">
+            <span class="table-shape-preview is-rectangular" aria-hidden="true">
+              <i></i><i></i><i></i><i></i><b></b>
+            </span>
+            <strong>Rectangular</strong>
+            <small>Mayor ancho horizontal</small>
+          </button>
+        </div>
+      </fieldset>
       <div class="table-seats-head"><div><strong>Asignación de sillas</strong><span>Los cambios de silla se guardan inmediatamente.</span></div></div>
       <div class="table-seats-editor" data-table-seats-editor></div>
     </form>
