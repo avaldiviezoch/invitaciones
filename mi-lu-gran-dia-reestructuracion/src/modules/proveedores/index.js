@@ -7,6 +7,7 @@ const FIELD_ALIASES = Object.freeze({
   id: ['id','providerId','proveedorId','uuid'],
   name: ['name','nombre','empresa','proveedor'],
   service: ['service','servicio','category','categoria','rubro'],
+  icon: ['icon','icono','emoji','symbol'],
   contact: ['contact','contacto','contactName','nombreContacto','personaContacto'],
   phone: ['phone','telefono','tel','celular','whatsapp'],
   email: ['email','correo','mail'],
@@ -25,6 +26,22 @@ const STATUS_LABELS = Object.freeze({
   completed: 'Completado',
   discarded: 'Descartado'
 });
+
+const PROVIDER_ICONS = Object.freeze([
+  ['🏛️','Local'],['🏠','Casa'],['⛪','Iglesia'],['💒','Ceremonia'],['🏨','Hotel'],['🌿','Jardín'],['🏖️','Playa'],['📍','Ubicación'],
+  ['🎀','Decoración'],['💐','Flores'],['🌹','Rosas'],['🌸','Florería'],['🪴','Plantas'],['🕯️','Velas'],['💡','Iluminación'],['🏮','Luces'],
+  ['🪞','Espejos'],['🪑','Mobiliario'],['🛋️','Sala'],['🪵','Madera'],['✨','Detalles'],['🎈','Globos'],['🎊','Ambientación'],['🧺','Montaje'],
+  ['🍽️','Catering'],['🍴','Menaje'],['🥂','Brindis'],['🍾','Bebidas'],['🍷','Vino'],['🍸','Bar'],['☕','Café'],['🧊','Hielo'],
+  ['🍰','Torta'],['🎂','Pastel'],['🧁','Postres'],['🍬','Dulces'],['🍓','Frutas'],['🍱','Buffet'],['🥘','Comida'],['🍽','Banquete'],
+  ['🎵','Música'],['🎧','DJ'],['🎤','Show'],['🎸','Banda'],['🎻','Músicos'],['🎹','Piano'],['🥁','Percusión'],['🔊','Sonido'],
+  ['📷','Fotografía'],['🎥','Video'],['📸','Cámara'],['🖼️','Recuerdos'],['💻','Pantallas'],['📺','Visuales'],['🎬','Producción'],['🪩','Fiesta'],
+  ['👰','Novia'],['🤵','Novio'],['👗','Vestido'],['👔','Traje'],['👠','Calzado'],['💄','Maquillaje'],['💇','Peinado'],['💅','Belleza'],
+  ['🚗','Auto'],['🚐','Transporte'],['🚌','Bus'],['✈️','Viaje'],['🧳','Equipaje'],['🛏️','Alojamiento'],['🅿️','Estacionamiento'],['🚕','Taxi'],
+  ['💌','Invitaciones'],['✉️','Papelería'],['📋','Organización'],['🗓️','Agenda'],['🖊️','Caligrafía'],['🏷️','Etiquetas'],['🪧','Señalética'],['📦','Entrega'],
+  ['🎁','Regalos'],['💍','Anillos'],['❤️','Pareja'],['🤝','Proveedor'],['👥','Personal'],['🛡️','Seguridad'],['🧹','Limpieza'],['🧑‍🍳','Chef'],
+  ['🎉','Celebración'],['🎇','Fuegos'],['🎆','Pirotecnia'],['🎭','Animación'],['🕺','Baile'],['💃','Danza'],['🤹','Entretenimiento'],['🎪','Show especial'],
+  ['💰','Presupuesto'],['💳','Pago'],['🧾','Comprobante'],['🏦','Banco'],['📞','Contacto'],['📱','WhatsApp'],['🌐','Web'],['⭐','Especial']
+]);
 
 let activeContext = null;
 let state = null;
@@ -159,6 +176,7 @@ function providerValues(record) {
   return {
     name: String(valueOf(record, 'name') || '').trim(),
     service: String(valueOf(record, 'service') || '').trim(),
+    icon: String(valueOf(record, 'icon') || '🤝').trim() || '🤝',
     contact: String(valueOf(record, 'contact') || '').trim(),
     phone: String(valueOf(record, 'phone') || '').trim(),
     email: String(valueOf(record, 'email') || '').trim(),
@@ -178,7 +196,7 @@ function providerMarkup(record, index) {
   const editable = canEdit();
   return `<article class="provider-card" data-provider-index="${index}">
     <div class="provider-card-main">
-      <span class="provider-card-icon" aria-hidden="true">▦</span>
+      <span class="provider-card-icon" aria-hidden="true">${esc(values.icon)}</span>
       <div>
         <div class="provider-card-title"><h3>${esc(values.name || 'Proveedor sin nombre')}</h3><span class="provider-status is-${esc(values.status)}">${esc(STATUS_LABELS[values.status])}</span></div>
         <p>${esc(values.service || 'Servicio sin definir')}</p>
@@ -229,6 +247,15 @@ function field(label, control, extra = '') {
   return `<label class="provider-form-field ${extra}"><span>${label}</span>${control}</label>`;
 }
 
+function providerIconPicker(current) {
+  const selected = current || '🤝';
+  return `<div class="provider-icon-picker">
+    <input type="hidden" name="icon" value="${esc(selected)}">
+    <div class="provider-icon-current"><span data-provider-icon-preview>${esc(selected)}</span><div><strong>Icono del proveedor</strong><small>Elige el que mejor represente el servicio.</small></div></div>
+    <div class="provider-icon-grid">${PROVIDER_ICONS.map(([icon,label]) => `<button type="button" data-provider-icon="${esc(icon)}" class="${icon===selected?'is-selected':''}" title="${esc(label)}"><span>${esc(icon)}</span><small>${esc(label)}</small></button>`).join('')}</div>
+  </div>`;
+}
+
 function openDialog(record = null, index = -1) {
   const root = document.querySelector('[data-module-view="proveedores"]');
   const dialog = root?.querySelector('[data-provider-dialog]');
@@ -242,6 +269,7 @@ function openDialog(record = null, index = -1) {
     <section class="provider-form-section">
       <h3>Proveedor</h3>
       ${field('Proveedor / empresa', `<input name="name" required maxlength="120" value="${esc(values.name)}">`)}
+      <div class="provider-form-field"><span>Icono</span>${providerIconPicker(values.icon)}</div>
       <div class="provider-form-grid">
         ${field('Servicio / categoría', `<input name="service" maxlength="100" value="${esc(values.service)}">`)}
         ${field('Estado', `<select name="status">${Object.entries(STATUS_LABELS).map(([value,label]) => `<option value="${value}"${values.status === value ? ' selected' : ''}>${label}</option>`).join('')}</select>`)}
@@ -292,6 +320,7 @@ function showDetails(record) {
   root.querySelector('[data-provider-dialog-title]').textContent = values.name || 'Proveedor';
   root.querySelector('[data-provider-dialog-body]').innerHTML = `<dl class="provider-details">
     ${[
+      ['Icono', values.icon || '🤝'],
       ['Servicio', values.service || '—'],
       ['Estado', STATUS_LABELS[values.status]],
       ['Contacto', values.contact || '—'],
@@ -319,6 +348,7 @@ async function handleSubmit(event) {
   const index = indexValue === '' ? -1 : Number(indexValue);
   const patch = {
     name: String(data.get('name') || '').trim(),
+    icon: String(data.get('icon') || '🤝').trim() || '🤝',
     service: String(data.get('service') || '').trim(),
     contact: String(data.get('contact') || '').trim(),
     phone: String(data.get('phone') || '').trim(),
@@ -367,6 +397,18 @@ function bind(root) {
   });
 
   root.addEventListener('click', async (event) => {
+    const iconChoice = event.target.closest('[data-provider-icon]');
+    if (iconChoice) {
+      const picker = iconChoice.closest('.provider-icon-picker');
+      const input = picker?.querySelector('input[name="icon"]');
+      const preview = picker?.querySelector('[data-provider-icon-preview]');
+      if (input && preview) {
+        input.value = iconChoice.dataset.providerIcon || '🤝';
+        preview.textContent = input.value;
+        picker.querySelectorAll('[data-provider-icon]').forEach(button => button.classList.toggle('is-selected', button === iconChoice));
+      }
+      return;
+    }
     if (event.target.closest('[data-provider-close]')) {
       event.target.closest('dialog')?.close();
       return;
