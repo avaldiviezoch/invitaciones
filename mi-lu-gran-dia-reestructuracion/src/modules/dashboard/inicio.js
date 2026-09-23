@@ -1,6 +1,6 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { mountChecklist } from '../checklist/index.js?v=13';
-import { mountPresupuesto } from '../presupuesto/index.js?v=8';
+import { mountPresupuesto } from '../presupuesto/index.js?v=9';
 import { auth } from '../../services/firebase-client.js';
 import {
   listWeddingContexts,
