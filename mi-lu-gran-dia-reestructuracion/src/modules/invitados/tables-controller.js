@@ -372,6 +372,34 @@ function createTablesController(api) {
     renderGuestPanel();
   }
 
+  function syncCapacityPicker(capacity) {
+    const root = api.getRoot();
+    const form = root?.querySelector('[data-table-form]');
+    const optionsRoot = root?.querySelector('[data-table-capacity-options]');
+    if (!form?.elements?.capacity || !optionsRoot) return;
+
+    const normalized = normalizeCapacity(capacity);
+    form.elements.capacity.value = String(normalized);
+
+    optionsRoot.querySelectorAll('[data-table-capacity][data-legacy-capacity="true"]').forEach((button) => button.remove());
+    let activeButton = optionsRoot.querySelector(`[data-table-capacity="${normalized}"]`);
+    if (!activeButton) {
+      activeButton = document.createElement('button');
+      activeButton.type = 'button';
+      activeButton.dataset.tableCapacity = String(normalized);
+      activeButton.dataset.legacyCapacity = 'true';
+      activeButton.innerHTML = `<strong>${normalized}</strong><small>existente</small>`;
+      optionsRoot.appendChild(activeButton);
+    }
+
+    optionsRoot.querySelectorAll('[data-table-capacity]').forEach((button) => {
+      const active = Number(button.dataset.tableCapacity) === normalized;
+      button.classList.toggle('is-active', active);
+      button.setAttribute('aria-pressed', active ? 'true' : 'false');
+      button.disabled = !api.canEdit();
+    });
+  }
+
   function syncShapePicker(shape) {
     const root = api.getRoot();
     const normalized = normalizeTableShape(shape);
@@ -399,17 +427,7 @@ function createTablesController(api) {
     form.elements.type.value = table ? normalizeTableShape(table.type || table.shape) : 'round';
     syncShapePicker(form.elements.type.value);
 
-    [...form.elements.capacity.options]
-      .filter((option) => option.dataset.legacyCapacity === 'true')
-      .forEach((option) => option.remove());
-    if (![...form.elements.capacity.options].some((option) => Number(option.value) === capacity)) {
-      const option = document.createElement('option');
-      option.value = String(capacity);
-      option.textContent = `${capacity} sillas · valor existente`;
-      option.dataset.legacyCapacity = 'true';
-      form.elements.capacity.appendChild(option);
-    }
-    form.elements.capacity.value = String(capacity);
+    syncCapacityPicker(capacity);
 
     [...form.elements].forEach((control) => {
       if (control.name !== 'tableId') control.disabled = !api.canEdit();
@@ -644,6 +662,16 @@ function createTablesController(api) {
   }
 
   async function handleClick(event) {
+    const capacityButton = event.target.closest('[data-table-capacity]');
+    if (capacityButton) {
+      if (!api.canEdit()) return true;
+      syncCapacityPicker(capacityButton.dataset.tableCapacity);
+      const form = capacityButton.closest('[data-table-form]');
+      const tableId = text(form?.elements.tableId?.value);
+      renderSeats(tableById(tableId));
+      return true;
+    }
+
     const shapeButton = event.target.closest('[data-table-shape]');
     if (shapeButton) {
       if (!api.canEdit()) return true;
@@ -745,21 +773,10 @@ function createTablesController(api) {
       }
       return true;
     }
-    if (event.target.matches('[name="capacity"]')) {
-      const form = event.target.closest('[data-table-form]');
-      const tableId = text(form?.elements.tableId?.value);
-      renderSeats(tableById(tableId));
-      return true;
-    }
     return false;
   }
 
   async function handleChange(event) {
-    if (event.target.matches('[name="capacity"]')) {
-      handleInput(event);
-      return true;
-    }
-
     const select = event.target.closest('[data-seat-guest]');
     if (!select) return false;
     const row = select.closest('[data-seat-index]');
