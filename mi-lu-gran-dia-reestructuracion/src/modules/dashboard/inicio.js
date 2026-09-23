@@ -414,7 +414,6 @@ $('createWeddingForm').onsubmit = async (event) => {
   $('createWeddingStatus').textContent = 'Creando boda…';
   try {
     const context = await createWedding({ name: $('newWeddingName').value, date: $('newWeddingDate').value });
-    weddingContexts = await listWeddingContexts();
     applyWeddingContext(context);
     $('createWeddingForm').reset();
     $('createWeddingForm').hidden = true;
@@ -430,7 +429,6 @@ receivedInvitesList.onclick = async (event) => {
   button.textContent = 'Aceptando…';
   try {
     const context = await acceptWeddingInvitation(button.dataset.acceptInvite);
-    weddingContexts = await listWeddingContexts();
     applyWeddingContext(context);
     setWeddingSwitcher(false);
   } catch (error) {
