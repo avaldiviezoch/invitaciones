@@ -93,46 +93,37 @@ function createTablesController(api) {
     return `Mesa ${number}`;
   }
 
-  function normalizeExistingTables() {
-    const snapshot = api.getSnapshot();
-    if (!snapshot) return false;
-    let changed = false;
+  function assignmentWarnings() {
+    const warnings = [];
+    const tableMap = new Map(tables().filter((table) => text(table?.id)).map((table) => [String(table.id), table]));
+    const occupied = new Map();
 
-    snapshot.canonical.tables = snapshot.canonical.tables.map((table, index) => {
-      const next = { ...table };
-      if (!text(next.id)) {
-        next.id = uid('table');
-        changed = true;
+    guests().forEach((guest) => {
+      if (!text(guest.tableId)) return;
+      const table = tableMap.get(String(guest.tableId));
+      if (!table) {
+        warnings.push(`${text(guest.name) || 'Invitado'} apunta a una mesa inexistente`);
+        return;
       }
-      const shape = normalizeShape(next.type || next.shape);
-      if (next.type !== shape) {
-        next.type = shape;
-        changed = true;
+      const seatNumber = Number(guest.seatNumber);
+      const capacity = tableCapacity(table);
+      if (!Number.isInteger(seatNumber) || seatNumber < 1 || seatNumber > capacity) {
+        warnings.push(`${text(guest.name) || 'Invitado'} tiene una silla fuera de rango en ${text(table.name) || 'su mesa'}`);
+        return;
       }
-      const capacity = tableCapacity(next);
-      if (Number(next.capacity) !== capacity) {
-        next.capacity = capacity;
-        changed = true;
+      const key = `${table.id}::${seatNumber}`;
+      if (occupied.has(key)) {
+        warnings.push(`${text(table.name) || 'Mesa'} tiene dos invitados en la silla ${seatNumber}`);
+      } else {
+        occupied.set(key, guest.id);
       }
-      const seats = ensureSeats(next, capacity);
-      const sameSeats = Array.isArray(next.seats) &&
-        next.seats.length === seats.length &&
-        next.seats.every((seat, seatIndex) =>
-          text(seat?.id) === text(seats[seatIndex]?.id) &&
-          Number(seat?.index) === seatIndex
-        );
-      if (!sameSeats) {
-        next.seats = seats;
-        changed = true;
+      const seat = Array.isArray(table.seats) ? table.seats[seatNumber - 1] : null;
+      if (seat && text(guest.seatId) && text(seat.id) && String(guest.seatId) !== String(seat.id)) {
+        warnings.push(`${text(guest.name) || 'Invitado'} tiene un seatId distinto al de su silla ${seatNumber}`);
       }
-      if (!text(next.name)) {
-        next.name = `Mesa ${index + 1}`;
-        changed = true;
-      }
-      return next;
     });
 
-    return changed;
+    return warnings;
   }
 
   function render() {
@@ -155,6 +146,16 @@ function createTablesController(api) {
     if (seatsTotal) seatsTotal.textContent = String(seatCount);
     if (occupiedTotal) occupiedTotal.textContent = String(occupied);
     if (unassignedTotal) unassignedTotal.textContent = String(unassigned);
+    const tabCount = root.querySelector('[data-tables-tab-count]');
+    if (tabCount) tabCount.textContent = String(tableRows.length);
+
+    const warnings = assignmentWarnings();
+    const state = root.querySelector('[data-tables-state]');
+    if (state && !api.isSaving()) {
+      state.textContent = warnings.length
+        ? `Revisión necesaria: ${warnings[0]}${warnings.length > 1 ? ` · +${warnings.length - 1} observación${warnings.length - 1 === 1 ? '' : 'es'}` : ''}`
+        : '';
+    }
 
     const add = root.querySelector('[data-table-add]');
     if (add) add.hidden = !api.canEdit();
@@ -391,6 +392,10 @@ function createTablesController(api) {
   }
 
   async function handleChange(event) {
+    if (event.target.matches('[name="capacity"]')) {
+      handleCapacityPreview(event);
+      return true;
+    }
     const select = event.target.closest('[data-seat-guest]');
     if (!select) return false;
     const row = select.closest('[data-seat-index]');
@@ -446,7 +451,6 @@ function createTablesController(api) {
   }
 
   function beginContext() {
-    normalizeExistingTables();
     render();
   }
 
