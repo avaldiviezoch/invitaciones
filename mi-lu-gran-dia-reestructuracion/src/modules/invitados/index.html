@@ -1,0 +1,40 @@
+<div class="guests-shell">
+  <header class="guests-hero">
+    <span class="guests-eyebrow">MÓDULO · ESPACIO DE LA BODA</span>
+    <div class="guests-title-row">
+      <div class="guests-title-icon" aria-hidden="true">♟</div>
+      <div>
+        <h1>Invitados</h1>
+        <p>Consulta la lista real de personas, confirmaciones y asignaciones de la boda.</p>
+      </div>
+      <div class="guests-hero-total"><strong data-guests-total>0</strong><span>personas registradas</span></div>
+    </div>
+  </header>
+
+  <section class="guests-kpis">
+    <article><span>Total</span><strong data-guests-kpi-total>0</strong><small>invitados</small></article>
+    <article><span>Confirmados</span><strong data-guests-kpi-confirmed>0</strong><small>asistencia confirmada</small></article>
+    <article><span>Pendientes</span><strong data-guests-kpi-pending>0</strong><small>sin confirmar</small></article>
+    <article><span>Con mesa</span><strong data-guests-kpi-seated>0</strong><small>asignados</small></article>
+    <article><span>Sin mesa</span><strong data-guests-kpi-unseated>0</strong><small>por ubicar</small></article>
+  </section>
+
+  <section class="guests-toolbar">
+    <label class="guests-search"><span aria-hidden="true">⌕</span><input type="search" data-guests-search placeholder="Buscar invitado, relación, familia o mesa"></label>
+    <div class="guests-segments" aria-label="Filtrar invitados">
+      <button type="button" data-guests-filter="all" class="is-active">Todos</button>
+      <button type="button" data-guests-filter="confirmed">Confirmados</button>
+      <button type="button" data-guests-filter="pending">Pendientes</button>
+      <button type="button" data-guests-filter="seated">Con mesa</button>
+      <button type="button" data-guests-filter="unseated">Sin mesa</button>
+    </div>
+  </section>
+
+  <section class="guests-list-head">
+    <div><h2>Lista de invitados</h2><p>Lectura directa de los datos existentes. En esta fase no se realiza ninguna escritura.</p></div>
+    <span data-guests-results>0 invitados</span>
+  </section>
+
+  <section class="guests-list" data-guests-list></section>
+  <p class="guests-read-state" data-guests-state>Datos de la boda activa · solo lectura</p>
+</div>
