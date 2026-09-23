@@ -24,6 +24,7 @@
     <button type="button" class="is-active" data-guests-view="list">Lista de invitados</button>
     <button type="button" data-guests-view="rsvp">Confirmaciones RSVP <span data-rsvp-tab-count>0</span></button>
     <button type="button" data-guests-view="tables">Mesas y sillas <span data-tables-tab-count>0</span></button>
+    <button type="button" class="guests-music-tab" data-guests-view="music">♫ Música <span data-music-tab-count>0</span></button>
   </nav>
 
   <div data-guests-pane="list">
@@ -61,6 +62,16 @@
     </section>
     <section class="rsvp-list" data-rsvp-list></section>
     <p class="guests-read-state" data-rsvp-state></p>
+  </div>
+
+  <div class="music-pane" data-guests-pane="music" hidden>
+    <section class="music-overview">
+      <article><span>Canciones</span><strong data-music-total>0</strong><small>solicitudes recibidas</small></article>
+      <article><span>Personas</span><strong data-music-people>0</strong><small>que enviaron música</small></article>
+      <article><span>Únicas</span><strong data-music-unique>0</strong><small>canciones distintas</small></article>
+    </section>
+    <section class="music-head"><div><h2>Música propuesta</h2><p>Solicitudes enviadas desde las invitaciones y vinculadas al RSVP de esta boda.</p></div></section>
+    <section class="music-request-list" data-music-list></section>
   </div>
 
   <div class="tables-pane" data-guests-pane="tables" hidden>
