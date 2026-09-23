@@ -31,8 +31,36 @@ function taskDate(task) {
   return String(task?.dueDate || task?.deadline || task?.date || task?.fecha || '');
 }
 
-function taskCategory(task) {
-  return String(task?.category || task?.categoria || task?.group || task?.section || task?.fase || 'Sin categoría');
+const BASE_GROUPS = [
+  ['Preparación inicial', 6],
+  ['Ceremonia civil y religiosa', 7],
+  ['Local y recepción', 9],
+  ['Vestimenta e indumentaria', 7],
+  ['Comida y bebidas', 13],
+  ['Música y entretenimiento', 8],
+  ['Fotografía y video', 7],
+  ['Invitaciones y papelería', 8],
+  ['Belleza y preparación personal', 6],
+  ['Últimos detalles', 11]
+];
+
+function explicitTaskCategory(task) {
+  return String(task?.category || task?.categoria || task?.group || task?.section || task?.fase || '').trim();
+}
+
+function legacyBaseCategory(index) {
+  let cursor = 0;
+  for (const [name, count] of BASE_GROUPS) {
+    if (index >= cursor && index < cursor + count) return name;
+    cursor += count;
+  }
+  return '';
+}
+
+function taskCategory(task, index = -1) {
+  const explicit = explicitTaskCategory(task);
+  if (explicit) return explicit;
+  return legacyBaseCategory(index) || 'Sin categoría';
 }
 
 function taskPriority(task) {
@@ -92,7 +120,7 @@ function visibleTasks() {
       const priority = priorityLabel(task);
       if (priorityFilter !== 'all' && priority !== priorityFilter) return false;
       if (!needle) return true;
-      return [taskTitle(task), responsible, taskCategory(task), task?.notes, task?.nota]
+      return [taskTitle(task), responsible, taskCategory(task, index), task?.notes, task?.nota]
         .join(' ').toLocaleLowerCase('es').includes(needle);
     });
 }
@@ -134,7 +162,7 @@ function render() {
   const rows = visibleTasks();
   const groups = new Map();
   rows.forEach(({ task, index }) => {
-    const name = taskCategory(task);
+    const name = taskCategory(task, index);
     if (!groups.has(name)) groups.set(name, []);
     groups.get(name).push({ task, index });
   });
@@ -227,7 +255,7 @@ function openForm(index = -1) {
   form.elements.title.value = index >= 0 ? taskTitle(task) : '';
   form.elements.responsible.value = index >= 0 ? taskResponsible(task) : '';
   form.elements.dueDate.value = index >= 0 ? taskDate(task) : '';
-  form.elements.category.value = index >= 0 ? taskCategory(task) : '';
+  form.elements.category.value = index >= 0 ? explicitTaskCategory(task) : '';
   form.elements.priority.value = index >= 0 ? taskPriority(task) : '';
   form.elements.notes.value = String(task?.notes || task?.nota || '');
   form.querySelector('h2').textContent = index >= 0 ? 'Editar tarea' : 'Nueva tarea';
