@@ -12,6 +12,7 @@ function createTablesController(api) {
   let guestSearch = '';
   let selectedGuestId = '';
   let draggingGuestId = '';
+  let pendingSeatConflict = null;
 
   const text = (value) => String(value ?? '').trim();
   const esc = (value) => String(value ?? '')
@@ -605,6 +606,52 @@ function createTablesController(api) {
     return true;
   }
 
+  function guestSeatLocation(guest) {
+    const table = guest && text(guest.tableId) ? tableById(guest.tableId) : null;
+    const seatIndex = Number(guest?.seatNumber) - 1;
+    if (!table || !Number.isInteger(seatIndex) || seatIndex < 0 || seatIndex >= tableCapacity(table)) return null;
+    return { table, seatIndex };
+  }
+
+  function closeSeatConflict(choice = 'cancel') {
+    const dialog = api.getRoot()?.querySelector('[data-seat-conflict-dialog]');
+    if (dialog?.open) dialog.close();
+    const pending = pendingSeatConflict;
+    pendingSeatConflict = null;
+    pending?.resolve(choice);
+  }
+
+  function requestSeatConflict(guest, current, table, seatIndex) {
+    const root = api.getRoot();
+    const dialog = root?.querySelector('[data-seat-conflict-dialog]');
+    if (!dialog) return Promise.resolve('cancel');
+
+    const origin = guestSeatLocation(guest);
+    const targetName = text(current.name) || 'El invitado actual';
+    const movingName = text(guest.name) || 'El invitado seleccionado';
+    const targetLabel = `${text(table.name) || 'Mesa'} · silla ${seatIndex + 1}`;
+    const summary = root.querySelector('[data-seat-conflict-summary]');
+    const swapCopy = root.querySelector('[data-seat-conflict-swap-copy]');
+    const replaceCopy = root.querySelector('[data-seat-conflict-replace-copy]');
+    const swapButton = root.querySelector('[data-seat-conflict-action="swap"]');
+
+    if (summary) summary.textContent = `${targetLabel} está ocupada por ${targetName}.`;
+    if (origin) {
+      if (swapCopy) swapCopy.textContent = `${movingName} y ${targetName} cambian de silla.`;
+      if (swapButton) swapButton.hidden = false;
+    } else {
+      if (swapCopy) swapCopy.textContent = '';
+      if (swapButton) swapButton.hidden = true;
+    }
+    if (replaceCopy) replaceCopy.textContent = `${movingName} ocupa esta silla y ${targetName} queda sin mesa.`;
+
+    if (pendingSeatConflict) closeSeatConflict('cancel');
+    return new Promise((resolve) => {
+      pendingSeatConflict = { resolve };
+      dialog.showModal();
+    });
+  }
+
   async function assignGuestToSeat(guestId, tableId, seatIndex, { confirmReplacement = true } = {}) {
     if (!api.canEdit() || api.isSaving()) return false;
     const table = tableById(tableId);
@@ -615,30 +662,43 @@ function createTablesController(api) {
     if (!Number.isInteger(seatIndex) || seatIndex < 0 || seatIndex >= capacity) return false;
 
     const current = guestAtSeat(table.id, seatIndex);
-    if (current && String(current.id) !== String(guest.id) && confirmReplacement) {
-      const ok = window.confirm(
-        `La silla ${seatIndex + 1} está ocupada por ${text(current.name) || 'otro invitado'}. Si continúas, esa persona quedará sin mesa. ¿Reemplazarla?`
-      );
-      if (!ok) return false;
+    let conflictAction = 'replace';
+    let origin = null;
+    if (current && String(current.id) !== String(guest.id)) {
+      origin = guestSeatLocation(guest);
+      if (confirmReplacement) {
+        conflictAction = await requestSeatConflict(guest, current, table, seatIndex);
+        if (conflictAction === 'cancel') return false;
+      }
     }
 
     const previous = deepClone(api.getSnapshot());
     table.seats = ensureSeats(table, capacity);
 
     if (current && String(current.id) !== String(guest.id)) {
-      current.tableId = '';
-      current.seatId = '';
-      current.seatNumber = null;
+      if (conflictAction === 'swap' && origin) {
+        origin.table.seats = ensureSeats(origin.table, tableCapacity(origin.table));
+        current.tableId = origin.table.id;
+        current.seatNumber = origin.seatIndex + 1;
+        current.seatId = origin.table.seats[origin.seatIndex].id;
+      } else {
+        current.tableId = '';
+        current.seatId = '';
+        current.seatNumber = null;
+      }
     }
 
     guest.tableId = table.id;
     guest.seatNumber = seatIndex + 1;
     guest.seatId = table.seats[seatIndex].id;
     selectedGuestId = '';
+    const message = conflictAction === 'swap' && current
+      ? `${text(guest.name) || 'Invitado'} y ${text(current.name) || 'Invitado'} intercambiaron lugares`
+      : `${text(guest.name) || 'Invitado'} · ${text(table.name) || 'Mesa'} · silla ${seatIndex + 1}`;
     await persist(
       previous,
-      `${text(guest.name) || 'Invitado'} · ${text(table.name) || 'Mesa'} · silla ${seatIndex + 1}`,
-      'table-guest-assigned'
+      message,
+      conflictAction === 'swap' ? 'table-guests-swapped' : 'table-guest-assigned'
     );
     return true;
   }
@@ -686,6 +746,16 @@ function createTablesController(api) {
   }
 
   async function handleClick(event) {
+    const conflictAction = event.target.closest('[data-seat-conflict-action]');
+    if (conflictAction) {
+      closeSeatConflict(conflictAction.dataset.seatConflictAction);
+      return true;
+    }
+    if (event.target.closest('[data-seat-conflict-cancel]')) {
+      closeSeatConflict('cancel');
+      return true;
+    }
+
     const capacityButton = event.target.closest('[data-table-capacity]');
     if (capacityButton) {
       if (!api.canEdit()) return true;
@@ -896,6 +966,7 @@ function createTablesController(api) {
     guestSearch = '';
     selectedGuestId = '';
     draggingGuestId = '';
+    if (pendingSeatConflict) closeSeatConflict('cancel');
     render();
   }
 
