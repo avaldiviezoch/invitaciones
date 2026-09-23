@@ -176,8 +176,7 @@ async function inviteWeddingMember(context, email, role = 'viewer') {
   if (cleanRole === 'owner') throw new Error('El rol Propietario no se puede asignar.');
   if (cleanRole === 'admin' && !capabilities.canAssignAdmin) throw new Error('Solo el propietario puede asignar administradores.');
 
-  const inviteRef = doc(db, 'invitations', invitationId(context.id, normalizedEmail));
-  const invitation = {
+  await setDoc(doc(db, 'invitations', invitationId(context.id, normalizedEmail)), {
     weddingId: context.id,
     weddingName: context.name || 'Mi boda',
     email: normalizedEmail,
@@ -186,14 +185,7 @@ async function inviteWeddingMember(context, email, role = 'viewer') {
     invitedBy: user.uid,
     invitedByEmail: String(user.email || '').toLowerCase(),
     updatedAt: serverTimestamp()
-  };
-
-  try {
-    await updateDoc(inviteRef, invitation);
-  } catch (error) {
-    if (error?.code !== 'not-found') throw error;
-    await setDoc(inviteRef, { ...invitation, createdAt: serverTimestamp() });
-  }
+  }, { merge: true });
 }
 async function updateWeddingMemberRole(context, uid, role) {
   const user = auth.currentUser;
