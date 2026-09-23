@@ -142,7 +142,7 @@ function taskMarkup(task, index, editable) {
   const responsible = taskResponsible(task);
   const date = taskDate(task);
   const priority = priorityClass(task, index);
-  return `<div class="ck-original-task ${done ? 'is-done' : ''}" data-task-index="${index}">
+  return `<div class="ck-original-task ${done ? 'is-done' : ''}${overdue ? ' is-overdue' : ''}" data-task-index="${index}" draggable="${editable ? 'true' : 'false'}">
     <span class="ck-drag" aria-hidden="true">⠿</span>
     <label class="ck-square-check" aria-label="${done ? 'Marcar pendiente' : 'Marcar completada'}">
       <input type="checkbox" data-task-toggle ${done ? 'checked' : ''} ${editable ? '' : 'disabled'}><span>✓</span>
@@ -151,7 +151,7 @@ function taskMarkup(task, index, editable) {
       <strong><i class="ck-priority-dot is-${priority}"></i>${esc(taskTitle(task))}</strong>
       <small>${overdue ? 'Atrasada' : status === 'completed' ? 'Completada' : status === 'progress' ? 'En proceso' : 'Pendiente'}${responsible ? ` · ${esc(responsible)}` : ''}${date ? ` · ${esc(date)}` : ''}</small>
     </div>
-    ${editable ? '<button class="ck-task-plus" type="button" data-task-edit aria-label="Editar tarea">＋</button>' : ''}
+    ${editable ? `<select class="ck-task-status" data-task-status aria-label="Estado de ${esc(taskTitle(task))}"><option value="pending" ${status==='pending'?'selected':''}>Pendiente</option><option value="progress" ${status==='progress'?'selected':''}>En proceso</option><option value="completed" ${status==='completed'?'selected':''}>Completada</option></select><button class="ck-task-plus" type="button" data-task-edit aria-label="Editar tarea">＋</button>` : ''}
   </div>`;
 }
 
@@ -317,6 +317,15 @@ async function handleClick(event) {
 }
 
 async function handleChange(event) {
+  if (event.target.matches('[data-task-status]')) {
+    const row = event.target.closest('[data-task-index]');
+    const index = Number(row?.dataset.taskIndex);
+    if (!Number.isInteger(index) || !state.tasks[index]) return;
+    state.tasks[index] = { ...state.tasks[index], status: event.target.value };
+    render();
+    await persist('Estado de tarea actualizado');
+    return;
+  }
   if (event.target.matches('[data-responsible-filter]')) {
     responsibleFilter = event.target.value;
     render();
@@ -373,6 +382,45 @@ async function handleSubmit(event) {
   await persist(index >= 0 ? 'Tarea actualizada' : 'Tarea agregada');
 }
 
+let draggedTaskIndex = null;
+function handleDragStart(event) {
+  const row = event.target.closest('[data-task-index]');
+  if (!row || !weddingCapabilities(activeContext?.role).canEdit) return;
+  draggedTaskIndex = Number(row.dataset.taskIndex);
+  event.dataTransfer.effectAllowed = 'move';
+  event.dataTransfer.setData('text/plain', String(draggedTaskIndex));
+  row.classList.add('is-dragging');
+}
+function handleDragOver(event) {
+  if (draggedTaskIndex === null) return;
+  const row = event.target.closest('[data-task-index]');
+  if (!row) return;
+  event.preventDefault();
+  event.dataTransfer.dropEffect = 'move';
+  row.classList.add('is-drag-over');
+}
+function handleDragLeave(event) {
+  event.target.closest('[data-task-index]')?.classList.remove('is-drag-over');
+}
+async function handleDrop(event) {
+  const target = event.target.closest('[data-task-index]');
+  if (!target || draggedTaskIndex === null) return;
+  event.preventDefault();
+  const targetIndex = Number(target.dataset.taskIndex);
+  document.querySelectorAll('.is-drag-over').forEach((el)=>el.classList.remove('is-drag-over'));
+  if (!Number.isInteger(targetIndex) || targetIndex === draggedTaskIndex || !state.tasks[draggedTaskIndex]) return;
+  const [moved] = state.tasks.splice(draggedTaskIndex, 1);
+  const adjustedTarget = draggedTaskIndex < targetIndex ? targetIndex - 1 : targetIndex;
+  state.tasks.splice(adjustedTarget, 0, moved);
+  draggedTaskIndex = null;
+  render();
+  await persist('Orden de tareas actualizado');
+}
+function handleDragEnd() {
+  draggedTaskIndex = null;
+  document.querySelectorAll('.is-dragging,.is-drag-over').forEach((el)=>el.classList.remove('is-dragging','is-drag-over'));
+}
+
 function bindRoot(root) {
   if (root.dataset.checklistBound === 'true') return;
   root.dataset.checklistBound = 'true';
@@ -380,6 +428,11 @@ function bindRoot(root) {
   root.addEventListener('change', handleChange);
   root.addEventListener('input', handleInput);
   root.addEventListener('submit', handleSubmit);
+  root.addEventListener('dragstart', handleDragStart);
+  root.addEventListener('dragover', handleDragOver);
+  root.addEventListener('dragleave', handleDragLeave);
+  root.addEventListener('drop', handleDrop);
+  root.addEventListener('dragend', handleDragEnd);
 }
 
 async function mountChecklist(context) {
