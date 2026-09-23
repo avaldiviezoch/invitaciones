@@ -129,8 +129,20 @@
       <input type="hidden" name="tableId">
       <div class="table-editor-fields">
         <label class="guests-field"><span>Nombre de mesa</span><input name="name" maxlength="80" required></label>
-        <label class="guests-field"><span>Capacidad</span><select name="capacity"><option value="4">4 sillas</option><option value="6">6 sillas</option><option value="8">8 sillas</option><option value="10">10 sillas</option><option value="12">12 sillas</option><option value="14">14 sillas</option><option value="16">16 sillas</option></select></label>
       </div>
+      <fieldset class="table-capacity-picker" data-table-capacity-picker>
+        <legend>Capacidad</legend>
+        <input type="hidden" name="capacity" value="10">
+        <div class="table-capacity-options" data-table-capacity-options>
+          <button type="button" data-table-capacity="4" aria-pressed="false"><strong>4</strong><small>sillas</small></button>
+          <button type="button" data-table-capacity="6" aria-pressed="false"><strong>6</strong><small>sillas</small></button>
+          <button type="button" data-table-capacity="8" aria-pressed="false"><strong>8</strong><small>sillas</small></button>
+          <button type="button" class="is-active" data-table-capacity="10" aria-pressed="true"><strong>10</strong><small>sillas</small></button>
+          <button type="button" data-table-capacity="12" aria-pressed="false"><strong>12</strong><small>sillas</small></button>
+          <button type="button" data-table-capacity="14" aria-pressed="false"><strong>14</strong><small>sillas</small></button>
+          <button type="button" data-table-capacity="16" aria-pressed="false"><strong>16</strong><small>sillas</small></button>
+        </div>
+      </fieldset>
       <fieldset class="table-shape-picker" data-table-shape-picker>
         <legend>Forma de la mesa</legend>
         <input type="hidden" name="type" value="round">
