@@ -1,15 +1,15 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { loadRsvpAdminSnapshot, saveRsvpManagement, deleteRsvpManagement, restoreRsvpManagement } from '../../services/rsvp-admin.js?v=3';
 import { loadInvitadosSnapshot, saveInvitadosSnapshot } from './invitados-data.js?v=2';
+import { createRsvpController } from './rsvp-controller.js?v=1';
 
 let activeContext = null;
 let snapshot = null;
-let rsvpSnapshot = { config: null, token: '', responses: [], management: [] };
 let mountEpoch = 0;
 let filter = 'all';
 let search = '';
 let activeView = 'list';
 let saving = false;
+let rsvpController = null;
 
 const esc = (value) => String(value ?? '')
   .replaceAll('&','&amp;')
@@ -22,10 +22,6 @@ function text(value) {
   return String(value ?? '').trim();
 }
 
-function cleanText(value, max = 700) {
-  return text(value).slice(0, max);
-}
-
 function canEdit() {
   return weddingCapabilities(activeContext?.role).canEdit;
 }
@@ -33,15 +29,6 @@ function canEdit() {
 function deepClone(value) {
   if (typeof structuredClone === 'function') return structuredClone(value);
   return JSON.parse(JSON.stringify(value));
-}
-
-function normalizeName(value) {
-  return String(value ?? '')
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .trim()
-    .replace(/\s+/g, ' ')
-    .toLowerCase();
 }
 
 function guestStatus(guest) {
@@ -133,88 +120,39 @@ function guestCard(guest, tables) {
   </article>`;
 }
 
-function managementFor(responseId) {
-  return rsvpSnapshot.management.find((item) => String(item.responseId || '') === String(responseId || '')) || null;
+function getRoot() {
+  return document.querySelector('[data-module-view="invitados"]');
 }
 
-function attendanceLabel(value) {
-  return statusLabel(text(value) || 'pending');
+function emitDataChange(source = 'invitados') {
+  window.dispatchEvent(new CustomEvent('migrandia:datachange', {
+    detail: {
+      source,
+      module: 'invitados',
+      weddingId: activeContext?.id || '',
+      guests: snapshot?.canonical?.guests?.length || 0
+    }
+  }));
 }
 
-function responseDate(response) {
-  const date = response?.submittedAtDate || response?.updatedAtDate || (response?.clientDate ? new Date(response.clientDate) : null);
-  if (!date || Number.isNaN(date.getTime?.())) return 'Sin fecha';
-  return new Intl.DateTimeFormat('es-PE', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date);
-}
-
-function responseTags(response) {
-  const tags = [attendanceLabel(response?.attendance)];
-  if (response?.menu) tags.push(`Menú: ${text(response.menu)}`);
-  if (response?.restriction) tags.push(`Restricción: ${text(response.restriction)}`);
-  return tags;
-}
-
-function rsvpCard(response) {
-  const management = managementFor(response.id);
-  const companions = Array.isArray(response.companions) ? response.companions.map(text).filter(Boolean) : [];
-  const linkedCount = Array.isArray(management?.linkedGuestIds) ? management.linkedGuestIds.length : 0;
-  const status = text(response.attendance) || 'pending';
-  const quantity = Math.max(1, Number(response.quantity || 1));
-  return `<article class="rsvp-card" data-response-id="${esc(response.id)}">
-    <div class="rsvp-card-main">
-      <span class="guest-avatar">${esc(initials(response.name))}</span>
-      <div>
-        <div class="guest-name-row"><h3>${esc(text(response.name) || 'Respuesta sin nombre')}</h3><span class="guest-status is-${esc(status)}">${esc(attendanceLabel(status))}</span></div>
-        <p>${esc(responseDate(response))} · ${quantity} ${quantity === 1 ? 'persona' : 'personas'}</p>
-        ${companions.length ? `<small>Acompañantes: ${esc(companions.join(', '))}</small>` : '<small>Sin acompañantes declarados</small>'}
-        <div class="guest-tags">${responseTags(response).map((tag) => `<span>${esc(tag)}</span>`).join('')}</div>
-      </div>
-    </div>
-    <div class="rsvp-card-review">
-      <span>${management?.reviewed ? 'Revisada' : 'Por revisar'}</span>
-      <strong>${linkedCount ? `${linkedCount} vinculado${linkedCount === 1 ? '' : 's'}` : 'Sin vínculo'}</strong>
-      <button type="button" data-rsvp-review>${canEdit() ? 'Revisar' : 'Ver'}</button>
-    </div>
-  </article>`;
-}
-
-function renderRsvp() {
-  const root = document.querySelector('[data-module-view="invitados"]');
-  if (!root) return;
-  const responses = rsvpSnapshot.responses || [];
-  const management = rsvpSnapshot.management || [];
-  const confirmed = responses.filter((item) => item.attendance === 'confirmed');
-  const people = confirmed.reduce((sum, item) => sum + Math.max(1, Number(item.quantity || 1)), 0);
-  const declined = responses.filter((item) => item.attendance === 'declined').length;
-  const reviewed = new Set(management.filter((item) => item.reviewed).map((item) => String(item.responseId)));
-  const unreviewed = responses.filter((item) => !reviewed.has(String(item.id))).length;
-
-  root.querySelector('[data-rsvp-tab-count]').textContent = String(responses.length);
-  const mainResponses = root.querySelector('[data-guests-kpi-responses]');
-  if (mainResponses) mainResponses.textContent = String(responses.length);
-  root.querySelector('[data-rsvp-total]').textContent = String(responses.length);
-  root.querySelector('[data-rsvp-people]').textContent = String(people);
-  root.querySelector('[data-rsvp-unreviewed]').textContent = String(unreviewed);
-  root.querySelector('[data-rsvp-declined]').textContent = String(declined);
-
-  const list = root.querySelector('[data-rsvp-list]');
-  if (!rsvpSnapshot.token) {
-    list.innerHTML = '<div class="guests-empty"><strong>RSVP aún no está configurado</strong><span>No existe un token activo para esta boda.</span></div>';
-    return;
-  }
-  list.innerHTML = responses.length
-    ? responses.map(rsvpCard).join('')
-    : '<div class="guests-empty"><strong>Aún no hay confirmaciones</strong><span>Las respuestas aparecerán aquí cuando lleguen.</span></div>';
+function ensureRsvpController() {
+  if (rsvpController) return rsvpController;
+  rsvpController = createRsvpController({
+    getRoot,
+    getContext: () => activeContext,
+    getSnapshot: () => snapshot,
+    setSnapshot: (value) => { snapshot = value; },
+    canEdit,
+    isSaving: () => saving,
+    setSaving: (value) => { saving = Boolean(value); },
+    renderMain: render,
+    emitDataChange
+  });
+  return rsvpController;
 }
 
 function render() {
-  const root = document.querySelector('[data-module-view="invitados"]');
+  const root = getRoot();
   if (!root || !snapshot) return;
   const guests = snapshot.canonical.guests;
   const tables = snapshot.canonical.tables;
@@ -248,15 +186,11 @@ function render() {
   root.querySelectorAll('[data-guests-pane]').forEach((pane) => {
     pane.hidden = pane.dataset.guestsPane !== activeView;
   });
-  renderRsvp();
+  ensureRsvpController().render();
 }
 
 function findGuest(id) {
   return snapshot?.canonical?.guests.find((guest) => String(guest?.id) === String(id)) || null;
-}
-
-function findResponse(id) {
-  return rsvpSnapshot.responses.find((response) => String(response?.id) === String(id)) || null;
 }
 
 function newGuestId() {
@@ -267,7 +201,7 @@ function newGuestId() {
 }
 
 function openEditor(guest = null) {
-  const root = document.querySelector('[data-module-view="invitados"]');
+  const root = getRoot();
   const dialog = root?.querySelector('[data-guests-dialog]');
   const form = root?.querySelector('[data-guests-form]');
   if (!dialog || !form || !canEdit()) return;
@@ -291,91 +225,11 @@ function openEditor(guest = null) {
 }
 
 function closeEditor() {
-  document.querySelector('[data-module-view="invitados"] [data-guests-dialog]')?.close();
-}
-
-function suggestedGuestIds(response) {
-  const wanted = new Set(
-    [response?.name, ...(Array.isArray(response?.companions) ? response.companions : [])]
-      .map(normalizeName)
-      .filter(Boolean)
-  );
-  if (!wanted.size) return [];
-  return snapshot.canonical.guests
-    .filter((guest) => wanted.has(normalizeName(guest.name)))
-    .map((guest) => String(guest.id));
-}
-
-function openRsvpReview(response) {
-  const root = document.querySelector('[data-module-view="invitados"]');
-  const dialog = root?.querySelector('[data-rsvp-dialog]');
-  const form = root?.querySelector('[data-rsvp-form]');
-  if (!dialog || !form || !response) return;
-
-  const management = managementFor(response.id);
-  const suggestions = suggestedGuestIds(response);
-  const selected = new Set(
-    Array.isArray(management?.linkedGuestIds) && management.linkedGuestIds.length
-      ? management.linkedGuestIds.map(String)
-      : suggestions
-  );
-
-  form.reset();
-  form.elements.responseId.value = String(response.id);
-  form.elements.group.value = text(management?.group);
-  form.elements.side.value = text(management?.side);
-  form.elements.familyLabel.value = text(management?.familyLabel);
-  [...form.elements].forEach((control) => { if (control.name !== 'responseId') control.disabled = !canEdit(); });
-
-  root.querySelector('[data-rsvp-dialog-title]').textContent = text(response.name) || 'Respuesta RSVP';
-  root.querySelector('[data-rsvp-response-summary]').innerHTML = `
-    <strong>${esc(attendanceLabel(response.attendance))}</strong>
-    <span>${Math.max(1, Number(response.quantity || 1))} ${Number(response.quantity || 1) === 1 ? 'persona' : 'personas'} · ${esc(responseDate(response))}</span>
-    ${Array.isArray(response.companions) && response.companions.length ? `<small>Acompañantes: ${esc(response.companions.map(text).filter(Boolean).join(', '))}</small>` : ''}
-  `;
-
-  const picker = root.querySelector('[data-rsvp-guest-picker]');
-  picker.innerHTML = snapshot.canonical.guests.length
-    ? snapshot.canonical.guests.map((guest) => {
-      const id = String(guest.id ?? '');
-      const suggested = suggestions.includes(id);
-      return `<label class="rsvp-guest-option${suggested ? ' is-suggested' : ''}">
-        <input type="checkbox" name="linkedGuestIds" value="${esc(id)}" ${selected.has(id) ? 'checked' : ''} ${canEdit() ? '' : 'disabled'}>
-        <span class="guest-avatar">${esc(initials(guest.name))}</span>
-        <span><strong>${esc(text(guest.name) || 'Sin nombre')}</strong><small>${suggested ? 'Coincidencia sugerida' : esc(text(guest.relation) || 'Invitado existente')}</small></span>
-      </label>`;
-    }).join('')
-    : '<div class="guests-empty"><strong>No hay invitados disponibles</strong><span>Primero agrega las personas a la lista de invitados.</span></div>';
-
-  root.querySelector('[data-rsvp-suggestion-label]').textContent = suggestions.length
-    ? `${suggestions.length} coincidencia${suggestions.length === 1 ? '' : 's'} sugerida${suggestions.length === 1 ? '' : 's'}`
-    : 'Sin coincidencias automáticas';
-
-  const declaredNames = [response?.name, ...(Array.isArray(response?.companions) ? response.companions : [])]
-    .map(text)
-    .filter(Boolean);
-  const guestNames = new Set(snapshot.canonical.guests.map((guest) => normalizeName(guest.name)));
-  const matchedNames = declaredNames.filter((name) => guestNames.has(normalizeName(name)));
-  const missingNames = declaredNames.filter((name) => !guestNames.has(normalizeName(name)));
-  const companionState = root.querySelector('[data-rsvp-companion-status]');
-  companionState.innerHTML = [
-    matchedNames.length ? `<span class="is-ok">${matchedNames.length} nombre${matchedNames.length === 1 ? '' : 's'} encontrado${matchedNames.length === 1 ? '' : 's'} en Invitados</span>` : '',
-    missingNames.length ? `<span class="is-pending">No encontrados: ${esc(missingNames.join(', '))}</span>` : ''
-  ].filter(Boolean).join('');
-
-  root.querySelector('[data-rsvp-apply]').hidden = !canEdit();
-  const unlinkButton = root.querySelector('[data-rsvp-unlink]');
-  unlinkButton.hidden = !canEdit() || !management || !Array.isArray(management.linkedGuestIds) || !management.linkedGuestIds.length;
-  unlinkButton.dataset.responseId = String(response.id);
-  dialog.showModal();
-}
-
-function closeRsvpReview() {
-  document.querySelector('[data-module-view="invitados"] [data-rsvp-dialog]')?.close();
+  getRoot()?.querySelector('[data-guests-dialog]')?.close();
 }
 
 async function persistMutation(previous, message) {
-  const root = document.querySelector('[data-module-view="invitados"]');
+  const root = getRoot();
   const state = root?.querySelector('[data-guests-state]');
   saving = true;
   if (state) state.textContent = 'Guardando en Firebase…';
@@ -384,18 +238,11 @@ async function persistMutation(previous, message) {
   try {
     await saveInvitadosSnapshot(activeContext, snapshot.canonical);
     if (state) state.textContent = message;
-    window.dispatchEvent(new CustomEvent('migrandia:datachange', {
-      detail: {
-        source: 'invitados',
-        module: 'invitados',
-        weddingId: activeContext.id,
-        guests: snapshot.canonical.guests.length
-      }
-    }));
+    emitDataChange('invitados');
   } catch (error) {
     snapshot = previous;
     render();
-    const restoredState = root?.querySelector('[data-guests-state]');
+    const restoredState = getRoot()?.querySelector('[data-guests-state]');
     if (restoredState) restoredState.textContent = error?.message || 'No se pudo guardar en Firebase.';
     throw error;
   } finally {
@@ -403,8 +250,7 @@ async function persistMutation(previous, message) {
   }
 }
 
-async function handleSubmit(event) {
-  if (!event.target.matches('[data-guests-form]')) return;
+async function handleGuestSubmit(event) {
   event.preventDefault();
   if (!canEdit() || saving) return;
 
@@ -451,224 +297,6 @@ async function handleSubmit(event) {
   await persistMutation(previous, guestId ? 'Invitado actualizado' : 'Invitado agregado');
 }
 
-function guestStatusFromAttendance(attendance) {
-  if (attendance === 'confirmed') return 'confirmed';
-  if (attendance === 'declined') return 'declined';
-  return 'pending';
-}
-
-function managementTags(response, meta) {
-  const tags = [attendanceLabel(response?.attendance)];
-  const groupLabels = { familia:'Familia', amigos:'Amigos', trabajo:'Trabajo', otros:'Otros' };
-  const sideLabels = { novio:'Del novio', novia:'De la novia', ambos:'De ambos' };
-  if (meta.group && groupLabels[meta.group]) tags.push(groupLabels[meta.group]);
-  if (meta.side && sideLabels[meta.side]) tags.push(sideLabels[meta.side]);
-  if (meta.familyLabel) tags.push(meta.familyLabel);
-  return [...new Set(tags.filter(Boolean))];
-}
-
-function applyResponseLocally(response, meta, previousManagement) {
-  const selected = new Set(meta.linkedGuestIds.map(String));
-  const previousLinked = new Set(
-    Array.isArray(previousManagement?.linkedGuestIds)
-      ? previousManagement.linkedGuestIds.map(String)
-      : []
-  );
-  const tags = managementTags(response, meta);
-  const status = guestStatusFromAttendance(response.attendance);
-  const timestamp = new Date().toISOString();
-
-  snapshot.canonical.guests = snapshot.canonical.guests.map((guest) => {
-    const next = { ...guest };
-    const id = String(next.id ?? '');
-
-    if (previousLinked.has(id) && !selected.has(id) && String(next.rsvpResponseId || '') === String(response.id)) {
-      delete next.rsvpResponseId;
-      delete next.rsvpResponseName;
-      delete next.rsvpGroup;
-      delete next.rsvpFamilyLabel;
-      delete next.rsvpTags;
-      delete next.rsvpLinkedAt;
-      next.notes = String(next.notes || '')
-        .split('\n')
-        .filter((line) => !line.trim().startsWith('[RSVP]'))
-        .join('\n')
-        .trim();
-    }
-
-    if (!selected.has(id)) return next;
-
-    next.status = status;
-    if (meta.side) next.side = meta.side;
-    next.rsvpResponseId = response.id;
-    next.rsvpResponseName = cleanText(response.name, 120);
-    next.rsvpGroup = meta.group || '';
-    next.rsvpFamilyLabel = meta.familyLabel || '';
-    next.rsvpTags = tags;
-    next.rsvpLinkedAt = timestamp;
-
-    if (meta.familyLabel && !text(next.relation)) next.relation = meta.familyLabel;
-
-    const rsvpLine = `[RSVP] ${tags.join(' · ')} · respuesta de ${cleanText(response.name, 120)}`;
-    const previousNotes = String(next.notes || '')
-      .split('\n')
-      .filter((line) => !line.trim().startsWith('[RSVP]'))
-      .join('\n')
-      .trim();
-    next.notes = [previousNotes, rsvpLine].filter(Boolean).join('\n');
-    return next;
-  });
-}
-
-async function handleRsvpSubmit(event) {
-  if (!event.target.matches('[data-rsvp-form]')) return;
-  event.preventDefault();
-  if (!canEdit() || saving) return;
-
-  const form = event.target;
-  const data = new FormData(form);
-  const response = findResponse(data.get('responseId'));
-  if (!response || !rsvpSnapshot.token) return;
-
-  const linkedGuestIds = data.getAll('linkedGuestIds').map(String).filter(Boolean);
-  if (!linkedGuestIds.length) {
-    window.alert('Selecciona al menos un invitado existente para aplicar esta respuesta.');
-    return;
-  }
-
-  const conflictingGuests = linkedGuestIds
-    .map((id) => findGuest(id))
-    .filter((guest) => guest && text(guest.rsvpResponseId) && String(guest.rsvpResponseId) !== String(response.id));
-  if (conflictingGuests.length) {
-    window.alert(`No se puede aplicar esta respuesta porque ${conflictingGuests.map((guest) => text(guest.name) || 'un invitado').join(', ')} ya está vinculado a otra respuesta RSVP. Primero revisa y desvincula esa relación.`);
-    return;
-  }
-
-  const meta = {
-    linkedGuestIds,
-    group: text(data.get('group')),
-    side: text(data.get('side')),
-    familyLabel: text(data.get('familyLabel'))
-  };
-
-  const previousGuests = deepClone(snapshot);
-  const previousManagement = managementFor(response.id);
-  const root = document.querySelector('[data-module-view="invitados"]');
-  const state = root?.querySelector('[data-rsvp-state]');
-  saving = true;
-  if (state) state.textContent = 'Aplicando respuesta y guardando en Firebase…';
-
-  try {
-    await saveRsvpManagement(activeContext, rsvpSnapshot.token, response.id, meta);
-    applyResponseLocally(response, meta, previousManagement);
-    try {
-      await saveInvitadosSnapshot(activeContext, snapshot.canonical);
-    } catch (guestError) {
-      snapshot = previousGuests;
-      await restoreRsvpManagement(activeContext, rsvpSnapshot.token, response.id, previousManagement).catch(() => {});
-      throw guestError;
-    }
-
-    rsvpSnapshot.management = rsvpSnapshot.management.filter((item) => String(item.responseId || '') !== String(response.id));
-    rsvpSnapshot.management.push({
-      version: 1,
-      token: rsvpSnapshot.token,
-      responseId: response.id,
-      weddingId: activeContext.id,
-      ...meta,
-      reviewed: true
-    });
-
-    closeRsvpReview();
-    render();
-    const currentState = root?.querySelector('[data-rsvp-state]');
-    if (currentState) currentState.textContent = `Respuesta aplicada a ${linkedGuestIds.length} invitado${linkedGuestIds.length === 1 ? '' : 's'}.`;
-    window.dispatchEvent(new CustomEvent('migrandia:datachange', {
-      detail: {
-        source: 'rsvp-manual-link',
-        module: 'invitados',
-        weddingId: activeContext.id,
-        guests: snapshot.canonical.guests.length
-      }
-    }));
-  } catch (error) {
-    snapshot = previousGuests;
-    render();
-    const currentState = root?.querySelector('[data-rsvp-state]');
-    if (currentState) currentState.textContent = error?.message || 'No se pudo aplicar la respuesta RSVP.';
-  } finally {
-    saving = false;
-  }
-}
-
-async function unlinkRsvpResponse(responseId) {
-  if (!canEdit() || saving || !rsvpSnapshot.token) return;
-  const response = findResponse(responseId);
-  const management = managementFor(responseId);
-  if (!response || !management) return;
-
-  const linkedGuestIds = Array.isArray(management.linkedGuestIds) ? management.linkedGuestIds.map(String) : [];
-  if (!linkedGuestIds.length) return;
-  if (!window.confirm(`¿Desvincular esta respuesta RSVP de ${linkedGuestIds.length} invitado${linkedGuestIds.length === 1 ? '' : 's'}? No se eliminarán personas ni mesas.`)) return;
-
-  const previousGuests = deepClone(snapshot);
-  const previousManagement = { ...management };
-  const root = document.querySelector('[data-module-view="invitados"]');
-  const state = root?.querySelector('[data-rsvp-state]');
-  saving = true;
-  if (state) state.textContent = 'Desvinculando respuesta…';
-
-  try {
-    await deleteRsvpManagement(activeContext, rsvpSnapshot.token, responseId);
-
-    snapshot.canonical.guests = snapshot.canonical.guests.map((guest) => {
-      if (String(guest.rsvpResponseId || '') !== String(responseId)) return guest;
-      const next = { ...guest };
-      delete next.rsvpResponseId;
-      delete next.rsvpResponseName;
-      delete next.rsvpGroup;
-      delete next.rsvpFamilyLabel;
-      delete next.rsvpTags;
-      delete next.rsvpLinkedAt;
-      next.notes = String(next.notes || '')
-        .split('\n')
-        .filter((line) => !line.trim().startsWith('[RSVP]'))
-        .join('\n')
-        .trim();
-      return next;
-    });
-
-    try {
-      await saveInvitadosSnapshot(activeContext, snapshot.canonical);
-    } catch (guestError) {
-      snapshot = previousGuests;
-      await restoreRsvpManagement(activeContext, rsvpSnapshot.token, responseId, previousManagement).catch(() => {});
-      throw guestError;
-    }
-
-    rsvpSnapshot.management = rsvpSnapshot.management.filter((item) => String(item.responseId || '') !== String(responseId));
-    closeRsvpReview();
-    render();
-    const currentState = root?.querySelector('[data-rsvp-state]');
-    if (currentState) currentState.textContent = 'Respuesta desvinculada. Los invitados y sus mesas se conservaron.';
-    window.dispatchEvent(new CustomEvent('migrandia:datachange', {
-      detail: {
-        source: 'rsvp-unlinked',
-        module: 'invitados',
-        weddingId: activeContext.id,
-        guests: snapshot.canonical.guests.length
-      }
-    }));
-  } catch (error) {
-    snapshot = previousGuests;
-    render();
-    const currentState = root?.querySelector('[data-rsvp-state]');
-    if (currentState) currentState.textContent = error?.message || 'No se pudo desvincular la respuesta RSVP.';
-  } finally {
-    saving = false;
-  }
-}
-
 async function deleteGuest(guestId) {
   if (!canEdit() || saving) return;
   const guest = findGuest(guestId);
@@ -688,19 +316,6 @@ async function deleteGuest(guestId) {
   closeEditor();
   render();
   await persistMutation(previous, 'Invitado eliminado');
-}
-
-async function refreshRsvp() {
-  const root = document.querySelector('[data-module-view="invitados"]');
-  const state = root?.querySelector('[data-rsvp-state]');
-  if (state) state.textContent = 'Actualizando confirmaciones…';
-  try {
-    rsvpSnapshot = await loadRsvpAdminSnapshot(activeContext);
-    renderRsvp();
-    if (state) state.textContent = rsvpSnapshot.token ? 'Confirmaciones actualizadas.' : 'RSVP aún no está configurado.';
-  } catch (error) {
-    if (state) state.textContent = error?.message || 'No se pudieron cargar las confirmaciones.';
-  }
 }
 
 function bind(root) {
@@ -732,30 +347,6 @@ function bind(root) {
       return;
     }
 
-    if (event.target.closest('[data-rsvp-close]')) {
-      closeRsvpReview();
-      return;
-    }
-
-    if (event.target.closest('[data-rsvp-refresh]')) {
-      await refreshRsvp();
-      return;
-    }
-
-    const unlinkButton = event.target.closest('[data-rsvp-unlink]');
-    if (unlinkButton) {
-      await unlinkRsvpResponse(unlinkButton.dataset.responseId);
-      return;
-    }
-
-    const reviewButton = event.target.closest('[data-rsvp-review]');
-    if (reviewButton) {
-      const card = reviewButton.closest('[data-response-id]');
-      const response = findResponse(card?.dataset.responseId);
-      if (response) openRsvpReview(response);
-      return;
-    }
-
     const editButton = event.target.closest('[data-guest-edit]');
     if (editButton) {
       const card = editButton.closest('[data-guest-id]');
@@ -767,7 +358,10 @@ function bind(root) {
     const deleteButton = event.target.closest('[data-guests-delete]');
     if (deleteButton) {
       await deleteGuest(deleteButton.dataset.guestId);
+      return;
     }
+
+    await ensureRsvpController().handleClick(event);
   });
 
   root.addEventListener('input', (event) => {
@@ -780,13 +374,16 @@ function bind(root) {
   });
 
   root.addEventListener('submit', async (event) => {
-    if (event.target.matches('[data-guests-form]')) return handleSubmit(event);
-    if (event.target.matches('[data-rsvp-form]')) return handleRsvpSubmit(event);
+    if (event.target.matches('[data-guests-form]')) {
+      await handleGuestSubmit(event);
+      return;
+    }
+    await ensureRsvpController().handleSubmit(event);
   });
 }
 
 async function mountInvitados(context) {
-  const root = document.querySelector('[data-module-view="invitados"]');
+  const root = getRoot();
   if (!root || !context?.id) return;
   const epoch = ++mountEpoch;
   activeContext = context;
@@ -804,11 +401,13 @@ async function mountInvitados(context) {
 
     root.innerHTML = template;
     snapshot = loaded;
-    rsvpSnapshot = { config: null, token: '', responses: [], management: [] };
     filter = 'all';
     search = '';
     activeView = 'list';
     saving = false;
+
+    const rsvp = ensureRsvpController();
+    rsvp.beginContext();
     bind(root);
     render();
 
@@ -819,7 +418,8 @@ async function mountInvitados(context) {
         ? `Datos de la boda activa · representación compartida: ${sharedCount}`
         : 'Datos de la boda activa';
     }
-    await refreshRsvp();
+
+    void rsvp.load(context);
   } catch (error) {
     if (epoch !== mountEpoch) return;
     root.innerHTML = `<div class="guests-error"><strong>No se pudo cargar Invitados</strong><span>${esc(error?.message || 'Revisa la conexión con Firebase.')}</span></div>`;
