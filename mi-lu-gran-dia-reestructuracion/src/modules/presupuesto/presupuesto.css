@@ -159,3 +159,35 @@
 }
 
 @media(prefers-reduced-motion:reduce){.budget-shell *{scroll-behavior:auto}}
+
+
+/* Agrupación visual de gastos en paquetes */
+.budget-package-drag-hint{display:block;margin-top:7px;color:#9a948e;font-size:9px;line-height:1.4}
+.budget-item[draggable="true"]{cursor:grab}
+.budget-item[draggable="true"]:active{cursor:grabbing}
+.budget-item.is-dragging{opacity:.46}
+.budget-package{transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease,background .18s ease}
+.budget-package.is-drop-target{border-color:#9aa47b;background:#fbfcf8;box-shadow:0 0 0 3px rgba(127,137,98,.12),var(--budget-shadow);transform:translateY(-1px)}
+.budget-item-actions{display:flex;align-items:center;justify-content:flex-end;gap:5px}
+.budget-item-group{width:38px;height:38px;border:1px solid #dfe5d4;border-radius:50%;background:#f8faf5;color:#66734e;font-size:16px;cursor:pointer}
+.budget-item-group:hover{border-color:#cbd4bd;background:#f1f5eb}
+.budget-package-chooser>p{margin:0 0 12px;color:#706b66;font-size:11px;line-height:1.5}
+.budget-package-chooser>div{display:grid;gap:8px}
+.budget-package-chooser button{width:100%;display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 13px;border:1px solid #e5dfd9;border-radius:12px;background:#fff;color:#4f4c48;text-align:left;cursor:pointer}
+.budget-package-chooser button:hover{border-color:#cfd7c3;background:#fafbf8}
+.budget-package-chooser button.is-current{border-color:#aab694;background:#f4f7ef}
+.budget-package-chooser button span{min-width:0}
+.budget-package-chooser button b{display:block;font-size:11px}
+.budget-package-chooser button small{display:block;margin-top:4px;color:#918b85;font-size:9px}
+.budget-package-chooser button>strong{flex:0 0 auto;color:#697553;font-size:9px}
+.budget-package-chooser .budget-package-remove-choice{border-color:#ead9dc;background:#fffafb}
+.budget-package-chooser .budget-package-remove-choice>strong{color:#a4616f}
+
+@media(max-width:760px){
+ .budget-package-drag-hint{font-size:8px}
+ .budget-item{grid-template-columns:minmax(0,1fr) auto}
+ .budget-item-actions{grid-column:2;grid-row:1;align-self:start}
+ .budget-item-group,.budget-item-action{width:32px;height:32px}
+ .budget-item[draggable="true"]{cursor:default}
+ .budget-package-chooser button{padding:11px}
+}
