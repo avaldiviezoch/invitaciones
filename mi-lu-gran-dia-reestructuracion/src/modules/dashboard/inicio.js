@@ -346,7 +346,7 @@ onAuthStateChanged(auth, async (user) => {
   }
 
   await hydrateWedding(user);
-  if (location.hash === '#checklist') openModule('checklist');
+  openModuleFromHash();
 });
 
 $('editWeddingDateButton').onclick = openDateCalendar;
@@ -453,7 +453,7 @@ weddingsList.onclick = async (event) => {
     const context = await selectActiveWedding(button.dataset.weddingId);
     applyWeddingContext(context);
     setWeddingSwitcher(false);
-    if (activeModule === 'checklist') openModule('checklist');
+    if (['checklist', 'presupuesto'].includes(activeModule)) openModule(activeModule);
   } catch (error) {
     console.error('No se pudo cambiar de boda:', error);
   }
@@ -554,8 +554,21 @@ document.addEventListener('click', (event) => {
 
 const moduleWorkspace = $('moduleWorkspace');
 
-function openModule(moduleId) {
-  if (!['checklist', 'presupuesto'].includes(moduleId)) return;
+const ACTIVE_MODULES = new Set(['checklist', 'presupuesto']);
+
+function moduleFromHash() {
+  const moduleId = location.hash.replace(/^#/, '');
+  return ACTIVE_MODULES.has(moduleId) ? moduleId : '';
+}
+
+function openModuleFromHash() {
+  if (!auth.currentUser || !weddingContext) return;
+  const moduleId = moduleFromHash();
+  if (moduleId) openModule(moduleId, { updateHash: false });
+}
+
+function openModule(moduleId, { updateHash = true } = {}) {
+  if (!auth.currentUser || !weddingContext || !ACTIVE_MODULES.has(moduleId)) return;
   setMenu(false);
   document.body.classList.add('module-open');
   moduleWorkspace.setAttribute('aria-hidden', 'false');
@@ -565,7 +578,7 @@ function openModule(moduleId) {
     button.classList.toggle('is-active', active);
     button.setAttribute('aria-current', active ? 'page' : 'false');
   });
-  history.replaceState(null, '', '#' + moduleId);
+  if (updateHash && location.hash !== '#' + moduleId) history.replaceState(null, '', '#' + moduleId);
   if (moduleId === 'checklist') mountChecklist(weddingContext);
   if (moduleId === 'presupuesto') mountPresupuesto(weddingContext);
 }
@@ -591,7 +604,12 @@ document.querySelectorAll('.module-link').forEach((link) => {
   });
 });
 
-if (['#checklist', '#presupuesto'].includes(location.hash) && auth.currentUser) openModule(location.hash.slice(1));
+window.addEventListener('hashchange', () => {
+  if (!auth.currentUser) return;
+  const moduleId = moduleFromHash();
+  if (moduleId) openModule(moduleId, { updateHash: false });
+  else if (document.body.classList.contains('module-open')) closeModuleWorkspace();
+});
 
 applyWeddingContext(null);
 tick();
