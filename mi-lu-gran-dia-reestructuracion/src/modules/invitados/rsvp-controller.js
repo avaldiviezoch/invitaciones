@@ -3,11 +3,11 @@ import {
   saveRsvpManagement,
   deleteRsvpManagement,
   restoreRsvpManagement
-} from '../../services/rsvp-admin.js?v=3';
+} from '../../services/rsvp-admin.js?v=4';
 import { saveInvitadosSnapshot } from './invitados-data.js?v=3';
 
 function createRsvpController(api) {
-  let state = { config: null, token: '', responses: [], management: [] };
+  let state = { config: null, token: '', responses: [], musicResponses: [], management: [] };
   let loadEpoch = 0;
   let loading = false;
 
@@ -80,9 +80,9 @@ function createRsvpController(api) {
 
   function responseMusic(response) {
     let value = response?.customData?.mgdMusic;
-    if (!value) return { songs: [], message: '' };
+    if (!value) return { songs: [], message: '', guestName: '' };
     if (typeof value === 'string') {
-      try { value = JSON.parse(value); } catch (_) { return { songs: [], message: '' }; }
+      try { value = JSON.parse(value); } catch (_) { return { songs: [], message: '', guestName: '' }; }
     }
     const songs = Array.isArray(value?.songs)
       ? value.songs.map((item) => ({
@@ -90,10 +90,11 @@ function createRsvpController(api) {
         artist: text(item?.artist).slice(0, 140)
       })).filter((item) => item.title || item.artist).slice(0, 10)
       : [];
-    return { songs, message: text(value?.message).slice(0, 500) };
+    return { songs, message: text(value?.message).slice(0, 500), guestName: text(value?.guestName).slice(0, 120) };
   }
 
   function musicMarkup(response) {
+    if (response?.attendance !== 'confirmed') return '';
     const music = responseMusic(response);
     if (!music.songs.length && !music.message) return '';
     return `<div class="rsvp-music-response">
@@ -128,10 +129,33 @@ function createRsvpController(api) {
     </article>`;
   }
 
+  function musicEntries() {
+    const source = Array.isArray(state.musicResponses) ? state.musicResponses : [];
+    return source.flatMap((response) => {
+      const music = responseMusic(response);
+      const person = text(music.guestName || response?.name) || 'Invitado';
+      return music.songs.map((song) => ({ responseId:String(response.id||''), person, title:song.title, artist:song.artist, message:music.message }));
+    });
+  }
+
+  function renderMusic(root) {
+    const entries = musicEntries();
+    const people = new Set(entries.map((item) => item.responseId || item.person)).size;
+    const unique = new Set(entries.map((item) => `${normalizeName(item.title)}|${normalizeName(item.artist)}`)).size;
+    root.querySelector('[data-music-tab-count]')?.replaceChildren(document.createTextNode(String(entries.length)));
+    const total=root.querySelector('[data-music-total]'), peopleEl=root.querySelector('[data-music-people]'), uniqueEl=root.querySelector('[data-music-unique]');
+    if(total) total.textContent=String(entries.length); if(peopleEl) peopleEl.textContent=String(people); if(uniqueEl) uniqueEl.textContent=String(unique);
+    const list=root.querySelector('[data-music-list]'); if(!list) return;
+    if(loading){list.innerHTML='<div class="guests-empty"><strong>Cargando música</strong><span>Consultando las respuestas existentes.</span></div>';return;}
+    if(!state.token){list.innerHTML='<div class="guests-empty"><strong>RSVP aún no está configurado</strong><span>La música utiliza el mismo token de la boda.</span></div>';return;}
+    list.innerHTML=entries.length?entries.map((item)=>`<article class="music-request-card"><span class="music-request-icon" aria-hidden="true">♫</span><div class="music-request-song"><strong>${esc(item.title||'Canción sin título')}</strong><span>${esc(item.artist||'Artista no indicado')}</span></div><div class="music-request-person"><strong>${esc(item.person)}</strong>${item.message?`<span>${esc(item.message)}</span>`:'<span>Sin dedicatoria</span>'}</div></article>`).join(''):'<div class="guests-empty"><strong>Aún no hay canciones solicitadas</strong><span>Las solicitudes enviadas desde las invitaciones aparecerán aquí.</span></div>';
+  }
+
   function render() {
     const root = api.getRoot();
     if (!root) return;
     const responses = state.responses || [];
+    renderMusic(root);
     const management = state.management || [];
     const confirmed = responses.filter((item) => item.attendance === 'confirmed');
     const people = confirmed.reduce((sum, item) => sum + Math.max(1, Number(item.quantity || 1)), 0);
@@ -169,7 +193,7 @@ function createRsvpController(api) {
   function beginContext() {
     loadEpoch += 1;
     loading = true;
-    state = { config: null, token: '', responses: [], management: [] };
+    state = { config: null, token: '', responses: [], musicResponses: [], management: [] };
     render();
   }
 
