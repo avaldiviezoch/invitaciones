@@ -5,7 +5,6 @@ import { weddingCapabilities } from '../../core/app/permissions.js';
 import { setupDistributionCamera } from './camera.js?v=1';
 import {
   DEFAULT_BACKGROUND_ID,
-  defaultDistributionBackground,
   addDistributionBackground,
   listDistributionBackgrounds,
   loadDistributionBackground,
@@ -1790,13 +1789,6 @@ async function mountDistribucion(context) {
       if (referenceObjectUrl) URL.revokeObjectURL(referenceObjectUrl);
       referenceObjectUrl = '';
     };
-    const persistReferencePreference = () => writeDistributionBackgroundPreference(referenceScopeId, {
-      backgroundId: activeReferenceId,
-      visible: referenceToggle.checked,
-      opacity: Number(referenceOpacity.value) / 100
-    }).catch(() => {
-      status.textContent = 'El plano sigue visible, pero el navegador no pudo guardar esta preferencia local';
-    });
     const applyReferenceBackground = async (id) => {
       const background = await loadDistributionBackground(id);
       if (!root.isConnected) return;
@@ -1822,50 +1814,27 @@ async function mountDistribucion(context) {
       const available = backgrounds.some((background) => background.id === selectedId);
       await applyReferenceBackground(available ? selectedId : DEFAULT_BACKGROUND_ID);
     };
+    const persistReferencePreference = () => writeDistributionBackgroundPreference(referenceScopeId, {
+      backgroundId: activeReferenceId,
+      visible: referenceToggle.checked,
+      opacity: Number(referenceOpacity.value) / 100
+    }).catch(() => {});
 
-    let referencePreference = {
-      backgroundId: DEFAULT_BACKGROUND_ID,
-      visible: true,
-      opacity: 0.45
-    };
-    try {
-      referencePreference = await readDistributionBackgroundPreference(referenceScopeId);
-      await refreshReferenceCatalog(referencePreference.backgroundId);
-    } catch (error) {
-      console.warn('El catálogo local de planos no está disponible; se usa Casa Acapulco como fondo base.', error);
-      referencePreference = {
-        backgroundId: DEFAULT_BACKGROUND_ID,
-        visible: true,
-        opacity: 0.45
-      };
-      referenceCatalog.replaceChildren();
-      const option = document.createElement('option');
-      option.value = DEFAULT_BACKGROUND_ID;
-      option.textContent = 'Casa Acapulco · por defecto';
-      referenceCatalog.append(option);
-      referenceCatalog.value = DEFAULT_BACKGROUND_ID;
-      referenceRemove.disabled = true;
-      referenceRemove.textContent = 'Casa Acapulco · incluido';
-      const fallbackBackground = defaultDistributionBackground();
-      world.style.setProperty('--distribution-reference-image', `url("${fallbackBackground.source}")`);
-      world.classList.add('has-reference-image');
-    }
+    const referencePreference = await readDistributionBackgroundPreference(referenceScopeId);
     if (epoch !== mountEpoch || !root.isConnected) return;
     referenceToggle.checked = referencePreference.visible;
     referenceOpacity.value = String(Math.round(referencePreference.opacity * 100));
     world.style.setProperty('--distribution-reference-opacity', String(referencePreference.opacity));
     world.classList.toggle('hide-reference-image', !referencePreference.visible);
+    await refreshReferenceCatalog(referencePreference.backgroundId);
+    if (epoch !== mountEpoch || !root.isConnected) return;
 
     referenceCatalog.onchange = async () => {
-      try {
-        await applyReferenceBackground(referenceCatalog.value);
-        referenceToggle.checked = true;
-        world.classList.remove('hide-reference-image');
-        await persistReferencePreference();
-        status.textContent = activeReferenceId === DEFAULT_BACKGROUND_ID ? 'Casa Acapulco seleccionado como plano base' : 'Plano local seleccionado';
-      } catch (_) {
-        status.textContent = 'No se pudo abrir el plano guardado en este navegador';
-      }
+      await applyReferenceBackground(referenceCatalog.value);
+      referenceToggle.checked = true;
+      world.classList.remove('hide-reference-image');
+      await persistReferencePreference();
+      status.textContent = activeReferenceId === DEFAULT_BACKGROUND_ID ? 'Casa Acapulco seleccionado como plano base' : 'Plano local seleccionado';
     };
     referenceFile.onchange = async () => {
       const file = referenceFile.files?.[0];
@@ -1894,16 +1863,12 @@ async function mountDistribucion(context) {
     };
     referenceRemove.onclick = async () => {
       if (activeReferenceId === DEFAULT_BACKGROUND_ID) return;
-      try {
-        await removeDistributionBackground(activeReferenceId);
-        await refreshReferenceCatalog(DEFAULT_BACKGROUND_ID);
-        referenceToggle.checked = true;
-        world.classList.remove('hide-reference-image');
-        await persistReferencePreference();
-        status.textContent = 'Plano personalizado eliminado. Casa Acapulco vuelve a ser el plano base';
-      } catch (_) {
-        status.textContent = 'No se pudo eliminar el plano local';
-      }
+      await removeDistributionBackground(activeReferenceId);
+      await refreshReferenceCatalog(DEFAULT_BACKGROUND_ID);
+      referenceToggle.checked = true;
+      world.classList.remove('hide-reference-image');
+      await persistReferencePreference();
+      status.textContent = 'Plano personalizado eliminado. Casa Acapulco vuelve a ser el plano base';
     };
     root.querySelector('[data-distribution-rotate-left]').onclick = () => rotateSelected(-ROTATION_STEP);
     root.querySelector('[data-distribution-rotate-right]').onclick = () => rotateSelected(ROTATION_STEP);
@@ -2034,12 +1999,9 @@ async function mountDistribucion(context) {
     updateSaveState();
     if (!dirty && canEdit && storedState) status.textContent = `Distribución guardada · ${seated} invitados ubicados`;
   } catch (error) {
-    console.error('No se pudo cargar Distribución:', error);
-    status.textContent = error?.message || 'No se pudo cargar la distribución.';
+    console.error('No se pudo inicializar Distribución:', error);
+    status.textContent = error?.message || 'Distribución no pudo inicializarse.';
     saveButton.disabled = true;
-    root.querySelector('[data-distribution-empty]').hidden = false;
-    root.querySelector('[data-distribution-empty] strong').textContent = 'No se pudo cargar el plano';
-    root.querySelector('[data-distribution-empty] span').textContent = 'No se modificó ningún dato.';
   }
 }
 
