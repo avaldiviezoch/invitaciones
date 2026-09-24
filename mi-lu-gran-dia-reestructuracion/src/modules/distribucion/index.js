@@ -459,12 +459,16 @@ function parseDistributionState(value) {
     proposalIds.add(proposal.id);
   });
   const activeProposalId = escapeText(value.activeProposalId);
+  if (proposals.length && activeProposalId && !proposalIds.has(activeProposalId)) {
+    throw new Error('La distribución guardada referencia una propuesta activa inexistente. No se modificó ningún dato.');
+  }
   return { version: 1, activeProposalId, proposals };
 }
 
 function activeProposalOf(state) {
   if (!state?.proposals?.length) return null;
-  return state.proposals.find((proposal) => proposal.id === state.activeProposalId) || state.proposals[0];
+  if (!state.activeProposalId) return state.proposals[0];
+  return state.proposals.find((proposal) => proposal.id === state.activeProposalId) || null;
 }
 
 function placementMapFor(layout, storedState) {
@@ -894,6 +898,10 @@ async function mountDistribucion(context) {
       placementState.clear();
       nextPlacements.forEach((placement, tableId) => placementState.set(tableId, placement));
       physicalElements.splice(0, physicalElements.length, ...next.elements.map((element) => ({ ...element, points: Array.isArray(element.points) ? element.points.map((point) => ({ ...point })) : null })));
+      elementSequence = physicalElements.reduce((max, element) => {
+        const value = Number(String(element.id).match(/(\d+)$/)?.[1] || 0);
+        return Math.max(max, value);
+      }, 0);
       world.querySelectorAll('.distribution-table,.distribution-element').forEach((node) => node.remove());
       layout.items.forEach((item) => {
         const tableId = escapeText(item.table?.id);
@@ -1160,9 +1168,14 @@ async function mountDistribucion(context) {
 
     const createElement = (type, x, y, rotation = 0) => {
       if (!PHYSICAL_ELEMENT_TYPES[type]) return null;
-      elementSequence += 1;
+      const usedIds = new Set(physicalElements.map((element) => escapeText(element.id)).filter(Boolean));
+      let elementId = '';
+      do {
+        elementSequence += 1;
+        elementId = `element_${elementSequence}`;
+      } while (usedIds.has(elementId));
       const definition = PHYSICAL_ELEMENT_TYPES[type];
-      const element = { id: `element_${elementSequence}`, type, x, y, rotation: normalizeRotation(rotation), layer: physicalElements.length, locked: false, width: definition.width, height: definition.height };
+      const element = { id: elementId, type, x, y, rotation: normalizeRotation(rotation), layer: physicalElements.length, locked: false, width: definition.width, height: definition.height };
       physicalElements.push(element);
       const node = renderPhysicalElement(element);
       world.append(node);
