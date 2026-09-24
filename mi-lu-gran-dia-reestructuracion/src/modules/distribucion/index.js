@@ -7,9 +7,6 @@ import { setupDistributionCamera } from './camera.js?v=1';
 const TEMPLATE_URL = new URL('./index.html?v=27', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
-const MIN_ZOOM = 0.45;
-const MAX_ZOOM = 1.6;
-const ZOOM_STEP = 0.12;
 const ROTATION_STEP = 15;
 const KEYBOARD_MOVE_STEP = 10;
 const KEYBOARD_MOVE_FINE_STEP = 1;
@@ -765,7 +762,7 @@ async function mountDistribucion(context) {
     });
     physicalElements.forEach((element) => world.append(renderPhysicalElement(element)));
 
-    const camera = setupCamera(root, world, layout);
+    const camera = setupDistributionCamera(root, world, layout);
 
     const updateSaveState = () => {
       saveButton.disabled = !canEdit || !dirty || saving || !tables.length;
