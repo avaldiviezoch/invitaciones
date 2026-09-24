@@ -466,9 +466,11 @@ async function mountInvitados(context) {
     }
 
     void rsvp.load(context);
+    return true;
   } catch (error) {
     if (epoch !== mountEpoch) return;
     root.innerHTML = `<div class="guests-error"><strong>No se pudo cargar Invitados</strong><span>${esc(error?.message || 'Revisa la conexión con Firebase.')}</span></div>`;
+    return false;
   }
 }
 
