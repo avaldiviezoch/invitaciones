@@ -4,7 +4,7 @@
     <div class="distribution-title-row">
       <div>
         <h1>Distribución</h1>
-        <p>Visualiza la ubicación de tus mesas, sillas e invitados sin alterar sus asignaciones.</p>
+        <p>Organiza la ubicación visual de tus mesas sin alterar invitados, sillas ni asignaciones.</p>
       </div>
       <div class="distribution-summary" aria-live="polite">
         <strong data-distribution-table-count>0</strong>
@@ -13,21 +13,24 @@
     </div>
   </header>
 
-  <section class="distribution-toolbar" aria-label="Controles de vista">
+  <section class="distribution-toolbar" aria-label="Controles de distribución">
     <div class="distribution-toolbar-copy">
       <strong>Plano de mesas</strong>
-      <span data-distribution-status>Edición temporal · sin guardar</span>
+      <span data-distribution-status>Cargando distribución…</span>
     </div>
-    <div class="distribution-view-controls">
-      <button type="button" data-distribution-fit>Encajar</button>
-      <button type="button" data-distribution-zoom-out aria-label="Alejar">−</button>
-      <output data-distribution-zoom>100%</output>
-      <button type="button" data-distribution-zoom-in aria-label="Acercar">＋</button>
+    <div class="distribution-toolbar-actions">
+      <button class="distribution-save" type="button" data-distribution-save disabled>Guardar distribución</button>
+      <div class="distribution-view-controls">
+        <button type="button" data-distribution-fit>Encajar</button>
+        <button type="button" data-distribution-zoom-out aria-label="Alejar">−</button>
+        <output data-distribution-zoom>100%</output>
+        <button type="button" data-distribution-zoom-in aria-label="Acercar">＋</button>
+      </div>
     </div>
   </section>
 
   <section class="distribution-workspace">
-    <div class="distribution-viewport" data-distribution-viewport tabindex="0" aria-label="Plano de distribución. Arrastra el fondo para desplazarte.">
+    <div class="distribution-viewport" data-distribution-viewport tabindex="0" aria-label="Plano de distribución. Arrastra una mesa para moverla o el fondo para desplazarte.">
       <div class="distribution-world" data-distribution-world></div>
       <div class="distribution-empty" data-distribution-empty hidden>
         <strong>Aún no hay mesas para mostrar</strong>
@@ -39,11 +42,20 @@
       <span class="distribution-inspector-eyebrow">SELECCIÓN</span>
       <div data-distribution-selection-empty>
         <h2>Explora tu distribución</h2>
-        <p>Selecciona una mesa para ver su capacidad y las asignaciones actuales.</p>
+        <p>Selecciona una mesa para moverla, rotarla y revisar sus asignaciones actuales.</p>
       </div>
       <div data-distribution-selection hidden>
         <h2 data-distribution-selected-name>Mesa</h2>
         <p data-distribution-selected-meta></p>
+        <div class="distribution-placement-controls">
+          <span>ROTACIÓN</span>
+          <div>
+            <button type="button" data-distribution-rotate-left aria-label="Rotar 15 grados a la izquierda">↺</button>
+            <output data-distribution-selected-rotation>0°</output>
+            <button type="button" data-distribution-rotate-right aria-label="Rotar 15 grados a la derecha">↻</button>
+          </div>
+          <small>La rotación solo cambia el plano. Los invitados permanecen en sus mismas sillas.</small>
+        </div>
         <div class="distribution-inspector-stats">
           <span><strong data-distribution-selected-seated>0</strong> asignados</span>
           <span><strong data-distribution-selected-free>0</strong> libres</span>
