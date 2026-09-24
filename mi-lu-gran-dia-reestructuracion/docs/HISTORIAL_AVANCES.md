@@ -316,3 +316,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se corrigió un problema de cascada CSS: la regla base que oculta la rueda fuera de móvil estaba declarada después del media query y anulaba el display móvil.
 - La regla base queda ahora antes de @media(max-width:700px), permitiendo que la rueda y el bottom sheet aparezcan correctamente en iPhone.
 - No se modificaron rueda, acciones, plano, switches, desktop ni lógica funcional.
+
+
+## 2026-09-24 — Distribución móvil: zoom con dos dedos sin paneo
+- Se habilita pinch-to-zoom únicamente en móvil (<=700 px) sobre el visor de Distribución.
+- El gesto requiere dos dedos; un dedo no desplaza la cámara.
+- El zoom mantiene el plano centrado: no existe paneo ni arrastre de la imagen.
+- El mínimo de zoom es siempre el encaje inicial y el máximo es 4x respecto de ese encaje.
+- Al cambiar tamaño u orientación se recalcula el encaje base.
+- Desktop permanece sin cambios.
