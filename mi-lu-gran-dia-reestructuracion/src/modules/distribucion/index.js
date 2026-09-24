@@ -59,6 +59,11 @@ const PHYSICAL_ELEMENT_TYPES = Object.freeze({
   dj: physicalType('DJ / sonido', 3, 2),
   stage: physicalType('Escenario', 4, 2.5),
   column: physicalType('Columna', 0.5, 0.5),
+  canopy: physicalType('Toldo / cobertura', 6, 6, { spatialFamily: 'container' }),
+  circulation: physicalType('Circulación', 4, 1.2, { spatialFamily: 'circulation' }),
+  restricted: physicalType('Zona restringida', 3, 3, { spatialFamily: 'restricted' }),
+  entrance: physicalType('Entrada / salida', 2, 1.2, { spatialFamily: 'circulation' }),
+  plant: physicalType('Planta / árbol', 0.8, 0.8, { spatialFamily: 'obstacle', visualFit: 'contain' }),
   zone: physicalType('Zona / área', 4, 3, { spatialFamily: 'informative' })
 });
 
