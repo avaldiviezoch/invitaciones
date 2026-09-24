@@ -3,8 +3,6 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#ffffff">
-<meta name="app-build" content="2026-09-24-mobile-shell-visible">
 <title>Planificador de bodas</title>
 <script>
 (function(){
@@ -12,12 +10,12 @@
   if(moduleId==='checklist'||moduleId==='presupuesto'||moduleId==='proveedores'||moduleId==='invitados'||moduleId==='distribucion') document.documentElement.classList.add('module-route');
 })();
 </script>
-<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=41">
+<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=42">
 <link rel="stylesheet" href="src/modules/checklist/checklist.css?v=18">
 <link rel="stylesheet" href="src/modules/presupuesto/presupuesto.css?v=26">
 <link rel="stylesheet" href="src/modules/proveedores/proveedores.css?v=4">
 <link rel="stylesheet" href="src/modules/invitados/invitados.css?v=27">
-<link rel="stylesheet" href="src/modules/distribucion/distribucion.css?v=31">
+<link rel="stylesheet" href="src/modules/distribucion/distribucion.css?v=27">
 </head>
 <body class="auth-locked">
 <main class="app">
@@ -440,14 +438,6 @@ Cancelar
 </div>
 </section>
 <section class="module-workspace" id="moduleWorkspace" aria-hidden="true">
-  <header class="app-mobile-header" id="appMobileHeader">
-    <button class="app-mobile-menu" id="appMobileMenu" type="button" aria-label="Abrir navegación" aria-controls="appModuleNav" aria-expanded="false">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-    </button>
-    <span class="app-mobile-brand-mark" aria-hidden="true">MGD</span>
-    <span class="app-mobile-identity"><strong>Mi Gran Día</strong><small id="appMobileWeddingName">Mi boda</small></span>
-  </header>
-  <button class="app-mobile-nav-backdrop" id="appMobileNavBackdrop" type="button" tabindex="-1" aria-label="Cerrar navegación" aria-hidden="true"></button>
   <nav class="app-module-nav" id="appModuleNav" aria-label="Navegación de Mi Gran Día">
     <button class="app-nav-home" id="appNavHome" type="button" aria-label="Volver al inicio"><span class="mgd-brand-mark">MGD</span><span class="mgd-brand-copy"><strong>Mi Gran Día</strong><small id="appNavWeddingName">Mi boda</small></span></button>
     <div class="app-nav-modules" aria-label="Cambiar de módulo">
@@ -494,7 +484,7 @@ Cancelar
 <form class="create-wedding-card" id="createWeddingForm" hidden><h3>Crear una nueva boda</h3><label><span>Nombre de la boda</span><input id="newWeddingName" type="text" maxlength="90" placeholder="Ej. Antonio & Lucero" required></label><label><span>Fecha</span><input id="newWeddingDate" type="date"></label><div><button type="button" id="cancelCreateWedding">Cancelar</button><button type="submit">Crear y abrir</button></div><p id="createWeddingStatus" aria-live="polite"></p></form>
 </div>
 </section>
-<script type="module" src="src/modules/dashboard/inicio.js?v=173">
+<script type="module" src="src/modules/dashboard/inicio.js?v=174">
 </script>
 </body>
 </html>
