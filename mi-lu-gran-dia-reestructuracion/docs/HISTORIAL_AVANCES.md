@@ -147,3 +147,17 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - No se modificaron Firebase, Firestore, Storage, Authentication, usuarios ni datos canónicos.
 - Si IndexedDB no está disponible, Casa Acapulco continúa disponible como fondo incluido y el módulo no intenta migrar datos a otro almacenamiento.
 - Fase 5S continúa pendiente para probar el conjunto completo, incluido catálogo, recarga, selección local y fallback a Casa Acapulco.
+
+
+## 2026-09-24 — Distribución: corrección de escala física, plano base y restauración de invariantes
+- Se restauró un único sistema espacial para Distribución: lienzo lógico fijo de 1448 × 1086 y escala física fija de 32 px/m.
+- Casa Acapulco deja de depender de `/Wedding/distribucion_base.png`. El mismo blob original `981caa80c12b68518c7b53947772ccb04a9accb4` queda incluido en `assets/distribucion/casa-acapulco.png`.
+- El plano base ya no se pinta con un pseudo-elemento CSS `background-size: contain`; ahora es una imagen real de 1448 × 1086 dentro del mismo `distribution-world` que mesas, objetos, áreas y mediciones.
+- El `distribution-world` ya no crece según el número de mesas. La cámara puede hacer zoom/pan, pero no modifica la escala física del mundo.
+- Distribución dejó de usar `tableSeatGeometry()` de Invitados para el tamaño físico de las mesas. Ese helper continúa perteneciendo a la presentación de Invitados/Mesas.
+- La mesa redonda vuelve al contrato físico auditado de Wedding: radio de tablero 0.915 m, diámetro funcional 3.40 m, órbita de sillas 1.33× y órbita de etiquetas 2.18×. Cuadradas y rectangulares usan dimensiones físicas en metros convertidas por el mismo `PLAN_SCALE`.
+- Sillas y nombres dejan de usar tamaños/órbitas arbitrarios derivados de capacidad; los nombres mantienen contrarrotación y se retiró el halo visual heredado.
+- El frame invisible de mesa se mantiene estable para preservar compatibilidad con los `x/y` ya guardados en `planificador_bodas_distribucion_v1`; no se migró ni cambió el esquema persistente.
+- Se recuperó el movimiento independiente del plano de referencia mediante offset local en IndexedDB, sin alterar escala, Firebase, Firestore, Storage ni el payload de Distribución.
+- Se retiró la escritura de asignaciones desde Distribución: ya no importa ni ejecuta `saveInvitadosSnapshot()` y no asigna `guest.tableId`, `guest.seatId` ni `guest.seatNumber`. Mesas vuelve a ser el único propietario de esas operaciones.
+- No se modificaron IDs de mesas/sillas/invitados, usuarios, reglas, Authentication, Storage ni contratos Firebase.

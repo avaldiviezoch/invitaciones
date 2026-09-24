@@ -1,8 +1,8 @@
-import { loadInvitadosSnapshot, saveInvitadosSnapshot } from '../invitados/invitados-data.js?v=4';
-import { normalizeTableShape, tableSeatGeometry } from '../invitados/table-geometry.js?v=4';
+import { loadInvitadosSnapshot } from '../invitados/invitados-data.js?v=4';
+import { normalizeTableShape } from '../invitados/table-geometry.js?v=4';
 import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { setupDistributionCamera } from './camera.js?v=1';
+import { setupDistributionCamera } from './camera.js?v=2';
 import {
   DEFAULT_BACKGROUND_ID,
   addDistributionBackground,
@@ -11,15 +11,14 @@ import {
   readDistributionBackgroundPreference,
   removeDistributionBackground,
   writeDistributionBackgroundPreference
-} from './background-catalog.js?v=1';
+} from './background-catalog.js?v=2';
 
-const TEMPLATE_URL = new URL('./index.html?v=29', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=30', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
 const KEYBOARD_MOVE_STEP = 10;
 const KEYBOARD_MOVE_FINE_STEP = 1;
-const TABLE_GAP = 72;
 const WORLD_PADDING = 90;
 const PLAN_WIDTH = 1448;
 const PLAN_HEIGHT = 1086;
@@ -29,6 +28,17 @@ const PLAN_SCALE = Object.freeze({
   pixelsToMeters: (pixels) => pixels / 32
 });
 const PIXELS_PER_METER = PLAN_SCALE.pixelsPerMeter;
+const TABLE_FRAME = Object.freeze({ width: 300, height: 316, centerX: 150, centerY: 158 });
+const TABLE_PHYSICAL = Object.freeze({
+  round: Object.freeze({ tabletopWidthMeters: 1.83, tabletopHeightMeters: 1.83, clearanceWidthMeters: 3.4, clearanceHeightMeters: 3.4 }),
+  square: Object.freeze({ tabletopWidthMeters: 1.8, tabletopHeightMeters: 1.8, clearanceWidthMeters: 3.4, clearanceHeightMeters: 3.4 }),
+  rectangular: Object.freeze({ tabletopWidthMeters: 2.4, tabletopHeightMeters: 0.75, clearanceWidthMeters: 4, clearanceHeightMeters: 2.35 })
+});
+const ROUND_TABLE_RADIUS_METERS = 0.915;
+const ROUND_CHAIR_ORBIT_FACTOR = 1.33;
+const ROUND_LABEL_ORBIT_FACTOR = 2.18;
+const RECT_CHAIR_OFFSET_METERS = 0.38;
+const RECT_LABEL_OFFSET_METERS = 0.72;
 const PROXIMITY_OPTIONS_METERS = Object.freeze([0.6, 1, 1.5, 2]);
 const MIN_ELEMENT_METERS = 0.5;
 const MAX_ELEMENT_METERS = 30;
@@ -384,29 +394,73 @@ function guestForSeat(index, tableId, seat, seatIndex) {
   return index.get(`${tableId}::number::${seatIndex + 1}`) || null;
 }
 
+function rectangularPerimeterPositions(count, width, height, centerX, centerY) {
+  const positions = [];
+  const perimeter = 2 * (width + height);
+  for (let index = 0; index < count; index += 1) {
+    let distance = (perimeter * index / count + width / 2) % perimeter;
+    let x;
+    let y;
+    if (distance < width) {
+      x = centerX - width / 2 + distance;
+      y = centerY - height / 2;
+    } else if ((distance -= width) < height) {
+      x = centerX + width / 2;
+      y = centerY - height / 2 + distance;
+    } else if ((distance -= height) < width) {
+      x = centerX + width / 2 - distance;
+      y = centerY + height / 2;
+    } else {
+      distance -= width;
+      x = centerX - width / 2;
+      y = centerY + height / 2 - distance;
+    }
+    positions.push({ x, y });
+  }
+  return positions;
+}
+
+function tablePhysicalGeometry(type, capacity) {
+  const shape = normalizeTableShape(type);
+  const count = Math.max(1, Number(capacity) || 1);
+  const physical = TABLE_PHYSICAL[shape] || TABLE_PHYSICAL.round;
+  const table = { width: PLAN_SCALE.metersToPixels(physical.tabletopWidthMeters), height: PLAN_SCALE.metersToPixels(physical.tabletopHeightMeters) };
+  const clearance = { width: PLAN_SCALE.metersToPixels(physical.clearanceWidthMeters), height: PLAN_SCALE.metersToPixels(physical.clearanceHeightMeters) };
+  const { width: visualWidth, height: visualHeight, centerX, centerY } = TABLE_FRAME;
+  const positions = [];
+  if (shape === 'round') {
+    const tableRadius = PLAN_SCALE.metersToPixels(ROUND_TABLE_RADIUS_METERS);
+    const chairOrbit = tableRadius * ROUND_CHAIR_ORBIT_FACTOR;
+    const labelOrbit = tableRadius * ROUND_LABEL_ORBIT_FACTOR;
+    for (let index = 0; index < count; index += 1) {
+      const angle = -Math.PI / 2 + Math.PI * 2 * index / count;
+      const cos = Math.cos(angle), sin = Math.sin(angle);
+      positions.push({ x:centerX + cos*chairOrbit, y:centerY + sin*chairOrbit, labelX:centerX + cos*labelOrbit, labelY:centerY + sin*labelOrbit, labelAlign:cos>.28?'left':cos<-.28?'right':'center' });
+    }
+    return { shape, table, clearance, visualWidth, visualHeight, centerX, centerY, positions };
+  }
+  const chairOffset = PLAN_SCALE.metersToPixels(RECT_CHAIR_OFFSET_METERS);
+  const labelOffset = PLAN_SCALE.metersToPixels(RECT_LABEL_OFFSET_METERS);
+  rectangularPerimeterPositions(count, table.width + chairOffset*2, table.height + chairOffset*2, centerX, centerY).forEach((point) => {
+    const dx=point.x-centerX, dy=point.y-centerY, length=Math.hypot(dx,dy)||1, ux=dx/length, uy=dy/length;
+    positions.push({ x:point.x, y:point.y, labelX:point.x+ux*labelOffset, labelY:point.y+uy*labelOffset, labelAlign:ux>.32?'left':ux<-.32?'right':'center' });
+  });
+  return { shape, table, clearance, visualWidth, visualHeight, centerX, centerY, positions };
+}
+
 function projectedLayout(tables) {
-  const items = tables.map((table, index) => {
-    const capacity = capacityOf(table);
-    const geometry = tableSeatGeometry(table?.type || table?.shape, capacity || 4);
-    return { table, index, capacity, geometry };
+  const items = tables.map((table,index) => {
+    const capacity=capacityOf(table);
+    return { table,index,capacity,geometry:tablePhysicalGeometry(table?.type || table?.shape,capacity || 4) };
   });
-  const columns = Math.max(1, Math.ceil(Math.sqrt(items.length || 1)));
-  let maxWidth = 0;
-  let maxHeight = 0;
-  items.forEach((item) => {
-    maxWidth = Math.max(maxWidth, item.geometry.visualWidth);
-    maxHeight = Math.max(maxHeight, item.geometry.visualHeight);
+  const usableWidth=Math.max(1,PLAN_WIDTH-WORLD_PADDING*2), cellWidth=190, cellHeight=190;
+  const columns=Math.max(1,Math.floor(usableWidth/cellWidth));
+  items.forEach((item,index)=>{
+    const centerX=WORLD_PADDING+cellWidth/2+(index%columns)*cellWidth;
+    const centerY=WORLD_PADDING+cellHeight/2+Math.floor(index/columns)*cellHeight;
+    item.x=centerX-item.geometry.centerX; item.y=centerY-item.geometry.centerY;
   });
-  items.forEach((item, index) => {
-    item.x = WORLD_PADDING + (index % columns) * (maxWidth + TABLE_GAP);
-    item.y = WORLD_PADDING + Math.floor(index / columns) * (maxHeight + TABLE_GAP);
-  });
-  const rows = Math.max(1, Math.ceil(items.length / columns));
-  return {
-    items,
-    width: Math.max(PLAN_WIDTH, WORLD_PADDING * 2 + columns * maxWidth + Math.max(0, columns - 1) * TABLE_GAP),
-    height: Math.max(PLAN_HEIGHT, WORLD_PADDING * 2 + rows * maxHeight + Math.max(0, rows - 1) * TABLE_GAP)
-  };
+  return { items, width: PLAN_WIDTH, height: PLAN_HEIGHT };
 }
 
 function parseDistributionState(value) {
@@ -540,8 +594,14 @@ function renderTable(item, guestIndex, placement) {
   node.style.height = `${geometry.visualHeight}px`;
   applyPlacement(node, placement);
 
+  const clearance = document.createElement('div');
+  clearance.className = `distribution-table-clearance is-${geometry.shape}`;
+  clearance.style.width = `${geometry.clearance.width}px`;
+  clearance.style.height = `${geometry.clearance.height}px`;
+  node.append(clearance);
+
   const surface = document.createElement('div');
-  surface.className = `distribution-tabletop is-${normalizeTableShape(table?.type || table?.shape)}`;
+  surface.className = `distribution-tabletop is-${geometry.shape}`;
   surface.style.width = `${geometry.table.width}px`;
   surface.style.height = `${geometry.table.height}px`;
   surface.innerHTML = `<strong></strong><span>${capacity} sillas</span>`;
@@ -558,7 +618,6 @@ function renderTable(item, guestIndex, placement) {
     chair.dataset.seatId = escapeText(seat?.id);
     if (guest) {
       chair.dataset.guestId = escapeText(guest.id);
-      chair.draggable = true;
     }
     chair.style.left = `${position.x}px`;
     chair.style.top = `${position.y}px`;
@@ -574,7 +633,6 @@ function renderTable(item, guestIndex, placement) {
       label.dataset.guestId = escapeText(guest.id);
       label.dataset.tableId = tableId;
       label.dataset.seatIndex = String(seatIndex);
-      label.draggable = true;
       label.textContent = escapeText(guest.name) || 'Invitado';
       node.append(label);
     }
@@ -746,8 +804,6 @@ async function mountDistribucion(context) {
     const tableById = new Map(tables.map((table, index) => [escapeText(table.id), { table, index }]));
     let selectedTableId = '';
     let selectedElementId = '';
-    let draggingGuestId = '';
-    let assignmentSaving = false;
     let dirty = false;
     let saving = false;
     let canonicalChanged = false;
@@ -1267,88 +1323,8 @@ async function mountDistribucion(context) {
       markDirty();
     };
 
-    const canonicalTableById = (tableId) => tables.find((table) => escapeText(table?.id) === escapeText(tableId)) || null;
-    const canonicalGuestById = (guestId) => guests.find((guest) => escapeText(guest?.id) === escapeText(guestId)) || null;
-    const canonicalGuestAtSeat = (tableId, seatIndex) => guests.find((guest) =>
-      escapeText(guest?.tableId) === escapeText(tableId) && Number(guest?.seatNumber) === seatIndex + 1
-    ) || null;
-
-    const assignGuestFromDistribution = async (guestId, tableId, seatIndex) => {
-      if (!canEdit || assignmentSaving || dirty || saving || canonicalChanged) return false;
-      const guest = canonicalGuestById(guestId);
-      const table = canonicalTableById(tableId);
-      const seat = table?.seats?.[seatIndex];
-      if (!guest || !table || !seat?.id || !Number.isInteger(seatIndex) || seatIndex < 0 || seatIndex >= table.seats.length) return false;
-      const current = canonicalGuestAtSeat(tableId, seatIndex);
-      if (current && escapeText(current.id) !== escapeText(guest.id)) {
-        status.textContent = 'Silla ocupada · usa Mesas para intercambiar o reemplazar invitados';
-        return false;
-      }
-      if (escapeText(guest.tableId) === escapeText(table.id) && Number(guest.seatNumber) === seatIndex + 1 && escapeText(guest.seatId) === escapeText(seat.id)) return true;
-      const previous = { tableId: guest.tableId, seatId: guest.seatId, seatNumber: guest.seatNumber };
-      guest.tableId = table.id;
-      guest.seatId = seat.id;
-      guest.seatNumber = seatIndex + 1;
-      assignmentSaving = true;
-      status.textContent = 'Guardando ubicación del invitado…';
-      try {
-        validateCanonicalIntegrity(tables, guests);
-        await saveInvitadosSnapshot(context, snapshot.canonical);
-        window.dispatchEvent(new CustomEvent('migrandia:datachange', { detail: { weddingId: context?.id, source: 'distribucion' } }));
-        status.textContent = `${escapeText(guest.name) || 'Invitado'} · ${tableName(table, tables.indexOf(table))} · silla ${seatIndex + 1}`;
-        void mountDistribucion(context);
-        return true;
-      } catch (error) {
-        guest.tableId = previous.tableId;
-        guest.seatId = previous.seatId;
-        guest.seatNumber = previous.seatNumber;
-        status.textContent = error?.message || 'No se pudo mover al invitado.';
-        return false;
-      } finally {
-        assignmentSaving = false;
-      }
-    };
-
-    const clearGuestDropState = () => {
-      world.classList.remove('is-guest-dragging');
-      world.querySelectorAll('.distribution-chair.is-drop-target').forEach((chair) => chair.classList.remove('is-drop-target'));
-    };
-    world.addEventListener('dragstart', (event) => {
-      const source = event.target.closest('[data-guest-id]');
-      if (!source || !canEdit || dirty || saving || canonicalChanged) return;
-      draggingGuestId = escapeText(source.dataset.guestId);
-      if (!draggingGuestId) return;
-      event.stopPropagation();
-      event.dataTransfer.effectAllowed = 'move';
-      event.dataTransfer.setData('text/plain', draggingGuestId);
-      world.classList.add('is-guest-dragging');
-    });
-    world.addEventListener('dragover', (event) => {
-      if (!draggingGuestId) return;
-      const chair = event.target.closest('.distribution-chair');
-      if (!chair) return;
-      const occupant = escapeText(chair.dataset.guestId);
-      if (occupant && occupant !== draggingGuestId) return;
-      event.preventDefault();
-      event.dataTransfer.dropEffect = 'move';
-      world.querySelectorAll('.distribution-chair.is-drop-target').forEach((node) => node.classList.remove('is-drop-target'));
-      chair.classList.add('is-drop-target');
-    });
-    world.addEventListener('drop', async (event) => {
-      if (!draggingGuestId) return;
-      const chair = event.target.closest('.distribution-chair');
-      if (!chair) return;
-      event.preventDefault();
-      event.stopPropagation();
-      const guestId = draggingGuestId;
-      draggingGuestId = '';
-      clearGuestDropState();
-      await assignGuestFromDistribution(guestId, chair.dataset.tableId, Number(chair.dataset.seatIndex));
-    });
-    world.addEventListener('dragend', () => {
-      draggingGuestId = '';
-      clearGuestDropState();
-    });
+    // Las asignaciones son canónicas de Invitados/Mesas y aquí son solo lectura.
+    // Distribución no escribe guest.tableId, guest.seatId ni guest.seatNumber.
 
     const bindTableInteraction = (node) => {
       let move = null;
@@ -1784,9 +1760,15 @@ async function mountDistribucion(context) {
     const referenceFile = root.querySelector('[data-distribution-reference-file]');
     const referenceOpacity = root.querySelector('[data-distribution-reference-opacity]');
     const referenceRemove = root.querySelector('[data-distribution-reference-remove]');
+    const referenceMove = root.querySelector('[data-distribution-reference-move]');
+    const referenceResetPosition = root.querySelector('[data-distribution-reference-reset-position]');
+    const referenceImage = root.querySelector('[data-distribution-reference-image]');
     const referenceScopeId = context?.weddingId || context?.id || 'default';
     let referenceObjectUrl = '';
     let activeReferenceId = DEFAULT_BACKGROUND_ID;
+    let referenceOffset = { x: 0, y: 0 };
+    let referenceDrag = null;
+    const applyReferencePosition = () => { referenceImage.style.transform = `translate(${referenceOffset.x}px,${referenceOffset.y}px)`; };
 
     const releaseReferenceObjectUrl = () => {
       if (referenceObjectUrl) URL.revokeObjectURL(referenceObjectUrl);
@@ -1799,7 +1781,8 @@ async function mountDistribucion(context) {
       activeReferenceId = background.id;
       const source = background.blob ? URL.createObjectURL(background.blob) : background.source;
       if (background.blob) referenceObjectUrl = source;
-      world.style.setProperty('--distribution-reference-image', `url("${source}")`);
+      referenceImage.src = source;
+      referenceImage.dataset.builtin = background.builtin ? 'true' : 'false';
       world.classList.add('has-reference-image');
       referenceCatalog.value = activeReferenceId;
       referenceRemove.disabled = background.builtin;
@@ -1820,14 +1803,18 @@ async function mountDistribucion(context) {
     const persistReferencePreference = () => writeDistributionBackgroundPreference(referenceScopeId, {
       backgroundId: activeReferenceId,
       visible: referenceToggle.checked,
-      opacity: Number(referenceOpacity.value) / 100
+      opacity: Number(referenceOpacity.value) / 100,
+      offsetX: referenceOffset.x,
+      offsetY: referenceOffset.y
     }).catch(() => {});
 
     const referencePreference = await readDistributionBackgroundPreference(referenceScopeId);
     if (epoch !== mountEpoch || !root.isConnected) return;
     referenceToggle.checked = referencePreference.visible;
     referenceOpacity.value = String(Math.round(referencePreference.opacity * 100));
-    world.style.setProperty('--distribution-reference-opacity', String(referencePreference.opacity));
+    referenceImage.style.opacity = String(referencePreference.opacity);
+    referenceOffset = { x: referencePreference.offsetX, y: referencePreference.offsetY };
+    applyReferencePosition();
     world.classList.toggle('hide-reference-image', !referencePreference.visible);
     await refreshReferenceCatalog(referencePreference.backgroundId);
     if (epoch !== mountEpoch || !root.isConnected) return;
@@ -1861,9 +1848,42 @@ async function mountDistribucion(context) {
       void persistReferencePreference();
     };
     referenceOpacity.oninput = () => {
-      world.style.setProperty('--distribution-reference-opacity', String(Math.max(0.1, Math.min(1, Number(referenceOpacity.value) / 100))));
+      referenceImage.style.opacity = String(Math.max(0.1, Math.min(1, Number(referenceOpacity.value) / 100)));
       void persistReferencePreference();
     };
+    referenceMove.onclick = () => {
+      const active = !root.classList.contains('is-moving-reference');
+      root.classList.toggle('is-moving-reference', active);
+      referenceMove.classList.toggle('is-active', active);
+      referenceMove.setAttribute('aria-pressed', String(active));
+      referenceMove.textContent = active ? 'Terminar movimiento' : 'Mover plano';
+      status.textContent = active ? 'Arrastra el plano del recinto para alinearlo' : 'Movimiento del plano finalizado';
+    };
+    referenceResetPosition.onclick = () => {
+      referenceOffset = { x: 0, y: 0 };
+      applyReferencePosition();
+      void persistReferencePreference();
+      status.textContent = 'Posición del plano restablecida';
+    };
+    referenceImage.addEventListener('pointerdown', (event) => {
+      if (!root.classList.contains('is-moving-reference') || event.button !== 0) return;
+      event.preventDefault(); event.stopPropagation(); referenceImage.setPointerCapture(event.pointerId);
+      referenceDrag = { pointerId:event.pointerId, clientX:event.clientX, clientY:event.clientY, x:referenceOffset.x, y:referenceOffset.y };
+      referenceImage.classList.add('is-dragging');
+    });
+    referenceImage.addEventListener('pointermove', (event) => {
+      if (!referenceDrag || referenceDrag.pointerId !== event.pointerId) return;
+      event.preventDefault();
+      referenceOffset.x = referenceDrag.x + camera.clientDeltaToWorld(event.clientX - referenceDrag.clientX);
+      referenceOffset.y = referenceDrag.y + camera.clientDeltaToWorld(event.clientY - referenceDrag.clientY);
+      applyReferencePosition();
+    });
+    const finishReferenceDrag = (event) => {
+      if (!referenceDrag || referenceDrag.pointerId !== event.pointerId) return;
+      referenceDrag = null; referenceImage.classList.remove('is-dragging'); void persistReferencePreference();
+    };
+    referenceImage.addEventListener('pointerup', finishReferenceDrag);
+    referenceImage.addEventListener('pointercancel', finishReferenceDrag);
     referenceRemove.onclick = async () => {
       if (activeReferenceId === DEFAULT_BACKGROUND_ID) return;
       await removeDistributionBackground(activeReferenceId);

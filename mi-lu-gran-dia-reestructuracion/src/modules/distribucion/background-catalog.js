@@ -8,7 +8,7 @@ const DEFAULT_BACKGROUND = Object.freeze({
   id: DEFAULT_BACKGROUND_ID,
   name: 'Casa Acapulco',
   builtin: true,
-  mimeType: 'image/svg+xml'
+  mimeType: 'image/png'
 });
 
 function openDatabase() {
@@ -53,7 +53,7 @@ async function withStore(storeName, mode, operation) {
 }
 
 function defaultSource() {
-  return '/Wedding/distribucion_base.png?v=20260904-bgdrag1';
+  return new URL('../../../assets/distribucion/casa-acapulco.png?v=1', import.meta.url).href;
 }
 
 function preferenceId(scopeId) {
@@ -108,10 +108,12 @@ export async function readDistributionBackgroundPreference(scopeId) {
     return {
       backgroundId: item?.backgroundId || DEFAULT_BACKGROUND_ID,
       visible: item?.visible !== false,
-      opacity: Math.max(0.1, Math.min(1, Number(item?.opacity) || 0.45))
+      opacity: Math.max(0.1, Math.min(1, Number(item?.opacity) || 0.45)),
+      offsetX: Number.isFinite(Number(item?.offsetX)) ? Number(item.offsetX) : 0,
+      offsetY: Number.isFinite(Number(item?.offsetY)) ? Number(item.offsetY) : 0
     };
   } catch (_) {
-    return { backgroundId: DEFAULT_BACKGROUND_ID, visible: true, opacity: 0.45 };
+    return { backgroundId: DEFAULT_BACKGROUND_ID, visible: true, opacity: 0.45, offsetX: 0, offsetY: 0 };
   }
 }
 
@@ -120,7 +122,9 @@ export async function writeDistributionBackgroundPreference(scopeId, preference)
     id: preferenceId(scopeId),
     backgroundId: preference?.backgroundId || DEFAULT_BACKGROUND_ID,
     visible: preference?.visible !== false,
-    opacity: Math.max(0.1, Math.min(1, Number(preference?.opacity) || 0.45))
+    opacity: Math.max(0.1, Math.min(1, Number(preference?.opacity) || 0.45)),
+    offsetX: Number.isFinite(Number(preference?.offsetX)) ? Number(preference.offsetX) : 0,
+    offsetY: Number.isFinite(Number(preference?.offsetY)) ? Number(preference.offsetY) : 0
   };
   await withStore(PREFERENCES_STORE, 'readwrite', (store) => requestValue(store.put(value)));
   return value;

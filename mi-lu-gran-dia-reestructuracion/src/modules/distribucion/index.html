@@ -137,8 +137,12 @@
           </label>
           <label>Agregar al catálogo local<input type="file" accept="image/png,image/jpeg,image/webp" data-distribution-reference-file></label>
           <label>Opacidad<input type="range" min="10" max="100" step="5" value="45" data-distribution-reference-opacity></label>
+          <div class="distribution-reference-actions">
+            <button type="button" data-distribution-reference-move aria-pressed="false">Mover plano</button>
+            <button type="button" data-distribution-reference-reset-position>Restablecer posición</button>
+          </div>
           <button type="button" data-distribution-reference-remove>Eliminar plano personalizado</button>
-          <small>Casa Acapulco viene incluido por defecto. Los planos que agregues se guardan únicamente en este navegador mediante IndexedDB; no se suben a Firebase, Firestore o Storage.</small>
+          <small>Casa Acapulco usa el lienzo físico 1448 × 1086 a 32 px/m. Los planos que agregues se guardan únicamente en este navegador mediante IndexedDB; no se suben a Firebase, Firestore o Storage.</small>
         </div>
         <label class="distribution-proximity-control">Separación entre mesas
           <select data-distribution-proximity>
@@ -163,6 +167,7 @@
     </aside>
     <div class="distribution-viewport" data-distribution-viewport tabindex="0" aria-label="Plano de distribución. Arrastra una mesa para moverla o el fondo para desplazarte.">
       <div class="distribution-world" data-distribution-world>
+        <img class="distribution-reference-image" data-distribution-reference-image alt="" aria-hidden="true">
         <svg class="distribution-drawing-layer" data-distribution-drawing-layer aria-hidden="true"></svg>
         <svg class="distribution-measure-layer" data-distribution-measure-layer aria-hidden="true"></svg>
       </div>

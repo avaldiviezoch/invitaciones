@@ -95,3 +95,16 @@ EXTENSIÓN DISTRIBUCIÓN — CATÁLOGO LOCAL DE PLANOS:
 - Sin cambios en Firebase, Firestore, Storage, Authentication ni usuarios.
 - Assets actuales: Distribución JS v53, CSS v17, dashboard raíz v145.
 - Fase 5S sigue pendiente.
+
+
+CORRECCIÓN DISTRIBUCIÓN — ESCALA FÍSICA Y PLANO BASE:
+- Lienzo físico fijo: 1448 x 1086.
+- Escala única: 32 px/m; zoom/pan son exclusivamente visuales.
+- Casa Acapulco incluido como asset propio en assets/distribucion/casa-acapulco.png.
+- Fondo, mesas, objetos, áreas y mediciones comparten el mismo distribution-world.
+- Mesa redonda: radio físico 0.915 m; sillas 1.33x; etiquetas 2.18x.
+- Distribución ya no usa tableSeatGeometry de Invitados para su geometría física.
+- Distribución vuelve a ser solo lectora de asignaciones de invitados; no escribe tableId/seatId/seatNumber.
+- Preferencia de visibilidad, opacidad y posición del plano sigue siendo exclusivamente local en IndexedDB.
+- Sin migración del esquema planificador_bodas_distribucion_v1 ni cambios en Firebase/Firestore/Storage.
+- Assets: Distribución JS v63, plantilla v30, cámara v2, catálogo de planos v2, CSS v19, dashboard raíz v155.

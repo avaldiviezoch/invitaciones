@@ -71,6 +71,7 @@ export function setupDistributionCamera(root, world, worldSize) {
     zoomAt(scale + (event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP), event.clientX, event.clientY);
   }, { passive: false });
   viewport.addEventListener('pointerdown', (event) => {
+    if (root.classList.contains('is-moving-reference') && event.target.closest('.distribution-reference-image')) return;
     if (event.target.closest('.distribution-table,.distribution-element') || root.classList.contains('is-drawing-area')) return;
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     viewport.setPointerCapture(event.pointerId);
