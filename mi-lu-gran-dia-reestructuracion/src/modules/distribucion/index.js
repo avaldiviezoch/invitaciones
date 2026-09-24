@@ -14,6 +14,13 @@ const KEYBOARD_MOVE_STEP = 10;
 const KEYBOARD_MOVE_FINE_STEP = 1;
 const TABLE_GAP = 72;
 const WORLD_PADDING = 90;
+const PHYSICAL_ELEMENT_TYPES = Object.freeze({
+  dance: Object.freeze({ label: 'Pista de baile', width: 220, height: 220 }),
+  bar: Object.freeze({ label: 'Barra', width: 176, height: 54 }),
+  dj: Object.freeze({ label: 'DJ / sonido', width: 132, height: 88 }),
+  stage: Object.freeze({ label: 'Escenario', width: 176, height: 110 }),
+  column: Object.freeze({ label: 'Columna', width: 36, height: 36 })
+});
 
 let templatePromise = null;
 let mountEpoch = 0;
@@ -165,10 +172,22 @@ function parseDistributionState(value) {
       seen.add(tableId);
       return { tableId, x, y, rotation: normalizeRotation(rotation) };
     });
+    const elements = Array.isArray(proposal.elements) ? proposal.elements.map((element) => {
+      const id = escapeText(element?.id);
+      const type = escapeText(element?.type);
+      const x = finiteNumber(element?.x);
+      const y = finiteNumber(element?.y);
+      const rotation = finiteNumber(element?.rotation);
+      if (!id || !PHYSICAL_ELEMENT_TYPES[type] || x === null || y === null || rotation === null) {
+        throw new Error('La distribución guardada contiene elementos físicos no válidos. No se modificó ningún dato.');
+      }
+      return { id, type, x, y, rotation: normalizeRotation(rotation) };
+    }) : [];
     return {
       id: escapeText(proposal.id),
       name: escapeText(proposal.name) || 'Propuesta',
-      placements
+      placements,
+      elements
     };
   });
   const activeProposalId = escapeText(value.activeProposalId);
@@ -191,7 +210,7 @@ function placementMapFor(layout, storedState) {
   }));
 }
 
-function serializeDistribution(placementState, tableIds) {
+function serializeDistribution(placementState, tableIds, elements) {
   return {
     version: 1,
     activeProposalId: DEFAULT_PROPOSAL_ID,
@@ -206,7 +225,14 @@ function serializeDistribution(placementState, tableIds) {
           y: Math.round(placement.y * 100) / 100,
           rotation: normalizeRotation(placement.rotation)
         };
-      })
+      }),
+      elements: elements.map((element) => ({
+        id: element.id,
+        type: element.type,
+        x: Math.round(element.x * 100) / 100,
+        y: Math.round(element.y * 100) / 100,
+        rotation: normalizeRotation(element.rotation)
+      }))
     }]
   };
 }
@@ -260,6 +286,21 @@ function renderTable(item, guestIndex, placement) {
       node.append(label);
     }
   });
+  return node;
+}
+
+function renderPhysicalElement(element) {
+  const definition = PHYSICAL_ELEMENT_TYPES[element.type];
+  const node = document.createElement('article');
+  node.className = `distribution-element is-${element.type}`;
+  node.dataset.elementId = element.id;
+  node.style.left = `${element.x}px`;
+  node.style.top = `${element.y}px`;
+  node.style.width = `${definition.width}px`;
+  node.style.height = `${definition.height}px`;
+  node.style.transform = `rotate(${normalizeRotation(element.rotation)}deg)`;
+  node.innerHTML = '<strong></strong>';
+  node.querySelector('strong').textContent = definition.label;
   return node;
 }
 
@@ -424,6 +465,11 @@ async function mountDistribucion(context) {
     const guestIndex = buildGuestIndex(guests);
     const layout = projectedLayout(tables);
     const placementState = placementMapFor(layout, storedState);
+    const physicalElements = (activeProposalOf(storedState)?.elements || []).map((element) => ({ ...element }));
+    let elementSequence = physicalElements.reduce((max, element) => {
+      const value = Number(String(element.id).match(/(\d+)$/)?.[1] || 0);
+      return Math.max(max, value);
+    }, 0);
     const tableIds = tables.map((table) => escapeText(table.id)).filter(Boolean);
     const world = root.querySelector('[data-distribution-world]');
     const tableById = new Map(tables.map((table, index) => [escapeText(table.id), { table, index }]));
@@ -442,6 +488,7 @@ async function mountDistribucion(context) {
       if (!tableId) return;
       world.append(renderTable(item, guestIndex, placementState.get(tableId)));
     });
+    physicalElements.forEach((element) => world.append(renderPhysicalElement(element)));
 
     const camera = setupCamera(root, world, layout);
 
@@ -556,6 +603,26 @@ async function mountDistribucion(context) {
       markDirty();
     };
 
+    root.querySelectorAll('[data-distribution-add-element]').forEach((button) => {
+      button.disabled = !canEdit;
+      button.onclick = () => {
+        if (!canEdit) return;
+        const type = escapeText(button.dataset.distributionAddElement);
+        if (!PHYSICAL_ELEMENT_TYPES[type]) return;
+        elementSequence += 1;
+        const element = {
+          id: `element_${elementSequence}`,
+          type,
+          x: WORLD_PADDING + 40 + physicalElements.length * 18,
+          y: WORLD_PADDING + 40 + physicalElements.length * 18,
+          rotation: 0
+        };
+        physicalElements.push(element);
+        world.append(renderPhysicalElement(element));
+        markDirty();
+      };
+    });
+
     root.querySelector('[data-distribution-rotate-left]').onclick = () => rotateSelected(-ROTATION_STEP);
     root.querySelector('[data-distribution-rotate-right]').onclick = () => rotateSelected(ROTATION_STEP);
 
@@ -564,7 +631,7 @@ async function mountDistribucion(context) {
       saving = true;
       updateSaveState();
       try {
-        await writePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, serializeDistribution(placementState, tableIds));
+        await writePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, serializeDistribution(placementState, tableIds, physicalElements));
         dirty = false;
         hasPersistedState = true;
         status.textContent = 'Distribución guardada';
