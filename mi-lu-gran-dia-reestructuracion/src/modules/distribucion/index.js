@@ -1999,7 +1999,9 @@ async function mountDistribucion(context) {
     console.error('No se pudo inicializar Distribución:', error);
     status.textContent = error?.message || 'Distribución no pudo inicializarse.';
     saveButton.disabled = true;
+    return false;
   }
+  return true;
 }
 
 export { mountDistribucion };
