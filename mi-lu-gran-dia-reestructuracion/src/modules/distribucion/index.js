@@ -637,7 +637,7 @@ async function mountDistribucion(context) {
       let moved = false;
 
       node.addEventListener('pointerdown', (event) => {
-        if (event.button !== 0 || !canEdit || element.locked) return;
+        if (event.button !== 0 || !canEdit) return;
         event.stopPropagation();
         const placement = placementState.get(node.dataset.tableId);
         if (!placement) return;
@@ -692,7 +692,7 @@ async function mountDistribucion(context) {
         selectTable(node.dataset.tableId);
         return;
       }
-      if (!canEdit || element.locked || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+      if (!canEdit || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
       const placement = placementState.get(node.dataset.tableId);
       if (!placement) return;
       event.preventDefault();
@@ -710,7 +710,7 @@ async function mountDistribucion(context) {
       let move = null;
       let moved = false;
       node.addEventListener('pointerdown', (event) => {
-        if (event.button !== 0 || !canEdit) return;
+        if (event.button !== 0 || !canEdit || element.locked) return;
         event.stopPropagation();
         node.setPointerCapture(event.pointerId);
         node.classList.add('is-moving');
@@ -744,7 +744,7 @@ async function mountDistribucion(context) {
         selectElement(element.id);
       });
       node.addEventListener('keydown', (event) => {
-        if (!canEdit || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+        if (!canEdit || element.locked || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
         event.preventDefault();
         const step = event.shiftKey ? KEYBOARD_MOVE_FINE_STEP : KEYBOARD_MOVE_STEP;
         if (event.key === 'ArrowLeft') element.x -= step;
@@ -778,7 +778,7 @@ async function mountDistribucion(context) {
       if (selectedElementId) {
         const element = physicalElements.find((item) => item.id === selectedElementId);
         const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
-        if (!element || !node) return;
+        if (!element || !node || element.locked) return;
         element.rotation = normalizeRotation(element.rotation + delta);
         applyElementPlacement(node, element);
         renderElementInspector(root, element);
