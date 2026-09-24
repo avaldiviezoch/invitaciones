@@ -1106,90 +1106,7 @@ async function mountDistribucion(context) {
         ...element,
         points: Array.isArray(element.points) ? element.points.map((point) => ({ ...point })) : null
       })));
-      const canonicalTableById = (tableId) => tables.find((table) => escapeText(table?.id) === escapeText(tableId)) || null;
-    const canonicalGuestById = (guestId) => guests.find((guest) => escapeText(guest?.id) === escapeText(guestId)) || null;
-    const canonicalGuestAtSeat = (tableId, seatIndex) => guests.find((guest) =>
-      escapeText(guest?.tableId) === escapeText(tableId) && Number(guest?.seatNumber) === seatIndex + 1
-    ) || null;
-
-    const assignGuestFromDistribution = async (guestId, tableId, seatIndex) => {
-      if (!canEdit || assignmentSaving || dirty || saving || canonicalChanged) return false;
-      const guest = canonicalGuestById(guestId);
-      const table = canonicalTableById(tableId);
-      const seat = table?.seats?.[seatIndex];
-      if (!guest || !table || !seat?.id || !Number.isInteger(seatIndex) || seatIndex < 0 || seatIndex >= capacityOf(table)) return false;
-      const current = canonicalGuestAtSeat(tableId, seatIndex);
-      if (current && escapeText(current.id) !== escapeText(guest.id)) {
-        status.textContent = 'Silla ocupada · usa Mesas para intercambiar o reemplazar invitados';
-        return false;
-      }
-      if (escapeText(guest.tableId) === escapeText(table.id) && Number(guest.seatNumber) === seatIndex + 1 && escapeText(guest.seatId) === escapeText(seat.id)) return true;
-      const previous = { tableId: guest.tableId, seatId: guest.seatId, seatNumber: guest.seatNumber };
-      guest.tableId = table.id;
-      guest.seatId = seat.id;
-      guest.seatNumber = seatIndex + 1;
-      assignmentSaving = true;
-      status.textContent = 'Guardando ubicación del invitado…';
-      try {
-        validateCanonicalIntegrity(tables, guests);
-        await saveInvitadosSnapshot(context, snapshot.canonical);
-        window.dispatchEvent(new CustomEvent('migrandia:datachange', { detail: { weddingId: context?.id, source: 'distribution-guest-assigned' } }));
-        status.textContent = `${escapeText(guest.name) || 'Invitado'} · ${tableName(table, tables.indexOf(table))} · silla ${seatIndex + 1}`;
-        void mountDistribucion(context);
-        return true;
-      } catch (error) {
-        guest.tableId = previous.tableId;
-        guest.seatId = previous.seatId;
-        guest.seatNumber = previous.seatNumber;
-        status.textContent = error?.message || 'No se pudo mover al invitado.';
-        return false;
-      } finally {
-        assignmentSaving = false;
-      }
-    };
-
-    const clearGuestDropState = () => {
-      world.classList.remove('is-guest-dragging');
-      world.querySelectorAll('.distribution-chair.is-drop-target').forEach((chair) => chair.classList.remove('is-drop-target'));
-    };
-    world.addEventListener('dragstart', (event) => {
-      const source = event.target.closest('[data-guest-id]');
-      if (!source || !canEdit || dirty || saving || canonicalChanged) return;
-      draggingGuestId = escapeText(source.dataset.guestId);
-      if (!draggingGuestId) return;
-      event.stopPropagation();
-      event.dataTransfer.effectAllowed = 'move';
-      event.dataTransfer.setData('text/plain', draggingGuestId);
-      world.classList.add('is-guest-dragging');
-    });
-    world.addEventListener('dragover', (event) => {
-      if (!draggingGuestId) return;
-      const chair = event.target.closest('.distribution-chair');
-      if (!chair) return;
-      const occupant = escapeText(chair.dataset.guestId);
-      if (occupant && occupant !== draggingGuestId) return;
-      event.preventDefault();
-      event.dataTransfer.dropEffect = 'move';
-      world.querySelectorAll('.distribution-chair.is-drop-target').forEach((node) => node.classList.remove('is-drop-target'));
-      chair.classList.add('is-drop-target');
-    });
-    world.addEventListener('drop', async (event) => {
-      if (!draggingGuestId) return;
-      const chair = event.target.closest('.distribution-chair');
-      if (!chair) return;
-      event.preventDefault();
-      event.stopPropagation();
-      const guestId = draggingGuestId;
-      draggingGuestId = '';
-      clearGuestDropState();
-      await assignGuestFromDistribution(guestId, chair.dataset.tableId, Number(chair.dataset.seatIndex));
-    });
-    world.addEventListener('dragend', () => {
-      draggingGuestId = '';
-      clearGuestDropState();
-    });
-
-    world.querySelectorAll('.distribution-table').forEach((node) => {
+      world.querySelectorAll('.distribution-table').forEach((node) => {
         const placement = placementState.get(node.dataset.tableId);
         if (placement) applyPlacement(node, placement);
       });
@@ -1429,6 +1346,89 @@ async function mountDistribucion(context) {
       world.querySelector(`.distribution-element[data-element-id="${CSS.escape(pasted.id)}"]`)?.focus();
       markDirty();
     };
+
+    const canonicalTableById = (tableId) => tables.find((table) => escapeText(table?.id) === escapeText(tableId)) || null;
+    const canonicalGuestById = (guestId) => guests.find((guest) => escapeText(guest?.id) === escapeText(guestId)) || null;
+    const canonicalGuestAtSeat = (tableId, seatIndex) => guests.find((guest) =>
+      escapeText(guest?.tableId) === escapeText(tableId) && Number(guest?.seatNumber) === seatIndex + 1
+    ) || null;
+
+    const assignGuestFromDistribution = async (guestId, tableId, seatIndex) => {
+      if (!canEdit || assignmentSaving || dirty || saving || canonicalChanged) return false;
+      const guest = canonicalGuestById(guestId);
+      const table = canonicalTableById(tableId);
+      const seat = table?.seats?.[seatIndex];
+      if (!guest || !table || !seat?.id || !Number.isInteger(seatIndex) || seatIndex < 0 || seatIndex >= capacityOf(table)) return false;
+      const current = canonicalGuestAtSeat(tableId, seatIndex);
+      if (current && escapeText(current.id) !== escapeText(guest.id)) {
+        status.textContent = 'Silla ocupada · usa Mesas para intercambiar o reemplazar invitados';
+        return false;
+      }
+      if (escapeText(guest.tableId) === escapeText(table.id) && Number(guest.seatNumber) === seatIndex + 1 && escapeText(guest.seatId) === escapeText(seat.id)) return true;
+      const previous = { tableId: guest.tableId, seatId: guest.seatId, seatNumber: guest.seatNumber };
+      guest.tableId = table.id;
+      guest.seatId = seat.id;
+      guest.seatNumber = seatIndex + 1;
+      assignmentSaving = true;
+      status.textContent = 'Guardando ubicación del invitado…';
+      try {
+        validateCanonicalIntegrity(tables, guests);
+        await saveInvitadosSnapshot(context, snapshot.canonical);
+        window.dispatchEvent(new CustomEvent('migrandia:datachange', { detail: { weddingId: context?.id, source: 'distribution-guest-assigned' } }));
+        status.textContent = `${escapeText(guest.name) || 'Invitado'} · ${tableName(table, tables.indexOf(table))} · silla ${seatIndex + 1}`;
+        void mountDistribucion(context);
+        return true;
+      } catch (error) {
+        guest.tableId = previous.tableId;
+        guest.seatId = previous.seatId;
+        guest.seatNumber = previous.seatNumber;
+        status.textContent = error?.message || 'No se pudo mover al invitado.';
+        return false;
+      } finally {
+        assignmentSaving = false;
+      }
+    };
+
+    const clearGuestDropState = () => {
+      world.classList.remove('is-guest-dragging');
+      world.querySelectorAll('.distribution-chair.is-drop-target').forEach((chair) => chair.classList.remove('is-drop-target'));
+    };
+    world.addEventListener('dragstart', (event) => {
+      const source = event.target.closest('[data-guest-id]');
+      if (!source || !canEdit || dirty || saving || canonicalChanged) return;
+      draggingGuestId = escapeText(source.dataset.guestId);
+      if (!draggingGuestId) return;
+      event.stopPropagation();
+      event.dataTransfer.effectAllowed = 'move';
+      event.dataTransfer.setData('text/plain', draggingGuestId);
+      world.classList.add('is-guest-dragging');
+    });
+    world.addEventListener('dragover', (event) => {
+      if (!draggingGuestId) return;
+      const chair = event.target.closest('.distribution-chair');
+      if (!chair) return;
+      const occupant = escapeText(chair.dataset.guestId);
+      if (occupant && occupant !== draggingGuestId) return;
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'move';
+      world.querySelectorAll('.distribution-chair.is-drop-target').forEach((node) => node.classList.remove('is-drop-target'));
+      chair.classList.add('is-drop-target');
+    });
+    world.addEventListener('drop', async (event) => {
+      if (!draggingGuestId) return;
+      const chair = event.target.closest('.distribution-chair');
+      if (!chair) return;
+      event.preventDefault();
+      event.stopPropagation();
+      const guestId = draggingGuestId;
+      draggingGuestId = '';
+      clearGuestDropState();
+      await assignGuestFromDistribution(guestId, chair.dataset.tableId, Number(chair.dataset.seatIndex));
+    });
+    world.addEventListener('dragend', () => {
+      draggingGuestId = '';
+      clearGuestDropState();
+    });
 
     world.querySelectorAll('.distribution-table').forEach((node) => {
       let move = null;
