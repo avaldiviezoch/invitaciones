@@ -21,10 +21,12 @@ const KEYBOARD_MOVE_STEP = 10;
 const KEYBOARD_MOVE_FINE_STEP = 1;
 const TABLE_GAP = 72;
 const WORLD_PADDING = 90;
+const PLAN_WIDTH = 1448;
+const PLAN_HEIGHT = 1086;
 const PLAN_SCALE = Object.freeze({
-  pixelsPerMeter: 44,
-  metersToPixels: (meters) => meters * 44,
-  pixelsToMeters: (pixels) => pixels / 44
+  pixelsPerMeter: 32,
+  metersToPixels: (meters) => meters * 32,
+  pixelsToMeters: (pixels) => pixels / 32
 });
 const PIXELS_PER_METER = PLAN_SCALE.pixelsPerMeter;
 const PROXIMITY_OPTIONS_METERS = Object.freeze([0.6, 1, 1.5, 2]);
@@ -402,8 +404,8 @@ function projectedLayout(tables) {
   const rows = Math.max(1, Math.ceil(items.length / columns));
   return {
     items,
-    width: Math.max(760, WORLD_PADDING * 2 + columns * maxWidth + Math.max(0, columns - 1) * TABLE_GAP),
-    height: Math.max(560, WORLD_PADDING * 2 + rows * maxHeight + Math.max(0, rows - 1) * TABLE_GAP)
+    width: Math.max(PLAN_WIDTH, WORLD_PADDING * 2 + columns * maxWidth + Math.max(0, columns - 1) * TABLE_GAP),
+    height: Math.max(PLAN_HEIGHT, WORLD_PADDING * 2 + rows * maxHeight + Math.max(0, rows - 1) * TABLE_GAP)
   };
 }
 
