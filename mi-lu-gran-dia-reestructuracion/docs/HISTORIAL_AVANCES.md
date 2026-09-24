@@ -250,3 +250,11 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Los menús usan details/summary nativo, solo uno puede permanecer abierto y se cierran al ejecutar una acción.
 - En móvil el selector y menús se adaptan al ancho disponible sin volver a desplegar todas las acciones.
 - No se modificaron funciones, persistencia, geometría, capas, validaciones, Firebase, Firestore, Storage ni IDs.
+
+
+## 2026-09-24 — Distribución: blindaje contra plantilla antigua en caché
+- Se verificó que la toolbar simplificada sí está presente en el HEAD a67d2ae3.
+- La plantilla de Distribución ahora se carga con fetch(..., { cache: 'no-store' }) para evitar reutilizar index.html antiguo durante iteraciones rápidas.
+- Se suben identificadores de carga a template v38, Distribución v73, CSS v30 y dashboard v165.
+- Se añade un marcador app-build en el HTML raíz para facilitar la verificación de la versión servida.
+- No se modificó la estructura funcional de la toolbar, datos, Firebase, Firestore, Storage ni geometría.

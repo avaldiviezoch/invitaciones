@@ -13,7 +13,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=36', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=38', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -263,7 +263,7 @@ let mountEpoch = 0;
 let activeDistributionCleanup = null;
 
 function template() {
-  if (!templatePromise) templatePromise = fetch(TEMPLATE_URL).then((response) => {
+  if (!templatePromise) templatePromise = fetch(TEMPLATE_URL, { cache: 'no-store' }).then((response) => {
     if (!response.ok) throw new Error('No se pudo cargar la vista de Distribución.');
     return response.text();
   });
