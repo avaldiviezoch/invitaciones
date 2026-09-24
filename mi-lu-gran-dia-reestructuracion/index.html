@@ -10,7 +10,7 @@
   if(moduleId==='checklist'||moduleId==='presupuesto'||moduleId==='proveedores'||moduleId==='invitados'||moduleId==='distribucion') document.documentElement.classList.add('module-route');
 })();
 </script>
-<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=33">
+<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=34">
 <link rel="stylesheet" href="src/modules/checklist/checklist.css?v=18">
 <link rel="stylesheet" href="src/modules/presupuesto/presupuesto.css?v=26">
 <link rel="stylesheet" href="src/modules/proveedores/proveedores.css?v=4">
@@ -440,6 +440,7 @@ Cancelar
 <section class="module-workspace" id="moduleWorkspace" aria-hidden="true">
   <nav class="app-module-nav" id="appModuleNav" aria-label="Navegación de Mi Gran Día">
     <button class="app-nav-home" id="appNavHome" type="button" aria-label="Volver al inicio"><span class="mgd-brand-mark">MGD</span><span class="mgd-brand-copy"><strong>Mi Gran Día</strong><small id="appNavWeddingName">Mi boda</small></span></button>
+    <button class="app-nav-collapse" id="appNavCollapse" type="button" aria-label="Recoger navegación" aria-controls="appModuleNav" aria-expanded="true"><span aria-hidden="true">‹</span></button>
     <div class="app-nav-modules" aria-label="Cambiar de módulo">
       <button class="app-nav-item is-active" type="button" data-app-module="checklist"><img src="../mi-gran-dia/barra/icons/checklist.png?v=1" alt=""><span>Checklist</span></button>
       <button class="app-nav-item" type="button" data-app-module="presupuesto"><img src="../mi-gran-dia/barra/icons/presupuesto.png?v=1" alt=""><span>Presupuesto</span></button>
@@ -452,6 +453,7 @@ Cancelar
     </div>
     <div class="app-nav-account-wrap" id="appNavAccountWrap"><button class="app-nav-account" id="appNavAccountButton" type="button" aria-haspopup="true" aria-expanded="false"><span class="app-nav-account-avatar"><img id="appNavAvatar" alt="Foto de perfil"><span id="appNavInitials">MGD</span></span><span class="app-nav-account-copy"><strong id="appNavAccountName">Mi cuenta</strong><small id="appNavRole">Mi acceso</small></span><span class="app-nav-chevron">⌄</span></button><div class="app-nav-account-popover" role="dialog" aria-label="Cuenta activa"><strong id="appNavPopoverName">Mi cuenta</strong><span id="appNavPopoverEmail"></span><button class="app-nav-wedding" id="appNavWeddingButton" type="button"><span>Boda activa</span><strong id="appNavPopoverWedding">Mi boda</strong><small>Ver mis bodas y accesos</small></button><button class="app-nav-logout" id="appNavLogout" type="button">Cerrar sesión</button></div></div>
   </nav>
+  <button class="app-nav-restore" id="appNavRestore" type="button" aria-label="Mostrar navegación" aria-controls="appModuleNav" aria-hidden="true"><span aria-hidden="true">☰</span></button>
   <main class="module-stage" id="moduleStage">
     <div class="module-loader" id="moduleLoader" role="status" aria-live="polite" aria-label="Cargando módulo">
       <div class="module-loader-mark" aria-hidden="true"><span>MGD</span><i></i></div>
@@ -484,7 +486,7 @@ Cancelar
 <form class="create-wedding-card" id="createWeddingForm" hidden><h3>Crear una nueva boda</h3><label><span>Nombre de la boda</span><input id="newWeddingName" type="text" maxlength="90" placeholder="Ej. Antonio & Lucero" required></label><label><span>Fecha</span><input id="newWeddingDate" type="date"></label><div><button type="button" id="cancelCreateWedding">Cancelar</button><button type="submit">Crear y abrir</button></div><p id="createWeddingStatus" aria-live="polite"></p></form>
 </div>
 </section>
-<script type="module" src="src/modules/dashboard/inicio.js?v=161">
+<script type="module" src="src/modules/dashboard/inicio.js?v=162">
 </script>
 </body>
 </html>
