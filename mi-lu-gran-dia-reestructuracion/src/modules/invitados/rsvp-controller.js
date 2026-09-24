@@ -139,6 +139,32 @@ function createRsvpController(api) {
     });
   }
 
+  function musicPublicUrl() {
+    const token = text(state.token);
+    return token ? `https://avaldiviezoch.github.io/Wedding/rsvp.html?token=${encodeURIComponent(token)}&view=music` : '';
+  }
+
+  function renderMusicPreview(root, config) {
+    const host = root.querySelector('[data-music-config-preview]');
+    if (!host || !config) return;
+    const rows = Array.from({ length: Math.min(3, Number(config.maxSongs || 5)) }, (_, index) =>
+      `<div class="music-preview-row"><span>Canción ${index + 1}</span>${config.askArtist !== false ? '<span>Artista</span>' : ''}</div>`
+    ).join('');
+    host.innerHTML = `<div class="music-preview-head"><small>VISTA PREVIA</small><span>${config.enabled === false ? 'Encuesta desactivada' : 'Encuesta activa'}</span></div><div class="music-preview-body"><b aria-hidden="true">♫</b><div><strong>${esc(config.title)}</strong><p>${esc(config.intro)}</p></div></div><div class="music-preview-fields">${rows}${Number(config.maxSongs || 5) > 3 ? `<div class="music-preview-more">+ ${Number(config.maxSongs || 5) - 3} canciones disponibles</div>` : ''}${config.askMessage !== false ? `<div class="music-preview-more">${esc(config.messageLabel)}</div>` : ''}</div>`;
+  }
+
+  function readMusicConfigForm(form) {
+    return {
+      title: form.elements.title.value,
+      intro: form.elements.intro.value,
+      maxSongs: Number(form.elements.maxSongs.value),
+      messageLabel: form.elements.messageLabel.value,
+      enabled: form.elements.enabled.checked,
+      askArtist: form.elements.askArtist.checked,
+      askMessage: form.elements.askMessage.checked
+    };
+  }
+
   function renderMusicConfig(root) {
     const form = root.querySelector('[data-music-config-form]');
     if (!form) return;
@@ -154,7 +180,12 @@ function createRsvpController(api) {
     form.elements.enabled.checked = config.enabled !== false;
     form.elements.askArtist.checked = config.askArtist !== false;
     form.elements.askMessage.checked = config.askMessage !== false;
-    form.querySelectorAll('input,textarea,select,button').forEach((control) => { control.disabled = !api.canEdit(); });
+    form.querySelectorAll('input:not([readonly]),textarea,select,button[data-music-config-save]').forEach((control) => { control.disabled = !api.canEdit(); });
+    const url = musicPublicUrl();
+    const urlInput = root.querySelector('[data-music-public-url]');
+    if (urlInput) urlInput.value = url;
+    root.querySelectorAll('[data-music-copy-url],[data-music-open-url]').forEach((button) => { button.disabled = !url; });
+    renderMusicPreview(root, config);
   }
 
   async function submitMusicConfig(event) {
@@ -163,15 +194,7 @@ function createRsvpController(api) {
     const form = event.target;
     const status = api.getRoot()?.querySelector('[data-music-config-state]');
     const button = form.querySelector('[data-music-config-save]');
-    const input = {
-      title: form.elements.title.value,
-      intro: form.elements.intro.value,
-      maxSongs: Number(form.elements.maxSongs.value),
-      messageLabel: form.elements.messageLabel.value,
-      enabled: form.elements.enabled.checked,
-      askArtist: form.elements.askArtist.checked,
-      askMessage: form.elements.askMessage.checked
-    };
+    const input = readMusicConfigForm(form);
     api.setSaving(true);
     if (button) button.disabled = true;
     if (status) status.textContent = 'Guardando…';
@@ -558,6 +581,22 @@ function createRsvpController(api) {
   }
 
   async function handleClick(event) {
+    const copyMusicUrl = event.target.closest('[data-music-copy-url]');
+    if (copyMusicUrl) {
+      const url = musicPublicUrl();
+      if (url) {
+        await navigator.clipboard.writeText(url);
+        const before = copyMusicUrl.textContent;
+        copyMusicUrl.textContent = 'Copiado ✓';
+        window.setTimeout(() => { copyMusicUrl.textContent = before; }, 1200);
+      }
+      return true;
+    }
+    if (event.target.closest('[data-music-open-url]')) {
+      const url = musicPublicUrl();
+      if (url) window.open(url, '_blank', 'noopener');
+      return true;
+    }
     if (event.target.closest('[data-rsvp-close]')) {
       closeReview();
       return true;
@@ -581,6 +620,13 @@ function createRsvpController(api) {
     return false;
   }
 
+  function handleInput(event) {
+    const form = event.target.closest('[data-music-config-form]');
+    if (!form) return false;
+    renderMusicPreview(api.getRoot(), readMusicConfigForm(form));
+    return true;
+  }
+
   async function handleSubmit(event) {
     if (event.target.matches('[data-music-config-form]')) return submitMusicConfig(event);
     if (!event.target.matches('[data-rsvp-form]')) return false;
@@ -592,6 +638,7 @@ function createRsvpController(api) {
     load,
     render,
     handleClick,
+    handleInput,
     handleSubmit
   });
 }
