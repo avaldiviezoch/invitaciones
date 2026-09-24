@@ -88,6 +88,8 @@ function applyWeddingContext(context) {
   $('activeWeddingName').textContent = name;
   $('mainWeddingTitle').textContent = name;
   $('appNavWeddingName').textContent = name;
+  const mobileWeddingName = $('appMobileWeddingName');
+  if (mobileWeddingName) mobileWeddingName.textContent = context?.name ? `La boda de ${name}` : 'Mi boda';
   $('appNavRole').textContent = capabilities.label || 'Mi acceso';
   $('appNavPopoverWedding').textContent = name;
   $('shareWeddingButton').hidden = !capabilities.canManageTeam;
@@ -566,6 +568,31 @@ document.addEventListener('click', (event) => {
 });
 
 const moduleWorkspace = $('moduleWorkspace');
+const appModuleNav = $('appModuleNav');
+const appMobileMenu = $('appMobileMenu');
+const appMobileNavBackdrop = $('appMobileNavBackdrop');
+const mobileShellMedia = window.matchMedia('(max-width: 980px)');
+
+function setMobileShellMenu(open) {
+  const next = Boolean(open) && mobileShellMedia.matches;
+  moduleWorkspace.classList.toggle('is-mobile-menu-open', next);
+  appMobileMenu?.setAttribute('aria-expanded', String(next));
+  appMobileMenu?.setAttribute('aria-label', next ? 'Cerrar navegación' : 'Abrir navegación');
+  appModuleNav?.setAttribute('aria-hidden', mobileShellMedia.matches ? String(!next) : 'false');
+  appMobileNavBackdrop?.setAttribute('aria-hidden', String(!next));
+  if (!next) {
+    appNavAccountWrap.classList.remove('is-open');
+    $('appNavAccountButton').setAttribute('aria-expanded', 'false');
+  }
+}
+
+appMobileMenu?.addEventListener('click', () => {
+  setMobileShellMenu(!moduleWorkspace.classList.contains('is-mobile-menu-open'));
+});
+appMobileNavBackdrop?.addEventListener('click', () => setMobileShellMenu(false));
+mobileShellMedia.addEventListener?.('change', () => setMobileShellMenu(false));
+setMobileShellMenu(false);
+
 const moduleLoader = $('moduleLoader');
 let moduleLoadEpoch = 0;
 let moduleCacheWeddingId = '';
@@ -723,6 +750,7 @@ function warmModuleCode() {
 warmModuleCode();
 
 function closeModuleWorkspace() {
+  setMobileShellMenu(false);
   resetModuleCache('');
   document.documentElement.classList.remove('module-route');
   document.body.classList.remove('module-open');
@@ -735,7 +763,10 @@ $('appNavHome').onclick = closeModuleWorkspace;
 
 document.querySelectorAll('[data-app-module]').forEach((button) => {
   button.addEventListener('click', () => {
-    if (ACTIVE_MODULES.has(button.dataset.appModule)) void openModule(button.dataset.appModule);
+    const moduleId = button.dataset.appModule;
+    if (!ACTIVE_MODULES.has(moduleId)) return;
+    setMobileShellMenu(false);
+    void openModule(moduleId);
   });
 });
 
