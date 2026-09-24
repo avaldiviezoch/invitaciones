@@ -40,6 +40,7 @@
         <button type="button" data-distribution-add-element="dj"><strong>♫</strong><span>DJ / sonido<small>3 × 2 m</small></span></button>
         <button type="button" data-distribution-add-element="stage"><strong>▔</strong><span>Escenario<small>4 × 2.5 m</small></span></button>
         <button type="button" data-distribution-add-element="column"><strong>■</strong><span>Columna<small>0.5 × 0.5 m</small></span></button>
+        <button type="button" data-distribution-add-element="zone"><strong>▧</strong><span>Zona / área<small>4 × 3 m</small></span></button>
       </div>
       <div class="distribution-layer-controls">
         <span class="distribution-inspector-eyebrow">CAPAS</span>
@@ -79,6 +80,10 @@
         </div>
         <div class="distribution-guest-list" data-distribution-selected-guests></div>
         <div class="distribution-element-note" data-distribution-element-note hidden>Elemento físico del plano. Su posición y rotación pertenecen únicamente a Distribución.</div>
+        <div class="distribution-dimensions" data-distribution-dimensions hidden>
+          <label>Ancho (m)<input type="number" min="0.5" max="30" step="0.1" data-distribution-width></label>
+          <label>Alto (m)<input type="number" min="0.5" max="30" step="0.1" data-distribution-height></label>
+        </div>
         <div class="distribution-element-actions" data-distribution-element-actions hidden>
           <button type="button" data-distribution-bring-front>Traer al frente</button>
           <button type="button" data-distribution-send-back>Enviar atrás</button>
