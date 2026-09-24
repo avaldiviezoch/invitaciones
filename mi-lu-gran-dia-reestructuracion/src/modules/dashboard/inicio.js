@@ -566,6 +566,34 @@ document.addEventListener('click', (event) => {
 });
 
 const moduleWorkspace = $('moduleWorkspace');
+const appModuleNav = $('appModuleNav');
+const appNavCollapse = $('appNavCollapse');
+const appNavRestore = $('appNavRestore');
+const mobileModuleNavMedia = window.matchMedia('(max-width: 700px)');
+
+function setModuleNavCollapsed(collapsed, { moveFocus = true } = {}) {
+  const next = Boolean(collapsed) && mobileModuleNavMedia.matches;
+  moduleWorkspace.classList.toggle('is-nav-collapsed', next);
+  appModuleNav?.setAttribute('aria-hidden', String(next));
+  appNavCollapse?.setAttribute('aria-expanded', String(!next));
+  appNavRestore?.setAttribute('aria-hidden', String(!next));
+  if (next) {
+    appNavAccountWrap.classList.remove('is-open');
+    $('appNavAccountButton').setAttribute('aria-expanded', 'false');
+  }
+  if (!moveFocus) return;
+  requestAnimationFrame(() => {
+    const target = next ? appNavRestore : appNavCollapse;
+    if (target && target.offsetParent !== null) target.focus({ preventScroll: true });
+  });
+}
+
+appNavCollapse?.addEventListener('click', () => setModuleNavCollapsed(true));
+appNavRestore?.addEventListener('click', () => setModuleNavCollapsed(false));
+mobileModuleNavMedia.addEventListener?.('change', (event) => {
+  if (!event.matches) setModuleNavCollapsed(false, { moveFocus: false });
+});
+
 const moduleLoader = $('moduleLoader');
 let moduleLoadEpoch = 0;
 let mountedModuleId = '';
@@ -637,7 +665,7 @@ async function openModule(moduleId, { updateHash = true } = {}) {
       await mountInvitados(weddingContext);
     }
     if (moduleId === 'distribucion') {
-      const { mountDistribucion } = await import('../distribucion/index.js?v=69');
+      const { mountDistribucion } = await import('../distribucion/index.js?v=70');
       await mountDistribucion(weddingContext);
     }
     if (loadEpoch === moduleLoadEpoch) {
@@ -650,6 +678,7 @@ async function openModule(moduleId, { updateHash = true } = {}) {
 }
 
 function closeModuleWorkspace() {
+  setModuleNavCollapsed(false, { moveFocus: false });
   mountedModuleId = '';
   mountedWeddingId = '';
   document.documentElement.classList.remove('module-route');
