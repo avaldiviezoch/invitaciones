@@ -54,6 +54,129 @@ function elementCapabilities(element) {
   return PHYSICAL_ELEMENT_TYPES[element?.type]?.capabilities || EDIT_CAPABILITIES.physical;
 }
 
+const TABLE_CLEARANCE = Object.freeze({
+  round: Object.freeze({ widthMeters: 3.4, heightMeters: 3.4, shape: 'circle' }),
+  square: Object.freeze({ widthMeters: 3.4, heightMeters: 3.4, shape: 'rect' }),
+  rectangular: Object.freeze({ widthMeters: 4, heightMeters: 2.35, shape: 'rect' })
+});
+
+function rotateLocalPoint(point, rotation) {
+  const angle = normalizeRotation(rotation) * Math.PI / 180;
+  const cos = Math.cos(angle);
+  const sin = Math.sin(angle);
+  return { x: point.x * cos - point.y * sin, y: point.x * sin + point.y * cos };
+}
+
+function rectanglePolygon(x, y, width, height, rotation = 0) {
+  const center = { x: x + width / 2, y: y + height / 2 };
+  return [
+    { x: -width / 2, y: -height / 2 },
+    { x: width / 2, y: -height / 2 },
+    { x: width / 2, y: height / 2 },
+    { x: -width / 2, y: height / 2 }
+  ].map((point) => {
+    const rotated = rotateLocalPoint(point, rotation);
+    return { x: center.x + rotated.x, y: center.y + rotated.y };
+  });
+}
+
+function polygonAxes(points) {
+  return points.map((point, index) => {
+    const next = points[(index + 1) % points.length];
+    const dx = next.x - point.x;
+    const dy = next.y - point.y;
+    const length = Math.hypot(dx, dy) || 1;
+    return { x: -dy / length, y: dx / length };
+  });
+}
+
+function polygonsIntersect(a, b) {
+  return [...polygonAxes(a), ...polygonAxes(b)].every((axis) => {
+    const projection = (points) => {
+      const values = points.map((point) => point.x * axis.x + point.y * axis.y);
+      return { min: Math.min(...values), max: Math.max(...values) };
+    };
+    const A = projection(a);
+    const B = projection(b);
+    return A.max > B.min && B.max > A.min;
+  });
+}
+
+function pointInPolygon(point, polygon) {
+  let inside = false;
+  for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i, i += 1) {
+    const a = polygon[i];
+    const b = polygon[j];
+    const crosses = ((a.y > point.y) !== (b.y > point.y))
+      && point.x < ((b.x - a.x) * (point.y - a.y) / ((b.y - a.y) || 1e-9) + a.x);
+    if (crosses) inside = !inside;
+  }
+  return inside;
+}
+
+function pointSegmentDistance(point, a, b) {
+  const dx = b.x - a.x;
+  const dy = b.y - a.y;
+  const lengthSquared = dx * dx + dy * dy;
+  if (!lengthSquared) return Math.hypot(point.x - a.x, point.y - a.y);
+  const t = Math.max(0, Math.min(1, ((point.x - a.x) * dx + (point.y - a.y) * dy) / lengthSquared));
+  return Math.hypot(point.x - (a.x + t * dx), point.y - (a.y + t * dy));
+}
+
+function circlePolygonIntersects(circle, polygon) {
+  if (pointInPolygon({ x: circle.x, y: circle.y }, polygon)) return true;
+  return polygon.some((point, index) => pointSegmentDistance(
+    { x: circle.x, y: circle.y },
+    point,
+    polygon[(index + 1) % polygon.length]
+  ) < circle.radius);
+}
+
+function spatialShapeForElement(element) {
+  const definition = PHYSICAL_ELEMENT_TYPES[element.type];
+  if (!definition || definition.collision === 'area') return null;
+  if (Array.isArray(element.points)) {
+    const center = { x: element.x + element.width / 2, y: element.y + element.height / 2 };
+    const points = element.points.map((point) => {
+      const local = { x: point.x - element.width / 2, y: point.y - element.height / 2 };
+      const rotated = rotateLocalPoint(local, element.rotation);
+      return { x: center.x + rotated.x, y: center.y + rotated.y };
+    });
+    return { kind: 'polygon', points, collision: definition.collision };
+  }
+  return {
+    kind: 'polygon',
+    points: rectanglePolygon(element.x, element.y, element.width, element.height, element.rotation),
+    collision: definition.collision
+  };
+}
+
+function spatialShapeForTable(table, placement, geometry) {
+  const shape = normalizeTableShape(table?.type);
+  const clearance = TABLE_CLEARANCE[shape] || TABLE_CLEARANCE.round;
+  const width = PLAN_SCALE.metersToPixels(clearance.widthMeters);
+  const height = PLAN_SCALE.metersToPixels(clearance.heightMeters);
+  const centerX = placement.x + geometry.visualWidth / 2;
+  const centerY = placement.y + geometry.visualHeight / 2;
+  if (clearance.shape === 'circle') {
+    return { kind: 'circle', x: centerX, y: centerY, radius: width / 2 };
+  }
+  return {
+    kind: 'polygon',
+    points: rectanglePolygon(centerX - width / 2, centerY - height / 2, width, height, placement.rotation)
+  };
+}
+
+function spatialShapesIntersect(a, b) {
+  if (!a || !b) return false;
+  if (a.kind === 'circle' && b.kind === 'circle') {
+    return Math.hypot(a.x - b.x, a.y - b.y) < a.radius + b.radius;
+  }
+  if (a.kind === 'circle' && b.kind === 'polygon') return circlePolygonIntersects(a, b.points);
+  if (a.kind === 'polygon' && b.kind === 'circle') return circlePolygonIntersects(b, a.points);
+  return polygonsIntersect(a.points, b.points);
+}
+
 let templatePromise = null;
 let mountEpoch = 0;
 let activeDistributionCleanup = null;
