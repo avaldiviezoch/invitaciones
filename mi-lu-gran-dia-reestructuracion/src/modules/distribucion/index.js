@@ -49,6 +49,52 @@ function tableName(table, index) {
   return escapeText(table?.name) || `Mesa ${index + 1}`;
 }
 
+function validateCanonicalIntegrity(tables, guests) {
+  const tableIds = new Set();
+  const seatIds = new Set();
+  const occupied = new Set();
+
+  tables.forEach((table) => {
+    const tableId = escapeText(table?.id);
+    if (!tableId || tableIds.has(tableId)) {
+      throw new Error('Mesas contiene identificadores vacíos o duplicados. Distribución se abrió en modo seguro sin modificar datos.');
+    }
+    tableIds.add(tableId);
+    const seats = Array.isArray(table?.seats) ? table.seats : [];
+    seats.forEach((seat) => {
+      const seatId = escapeText(seat?.id);
+      if (!seatId || seatIds.has(seatId)) {
+        throw new Error('Mesas contiene sillas con identificadores vacíos o duplicados. Distribución no modificó ningún dato.');
+      }
+      seatIds.add(seatId);
+    });
+  });
+
+  guests.forEach((guest) => {
+    const tableId = escapeText(guest?.tableId);
+    if (!tableId) return;
+    if (!tableIds.has(tableId)) {
+      throw new Error('Existe un invitado asignado a una mesa inexistente. Corrige la asignación en Mesas antes de editar Distribución.');
+    }
+    const table = tables.find((item) => escapeText(item?.id) === tableId);
+    const seatNumber = Number(guest?.seatNumber);
+    const seats = Array.isArray(table?.seats) ? table.seats : [];
+    if (!Number.isInteger(seatNumber) || seatNumber < 1 || seatNumber > seats.length) {
+      throw new Error('Existe un invitado con una silla fuera de rango. Corrige la asignación en Mesas antes de editar Distribución.');
+    }
+    const seatId = escapeText(guest?.seatId);
+    const canonicalSeatId = escapeText(seats[seatNumber - 1]?.id);
+    if (!seatId || seatId !== canonicalSeatId) {
+      throw new Error('Existe una asignación de silla inconsistente. Corrígela en Mesas antes de editar Distribución.');
+    }
+    const occupancyKey = `${tableId}::${seatNumber}`;
+    if (occupied.has(occupancyKey)) {
+      throw new Error('Hay dos invitados asignados a la misma silla. Corrige la asignación en Mesas antes de editar Distribución.');
+    }
+    occupied.add(occupancyKey);
+  });
+}
+
 function buildGuestIndex(guests) {
   const bySeat = new Map();
   guests.forEach((guest) => {
@@ -372,6 +418,7 @@ async function mountDistribucion(context) {
     const storedState = parseDistributionState(storedValue);
     const tables = snapshot.canonical.tables;
     const guests = snapshot.canonical.guests;
+    validateCanonicalIntegrity(tables, guests);
     const guestIndex = buildGuestIndex(guests);
     const layout = projectedLayout(tables);
     const placementState = placementMapFor(layout, storedState);
