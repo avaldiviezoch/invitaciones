@@ -17,6 +17,7 @@ const WORLD_PADDING = 90;
 const PIXELS_PER_METER = 44;
 const MIN_ELEMENT_METERS = 0.5;
 const MAX_ELEMENT_METERS = 30;
+const HISTORY_LIMIT = 50;
 const PHYSICAL_ELEMENT_TYPES = Object.freeze({
   dance: Object.freeze({ label: 'Pista de baile', width: 220, height: 220 }),
   bar: Object.freeze({ label: 'Barra', width: 176, height: 54 }),
@@ -617,6 +618,10 @@ async function mountDistribucion(context) {
     let saving = false;
     let canonicalChanged = false;
     let hasPersistedState = Boolean(storedState);
+    const undoStack = [];
+    const redoStack = [];
+    const undoButton = root.querySelector('[data-distribution-undo]');
+    const redoButton = root.querySelector('[data-distribution-redo]');
 
     world.style.width = `${layout.width}px`;
     world.style.height = `${layout.height}px`;
@@ -674,6 +679,67 @@ async function mountDistribucion(context) {
       root.querySelector('[data-distribution-selection-empty]').hidden = false;
     };
 
+    const editorSnapshot = () => ({
+      placements: tableIds.map((tableId) => ({ tableId, ...placementState.get(tableId) })),
+      elements: physicalElements.map((element) => ({
+        ...element,
+        points: Array.isArray(element.points) ? element.points.map((point) => ({ ...point })) : null
+      }))
+    });
+
+    const updateHistoryState = () => {
+      undoButton.disabled = !canEdit || undoStack.length === 0;
+      redoButton.disabled = !canEdit || redoStack.length === 0;
+    };
+
+    const rememberEdit = () => {
+      undoStack.push(editorSnapshot());
+      if (undoStack.length > HISTORY_LIMIT) undoStack.shift();
+      redoStack.length = 0;
+      updateHistoryState();
+    };
+
+    const restoreEditorSnapshot = (snapshot) => {
+      snapshot.placements.forEach((placement) => {
+        const current = placementState.get(placement.tableId);
+        if (!current) return;
+        current.x = placement.x;
+        current.y = placement.y;
+        current.rotation = placement.rotation;
+      });
+      physicalElements.splice(0, physicalElements.length, ...snapshot.elements.map((element) => ({
+        ...element,
+        points: Array.isArray(element.points) ? element.points.map((point) => ({ ...point })) : null
+      })));
+      world.querySelectorAll('.distribution-table').forEach((node) => {
+        const placement = placementState.get(node.dataset.tableId);
+        if (placement) applyPlacement(node, placement);
+      });
+      world.querySelectorAll('.distribution-element').forEach((node) => node.remove());
+      physicalElements.forEach((element) => {
+        const node = renderPhysicalElement(element);
+        world.append(node);
+        bindElementInteraction(node, element);
+      });
+      clearSelection();
+      dirty = true;
+      updateSaveState();
+    };
+
+    const undoEdit = () => {
+      if (!canEdit || !undoStack.length) return;
+      redoStack.push(editorSnapshot());
+      restoreEditorSnapshot(undoStack.pop());
+      updateHistoryState();
+    };
+
+    const redoEdit = () => {
+      if (!canEdit || !redoStack.length) return;
+      undoStack.push(editorSnapshot());
+      restoreEditorSnapshot(redoStack.pop());
+      updateHistoryState();
+    };
+
     const markDirty = () => {
       dirty = true;
       updateSaveState();
@@ -695,6 +761,7 @@ async function mountDistribucion(context) {
       if (!canEdit || !selectedElementId) return;
       const source = physicalElements.find((item) => item.id === selectedElementId);
       if (!source || source.locked) return;
+      rememberEdit();
       const duplicate = createElement(source.type, source.x + 24, source.y + 24, source.rotation);
       if (!duplicate) return;
       duplicate.width = source.width;
@@ -719,6 +786,7 @@ async function mountDistribucion(context) {
       if (selected?.locked) return;
       const index = physicalElements.findIndex((item) => item.id === selectedElementId);
       if (index < 0) return;
+      rememberEdit();
       const [removed] = physicalElements.splice(index, 1);
       world.querySelector(`.distribution-element[data-element-id="${CSS.escape(removed.id)}"]`)?.remove();
       clearSelection();
@@ -737,6 +805,7 @@ async function mountDistribucion(context) {
 
     const pasteCopiedElement = () => {
       if (!canEdit || !copiedElement) return;
+      rememberEdit();
       copiedElement = { ...copiedElement, x: copiedElement.x + 24, y: copiedElement.y + 24 };
       const pasted = createElement(copiedElement.type, copiedElement.x, copiedElement.y, copiedElement.rotation);
       if (!pasted) return;
@@ -895,6 +964,7 @@ async function mountDistribucion(context) {
         const node = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(selectedTableId)}"]`);
         const entry = tableById.get(selectedTableId);
         if (!placement || !node || !entry) return;
+        rememberEdit();
         placement.rotation = normalizeRotation(placement.rotation + delta);
         applyPlacement(node, placement);
         renderInspector(root, entry.table, entry.index, guests, placement);
@@ -905,6 +975,7 @@ async function mountDistribucion(context) {
         const element = physicalElements.find((item) => item.id === selectedElementId);
         const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
         if (!element || !node || element.locked) return;
+        rememberEdit();
         element.rotation = normalizeRotation(element.rotation + delta);
         applyElementPlacement(node, element);
         renderElementInspector(root, element);
@@ -918,6 +989,7 @@ async function mountDistribucion(context) {
         if (!canEdit) return;
         const type = escapeText(button.dataset.distributionAddElement);
         if (!PHYSICAL_ELEMENT_TYPES[type]) return;
+        rememberEdit();
         const element = createElement(
           type,
           WORLD_PADDING + 40 + physicalElements.length * 18,
@@ -935,6 +1007,7 @@ async function mountDistribucion(context) {
       const element = physicalElements.find((item) => item.id === selectedElementId);
       const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
       if (!element || !node) return;
+      rememberEdit();
       const layers = physicalElements.map((item) => Number(item.layer || 0));
       element.layer = direction > 0 ? Math.max(0, ...layers) + 1 : Math.min(0, ...layers) - 1;
       applyElementPlacement(node, element);
@@ -946,6 +1019,7 @@ async function mountDistribucion(context) {
       const element = physicalElements.find((item) => item.id === selectedElementId);
       const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
       if (!element || !node) return;
+      rememberEdit();
       element.locked = !element.locked;
       applyElementPlacement(node, element);
       renderElementInspector(root, element);
@@ -965,6 +1039,7 @@ async function mountDistribucion(context) {
         input.value = ((axis === 'width' ? element.width : element.height) / PIXELS_PER_METER).toFixed(1);
         return;
       }
+      rememberEdit();
       const previousSize = element[axis];
       const nextSize = meters * PIXELS_PER_METER;
       if (Array.isArray(element.points) && previousSize > 0) {
@@ -1051,6 +1126,7 @@ async function mountDistribucion(context) {
       const maxX = Math.max(...xs);
       const maxY = Math.max(...ys);
       if (maxX - minX < PIXELS_PER_METER * MIN_ELEMENT_METERS || maxY - minY < PIXELS_PER_METER * MIN_ELEMENT_METERS) return;
+      rememberEdit();
       const element = createElement('zone', minX, minY);
       if (!element) return;
       element.width = maxX - minX;
@@ -1143,12 +1219,27 @@ async function mountDistribucion(context) {
     root.querySelector('[data-distribution-toggle-lock]').onclick = toggleElementLock;
     root.querySelector('[data-distribution-duplicate-element]').onclick = duplicateSelectedElement;
     root.querySelector('[data-distribution-delete-element]').onclick = deleteSelectedElement;
+    undoButton.onclick = undoEdit;
+    redoButton.onclick = redoEdit;
+    updateHistoryState();
 
-    root.addEventListener('keydown', (event) => {
+    world.addEventListener('keydown', (event) => {
       if (!canEdit) return;
       const target = event.target;
       if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable) return;
       const modifier = event.ctrlKey || event.metaKey;
+      const key = event.key.toLowerCase();
+      if (modifier && key === 'z') {
+        event.preventDefault();
+        if (event.shiftKey) redoEdit();
+        else undoEdit();
+        return;
+      }
+      if (modifier && key === 'y') {
+        event.preventDefault();
+        redoEdit();
+        return;
+      }
       if (selectedElementId && modifier && event.key.toLowerCase() === 'd') {
         event.preventDefault();
         duplicateSelectedElement();
