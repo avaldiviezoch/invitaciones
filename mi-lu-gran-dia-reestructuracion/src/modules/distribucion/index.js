@@ -14,7 +14,12 @@ const KEYBOARD_MOVE_STEP = 10;
 const KEYBOARD_MOVE_FINE_STEP = 1;
 const TABLE_GAP = 72;
 const WORLD_PADDING = 90;
-const PIXELS_PER_METER = 44;
+const PLAN_SCALE = Object.freeze({
+  pixelsPerMeter: 44,
+  metersToPixels: (meters) => meters * 44,
+  pixelsToMeters: (pixels) => pixels / 44
+});
+const PIXELS_PER_METER = PLAN_SCALE.pixelsPerMeter;
 const MIN_ELEMENT_METERS = 0.5;
 const MAX_ELEMENT_METERS = 30;
 const HISTORY_LIMIT = 50;
@@ -23,13 +28,26 @@ const EDIT_CAPABILITIES = Object.freeze({
   physical: Object.freeze({ movable: true, rotatable: true, resizable: true, copyable: true, deletable: true, layerable: true, lockable: true })
 });
 
+function physicalType(label, widthMeters, heightMeters, options = {}) {
+  return Object.freeze({
+    label,
+    widthMeters,
+    heightMeters,
+    width: PLAN_SCALE.metersToPixels(widthMeters),
+    height: PLAN_SCALE.metersToPixels(heightMeters),
+    capabilities: options.capabilities || EDIT_CAPABILITIES.physical,
+    collision: options.collision || 'obstacle',
+    visualFit: options.visualFit || 'contain'
+  });
+}
+
 const PHYSICAL_ELEMENT_TYPES = Object.freeze({
-  dance: Object.freeze({ label: 'Pista de baile', width: 220, height: 220, capabilities: EDIT_CAPABILITIES.physical }),
-  bar: Object.freeze({ label: 'Barra', width: 176, height: 54, capabilities: EDIT_CAPABILITIES.physical }),
-  dj: Object.freeze({ label: 'DJ / sonido', width: 132, height: 88, capabilities: EDIT_CAPABILITIES.physical }),
-  stage: Object.freeze({ label: 'Escenario', width: 176, height: 110, capabilities: EDIT_CAPABILITIES.physical }),
-  column: Object.freeze({ label: 'Columna', width: 22, height: 22, capabilities: EDIT_CAPABILITIES.physical }),
-  zone: Object.freeze({ label: 'Zona / área', width: 176, height: 132, capabilities: EDIT_CAPABILITIES.physical })
+  dance: physicalType('Pista de baile', 5, 5, { collision: 'reserved' }),
+  bar: physicalType('Barra', 4, 1.2),
+  dj: physicalType('DJ / sonido', 3, 2),
+  stage: physicalType('Escenario', 4, 2.5),
+  column: physicalType('Columna', 0.5, 0.5),
+  zone: physicalType('Zona / área', 4, 3, { collision: 'area' })
 });
 
 function elementCapabilities(element) {
@@ -415,8 +433,8 @@ function renderElementInspector(root, element) {
   root.querySelector('[data-distribution-element-actions]').hidden = false;
   const capabilities = elementCapabilities(element);
   root.querySelector('[data-distribution-dimensions]').hidden = !capabilities.resizable;
-  root.querySelector('[data-distribution-width]').value = (element.width / PIXELS_PER_METER).toFixed(1);
-  root.querySelector('[data-distribution-height]').value = (element.height / PIXELS_PER_METER).toFixed(1);
+  root.querySelector('[data-distribution-width]').value = (element.width / PLAN_SCALE.pixelsPerMeter).toFixed(1);
+  root.querySelector('[data-distribution-height]').value = (element.height / PLAN_SCALE.pixelsPerMeter).toFixed(1);
   const lockButton = root.querySelector('[data-distribution-toggle-lock]');
   lockButton.hidden = !capabilities.lockable;
   lockButton.textContent = element.locked ? 'Desbloquear' : 'Bloquear';
@@ -1059,17 +1077,17 @@ async function mountDistribucion(context) {
       const element = physicalElements.find((item) => item.id === selectedElementId);
       const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
       if (!element || !node || element.locked || !elementCapabilities(element).resizable) {
-        if (element) input.value = ((axis === 'width' ? element.width : element.height) / PIXELS_PER_METER).toFixed(1);
+        if (element) input.value = ((axis === 'width' ? element.width : element.height) / PLAN_SCALE.pixelsPerMeter).toFixed(1);
         return;
       }
       const meters = finiteNumber(input.value);
       if (meters === null || meters < MIN_ELEMENT_METERS || meters > MAX_ELEMENT_METERS) {
-        input.value = ((axis === 'width' ? element.width : element.height) / PIXELS_PER_METER).toFixed(1);
+        input.value = ((axis === 'width' ? element.width : element.height) / PLAN_SCALE.pixelsPerMeter).toFixed(1);
         return;
       }
       rememberEdit();
       const previousSize = element[axis];
-      const nextSize = meters * PIXELS_PER_METER;
+      const nextSize = meters * PLAN_SCALE.pixelsPerMeter;
       if (Array.isArray(element.points) && previousSize > 0) {
         const ratio = nextSize / previousSize;
         element.points = element.points.map((point) => axis === 'width'
@@ -1118,7 +1136,7 @@ async function mountDistribucion(context) {
     viewport.addEventListener('pointermove', (event) => {
       if (event.pointerType === 'touch') return;
       const point = camera.clientPointToWorld(event.clientX, event.clientY);
-      coordsOutput.value = `x ${(point.x / PIXELS_PER_METER).toFixed(2)} m · y ${(point.y / PIXELS_PER_METER).toFixed(2)} m`;
+      coordsOutput.value = `x ${(point.x / PLAN_SCALE.pixelsPerMeter).toFixed(2)} m · y ${(point.y / PLAN_SCALE.pixelsPerMeter).toFixed(2)} m`;
       coordsOutput.textContent = coordsOutput.value;
     });
 
@@ -1219,7 +1237,7 @@ async function mountDistribucion(context) {
         measureHint.textContent = 'Marca el segundo punto';
         return;
       }
-      const distanceMeters = Math.hypot(point.x - measureStart.x, point.y - measureStart.y) / PIXELS_PER_METER;
+      const distanceMeters = Math.hypot(point.x - measureStart.x, point.y - measureStart.y) / PLAN_SCALE.pixelsPerMeter;
       const svgNs = 'http://www.w3.org/2000/svg';
       const line = document.createElementNS(svgNs, 'line');
       line.setAttribute('x1', measureStart.x);
