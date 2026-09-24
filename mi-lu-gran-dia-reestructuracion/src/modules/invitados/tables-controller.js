@@ -594,9 +594,24 @@ function createTablesController(api) {
     }
   }
 
+  async function waitForIdleSave(timeoutMs = 8000) {
+    const startedAt = Date.now();
+    while (api.isSaving()) {
+      if (Date.now() - startedAt > timeoutMs) throw new Error('La sincronización anterior está tardando demasiado. Intenta nuevamente.');
+      await new Promise((resolve) => window.setTimeout(resolve, 80));
+    }
+  }
+
   async function submitTable(event) {
     event.preventDefault();
-    if (!api.canEdit() || api.isSaving()) return true;
+    if (!api.canEdit()) return true;
+    try {
+      await waitForIdleSave();
+    } catch (error) {
+      const stateNode = api.getRoot()?.querySelector('[data-tables-state]');
+      if (stateNode) stateNode.textContent = error?.message || 'No se pudo continuar con el guardado de la mesa.';
+      return true;
+    }
 
     const form = event.target;
     const data = new FormData(form);
@@ -874,6 +889,14 @@ function createTablesController(api) {
     }
     if (event.target.closest('[data-seat-conflict-cancel]')) {
       closeSeatConflict('cancel');
+      return true;
+    }
+
+    const saveTableButton = event.target.closest('[data-table-save]');
+    if (saveTableButton) {
+      event.preventDefault();
+      const form = api.getRoot()?.querySelector('[data-table-form]');
+      form?.requestSubmit();
       return true;
     }
 

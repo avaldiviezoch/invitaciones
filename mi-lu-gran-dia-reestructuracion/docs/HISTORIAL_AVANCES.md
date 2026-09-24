@@ -388,3 +388,11 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se conservan placement x/y, rotación, selección, cámara/zoom y el resto del plano sin desmontar.
 - Firebase se sincroniza en segundo plano mediante saveInvitadosSnapshot().
 - Si la persistencia falla, se restaura el tipo anterior y se redibuja únicamente esa mesa, sin reiniciar el módulo.
+
+
+## 2026-09-24 — Mesas y sillas: guardar fiable + sincronización inmediata con Distribución
+- submitTable ya no descarta silenciosamente Guardar mesa cuando existe una persistencia inmediata previa en curso; espera a que termine y luego continúa.
+- El botón Guardar mesa fuerza el submit del formulario mediante requestSubmit(), evitando clicks perdidos.
+- Distribución procesa eventos table-* de Invitados mediante reconcileCanonicalTables().
+- Si el conjunto de mesas es el mismo, se relee Firebase y se actualizan en caliente nombre, tipo, capacidad, sillas e invitados, conservando x/y, rotación, cámara y selección.
+- Solo crear/eliminar/reordenar estructuralmente puede requerir remonte cuando el conjunto/orden de mesas cambia.

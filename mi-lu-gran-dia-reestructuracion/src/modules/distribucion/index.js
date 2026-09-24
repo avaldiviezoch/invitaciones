@@ -13,7 +13,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=44', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=45', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -2223,14 +2223,72 @@ async function mountDistribucion(context) {
 
     const seated = guests.filter((guest) => escapeText(guest.tableId)).length;
 
+    const reconcileCanonicalTables = async () => {
+      const latest = await loadInvitadosSnapshot(context);
+      const latestTables = latest.canonical.tables;
+      const latestGuests = latest.canonical.guests;
+      const currentIds = tables.map((table) => escapeText(table.id)).filter(Boolean);
+      const latestIds = latestTables.map((table) => escapeText(table.id)).filter(Boolean);
+
+      const sameTableSet = currentIds.length === latestIds.length
+        && currentIds.every((id, index) => id === latestIds[index]);
+
+      if (!sameTableSet) {
+        if (!dirty && !saving) {
+          await mountDistribucion(context);
+          return true;
+        }
+        canonicalChanged = true;
+        updateSaveState();
+        status.textContent = 'La estructura de mesas cambió · se actualizará al terminar la sincronización';
+        return false;
+      }
+
+      tables.splice(0, tables.length, ...latestTables);
+      guests.splice(0, guests.length, ...latestGuests);
+      tableById.clear();
+      tables.forEach((table, index) => tableById.set(escapeText(table.id), { table, index }));
+
+      const latestGuestIndex = buildGuestIndex(guests);
+      tables.forEach((table, index) => {
+        const tableId = escapeText(table.id);
+        const placement = placementState.get(tableId);
+        const currentNode = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableId)}"]`);
+        if (!placement || !currentNode) return;
+
+        const capacity = capacityOf(table);
+        const geometry = tablePhysicalGeometry(table.type || table.shape, capacity || 4);
+        const replacement = renderTable({ table, index, capacity, geometry }, latestGuestIndex, placement);
+        currentNode.replaceWith(replacement);
+        bindTableInteraction(replacement);
+        if (selectedTableId === tableId) {
+          replacement.classList.add('is-selected');
+          renderInspector(root, table, index, guests, placement);
+        }
+      });
+
+      refreshSpatialConflicts();
+      status.textContent = 'Mesas sincronizadas con Invitados';
+      return true;
+    };
+
     const handleCanonicalChange = (event) => {
       if (escapeText(event?.detail?.weddingId) !== escapeText(context?.id)) return;
       const source = escapeText(event?.detail?.source);
       if (!source || source === 'distribucion') return;
+
+      if (source.startsWith('table-')) {
+        void reconcileCanonicalTables().catch((error) => {
+          console.error('No se pudo sincronizar Mesas con Distribución:', error);
+          if (!dirty && !saving) void mountDistribucion(context);
+        });
+        return;
+      }
+
       if (dirty || saving) {
         canonicalChanged = true;
         updateSaveState();
-        status.textContent = 'Invitados o Mesas cambiaron · vuelve a abrir Distribución antes de guardar';
+        status.textContent = 'Invitados cambiaron · se actualizará al terminar la sincronización';
         return;
       }
       void mountDistribucion(context);
