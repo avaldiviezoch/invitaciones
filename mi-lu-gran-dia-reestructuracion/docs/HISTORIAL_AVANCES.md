@@ -270,3 +270,15 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Durante la carga inicial/cambio de módulo, el loader ocupa toda la pantalla y mantiene ocultos header, drawer y contenido hasta completar el montaje y finalizar la salida del loader.
 - Desktop conserva la navegación horizontal vigente.
 - Sin cambios en Firebase, Firestore, Storage, usuarios, invitados, mesas, sillas ni contratos persistentes.
+
+
+## 2026-09-24 — Shell móvil: corrección estructural y carga
+- Se retiraron las excepciones por orientación, pointer e iOS introducidas durante la prueba del nuevo shell.
+- El shell responsive usa una sola regla: hasta 980 px se presenta header móvil + drawer; desde 981 px se mantiene la barra desktop.
+- Se eliminó el 100dvh redundante del workspace fijo; el workspace móvil usa fondo blanco propio y el safe area inferior queda integrado al contenido blanco.
+- Se corrigió un texto literal "\\n" que había quedado dentro del head y podía alterar el parseo del documento en Safari.
+- El loader sigue ocultando shell y módulo hasta completar el montaje, pero su transición de salida se redujo para no añadir espera artificial.
+- Distribución dejó de solicitar su plantilla con cache no-store; la plantilla versionada usa caché del navegador.
+- El adaptador planner-cloud deduplica únicamente lecturas concurrentes del mismo backup de la misma boda/usuario. No conserva caché persistente ni cambia el contrato de datos.
+- Invitados y Distribución comparten esa misma lectura cuando montan simultáneamente sus datos, evitando descargar dos veces cloudSync/main y sus chunks.
+- No se modificaron Firebase, Firestore, Storage, Authentication, usuarios, documentos, claves, payloads ni datos persistentes.
