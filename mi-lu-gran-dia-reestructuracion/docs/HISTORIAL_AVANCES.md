@@ -90,3 +90,17 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Riesgo pendiente no resuelto en esta tarea: `planner-cloud.js` realiza read-modify-write del backup agregado; escrituras simultáneas de distintas sesiones o módulos pueden producir pérdida de actualización. No se modifica sin autorización explícita porque pertenece a persistencia.
 - Las carpetas de tests siguen sin pruebas ejecutables para Presupuesto; antes de declarar el módulo completamente cerrado deben añadirse invariantes/no-pérdida y validación responsive en 360, 390–430, 768, 1024 y 1440 px.
 
+
+
+## 2026-09-24 — Distribución Fase 3: persistencia mínima del plano
+- Se cerró la edición real de posición y rotación de mesas sobre un estado geométrico separado de Invitados/Mesas.
+- Distribución persiste únicamente propuestas y placements: `tableId + x + y + rotation`. No persiste copias de mesas, capacidad, sillas, invitados, `guestIds`, `sharedTableId` ni asignaciones.
+- La clave de compatibilidad del backup agregado es `planificador_bodas_distribucion_v1`, almacenada exclusivamente mediante `services/planner-cloud.js`; el módulo no importa Firestore ni usa localStorage/sessionStorage/IndexedDB directamente.
+- El contrato inicial es `version: 1`, `activeProposalId` y `proposals[]`; la primera propuesta canónica usa `proposal_main`.
+- Abrir Distribución no escribe datos. Si no existe placement guardado, las mesas reciben una proyección inicial solo en memoria; la escritura ocurre únicamente al pulsar “Guardar distribución”.
+- Los formatos persistidos desconocidos fallan cerrados y no intentan reparar, migrar ni reconstruir mesas.
+- Un placement cuyo `tableId` ya no exista en las mesas canónicas no recrea esa mesa ni altera Invitados; simplemente no se renderiza ni se vuelve a serializar.
+- La rotación es propiedad de Distribución: mesa y sillas rotan juntas; las etiquetas de invitados contrarrotan visualmente para permanecer horizontales.
+- Se respeta `weddingCapabilities(context.role).canEdit`: usuarios sin edición pueden leer el plano pero no mover, rotar ni guardar.
+- Auditoría estática posterior: 0 `!important`, 0 escrituras Firestore directas, 0 localStorage/sessionStorage/IndexedDB directos y 0 asignaciones a `guest.tableId`, `guest.seatId`, `guest.seatNumber`, `table.id` o `seat.id`.
+- No se modificó el repositorio Wedding, reglas de Firestore, Storage, Authentication, usuarios ni contratos de Invitados/Mesas.
