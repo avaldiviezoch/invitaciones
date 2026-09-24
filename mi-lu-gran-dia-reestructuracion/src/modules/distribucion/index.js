@@ -1,6 +1,6 @@
-import { loadInvitadosSnapshot } from '../invitados/invitados-data.js?v=5';
+import { loadInvitadosSnapshot } from '../invitados/invitados-data.js?v=4';
 import { normalizeTableShape } from '../invitados/table-geometry.js?v=4';
-import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=5';
+import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { setupDistributionCamera } from './camera.js?v=6';
 import {
@@ -263,7 +263,7 @@ let mountEpoch = 0;
 let activeDistributionCleanup = null;
 
 function template() {
-  if (!templatePromise) templatePromise = fetch(TEMPLATE_URL, { cache: 'force-cache' }).then((response) => {
+  if (!templatePromise) templatePromise = fetch(TEMPLATE_URL, { cache: 'no-store' }).then((response) => {
     if (!response.ok) throw new Error('No se pudo cargar la vista de Distribución.');
     return response.text();
   });
