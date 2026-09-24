@@ -765,6 +765,17 @@ function setupCamera(root, world, worldSize) {
     clientPointToWorld: (clientX, clientY) => {
       const rect = viewport.getBoundingClientRect();
       return { x: (clientX - rect.left - x) / scale, y: (clientY - rect.top - y) / scale };
+    },
+    focusNode: (node) => {
+      if (!node) return;
+      const rect = viewport.getBoundingClientRect();
+      const left = finiteNumber(node.style.left) ?? 0;
+      const top = finiteNumber(node.style.top) ?? 0;
+      const width = finiteNumber(node.style.width) ?? node.offsetWidth;
+      const height = finiteNumber(node.style.height) ?? node.offsetHeight;
+      x = rect.width / 2 - (left + width / 2) * scale;
+      y = rect.height / 2 - (top + height / 2) * scale;
+      apply();
     }
   };
 }
@@ -975,25 +986,30 @@ async function mountDistribucion(context) {
     const proximitySelect = root.querySelector('[data-distribution-proximity]');
     let proximityMeters = Number(proximitySelect?.value) || 1;
 
-        const refreshSpatialConflicts = () => {
+    const refreshSpatialConflicts = () => {
+      const issues = [];
       const tableShapes = layout.items.map((item) => {
         const tableId = escapeText(item.table?.id);
-        return { tableId, shape: spatialShapeForTable(item.table, placementState.get(tableId), item.geometry) };
+        return { tableId, table: item.table, index: item.index, shape: spatialShapeForTable(item.table, placementState.get(tableId), item.geometry) };
       });
       const elementShapes = physicalElements.map((element) => ({
         element,
         shape: spatialShapeForElement(element)
       })).filter((entry) => entry.shape);
 
+      const tableLabel = (entry) => tableName(entry.table, entry.index);
+      const elementLabel = (element) => PHYSICAL_ELEMENT_TYPES[element.type]?.label || 'Elemento';
+
       world.querySelectorAll('.distribution-table,.distribution-element').forEach((node) => {
         node.classList.remove('has-spatial-conflict', 'has-spatial-warning', 'has-proximity-warning');
-        node.removeAttribute('data-proximity-gap');
       });
 
       const markSpatialState = (node, state) => {
         if (!node || state === 'allow') return;
         node.classList.add(state === 'conflict' ? 'has-spatial-conflict' : 'has-spatial-warning');
       };
+
+      const addIssue = (kind, message, target) => issues.push({ kind, message, target });
 
       tableShapes.forEach((tableEntry, index) => {
         const tableNode = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableEntry.tableId)}"]`);
@@ -1002,6 +1018,9 @@ async function mountDistribucion(context) {
           const state = spatialRuleFor(elementEntry.element, 'table');
           markSpatialState(tableNode, state);
           markSpatialState(world.querySelector(`.distribution-element[data-element-id="${CSS.escape(elementEntry.element.id)}"]`), state);
+          if (state !== 'allow') {
+            addIssue(state, `${tableLabel(tableEntry)} · ${elementLabel(elementEntry.element)}`, { kind: 'table', id: tableEntry.tableId });
+          }
         });
 
         tableShapes.slice(index + 1).forEach((otherEntry) => {
@@ -1009,13 +1028,13 @@ async function mountDistribucion(context) {
           if (spatialShapesIntersect(tableEntry.shape, otherEntry.shape)) {
             markSpatialState(tableNode, 'conflict');
             markSpatialState(second, 'conflict');
+            addIssue('conflict', `${tableLabel(tableEntry)} · ${tableLabel(otherEntry)}`, { kind: 'table', id: tableEntry.tableId });
             return;
           }
           const gapMeters = PLAN_SCALE.pixelsToMeters(shapeBoundaryDistance(tableEntry.shape, otherEntry.shape));
           if (gapMeters >= proximityMeters) return;
-          [tableNode, second].forEach((node) => {
-            node?.classList.add('has-proximity-warning');
-          });
+          [tableNode, second].forEach((node) => node?.classList.add('has-proximity-warning'));
+          addIssue('proximity', `${tableLabel(tableEntry)} · ${tableLabel(otherEntry)} · ${gapMeters.toFixed(2)} m`, { kind: 'table', id: tableEntry.tableId });
         });
       });
 
@@ -1026,7 +1045,46 @@ async function mountDistribucion(context) {
           const state = spatialRuleFor(entry.element, other.element);
           markSpatialState(node, state);
           markSpatialState(world.querySelector(`.distribution-element[data-element-id="${CSS.escape(other.element.id)}"]`), state);
+          if (state !== 'allow') {
+            addIssue(state, `${elementLabel(entry.element)} · ${elementLabel(other.element)}`, { kind: 'element', id: entry.element.id });
+          }
         });
+      });
+
+      const list = root.querySelector('[data-distribution-validation-list]');
+      const conflicts = issues.filter((issue) => issue.kind === 'conflict').length;
+      const warnings = issues.filter((issue) => issue.kind === 'warning').length;
+      const proximity = issues.filter((issue) => issue.kind === 'proximity').length;
+      root.querySelector('[data-distribution-validation-count]').textContent = `${issues.length} ${issues.length === 1 ? 'incidencia' : 'incidencias'}`;
+      root.querySelector('[data-distribution-validation-conflicts]').textContent = String(conflicts);
+      root.querySelector('[data-distribution-validation-warnings]').textContent = String(warnings);
+      root.querySelector('[data-distribution-validation-proximity]').textContent = String(proximity);
+      list.replaceChildren();
+
+      if (!issues.length) {
+        const ok = document.createElement('span');
+        ok.className = 'distribution-validation-ok';
+        ok.textContent = 'Plano sin incidencias espaciales.';
+        list.append(ok);
+        return;
+      }
+
+      issues.forEach((issue) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `distribution-validation-issue is-${issue.kind}`;
+        button.textContent = issue.message;
+        button.onclick = () => {
+          const selector = issue.target.kind === 'table'
+            ? `.distribution-table[data-table-id="${CSS.escape(issue.target.id)}"]`
+            : `.distribution-element[data-element-id="${CSS.escape(issue.target.id)}"]`;
+          const node = world.querySelector(selector);
+          if (issue.target.kind === 'table') selectTable(issue.target.id);
+          else selectElement(issue.target.id);
+          camera.focusNode(node);
+          node?.focus();
+        };
+        list.append(button);
       });
     };
 
