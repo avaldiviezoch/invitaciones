@@ -88,6 +88,9 @@ function applyWeddingContext(context) {
   $('activeWeddingName').textContent = name;
   $('mainWeddingTitle').textContent = name;
   $('appNavWeddingName').textContent = name;
+  $('appMobileWeddingName').textContent = context?.name
+    ? (/^la boda de\b/i.test(name) ? name : `La boda de ${name}`)
+    : 'Mi boda';
   $('appNavRole').textContent = capabilities.label || 'Mi acceso';
   $('appNavPopoverWedding').textContent = name;
   $('shareWeddingButton').hidden = !capabilities.canManageTeam;
@@ -567,32 +570,30 @@ document.addEventListener('click', (event) => {
 
 const moduleWorkspace = $('moduleWorkspace');
 const appModuleNav = $('appModuleNav');
-const appNavCollapse = $('appNavCollapse');
-const appNavRestore = $('appNavRestore');
+const appMobileMenu = $('appMobileMenu');
+const appMobileNavBackdrop = $('appMobileNavBackdrop');
 const mobileModuleNavMedia = window.matchMedia('(max-width: 700px)');
 
-function setModuleNavCollapsed(collapsed, { moveFocus = true } = {}) {
-  const next = Boolean(collapsed) && mobileModuleNavMedia.matches;
-  moduleWorkspace.classList.toggle('is-nav-collapsed', next);
-  appModuleNav?.setAttribute('aria-hidden', String(next));
-  appNavCollapse?.setAttribute('aria-expanded', String(!next));
-  appNavRestore?.setAttribute('aria-hidden', String(!next));
-  if (next) {
+function setMobileModuleMenu(open, { moveFocus = false } = {}) {
+  const next = Boolean(open) && mobileModuleNavMedia.matches;
+  moduleWorkspace.classList.toggle('is-mobile-menu-open', next);
+  appMobileMenu?.setAttribute('aria-expanded', String(next));
+  appMobileMenu?.setAttribute('aria-label', next ? 'Cerrar navegación' : 'Abrir navegación');
+  appModuleNav?.setAttribute('aria-hidden', mobileModuleNavMedia.matches ? String(!next) : 'false');
+  appMobileNavBackdrop?.setAttribute('aria-hidden', String(!next));
+  if (!next) {
     appNavAccountWrap.classList.remove('is-open');
     $('appNavAccountButton').setAttribute('aria-expanded', 'false');
   }
-  if (!moveFocus) return;
-  requestAnimationFrame(() => {
-    const target = next ? appNavRestore : appNavCollapse;
-    if (target && target.offsetParent !== null) target.focus({ preventScroll: true });
-  });
+  if (moveFocus) requestAnimationFrame(() => appMobileMenu?.focus({ preventScroll: true }));
 }
 
-appNavCollapse?.addEventListener('click', () => setModuleNavCollapsed(true));
-appNavRestore?.addEventListener('click', () => setModuleNavCollapsed(false));
-mobileModuleNavMedia.addEventListener?.('change', (event) => {
-  if (!event.matches) setModuleNavCollapsed(false, { moveFocus: false });
+appMobileMenu?.addEventListener('click', () => {
+  setMobileModuleMenu(!moduleWorkspace.classList.contains('is-mobile-menu-open'));
 });
+appMobileNavBackdrop?.addEventListener('click', () => setMobileModuleMenu(false, { moveFocus: true }));
+mobileModuleNavMedia.addEventListener?.('change', () => setMobileModuleMenu(false));
+setMobileModuleMenu(false);
 
 const moduleLoader = $('moduleLoader');
 let moduleLoadEpoch = 0;
@@ -601,15 +602,21 @@ let mountedWeddingId = '';
 
 function setModuleLoading(loading) {
   if (!moduleLoader) return;
-  document.body.classList.toggle('is-module-loading', loading);
   if (loading) {
+    document.body.classList.add('is-module-loading');
     moduleLoader.hidden = false;
     moduleLoader.classList.remove('is-leaving');
     return;
   }
+  if (moduleLoader.hidden) {
+    document.body.classList.remove('is-module-loading');
+    return;
+  }
   moduleLoader.classList.add('is-leaving');
   window.setTimeout(() => {
-    if (moduleLoader.classList.contains('is-leaving')) moduleLoader.hidden = true;
+    if (!moduleLoader.classList.contains('is-leaving')) return;
+    moduleLoader.hidden = true;
+    document.body.classList.remove('is-module-loading');
   }, 420);
 }
 
@@ -630,6 +637,7 @@ async function openModule(moduleId, { updateHash = true } = {}) {
   if (!auth.currentUser || !weddingContext || !ACTIVE_MODULES.has(moduleId)) return;
   const sameMountedModule = mountedModuleId === moduleId && mountedWeddingId === weddingContext.id;
   const loadEpoch = ++moduleLoadEpoch;
+  if (!sameMountedModule) setModuleLoading(true);
   document.documentElement.classList.add('module-route');
   heroVideo?.pause();
   setMenu(false);
@@ -646,7 +654,6 @@ async function openModule(moduleId, { updateHash = true } = {}) {
     setModuleLoading(false);
     return;
   }
-  setModuleLoading(true);
   try {
     if (moduleId === 'checklist') {
       const { mountChecklist } = await import('../checklist/index.js?v=15');
@@ -678,7 +685,7 @@ async function openModule(moduleId, { updateHash = true } = {}) {
 }
 
 function closeModuleWorkspace() {
-  setModuleNavCollapsed(false, { moveFocus: false });
+  setMobileModuleMenu(false);
   mountedModuleId = '';
   mountedWeddingId = '';
   document.documentElement.classList.remove('module-route');
@@ -692,7 +699,10 @@ $('appNavHome').onclick = closeModuleWorkspace;
 
 document.querySelectorAll('[data-app-module]').forEach((button) => {
   button.addEventListener('click', () => {
-    if (ACTIVE_MODULES.has(button.dataset.appModule)) openModule(button.dataset.appModule);
+    const moduleId = button.dataset.appModule;
+    if (!ACTIVE_MODULES.has(moduleId)) return;
+    setMobileModuleMenu(false);
+    openModule(moduleId);
   });
 });
 
