@@ -191,7 +191,7 @@ function spatialShapeForElement(element) {
 }
 
 function spatialShapeForTable(table, placement, geometry) {
-  const shape = normalizeTableShape(table?.type);
+  const shape = normalizeTableShape(table?.type || table?.shape);
   const clearance = TABLE_CLEARANCE[shape] || TABLE_CLEARANCE.round;
   const width = PLAN_SCALE.metersToPixels(clearance.widthMeters);
   const height = PLAN_SCALE.metersToPixels(clearance.heightMeters);
@@ -376,7 +376,7 @@ function guestForSeat(index, tableId, seat, seatIndex) {
 function projectedLayout(tables) {
   const items = tables.map((table, index) => {
     const capacity = capacityOf(table);
-    const geometry = tableSeatGeometry(table?.type, capacity || 4);
+    const geometry = tableSeatGeometry(table?.type || table?.shape, capacity || 4);
     return { table, index, capacity, geometry };
   });
   const columns = Math.max(1, Math.ceil(Math.sqrt(items.length || 1)));
@@ -519,7 +519,7 @@ function renderTable(item, guestIndex, placement) {
   applyPlacement(node, placement);
 
   const surface = document.createElement('div');
-  surface.className = `distribution-tabletop is-${normalizeTableShape(table?.type)}`;
+  surface.className = `distribution-tabletop is-${normalizeTableShape(table?.type || table?.shape)}`;
   surface.style.width = `${geometry.table.width}px`;
   surface.style.height = `${geometry.table.height}px`;
   surface.innerHTML = `<strong></strong><span>${capacity} sillas</span>`;
