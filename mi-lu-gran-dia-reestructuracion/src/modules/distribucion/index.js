@@ -29,7 +29,18 @@ const EDIT_CAPABILITIES = Object.freeze({
   physical: Object.freeze({ movable: true, rotatable: true, resizable: true, copyable: true, deletable: true, layerable: true, lockable: true })
 });
 
+const SPATIAL_FAMILIES = Object.freeze({
+  obstacle: Object.freeze({ tableOverlap: 'conflict', elementOverlap: 'conflict' }),
+  reserved: Object.freeze({ tableOverlap: 'conflict', elementOverlap: 'warning' }),
+  container: Object.freeze({ tableOverlap: 'allow', elementOverlap: 'allow' }),
+  circulation: Object.freeze({ tableOverlap: 'conflict', elementOverlap: 'conflict' }),
+  restricted: Object.freeze({ tableOverlap: 'conflict', elementOverlap: 'conflict' }),
+  informative: Object.freeze({ tableOverlap: 'allow', elementOverlap: 'allow' })
+});
+
 function physicalType(label, widthMeters, heightMeters, options = {}) {
+  const spatialFamily = options.spatialFamily || 'obstacle';
+  if (!SPATIAL_FAMILIES[spatialFamily]) throw new Error(`Familia espacial no reconocida: ${spatialFamily}`);
   return Object.freeze({
     label,
     widthMeters,
@@ -37,18 +48,18 @@ function physicalType(label, widthMeters, heightMeters, options = {}) {
     width: PLAN_SCALE.metersToPixels(widthMeters),
     height: PLAN_SCALE.metersToPixels(heightMeters),
     capabilities: options.capabilities || EDIT_CAPABILITIES.physical,
-    collision: options.collision || 'obstacle',
+    spatialFamily,
     visualFit: options.visualFit || 'contain'
   });
 }
 
 const PHYSICAL_ELEMENT_TYPES = Object.freeze({
-  dance: physicalType('Pista de baile', 5, 5, { collision: 'reserved' }),
+  dance: physicalType('Pista de baile', 5, 5, { spatialFamily: 'reserved' }),
   bar: physicalType('Barra', 4, 1.2),
   dj: physicalType('DJ / sonido', 3, 2),
   stage: physicalType('Escenario', 4, 2.5),
   column: physicalType('Columna', 0.5, 0.5),
-  zone: physicalType('Zona / área', 4, 3, { collision: 'area' })
+  zone: physicalType('Zona / área', 4, 3, { spatialFamily: 'informative' })
 });
 
 function elementCapabilities(element) {
@@ -135,7 +146,7 @@ function circlePolygonIntersects(circle, polygon) {
 
 function spatialShapeForElement(element) {
   const definition = PHYSICAL_ELEMENT_TYPES[element.type];
-  if (!definition || definition.collision === 'area') return null;
+  if (!definition) return null;
   if (Array.isArray(element.points)) {
     const center = { x: element.x + element.width / 2, y: element.y + element.height / 2 };
     const points = element.points.map((point) => {
@@ -143,12 +154,12 @@ function spatialShapeForElement(element) {
       const rotated = rotateLocalPoint(local, element.rotation);
       return { x: center.x + rotated.x, y: center.y + rotated.y };
     });
-    return { kind: 'polygon', points, collision: definition.collision };
+    return { kind: 'polygon', points, spatialFamily: definition.spatialFamily };
   }
   return {
     kind: 'polygon',
     points: rectanglePolygon(element.x, element.y, element.width, element.height, element.rotation),
-    collision: definition.collision
+    spatialFamily: definition.spatialFamily
   };
 }
 
@@ -166,6 +177,12 @@ function spatialShapeForTable(table, placement, geometry) {
     kind: 'polygon',
     points: rectanglePolygon(centerX - width / 2, centerY - height / 2, width, height, placement.rotation)
   };
+}
+
+function spatialRuleFor(element, targetKind) {
+  const family = PHYSICAL_ELEMENT_TYPES[element?.type]?.spatialFamily;
+  const rules = SPATIAL_FAMILIES[family] || SPATIAL_FAMILIES.informative;
+  return targetKind === 'table' ? rules.tableOverlap : rules.elementOverlap;
 }
 
 function spatialShapesIntersect(a, b) {
