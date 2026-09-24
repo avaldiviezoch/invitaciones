@@ -435,3 +435,10 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - El diálogo solo se cierra después de que saveInvitadosSnapshot confirme el guardado.
 - Si la validación o Firebase falla, el diálogo permanece abierto y muestra el error en data-table-dialog-state.
 - No se cambian claves, IDs, colecciones, reglas de Firebase ni asignaciones de invitados.
+
+
+## 2026-09-24 — Distribución: sillas libres con color de Conflictos
+- Las sillas no asignadas dejan el fondo blanco y adoptan la misma familia visual de la pastilla Conflictos.
+- Se usa fondo rgba(246,231,228,.92) y borde rojizo suave rgba(172,92,82,.34).
+- Las sillas ocupadas conservan su estado verde existente.
+- No se modifica geometría, tamaño, asignaciones ni interacción.
