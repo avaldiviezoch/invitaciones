@@ -739,6 +739,7 @@ async function mountDistribucion(context) {
       return Math.max(max, value);
     }, 0);
     const tableIds = tables.map((table) => escapeText(table.id)).filter(Boolean);
+    const viewport = root.querySelector('[data-distribution-viewport]');
     const world = root.querySelector('[data-distribution-world]');
     const tableById = new Map(tables.map((table, index) => [escapeText(table.id), { table, index }]));
     let selectedTableId = '';
