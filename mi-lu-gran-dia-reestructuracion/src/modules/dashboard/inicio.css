@@ -1173,7 +1173,7 @@ body.menu-open .menu-button svg {
 @keyframes mgdLoaderSpin{to{transform:rotate(360deg)}}
 @keyframes mgdLoaderDot{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}.checklist-review{width:min(980px,100%);min-height:360px;margin:40px auto;padding:42px;border:1px solid rgba(73,77,59,.12);border-radius:24px;background:#fbfaf7;box-shadow:0 22px 60px rgba(57,58,48,.08)}.checklist-review>span{color:#7f8962;font-size:9px;font-weight:900;letter-spacing:.18em}.checklist-review h2{margin:9px 0 10px;font-family:Georgia,serif;font-size:34px;font-weight:500}.checklist-review p{max-width:620px;margin:0;color:#77796f;font-size:13px;line-height:1.7}
 @media(max-width:1050px){.app-nav-home{min-width:72px;width:72px;padding:0;border-right:0}.mgd-brand-copy{display:none}.app-nav-modules{justify-content:flex-start}.app-nav-account{min-width:62px;width:62px;padding-left:8px}.app-nav-account div{display:none}}
-@media (max-width:700px), ((max-height:520px) and (pointer:coarse) and (max-width:1000px)){
+@media (max-width:700px), (max-height:520px) and (pointer:coarse) and (max-width:1000px){
 html.module-route,.module-route body{height:100dvh;min-height:100dvh;background:#fff}
 body.module-open.is-module-loading .app-mobile-header,
 body.module-open.is-module-loading .app-module-nav,
@@ -1228,7 +1228,7 @@ body.module-open.is-module-loading .module-stage>[data-module-view]{visibility:h
 .app-nav-account:hover{background:rgba(108,117,88,.06)}.app-nav-account-copy strong,.app-nav-account-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.app-nav-account-copy strong{font-size:11px}.app-nav-account-copy small{margin-top:2px;font-size:8px;color:#999087}.app-nav-chevron{font-size:13px;font-weight:700;color:#756e67}
 .app-nav-account-popover{box-sizing:border-box;display:none;position:absolute;right:0;top:70px;width:240px;padding:14px;border:1px solid rgba(80,67,56,.1);border-radius:18px;background:rgba(255,255,255,.96);box-shadow:0 20px 55px rgba(55,45,37,.17);backdrop-filter:blur(20px);color:#413d38;z-index:1000}.app-nav-account-wrap.is-open .app-nav-account-popover{display:block}.app-nav-account-popover>strong,.app-nav-account-popover>span{display:block}.app-nav-account-popover>strong{font-size:12px}.app-nav-account-popover>span{margin:3px 0 11px;color:#999087;font-size:9px}.app-nav-wedding,.app-nav-logout{box-sizing:border-box;width:100%;margin-top:6px;padding:10px;border:0;border-radius:11px;background:#f4f1ec;color:#615b54;font-size:9px;font-weight:750;cursor:pointer}.app-nav-wedding{text-align:left}.app-nav-wedding span,.app-nav-wedding strong,.app-nav-wedding small{display:block}.app-nav-wedding span,.app-nav-wedding small{font-size:8px;color:#999087}.app-nav-wedding strong{margin:2px 0;font-size:9px}
 @media(max-width:1050px){.app-nav-account-wrap{min-width:62px;width:62px;padding-left:8px}.app-nav-account-copy,.app-nav-chevron{display:none}.app-nav-account{grid-template-columns:44px;width:52px}}
-@media (max-width:700px), ((max-height:520px) and (pointer:coarse) and (max-width:1000px)){
+@media (max-width:700px), (max-height:520px) and (pointer:coarse) and (max-width:1000px){
   .app-module-nav{z-index:73}
   .app-nav-account-wrap{position:relative;min-width:0;width:100%;margin-top:auto;padding:7px 0 0;border-left:0;border-top:1px solid rgba(80,67,56,.1);overflow:visible}
   .app-nav-account{min-width:0;width:100%;height:52px;padding:4px 6px;display:grid;grid-template-columns:40px minmax(0,1fr) 18px;align-items:center;gap:8px;border-left:0;border-top:0}
