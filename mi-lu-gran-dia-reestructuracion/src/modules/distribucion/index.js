@@ -695,6 +695,7 @@ async function mountDistribucion(context) {
     };
 
     const editorSnapshot = () => ({
+      dirty,
       placements: tableIds.map((tableId) => ({ tableId, ...placementState.get(tableId) })),
       elements: physicalElements.map((element) => ({
         ...element,
@@ -737,7 +738,7 @@ async function mountDistribucion(context) {
         bindElementInteraction(node, element);
       });
       clearSelection();
-      dirty = true;
+      dirty = snapshot.dirty === true;
       updateSaveState();
     };
 
