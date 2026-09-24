@@ -70,6 +70,21 @@
       <article><span>Personas</span><strong data-music-people>0</strong><small>que enviaron música</small></article>
       <article><span>Únicas</span><strong data-music-unique>0</strong><small>canciones distintas</small></article>
     </section>
+    <section class="music-config">
+      <div class="music-config-head"><div><h2>Encuesta de música</h2><p>Configura el mismo bloque musical que utilizan tus invitaciones. Se conserva el token RSVP actual.</p></div><span data-music-config-state></span></div>
+      <form class="music-config-form" data-music-config-form>
+        <label class="guests-field music-config-wide"><span>Título</span><input name="title" maxlength="110"></label>
+        <label class="guests-field music-config-wide"><span>Texto para tus invitados</span><textarea name="intro" maxlength="500" rows="3"></textarea></label>
+        <label class="guests-field"><span>Máximo de canciones</span><select name="maxSongs"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option></select></label>
+        <label class="guests-field"><span>Etiqueta de dedicatoria</span><input name="messageLabel" maxlength="90"></label>
+        <div class="music-config-switches music-config-wide">
+          <label><input type="checkbox" name="enabled"><span>Activar encuesta</span></label>
+          <label><input type="checkbox" name="askArtist"><span>Preguntar artista</span></label>
+          <label><input type="checkbox" name="askMessage"><span>Permitir dedicatoria</span></label>
+        </div>
+        <div class="music-config-actions music-config-wide"><button class="guests-save" type="submit" data-music-config-save>Guardar configuración</button></div>
+      </form>
+    </section>
     <section class="music-head"><div><h2>Música propuesta</h2><p>Solicitudes enviadas desde las invitaciones y vinculadas al RSVP de esta boda.</p></div></section>
     <section class="music-request-list" data-music-list></section>
   </div>
