@@ -442,3 +442,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se usa fondo rgba(246,231,228,.92) y borde rojizo suave rgba(172,92,82,.34).
 - Las sillas ocupadas conservan su estado verde existente.
 - No se modifica geometría, tamaño, asignaciones ni interacción.
+
+
+## 2026-09-24 — Mesas y sillas: normalización segura de seatId legacy
+- Se confirma en la implementación original de Wedding que un invitado con tableId y seatNumber válidos normalizaba guest.seatId al id canónico de table.seats[seatNumber - 1].
+- La reestructuración estaba bloqueando ese caso como error, impidiendo guardar mesas con asignaciones históricas válidas pero seatId desfasado.
+- reconcileGuestSeatIdentity() restaura el contrato original: mantiene tableId y seatNumber y corrige únicamente seatId cuando la silla canónica existe.
+- Las sillas fuera de rango, mesas inválidas o sillas sin identidad siguen bloqueando el guardado.
+- La reparación forma parte de la misma mutación de Mesas y queda cubierta por el snapshot previo/rollback si Firebase falla.
+- No se reasignan invitados, no se cambian números de silla, no se crean IDs paralelos y no se modifican contratos de Firebase.

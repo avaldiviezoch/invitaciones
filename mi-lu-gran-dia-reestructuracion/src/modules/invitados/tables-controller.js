@@ -69,6 +69,24 @@ function createTablesController(api) {
     }));
   }
 
+  function reconcileGuestSeatIdentity(table, nextSeats, occupiedGuests) {
+    occupiedGuests.forEach((guest) => {
+      const seatIndex = Number(guest.seatNumber) - 1;
+      if (!Number.isInteger(seatIndex) || seatIndex < 0 || seatIndex >= nextSeats.length) {
+        throw new Error(`No se actualizó ${text(table.name) || 'la mesa'} porque ${text(guest.name) || 'un invitado'} tiene una silla fuera de rango.`);
+      }
+
+      const canonicalSeatId = text(nextSeats[seatIndex]?.id);
+      if (!canonicalSeatId) {
+        throw new Error(`No se actualizó ${text(table.name) || 'la mesa'} porque la silla ${seatIndex + 1} no tiene una identidad canónica.`);
+      }
+
+      if (text(guest.seatId) !== canonicalSeatId) {
+        guest.seatId = canonicalSeatId;
+      }
+    });
+  }
+
   function assertSeatIdentityPreserved(table, nextSeats, occupiedGuests) {
     const previousSeats = Array.isArray(table?.seats) ? table.seats : [];
     previousSeats.slice(0, nextSeats.length).forEach((seat, index) => {
@@ -655,6 +673,7 @@ function createTablesController(api) {
       }
 
       const nextSeats = ensureSeats(table, capacity);
+      reconcileGuestSeatIdentity(table, nextSeats, occupied);
       assertSeatIdentityPreserved(table, nextSeats, occupied);
 
       table.name = name;
