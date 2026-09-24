@@ -5,6 +5,7 @@ import { weddingCapabilities } from '../../core/app/permissions.js';
 import { setupDistributionCamera } from './camera.js?v=1';
 import {
   DEFAULT_BACKGROUND_ID,
+  defaultDistributionBackground,
   addDistributionBackground,
   listDistributionBackgrounds,
   loadDistributionBackground,
