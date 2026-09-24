@@ -325,6 +325,7 @@ function renderElementInspector(root, element) {
   root.querySelector('[data-distribution-table-stats]').hidden = true;
   root.querySelector('[data-distribution-selected-guests]').hidden = true;
   root.querySelector('[data-distribution-element-note]').hidden = false;
+  root.querySelector('[data-distribution-element-actions]').hidden = false;
 }
 
 function setupCamera(root, world, worldSize) {
@@ -433,6 +434,7 @@ function renderInspector(root, table, tableIndex, guests, placement) {
   root.querySelector('[data-distribution-table-stats]').hidden = false;
   root.querySelector('[data-distribution-selected-guests]').hidden = false;
   root.querySelector('[data-distribution-element-note]').hidden = true;
+  root.querySelector('[data-distribution-element-actions]').hidden = true;
   root.querySelector('[data-distribution-selection]').hidden = false;
   const capacity = capacityOf(table);
   const assigned = guests
@@ -553,9 +555,49 @@ async function mountDistribucion(context) {
       renderElementInspector(root, element);
     };
 
+    const clearSelection = () => {
+      selectedTableId = '';
+      selectedElementId = '';
+      clearVisualSelection();
+      root.querySelector('[data-distribution-selection]').hidden = true;
+      root.querySelector('[data-distribution-selection-empty]').hidden = false;
+    };
+
     const markDirty = () => {
       dirty = true;
       updateSaveState();
+    };
+
+    const createElement = (type, x, y, rotation = 0) => {
+      if (!PHYSICAL_ELEMENT_TYPES[type]) return null;
+      elementSequence += 1;
+      const element = { id: `element_${elementSequence}`, type, x, y, rotation: normalizeRotation(rotation) };
+      physicalElements.push(element);
+      const node = renderPhysicalElement(element);
+      world.append(node);
+      bindElementInteraction(node, element);
+      return element;
+    };
+
+    const duplicateSelectedElement = () => {
+      if (!canEdit || !selectedElementId) return;
+      const source = physicalElements.find((item) => item.id === selectedElementId);
+      if (!source) return;
+      const duplicate = createElement(source.type, source.x + 24, source.y + 24, source.rotation);
+      if (!duplicate) return;
+      selectElement(duplicate.id);
+      world.querySelector(`.distribution-element[data-element-id="${CSS.escape(duplicate.id)}"]`)?.focus();
+      markDirty();
+    };
+
+    const deleteSelectedElement = () => {
+      if (!canEdit || !selectedElementId) return;
+      const index = physicalElements.findIndex((item) => item.id === selectedElementId);
+      if (index < 0) return;
+      const [removed] = physicalElements.splice(index, 1);
+      world.querySelector(`.distribution-element[data-element-id="${CSS.escape(removed.id)}"]`)?.remove();
+      clearSelection();
+      markDirty();
     };
 
     world.querySelectorAll('.distribution-table').forEach((node) => {
@@ -718,25 +760,38 @@ async function mountDistribucion(context) {
         if (!canEdit) return;
         const type = escapeText(button.dataset.distributionAddElement);
         if (!PHYSICAL_ELEMENT_TYPES[type]) return;
-        elementSequence += 1;
-        const element = {
-          id: `element_${elementSequence}`,
+        const element = createElement(
           type,
-          x: WORLD_PADDING + 40 + physicalElements.length * 18,
-          y: WORLD_PADDING + 40 + physicalElements.length * 18,
-          rotation: 0
-        };
-        physicalElements.push(element);
-        const node = renderPhysicalElement(element);
-        world.append(node);
-        bindElementInteraction(node, element);
+          WORLD_PADDING + 40 + physicalElements.length * 18,
+          WORLD_PADDING + 40 + physicalElements.length * 18
+        );
+        if (!element) return;
         selectElement(element.id);
+        world.querySelector(`.distribution-element[data-element-id="${CSS.escape(element.id)}"]`)?.focus();
         markDirty();
       };
     });
 
     root.querySelector('[data-distribution-rotate-left]').onclick = () => rotateSelected(-ROTATION_STEP);
     root.querySelector('[data-distribution-rotate-right]').onclick = () => rotateSelected(ROTATION_STEP);
+    root.querySelector('[data-distribution-duplicate-element]').onclick = duplicateSelectedElement;
+    root.querySelector('[data-distribution-delete-element]').onclick = deleteSelectedElement;
+
+    root.addEventListener('keydown', (event) => {
+      if (!canEdit) return;
+      const target = event.target;
+      if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable) return;
+      const modifier = event.ctrlKey || event.metaKey;
+      if (selectedElementId && modifier && event.key.toLowerCase() === 'd') {
+        event.preventDefault();
+        duplicateSelectedElement();
+        return;
+      }
+      if (selectedElementId && ['Delete', 'Backspace'].includes(event.key)) {
+        event.preventDefault();
+        deleteSelectedElement();
+      }
+    });
 
     saveButton.onclick = async () => {
       if (!canEdit || !dirty || saving) return;
