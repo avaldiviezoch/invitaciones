@@ -329,7 +329,7 @@ function renderPhysicalElement(element) {
     polygon.classList.add('distribution-area-shape');
     polygon.setAttribute('viewBox', `0 0 ${element.width} ${element.height}`);
     const shape = document.createElementNS(svgNs, 'polygon');
-    shape.setAttribute('points', element.points.map((point) => `${point.x - element.x},${point.y - element.y}`).join(' '));
+    shape.setAttribute('points', element.points.map((point) => `${point.x},${point.y}`).join(' '));
     polygon.append(shape);
     node.append(polygon);
   }
@@ -637,7 +637,15 @@ async function mountDistribucion(context) {
       if (!duplicate) return;
       duplicate.width = source.width;
       duplicate.height = source.height;
-      applyElementPlacement(world.querySelector(`.distribution-element[data-element-id="${CSS.escape(duplicate.id)}"]`), duplicate);
+      duplicate.points = Array.isArray(source.points) ? source.points.map((point) => ({ ...point })) : null;
+      const duplicateNode = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(duplicate.id)}"]`);
+      if (Array.isArray(duplicate.points) && duplicateNode) {
+        const replacement = renderPhysicalElement(duplicate);
+        duplicateNode.replaceWith(replacement);
+        bindElementInteraction(replacement, duplicate);
+      } else if (duplicateNode) {
+        applyElementPlacement(duplicateNode, duplicate);
+      }
       selectElement(duplicate.id);
       world.querySelector(`.distribution-element[data-element-id="${CSS.escape(duplicate.id)}"]`)?.focus();
       markDirty();
@@ -661,7 +669,7 @@ async function mountDistribucion(context) {
       if (!selectedElementId) return;
       const source = physicalElements.find((item) => item.id === selectedElementId);
       if (!source) return;
-      copiedElement = { type: source.type, x: source.x, y: source.y, rotation: source.rotation, width: source.width, height: source.height };
+      copiedElement = { type: source.type, x: source.x, y: source.y, rotation: source.rotation, width: source.width, height: source.height, points: Array.isArray(source.points) ? source.points.map((point) => ({ ...point })) : null };
       status.textContent = `${PHYSICAL_ELEMENT_TYPES[source.type].label} copiado`;
     };
 
@@ -672,7 +680,15 @@ async function mountDistribucion(context) {
       if (!pasted) return;
       pasted.width = copiedElement.width;
       pasted.height = copiedElement.height;
-      applyElementPlacement(world.querySelector(`.distribution-element[data-element-id="${CSS.escape(pasted.id)}"]`), pasted);
+      pasted.points = Array.isArray(copiedElement.points) ? copiedElement.points.map((point) => ({ ...point })) : null;
+      const pastedNode = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(pasted.id)}"]`);
+      if (Array.isArray(pasted.points) && pastedNode) {
+        const replacement = renderPhysicalElement(pasted);
+        pastedNode.replaceWith(replacement);
+        bindElementInteraction(replacement, pasted);
+      } else if (pastedNode) {
+        applyElementPlacement(pastedNode, pasted);
+      }
       selectElement(pasted.id);
       world.querySelector(`.distribution-element[data-element-id="${CSS.escape(pasted.id)}"]`)?.focus();
       markDirty();
@@ -885,8 +901,23 @@ async function mountDistribucion(context) {
         input.value = ((axis === 'width' ? element.width : element.height) / PIXELS_PER_METER).toFixed(1);
         return;
       }
-      element[axis] = meters * PIXELS_PER_METER;
-      applyElementPlacement(node, element);
+      const previousSize = element[axis];
+      const nextSize = meters * PIXELS_PER_METER;
+      if (Array.isArray(element.points) && previousSize > 0) {
+        const ratio = nextSize / previousSize;
+        element.points = element.points.map((point) => axis === 'width'
+          ? { x: point.x * ratio, y: point.y }
+          : { x: point.x, y: point.y * ratio });
+      }
+      element[axis] = nextSize;
+      if (Array.isArray(element.points)) {
+        const replacement = renderPhysicalElement(element);
+        node.replaceWith(replacement);
+        bindElementInteraction(replacement, element);
+        selectElement(element.id);
+      } else {
+        applyElementPlacement(node, element);
+      }
       markDirty();
     };
     root.querySelector('[data-distribution-width]').onchange = (event) => updateSelectedDimension('width', event.currentTarget);
@@ -956,7 +987,7 @@ async function mountDistribucion(context) {
       if (!element) return;
       element.width = maxX - minX;
       element.height = maxY - minY;
-      element.points = drawingPoints.map((point) => ({ x: point.x, y: point.y }));
+      element.points = drawingPoints.map((point) => ({ x: point.x - minX, y: point.y - minY }));
       const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(element.id)}"]`);
       node?.remove();
       const rendered = renderPhysicalElement(element);
