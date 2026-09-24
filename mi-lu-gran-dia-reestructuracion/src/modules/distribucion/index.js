@@ -410,7 +410,7 @@ function setupCamera(root, world, worldSize) {
   }, { passive: false });
 
   viewport.addEventListener('pointerdown', (event) => {
-    if (event.target.closest('.distribution-table')) return;
+    if (event.target.closest('.distribution-table,.distribution-element')) return;
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     viewport.setPointerCapture(event.pointerId);
     if (pointers.size === 1) {
