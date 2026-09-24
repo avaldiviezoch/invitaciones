@@ -417,3 +417,11 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Los cambios canónicos locales de Invitados se reconcilian mediante reconcileCanonicalTables() en lugar de remontar el módulo.
 - Se elimina el remonte posterior al autoguardado y el fallback de remonte ante errores ordinarios de eventos table-*.
 - Solo cambios estructurales reales del conjunto de mesas (crear/eliminar/reordenar IDs) conservan la posibilidad de reconstrucción completa.
+
+
+## 2026-09-24 — Invitados/Música: uniformizar botones a rojo
+- Se elimina la excepción verde de la pestaña Música dentro de Invitados.
+- La pestaña Música activa usa la misma paleta rosada/roja de Invitados.
+- Guardar configuración cambia de verde a #ad7480.
+- Copiar enlace y Abrir vista usan fondo #f7ecef, borde #e3c6cc y texto #9c6470.
+- No se modifican tarjetas, iconos, estados informativos ni lógica funcional.
