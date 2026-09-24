@@ -303,3 +303,10 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Las acciones reutilizan los controles existentes mediante proxy: no se duplica la lógica funcional.
 - Añadir ofrece accesos iniciales a Pista, Barra, DJ, Escenario y Pantalla; Propuesta reutiliza Nueva/Duplicar/Renombrar/Eliminar; Vista reutiliza Presentación/Plano limpio/Imprimir; Revisar refleja validaciones; Ajustes incorpora Medir/Limpiar y cuadrícula.
 - Sin !important, sin cambios en Firebase, Firestore, Storage, IDs, esquema persistente ni comportamiento desktop.
+
+
+## 2026-09-24 — Distribución móvil: restaurar cabecera común del módulo
+- Se restaura únicamente la cabecera/hero de Distribución en móvil para mantener consistencia con Presupuesto y los demás módulos.
+- La cabecera vuelve a mostrar “Módulo · Espacio de la boda”, título “Distribución”, descripción y KPI “Mesas registradas”.
+- La rueda móvil, plano, switches y bottom sheet permanecen sin cambios.
+- Desktop no se modifica.
