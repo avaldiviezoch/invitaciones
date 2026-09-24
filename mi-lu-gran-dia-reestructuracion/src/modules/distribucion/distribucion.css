@@ -39,3 +39,5 @@
 .distribution-shell.is-presentation-mode .distribution-viewport{min-height:calc(100vh - 160px);border-radius:22px;background:#fff}
 .distribution-shell.is-presentation-mode .distribution-table,.distribution-shell.is-presentation-mode .distribution-element{cursor:default}
 .distribution-shell.is-presentation-mode .distribution-table.is-selected,.distribution-shell.is-presentation-mode .distribution-element.is-selected{outline:none;box-shadow:inherit}
+
+.distribution-proposal-controls{display:flex;align-items:center;gap:5px}.distribution-proposal-controls select,.distribution-proposal-controls button{height:34px;border:1px solid rgba(91,91,75,.13);border-radius:10px;background:#fff;color:#625e58;font-size:8px;font-weight:750}.distribution-proposal-controls select{max-width:150px;padding:0 26px 0 9px}.distribution-proposal-controls button{padding:0 9px;cursor:pointer}.distribution-proposal-controls button:disabled{opacity:.42;cursor:default}.distribution-shell.is-presentation-mode .distribution-proposal-controls{display:none}
