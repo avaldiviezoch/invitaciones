@@ -297,9 +297,7 @@ function polygonSelfIntersects(points) {
 }
 
 function capacityOf(table) {
-  const seats = Array.isArray(table?.seats) ? table.seats.length : 0;
-  const declared = Number(table?.capacity || 0);
-  return Math.max(seats, Number.isFinite(declared) ? declared : 0, 0);
+  return Array.isArray(table?.seats) ? table.seats.length : 0;
 }
 
 function tableName(table, index) {
@@ -1251,7 +1249,7 @@ async function mountDistribucion(context) {
       const guest = canonicalGuestById(guestId);
       const table = canonicalTableById(tableId);
       const seat = table?.seats?.[seatIndex];
-      if (!guest || !table || !seat?.id || !Number.isInteger(seatIndex) || seatIndex < 0 || seatIndex >= capacityOf(table)) return false;
+      if (!guest || !table || !seat?.id || !Number.isInteger(seatIndex) || seatIndex < 0 || seatIndex >= table.seats.length) return false;
       const current = canonicalGuestAtSeat(tableId, seatIndex);
       if (current && escapeText(current.id) !== escapeText(guest.id)) {
         status.textContent = 'Silla ocupada · usa Mesas para intercambiar o reemplazar invitados';
