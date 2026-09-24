@@ -51,7 +51,7 @@ let calendarCursor = new Date();
 const heroVideo = $('heroVideo');
 
 function syncEntrySurface() {
-  const directModule = ['#checklist', '#presupuesto', '#proveedores', '#invitados'].includes(location.hash);
+  const directModule = ['#checklist', '#presupuesto', '#proveedores', '#invitados', '#distribucion'].includes(location.hash);
   document.documentElement.classList.toggle('module-route', directModule);
   if (directModule) {
     heroVideo?.pause();
@@ -585,7 +585,7 @@ function setModuleLoading(loading) {
   }, 420);
 }
 
-const ACTIVE_MODULES = new Set(['checklist', 'presupuesto', 'proveedores', 'invitados']);
+const ACTIVE_MODULES = new Set(['checklist', 'presupuesto', 'proveedores', 'invitados', 'distribucion']);
 
 function moduleFromHash() {
   const moduleId = location.hash.replace(/^#/, '');
@@ -635,6 +635,10 @@ async function openModule(moduleId, { updateHash = true } = {}) {
     if (moduleId === 'invitados') {
       const { mountInvitados } = await import('../invitados/index.js?v=27');
       await mountInvitados(weddingContext);
+    }
+    if (moduleId === 'distribucion') {
+      const { mountDistribucion } = await import('../distribucion/index.js?v=1');
+      await mountDistribucion(weddingContext);
     }
     if (loadEpoch === moduleLoadEpoch) {
       mountedModuleId = moduleId;
