@@ -621,7 +621,7 @@ async function openModule(moduleId, { updateHash = true } = {}) {
   setModuleLoading(true);
   try {
     if (moduleId === 'checklist') {
-      const { mountChecklist } = await import('../checklist/index.js?v=14');
+      const { mountChecklist } = await import('../checklist/index.js?v=15');
       await mountChecklist(weddingContext);
     }
     if (moduleId === 'presupuesto') {
