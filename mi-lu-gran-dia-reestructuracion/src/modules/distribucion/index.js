@@ -600,6 +600,26 @@ async function mountDistribucion(context) {
       markDirty();
     };
 
+    let copiedElement = null;
+
+    const copySelectedElement = () => {
+      if (!selectedElementId) return;
+      const source = physicalElements.find((item) => item.id === selectedElementId);
+      if (!source) return;
+      copiedElement = { type: source.type, x: source.x, y: source.y, rotation: source.rotation };
+      status.textContent = `${PHYSICAL_ELEMENT_TYPES[source.type].label} copiado`;
+    };
+
+    const pasteCopiedElement = () => {
+      if (!canEdit || !copiedElement) return;
+      copiedElement = { ...copiedElement, x: copiedElement.x + 24, y: copiedElement.y + 24 };
+      const pasted = createElement(copiedElement.type, copiedElement.x, copiedElement.y, copiedElement.rotation);
+      if (!pasted) return;
+      selectElement(pasted.id);
+      world.querySelector(`.distribution-element[data-element-id="${CSS.escape(pasted.id)}"]`)?.focus();
+      markDirty();
+    };
+
     world.querySelectorAll('.distribution-table').forEach((node) => {
       let move = null;
       let moved = false;
@@ -785,6 +805,16 @@ async function mountDistribucion(context) {
       if (selectedElementId && modifier && event.key.toLowerCase() === 'd') {
         event.preventDefault();
         duplicateSelectedElement();
+        return;
+      }
+      if (selectedElementId && modifier && event.key.toLowerCase() === 'c') {
+        event.preventDefault();
+        copySelectedElement();
+        return;
+      }
+      if (modifier && event.key.toLowerCase() === 'v' && copiedElement) {
+        event.preventDefault();
+        pasteCopiedElement();
         return;
       }
       if (selectedElementId && ['Delete', 'Backspace'].includes(event.key)) {
