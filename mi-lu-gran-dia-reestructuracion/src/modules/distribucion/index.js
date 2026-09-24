@@ -631,7 +631,7 @@ function renderElementInspector(root, element) {
   const areaMeters = Array.isArray(element.points) ? polygonArea(element.points) / (PIXELS_PER_METER ** 2) : null;
   root.querySelector('[data-distribution-selected-meta]').textContent = areaMeters === null
     ? 'Elemento físico del plano'
-    : `Área libre · ${areaMeters.toFixed(2)} m²`;
+    : `${definition.label} · ${areaMeters.toFixed(2)} m²`;
   const rotationOutput = root.querySelector('[data-distribution-selected-rotation]');
   rotationOutput.value = `${normalizeRotation(element.rotation)}°`;
   rotationOutput.textContent = rotationOutput.value;
@@ -1717,14 +1717,19 @@ async function mountDistribucion(context) {
       stopMeasuring();
     });
 
+    const applyVisibilityLayer = (className, visible, hiddenSelectionKind) => {
+      world.classList.toggle(className, !visible);
+      if (!visible && hiddenSelectionKind === 'table' && selectedTableId) clearSelection();
+      if (!visible && hiddenSelectionKind === 'element' && selectedElementId) clearSelection();
+    };
     root.querySelector('[data-distribution-show-tables]').onchange = (event) => {
-      world.classList.toggle('hide-tables', !event.currentTarget.checked);
+      applyVisibilityLayer('hide-tables', event.currentTarget.checked, 'table');
     };
     root.querySelector('[data-distribution-show-guest-labels]').onchange = (event) => {
-      world.classList.toggle('hide-guest-labels', !event.currentTarget.checked);
+      applyVisibilityLayer('hide-guest-labels', event.currentTarget.checked, 'labels');
     };
     root.querySelector('[data-distribution-show-elements]').onchange = (event) => {
-      world.classList.toggle('hide-elements', !event.currentTarget.checked);
+      applyVisibilityLayer('hide-elements', event.currentTarget.checked, 'element');
     };
     root.querySelector('[data-distribution-rotate-left]').onclick = () => rotateSelected(-ROTATION_STEP);
     root.querySelector('[data-distribution-rotate-right]').onclick = () => rotateSelected(ROTATION_STEP);
