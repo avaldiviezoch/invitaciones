@@ -71,7 +71,7 @@ function createTablesController(api) {
 
   function assertSeatIdentityPreserved(table, nextSeats, occupiedGuests) {
     const previousSeats = Array.isArray(table?.seats) ? table.seats : [];
-    previousSeats.forEach((seat, index) => {
+    previousSeats.slice(0, nextSeats.length).forEach((seat, index) => {
       const previousSeatId = text(seat?.id);
       const nextSeatId = text(nextSeats?.[index]?.id);
       if (previousSeatId && nextSeatId !== previousSeatId) {
@@ -525,6 +525,8 @@ function createTablesController(api) {
     });
 
     root.querySelector('[data-table-dialog-title]').textContent = isNew ? 'Nueva mesa' : text(table.name) || 'Editar mesa';
+    const dialogState = root.querySelector('[data-table-dialog-state]');
+    if (dialogState) dialogState.textContent = '';
     root.querySelector('[data-table-delete]').hidden = isNew || !api.canEdit();
     root.querySelector('[data-table-save]').hidden = !api.canEdit();
     root.querySelector('[data-table-delete]').dataset.tableId = table ? String(table.id) : '';
@@ -605,61 +607,70 @@ function createTablesController(api) {
   async function submitTable(event) {
     event.preventDefault();
     if (!api.canEdit()) return true;
-    try {
-      await waitForIdleSave();
-    } catch (error) {
-      const stateNode = api.getRoot()?.querySelector('[data-tables-state]');
-      if (stateNode) stateNode.textContent = error?.message || 'No se pudo continuar con el guardado de la mesa.';
-      return true;
-    }
 
     const form = event.target;
+    const dialogState = api.getRoot()?.querySelector('[data-table-dialog-state]');
     const data = new FormData(form);
     const tableId = text(data.get('tableId'));
     const name = text(data.get('name')).slice(0, 80);
     const type = normalizeTableShape(data.get('type'));
     const capacity = normalizeCapacity(data.get('capacity'));
-    if (!name) return true;
 
-    const previous = deepClone(api.getSnapshot());
+    if (!name) {
+      if (dialogState) dialogState.textContent = 'Escribe un nombre para la mesa.';
+      return true;
+    }
 
-    if (!tableId) {
-      api.getSnapshot().canonical.tables.push({
-        id: uid('table'),
-        name,
-        type,
-        capacity,
-        seats: ensureSeats({}, capacity),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      });
+    try {
+      if (dialogState) dialogState.textContent = api.isSaving()
+        ? 'Terminando la sincronización anterior…'
+        : 'Guardando mesa…';
+      await waitForIdleSave();
+
+      const previous = deepClone(api.getSnapshot());
+
+      if (!tableId) {
+        api.getSnapshot().canonical.tables.push({
+          id: uid('table'),
+          name,
+          type,
+          capacity,
+          seats: ensureSeats({}, capacity),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+        await persist(previous, 'Mesa creada', 'table-created');
+        closeTable();
+        return true;
+      }
+
+      const table = tableById(tableId);
+      if (!table) throw new Error('La mesa ya no existe en la información actual.');
+
+      const occupied = guestsAtTable(table.id);
+      const invalidOccupied = occupied.filter((guest) => Number(guest.seatNumber) > capacity);
+      if (invalidOccupied.length || occupied.length > capacity) {
+        if (dialogState) dialogState.textContent = `No se puede reducir a ${capacity} lugares porque hay invitados en sillas que desaparecerían.`;
+        return true;
+      }
+
+      const nextSeats = ensureSeats(table, capacity);
+      assertSeatIdentityPreserved(table, nextSeats, occupied);
+
+      table.name = name;
+      table.type = type;
+      table.capacity = capacity;
+      table.seats = nextSeats;
+      table.updatedAt = new Date().toISOString();
+
+      await persist(previous, 'Mesa actualizada', 'table-updated');
       closeTable();
-      await persist(previous, 'Mesa creada', 'table-created');
+      return true;
+    } catch (error) {
+      console.error('No se pudo guardar la mesa:', error);
+      if (dialogState) dialogState.textContent = error?.message || 'No se pudo guardar la mesa.';
       return true;
     }
-
-    const table = tableById(tableId);
-    if (!table) return true;
-
-    const occupied = guestsAtTable(table.id);
-    const invalidOccupied = occupied.filter((guest) => Number(guest.seatNumber) > capacity);
-    if (invalidOccupied.length || occupied.length > capacity) {
-      window.alert(`No se puede reducir a ${capacity} lugares porque hay invitados en sillas que desaparecerían. Reasígnalos o déjalos sin mesa primero.`);
-      return true;
-    }
-
-    const nextSeats = ensureSeats(table, capacity);
-    assertSeatIdentityPreserved(table, nextSeats, occupied);
-
-    table.name = name;
-    table.type = type;
-    table.capacity = capacity;
-    table.seats = nextSeats;
-    table.updatedAt = new Date().toISOString();
-
-    closeTable();
-    await persist(previous, 'Mesa actualizada', 'table-updated');
-    return true;
   }
 
   async function deleteTable(tableId) {
@@ -889,14 +900,6 @@ function createTablesController(api) {
     }
     if (event.target.closest('[data-seat-conflict-cancel]')) {
       closeSeatConflict('cancel');
-      return true;
-    }
-
-    const saveTableButton = event.target.closest('[data-table-save]');
-    if (saveTableButton) {
-      event.preventDefault();
-      const form = api.getRoot()?.querySelector('[data-table-form]');
-      form?.requestSubmit();
       return true;
     }
 

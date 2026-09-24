@@ -425,3 +425,13 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Guardar configuración cambia de verde a #ad7480.
 - Copiar enlace y Abrir vista usan fondo #f7ecef, borde #e3c6cc y texto #9c6470.
 - No se modifican tarjetas, iconos, estados informativos ni lógica funcional.
+
+
+## 2026-09-24 — Mesas y sillas: corrección raíz del guardado de opciones
+- Se corrige assertSeatIdentityPreserved(): al reducir capacidad solo se exige conservar la identidad de las sillas que permanecen; las sillas vacías eliminadas ya no bloquean un cambio legítimo.
+- Se mantiene la validación estricta de invitados ocupados y de seatId/seatNumber canónicos.
+- Se elimina la ruta redundante que interceptaba Guardar mesa y llamaba requestSubmit(); queda un único flujo nativo de submit.
+- El formulario captura nombre, forma y capacidad una sola vez y espera cualquier persistencia previa antes de aplicar la mutación.
+- El diálogo solo se cierra después de que saveInvitadosSnapshot confirme el guardado.
+- Si la validación o Firebase falla, el diálogo permanece abierto y muestra el error en data-table-dialog-state.
+- No se cambian claves, IDs, colecciones, reglas de Firebase ni asignaciones de invitados.

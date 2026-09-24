@@ -494,3 +494,5 @@
 .guest-card h3{font-size:16px;white-space:normal}
 .guest-assignment{padding-left:48px;text-align:left}
 }
+
+.table-dialog-state{min-height:16px;margin:10px 0 0;color:#9c6470;font-size:8px;font-weight:700;line-height:1.4}
