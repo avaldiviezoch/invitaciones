@@ -356,13 +356,6 @@ async function handleClick(event) {
     openForm(index);
     return;
   }
-  if (event.target.closest('[data-task-delete]')) {
-    const title = taskTitle(state.tasks[index]);
-    if (!window.confirm(`¿Eliminar “${title}” del checklist?`)) return;
-    state.tasks.splice(index, 1);
-    render();
-    await persist('Tarea eliminada');
-  }
 }
 
 async function handleChange(event) {
