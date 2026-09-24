@@ -984,7 +984,13 @@ async function mountDistribucion(context) {
     };
 
     const proximitySelect = root.querySelector('[data-distribution-proximity]');
+    const snapToggle = root.querySelector('[data-distribution-snap]');
+    const SNAP_STEP_METERS = 0.25;
     let proximityMeters = Number(proximitySelect?.value) || 1;
+    let snapEnabled = false;
+    const snapCoordinate = (value) => snapEnabled
+      ? Math.round(value / (PLAN_SCALE.pixelsPerMeter * SNAP_STEP_METERS)) * PLAN_SCALE.pixelsPerMeter * SNAP_STEP_METERS
+      : value;
 
     const refreshSpatialConflicts = () => {
       const issues = [];
@@ -1093,6 +1099,13 @@ async function mountDistribucion(context) {
       proximityMeters = PROXIMITY_OPTIONS_METERS.includes(next) ? next : 1;
       refreshSpatialConflicts();
       status.textContent = `Alerta de separación configurada en ${proximityMeters.toFixed(1)} m`;
+    });
+
+    snapToggle?.addEventListener('change', () => {
+      snapEnabled = snapToggle.checked;
+      status.textContent = snapEnabled
+        ? `Ajuste a cuadrícula activo · pasos de ${SNAP_STEP_METERS.toFixed(2)} m`
+        : 'Ajuste a cuadrícula desactivado';
     });
 
     const markDirty = () => {
@@ -1210,8 +1223,8 @@ async function mountDistribucion(context) {
         const dy = camera.clientDeltaToWorld(event.clientY - move.clientY);
         if (Math.abs(dx) + Math.abs(dy) > 1) moved = true;
         const placement = placementState.get(node.dataset.tableId);
-        placement.x = move.x + dx;
-        placement.y = move.y + dy;
+        placement.x = snapCoordinate(move.x + dx);
+        placement.y = snapCoordinate(move.y + dy);
         applyPlacement(node, placement);
         refreshSpatialConflicts();
       });
@@ -1282,8 +1295,8 @@ async function mountDistribucion(context) {
         const dx = camera.clientDeltaToWorld(event.clientX - move.clientX);
         const dy = camera.clientDeltaToWorld(event.clientY - move.clientY);
         if (Math.abs(dx) + Math.abs(dy) > 1) moved = true;
-        element.x = move.x + dx;
-        element.y = move.y + dy;
+        element.x = snapCoordinate(move.x + dx);
+        element.y = snapCoordinate(move.y + dy);
         applyElementPlacement(node, element);
         refreshSpatialConflicts();
       });
@@ -1519,6 +1532,7 @@ async function mountDistribucion(context) {
         return;
       }
       stopMeasuring();
+      clearSelection();
       drawingArea = true;
       root.classList.add('is-drawing-area');
       drawingPoints = [];
@@ -1533,6 +1547,8 @@ async function mountDistribucion(context) {
         stopMeasuring();
         return;
       }
+      stopDrawingArea();
+      clearSelection();
       measuring = true;
       measureStart = null;
       measureLayer.replaceChildren();
@@ -1599,6 +1615,16 @@ async function mountDistribucion(context) {
       if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable) return;
       const modifier = event.ctrlKey || event.metaKey;
       const key = event.key.toLowerCase();
+      if (event.key === 'Escape') {
+        if (drawingArea) stopDrawingArea();
+        if (measuring) stopMeasuring();
+        return;
+      }
+      if (drawingArea && event.key === 'Enter') {
+        event.preventDefault();
+        finishDrawingArea();
+        return;
+      }
       if (modifier && key === 'z') {
         event.preventDefault();
         if (event.shiftKey) redoEdit();
