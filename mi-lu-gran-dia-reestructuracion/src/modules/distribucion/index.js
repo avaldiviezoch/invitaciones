@@ -1,6 +1,6 @@
-import { loadInvitadosSnapshot } from '../invitados/invitados-data.js?v=4';
+import { loadInvitadosSnapshot } from '../invitados/invitados-data.js?v=5';
 import { normalizeTableShape } from '../invitados/table-geometry.js?v=4';
-import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
+import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=5';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { setupDistributionCamera } from './camera.js?v=6';
 import {
