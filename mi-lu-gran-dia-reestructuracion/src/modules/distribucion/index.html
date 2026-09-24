@@ -44,6 +44,12 @@
           <span>Elementos</span>
         </label>
       </div>
+      <div class="distribution-validation-indicators" aria-label="Indicadores de validación">
+        <span class="distribution-validation-total"><strong data-distribution-validation-count>0 incidencias</strong></span>
+        <span class="distribution-validation-kpi is-conflict"><strong data-distribution-validation-conflicts>0</strong><small>Conflictos</small></span>
+        <span class="distribution-validation-kpi is-warning"><strong data-distribution-validation-warnings>0</strong><small>Alertas</small></span>
+        <span class="distribution-validation-kpi is-proximity"><strong data-distribution-validation-proximity>0</strong><small>Proximidad</small></span>
+      </div>
     </div>
     <div class="distribution-toolbar-actions">
       <div class="distribution-proposal-controls" aria-label="Propuestas de distribución">
@@ -130,15 +136,9 @@
           </div>
         </details>
       </div>
-      <section class="distribution-validation" aria-label="Validación del plano">
+      <section class="distribution-validation" aria-label="Detalle de validación del plano">
         <div class="distribution-validation-head">
-          <span class="distribution-inspector-eyebrow">VALIDACIÓN</span>
-          <strong data-distribution-validation-count>0 incidencias</strong>
-        </div>
-        <div class="distribution-validation-summary">
-          <span><strong data-distribution-validation-conflicts>0</strong> conflictos</span>
-          <span><strong data-distribution-validation-warnings>0</strong> alertas</span>
-          <span><strong data-distribution-validation-proximity>0</strong> proximidad</span>
+          <span class="distribution-inspector-eyebrow">DETALLE DE VALIDACIÓN</span>
         </div>
         <div class="distribution-validation-list" data-distribution-validation-list>
           <span class="distribution-validation-ok">Plano sin incidencias espaciales.</span>

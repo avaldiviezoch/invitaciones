@@ -210,3 +210,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - La tipografía baja de 12 px a 10 px.
 - El nombre puede ocupar hasta dos líneas centradas; si excede ese espacio se recorta con puntos suspensivos.
 - No se modificaron geometría, sillas, etiquetas de invitados, asignaciones, persistencia ni escala física.
+
+
+## 2026-09-24 — Distribución: indicadores de validación en la barra superior
+- Los indicadores de validación se movieron a la zona superior junto a los switches de capas.
+- Se muestran siempre visibles como KPIs compactos: total de incidencias, conflictos, alertas y proximidad.
+- Se conservaron los mismos data-attributes y la misma función de cálculo; no se duplicó la lógica ni el estado.
+- El panel lateral mantiene únicamente el detalle/listado de incidencias bajo “DETALLE DE VALIDACIÓN”.
+- En pantallas medianas los indicadores ocupan una fila propia y en móvil se organizan como tres KPIs más un total en ancho completo.
+- No se modificaron reglas espaciales, geometría, persistencia, mesas, sillas, invitados, Firebase, Firestore, Storage ni IDs.
