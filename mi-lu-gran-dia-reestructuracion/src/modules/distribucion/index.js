@@ -962,6 +962,32 @@ async function mountDistribucion(context) {
     };
     presentationButton.onclick = () => setPresentationMode(!presentationMode);
 
+    const cleanViewButton = root.querySelector('[data-distribution-clean-view]');
+    let cleanView = false;
+    cleanViewButton.onclick = () => {
+      cleanView = !cleanView;
+      root.classList.toggle('is-clean-plan', cleanView);
+      cleanViewButton.setAttribute('aria-pressed', String(cleanView));
+      cleanViewButton.textContent = cleanView ? 'Mostrar cuadrícula' : 'Plano limpio';
+    };
+    root.querySelector('[data-distribution-print]').onclick = () => {
+      if (dirty || saving || canonicalChanged) {
+        status.textContent = 'Guarda los cambios antes de imprimir o generar PDF';
+        return;
+      }
+      const wasPresentation = presentationMode;
+      if (!wasPresentation) setPresentationMode(true);
+      root.classList.add('is-printing-plan');
+      requestAnimationFrame(() => {
+        camera.fit();
+        requestAnimationFrame(() => {
+          window.print();
+          root.classList.remove('is-printing-plan');
+          if (!wasPresentation) setPresentationMode(false);
+        });
+      });
+    };
+
     const persistCurrentProposalInMemory = () => {
       const index = proposalState.findIndex((proposal) => proposal.id === activeProposalId);
       if (index < 0) return;
