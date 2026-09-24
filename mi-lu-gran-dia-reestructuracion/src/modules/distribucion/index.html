@@ -41,6 +41,11 @@
         <button type="button" data-distribution-add-element="stage"><strong>▔</strong><span>Escenario<small>4 × 2.5 m</small></span></button>
         <button type="button" data-distribution-add-element="column"><strong>■</strong><span>Columna<small>0.5 × 0.5 m</small></span></button>
       </div>
+      <div class="distribution-layer-controls">
+        <span class="distribution-inspector-eyebrow">CAPAS</span>
+        <label><input type="checkbox" data-distribution-show-tables checked> Mesas</label>
+        <label><input type="checkbox" data-distribution-show-elements checked> Elementos</label>
+      </div>
     </aside>
     <div class="distribution-viewport" data-distribution-viewport tabindex="0" aria-label="Plano de distribución. Arrastra una mesa para moverla o el fondo para desplazarte.">
       <div class="distribution-world" data-distribution-world></div>
@@ -75,6 +80,9 @@
         <div class="distribution-guest-list" data-distribution-selected-guests></div>
         <div class="distribution-element-note" data-distribution-element-note hidden>Elemento físico del plano. Su posición y rotación pertenecen únicamente a Distribución.</div>
         <div class="distribution-element-actions" data-distribution-element-actions hidden>
+          <button type="button" data-distribution-bring-front>Traer al frente</button>
+          <button type="button" data-distribution-send-back>Enviar atrás</button>
+          <button type="button" data-distribution-toggle-lock>Bloquear</button>
           <button type="button" data-distribution-duplicate-element>Duplicar</button>
           <button type="button" data-distribution-delete-element>Eliminar</button>
         </div>
