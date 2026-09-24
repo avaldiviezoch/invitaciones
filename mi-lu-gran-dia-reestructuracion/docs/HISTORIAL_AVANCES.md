@@ -514,3 +514,14 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - “Conservar este” fuerza la escritura solo después de esa acción explícita; “Usar remoto” aplica el estado remoto en caliente y limpia el historial incompatible.
 - lastPersistedState se actualiza tanto al guardar como al recibir/aplicar cambios remotos.
 - No se modifica el esquema de Firebase, claves, IDs, invitados, sillas ni table.dimensions.
+
+
+## 2026-09-24 — Distribución Fase 5: cierre responsive y de estados transitorios
+- El panel móvil Añadir deja de mantener una lista hardcodeada de 5 objetos y consume directamente los mismos botones/tipos físicos del catálogo desktop.
+- Móvil tiene acceso al catálogo completo sin crear una segunda fuente de tipos ni etiquetas.
+- Se elimina el texto de “Primera versión móvil” porque la funcionalidad ya no es parcial.
+- Mientras existe un conflicto multi-dispositivo sin resolver, el autosave queda pausado; no vuelve a ejecutar preflight en bucle.
+- updateSaveState() da prioridad visual al conflicto pendiente y solo reanuda autosave después de resolverlo.
+- Al mostrar o aplicar un estado remoto se cierra el bottom sheet móvil para evitar controles con valores obsoletos.
+- El cleanup del módulo cierra panel móvil y limpia el estado visual transitorio de conflicto.
+- No se añaden listeners globales ni una segunda ruta de catálogo/persistencia.

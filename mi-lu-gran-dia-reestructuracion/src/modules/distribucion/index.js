@@ -21,7 +21,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=51', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=52', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -899,6 +899,7 @@ async function mountDistribucion(context) {
       mobileSheetBackdrop.hidden = true;
       mobileSheetBody.replaceChildren();
     };
+    const hasSyncConflict = () => Boolean(pendingRemoteDistributionState && pendingLocalDistributionState);
     const addMobileButton = (label, onClick, className = '') => {
       const button = document.createElement('button');
       button.type = 'button';
@@ -914,20 +915,15 @@ async function mountDistribucion(context) {
       mobileSheetBody.replaceChildren();
 
       if (action === 'add') {
-        [
-          ['Pista de baile', 'dance'],
-          ['Barra', 'bar'],
-          ['DJ / sonido', 'dj'],
-          ['Escenario', 'stage'],
-          ['Pantalla', 'screen']
-        ].forEach(([label, type]) => addMobileButton(label, () => {
-          proxyClick(`[data-distribution-add-element="${type}"]`);
-          closeMobileSheet();
-        }));
-        const note = document.createElement('p');
-        note.className = 'distribution-mobile-sheet-note';
-        note.textContent = 'Primera versión móvil: aquí iremos incorporando el resto del catálogo por grupos.';
-        mobileSheetBody.append(note);
+        [...root.querySelectorAll('[data-distribution-add-element]')].forEach((sourceButton) => {
+          const type = escapeText(sourceButton.dataset.distributionAddElement);
+          const definition = PHYSICAL_ELEMENT_TYPES[type];
+          if (!definition) return;
+          addMobileButton(definition.label, () => {
+            sourceButton.click();
+            closeMobileSheet();
+          });
+        });
       } else if (action === 'proposal') {
         const proposalName = proposalSelect?.selectedOptions?.[0]?.textContent || 'Propuesta activa';
         const note = document.createElement('p');
@@ -1202,6 +1198,7 @@ async function mountDistribucion(context) {
     const showSyncConflict = (localState, remoteState) => {
       pendingLocalDistributionState = JSON.parse(JSON.stringify(localState));
       pendingRemoteDistributionState = JSON.parse(JSON.stringify(remoteState));
+      closeMobileSheet();
       syncConflict.hidden = false;
       status.textContent = 'Conflicto de sincronización · elige qué versión conservar';
     };
@@ -1283,7 +1280,7 @@ async function mountDistribucion(context) {
     }
 
     const scheduleAutosave = (delay = 250) => {
-      if (!canEdit || saving || canonicalChanged || !dirty) return;
+      if (!canEdit || saving || canonicalChanged || !dirty || hasSyncConflict()) return;
       if (autosaveTimer) window.clearTimeout(autosaveTimer);
       autosaveTimer = window.setTimeout(() => {
         autosaveTimer = 0;
@@ -1294,10 +1291,11 @@ async function mountDistribucion(context) {
 
     const updateSaveState = () => {
       if (!canEdit) status.textContent = 'Solo lectura · la distribución no puede modificarse';
+      else if (hasSyncConflict()) status.textContent = 'Conflicto de sincronización · elige qué versión conservar';
       else if (saving) status.textContent = 'Sincronizando distribución…';
       else if (dirty) status.textContent = 'Sincronizando cambios…';
       else status.textContent = hasPersistedState ? 'Distribución sincronizada' : 'Distribución proyectada · sincronización pendiente';
-      if (dirty && !saving && !canonicalChanged) scheduleAutosave();
+      if (dirty && !saving && !canonicalChanged && !hasSyncConflict()) scheduleAutosave();
     };
 
     const clearVisualSelection = () => {
@@ -2739,6 +2737,7 @@ async function mountDistribucion(context) {
 
     const applyRemoteDistributionState = (remoteState) => {
       if (!remoteState?.proposals?.length) return false;
+      closeMobileSheet();
 
       const incomingProposals = remoteState.proposals.map((proposal) => ({
         ...proposal,
@@ -2874,6 +2873,8 @@ async function mountDistribucion(context) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
       distributionCloudUnsubscribe?.();
       canonicalCloudUnsubscribe?.();
+      closeMobileSheet();
+      hideSyncConflict();
       if (autosaveTimer) window.clearTimeout(autosaveTimer);
       camera.destroy();
       if (referenceObjectUrl) {
