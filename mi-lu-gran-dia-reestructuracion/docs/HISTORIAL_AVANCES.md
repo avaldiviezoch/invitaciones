@@ -258,3 +258,15 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se suben identificadores de carga a template v38, Distribución v73, CSS v30 y dashboard v165.
 - Se añade un marcador app-build en el HTML raíz para facilitar la verificación de la versión servida.
 - No se modificó la estructura funcional de la toolbar, datos, Firebase, Firestore, Storage ni geometría.
+
+
+## 2026-09-24 — Shell móvil: header permanente y drawer
+- Se reemplazó la prueba anterior de barra lateral móvil plegable por una única navegación móvil tipo app.
+- En celular queda un header fijo con hamburguesa, marca MGD, “Mi Gran Día” y el nombre de la boda activa; el subtítulo se forma desde el nombre ya cargado por wedding-context, sin duplicar persistencia.
+- La navegación existente se reutiliza como drawer superpuesto desde la izquierda: no reserva ancho del módulo y no crea una segunda lista de navegación.
+- El drawer se abre/cierra desde la hamburguesa, se cierra al tocar el fondo o seleccionar un módulo y conserva dentro el acceso a Inicio y Cuenta.
+- Se retiraron completamente el botón flotante inferior, el estado is-nav-collapsed y los controles appNavCollapse/appNavRestore.
+- El contenido móvil usa márgenes laterales completos; Distribución conserva todo el ancho disponible debajo del header.
+- Durante la carga inicial/cambio de módulo, el loader ocupa toda la pantalla y mantiene ocultos header, drawer y contenido hasta completar el montaje y finalizar la salida del loader.
+- Desktop conserva la navegación horizontal vigente.
+- Sin cambios en Firebase, Firestore, Storage, usuarios, invitados, mesas, sillas ni contratos persistentes.
