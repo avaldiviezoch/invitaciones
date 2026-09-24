@@ -2,7 +2,7 @@ import { loadInvitadosSnapshot } from '../invitados/invitados-data.js?v=4';
 import { normalizeTableShape } from '../invitados/table-geometry.js?v=4';
 import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { setupDistributionCamera } from './camera.js?v=7';
+import { setupDistributionCamera } from './camera.js?v=8';
 import {
   DEFAULT_BACKGROUND_ID,
   addDistributionBackground,

@@ -325,3 +325,14 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - El mínimo de zoom es siempre el encaje inicial y el máximo es 4x respecto de ese encaje.
 - Al cambiar tamaño u orientación se recalcula el encaje base.
 - Desktop permanece sin cambios.
+
+
+## 2026-09-24 — Distribución móvil: navegación tipo mapa
+- Se reemplaza el zoom centrado rígido por interacción táctil tipo mapa únicamente en móvil.
+- Un dedo sobre espacio vacío desplaza el plano libremente en los ejes X/Y.
+- Dos dedos hacen pinch-to-zoom alrededor del punto medio real del gesto; el punto bajo los dedos permanece estable mientras se amplía o reduce.
+- Al mover ambos dedos durante el pinch también se puede recorrer el plano naturalmente.
+- Un dedo sobre una mesa u objeto no activa el paneo de cámara, preservando el arrastre del elemento.
+- La cámara limita el desplazamiento para no dejar el plano perdido fuera del visor ni mostrar espacio vacío más allá de sus bordes.
+- El zoom conserva mínimo de encaje y máximo 4x.
+- Desktop permanece sin cambios.
