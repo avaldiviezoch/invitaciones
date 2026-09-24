@@ -178,10 +178,12 @@ function parseDistributionState(value) {
       const x = finiteNumber(element?.x);
       const y = finiteNumber(element?.y);
       const rotation = finiteNumber(element?.rotation);
+      const layer = finiteNumber(element?.layer) ?? 0;
+      const locked = element?.locked === true;
       if (!id || !PHYSICAL_ELEMENT_TYPES[type] || x === null || y === null || rotation === null) {
         throw new Error('La distribución guardada contiene elementos físicos no válidos. No se modificó ningún dato.');
       }
-      return { id, type, x, y, rotation: normalizeRotation(rotation) };
+      return { id, type, x, y, rotation: normalizeRotation(rotation), layer, locked };
     }) : [];
     return {
       id: escapeText(proposal.id),
@@ -231,7 +233,9 @@ function serializeDistribution(placementState, tableIds, elements) {
         type: element.type,
         x: Math.round(element.x * 100) / 100,
         y: Math.round(element.y * 100) / 100,
-        rotation: normalizeRotation(element.rotation)
+        rotation: normalizeRotation(element.rotation),
+        layer: Number(element.layer || 0),
+        locked: element.locked === true
       }))
     }]
   };
@@ -297,6 +301,8 @@ function renderPhysicalElement(element) {
   node.tabIndex = 0;
   node.setAttribute('role', 'button');
   node.setAttribute('aria-label', definition.label);
+  node.classList.toggle('is-locked', element.locked === true);
+  node.style.zIndex = String(10 + Number(element.layer || 0));
   node.style.left = `${element.x}px`;
   node.style.top = `${element.y}px`;
   node.style.width = `${definition.width}px`;
@@ -308,6 +314,8 @@ function renderPhysicalElement(element) {
 }
 
 function applyElementPlacement(node, element) {
+  node.classList.toggle('is-locked', element.locked === true);
+  node.style.zIndex = String(10 + Number(element.layer || 0));
   node.style.left = `${element.x}px`;
   node.style.top = `${element.y}px`;
   node.style.transform = `rotate(${normalizeRotation(element.rotation)}deg)`;
@@ -326,6 +334,8 @@ function renderElementInspector(root, element) {
   root.querySelector('[data-distribution-selected-guests]').hidden = true;
   root.querySelector('[data-distribution-element-note]').hidden = false;
   root.querySelector('[data-distribution-element-actions]').hidden = false;
+  const lockButton = root.querySelector('[data-distribution-toggle-lock]');
+  lockButton.textContent = element.locked ? 'Desbloquear' : 'Bloquear';
 }
 
 function setupCamera(root, world, worldSize) {
@@ -571,7 +581,7 @@ async function mountDistribucion(context) {
     const createElement = (type, x, y, rotation = 0) => {
       if (!PHYSICAL_ELEMENT_TYPES[type]) return null;
       elementSequence += 1;
-      const element = { id: `element_${elementSequence}`, type, x, y, rotation: normalizeRotation(rotation) };
+      const element = { id: `element_${elementSequence}`, type, x, y, rotation: normalizeRotation(rotation), layer: physicalElements.length, locked: false };
       physicalElements.push(element);
       const node = renderPhysicalElement(element);
       world.append(node);
@@ -582,7 +592,7 @@ async function mountDistribucion(context) {
     const duplicateSelectedElement = () => {
       if (!canEdit || !selectedElementId) return;
       const source = physicalElements.find((item) => item.id === selectedElementId);
-      if (!source) return;
+      if (!source || source.locked) return;
       const duplicate = createElement(source.type, source.x + 24, source.y + 24, source.rotation);
       if (!duplicate) return;
       selectElement(duplicate.id);
@@ -592,6 +602,8 @@ async function mountDistribucion(context) {
 
     const deleteSelectedElement = () => {
       if (!canEdit || !selectedElementId) return;
+      const selected = physicalElements.find((item) => item.id === selectedElementId);
+      if (selected?.locked) return;
       const index = physicalElements.findIndex((item) => item.id === selectedElementId);
       if (index < 0) return;
       const [removed] = physicalElements.splice(index, 1);
@@ -625,7 +637,7 @@ async function mountDistribucion(context) {
       let moved = false;
 
       node.addEventListener('pointerdown', (event) => {
-        if (event.button !== 0 || !canEdit) return;
+        if (event.button !== 0 || !canEdit || element.locked) return;
         event.stopPropagation();
         const placement = placementState.get(node.dataset.tableId);
         if (!placement) return;
@@ -680,7 +692,7 @@ async function mountDistribucion(context) {
         selectTable(node.dataset.tableId);
         return;
       }
-      if (!canEdit || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+      if (!canEdit || element.locked || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
       const placement = placementState.get(node.dataset.tableId);
       if (!placement) return;
       event.preventDefault();
@@ -792,8 +804,39 @@ async function mountDistribucion(context) {
       };
     });
 
+    const updateElementLayer = (direction) => {
+      if (!canEdit || !selectedElementId) return;
+      const element = physicalElements.find((item) => item.id === selectedElementId);
+      const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
+      if (!element || !node) return;
+      const layers = physicalElements.map((item) => Number(item.layer || 0));
+      element.layer = direction > 0 ? Math.max(0, ...layers) + 1 : Math.min(0, ...layers) - 1;
+      applyElementPlacement(node, element);
+      markDirty();
+    };
+
+    const toggleElementLock = () => {
+      if (!canEdit || !selectedElementId) return;
+      const element = physicalElements.find((item) => item.id === selectedElementId);
+      const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
+      if (!element || !node) return;
+      element.locked = !element.locked;
+      applyElementPlacement(node, element);
+      renderElementInspector(root, element);
+      markDirty();
+    };
+
+    root.querySelector('[data-distribution-show-tables]').onchange = (event) => {
+      world.classList.toggle('hide-tables', !event.currentTarget.checked);
+    };
+    root.querySelector('[data-distribution-show-elements]').onchange = (event) => {
+      world.classList.toggle('hide-elements', !event.currentTarget.checked);
+    };
     root.querySelector('[data-distribution-rotate-left]').onclick = () => rotateSelected(-ROTATION_STEP);
     root.querySelector('[data-distribution-rotate-right]').onclick = () => rotateSelected(ROTATION_STEP);
+    root.querySelector('[data-distribution-bring-front]').onclick = () => updateElementLayer(1);
+    root.querySelector('[data-distribution-send-back]').onclick = () => updateElementLayer(-1);
+    root.querySelector('[data-distribution-toggle-lock]').onclick = toggleElementLock;
     root.querySelector('[data-distribution-duplicate-element]').onclick = duplicateSelectedElement;
     root.querySelector('[data-distribution-delete-element]').onclick = deleteSelectedElement;
 
