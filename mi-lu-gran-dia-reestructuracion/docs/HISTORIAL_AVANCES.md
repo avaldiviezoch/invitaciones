@@ -219,3 +219,11 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - El panel lateral mantiene únicamente el detalle/listado de incidencias bajo “DETALLE DE VALIDACIÓN”.
 - En pantallas medianas los indicadores ocupan una fila propia y en móvil se organizan como tres KPIs más un total en ancho completo.
 - No se modificaron reglas espaciales, geometría, persistencia, mesas, sillas, invitados, Firebase, Firestore, Storage ni IDs.
+
+
+## 2026-09-24 — Distribución: retirar encabezado redundante de la toolbar
+- Se retiró visualmente el bloque “Plano de mesas / Distribución proyectada · aún sin guardar” de la barra superior.
+- Se conserva el mismo nodo data-distribution-status como texto oculto accesible para no romper la lógica existente ni los mensajes de estado.
+- La barra superior comienza directamente con switches de capas e indicadores de validación.
+- En modo Presentación se oculta el bloque principal de switches/indicadores junto con los demás controles no esenciales.
+- No se modificaron acciones, persistencia, geometría, Firebase, Firestore, Storage ni IDs.
