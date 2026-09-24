@@ -70,12 +70,19 @@ function createTablesController(api) {
   }
 
   function assertSeatIdentityPreserved(table, nextSeats, occupiedGuests) {
+    const previousSeats = Array.isArray(table?.seats) ? table.seats : [];
+    previousSeats.forEach((seat, index) => {
+      const previousSeatId = text(seat?.id);
+      const nextSeatId = text(nextSeats?.[index]?.id);
+      if (previousSeatId && nextSeatId !== previousSeatId) {
+        throw new Error(`No se actualizó ${text(table.name) || 'la mesa'} porque cambiaría la identidad de la silla ${index + 1}.`);
+      }
+    });
     occupiedGuests.forEach((guest) => {
       const seatIndex = Number(guest.seatNumber) - 1;
-      const previousSeatId = text(table?.seats?.[seatIndex]?.id);
-      const nextSeatId = text(nextSeats?.[seatIndex]?.id);
-      if (!previousSeatId || !nextSeatId || previousSeatId !== nextSeatId || text(guest.seatId) !== previousSeatId) {
-        throw new Error(`No se actualizó ${text(table.name) || 'la mesa'} porque cambiaría la identidad de una silla ocupada.`);
+      const canonicalSeatId = text(nextSeats?.[seatIndex]?.id);
+      if (!canonicalSeatId || text(guest.seatId) !== canonicalSeatId) {
+        throw new Error(`No se actualizó ${text(table.name) || 'la mesa'} porque la asignación de ${text(guest.name) || 'un invitado'} no coincide con su silla canónica.`);
       }
     });
   }
