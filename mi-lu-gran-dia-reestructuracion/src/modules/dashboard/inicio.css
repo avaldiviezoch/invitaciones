@@ -1159,7 +1159,7 @@ body.menu-open .menu-button svg {
 .app-nav-account-avatar>img{position:absolute;inset:0;width:100%;height:100%;display:none;object-fit:cover}.app-nav-account-avatar>img.show{display:block}.app-nav-account-avatar>img.show+span{display:none}
 .app-nav-account strong,.app-nav-account small{display:block;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.app-nav-account strong{font-size:11px}.app-nav-account small{margin-top:2px;font-size:8px;color:#999087}
 .module-stage{min-height:100dvh;padding:114px 36px 36px;overflow:visible}
-.module-loader{position:fixed;z-index:71;inset:100px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:rgba(247,245,241,.96);backdrop-filter:blur(12px);text-align:center;opacity:1;visibility:visible;transition:opacity .38s ease,visibility .38s ease}
+.module-loader{position:fixed;z-index:71;inset:100px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:rgba(247,245,241,.96);backdrop-filter:blur(12px);text-align:center;opacity:1;visibility:visible;transition:opacity .18s ease,visibility .18s ease}
 .module-loader[hidden]{display:none}
 .module-loader.is-leaving{opacity:0;visibility:hidden;pointer-events:none}
 .module-loader-mark{position:relative;width:86px;height:86px;display:grid;place-items:center;margin-bottom:22px}
@@ -1173,8 +1173,15 @@ body.menu-open .menu-button svg {
 @keyframes mgdLoaderSpin{to{transform:rotate(360deg)}}
 @keyframes mgdLoaderDot{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}.checklist-review{width:min(980px,100%);min-height:360px;margin:40px auto;padding:42px;border:1px solid rgba(73,77,59,.12);border-radius:24px;background:#fbfaf7;box-shadow:0 22px 60px rgba(57,58,48,.08)}.checklist-review>span{color:#7f8962;font-size:9px;font-weight:900;letter-spacing:.18em}.checklist-review h2{margin:9px 0 10px;font-family:Georgia,serif;font-size:34px;font-weight:500}.checklist-review p{max-width:620px;margin:0;color:#77796f;font-size:13px;line-height:1.7}
 @media(max-width:1050px){.app-nav-home{min-width:72px;width:72px;padding:0;border-right:0}.mgd-brand-copy{display:none}.app-nav-modules{justify-content:flex-start}.app-nav-account{min-width:62px;width:62px;padding-left:8px}.app-nav-account div{display:none}}
-@media (max-width:700px), (max-height:520px) and (pointer:coarse) and (max-width:1000px){
-html.module-route,.module-route body{height:100dvh;min-height:100dvh;background:#fff}
+
+
+.app-nav-account-wrap{position:relative;min-width:190px;flex:0 0 auto;border-left:1px solid rgba(80,67,56,.1);padding-left:14px}
+.app-nav-account{width:100%;min-width:0;height:58px;padding:5px 7px;display:grid;grid-template-columns:44px 1fr 18px;align-items:center;gap:9px;border:0;border-radius:17px;background:transparent;color:inherit;text-align:left;cursor:pointer}
+.app-nav-account:hover{background:rgba(108,117,88,.06)}.app-nav-account-copy strong,.app-nav-account-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.app-nav-account-copy strong{font-size:11px}.app-nav-account-copy small{margin-top:2px;font-size:8px;color:#999087}.app-nav-chevron{font-size:13px;font-weight:700;color:#756e67}
+.app-nav-account-popover{box-sizing:border-box;display:none;position:absolute;right:0;top:70px;width:240px;padding:14px;border:1px solid rgba(80,67,56,.1);border-radius:18px;background:rgba(255,255,255,.96);box-shadow:0 20px 55px rgba(55,45,37,.17);backdrop-filter:blur(20px);color:#413d38;z-index:1000}.app-nav-account-wrap.is-open .app-nav-account-popover{display:block}.app-nav-account-popover>strong,.app-nav-account-popover>span{display:block}.app-nav-account-popover>strong{font-size:12px}.app-nav-account-popover>span{margin:3px 0 11px;color:#999087;font-size:9px}.app-nav-wedding,.app-nav-logout{box-sizing:border-box;width:100%;margin-top:6px;padding:10px;border:0;border-radius:11px;background:#f4f1ec;color:#615b54;font-size:9px;font-weight:750;cursor:pointer}.app-nav-wedding{text-align:left}.app-nav-wedding span,.app-nav-wedding strong,.app-nav-wedding small{display:block}.app-nav-wedding span,.app-nav-wedding small{font-size:8px;color:#999087}.app-nav-wedding strong{margin:2px 0;font-size:9px}
+@media(max-width:1050px){.app-nav-account-wrap{min-width:62px;width:62px;padding-left:8px}.app-nav-account-copy,.app-nav-chevron{display:none}.app-nav-account{grid-template-columns:44px;width:52px}}
+@media(max-width:980px){
+html.module-route,.module-route body{background:#fff}
 body.module-open.is-module-loading .app-mobile-header,
 body.module-open.is-module-loading .app-module-nav,
 body.module-open.is-module-loading .app-mobile-nav-backdrop{opacity:0;visibility:hidden;pointer-events:none}
@@ -1197,7 +1204,7 @@ body.module-open.is-module-loading .module-stage>[data-module-view]{visibility:h
 .app-mobile-nav-backdrop{position:fixed;z-index:72;top:calc(70px + env(safe-area-inset-top));left:0;right:0;bottom:0;display:block;padding:0;border:0;background:rgba(49,44,39,.18);backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);opacity:0;visibility:hidden;pointer-events:none;transition:opacity .22s ease,visibility .22s ease}
 .module-workspace.is-mobile-menu-open .app-mobile-nav-backdrop{opacity:1;visibility:visible;pointer-events:auto}
 
-.app-module-nav{top:calc(72px + env(safe-area-inset-top));left:8px;right:auto;bottom:8px;width:min(292px,calc(100vw - 24px));height:auto;padding:11px;display:flex;flex-direction:column;align-items:stretch;gap:7px;border-radius:20px;overflow-y:auto;overflow-x:hidden;animation:none;transform:translate3d(calc(-100% - 20px),0,0);opacity:0;visibility:hidden;pointer-events:none;transition:transform .28s cubic-bezier(.2,.75,.2,1),opacity .2s ease,visibility .28s ease}
+.app-module-nav{top:calc(72px + env(safe-area-inset-top));left:8px;right:auto;bottom:max(8px,env(safe-area-inset-bottom));width:min(292px,calc(100vw - 24px));height:auto;padding:11px;display:flex;flex-direction:column;align-items:stretch;gap:7px;border-radius:20px;overflow-y:auto;overflow-x:hidden;animation:none;transform:translate3d(calc(-100% - 20px),0,0);opacity:0;visibility:hidden;pointer-events:none;transition:transform .28s cubic-bezier(.2,.75,.2,1),opacity .2s ease,visibility .28s ease}
 .module-workspace.is-mobile-menu-open .app-module-nav{transform:translate3d(0,0,0);opacity:1;visibility:visible;pointer-events:auto}
 .app-nav-home{min-width:0;width:100%;height:60px;padding:5px 7px;justify-content:flex-start;border-right:0;border-bottom:1px solid rgba(80,67,56,.1)}
 .mgd-brand-mark{width:44px;height:44px;flex-basis:44px;font-size:12px}
@@ -1217,28 +1224,11 @@ body.module-open.is-module-loading .module-stage>[data-module-view]{visibility:h
 .app-nav-chevron{display:inline}
 .app-nav-account strong,.app-nav-account small{max-width:180px}
 .app-nav-account-popover{position:static;width:100%;margin-top:7px;max-height:none;overflow:visible}
-.module-workspace{height:100dvh;min-height:100dvh;background:#fff}.module-stage{min-height:100dvh;padding:calc(76px + env(safe-area-inset-top)) 12px 0;background:#fff;overflow:visible}
-.checklist-review{min-height:calc(100dvh - 94px - env(safe-area-inset-top));margin:0;padding:26px 20px;border-radius:20px}
+.module-workspace{background:#fff}.module-stage{min-height:100%;padding:calc(76px + env(safe-area-inset-top)) 12px max(12px,env(safe-area-inset-bottom));background:#fff;overflow:visible}
+.checklist-review{min-height:calc(100% - 94px - env(safe-area-inset-top));margin:0;padding:26px 20px;border-radius:20px}
 .checklist-review h2{font-size:28px}
 }
 @media(prefers-reduced-motion:reduce){.app-module-nav,.app-mobile-header,.app-mobile-nav-backdrop{animation:none;transition:none}.app-nav-item{transition:none}.module-stage{transition:none}.module-loader-mark i,.module-loader-dots i{animation:none}.module-loader{transition:none}}
-
-.app-nav-account-wrap{position:relative;min-width:190px;flex:0 0 auto;border-left:1px solid rgba(80,67,56,.1);padding-left:14px}
-.app-nav-account{width:100%;min-width:0;height:58px;padding:5px 7px;display:grid;grid-template-columns:44px 1fr 18px;align-items:center;gap:9px;border:0;border-radius:17px;background:transparent;color:inherit;text-align:left;cursor:pointer}
-.app-nav-account:hover{background:rgba(108,117,88,.06)}.app-nav-account-copy strong,.app-nav-account-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.app-nav-account-copy strong{font-size:11px}.app-nav-account-copy small{margin-top:2px;font-size:8px;color:#999087}.app-nav-chevron{font-size:13px;font-weight:700;color:#756e67}
-.app-nav-account-popover{box-sizing:border-box;display:none;position:absolute;right:0;top:70px;width:240px;padding:14px;border:1px solid rgba(80,67,56,.1);border-radius:18px;background:rgba(255,255,255,.96);box-shadow:0 20px 55px rgba(55,45,37,.17);backdrop-filter:blur(20px);color:#413d38;z-index:1000}.app-nav-account-wrap.is-open .app-nav-account-popover{display:block}.app-nav-account-popover>strong,.app-nav-account-popover>span{display:block}.app-nav-account-popover>strong{font-size:12px}.app-nav-account-popover>span{margin:3px 0 11px;color:#999087;font-size:9px}.app-nav-wedding,.app-nav-logout{box-sizing:border-box;width:100%;margin-top:6px;padding:10px;border:0;border-radius:11px;background:#f4f1ec;color:#615b54;font-size:9px;font-weight:750;cursor:pointer}.app-nav-wedding{text-align:left}.app-nav-wedding span,.app-nav-wedding strong,.app-nav-wedding small{display:block}.app-nav-wedding span,.app-nav-wedding small{font-size:8px;color:#999087}.app-nav-wedding strong{margin:2px 0;font-size:9px}
-@media(max-width:1050px){.app-nav-account-wrap{min-width:62px;width:62px;padding-left:8px}.app-nav-account-copy,.app-nav-chevron{display:none}.app-nav-account{grid-template-columns:44px;width:52px}}
-@media (max-width:700px), (max-height:520px) and (pointer:coarse) and (max-width:1000px){
-  .app-module-nav{z-index:73}
-  .app-nav-account-wrap{position:relative;min-width:0;width:100%;margin-top:auto;padding:7px 0 0;border-left:0;border-top:1px solid rgba(80,67,56,.1);overflow:visible}
-  .app-nav-account{min-width:0;width:100%;height:52px;padding:4px 6px;display:grid;grid-template-columns:40px minmax(0,1fr) 18px;align-items:center;gap:8px;border-left:0;border-top:0}
-  .app-nav-account-avatar{width:38px;height:38px}
-  .app-nav-account-copy{display:block}
-  .app-nav-chevron{display:inline}
-  .app-nav-account strong,.app-nav-account small{max-width:180px}
-  .app-nav-account-popover{position:static;right:auto;top:auto;width:100%;margin-top:7px;max-height:none;overflow:visible}
-}
-
 
 /* Gestor de accesos: una sola interfaz sobre los miembros e invitaciones reales de Firebase. */
 .access-manager{position:fixed;inset:0;z-index:1100;display:none;place-items:center;padding:20px}
