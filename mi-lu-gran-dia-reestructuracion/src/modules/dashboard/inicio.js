@@ -574,6 +574,7 @@ let moduleLoadEpoch = 0;
 
 function setModuleLoading(loading) {
   if (!moduleLoader) return;
+  document.body.classList.toggle('is-module-loading', loading);
   if (loading) {
     moduleLoader.hidden = false;
     moduleLoader.classList.remove('is-leaving');
