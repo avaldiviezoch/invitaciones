@@ -1,7 +1,7 @@
 import {
-  readPlannerStorageKey,
+  readPlannerStorageKeys,
   writePlannerStorageKeys
-} from '../../services/planner-cloud.js?v=3';
+} from '../../services/planner-cloud.js?v=4';
 
 const GUEST_STORAGE_KEY = 'planificador_bodas_invitados_v1';
 const SHARED_STORAGE_KEY = 'planificador_bodas_datos_compartidos_v1';
@@ -91,10 +91,9 @@ function buildSharedState(canonical) {
 
 async function loadInvitadosSnapshot(context) {
   if (!context?.id) throw new Error('No hay una boda activa.');
-  const [guestValue, sharedValue] = await Promise.all([
-    readPlannerStorageKey(context, GUEST_STORAGE_KEY),
-    readPlannerStorageKey(context, SHARED_STORAGE_KEY)
-  ]);
+  const values = await readPlannerStorageKeys(context, [GUEST_STORAGE_KEY, SHARED_STORAGE_KEY]);
+  const guestValue = values[GUEST_STORAGE_KEY];
+  const sharedValue = values[SHARED_STORAGE_KEY];
   return {
     canonical: normalizeGuestState(guestValue),
     shared: normalizeSharedState(sharedValue)
