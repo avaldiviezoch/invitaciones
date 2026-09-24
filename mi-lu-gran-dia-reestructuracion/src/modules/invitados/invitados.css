@@ -361,6 +361,12 @@
 .guest-card{position:relative}
 .guest-card-action{position:absolute;top:12px;right:12px;width:32px;height:32px;border:1px solid #e5dfda;border-radius:10px;background:#fff;color:#6f7760;font-size:15px;cursor:pointer}
 .guest-card.is-editable{padding-right:58px}
+@media(max-width:1100px){
+.table-seat-label{left:var(--label-x-medium);top:var(--label-y-medium)}
+.tables-workspace{grid-template-columns:1fr}
+.tables-guests-panel{position:relative;top:auto}
+.tables-guest-list{max-height:290px}
+}
 @media(max-width:900px){
 .tables-overview{grid-template-columns:repeat(2,1fr)}
 .tables-overview article{border-bottom:1px solid #e8e2dd}
@@ -487,10 +493,4 @@
 .guest-name-row{align-items:flex-start;flex-wrap:wrap}
 .guest-card h3{font-size:16px;white-space:normal}
 .guest-assignment{padding-left:48px;text-align:left}
-}
-@media(max-width:1100px){
-.table-seat-label{left:var(--label-x-medium);top:var(--label-y-medium)}
-.tables-workspace{grid-template-columns:1fr}
-.tables-guests-panel{position:relative;top:auto}
-.tables-guest-list{max-height:290px}
 }
