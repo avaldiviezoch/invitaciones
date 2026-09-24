@@ -526,9 +526,16 @@ async function mountDistribucion(context) {
       }
       void mountDistribucion(context);
     };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden || dirty || saving) return;
+      void mountDistribucion(context);
+    };
     window.addEventListener('migrandia:datachange', handleCanonicalChange);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     activeDistributionCleanup = () => {
       window.removeEventListener('migrandia:datachange', handleCanonicalChange);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
 
     updateSaveState();
