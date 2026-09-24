@@ -1453,9 +1453,12 @@ async function mountDistribucion(context) {
     let measureStart = null;
     let measuring = false;
     const drawingLayer = root.querySelector('[data-distribution-drawing-layer]');
-    const drawAreaButton = root.querySelector('[data-distribution-draw-area]');
+    const drawAreaButtons = [...root.querySelectorAll('[data-distribution-draw-area]')];
     let drawingPoints = [];
     let drawingArea = false;
+    let drawingType = 'zone';
+
+    const drawingLabel = (type) => PHYSICAL_ELEMENT_TYPES[type]?.label || 'Área libre';
 
     const stopMeasuring = () => {
       measuring = false;
@@ -1491,8 +1494,10 @@ async function mountDistribucion(context) {
       root.classList.remove('is-drawing-area');
       drawingPoints = [];
       drawingLayer.replaceChildren();
-      drawAreaButton.classList.remove('is-active');
-      drawAreaButton.textContent = 'Dibujar área libre';
+      drawAreaButtons.forEach((button) => {
+        button.classList.remove('is-active');
+        button.textContent = button.dataset.defaultLabel || button.textContent;
+      });
       measureHint.hidden = true;
     };
 
@@ -1510,7 +1515,7 @@ async function mountDistribucion(context) {
       const maxY = Math.max(...ys);
       if (maxX - minX < PIXELS_PER_METER * MIN_ELEMENT_METERS || maxY - minY < PIXELS_PER_METER * MIN_ELEMENT_METERS) return;
       rememberEdit();
-      const element = createElement('zone', minX, minY);
+      const element = createElement(drawingType, minX, minY);
       if (!element) return;
       element.width = maxX - minX;
       element.height = maxY - minY;
@@ -1526,21 +1531,28 @@ async function mountDistribucion(context) {
       stopDrawingArea();
     };
 
-    drawAreaButton.onclick = () => {
-      if (drawingArea) {
-        stopDrawingArea();
-        return;
-      }
-      stopMeasuring();
-      clearSelection();
-      drawingArea = true;
-      root.classList.add('is-drawing-area');
-      drawingPoints = [];
-      drawAreaButton.classList.add('is-active');
-      drawAreaButton.textContent = 'Cancelar dibujo';
-      measureHint.textContent = 'Marca al menos 3 puntos · toca el primer punto para cerrar';
-      measureHint.hidden = false;
-    };
+    drawAreaButtons.forEach((button) => {
+      button.dataset.defaultLabel = button.textContent;
+      button.onclick = () => {
+        const nextType = button.dataset.distributionDrawArea || 'zone';
+        if (!PHYSICAL_ELEMENT_TYPES[nextType]) return;
+        if (drawingArea) {
+          const switchingType = drawingType !== nextType;
+          stopDrawingArea();
+          if (!switchingType) return;
+        }
+        stopMeasuring();
+        clearSelection();
+        drawingType = nextType;
+        drawingArea = true;
+        root.classList.add('is-drawing-area');
+        drawingPoints = [];
+        button.classList.add('is-active');
+        button.textContent = 'Cancelar dibujo';
+        measureHint.textContent = `${drawingLabel(drawingType)} · marca al menos 3 puntos · toca el primer punto para cerrar`;
+        measureHint.hidden = false;
+      };
+    });
 
     measureButton.onclick = () => {
       if (measuring) {
