@@ -88,9 +88,6 @@ function applyWeddingContext(context) {
   $('activeWeddingName').textContent = name;
   $('mainWeddingTitle').textContent = name;
   $('appNavWeddingName').textContent = name;
-  $('appMobileWeddingName').textContent = context?.name
-    ? (/^la boda de\b/i.test(name) ? name : `La boda de ${name}`)
-    : 'Mi boda';
   $('appNavRole').textContent = capabilities.label || 'Mi acceso';
   $('appNavPopoverWedding').textContent = name;
   $('shareWeddingButton').hidden = !capabilities.canManageTeam;
