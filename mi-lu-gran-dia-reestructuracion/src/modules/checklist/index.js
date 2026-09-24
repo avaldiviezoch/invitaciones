@@ -509,9 +509,11 @@ async function mountChecklist(context) {
     responsibleFilter = 'all';
     priorityFilter = 'all';
     render();
+    return true;
   } catch (error) {
     if (epoch !== mountEpoch) return;
     root.innerHTML = `<div class="ck-error"><strong>No se pudo cargar el Checklist</strong><span>${esc(error?.message || 'Revisa la conexión con Firebase.')}</span></div>`;
+    return false;
   }
 }
 
