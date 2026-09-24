@@ -177,3 +177,10 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - En celular vertical el visor adopta formato horizontal 16:9, manteniendo el plano full bleed, y muestra debajo el mensaje “Gira tu celular” para sugerir una vista de trabajo más amplia. En horizontal el mensaje desaparece y el visor aprovecha la altura disponible.
 - La cámara vuelve a encajar automáticamente cuando cambia el tamaño/orientación de la ventana y libera su listener al desmontar el módulo.
 - Se mantuvieron intactos el lienzo lógico 1448 × 1086, la escala 32 px/m, Firebase, Firestore, Storage, usuarios, IDs y el payload persistente de Distribución.
+
+
+## 2026-09-24 — Distribución: mayor altura del plano en desktop
+- Se amplió únicamente el visor del plano en escritorio amplio; no se tocaron mesas, sillas, etiquetas ni persistencia.
+- Desde 1200 px de ancho el visor adopta relación 4:3, igual al lienzo físico 1448 × 1086, con mínimo de 620 px.
+- Esto permite que Casa Acapulco se extienda hacia abajo y reduzca el recorte vertical del modo full bleed, manteniendo el mismo sistema de coordenadas y la misma escala física.
+- Tablet y móvil conservan sus reglas responsive anteriores, incluido el modo horizontal sugerido en celular.
