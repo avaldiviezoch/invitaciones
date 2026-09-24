@@ -306,7 +306,9 @@ function polygonSelfIntersects(points) {
 }
 
 function capacityOf(table) {
-  return Array.isArray(table?.seats) ? table.seats.length : 0;
+  const seats = Array.isArray(table?.seats) ? table.seats.length : 0;
+  const declared = Number(table?.capacity || 0);
+  return Math.max(seats, Number.isFinite(declared) ? declared : 0, 0);
 }
 
 function tableName(table, index) {
