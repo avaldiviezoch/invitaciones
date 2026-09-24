@@ -1831,7 +1831,12 @@ async function mountDistribucion(context) {
       referencePreference = await readDistributionBackgroundPreference(referenceScopeId);
       await refreshReferenceCatalog(referencePreference.backgroundId);
     } catch (error) {
-      console.warn('El catálogo local de planos no está disponible; Distribución continúa sin fondo de referencia.', error);
+      console.warn('El catálogo local de planos no está disponible; se usa Casa Acapulco como fondo base.', error);
+      referencePreference = {
+        backgroundId: DEFAULT_BACKGROUND_ID,
+        visible: true,
+        opacity: 0.45
+      };
       referenceCatalog.replaceChildren();
       const option = document.createElement('option');
       option.value = DEFAULT_BACKGROUND_ID;
@@ -1840,7 +1845,9 @@ async function mountDistribucion(context) {
       referenceCatalog.value = DEFAULT_BACKGROUND_ID;
       referenceRemove.disabled = true;
       referenceRemove.textContent = 'Casa Acapulco · incluido';
-      world.classList.remove('has-reference-image');
+      const fallbackBackground = defaultDistributionBackground();
+      world.style.setProperty('--distribution-reference-image', `url("${fallbackBackground.source}")`);
+      world.classList.add('has-reference-image');
     }
     if (epoch !== mountEpoch || !root.isConnected) return;
     referenceToggle.checked = referencePreference.visible;
