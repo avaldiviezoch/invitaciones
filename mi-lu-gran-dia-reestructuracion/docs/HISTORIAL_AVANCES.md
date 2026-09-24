@@ -407,3 +407,13 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - reconcileCanonicalTables actualiza también guestIndex para que redibujos posteriores usen asignaciones vigentes.
 - Al volver a una pestaña visible se reconcilian mesas/invitados en caliente en lugar de remontar Distribución innecesariamente.
 - Se mantienen una sola fuente Firebase, los mismos IDs, claves, placements y contratos de datos.
+
+
+## 2026-09-24 — Distribución: sincronización en caliente y nombres apagados por defecto
+- El switch Nombres/Etiquetas inicia apagado y se aplica hide-guest-labels desde el primer render.
+- Las actualizaciones remotas de planificador_bodas_distribucion_v1 ya no llaman mountDistribucion().
+- applyRemoteDistributionState() actualiza propuestas, placements x/y/rotation y elementos sobre el DOM actual.
+- Se preservan cámara, zoom, viewport y selección cuando siguen siendo válidos.
+- Los cambios canónicos locales de Invitados se reconcilian mediante reconcileCanonicalTables() en lugar de remontar el módulo.
+- Se elimina el remonte posterior al autoguardado y el fallback de remonte ante errores ordinarios de eventos table-*.
+- Solo cambios estructurales reales del conjunto de mesas (crear/eliminar/reordenar IDs) conservan la posibilidad de reconstrucción completa.

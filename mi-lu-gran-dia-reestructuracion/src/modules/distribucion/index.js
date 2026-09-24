@@ -13,7 +13,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=46', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=47', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -1059,19 +1059,7 @@ async function mountDistribucion(context) {
       } finally {
         saving = false;
         updateSaveState();
-        if (
-          queuedRemoteDistributionSignature
-          && queuedRemoteDistributionSignature !== lastPersistedSignature
-          && !dirty
-          && !canonicalChanged
-        ) {
-          queuedRemoteDistributionSignature = '';
-          window.setTimeout(() => {
-            if (!dirty && !saving && !canonicalChanged) void mountDistribucion(context);
-          }, 120);
-        } else {
-          queuedRemoteDistributionSignature = '';
-        }
+        queuedRemoteDistributionSignature = '';
       }
     }
 
@@ -2072,6 +2060,11 @@ async function mountDistribucion(context) {
     root.querySelector('[data-distribution-show-guest-labels]').onchange = (event) => {
       applyVisibilityLayer('hide-guest-labels', event.currentTarget.checked, 'labels');
     };
+    applyVisibilityLayer(
+      'hide-guest-labels',
+      root.querySelector('[data-distribution-show-guest-labels]').checked,
+      'labels'
+    );
     root.querySelector('[data-distribution-show-elements]').onchange = (event) => {
       applyVisibilityLayer('hide-elements', event.currentTarget.checked, 'element');
     };
@@ -2289,7 +2282,7 @@ async function mountDistribucion(context) {
       if (source.startsWith('table-')) {
         void reconcileCanonicalTables().catch((error) => {
           console.error('No se pudo sincronizar Mesas con Distribución:', error);
-          if (!dirty && !saving) void mountDistribucion(context);
+          status.textContent = 'No se pudo actualizar Mesas en este momento';
         });
         return;
       }
@@ -2300,7 +2293,9 @@ async function mountDistribucion(context) {
         status.textContent = 'Invitados cambiaron · se actualizará al terminar la sincronización';
         return;
       }
-      void mountDistribucion(context);
+      void reconcileCanonicalTables().catch((error) => {
+        console.error('No se pudo reconciliar Invitados con Distribución:', error);
+      });
     };
 
     const handleVisibilityChange = () => {
@@ -2320,6 +2315,83 @@ async function mountDistribucion(context) {
       });
     };
 
+    const applyRemoteDistributionState = (remoteState) => {
+      if (!remoteState?.proposals?.length) return false;
+
+      const incomingProposals = remoteState.proposals.map((proposal) => ({
+        ...proposal,
+        placements: proposal.placements.map((placement) => ({ ...placement })),
+        elements: proposal.elements.map((element) => ({
+          ...element,
+          points: Array.isArray(element.points)
+            ? element.points.map((point) => ({ ...point }))
+            : null
+        }))
+      }));
+
+      proposalState.splice(0, proposalState.length, ...incomingProposals);
+      activeProposalId = activeProposalOf(remoteState)?.id || incomingProposals[0].id;
+
+      const nextPlacements = placementMapFor(layout, remoteState);
+      placementState.clear();
+      nextPlacements.forEach((placement, tableId) => placementState.set(tableId, placement));
+
+      world.querySelectorAll('.distribution-table').forEach((node) => {
+        const placement = placementState.get(node.dataset.tableId);
+        if (placement) applyPlacement(node, placement);
+      });
+
+      const nextProposal = activeProposalOf(remoteState);
+      physicalElements.splice(
+        0,
+        physicalElements.length,
+        ...(nextProposal?.elements || []).map((element) => ({
+          ...element,
+          points: Array.isArray(element.points)
+            ? element.points.map((point) => ({ ...point }))
+            : null
+        }))
+      );
+      elementSequence = physicalElements.reduce((max, element) => {
+        const value = Number(String(element.id).match(/(\d+)$/)?.[1] || 0);
+        return Math.max(max, value);
+      }, 0);
+
+      world.querySelectorAll('.distribution-element').forEach((node) => node.remove());
+      physicalElements.forEach((element) => {
+        const node = renderPhysicalElement(element);
+        world.append(node);
+        bindElementInteraction(node, element);
+      });
+
+      if (selectedTableId) {
+        const entry = tableById.get(selectedTableId);
+        const placement = placementState.get(selectedTableId);
+        if (entry && placement) {
+          world.querySelector(`.distribution-table[data-table-id="${CSS.escape(selectedTableId)}"]`)?.classList.add('is-selected');
+          renderInspector(root, entry.table, entry.index, guests, placement);
+        } else {
+          clearSelection();
+        }
+      } else if (selectedElementId) {
+        const selectedElement = physicalElements.find((element) => element.id === selectedElementId);
+        if (selectedElement) {
+          world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`)?.classList.add('is-selected');
+          renderElementInspector(root, selectedElement);
+        } else {
+          clearSelection();
+        }
+      }
+
+      undoStack.length = 0;
+      redoStack.length = 0;
+      updateHistoryState();
+      refreshProposalControls();
+      refreshSpatialConflicts();
+      status.textContent = 'Distribución sincronizada';
+      return true;
+    };
+
     distributionCloudUnsubscribe = subscribePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, (remoteValue) => {
       let remoteState = null;
       try {
@@ -2336,9 +2408,9 @@ async function mountDistribucion(context) {
         return;
       }
 
-      lastPersistedSignature = remoteSignature;
-      status.textContent = 'Cambios recibidos de otro dispositivo';
-      void mountDistribucion(context);
+      if (applyRemoteDistributionState(remoteState)) {
+        lastPersistedSignature = remoteSignature;
+      }
     }, (error) => {
       console.error('No se pudo escuchar la sincronización de Distribución:', error);
     });
