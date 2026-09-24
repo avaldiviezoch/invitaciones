@@ -637,7 +637,7 @@ async function openModule(moduleId, { updateHash = true } = {}) {
       await mountInvitados(weddingContext);
     }
     if (moduleId === 'distribucion') {
-      const { mountDistribucion } = await import('../distribucion/index.js?v=45');
+      const { mountDistribucion } = await import('../distribucion/index.js?v=46');
       await mountDistribucion(weddingContext);
     }
     if (loadEpoch === moduleLoadEpoch) {
