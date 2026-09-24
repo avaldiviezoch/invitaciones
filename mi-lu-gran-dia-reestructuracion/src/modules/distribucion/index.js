@@ -1822,14 +1822,31 @@ async function mountDistribucion(context) {
       await applyReferenceBackground(available ? selectedId : DEFAULT_BACKGROUND_ID);
     };
 
-    const referencePreference = await readDistributionBackgroundPreference(referenceScopeId);
+    let referencePreference = {
+      backgroundId: DEFAULT_BACKGROUND_ID,
+      visible: true,
+      opacity: 0.45
+    };
+    try {
+      referencePreference = await readDistributionBackgroundPreference(referenceScopeId);
+      await refreshReferenceCatalog(referencePreference.backgroundId);
+    } catch (error) {
+      console.warn('El catálogo local de planos no está disponible; Distribución continúa sin fondo de referencia.', error);
+      referenceCatalog.replaceChildren();
+      const option = document.createElement('option');
+      option.value = DEFAULT_BACKGROUND_ID;
+      option.textContent = 'Casa Acapulco · por defecto';
+      referenceCatalog.append(option);
+      referenceCatalog.value = DEFAULT_BACKGROUND_ID;
+      referenceRemove.disabled = true;
+      referenceRemove.textContent = 'Casa Acapulco · incluido';
+      world.classList.remove('has-reference-image');
+    }
     if (epoch !== mountEpoch || !root.isConnected) return;
     referenceToggle.checked = referencePreference.visible;
     referenceOpacity.value = String(Math.round(referencePreference.opacity * 100));
     world.style.setProperty('--distribution-reference-opacity', String(referencePreference.opacity));
     world.classList.toggle('hide-reference-image', !referencePreference.visible);
-    await refreshReferenceCatalog(referencePreference.backgroundId);
-    if (epoch !== mountEpoch || !root.isConnected) return;
 
     referenceCatalog.onchange = async () => {
       try {
