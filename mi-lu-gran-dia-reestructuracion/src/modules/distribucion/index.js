@@ -1109,8 +1109,7 @@ async function mountDistribucion(context) {
       const canonicalTableById = (tableId) => tables.find((table) => escapeText(table?.id) === escapeText(tableId)) || null;
     const canonicalGuestById = (guestId) => guests.find((guest) => escapeText(guest?.id) === escapeText(guestId)) || null;
     const canonicalGuestAtSeat = (tableId, seatIndex) => guests.find((guest) =>
-      escapeText(guest?.tableId) === escapeText(tableId)
-      && Number(guest?.seatNumber) === seatIndex + 1
+      escapeText(guest?.tableId) === escapeText(tableId) && Number(guest?.seatNumber) === seatIndex + 1
     ) || null;
 
     const assignGuestFromDistribution = async (guestId, tableId, seatIndex) => {
@@ -1124,17 +1123,8 @@ async function mountDistribucion(context) {
         status.textContent = 'Silla ocupada · usa Mesas para intercambiar o reemplazar invitados';
         return false;
       }
-      if (
-        escapeText(guest.tableId) === escapeText(table.id)
-        && Number(guest.seatNumber) === seatIndex + 1
-        && escapeText(guest.seatId) === escapeText(seat.id)
-      ) return true;
-
-      const previous = {
-        tableId: guest.tableId,
-        seatId: guest.seatId,
-        seatNumber: guest.seatNumber
-      };
+      if (escapeText(guest.tableId) === escapeText(table.id) && Number(guest.seatNumber) === seatIndex + 1 && escapeText(guest.seatId) === escapeText(seat.id)) return true;
+      const previous = { tableId: guest.tableId, seatId: guest.seatId, seatNumber: guest.seatNumber };
       guest.tableId = table.id;
       guest.seatId = seat.id;
       guest.seatNumber = seatIndex + 1;
@@ -1143,9 +1133,7 @@ async function mountDistribucion(context) {
       try {
         validateCanonicalIntegrity(tables, guests);
         await saveInvitadosSnapshot(context, snapshot.canonical);
-        window.dispatchEvent(new CustomEvent('migrandia:datachange', {
-          detail: { weddingId: context?.id, source: 'distribution-guest-assigned' }
-        }));
+        window.dispatchEvent(new CustomEvent('migrandia:datachange', { detail: { weddingId: context?.id, source: 'distribution-guest-assigned' } }));
         status.textContent = `${escapeText(guest.name) || 'Invitado'} · ${tableName(table, tables.indexOf(table))} · silla ${seatIndex + 1}`;
         void mountDistribucion(context);
         return true;
@@ -1164,7 +1152,6 @@ async function mountDistribucion(context) {
       world.classList.remove('is-guest-dragging');
       world.querySelectorAll('.distribution-chair.is-drop-target').forEach((chair) => chair.classList.remove('is-drop-target'));
     };
-
     world.addEventListener('dragstart', (event) => {
       const source = event.target.closest('[data-guest-id]');
       if (!source || !canEdit || dirty || saving || canonicalChanged) return;
@@ -1175,7 +1162,6 @@ async function mountDistribucion(context) {
       event.dataTransfer.setData('text/plain', draggingGuestId);
       world.classList.add('is-guest-dragging');
     });
-
     world.addEventListener('dragover', (event) => {
       if (!draggingGuestId) return;
       const chair = event.target.closest('.distribution-chair');
@@ -1187,7 +1173,6 @@ async function mountDistribucion(context) {
       world.querySelectorAll('.distribution-chair.is-drop-target').forEach((node) => node.classList.remove('is-drop-target'));
       chair.classList.add('is-drop-target');
     });
-
     world.addEventListener('drop', async (event) => {
       if (!draggingGuestId) return;
       const chair = event.target.closest('.distribution-chair');
@@ -1199,7 +1184,6 @@ async function mountDistribucion(context) {
       clearGuestDropState();
       await assignGuestFromDistribution(guestId, chair.dataset.tableId, Number(chair.dataset.seatIndex));
     });
-
     world.addEventListener('dragend', () => {
       draggingGuestId = '';
       clearGuestDropState();
