@@ -572,28 +572,29 @@ const moduleWorkspace = $('moduleWorkspace');
 const appModuleNav = $('appModuleNav');
 const appMobileMenu = $('appMobileMenu');
 const appMobileNavBackdrop = $('appMobileNavBackdrop');
-const mobileModuleNavMedia = window.matchMedia('(max-width: 980px)');
+const moduleNavMedia = window.matchMedia('(max-width: 980px)');
 
-function setMobileModuleMenu(open, { moveFocus = false } = {}) {
-  const next = Boolean(open) && mobileModuleNavMedia.matches;
-  moduleWorkspace.classList.toggle('is-mobile-menu-open', next);
-  appMobileMenu?.setAttribute('aria-expanded', String(next));
-  appMobileMenu?.setAttribute('aria-label', next ? 'Cerrar navegación' : 'Abrir navegación');
-  appModuleNav?.setAttribute('aria-hidden', mobileModuleNavMedia.matches ? String(!next) : 'false');
-  appMobileNavBackdrop?.setAttribute('aria-hidden', String(!next));
-  if (!next) {
-    appNavAccountWrap.classList.remove('is-open');
-    $('appNavAccountButton').setAttribute('aria-expanded', 'false');
-  }
-  if (moveFocus) requestAnimationFrame(() => appMobileMenu?.focus({ preventScroll: true }));
+function closeModuleAccount() {
+  appNavAccountWrap.classList.remove('is-open');
+  $('appNavAccountButton').setAttribute('aria-expanded', 'false');
 }
 
-appMobileMenu?.addEventListener('click', () => {
-  setMobileModuleMenu(!moduleWorkspace.classList.contains('is-mobile-menu-open'));
+function setModuleNavigationOpen(open) {
+  const next = moduleNavMedia.matches && Boolean(open);
+  moduleWorkspace.classList.toggle('is-mobile-menu-open', next);
+  appMobileMenu.setAttribute('aria-expanded', String(next));
+  appMobileMenu.setAttribute('aria-label', next ? 'Cerrar navegación' : 'Abrir navegación');
+  appModuleNav.setAttribute('aria-hidden', moduleNavMedia.matches ? String(!next) : 'false');
+  appMobileNavBackdrop.setAttribute('aria-hidden', String(!next));
+  if (!next) closeModuleAccount();
+}
+
+appMobileMenu.addEventListener('click', () => {
+  setModuleNavigationOpen(!moduleWorkspace.classList.contains('is-mobile-menu-open'));
 });
-appMobileNavBackdrop?.addEventListener('click', () => setMobileModuleMenu(false, { moveFocus: true }));
-mobileModuleNavMedia.addEventListener?.('change', () => setMobileModuleMenu(false));
-setMobileModuleMenu(false);
+appMobileNavBackdrop.addEventListener('click', () => setModuleNavigationOpen(false));
+moduleNavMedia.addEventListener?.('change', () => setModuleNavigationOpen(false));
+setModuleNavigationOpen(false);
 
 const moduleLoader = $('moduleLoader');
 let moduleLoadEpoch = 0;
@@ -601,23 +602,8 @@ let mountedModuleId = '';
 let mountedWeddingId = '';
 
 function setModuleLoading(loading) {
-  if (!moduleLoader) return;
-  if (loading) {
-    document.body.classList.add('is-module-loading');
-    moduleLoader.hidden = false;
-    moduleLoader.classList.remove('is-leaving');
-    return;
-  }
-  if (moduleLoader.hidden) {
-    document.body.classList.remove('is-module-loading');
-    return;
-  }
-  moduleLoader.classList.add('is-leaving');
-  window.setTimeout(() => {
-    if (!moduleLoader.classList.contains('is-leaving')) return;
-    moduleLoader.hidden = true;
-    document.body.classList.remove('is-module-loading');
-  }, 200);
+  document.body.classList.toggle('is-module-loading', Boolean(loading));
+  moduleLoader.hidden = !loading;
 }
 
 const ACTIVE_MODULES = new Set(['checklist', 'presupuesto', 'proveedores', 'invitados', 'distribucion']);
@@ -685,7 +671,7 @@ async function openModule(moduleId, { updateHash = true } = {}) {
 }
 
 function closeModuleWorkspace() {
-  setMobileModuleMenu(false);
+  setModuleNavigationOpen(false);
   mountedModuleId = '';
   mountedWeddingId = '';
   document.documentElement.classList.remove('module-route');
@@ -701,7 +687,7 @@ document.querySelectorAll('[data-app-module]').forEach((button) => {
   button.addEventListener('click', () => {
     const moduleId = button.dataset.appModule;
     if (!ACTIVE_MODULES.has(moduleId)) return;
-    setMobileModuleMenu(false);
+    setModuleNavigationOpen(false);
     openModule(moduleId);
   });
 });
