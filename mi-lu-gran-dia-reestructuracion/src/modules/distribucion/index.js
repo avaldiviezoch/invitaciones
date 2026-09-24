@@ -13,7 +13,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=39', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=40', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -832,6 +832,9 @@ async function mountDistribucion(context) {
     const mobileSheetTitle = root.querySelector('[data-distribution-mobile-sheet-title]');
     const mobileSheetBody = root.querySelector('[data-distribution-mobile-sheet-body]');
     const mobileWheelToggle = root.querySelector('[data-distribution-mobile-wheel-toggle]');
+    const mobileSaveButton = root.querySelector('[data-distribution-mobile-save]');
+    const mobileSaveState = root.querySelector('[data-distribution-mobile-save-state]');
+    const mobileSaveRow = mobileSaveButton?.closest('.distribution-mobile-save-row');
     const mobileActions = [...root.querySelectorAll('[data-mobile-action]')];
     const mobileActionOrder = ['add', 'proposal', 'view', 'review', 'settings'];
     const mobileActionLabels = { add: 'Añadir', proposal: 'Propuesta', view: 'Vista', review: 'Revisar', settings: 'Ajustes' };
@@ -1002,8 +1005,28 @@ async function mountDistribucion(context) {
     const camera = setupDistributionCamera(root, world, layout);
 
     const updateSaveState = () => {
-      saveButton.disabled = !canEdit || !dirty || saving || canonicalChanged || !tables.length;
+      const saveDisabled = !canEdit || !dirty || saving || canonicalChanged || !tables.length;
+      saveButton.disabled = saveDisabled;
       saveButton.textContent = saving ? 'Guardando…' : 'Guardar distribución';
+      if (mobileSaveButton) {
+        mobileSaveButton.disabled = saveDisabled;
+        mobileSaveButton.textContent = saving ? 'Guardando…' : 'Guardar cambios';
+      }
+      if (mobileSaveState) {
+        mobileSaveState.textContent = !canEdit
+          ? 'Solo lectura'
+          : saving
+            ? 'Guardando'
+            : canonicalChanged
+              ? 'Reabrir'
+              : dirty
+                ? 'Sin guardar'
+                : hasPersistedState
+                  ? 'Guardado'
+                  : 'Sin guardar';
+      }
+      mobileSaveRow?.classList.toggle('is-dirty', dirty && !saving);
+      mobileSaveRow?.classList.toggle('is-saving', saving);
       if (!canEdit) status.textContent = 'Solo lectura · la distribución no puede modificarse';
       else if (saving) status.textContent = 'Guardando distribución…';
       else if (dirty) status.textContent = 'Cambios sin guardar';
@@ -2062,6 +2085,8 @@ async function mountDistribucion(context) {
         deleteSelectedElement();
       }
     });
+
+    if (mobileSaveButton) mobileSaveButton.onclick = () => saveButton.click();
 
     saveButton.onclick = async () => {
       if (!canEdit || !dirty || saving || canonicalChanged) {

@@ -336,3 +336,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - La cámara limita el desplazamiento para no dejar el plano perdido fuera del visor ni mostrar espacio vacío más allá de sus bordes.
 - El zoom conserva mínimo de encaje y máximo 4x.
 - Desktop permanece sin cambios.
+
+
+## 2026-09-24 — Distribución móvil: guardado compartido visible
+- Se confirma que desktop y móvil usan la misma clave planificador_bodas_distribucion_v1 en la misma copia de Firebase.
+- Mover mesas/objetos continúa siendo una edición en memoria hasta ejecutar Guardar; no se cambia este contrato.
+- Se agrega en móvil un control compacto sobre la rueda con estado Guardado / Sin guardar / Guardando / Reabrir.
+- El botón móvil “Guardar cambios” reutiliza exactamente el mismo saveButton y la misma writePlannerStorageKey; no se crea una segunda ruta de persistencia.
+- Esto hace explícito cuándo un movimiento ya está disponible para otro dispositivo tras recargar.
+- Sin cambios en Firebase, Firestore, Storage, claves, geometría ni modelo de datos.
