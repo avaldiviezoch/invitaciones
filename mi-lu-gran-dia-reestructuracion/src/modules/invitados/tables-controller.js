@@ -69,6 +69,17 @@ function createTablesController(api) {
     }));
   }
 
+  function assertSeatIdentityPreserved(table, nextSeats, occupiedGuests) {
+    occupiedGuests.forEach((guest) => {
+      const seatIndex = Number(guest.seatNumber) - 1;
+      const previousSeatId = text(table?.seats?.[seatIndex]?.id);
+      const nextSeatId = text(nextSeats?.[seatIndex]?.id);
+      if (!previousSeatId || !nextSeatId || previousSeatId !== nextSeatId || text(guest.seatId) !== previousSeatId) {
+        throw new Error(`No se actualizó ${text(table.name) || 'la mesa'} porque cambiaría la identidad de una silla ocupada.`);
+      }
+    });
+  }
+
   function tables() {
     return api.getSnapshot()?.canonical?.tables || [];
   }
@@ -615,16 +626,14 @@ function createTablesController(api) {
       return true;
     }
 
+    const nextSeats = ensureSeats(table, capacity);
+    assertSeatIdentityPreserved(table, nextSeats, occupied);
+
     table.name = name;
     table.type = type;
     table.capacity = capacity;
-    table.seats = ensureSeats(table, capacity);
+    table.seats = nextSeats;
     table.updatedAt = new Date().toISOString();
-
-    occupied.forEach((guest) => {
-      const seatIndex = Number(guest.seatNumber) - 1;
-      guest.seatId = table.seats[seatIndex]?.id || guest.seatId || '';
-    });
 
     closeTable();
     await persist(previous, 'Mesa actualizada', 'table-updated');
