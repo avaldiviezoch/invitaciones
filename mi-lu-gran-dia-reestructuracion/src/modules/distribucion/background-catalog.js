@@ -107,13 +107,10 @@ export async function readDistributionBackgroundPreference(scopeId) {
     const item = await withStore(PREFERENCES_STORE, 'readonly', (store) => requestValue(store.get(preferenceId(scopeId))));
     return {
       backgroundId: item?.backgroundId || DEFAULT_BACKGROUND_ID,
-      visible: item?.visible !== false,
-      opacity: Math.max(0.1, Math.min(1, Number(item?.opacity) || 0.45)),
-      offsetX: Number.isFinite(Number(item?.offsetX)) ? Number(item.offsetX) : 0,
-      offsetY: Number.isFinite(Number(item?.offsetY)) ? Number(item.offsetY) : 0
+      visible: item?.visible !== false
     };
   } catch (_) {
-    return { backgroundId: DEFAULT_BACKGROUND_ID, visible: true, opacity: 0.45, offsetX: 0, offsetY: 0 };
+    return { backgroundId: DEFAULT_BACKGROUND_ID, visible: true };
   }
 }
 
@@ -121,10 +118,7 @@ export async function writeDistributionBackgroundPreference(scopeId, preference)
   const value = {
     id: preferenceId(scopeId),
     backgroundId: preference?.backgroundId || DEFAULT_BACKGROUND_ID,
-    visible: preference?.visible !== false,
-    opacity: Math.max(0.1, Math.min(1, Number(preference?.opacity) || 0.45)),
-    offsetX: Number.isFinite(Number(preference?.offsetX)) ? Number(preference.offsetX) : 0,
-    offsetY: Number.isFinite(Number(preference?.offsetY)) ? Number(preference.offsetY) : 0
+    visible: preference?.visible !== false
   };
   await withStore(PREFERENCES_STORE, 'readwrite', (store) => requestValue(store.put(value)));
   return value;

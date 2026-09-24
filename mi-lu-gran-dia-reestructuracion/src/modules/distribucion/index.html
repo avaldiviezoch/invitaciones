@@ -136,13 +136,8 @@
             <select data-distribution-reference-catalog aria-label="Plano del recinto"></select>
           </label>
           <label>Agregar al catálogo local<input type="file" accept="image/png,image/jpeg,image/webp" data-distribution-reference-file></label>
-          <label>Opacidad<input type="range" min="10" max="100" step="5" value="45" data-distribution-reference-opacity></label>
-          <div class="distribution-reference-actions">
-            <button type="button" data-distribution-reference-move aria-pressed="false">Mover plano</button>
-            <button type="button" data-distribution-reference-reset-position>Restablecer posición</button>
-          </div>
           <button type="button" data-distribution-reference-remove>Eliminar plano personalizado</button>
-          <small>Casa Acapulco usa el lienzo físico 1448 × 1086 a 32 px/m. Los planos que agregues se guardan únicamente en este navegador mediante IndexedDB; no se suben a Firebase, Firestore o Storage.</small>
+          <small>El plano se muestra a tamaño completo, sin transparencia y cubriendo todo el visor. Los planos personalizados se guardan solo en este navegador.</small>
         </div>
         <label class="distribution-proximity-control">Separación entre mesas
           <select data-distribution-proximity>
@@ -176,6 +171,10 @@
         <strong>Aún no hay mesas para mostrar</strong>
         <span>Las mesas se administran desde Invitados · Mesas y sillas.</span>
       </div>
+    </div>
+    <div class="distribution-orientation-hint" aria-hidden="true">
+      <span class="distribution-orientation-phone">▭</span>
+      <div><strong>Gira tu celular</strong><small>Para ver y trabajar el plano con más espacio.</small></div>
     </div>
 
     <aside class="distribution-inspector" data-distribution-inspector>

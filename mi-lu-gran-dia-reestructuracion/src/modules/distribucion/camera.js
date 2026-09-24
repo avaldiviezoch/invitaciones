@@ -29,10 +29,12 @@ export function setupDistributionCamera(root, world, worldSize) {
   const fit = () => {
     const rect = viewport.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
-    // Paridad con Distribución original: encajar por ancho, nunca reducir automáticamente
-    // por debajo de 65 %. El exceso vertical se navega con pan.
-    const fitWidth = Math.max(0.01, (rect.width - 24) / Math.max(1, worldSize.width));
-    scale = clampScale(Math.max(0.65, Math.min(1, fitWidth)));
+    const scaleX = rect.width / Math.max(1, worldSize.width);
+    const scaleY = rect.height / Math.max(1, worldSize.height);
+    const coverScale = Math.max(scaleX, scaleY);
+    const portraitPhone = window.matchMedia('(max-width: 700px) and (orientation: portrait)').matches;
+    const fitFloor = portraitPhone ? 0.2 : MIN_ZOOM;
+    scale = Math.max(fitFloor, Math.min(MAX_ZOOM, coverScale));
     x = Math.round((rect.width - worldSize.width * scale) / 2);
     y = Math.round((rect.height - worldSize.height * scale) / 2);
     apply();
@@ -53,7 +55,6 @@ export function setupDistributionCamera(root, world, worldSize) {
     zoomAt(scale + (event.deltaY < 0 ? ZOOM_STEP : -ZOOM_STEP), event.clientX, event.clientY);
   }, { passive: false });
   viewport.addEventListener('pointerdown', (event) => {
-    if (root.classList.contains('is-moving-reference') && event.target.closest('.distribution-reference-image')) return;
     if (event.target.closest('.distribution-table,.distribution-element') || root.classList.contains('is-drawing-area')) return;
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     viewport.setPointerCapture(event.pointerId);
@@ -87,10 +88,13 @@ export function setupDistributionCamera(root, world, worldSize) {
   };
   viewport.addEventListener('pointerup', release);
   viewport.addEventListener('pointercancel', release);
+  const handleResize = () => requestAnimationFrame(fit);
+  window.addEventListener('resize', handleResize);
   requestAnimationFrame(fit);
 
   return {
     fit,
+    destroy: () => window.removeEventListener('resize', handleResize),
     clientDeltaToWorld: (delta) => delta / scale,
     clientPointToWorld: (clientX, clientY) => {
       const rect = viewport.getBoundingClientRect();

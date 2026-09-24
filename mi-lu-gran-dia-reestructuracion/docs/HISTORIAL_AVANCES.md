@@ -168,3 +168,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se eliminó la selección nativa de texto durante paneo/arrastre, que estaba mostrando nombres de invitados con resaltado azul.
 - Los nombres visibles de invitados vuelven a compactarse a 18 caracteres con el nombre completo disponible en tooltip.
 - Se recuperó una etiqueta visual clara y discreta para nombres, sin modificar la geometría física, asignaciones, IDs, Firebase, Firestore ni Storage.
+
+
+## 2026-09-24 — Distribución: plano full bleed y responsive horizontal
+- Se trabajó únicamente la presentación del plano del recinto; no se modificó geometría de mesas, sillas ni etiquetas.
+- El visor ahora usa comportamiento full bleed: el mundo 1448 × 1086 se escala con criterio cover para ocupar todo el espacio disponible del visor, centrado y sin áreas transparentes del fondo.
+- El plano de referencia se muestra siempre con opacidad 100 %. Se retiraron los controles y la persistencia local de opacidad y desplazamiento para evitar estados visuales inconsistentes y mantener una única presentación.
+- En celular vertical el visor adopta formato horizontal 16:9, manteniendo el plano full bleed, y muestra debajo el mensaje “Gira tu celular” para sugerir una vista de trabajo más amplia. En horizontal el mensaje desaparece y el visor aprovecha la altura disponible.
+- La cámara vuelve a encajar automáticamente cuando cambia el tamaño/orientación de la ventana y libera su listener al desmontar el módulo.
+- Se mantuvieron intactos el lienzo lógico 1448 × 1086, la escala 32 px/m, Firebase, Firestore, Storage, usuarios, IDs y el payload persistente de Distribución.

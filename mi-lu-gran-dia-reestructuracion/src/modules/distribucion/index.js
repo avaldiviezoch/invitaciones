@@ -2,7 +2,7 @@ import { loadInvitadosSnapshot } from '../invitados/invitados-data.js?v=4';
 import { normalizeTableShape } from '../invitados/table-geometry.js?v=4';
 import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { setupDistributionCamera } from './camera.js?v=3';
+import { setupDistributionCamera } from './camera.js?v=4';
 import {
   DEFAULT_BACKGROUND_ID,
   addDistributionBackground,
@@ -11,9 +11,9 @@ import {
   readDistributionBackgroundPreference,
   removeDistributionBackground,
   writeDistributionBackgroundPreference
-} from './background-catalog.js?v=2';
+} from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=30', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=31', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -1766,17 +1766,11 @@ async function mountDistribucion(context) {
     const referenceToggle = root.querySelector('[data-distribution-show-reference]');
     const referenceCatalog = root.querySelector('[data-distribution-reference-catalog]');
     const referenceFile = root.querySelector('[data-distribution-reference-file]');
-    const referenceOpacity = root.querySelector('[data-distribution-reference-opacity]');
     const referenceRemove = root.querySelector('[data-distribution-reference-remove]');
-    const referenceMove = root.querySelector('[data-distribution-reference-move]');
-    const referenceResetPosition = root.querySelector('[data-distribution-reference-reset-position]');
     const referenceImage = root.querySelector('[data-distribution-reference-image]');
     const referenceScopeId = context?.weddingId || context?.id || 'default';
     let referenceObjectUrl = '';
     let activeReferenceId = DEFAULT_BACKGROUND_ID;
-    let referenceOffset = { x: 0, y: 0 };
-    let referenceDrag = null;
-    const applyReferencePosition = () => { referenceImage.style.transform = `translate(${referenceOffset.x}px,${referenceOffset.y}px)`; };
 
     const releaseReferenceObjectUrl = () => {
       if (referenceObjectUrl) URL.revokeObjectURL(referenceObjectUrl);
@@ -1810,19 +1804,12 @@ async function mountDistribucion(context) {
     };
     const persistReferencePreference = () => writeDistributionBackgroundPreference(referenceScopeId, {
       backgroundId: activeReferenceId,
-      visible: referenceToggle.checked,
-      opacity: Number(referenceOpacity.value) / 100,
-      offsetX: referenceOffset.x,
-      offsetY: referenceOffset.y
+      visible: referenceToggle.checked
     }).catch(() => {});
 
     const referencePreference = await readDistributionBackgroundPreference(referenceScopeId);
     if (epoch !== mountEpoch || !root.isConnected) return;
     referenceToggle.checked = referencePreference.visible;
-    referenceOpacity.value = String(Math.round(referencePreference.opacity * 100));
-    referenceImage.style.opacity = String(referencePreference.opacity);
-    referenceOffset = { x: referencePreference.offsetX, y: referencePreference.offsetY };
-    applyReferencePosition();
     world.classList.toggle('hide-reference-image', !referencePreference.visible);
     await refreshReferenceCatalog(referencePreference.backgroundId);
     if (epoch !== mountEpoch || !root.isConnected) return;
@@ -1832,6 +1819,7 @@ async function mountDistribucion(context) {
       referenceToggle.checked = true;
       world.classList.remove('hide-reference-image');
       await persistReferencePreference();
+      camera.fit();
       status.textContent = activeReferenceId === DEFAULT_BACKGROUND_ID ? 'Casa Acapulco seleccionado como plano base' : 'Plano local seleccionado';
     };
     referenceFile.onchange = async () => {
@@ -1844,6 +1832,7 @@ async function mountDistribucion(context) {
         referenceToggle.checked = true;
         world.classList.remove('hide-reference-image');
         await persistReferencePreference();
+        camera.fit();
         status.textContent = 'Plano agregado al catálogo local de este navegador';
       } catch (error) {
         status.textContent = error?.message || 'No se pudo guardar el plano en este navegador';
@@ -1855,43 +1844,6 @@ async function mountDistribucion(context) {
       world.classList.toggle('hide-reference-image', !referenceToggle.checked);
       void persistReferencePreference();
     };
-    referenceOpacity.oninput = () => {
-      referenceImage.style.opacity = String(Math.max(0.1, Math.min(1, Number(referenceOpacity.value) / 100)));
-      void persistReferencePreference();
-    };
-    referenceMove.onclick = () => {
-      const active = !root.classList.contains('is-moving-reference');
-      root.classList.toggle('is-moving-reference', active);
-      referenceMove.classList.toggle('is-active', active);
-      referenceMove.setAttribute('aria-pressed', String(active));
-      referenceMove.textContent = active ? 'Terminar movimiento' : 'Mover plano';
-      status.textContent = active ? 'Arrastra el plano del recinto para alinearlo' : 'Movimiento del plano finalizado';
-    };
-    referenceResetPosition.onclick = () => {
-      referenceOffset = { x: 0, y: 0 };
-      applyReferencePosition();
-      void persistReferencePreference();
-      status.textContent = 'Posición del plano restablecida';
-    };
-    referenceImage.addEventListener('pointerdown', (event) => {
-      if (!root.classList.contains('is-moving-reference') || event.button !== 0) return;
-      event.preventDefault(); event.stopPropagation(); referenceImage.setPointerCapture(event.pointerId);
-      referenceDrag = { pointerId:event.pointerId, clientX:event.clientX, clientY:event.clientY, x:referenceOffset.x, y:referenceOffset.y };
-      referenceImage.classList.add('is-dragging');
-    });
-    referenceImage.addEventListener('pointermove', (event) => {
-      if (!referenceDrag || referenceDrag.pointerId !== event.pointerId) return;
-      event.preventDefault();
-      referenceOffset.x = referenceDrag.x + camera.clientDeltaToWorld(event.clientX - referenceDrag.clientX);
-      referenceOffset.y = referenceDrag.y + camera.clientDeltaToWorld(event.clientY - referenceDrag.clientY);
-      applyReferencePosition();
-    });
-    const finishReferenceDrag = (event) => {
-      if (!referenceDrag || referenceDrag.pointerId !== event.pointerId) return;
-      referenceDrag = null; referenceImage.classList.remove('is-dragging'); void persistReferencePreference();
-    };
-    referenceImage.addEventListener('pointerup', finishReferenceDrag);
-    referenceImage.addEventListener('pointercancel', finishReferenceDrag);
     referenceRemove.onclick = async () => {
       if (activeReferenceId === DEFAULT_BACKGROUND_ID) return;
       await removeDistributionBackground(activeReferenceId);
@@ -1899,6 +1851,7 @@ async function mountDistribucion(context) {
       referenceToggle.checked = true;
       world.classList.remove('hide-reference-image');
       await persistReferencePreference();
+      camera.fit();
       status.textContent = 'Plano personalizado eliminado. Casa Acapulco vuelve a ser el plano base';
     };
     root.querySelector('[data-distribution-rotate-left]').onclick = () => rotateSelected(-ROTATION_STEP);
@@ -2020,6 +1973,7 @@ async function mountDistribucion(context) {
     activeDistributionCleanup = () => {
       window.removeEventListener('migrandia:datachange', handleCanonicalChange);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      camera.destroy();
       if (referenceObjectUrl) {
         URL.revokeObjectURL(referenceObjectUrl);
         referenceObjectUrl = '';
