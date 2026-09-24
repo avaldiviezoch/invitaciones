@@ -1174,6 +1174,7 @@ body.menu-open .menu-button svg {
 @keyframes mgdLoaderDot{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}.checklist-review{width:min(980px,100%);min-height:360px;margin:40px auto;padding:42px;border:1px solid rgba(73,77,59,.12);border-radius:24px;background:#fbfaf7;box-shadow:0 22px 60px rgba(57,58,48,.08)}.checklist-review>span{color:#7f8962;font-size:9px;font-weight:900;letter-spacing:.18em}.checklist-review h2{margin:9px 0 10px;font-family:Georgia,serif;font-size:34px;font-weight:500}.checklist-review p{max-width:620px;margin:0;color:#77796f;font-size:13px;line-height:1.7}
 @media(max-width:1050px){.app-nav-home{min-width:72px;width:72px;padding:0;border-right:0}.mgd-brand-copy{display:none}.app-nav-modules{justify-content:flex-start}.app-nav-account{min-width:62px;width:62px;padding-left:8px}.app-nav-account div{display:none}}
 @media (max-width:700px), ((max-height:520px) and (pointer:coarse) and (max-width:1000px)){
+html.module-route,.module-route body{height:100dvh;min-height:100dvh;background:#fff}
 body.module-open.is-module-loading .app-mobile-header,
 body.module-open.is-module-loading .app-module-nav,
 body.module-open.is-module-loading .app-mobile-nav-backdrop{opacity:0;visibility:hidden;pointer-events:none}
