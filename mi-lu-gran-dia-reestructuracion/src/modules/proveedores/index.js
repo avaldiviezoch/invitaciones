@@ -475,9 +475,11 @@ async function mountProveedores(context) {
     root.querySelector('[data-provider-state]').textContent = editable
       ? 'Datos de la boda activa · edición habilitada'
       : 'Datos reales de Firebase · solo lectura';
+    return true;
   } catch (error) {
     if (epoch !== mountEpoch) return;
     root.innerHTML = '<div class="provider-loading">No se pudo cargar Proveedores: ' + esc(error?.message || 'Error de lectura') + '</div>';
+    return false;
   }
 }
 
