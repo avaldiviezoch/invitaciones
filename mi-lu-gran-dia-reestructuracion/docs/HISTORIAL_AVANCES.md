@@ -227,3 +227,14 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - La barra superior comienza directamente con switches de capas e indicadores de validación.
 - En modo Presentación se oculta el bloque principal de switches/indicadores junto con los demás controles no esenciales.
 - No se modificaron acciones, persistencia, geometría, Firebase, Firestore, Storage ni IDs.
+
+
+## 2026-09-24 — Shell móvil: navegación lateral plegable
+- La barra lateral móvil continúa visible por defecto y conserva la misma navegación y cuenta activa.
+- Se agregó un control propio de la barra para recogerla sin crear una segunda navegación.
+- Al recogerla, el área de módulos deja de reservar los 82 px de navegación y vuelve a márgenes simétricos de 16 px, recuperando ancho útil especialmente para Distribución.
+- Mientras la barra está oculta aparece un único botón flotante translúcido en la esquina inferior izquierda, respetando el safe area, para restaurarla.
+- El estado es exclusivamente visual y en memoria: no se escribe en Firebase, Firestore, Storage, localStorage, sessionStorage ni IndexedDB.
+- Al volver al inicio o ampliar la pantalla fuera del breakpoint móvil, la barra retorna al estado visible por defecto.
+- La cámara de Distribución observa cambios reales de tamaño de su viewport mediante ResizeObserver, además del resize de ventana, para reencajar el plano cuando cambia el espacio disponible sin modificar coordenadas lógicas, mesas, sillas ni persistencia.
+- Desktop conserva su barra horizontal actual; el cambio está limitado al layout móvil existente.
