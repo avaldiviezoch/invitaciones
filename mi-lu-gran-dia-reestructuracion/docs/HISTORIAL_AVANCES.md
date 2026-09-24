@@ -477,3 +477,16 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - El inspector muestra ancho × alto actual; Ajustes móvil permite editar ambos con la misma changeSelectedElementDimensions().
 - Tiradores móviles usan 20 px para facilitar interacción táctil.
 - No se modifica Firebase, tablas, invitados, sillas ni dimensiones canónicas de mesas.
+
+
+## 2026-09-24 — Mesas y sillas: integración canónica de dimensiones físicas
+- table-geometry.js pasa a ser el único propietario de estándares físicos de mesa, límites y normalización de table.dimensions.
+- Mesas y sillas incorpora edición de medida física en el mismo diálogo de la mesa: diámetro para redonda, lado para cuadrada y largo/fondo para rectangular.
+- El diálogo hidrata directamente table.dimensions existente; no crea una copia local persistente.
+- “Usar medida estándar” elimina el override al guardar, de modo que la mesa vuelve a heredar el estándar de su forma.
+- Una mesa nueva solo guarda dimensions cuando el usuario personaliza la medida; las mesas existentes sin override permanecen sin migración.
+- El resumen de vista previa muestra forma, capacidad y medida física actual.
+- Distribución deja de declarar sus propios estándares físicos y consume las mismas funciones exportadas por table-geometry.js.
+- Cambiar medidas desde Mesas emite table-updated mediante el persist existente; Distribución recibe el mismo tableId y redibuja la geometría canónica.
+- Cambiar medidas desde Distribución sigue escribiendo table.dimensions canónico; al reabrir Mesas se hidrata el mismo valor.
+- No se modifican IDs de mesa/silla, asignaciones, claves de almacenamiento, colecciones ni reglas de Firebase.

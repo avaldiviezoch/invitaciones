@@ -1,5 +1,12 @@
 const MIN_CAPACITY = 4;
 const MAX_CAPACITY = 16;
+const MIN_TABLE_METERS = 0.5;
+const MAX_TABLE_METERS = 4;
+const TABLE_PHYSICAL_DEFAULTS = Object.freeze({
+  round: Object.freeze({ width: 1.83, height: 1.83 }),
+  square: Object.freeze({ width: 1.8, height: 1.8 }),
+  rectangular: Object.freeze({ width: 2.4, height: 0.75 })
+});
 
 function clamp(value, min, max) {
   return Math.max(min, Math.min(max, Number(value) || min));
@@ -10,6 +17,73 @@ function normalizeTableShape(value) {
   if (['rect', 'rectangle', 'rectangular'].includes(clean)) return 'rectangular';
   if (['square', 'cuadrada', 'cuadrado'].includes(clean)) return 'square';
   return 'round';
+}
+
+
+function finiteNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function normalizeTableMeters(value, fallback) {
+  const number = finiteNumber(value);
+  if (number === null) return fallback;
+  return Math.max(MIN_TABLE_METERS, Math.min(MAX_TABLE_METERS, number));
+}
+
+function standardTablePhysicalDimensions(type) {
+  const shape = normalizeTableShape(type);
+  const standard = TABLE_PHYSICAL_DEFAULTS[shape] || TABLE_PHYSICAL_DEFAULTS.round;
+  return { shape, width: standard.width, height: standard.height };
+}
+
+function tablePhysicalDimensions(tableOrType) {
+  const table = tableOrType && typeof tableOrType === 'object'
+    ? tableOrType
+    : { type: tableOrType };
+  const shape = normalizeTableShape(table?.type || table?.shape);
+  const standard = TABLE_PHYSICAL_DEFAULTS[shape] || TABLE_PHYSICAL_DEFAULTS.round;
+  const dimensions = table?.dimensions && typeof table.dimensions === 'object'
+    ? table.dimensions
+    : {};
+
+  if (shape === 'round') {
+    const diameter = normalizeTableMeters(
+      dimensions.tabletopDiameterM ?? dimensions.tabletopWidthM,
+      standard.width
+    );
+    return { shape, width: diameter, height: diameter };
+  }
+
+  if (shape === 'square') {
+    const side = normalizeTableMeters(
+      dimensions.tabletopWidthM ?? dimensions.tabletopHeightM,
+      standard.width
+    );
+    return { shape, width: side, height: side };
+  }
+
+  return {
+    shape,
+    width: normalizeTableMeters(dimensions.tabletopWidthM, standard.width),
+    height: normalizeTableMeters(dimensions.tabletopHeightM, standard.height)
+  };
+}
+
+function createTableDimensions(type, widthMeters, heightMeters, current = null) {
+  const shape = normalizeTableShape(type);
+  const standard = TABLE_PHYSICAL_DEFAULTS[shape] || TABLE_PHYSICAL_DEFAULTS.round;
+  const width = normalizeTableMeters(widthMeters, standard.width);
+  const height = shape === 'rectangular'
+    ? normalizeTableMeters(heightMeters, standard.height)
+    : width;
+
+  return {
+    ...(current && typeof current === 'object' ? current : {}),
+    tabletopWidthM: width,
+    tabletopHeightM: height,
+    tabletopDiameterM: shape === 'round' ? width : null
+  };
 }
 
 function tableVisualSize(type, capacity) {
@@ -107,4 +181,15 @@ function tableSeatGeometry(type, capacity) {
   return { shape, table, visualWidth, visualHeight, positions };
 }
 
-export { normalizeTableShape, tableVisualSize, tableSeatGeometry };
+export {
+  MIN_TABLE_METERS,
+  MAX_TABLE_METERS,
+  TABLE_PHYSICAL_DEFAULTS,
+  normalizeTableMeters,
+  normalizeTableShape,
+  standardTablePhysicalDimensions,
+  tablePhysicalDimensions,
+  createTableDimensions,
+  tableVisualSize,
+  tableSeatGeometry
+};

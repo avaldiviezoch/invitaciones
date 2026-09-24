@@ -1,5 +1,13 @@
 import { saveInvitadosSnapshot } from './invitados-data.js?v=3';
-import { normalizeTableShape, tableSeatGeometry } from './table-geometry.js?v=4';
+import {
+  MIN_TABLE_METERS,
+  MAX_TABLE_METERS,
+  createTableDimensions,
+  normalizeTableShape,
+  standardTablePhysicalDimensions,
+  tablePhysicalDimensions,
+  tableSeatGeometry
+} from './table-geometry.js?v=5';
 
 const SHAPE_LABELS = Object.freeze({
   round: 'Redonda',
@@ -499,6 +507,68 @@ function createTablesController(api) {
     });
   }
 
+
+  function syncPhysicalDimensionFields(table = null, { preserveCustom = false } = {}) {
+    const root = api.getRoot();
+    const form = root?.querySelector('[data-table-form]');
+    if (!form) return;
+
+    const shape = normalizeTableShape(form.elements.type?.value);
+    const widthInput = form.elements.tabletopWidthM;
+    const heightInput = form.elements.tabletopHeightM;
+    const heightField = root.querySelector('[data-table-physical-height-field]');
+    const widthLabel = root.querySelector('[data-table-physical-width-label]');
+    const custom = preserveCustom
+      ? form.dataset.dimensionsCustom === 'true'
+      : Boolean(table?.dimensions && typeof table.dimensions === 'object');
+    const dimensions = custom && table
+      ? tablePhysicalDimensions(table)
+      : standardTablePhysicalDimensions(shape);
+
+    if (!preserveCustom || !widthInput.value) widthInput.value = dimensions.width.toFixed(2);
+    if (!preserveCustom || !heightInput.value) heightInput.value = dimensions.height.toFixed(2);
+
+    if (shape === 'round') {
+      widthLabel.textContent = 'Diámetro (m)';
+      heightField.hidden = true;
+      if (preserveCustom) heightInput.value = widthInput.value;
+    } else if (shape === 'square') {
+      widthLabel.textContent = 'Lado (m)';
+      heightField.hidden = true;
+      if (preserveCustom) heightInput.value = widthInput.value;
+    } else {
+      widthLabel.textContent = 'Largo (m)';
+      heightField.hidden = false;
+    }
+
+    form.dataset.dimensionsCustom = custom ? 'true' : 'false';
+    root.querySelector('[data-table-physical-reset]').disabled = !api.canEdit() || !custom;
+  }
+
+  function markPhysicalDimensionsCustom() {
+    const root = api.getRoot();
+    const form = root?.querySelector('[data-table-form]');
+    if (!form) return;
+    const shape = normalizeTableShape(form.elements.type?.value);
+    if (shape !== 'rectangular') form.elements.tabletopHeightM.value = form.elements.tabletopWidthM.value;
+    form.dataset.dimensionsCustom = 'true';
+    const reset = root.querySelector('[data-table-physical-reset]');
+    if (reset) reset.disabled = !api.canEdit();
+    renderTablePreview();
+  }
+
+  function resetPhysicalDimensions() {
+    const root = api.getRoot();
+    const form = root?.querySelector('[data-table-form]');
+    if (!form) return;
+    const standard = standardTablePhysicalDimensions(form.elements.type?.value);
+    form.elements.tabletopWidthM.value = standard.width.toFixed(2);
+    form.elements.tabletopHeightM.value = standard.height.toFixed(2);
+    form.dataset.dimensionsCustom = 'false';
+    syncPhysicalDimensionFields(null, { preserveCustom: true });
+    renderTablePreview();
+  }
+
   function renderTablePreview() {
     const root = api.getRoot();
     const form = root?.querySelector('[data-table-form]');
@@ -510,6 +580,13 @@ function createTablesController(api) {
     const capacity = normalizeCapacity(form.elements.capacity?.value);
     const geometry = tableSeatGeometry(shape, capacity);
     const shapeLabel = SHAPE_LABELS[shape] || 'Mesa';
+    const physicalWidth = Number(form.elements.tabletopWidthM?.value);
+    const physicalHeight = shape === 'rectangular'
+      ? Number(form.elements.tabletopHeightM?.value)
+      : physicalWidth;
+    const physicalLabel = shape === 'round'
+      ? `Ø ${physicalWidth.toFixed(2)} m`
+      : `${physicalWidth.toFixed(2)} × ${physicalHeight.toFixed(2)} m`;
 
     previewRoot.innerHTML = `<div class="table-editor-preview-canvas" style="width:${geometry.visualWidth}px;height:${geometry.visualHeight}px;--table-body-w:${geometry.table.width}px;--table-body-h:${geometry.table.height}px">
       <div class="table-editor-preview-body is-${shape}">
@@ -518,7 +595,7 @@ function createTablesController(api) {
       </div>
       ${geometry.positions.map((position, index) => `<span class="table-editor-preview-seat" style="left:${position.x}px;top:${position.y}px" aria-hidden="true">${index + 1}</span>`).join('')}
     </div>`;
-    if (summary) summary.textContent = `${shapeLabel} · ${capacity} lugares`;
+    if (summary) summary.textContent = `${shapeLabel} · ${capacity} lugares · ${physicalLabel}`;
   }
 
   function openTable(table = null) {
@@ -534,6 +611,7 @@ function createTablesController(api) {
     form.elements.name.value = table ? text(table.name) : nextTableName();
     form.elements.type.value = table ? normalizeTableShape(table.type || table.shape) : 'round';
     syncShapePicker(form.elements.type.value);
+    syncPhysicalDimensionFields(table);
 
     syncCapacityPicker(capacity);
     renderTablePreview();
@@ -633,6 +711,11 @@ function createTablesController(api) {
     const name = text(data.get('name')).slice(0, 80);
     const type = normalizeTableShape(data.get('type'));
     const capacity = normalizeCapacity(data.get('capacity'));
+    const dimensionsCustom = form.dataset.dimensionsCustom === 'true';
+    const widthMeters = Number(data.get('tabletopWidthM'));
+    const heightMeters = type === 'rectangular'
+      ? Number(data.get('tabletopHeightM'))
+      : widthMeters;
 
     if (!name) {
       if (dialogState) dialogState.textContent = 'Escribe un nombre para la mesa.';
@@ -648,7 +731,7 @@ function createTablesController(api) {
       const previous = deepClone(api.getSnapshot());
 
       if (!tableId) {
-        api.getSnapshot().canonical.tables.push({
+        const nextTable = {
           id: uid('table'),
           name,
           type,
@@ -656,7 +739,11 @@ function createTablesController(api) {
           seats: ensureSeats({}, capacity),
           createdAt: new Date().toISOString(),
           updatedAt: new Date().toISOString()
-        });
+        };
+        if (dimensionsCustom) {
+          nextTable.dimensions = createTableDimensions(type, widthMeters, heightMeters);
+        }
+        api.getSnapshot().canonical.tables.push(nextTable);
         await persist(previous, 'Mesa creada', 'table-created');
         closeTable();
         return true;
@@ -680,6 +767,11 @@ function createTablesController(api) {
       table.type = type;
       table.capacity = capacity;
       table.seats = nextSeats;
+      if (dimensionsCustom) {
+        table.dimensions = createTableDimensions(type, widthMeters, heightMeters, table.dimensions);
+      } else {
+        delete table.dimensions;
+      }
       table.updatedAt = new Date().toISOString();
 
       await persist(previous, 'Mesa actualizada', 'table-updated');
@@ -922,6 +1014,13 @@ function createTablesController(api) {
       return true;
     }
 
+    const physicalReset = event.target.closest('[data-table-physical-reset]');
+    if (physicalReset) {
+      if (!api.canEdit()) return true;
+      resetPhysicalDimensions();
+      return true;
+    }
+
     const capacityButton = event.target.closest('[data-table-capacity]');
     if (capacityButton) {
       if (!api.canEdit()) return true;
@@ -936,7 +1035,17 @@ function createTablesController(api) {
     const shapeButton = event.target.closest('[data-table-shape]');
     if (shapeButton) {
       if (!api.canEdit()) return true;
+      const form = shapeButton.closest('[data-table-form]');
+      const wasCustom = form?.dataset.dimensionsCustom === 'true';
       syncShapePicker(shapeButton.dataset.tableShape);
+      if (wasCustom) {
+        syncPhysicalDimensionFields(null, { preserveCustom: true });
+      } else {
+        const standard = standardTablePhysicalDimensions(form?.elements?.type?.value);
+        if (form?.elements?.tabletopWidthM) form.elements.tabletopWidthM.value = standard.width.toFixed(2);
+        if (form?.elements?.tabletopHeightM) form.elements.tabletopHeightM.value = standard.height.toFixed(2);
+        syncPhysicalDimensionFields(null, { preserveCustom: true });
+      }
       renderTablePreview();
       return true;
     }
@@ -1037,6 +1146,10 @@ function createTablesController(api) {
   }
 
   function handleInput(event) {
+    if (event.target.matches('[data-table-physical-width],[data-table-physical-height]')) {
+      markPhysicalDimensionsCustom();
+      return true;
+    }
     if (event.target.matches('[data-table-guest-search]')) {
       guestSearch = event.target.value;
       renderGuestPanel();

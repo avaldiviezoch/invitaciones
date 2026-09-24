@@ -613,11 +613,11 @@ const MODULES = Object.freeze({
     mount: 'mountProveedores'
   },
   invitados: {
-    load: () => import('../invitados/index.js?v=31'),
+    load: () => import('../invitados/index.js?v=32'),
     mount: 'mountInvitados'
   },
   distribucion: {
-    load: () => import('../distribucion/index.js?v=90'),
+    load: () => import('../distribucion/index.js?v=91'),
     mount: 'mountDistribucion'
   }
 });

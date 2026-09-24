@@ -1,5 +1,13 @@
 import { GUEST_STORAGE_KEY, loadInvitadosSnapshot, saveInvitadosSnapshot } from '../invitados/invitados-data.js?v=5';
-import { normalizeTableShape } from '../invitados/table-geometry.js?v=4';
+import {
+  MIN_TABLE_METERS,
+  MAX_TABLE_METERS,
+  createTableDimensions,
+  normalizeTableMeters,
+  normalizeTableShape,
+  standardTablePhysicalDimensions,
+  tablePhysicalDimensions
+} from '../invitados/table-geometry.js?v=5';
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=6';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { setupDistributionCamera } from './camera.js?v=8';
@@ -29,14 +37,7 @@ const PLAN_SCALE = Object.freeze({
 });
 const PIXELS_PER_METER = PLAN_SCALE.pixelsPerMeter;
 const TABLE_FRAME = Object.freeze({ width: 300, height: 316, centerX: 150, centerY: 158 });
-const TABLE_PHYSICAL = Object.freeze({
-  round: Object.freeze({ tabletopWidthMeters: 1.83, tabletopHeightMeters: 1.83 }),
-  square: Object.freeze({ tabletopWidthMeters: 1.8, tabletopHeightMeters: 1.8 }),
-  rectangular: Object.freeze({ tabletopWidthMeters: 2.4, tabletopHeightMeters: 0.75 })
-});
 const TABLE_CLEARANCE_MARGIN_METERS = 0.8;
-const MIN_TABLE_METERS = 0.5;
-const MAX_TABLE_METERS = 4;
 const ROUND_CHAIR_ORBIT_FACTOR = 1.33;
 const ROUND_LABEL_ORBIT_FACTOR = 2.18;
 const RECT_CHAIR_OFFSET_METERS = 0.38;
@@ -421,66 +422,9 @@ function rectangularPerimeterPositions(count, width, height, centerX, centerY) {
   return positions;
 }
 
-function clampTableMeters(value, fallback) {
-  const number = finiteNumber(value);
-  if (number === null) return fallback;
-  return Math.max(MIN_TABLE_METERS, Math.min(MAX_TABLE_METERS, number));
-}
-
-function tableTopMeters(table) {
-  const shape = normalizeTableShape(table?.type || table?.shape);
-  const standard = TABLE_PHYSICAL[shape] || TABLE_PHYSICAL.round;
-  const dimensions = table?.dimensions && typeof table.dimensions === 'object'
-    ? table.dimensions
-    : {};
-
-  if (shape === 'round') {
-    const diameter = clampTableMeters(
-      dimensions.tabletopDiameterM ?? dimensions.tabletopWidthM,
-      standard.tabletopWidthMeters
-    );
-    return { shape, width: diameter, height: diameter };
-  }
-
-  if (shape === 'square') {
-    const side = clampTableMeters(
-      dimensions.tabletopWidthM ?? dimensions.tabletopHeightM,
-      standard.tabletopWidthMeters
-    );
-    return { shape, width: side, height: side };
-  }
-
-  return {
-    shape,
-    width: clampTableMeters(dimensions.tabletopWidthM, standard.tabletopWidthMeters),
-    height: clampTableMeters(dimensions.tabletopHeightM, standard.tabletopHeightMeters)
-  };
-}
-
-function standardTableTopMeters(table) {
-  const shape = normalizeTableShape(table?.type || table?.shape);
-  const standard = TABLE_PHYSICAL[shape] || TABLE_PHYSICAL.round;
-  return { shape, width: standard.tabletopWidthMeters, height: standard.tabletopHeightMeters };
-}
-
-function tableDimensionsPayload(table, widthMeters, heightMeters) {
-  const shape = normalizeTableShape(table?.type || table?.shape);
-  const width = clampTableMeters(widthMeters, TABLE_PHYSICAL[shape]?.tabletopWidthMeters || TABLE_PHYSICAL.round.tabletopWidthMeters);
-  const height = shape === 'round' || shape === 'square'
-    ? width
-    : clampTableMeters(heightMeters, TABLE_PHYSICAL.rectangular.tabletopHeightMeters);
-
-  return {
-    ...(table?.dimensions && typeof table.dimensions === 'object' ? table.dimensions : {}),
-    tabletopWidthM: width,
-    tabletopHeightM: height,
-    tabletopDiameterM: shape === 'round' ? width : null
-  };
-}
-
 function tablePhysicalGeometry(tableSource, capacity) {
   const source = tableSource && typeof tableSource === 'object' ? tableSource : { type: tableSource };
-  const physical = tableTopMeters(source);
+  const physical = tablePhysicalDimensions(source);
   const shape = physical.shape;
   const count = Math.max(1, Number(capacity) || 1);
   const table = {
@@ -836,7 +780,7 @@ function renderInspector(root, table, tableIndex, guests, placement) {
   root.querySelector('[data-distribution-selected-meta]').textContent = `${normalizeTableShape(table.type)} · ${capacity} sillas`;
   root.querySelector('[data-distribution-table-shape-control]').hidden = false;
   root.querySelector('[data-distribution-table-shape]').value = normalizeTableShape(table.type || table.shape);
-  const tabletop = tableTopMeters(table);
+  const tabletop = tablePhysicalDimensions(table);
   const tableDimensions = root.querySelector('[data-distribution-table-dimensions]');
   const widthLabel = root.querySelector('[data-distribution-table-width-label]');
   const heightLabel = root.querySelector('[data-distribution-table-height-label]');
@@ -1035,7 +979,7 @@ async function mountDistribucion(context) {
             if (shape === currentShape) button.disabled = true;
           });
 
-          const tabletop = tableTopMeters(selectedEntry.table);
+          const tabletop = tablePhysicalDimensions(selectedEntry.table);
           const sizeWrap = document.createElement('div');
           sizeWrap.className = 'distribution-mobile-size-editor';
           const widthField = document.createElement('label');
@@ -1335,18 +1279,18 @@ async function mountDistribucion(context) {
         ? { ...table.dimensions }
         : null;
       const target = reset
-        ? standardTableTopMeters(table)
+        ? standardTablePhysicalDimensions(table.type || table.shape)
         : {
-            ...tableTopMeters(table),
-            width: clampTableMeters(widthMeters, tableTopMeters(table).width),
+            ...tablePhysicalDimensions(table),
+            width: normalizeTableMeters(widthMeters, tablePhysicalDimensions(table).width),
             height: normalizeTableShape(table.type || table.shape) === 'rectangular'
-              ? clampTableMeters(heightMeters, tableTopMeters(table).height)
-              : clampTableMeters(widthMeters, tableTopMeters(table).width)
+              ? normalizeTableMeters(heightMeters, tablePhysicalDimensions(table).height)
+              : normalizeTableMeters(widthMeters, tablePhysicalDimensions(table).width)
           };
 
       table.dimensions = reset
         ? undefined
-        : tableDimensionsPayload(table, target.width, target.height);
+        : createTableDimensions(table.type || table.shape, target.width, target.height, table.dimensions);
       redrawTableInPlace(tableId);
       renderInspector(root, table, entry.index, guests, placementState.get(tableId));
       refreshSpatialConflicts();
@@ -1355,7 +1299,7 @@ async function mountDistribucion(context) {
       try {
         const latestTable = await persistCanonicalTableChange(tableId, (record) => {
           if (reset) delete record.dimensions;
-          else record.dimensions = tableDimensionsPayload(record, target.width, target.height);
+          else record.dimensions = createTableDimensions(record.type || record.shape, target.width, target.height, record.dimensions);
         });
         if (latestTable.dimensions) table.dimensions = { ...latestTable.dimensions };
         else delete table.dimensions;

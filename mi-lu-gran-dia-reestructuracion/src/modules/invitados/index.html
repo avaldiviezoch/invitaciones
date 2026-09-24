@@ -205,6 +205,17 @@
           </button>
         </div>
       </fieldset>
+      <fieldset class="table-physical-picker" data-table-physical-picker>
+        <legend>Medida física del tablero</legend>
+        <div class="table-physical-fields">
+          <label><span data-table-physical-width-label>Diámetro (m)</span><input type="number" name="tabletopWidthM" min="0.5" max="4" step="0.1" value="1.83" data-table-physical-width></label>
+          <label data-table-physical-height-field hidden><span>Fondo (m)</span><input type="number" name="tabletopHeightM" min="0.5" max="4" step="0.1" value="1.83" data-table-physical-height></label>
+        </div>
+        <div class="table-physical-foot">
+          <small>Cada mesa puede tener una medida distinta. Distribución usa esta misma medida para el plano, sillas y validaciones.</small>
+          <button type="button" data-table-physical-reset disabled>Usar medida estándar</button>
+        </div>
+      </fieldset>
       <section class="table-editor-preview" aria-label="Vista previa de la mesa">
         <div class="table-editor-preview-head">
           <div><strong>Vista previa</strong><span>Forma y capacidad antes de guardar</span></div>
