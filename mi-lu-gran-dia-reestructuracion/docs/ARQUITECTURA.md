@@ -106,6 +106,7 @@ La carpeta `src/modules/distribucion/` mantiene pocos archivos. No se divide por
 - `distribucion.css`: presentación visual, estados de edición/presentación e impresión. No contiene reglas de dominio.
 - `index.js`: orquestador del módulo. Monta la vista, coordina estado del editor, propuestas, historial, render de mesas/elementos, validación espacial e integración explícita con los contratos de Mesas/Invitados.
 - `camera.js`: único propietario de cámara y navegación del plano: zoom, paneo, pinch, Encajar, conversión de coordenadas pantalla↔plano y enfoque de objetos. No conoce mesas, invitados, propuestas ni persistencia.
+- `background-catalog.js`: único propietario del catálogo local de planos del recinto. Incluye Casa Acapulco como fondo inmutable por defecto y usa IndexedDB exclusivamente para imágenes personalizadas y preferencias locales de fondo. No guarda mesas, sillas, invitados, propuestas ni datos canónicos de la boda; no usa Firebase, Firestore ni Storage. Esta es una excepción explícita y limitada a la regla general de no usar almacenamiento del navegador en Distribución.
 
 No se crearán archivos `helpers`, `utils`, `fix`, `patch`, `v2` o equivalentes para repartir código sin dueño. Una futura extracción solo procede si toda una responsabilidad puede trasladarse a un único propietario sin duplicarla ni repartir su lógica entre varios archivos.
 
