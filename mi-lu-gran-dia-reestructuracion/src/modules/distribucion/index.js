@@ -49,7 +49,11 @@ function physicalType(label, widthMeters, heightMeters, options = {}) {
     height: PLAN_SCALE.metersToPixels(heightMeters),
     capabilities: options.capabilities || EDIT_CAPABILITIES.physical,
     spatialFamily,
-    visualFit: options.visualFit || 'contain'
+    visual: Object.freeze({
+      fit: options.visualFit || 'contain',
+      paddingRatio: Math.max(0, Math.min(0.35, Number(options.visualPaddingRatio ?? 0.08))),
+      anchor: options.visualAnchor || 'center'
+    })
   });
 }
 
@@ -533,6 +537,13 @@ function renderTable(item, guestIndex, placement) {
   return node;
 }
 
+function applyElementVisualContract(node, definition) {
+  const visual = definition.visual;
+  node.style.setProperty('--element-visual-padding', `${visual.paddingRatio * 100}%`);
+  node.dataset.visualFit = visual.fit;
+  node.dataset.visualAnchor = visual.anchor;
+}
+
 function renderPhysicalElement(element) {
   const definition = PHYSICAL_ELEMENT_TYPES[element.type];
   const node = document.createElement('article');
@@ -541,6 +552,7 @@ function renderPhysicalElement(element) {
   node.tabIndex = 0;
   node.setAttribute('role', 'button');
   node.setAttribute('aria-label', definition.label);
+  applyElementVisualContract(node, definition);
   node.classList.toggle('is-locked', element.locked === true);
   node.style.zIndex = String(10 + Number(element.layer || 0));
   node.style.left = `${element.x}px`;
