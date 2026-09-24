@@ -1227,6 +1227,16 @@ body.module-open.is-module-loading .module-stage>[data-module-view]{visibility:h
 .app-nav-account:hover{background:rgba(108,117,88,.06)}.app-nav-account-copy strong,.app-nav-account-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.app-nav-account-copy strong{font-size:11px}.app-nav-account-copy small{margin-top:2px;font-size:8px;color:#999087}.app-nav-chevron{font-size:13px;font-weight:700;color:#756e67}
 .app-nav-account-popover{box-sizing:border-box;display:none;position:absolute;right:0;top:70px;width:240px;padding:14px;border:1px solid rgba(80,67,56,.1);border-radius:18px;background:rgba(255,255,255,.96);box-shadow:0 20px 55px rgba(55,45,37,.17);backdrop-filter:blur(20px);color:#413d38;z-index:1000}.app-nav-account-wrap.is-open .app-nav-account-popover{display:block}.app-nav-account-popover>strong,.app-nav-account-popover>span{display:block}.app-nav-account-popover>strong{font-size:12px}.app-nav-account-popover>span{margin:3px 0 11px;color:#999087;font-size:9px}.app-nav-wedding,.app-nav-logout{box-sizing:border-box;width:100%;margin-top:6px;padding:10px;border:0;border-radius:11px;background:#f4f1ec;color:#615b54;font-size:9px;font-weight:750;cursor:pointer}.app-nav-wedding{text-align:left}.app-nav-wedding span,.app-nav-wedding strong,.app-nav-wedding small{display:block}.app-nav-wedding span,.app-nav-wedding small{font-size:8px;color:#999087}.app-nav-wedding strong{margin:2px 0;font-size:9px}
 @media(max-width:1050px){.app-nav-account-wrap{min-width:62px;width:62px;padding-left:8px}.app-nav-account-copy,.app-nav-chevron{display:none}.app-nav-account{grid-template-columns:44px;width:52px}}
+@media(max-width:700px){
+  .app-module-nav{z-index:73}
+  .app-nav-account-wrap{position:relative;min-width:0;width:100%;margin-top:auto;padding:7px 0 0;border-left:0;border-top:1px solid rgba(80,67,56,.1);overflow:visible}
+  .app-nav-account{min-width:0;width:100%;height:52px;padding:4px 6px;display:grid;grid-template-columns:40px minmax(0,1fr) 18px;align-items:center;gap:8px;border-left:0;border-top:0}
+  .app-nav-account-avatar{width:38px;height:38px}
+  .app-nav-account-copy{display:block}
+  .app-nav-chevron{display:inline}
+  .app-nav-account strong,.app-nav-account small{max-width:180px}
+  .app-nav-account-popover{position:static;right:auto;top:auto;width:100%;margin-top:7px;max-height:none;overflow:visible}
+}
 
 
 /* Gestor de accesos: una sola interfaz sobre los miembros e invitaciones reales de Firebase. */
