@@ -310,3 +310,9 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - La cabecera vuelve a mostrar “Módulo · Espacio de la boda”, título “Distribución”, descripción y KPI “Mesas registradas”.
 - La rueda móvil, plano, switches y bottom sheet permanecen sin cambios.
 - Desktop no se modifica.
+
+
+## 2026-09-24 — Distribución móvil: corregir visibilidad de la rueda
+- Se corrigió un problema de cascada CSS: la regla base que oculta la rueda fuera de móvil estaba declarada después del media query y anulaba el display móvil.
+- La regla base queda ahora antes de @media(max-width:700px), permitiendo que la rueda y el bottom sheet aparezcan correctamente en iPhone.
+- No se modificaron rueda, acciones, plano, switches, desktop ni lógica funcional.
