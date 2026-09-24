@@ -41,3 +41,16 @@
 .distribution-shell.is-presentation-mode .distribution-table.is-selected,.distribution-shell.is-presentation-mode .distribution-element.is-selected{outline:none;box-shadow:inherit}
 
 .distribution-proposal-controls{display:flex;align-items:center;gap:5px}.distribution-proposal-controls select,.distribution-proposal-controls button{height:34px;border:1px solid rgba(91,91,75,.13);border-radius:10px;background:#fff;color:#625e58;font-size:8px;font-weight:750}.distribution-proposal-controls select{max-width:150px;padding:0 26px 0 9px}.distribution-proposal-controls button{padding:0 9px;cursor:pointer}.distribution-proposal-controls button:disabled{opacity:.42;cursor:default}.distribution-shell.is-presentation-mode .distribution-proposal-controls{display:none}
+
+.distribution-shell.is-clean-plan .distribution-viewport{background-image:none;background-color:#fff}
+.distribution-shell.is-clean-plan .distribution-cursor-coords{display:none}
+@media print{
+  body *{visibility:hidden}
+  [data-module-view="distribucion"],[data-module-view="distribucion"] *{visibility:visible}
+  [data-module-view="distribucion"]{position:absolute;inset:0;width:100%;background:#fff}
+  .distribution-shell{padding:0;background:#fff}
+  .distribution-shell .distribution-hero,.distribution-shell .distribution-tools,.distribution-shell .distribution-inspector,.distribution-shell .distribution-toolbar{display:none}
+  .distribution-shell .distribution-workspace{display:block;min-height:0}
+  .distribution-shell .distribution-viewport{height:95vh;min-height:0;border:0;border-radius:0;box-shadow:none;background-color:#fff;background-image:none}
+  .distribution-measure-hint,.distribution-cursor-coords{display:none}
+}
