@@ -13,6 +13,54 @@
   .ck-original-search{grid-column:1 / -1}
   .ck-select{grid-column:auto}
 }
+
+
+
+
+/* Mobile refinement: cabecera y controles más delicados; listas se conservan */
+
+
+
+/* Acciones integradas a filtros: sin barra de acciones separada. */
+.ck-original-toolbar{grid-template-columns:auto auto minmax(220px,1fr) 185px 185px 44px}
+.ck-toolbar-new{height:44px;padding:0 14px;display:flex;align-items:center;gap:7px;border:0;border-radius:13px;background:#849168;color:#fff;font-size:10px;font-weight:750;white-space:nowrap;cursor:pointer}
+.ck-toolbar-new b{font-size:18px;font-weight:400;line-height:1}
+.ck-export-icon{width:44px;height:44px;padding:0;border:1px solid #e4ded9;border-radius:13px;background:#fff;color:#66734e;font-size:20px;line-height:1;cursor:pointer}
+.ck-export-icon:hover{background:#f4f4ef}
+
+
+
+/* Acordeón de grupos */
+.ck-group .ck-group-tasks{display:block}
+.ck-group.is-collapsed .ck-group-tasks{display:none}
+.ck-group.is-collapsed>header{border-bottom:0}
+.ck-collapse{transition:transform .18s ease}
+.ck-group.is-collapsed .ck-collapse{transform:rotate(-90deg)}
+.ck-group>header{cursor:pointer}
+
+/* Estados y reordenamiento funcional */
+.ck-drag[draggable="true"]{cursor:grab;touch-action:none}
+.ck-original-task.is-dragging{opacity:.45}
+.ck-original-task.is-drag-over{outline:2px solid #9aa77d;outline-offset:-2px}
+.ck-original-task.is-overdue .ck-original-task-copy small{color:#a35f69;font-weight:700}
+.ck-task-status{grid-column:4;margin-left:0;width:104px;max-width:100%;box-sizing:border-box;height:30px;padding:0 7px;border:1px solid #e5dfda;border-radius:9px;background:#fff;color:#666;font-size:9px;outline:0}
+
+
+
+
+/* Creación de grupos padre y tareas hijas */
+.ck-group-controls{display:flex;align-items:center;justify-content:flex-end;gap:4px}
+.ck-group-add{width:30px;height:30px;border:1px solid #ebe4df;border-radius:50%;background:#fff;color:#87936d;font-size:17px;line-height:1;cursor:pointer}
+.ck-group-empty{margin:0;padding:18px 4px 8px;color:#aaa39c;font-size:10px}
+.ck-create-kind{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:0 0 18px;padding:4px;border:1px solid #ebe5df;border-radius:13px;background:#f7f5f2}
+.ck-create-kind button{height:38px;border:0;border-radius:10px;background:transparent;color:#77716b;font-size:11px;font-weight:650;cursor:pointer}
+.ck-create-kind button.is-active{background:#fff;color:#66734e;box-shadow:0 2px 8px rgba(56,48,42,.08)}
+.ck-form-help{margin:8px 0 0;color:#938d86;font-size:10px;line-height:1.45}
+.ck-dialog [hidden]{display:none}
+
+
+/* Diálogo Checklist compacto en móvil */
+
 @media(max-width:760px){
 .checklist-review{margin-top:76px}
 .ck-actions,.ck-original-toolbar,.ck-group,.ck-kpis,.ck-save-state,.ck-empty,.ck-loading,.ck-error{box-sizing:border-box;width:calc(100% - 24px);margin-left:auto;margin-right:auto}
@@ -119,54 +167,9 @@
   .ck-segments button{padding:0 10px}
 .ck-original-task{grid-template-columns:14px 24px minmax(0,1fr) 78px 30px;gap:5px}.ck-task-status{width:78px;height:28px;padding:0 4px;font-size:8px}.ck-task-plus{width:28px;height:28px;font-size:16px}
 }
-@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
-
-/* Mobile refinement: cabecera y controles más delicados; listas se conservan */
-
-
-
-/* Acciones integradas a filtros: sin barra de acciones separada. */
-.ck-original-toolbar{grid-template-columns:auto auto minmax(220px,1fr) 185px 185px 44px}
-.ck-toolbar-new{height:44px;padding:0 14px;display:flex;align-items:center;gap:7px;border:0;border-radius:13px;background:#849168;color:#fff;font-size:10px;font-weight:750;white-space:nowrap;cursor:pointer}
-.ck-toolbar-new b{font-size:18px;font-weight:400;line-height:1}
-.ck-export-icon{width:44px;height:44px;padding:0;border:1px solid #e4ded9;border-radius:13px;background:#fff;color:#66734e;font-size:20px;line-height:1;cursor:pointer}
-.ck-export-icon:hover{background:#f4f4ef}
-
-
-
-/* Acordeón de grupos */
-.ck-group .ck-group-tasks{display:block}
-.ck-group.is-collapsed .ck-group-tasks{display:none}
-.ck-group.is-collapsed>header{border-bottom:0}
-.ck-collapse{transition:transform .18s ease}
-.ck-group.is-collapsed .ck-collapse{transform:rotate(-90deg)}
-.ck-group>header{cursor:pointer}
-
-/* Estados y reordenamiento funcional */
-.ck-drag[draggable="true"]{cursor:grab;touch-action:none}
-.ck-original-task.is-dragging{opacity:.45}
-.ck-original-task.is-drag-over{outline:2px solid #9aa77d;outline-offset:-2px}
-.ck-original-task.is-overdue .ck-original-task-copy small{color:#a35f69;font-weight:700}
-.ck-task-status{grid-column:4;margin-left:0;width:104px;max-width:100%;box-sizing:border-box;height:30px;padding:0 7px;border:1px solid #e5dfda;border-radius:9px;background:#fff;color:#666;font-size:9px;outline:0}
-
-
-
-
-/* Creación de grupos padre y tareas hijas */
-.ck-group-controls{display:flex;align-items:center;justify-content:flex-end;gap:4px}
-.ck-group-add{width:30px;height:30px;border:1px solid #ebe4df;border-radius:50%;background:#fff;color:#87936d;font-size:17px;line-height:1;cursor:pointer}
-.ck-group-empty{margin:0;padding:18px 4px 8px;color:#aaa39c;font-size:10px}
-.ck-create-kind{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin:0 0 18px;padding:4px;border:1px solid #ebe5df;border-radius:13px;background:#f7f5f2}
-.ck-create-kind button{height:38px;border:0;border-radius:10px;background:transparent;color:#77716b;font-size:11px;font-weight:650;cursor:pointer}
-.ck-create-kind button.is-active{background:#fff;color:#66734e;box-shadow:0 2px 8px rgba(56,48,42,.08)}
-.ck-form-help{margin:8px 0 0;color:#938d86;font-size:10px;line-height:1.45}
-.ck-dialog [hidden]{display:none}
-
-
-/* Diálogo Checklist compacto en móvil */
-
 @media(max-width:390px){
   .ck-dialog form{padding:14px}
   .ck-dialog-actions{bottom:-14px;margin:10px -14px -14px;padding:9px 14px max(9px,env(safe-area-inset-bottom))}
   .ck-dialog-head h2{font-size:22px}
 }
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto}}
