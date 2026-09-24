@@ -46,10 +46,14 @@
         <span class="distribution-inspector-eyebrow">CAPAS</span>
         <label><input type="checkbox" data-distribution-show-tables checked> Mesas</label>
         <label><input type="checkbox" data-distribution-show-elements checked> Elementos</label>
+        <button type="button" data-distribution-measure>Medir distancia</button>
       </div>
     </aside>
     <div class="distribution-viewport" data-distribution-viewport tabindex="0" aria-label="Plano de distribución. Arrastra una mesa para moverla o el fondo para desplazarte.">
-      <div class="distribution-world" data-distribution-world></div>
+      <div class="distribution-world" data-distribution-world>
+        <svg class="distribution-measure-layer" data-distribution-measure-layer aria-hidden="true"></svg>
+      </div>
+      <div class="distribution-measure-hint" data-distribution-measure-hint hidden>Marca el primer punto</div>
       <div class="distribution-empty" data-distribution-empty hidden>
         <strong>Aún no hay mesas para mostrar</strong>
         <span>Las mesas se administran desde Invitados · Mesas y sillas.</span>
