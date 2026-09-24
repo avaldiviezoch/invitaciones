@@ -572,7 +572,7 @@ const moduleWorkspace = $('moduleWorkspace');
 const appModuleNav = $('appModuleNav');
 const appMobileMenu = $('appMobileMenu');
 const appMobileNavBackdrop = $('appMobileNavBackdrop');
-const mobileModuleNavMedia = window.matchMedia('(max-width: 700px), (max-height: 520px) and (pointer: coarse) and (max-width: 1000px)');
+const mobileModuleNavMedia = window.matchMedia('(max-width: 980px)');
 
 function setMobileModuleMenu(open, { moveFocus = false } = {}) {
   const next = Boolean(open) && mobileModuleNavMedia.matches;
@@ -617,7 +617,7 @@ function setModuleLoading(loading) {
     if (!moduleLoader.classList.contains('is-leaving')) return;
     moduleLoader.hidden = true;
     document.body.classList.remove('is-module-loading');
-  }, 420);
+  }, 200);
 }
 
 const ACTIVE_MODULES = new Set(['checklist', 'presupuesto', 'proveedores', 'invitados', 'distribucion']);
