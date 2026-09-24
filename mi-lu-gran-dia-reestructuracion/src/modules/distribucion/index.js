@@ -71,6 +71,21 @@ const PHYSICAL_ELEMENT_TYPES = Object.freeze({
   plantSmall: physicalType('Planta pequeña', 0.5, 0.5, { spatialFamily: 'obstacle', visualFit: 'contain', visualPaddingRatio: 0.04 }),
   tree: physicalType('Árbol / macetero grande', 1.2, 1.2, { spatialFamily: 'obstacle', visualFit: 'contain', visualPaddingRatio: 0.04 }),
   planter: physicalType('Jardinera', 1.5, 0.6, { spatialFamily: 'obstacle', visualFit: 'contain', visualPaddingRatio: 0.05 }),
+  buffet: physicalType('Buffet', 3, 0.9),
+  drinks: physicalType('Bebidas', 2, 0.8),
+  desserts: physicalType('Postres', 2.4, 0.8),
+  cake: physicalType('Torta', 1.8, 1.8),
+  gifts: physicalType('Regalos', 1.8, 0.75),
+  welcome: physicalType('Bienvenida', 1.8, 0.75),
+  booth360: physicalType('Cabina 360°', 2.5, 2.5, { spatialFamily: 'reserved' }),
+  photo: physicalType('Zona de fotos', 3, 2, { spatialFamily: 'reserved' }),
+  screen: physicalType('Pantalla', 2.5, 0.5),
+  altar: physicalType('Altar', 4, 2, { spatialFamily: 'reserved' }),
+  arch: physicalType('Arco decorativo', 2.4, 0.8),
+  restroom: physicalType('Baños', 2.5, 2),
+  kitchen: physicalType('Cocina / apoyo', 3, 2.5, { spatialFamily: 'restricted' }),
+  technical: physicalType('Zona técnica', 2, 1.5, { spatialFamily: 'restricted' }),
+  extinguisher: physicalType('Extintor', 0.5, 0.5),
   zone: physicalType('Zona / área', 4, 3, { spatialFamily: 'informative' })
 });
 
