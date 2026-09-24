@@ -3,7 +3,7 @@ import { normalizeTableShape, tableSeatGeometry } from '../invitados/table-geome
 import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 
-const TEMPLATE_URL = new URL('./index.html?v=11', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=12', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const MIN_ZOOM = 0.45;
