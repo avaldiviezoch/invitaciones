@@ -176,6 +176,7 @@ function parseDistributionState(value) {
       seen.add(tableId);
       return { tableId, x, y, rotation: normalizeRotation(rotation) };
     });
+    const seenElements = new Set();
     const elements = Array.isArray(proposal.elements) ? proposal.elements.map((element) => {
       const id = escapeText(element?.id);
       const type = escapeText(element?.type);
@@ -186,9 +187,10 @@ function parseDistributionState(value) {
       const width = finiteNumber(element?.width) ?? PHYSICAL_ELEMENT_TYPES[type]?.width;
       const height = finiteNumber(element?.height) ?? PHYSICAL_ELEMENT_TYPES[type]?.height;
       const locked = element?.locked === true;
-      if (!id || !PHYSICAL_ELEMENT_TYPES[type] || x === null || y === null || rotation === null || width === null || height === null || width < PIXELS_PER_METER * MIN_ELEMENT_METERS || height < PIXELS_PER_METER * MIN_ELEMENT_METERS || width > PIXELS_PER_METER * MAX_ELEMENT_METERS || height > PIXELS_PER_METER * MAX_ELEMENT_METERS) {
+      if (!id || seenElements.has(id) || !PHYSICAL_ELEMENT_TYPES[type] || x === null || y === null || rotation === null || width === null || height === null || width < PIXELS_PER_METER * MIN_ELEMENT_METERS || height < PIXELS_PER_METER * MIN_ELEMENT_METERS || width > PIXELS_PER_METER * MAX_ELEMENT_METERS || height > PIXELS_PER_METER * MAX_ELEMENT_METERS) {
         throw new Error('La distribución guardada contiene elementos físicos no válidos. No se modificó ningún dato.');
       }
+      seenElements.add(id);
       return { id, type, x, y, rotation: normalizeRotation(rotation), layer, locked, width, height };
     }) : [];
     return {
@@ -974,9 +976,14 @@ async function mountDistribucion(context) {
       updateSaveState();
       try {
         await writePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, serializeDistribution(placementState, tableIds, physicalElements));
-        dirty = false;
         hasPersistedState = true;
-        status.textContent = 'Distribución guardada';
+        if (canonicalChanged) {
+          dirty = true;
+          status.textContent = 'Invitados o Mesas cambiaron durante el guardado · vuelve a abrir Distribución antes de continuar';
+        } else {
+          dirty = false;
+          status.textContent = 'Distribución guardada';
+        }
       } catch (error) {
         console.error('No se pudo guardar Distribución:', error);
         status.textContent = error?.message || 'No se pudo guardar la distribución.';
