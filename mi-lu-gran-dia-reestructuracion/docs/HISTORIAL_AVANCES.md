@@ -184,3 +184,13 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Desde 1200 px de ancho el visor adopta relación 4:3, igual al lienzo físico 1448 × 1086, con mínimo de 620 px.
 - Esto permite que Casa Acapulco se extienda hacia abajo y reduzca el recorte vertical del modo full bleed, manteniendo el mismo sistema de coordenadas y la misma escala física.
 - Tablet y móvil conservan sus reglas responsive anteriores, incluido el modo horizontal sugerido en celular.
+
+
+## 2026-09-24 — Distribución: visor igual al plano y cámara fija
+- Se trabajó únicamente el encuadre del plano.
+- En desktop el visor ahora usa exactamente la relación 1448:1086 del lienzo físico, por lo que el espacio del visor coincide con el espacio de la imagen.
+- Se eliminó el fondo negro del visor; el fondo neutro evita que transparencias internas del PNG aparezcan como franjas negras.
+- La cámara queda fija temporalmente: sin paneo, rueda, pinch ni desplazamiento al enfocar elementos.
+- Se retiraron temporalmente Encajar y los controles de zoom del toolbar. El zoom se resolverá como una fase posterior, una vez cerrada la presentación base del plano.
+- Tablet y móvil conservan sus reglas responsive; en móvil vertical continúa el formato horizontal 16:9 con sugerencia de rotación.
+- No se modificaron mesas, sillas, etiquetas, escala física, Firebase, Firestore, Storage, IDs ni persistencia.
