@@ -177,6 +177,19 @@ function spatialShapesIntersect(a, b) {
   return polygonsIntersect(a.points, b.points);
 }
 
+function shapeBoundaryDistance(a, b) {
+  if (!a || !b || spatialShapesIntersect(a, b)) return 0;
+  if (a.kind === 'circle' && b.kind === 'circle') {
+    return Math.max(0, Math.hypot(a.x - b.x, a.y - b.y) - a.radius - b.radius);
+  }
+  const polygonDistance = (polyA, polyB) => Math.min(...polyA.flatMap((point) => polyB.map((next, index) => pointSegmentDistance(point, next, polyB[(index + 1) % polyB.length]))));
+  if (a.kind === 'circle' && b.kind === 'polygon') {
+    return Math.max(0, Math.min(...b.points.map((point, index) => pointSegmentDistance({ x: a.x, y: a.y }, point, b.points[(index + 1) % b.points.length]))) - a.radius);
+  }
+  if (a.kind === 'polygon' && b.kind === 'circle') return shapeBoundaryDistance(b, a);
+  return Math.min(polygonDistance(a.points, b.points), polygonDistance(b.points, a.points));
+}
+
 let templatePromise = null;
 let mountEpoch = 0;
 let activeDistributionCleanup = null;
@@ -898,7 +911,10 @@ async function mountDistribucion(context) {
       updateHistoryState();
     };
 
-    const refreshSpatialConflicts = () => {
+    const proximitySelect = root.querySelector('[data-distribution-proximity]');
+    let proximityMeters = Number(proximitySelect?.value) || 1;
+
+        const refreshSpatialConflicts = () => {
       const tableShapes = layout.items.map((item) => {
         const tableId = escapeText(item.table?.id);
         return { tableId, shape: spatialShapeForTable(item.table, placementState.get(tableId), item.geometry) };
@@ -908,16 +924,42 @@ async function mountDistribucion(context) {
         shape: spatialShapeForElement(element)
       })).filter((entry) => entry.shape);
 
-      world.querySelectorAll('.distribution-table,.distribution-element').forEach((node) => node.classList.remove('has-spatial-conflict'));
+      world.querySelectorAll('.distribution-table,.distribution-element').forEach((node) => {
+        node.classList.remove('has-spatial-conflict', 'has-proximity-warning');
+        node.removeAttribute('data-proximity-gap');
+      });
 
-      tableShapes.forEach((tableEntry) => {
+      tableShapes.forEach((tableEntry, index) => {
         elementShapes.forEach((elementEntry) => {
           if (!spatialShapesIntersect(tableEntry.shape, elementEntry.shape)) return;
           world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableEntry.tableId)}"]`)?.classList.add('has-spatial-conflict');
           world.querySelector(`.distribution-element[data-element-id="${CSS.escape(elementEntry.element.id)}"]`)?.classList.add('has-spatial-conflict');
         });
+
+        tableShapes.slice(index + 1).forEach((otherEntry) => {
+          const first = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableEntry.tableId)}"]`);
+          const second = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(otherEntry.tableId)}"]`);
+          if (spatialShapesIntersect(tableEntry.shape, otherEntry.shape)) {
+            first?.classList.add('has-spatial-conflict');
+            second?.classList.add('has-spatial-conflict');
+            return;
+          }
+          const gapMeters = PLAN_SCALE.pixelsToMeters(shapeBoundaryDistance(tableEntry.shape, otherEntry.shape));
+          if (gapMeters >= proximityMeters) return;
+          [first, second].forEach((node) => {
+            node?.classList.add('has-proximity-warning');
+            if (node) node.dataset.proximityGap = gapMeters.toFixed(2);
+          });
+        });
       });
     };
+
+    proximitySelect?.addEventListener('change', () => {
+      const next = Number(proximitySelect.value);
+      proximityMeters = [0.6, 1, 1.5, 2].includes(next) ? next : 1;
+      refreshSpatialConflicts();
+      status.textContent = `Alerta de separación configurada en ${proximityMeters.toFixed(1)} m`;
+    });
 
     const markDirty = () => {
       dirty = true;
