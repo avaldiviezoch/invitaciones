@@ -99,7 +99,14 @@
         <label><input type="checkbox" data-distribution-show-tables checked> Mesas y sillas</label>
         <label><input type="checkbox" data-distribution-show-guest-labels checked> Nombres de invitados</label>
         <label><input type="checkbox" data-distribution-show-elements checked> Elementos físicos</label>
+        <label><input type="checkbox" data-distribution-show-reference> Fondo de referencia</label>
         <small class="distribution-layer-help">Estas capas son solo de visualización. Ocultarlas no modifica mesas, sillas, invitados ni asignaciones.</small>
+        <div class="distribution-reference-controls">
+          <label>Imagen de referencia<input type="file" accept="image/png,image/jpeg,image/webp" data-distribution-reference-file></label>
+          <label>Opacidad<input type="range" min="10" max="100" step="5" value="45" data-distribution-reference-opacity></label>
+          <button type="button" data-distribution-reference-remove>Quitar fondo</button>
+          <small>La imagen es una ayuda visual temporal de esta sesión. No se sube ni se guarda en Firebase, Firestore o Storage.</small>
+        </div>
         <label class="distribution-proximity-control">Separación entre mesas
           <select data-distribution-proximity>
             <option value="0.6">0.6 m</option>
