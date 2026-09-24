@@ -584,12 +584,15 @@ function createRsvpController(api) {
     const copyMusicUrl = event.target.closest('[data-music-copy-url]');
     if (copyMusicUrl) {
       const url = musicPublicUrl();
-      if (url) {
+      if (!url) return true;
+      const before = copyMusicUrl.textContent;
+      try {
         await navigator.clipboard.writeText(url);
-        const before = copyMusicUrl.textContent;
         copyMusicUrl.textContent = 'Copiado ✓';
-        window.setTimeout(() => { copyMusicUrl.textContent = before; }, 1200);
+      } catch {
+        copyMusicUrl.textContent = 'No se pudo copiar';
       }
+      window.setTimeout(() => { copyMusicUrl.textContent = before; }, 1200);
       return true;
     }
     if (event.target.closest('[data-music-open-url]')) {
