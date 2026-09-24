@@ -13,12 +13,14 @@ La asignación vigente de una persona se expresa en `guest.tableId + guest.seatI
 Editar datos personales o RSVP no debe modificar esos tres campos salvo una operación explícita de Mesas.
 
 ## Mesas
-Fuente lógica de `tableId`, forma, capacidad y `seatId`.
+Fuente lógica de `tableId`, forma, capacidad, `seatId` y dimensiones físicas del tablero por mesa.
+La dimensión física se guarda opcionalmente en `table.dimensions`; si no existe, los consumidores usan el estándar de la forma.
 Mover o rotar una mesa no cambia su identidad.
 `table.guestIds` es una representación derivada de las asignaciones de Invitados; no es una segunda fuente maestra y no debe editarse independientemente.
 
 ## Distribución
-Dueño de posición, rotación y elementos físicos del plano por propuesta.
+Dueño de posición, rotación y elementos físicos no-mesa del plano por propuesta.
+Consume `table.dimensions` de Mesas para dibujar el tablero, sillas y clearance; no guarda una segunda medida de la mesa en el placement.
 No crea una segunda identidad de mesa.
 
 ## Checklist

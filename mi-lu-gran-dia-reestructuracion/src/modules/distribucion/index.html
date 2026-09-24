@@ -225,6 +225,15 @@
           </select>
           <small>Se sincroniza con Invitados sin cambiar capacidad, sillas ni asignaciones.</small>
         </label>
+        <div class="distribution-table-dimensions" data-distribution-table-dimensions hidden>
+          <span>MEDIDA FÍSICA</span>
+          <div class="distribution-dimensions">
+            <label data-distribution-table-width-label>Diámetro (m)<input type="number" min="0.5" max="4" step="0.1" data-distribution-table-width></label>
+            <label data-distribution-table-height-label hidden>Fondo (m)<input type="number" min="0.5" max="4" step="0.1" data-distribution-table-height></label>
+          </div>
+          <button type="button" data-distribution-table-size-reset>Usar medida estándar</button>
+          <small>La medida pertenece a esta mesa y se conserva aunque cambies su posición en el plano.</small>
+        </div>
         <div class="distribution-inspector-stats" data-distribution-table-stats>
           <span><strong data-distribution-selected-seated>0</strong> asignados</span>
           <span><strong data-distribution-selected-free>0</strong> libres</span>

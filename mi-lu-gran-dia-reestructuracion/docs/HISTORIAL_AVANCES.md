@@ -451,3 +451,16 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Las sillas fuera de rango, mesas inválidas o sillas sin identidad siguen bloqueando el guardado.
 - La reparación forma parte de la misma mutación de Mesas y queda cubierta por el snapshot previo/rollback si Firebase falla.
 - No se reasignan invitados, no se cambian números de silla, no se crean IDs paralelos y no se modifican contratos de Firebase.
+
+
+## 2026-09-24 — Distribución Fase 1: dimensiones físicas por mesa
+- Se formaliza table.dimensions como override físico opcional de cada tableId canónica.
+- Mesas existentes sin dimensions conservan automáticamente los tamaños estándar actuales; no se ejecuta migración masiva.
+- Redonda guarda diámetro; cuadrada lado; rectangular largo y fondo. Rango inicial seguro: 0.5 a 4.0 m.
+- tablePhysicalGeometry() consume ahora la mesa completa y deriva tablero, órbita de sillas y clearance desde su tamaño real.
+- Clearance deja de ser constante global y se deriva como tablero + 0.80 m por cada lado, siguiendo el contrato físico original.
+- El inspector desktop permite editar medidas y restaurar el estándar.
+- Ajustes móvil permite editar las mismas medidas mediante la misma función de dominio; no existe una segunda implementación.
+- Las dimensiones se persisten mediante saveInvitadosSnapshot sobre la mesa canónica, releyendo primero el snapshot vigente para reducir escrituras desde estado obsoleto.
+- x/y/rotation siguen siendo propiedad de Distribución y no incluyen dimensiones.
+- Los elementos físicos no-mesa mantienen su width/height existente por propuesta; esa persistencia ya estaba implementada.
