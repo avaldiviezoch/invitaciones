@@ -58,3 +58,13 @@ HITO DISTRIBUCIÓN — FASE 3:
 - Rotar una mesa hace orbitar sus sillas y mantiene horizontales las etiquetas de invitados.
 - Sin Firestore directo, sin localStorage/sessionStorage/IndexedDB directo y sin !important.
 - Próximo: Fase 4, integración estructural controlada, previa auditoría de operaciones permitidas.
+
+
+HITO DISTRIBUCIÓN — FASE 4 CERRADA:
+- Integración estructural validada sin convertir Distribución en propietario de mesas, sillas o asignaciones.
+- Refresco canónico controlado ante cambios de Invitados/Mesas y al volver a la aplicación.
+- Si existen movimientos sin guardar, no se mezclan automáticamente con cambios estructurales externos.
+- Validación fail-closed de IDs de mesa/silla, referencias, rangos, seatId y doble ocupación antes de editar el plano.
+- Una inconsistencia se informa; Distribución no la repara ni escribe sobre los datos.
+- Sin escrituras directas de datos canónicos desde Distribución.
+- Próximo: Fase 5 — editor avanzado de Distribución.
