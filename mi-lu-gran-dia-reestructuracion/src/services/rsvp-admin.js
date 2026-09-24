@@ -56,14 +56,15 @@ async function loadRsvpAdminSnapshot(context) {
   const token = cleanText(config.token, 160);
   if (!token) return { config, token: '', responses: [], musicResponses: [], management: [] };
 
-  let responseSnaps;
-  try {
-    responseSnaps = await getDocs(query(collection(db, 'publicRsvp', token, 'responses'), orderBy('submittedAt', 'desc')));
-  } catch {
-    responseSnaps = await getDocs(collection(db, 'publicRsvp', token, 'responses'));
-  }
-
-  const managementSnaps = await getDocs(collection(db, 'weddings', context.id, 'rsvpManagement'));
+  const responseRequest = (async () => {
+    try {
+      return await getDocs(query(collection(db, 'publicRsvp', token, 'responses'), orderBy('submittedAt', 'desc')));
+    } catch {
+      return getDocs(collection(db, 'publicRsvp', token, 'responses'));
+    }
+  })();
+  const managementRequest = getDocs(collection(db, 'weddings', context.id, 'rsvpManagement'));
+  const [responseSnaps, managementSnaps] = await Promise.all([responseRequest, managementRequest]);
   const allResponses = responseSnaps.docs.map(responseFromSnap);
   const responses = allResponses
     .filter((item) => !isMusicOnlyResponse(item))
