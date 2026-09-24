@@ -48,6 +48,15 @@
         <span class="distribution-inspector-eyebrow">CAPAS</span>
         <label><input type="checkbox" data-distribution-show-tables checked> Mesas</label>
         <label><input type="checkbox" data-distribution-show-elements checked> Elementos</label>
+        <label class="distribution-proximity-control">Separación entre mesas
+          <select data-distribution-proximity>
+            <option value="0.6">0.6 m</option>
+            <option value="1" selected>1.0 m</option>
+            <option value="1.5">1.5 m</option>
+            <option value="2">2.0 m</option>
+          </select>
+        </label>
+        <small class="distribution-proximity-help">Alerta cuando el espacio libre entre las áreas funcionales de dos mesas baja de este valor.</small>
         <button type="button" data-distribution-measure>Medir distancia</button>
         <button type="button" data-distribution-clear-measure>Limpiar medida</button>
         <button type="button" data-distribution-draw-area>Dibujar área libre</button>
