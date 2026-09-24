@@ -3,6 +3,7 @@ export function setupDistributionCamera(root, world, worldSize) {
   let scale = 1;
   let x = 0;
   let y = 0;
+  let resizeFrame = 0;
 
   const apply = () => {
     world.style.transform = `translate(${x}px,${y}px) scale(${scale})`;
@@ -19,13 +20,29 @@ export function setupDistributionCamera(root, world, worldSize) {
     apply();
   };
 
-  const handleResize = () => requestAnimationFrame(fit);
-  window.addEventListener('resize', handleResize);
-  requestAnimationFrame(fit);
+  const scheduleFit = () => {
+    if (resizeFrame) cancelAnimationFrame(resizeFrame);
+    resizeFrame = requestAnimationFrame(() => {
+      resizeFrame = 0;
+      fit();
+    });
+  };
+
+  const resizeObserver = typeof ResizeObserver === 'function'
+    ? new ResizeObserver(scheduleFit)
+    : null;
+
+  resizeObserver?.observe(viewport);
+  window.addEventListener('resize', scheduleFit);
+  scheduleFit();
 
   return {
     fit,
-    destroy: () => window.removeEventListener('resize', handleResize),
+    destroy: () => {
+      resizeObserver?.disconnect();
+      window.removeEventListener('resize', scheduleFit);
+      if (resizeFrame) cancelAnimationFrame(resizeFrame);
+    },
     clientDeltaToWorld: (delta) => delta / scale,
     clientPointToWorld: (clientX, clientY) => {
       const rect = viewport.getBoundingClientRect();
