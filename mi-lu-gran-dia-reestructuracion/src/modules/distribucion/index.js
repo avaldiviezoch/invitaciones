@@ -943,31 +943,51 @@ async function mountDistribucion(context) {
       })).filter((entry) => entry.shape);
 
       world.querySelectorAll('.distribution-table,.distribution-element').forEach((node) => {
-        node.classList.remove('has-spatial-conflict', 'has-proximity-warning');
+        node.classList.remove('has-spatial-conflict', 'has-spatial-warning', 'has-proximity-warning');
         node.removeAttribute('data-proximity-gap');
       });
 
+      const markSpatialState = (node, state) => {
+        if (!node || state === 'allow') return;
+        node.classList.add(state === 'conflict' ? 'has-spatial-conflict' : 'has-spatial-warning');
+      };
+
       tableShapes.forEach((tableEntry, index) => {
+        const tableNode = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableEntry.tableId)}"]`);
         elementShapes.forEach((elementEntry) => {
           if (!spatialShapesIntersect(tableEntry.shape, elementEntry.shape)) return;
-          world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableEntry.tableId)}"]`)?.classList.add('has-spatial-conflict');
-          world.querySelector(`.distribution-element[data-element-id="${CSS.escape(elementEntry.element.id)}"]`)?.classList.add('has-spatial-conflict');
+          const state = spatialRuleFor(elementEntry.element, 'table');
+          markSpatialState(tableNode, state);
+          markSpatialState(world.querySelector(`.distribution-element[data-element-id="${CSS.escape(elementEntry.element.id)}"]`), state);
         });
 
         tableShapes.slice(index + 1).forEach((otherEntry) => {
-          const first = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableEntry.tableId)}"]`);
           const second = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(otherEntry.tableId)}"]`);
           if (spatialShapesIntersect(tableEntry.shape, otherEntry.shape)) {
-            first?.classList.add('has-spatial-conflict');
-            second?.classList.add('has-spatial-conflict');
+            markSpatialState(tableNode, 'conflict');
+            markSpatialState(second, 'conflict');
             return;
           }
           const gapMeters = PLAN_SCALE.pixelsToMeters(shapeBoundaryDistance(tableEntry.shape, otherEntry.shape));
           if (gapMeters >= proximityMeters) return;
-          [first, second].forEach((node) => {
+          [tableNode, second].forEach((node) => {
             node?.classList.add('has-proximity-warning');
             if (node) node.dataset.proximityGap = gapMeters.toFixed(2);
           });
+        });
+      });
+
+      elementShapes.forEach((entry, index) => {
+        const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(entry.element.id)}"]`);
+        elementShapes.slice(index + 1).forEach((other) => {
+          if (!spatialShapesIntersect(entry.shape, other.shape)) return;
+          const firstState = spatialRuleFor(entry.element, 'element');
+          const secondState = spatialRuleFor(other.element, 'element');
+          const state = firstState === 'conflict' || secondState === 'conflict'
+            ? 'conflict'
+            : firstState === 'warning' || secondState === 'warning' ? 'warning' : 'allow';
+          markSpatialState(node, state);
+          markSpatialState(world.querySelector(`.distribution-element[data-element-id="${CSS.escape(other.element.id)}"]`), state);
         });
       });
     };
