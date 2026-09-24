@@ -976,6 +976,8 @@ async function mountDistribucion(context) {
         return;
       }
       const wasPresentation = presentationMode;
+      const referenceWasHidden = world.classList.contains('hide-reference-image');
+      if (referenceObjectUrl && !referenceWasHidden) world.classList.add('print-reference-image');
       if (!wasPresentation) setPresentationMode(true);
       root.classList.add('is-printing-plan');
       requestAnimationFrame(() => {
@@ -983,6 +985,7 @@ async function mountDistribucion(context) {
         requestAnimationFrame(() => {
           window.print();
           root.classList.remove('is-printing-plan');
+          world.classList.remove('print-reference-image');
           if (!wasPresentation) setPresentationMode(false);
         });
       });
@@ -1870,6 +1873,40 @@ async function mountDistribucion(context) {
     root.querySelector('[data-distribution-show-elements]').onchange = (event) => {
       applyVisibilityLayer('hide-elements', event.currentTarget.checked, 'element');
     };
+    const referenceToggle = root.querySelector('[data-distribution-show-reference]');
+    const referenceFile = root.querySelector('[data-distribution-reference-file]');
+    const referenceOpacity = root.querySelector('[data-distribution-reference-opacity]');
+    const referenceRemove = root.querySelector('[data-distribution-reference-remove]');
+    let referenceObjectUrl = '';
+    const clearReferenceImage = () => {
+      if (referenceObjectUrl) URL.revokeObjectURL(referenceObjectUrl);
+      referenceObjectUrl = '';
+      world.style.removeProperty('--distribution-reference-image');
+      world.classList.remove('has-reference-image');
+      referenceToggle.checked = false;
+      referenceFile.value = '';
+    };
+    referenceFile.onchange = () => {
+      const file = referenceFile.files?.[0];
+      if (!file || !['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        clearReferenceImage();
+        if (file) status.textContent = 'El fondo debe ser PNG, JPG o WebP';
+        return;
+      }
+      if (referenceObjectUrl) URL.revokeObjectURL(referenceObjectUrl);
+      referenceObjectUrl = URL.createObjectURL(file);
+      world.style.setProperty('--distribution-reference-image', `url("${referenceObjectUrl}")`);
+      world.classList.add('has-reference-image');
+      referenceToggle.checked = true;
+      status.textContent = 'Fondo de referencia cargado solo para esta sesión';
+    };
+    referenceToggle.onchange = () => {
+      world.classList.toggle('hide-reference-image', !referenceToggle.checked);
+    };
+    referenceOpacity.oninput = () => {
+      world.style.setProperty('--distribution-reference-opacity', String(Math.max(0.1, Math.min(1, Number(referenceOpacity.value) / 100))));
+    };
+    referenceRemove.onclick = clearReferenceImage;
     root.querySelector('[data-distribution-rotate-left]').onclick = () => rotateSelected(-ROTATION_STEP);
     root.querySelector('[data-distribution-rotate-right]').onclick = () => rotateSelected(ROTATION_STEP);
     root.querySelector('[data-distribution-bring-front]').onclick = () => updateElementLayer(1);
