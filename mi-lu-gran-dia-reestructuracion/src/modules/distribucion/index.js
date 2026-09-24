@@ -21,7 +21,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=50', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=51', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -867,6 +867,10 @@ async function mountDistribucion(context) {
     let canonicalCloudUnsubscribe = null;
     let lastPersistedSignature = storedState ? JSON.stringify(storedState) : '';
     let queuedRemoteDistributionSignature = '';
+    let lastPersistedState = storedState ? JSON.parse(JSON.stringify(storedState)) : null;
+    let pendingRemoteDistributionState = null;
+    let pendingLocalDistributionState = null;
+    const syncConflict = root.querySelector('[data-distribution-sync-conflict]');
     const undoStack = [];
     const redoStack = [];
     const undoButton = root.querySelector('[data-distribution-undo]');
@@ -1147,7 +1151,62 @@ async function mountDistribucion(context) {
 
     const camera = setupDistributionCamera(root, world, layout);
 
-    async function persistDistribution() {
+    const distributionProposalSignature = (proposal) => JSON.stringify(proposal ?? null);
+
+    const mergeDistributionStates = (baseState, localState, remoteState) => {
+      if (!baseState || !remoteState) return { state: localState, conflicts: [] };
+      const baseById = new Map(baseState.proposals.map((proposal) => [proposal.id, proposal]));
+      const localById = new Map(localState.proposals.map((proposal) => [proposal.id, proposal]));
+      const remoteById = new Map(remoteState.proposals.map((proposal) => [proposal.id, proposal]));
+      const orderedIds = [
+        ...localState.proposals.map((proposal) => proposal.id),
+        ...remoteState.proposals.map((proposal) => proposal.id).filter((id) => !localById.has(id))
+      ];
+      const conflicts = [];
+      const proposals = [];
+
+      orderedIds.forEach((id) => {
+        const baseProposal = baseById.get(id) || null;
+        const localProposal = localById.get(id) || null;
+        const remoteProposal = remoteById.get(id) || null;
+        const baseSignature = distributionProposalSignature(baseProposal);
+        const localSignature = distributionProposalSignature(localProposal);
+        const remoteSignature = distributionProposalSignature(remoteProposal);
+        const localChanged = localSignature !== baseSignature;
+        const remoteChanged = remoteSignature !== baseSignature;
+
+        if (localChanged && remoteChanged && localSignature !== remoteSignature) {
+          conflicts.push(id);
+          return;
+        }
+        const chosen = remoteChanged ? remoteProposal : localProposal;
+        if (chosen) proposals.push(JSON.parse(JSON.stringify(chosen)));
+      });
+
+      if (conflicts.length) return { state: null, conflicts };
+      const activeId = proposals.some((proposal) => proposal.id === localState.activeProposalId)
+        ? localState.activeProposalId
+        : proposals[0]?.id || DEFAULT_PROPOSAL_ID;
+      return {
+        state: { version: 1, activeProposalId: activeId, proposals },
+        conflicts: []
+      };
+    };
+
+    const hideSyncConflict = () => {
+      pendingRemoteDistributionState = null;
+      pendingLocalDistributionState = null;
+      syncConflict.hidden = true;
+    };
+
+    const showSyncConflict = (localState, remoteState) => {
+      pendingLocalDistributionState = JSON.parse(JSON.stringify(localState));
+      pendingRemoteDistributionState = JSON.parse(JSON.stringify(remoteState));
+      syncConflict.hidden = false;
+      status.textContent = 'Conflicto de sincronización · elige qué versión conservar';
+    };
+
+    async function persistDistribution({ force = false } = {}) {
       if (!canEdit || !dirty || saving || canonicalChanged || !tables.length) return false;
       saving = true;
       updateSaveState();
@@ -1155,10 +1214,36 @@ async function mountDistribucion(context) {
         const activeIndex = proposalState.findIndex((proposal) => proposal.id === activeProposalId);
         const activeName = proposalState[activeIndex]?.name || 'Propuesta';
         proposalState[activeIndex] = serializeProposal(activeProposalId, activeName, placementState, tableIds, physicalElements);
-        const payload = serializeDistribution(proposalState, activeProposalId);
+        let payload = serializeDistribution(proposalState, activeProposalId);
+
+        if (!force) {
+          const remoteValue = await readPlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY);
+          const remoteState = parseDistributionState(remoteValue);
+          const remoteSignature = remoteState ? JSON.stringify(remoteState) : '';
+          if (remoteSignature && lastPersistedSignature && remoteSignature !== lastPersistedSignature) {
+            const merged = mergeDistributionStates(lastPersistedState, payload, remoteState);
+            if (merged.conflicts.length) {
+              showSyncConflict(payload, remoteState);
+              dirty = true;
+              return false;
+            }
+            payload = merged.state;
+            proposalState.splice(0, proposalState.length, ...payload.proposals.map((proposal) => ({
+              ...proposal,
+              placements: proposal.placements.map((placement) => ({ ...placement })),
+              elements: proposal.elements.map((element) => ({
+                ...element,
+                points: Array.isArray(element.points) ? element.points.map((point) => ({ ...point })) : null
+              }))
+            })));
+          }
+        }
+
         await writePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, payload);
         lastPersistedSignature = JSON.stringify(payload);
+        lastPersistedState = JSON.parse(JSON.stringify(payload));
         hasPersistedState = true;
+        hideSyncConflict();
 
         if (canonicalChanged) {
           dirty = true;
@@ -1167,8 +1252,6 @@ async function mountDistribucion(context) {
         }
 
         dirty = false;
-        undoStack.length = 0;
-        redoStack.length = 0;
         updateHistoryState();
         status.textContent = 'Distribución sincronizada';
         return true;
@@ -1178,8 +1261,24 @@ async function mountDistribucion(context) {
         return false;
       } finally {
         saving = false;
+        if (
+          queuedRemoteDistributionSignature
+          && queuedRemoteDistributionSignature !== lastPersistedSignature
+          && pendingRemoteDistributionState
+          && dirty === false
+        ) {
+          const activeIndex = proposalState.findIndex((proposal) => proposal.id === activeProposalId);
+          const activeName = proposalState[activeIndex]?.name || 'Propuesta';
+          proposalState[activeIndex] = serializeProposal(activeProposalId, activeName, placementState, tableIds, physicalElements);
+          const currentLocalState = serializeDistribution(proposalState, activeProposalId);
+          showSyncConflict(currentLocalState, pendingRemoteDistributionState);
+          dirty = true;
+        }
+        if (queuedRemoteDistributionSignature === lastPersistedSignature) {
+          queuedRemoteDistributionSignature = '';
+          pendingRemoteDistributionState = null;
+        }
         updateSaveState();
-        queuedRemoteDistributionSignature = '';
       }
     }
 
@@ -1562,7 +1661,6 @@ async function mountDistribucion(context) {
     };
 
     const editorSnapshot = () => ({
-      dirty,
       placements: tableIds.map((tableId) => ({ tableId, ...placementState.get(tableId) })),
       elements: physicalElements.map((element) => ({
         ...element,
@@ -1605,7 +1703,7 @@ async function mountDistribucion(context) {
         bindElementInteraction(node, element);
       });
       clearSelection();
-      dirty = snapshot.dirty === true;
+      dirty = true;
       updateSaveState();
       refreshSpatialConflicts();
     };
@@ -2709,11 +2807,31 @@ async function mountDistribucion(context) {
 
       undoStack.length = 0;
       redoStack.length = 0;
+      lastPersistedState = JSON.parse(JSON.stringify(remoteState));
+      hideSyncConflict();
       updateHistoryState();
       refreshProposalControls();
       refreshSpatialConflicts();
       status.textContent = 'Distribución sincronizada';
       return true;
+    };
+
+    root.querySelector('[data-distribution-sync-use-local]').onclick = async () => {
+      if (!pendingLocalDistributionState || saving) return;
+      dirty = true;
+      await persistDistribution({ force: true });
+    };
+
+    root.querySelector('[data-distribution-sync-use-remote]').onclick = () => {
+      if (!pendingRemoteDistributionState || saving) return;
+      const remoteState = JSON.parse(JSON.stringify(pendingRemoteDistributionState));
+      const remoteSignature = JSON.stringify(remoteState);
+      if (applyRemoteDistributionState(remoteState)) {
+        lastPersistedSignature = remoteSignature;
+        lastPersistedState = JSON.parse(JSON.stringify(remoteState));
+        dirty = false;
+        updateSaveState();
+      }
     };
 
     distributionCloudUnsubscribe = subscribePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, (remoteValue) => {
@@ -2729,11 +2847,13 @@ async function mountDistribucion(context) {
 
       if (dirty || saving || canonicalChanged) {
         queuedRemoteDistributionSignature = remoteSignature;
+        pendingRemoteDistributionState = JSON.parse(JSON.stringify(remoteState));
         return;
       }
 
       if (applyRemoteDistributionState(remoteState)) {
         lastPersistedSignature = remoteSignature;
+        lastPersistedState = JSON.parse(JSON.stringify(remoteState));
       }
     }, (error) => {
       console.error('No se pudo escuchar la sincronización de Distribución:', error);

@@ -147,3 +147,8 @@
 @media(max-width:700px){
   .distribution-resize-handle{width:20px;height:20px;border-width:3px}
 }
+
+.distribution-sync-conflict{display:flex;align-items:center;gap:6px;padding:5px 7px;border:1px solid rgba(172,92,82,.28);border-radius:10px;background:rgba(246,231,228,.86);color:#875951;font-size:7px;font-weight:800}
+.distribution-sync-conflict[hidden]{display:none}
+.distribution-sync-conflict button{min-height:24px;padding:0 7px;border:1px solid rgba(172,92,82,.22);border-radius:7px;background:#fff;color:#875951;font-size:7px;font-weight:800;cursor:pointer}
+@media(max-width:700px){.distribution-sync-conflict{grid-column:1/-1;flex-wrap:wrap}.distribution-sync-conflict span{flex:1 0 100%}}

@@ -502,3 +502,15 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - redrawTableInPlace() y reconcileCanonicalTables() actualizan layout antes de redibujar.
 - refreshSpatialConflicts() deriva nuevamente la geometría desde tableById antes de calcular colisiones/proximidad, por lo que las validaciones siempre usan la medida física vigente.
 - No se cambian seatId, seatNumber, tableId, placements ni contratos de persistencia.
+
+
+## 2026-09-24 — Distribución Fase 4: historial y concurrencia multi-dispositivo
+- El autosave deja de borrar undoStack/redoStack; un objeto redimensionado puede deshacerse incluso después de sincronizarse.
+- restoreEditorSnapshot() considera Undo/Redo una nueva edición y vuelve a autoguardarla, evitando que el DOM quede revertido solo localmente.
+- Antes de guardar Distribución se relee la clave remota y se compara contra lastPersistedState.
+- mergeDistributionStates() realiza fusión de tres vías por proposalId: cambios no superpuestos en propuestas distintas se combinan automáticamente.
+- Si dos dispositivos modificaron la misma propuesta desde la misma base y los resultados difieren, no se sobrescribe silenciosamente.
+- En conflicto aparece un control compacto con “Conservar este” y “Usar remoto”; la decisión queda explícitamente en manos del usuario.
+- “Conservar este” fuerza la escritura solo después de esa acción explícita; “Usar remoto” aplica el estado remoto en caliente y limpia el historial incompatible.
+- lastPersistedState se actualiza tanto al guardar como al recibir/aplicar cambios remotos.
+- No se modifica el esquema de Firebase, claves, IDs, invitados, sillas ni table.dimensions.
