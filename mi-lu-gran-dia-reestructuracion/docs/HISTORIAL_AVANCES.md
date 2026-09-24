@@ -357,3 +357,14 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Si llega un evento remoto mientras existe una edición local en guardado, se difiere el refresco hasta terminar para no interrumpir el gesto.
 - El botón Guardar sigue existiendo como acción manual/estado de respaldo, pero ya no es requisito para conservar una edición estable.
 - No se cambian Firebase collections, esquema planificador_bodas_distribucion_v1, IDs, Firestore rules ni Storage.
+
+
+## 2026-09-24 — Distribución: autoguardado puro, sin botones Guardar
+- Se eliminan los botones Guardar de desktop y móvil.
+- El autoguardado deja de simular clicks sobre controles UI.
+- Se crea persistDistribution() como única ruta interna de persistencia de Distribución.
+- Cada estado dirty programa persistDistribution() automáticamente a los 250 ms.
+- Al ocultar la pestaña se intenta persistir directamente cualquier edición pendiente.
+- Si Firebase falla, dirty se conserva y no se presenta el estado como sincronizado.
+- Se mantiene la misma clave planificador_bodas_distribucion_v1 y la misma escritura writePlannerStorageKey.
+- No se modifican colecciones, reglas, IDs, esquema ni Storage.

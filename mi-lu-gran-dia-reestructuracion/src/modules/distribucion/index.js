@@ -13,7 +13,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=41', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=42', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -779,7 +779,6 @@ async function mountDistribucion(context) {
   if (epoch !== mountEpoch || !root.isConnected) return;
   root.innerHTML = templateHtml;
   const status = root.querySelector('[data-distribution-status]');
-  const saveButton = root.querySelector('[data-distribution-save]');
   const canEdit = weddingCapabilities(context?.role).canEdit;
   status.textContent = 'Cargando mesas y distribución…';
 
@@ -836,9 +835,6 @@ async function mountDistribucion(context) {
     const mobileSheetTitle = root.querySelector('[data-distribution-mobile-sheet-title]');
     const mobileSheetBody = root.querySelector('[data-distribution-mobile-sheet-body]');
     const mobileWheelToggle = root.querySelector('[data-distribution-mobile-wheel-toggle]');
-    const mobileSaveButton = root.querySelector('[data-distribution-mobile-save]');
-    const mobileSaveState = root.querySelector('[data-distribution-mobile-save-state]');
-    const mobileSaveRow = mobileSaveButton?.closest('.distribution-mobile-save-row');
     const mobileActions = [...root.querySelectorAll('[data-mobile-action]')];
     const mobileActionOrder = ['add', 'proposal', 'view', 'review', 'settings'];
     const mobileActionLabels = { add: 'Añadir', proposal: 'Propuesta', view: 'Vista', review: 'Revisar', settings: 'Ajustes' };
@@ -1008,43 +1004,62 @@ async function mountDistribucion(context) {
 
     const camera = setupDistributionCamera(root, world, layout);
 
+    async function persistDistribution() {
+      if (!canEdit || !dirty || saving || canonicalChanged || !tables.length) return false;
+      saving = true;
+      updateSaveState();
+      try {
+        const activeIndex = proposalState.findIndex((proposal) => proposal.id === activeProposalId);
+        const activeName = proposalState[activeIndex]?.name || 'Propuesta';
+        proposalState[activeIndex] = serializeProposal(activeProposalId, activeName, placementState, tableIds, physicalElements);
+        const payload = serializeDistribution(proposalState, activeProposalId);
+        await writePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, payload);
+        lastPersistedSignature = JSON.stringify(payload);
+        hasPersistedState = true;
+
+        if (canonicalChanged) {
+          dirty = true;
+          status.textContent = 'Invitados o Mesas cambiaron durante la sincronización · vuelve a abrir Distribución';
+          return false;
+        }
+
+        dirty = false;
+        undoStack.length = 0;
+        redoStack.length = 0;
+        updateHistoryState();
+        status.textContent = 'Distribución sincronizada';
+        return true;
+      } catch (error) {
+        console.error('No se pudo sincronizar Distribución:', error);
+        status.textContent = error?.message || 'No se pudo sincronizar la distribución.';
+        return false;
+      } finally {
+        saving = false;
+        updateSaveState();
+        if (remoteRefreshQueued && !dirty && !canonicalChanged) {
+          remoteRefreshQueued = false;
+          window.setTimeout(() => {
+            if (!dirty && !saving && !canonicalChanged) void mountDistribucion(context);
+          }, 120);
+        }
+      }
+    }
+
     const scheduleAutosave = (delay = 250) => {
       if (!canEdit || saving || canonicalChanged || !dirty) return;
       if (autosaveTimer) window.clearTimeout(autosaveTimer);
       autosaveTimer = window.setTimeout(() => {
         autosaveTimer = 0;
         if (!dirty || saving || canonicalChanged) return;
-        saveButton.click();
+        void persistDistribution();
       }, delay);
     };
 
     const updateSaveState = () => {
-      const saveDisabled = !canEdit || !dirty || saving || canonicalChanged || !tables.length;
-      saveButton.disabled = saveDisabled;
-      saveButton.textContent = saving ? 'Guardando…' : 'Guardar distribución';
-      if (mobileSaveButton) {
-        mobileSaveButton.disabled = saveDisabled;
-        mobileSaveButton.textContent = saving ? 'Guardando…' : 'Guardar cambios';
-      }
-      if (mobileSaveState) {
-        mobileSaveState.textContent = !canEdit
-          ? 'Solo lectura'
-          : saving
-            ? 'Guardando'
-            : canonicalChanged
-              ? 'Reabrir'
-              : dirty
-                ? 'Sincronizando'
-                : hasPersistedState
-                  ? 'Sincronizado'
-                  : 'Sin guardar';
-      }
-      mobileSaveRow?.classList.toggle('is-dirty', dirty && !saving);
-      mobileSaveRow?.classList.toggle('is-saving', saving);
       if (!canEdit) status.textContent = 'Solo lectura · la distribución no puede modificarse';
-      else if (saving) status.textContent = 'Guardando distribución…';
+      else if (saving) status.textContent = 'Sincronizando distribución…';
       else if (dirty) status.textContent = 'Sincronizando cambios…';
-      else status.textContent = hasPersistedState ? 'Distribución sincronizada' : 'Distribución proyectada · aún sin guardar';
+      else status.textContent = hasPersistedState ? 'Distribución sincronizada' : 'Distribución proyectada · sincronización pendiente';
       if (dirty && !saving && !canonicalChanged) scheduleAutosave();
     };
 
@@ -2101,48 +2116,6 @@ async function mountDistribucion(context) {
       }
     });
 
-    if (mobileSaveButton) mobileSaveButton.onclick = () => saveButton.click();
-
-    saveButton.onclick = async () => {
-      if (!canEdit || !dirty || saving || canonicalChanged) {
-        if (canonicalChanged) status.textContent = 'Invitados o Mesas cambiaron · vuelve a abrir Distribución antes de guardar';
-        return;
-      }
-      saving = true;
-      updateSaveState();
-      try {
-        const activeIndex = proposalState.findIndex((proposal) => proposal.id === activeProposalId);
-        const activeName = proposalState[activeIndex]?.name || 'Propuesta';
-        proposalState[activeIndex] = serializeProposal(activeProposalId, activeName, placementState, tableIds, physicalElements);
-        const payload = serializeDistribution(proposalState, activeProposalId);
-        await writePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, payload);
-        lastPersistedSignature = JSON.stringify(payload);
-        hasPersistedState = true;
-        if (canonicalChanged) {
-          dirty = true;
-          status.textContent = 'Invitados o Mesas cambiaron durante el guardado · vuelve a abrir Distribución antes de continuar';
-        } else {
-          dirty = false;
-          undoStack.length = 0;
-          redoStack.length = 0;
-          updateHistoryState();
-          status.textContent = 'Distribución sincronizada';
-        }
-      } catch (error) {
-        console.error('No se pudo guardar Distribución:', error);
-        status.textContent = error?.message || 'No se pudo guardar la distribución.';
-      } finally {
-        saving = false;
-        updateSaveState();
-        if (remoteRefreshQueued && !dirty && !canonicalChanged) {
-          remoteRefreshQueued = false;
-          window.setTimeout(() => {
-            if (!dirty && !saving && !canonicalChanged) void mountDistribucion(context);
-          }, 120);
-        }
-      }
-    };
-
     const seated = guests.filter((guest) => escapeText(guest.tableId)).length;
 
     const handleCanonicalChange = (event) => {
@@ -2165,7 +2138,7 @@ async function mountDistribucion(context) {
             window.clearTimeout(autosaveTimer);
             autosaveTimer = 0;
           }
-          saveButton.click();
+          void persistDistribution();
         }
         return;
       }
@@ -2212,11 +2185,10 @@ async function mountDistribucion(context) {
 
     refreshSpatialConflicts();
     updateSaveState();
-    if (!dirty && canEdit && storedState) status.textContent = `Distribución guardada · ${seated} invitados ubicados`;
+    if (!dirty && canEdit && storedState) status.textContent = `Distribución sincronizada · ${seated} invitados ubicados`;
   } catch (error) {
     console.error('No se pudo inicializar Distribución:', error);
     status.textContent = error?.message || 'Distribución no pudo inicializarse.';
-    saveButton.disabled = true;
     return false;
   }
   return true;
