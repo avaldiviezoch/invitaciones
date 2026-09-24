@@ -98,6 +98,17 @@ Solo piezas verdaderamente reutilizables. No debe convertirse en un cajón de c�
 
 Cada módulo es dueño de su lógica y expone un contrato público pequeño.
 
+## Distribución: archivos con propietario explícito
+
+La carpeta `src/modules/distribucion/` mantiene pocos archivos. No se divide por tamaño; un archivo nuevo requiere una frontera funcional independiente.
+
+- `index.html`: estructura y controles visibles del módulo. No contiene lógica de negocio ni persistencia.
+- `distribucion.css`: presentación visual, estados de edición/presentación e impresión. No contiene reglas de dominio.
+- `index.js`: orquestador del módulo. Monta la vista, coordina estado del editor, propuestas, historial, render de mesas/elementos, validación espacial e integración explícita con los contratos de Mesas/Invitados.
+- `camera.js`: único propietario de cámara y navegación del plano: zoom, paneo, pinch, Encajar, conversión de coordenadas pantalla↔plano y enfoque de objetos. No conoce mesas, invitados, propuestas ni persistencia.
+
+No se crearán archivos `helpers`, `utils`, `fix`, `patch`, `v2` o equivalentes para repartir código sin dueño. Una futura extracción solo procede si toda una responsabilidad puede trasladarse a un único propietario sin duplicarla ni repartir su lógica entre varios archivos.
+
 ## Migración
 
 La migración será por módulo. No se copiará `app_integral` completo ni se moverán 140+ archivos a esta estructura.
