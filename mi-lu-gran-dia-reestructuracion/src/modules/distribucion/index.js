@@ -166,6 +166,7 @@ function applyPlacement(node, placement) {
   node.style.left = `${placement.x}px`;
   node.style.top = `${placement.y}px`;
   node.style.setProperty('--table-rotation', `${normalizeRotation(placement.rotation)}deg`);
+  node.style.setProperty('--counter-rotation', `${-normalizeRotation(placement.rotation)}deg`);
 }
 
 function renderTable(item, guestIndex, placement) {
