@@ -187,11 +187,15 @@ function parseDistributionState(value) {
       const width = finiteNumber(element?.width) ?? PHYSICAL_ELEMENT_TYPES[type]?.width;
       const height = finiteNumber(element?.height) ?? PHYSICAL_ELEMENT_TYPES[type]?.height;
       const locked = element?.locked === true;
-      if (!id || seenElements.has(id) || !PHYSICAL_ELEMENT_TYPES[type] || x === null || y === null || rotation === null || width === null || height === null || width < PIXELS_PER_METER * MIN_ELEMENT_METERS || height < PIXELS_PER_METER * MIN_ELEMENT_METERS || width > PIXELS_PER_METER * MAX_ELEMENT_METERS || height > PIXELS_PER_METER * MAX_ELEMENT_METERS) {
+      const points = type === 'zone' && Array.isArray(element?.points)
+        ? element.points.map((point) => ({ x: finiteNumber(point?.x), y: finiteNumber(point?.y) }))
+        : null;
+      const validPoints = points === null || (points.length >= 3 && points.every((point) => point.x !== null && point.y !== null));
+      if (!id || seenElements.has(id) || !PHYSICAL_ELEMENT_TYPES[type] || x === null || y === null || rotation === null || width === null || height === null || width < PIXELS_PER_METER * MIN_ELEMENT_METERS || height < PIXELS_PER_METER * MIN_ELEMENT_METERS || width > PIXELS_PER_METER * MAX_ELEMENT_METERS || height > PIXELS_PER_METER * MAX_ELEMENT_METERS || !validPoints) {
         throw new Error('La distribución guardada contiene elementos físicos no válidos. No se modificó ningún dato.');
       }
       seenElements.add(id);
-      return { id, type, x, y, rotation: normalizeRotation(rotation), layer, locked, width, height };
+      return { id, type, x, y, rotation: normalizeRotation(rotation), layer, locked, width, height, points };
     }) : [];
     return {
       id: escapeText(proposal.id),
@@ -245,7 +249,8 @@ function serializeDistribution(placementState, tableIds, elements) {
         layer: Number(element.layer || 0),
         locked: element.locked === true,
         width: Math.round(element.width * 100) / 100,
-        height: Math.round(element.height * 100) / 100
+        height: Math.round(element.height * 100) / 100,
+        ...(Array.isArray(element.points) ? { points: element.points.map((point) => ({ x: Math.round(point.x * 100) / 100, y: Math.round(point.y * 100) / 100 })) } : {})
       }))
     }]
   };
@@ -318,8 +323,19 @@ function renderPhysicalElement(element) {
   node.style.width = `${element.width}px`;
   node.style.height = `${element.height}px`;
   node.style.transform = `rotate(${normalizeRotation(element.rotation)}deg)`;
-  node.innerHTML = '<strong></strong>';
-  node.querySelector('strong').textContent = definition.label;
+  if (Array.isArray(element.points)) {
+    const svgNs = 'http://www.w3.org/2000/svg';
+    const polygon = document.createElementNS(svgNs, 'svg');
+    polygon.classList.add('distribution-area-shape');
+    polygon.setAttribute('viewBox', `0 0 ${element.width} ${element.height}`);
+    const shape = document.createElementNS(svgNs, 'polygon');
+    shape.setAttribute('points', element.points.map((point) => `${point.x - element.x},${point.y - element.y}`).join(' '));
+    polygon.append(shape);
+    node.append(polygon);
+  }
+  const label = document.createElement('strong');
+  label.textContent = definition.label;
+  node.append(label);
   return node;
 }
 
@@ -410,7 +426,7 @@ function setupCamera(root, world, worldSize) {
   }, { passive: false });
 
   viewport.addEventListener('pointerdown', (event) => {
-    if (event.target.closest('.distribution-table,.distribution-element')) return;
+    if (event.target.closest('.distribution-table,.distribution-element') || root.classList.contains('is-drawing-area')) return;
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     viewport.setPointerCapture(event.pointerId);
     if (pointers.size === 1) {
@@ -883,6 +899,10 @@ async function mountDistribucion(context) {
     const coordsOutput = root.querySelector('[data-distribution-coords]');
     let measureStart = null;
     let measuring = false;
+    const drawingLayer = root.querySelector('[data-distribution-drawing-layer]');
+    const drawAreaButton = root.querySelector('[data-distribution-draw-area]');
+    let drawingPoints = [];
+    let drawingArea = false;
 
     const stopMeasuring = () => {
       measuring = false;
@@ -904,6 +924,65 @@ async function mountDistribucion(context) {
       coordsOutput.textContent = coordsOutput.value;
     });
 
+    const renderDrawingPreview = () => {
+      drawingLayer.replaceChildren();
+      if (!drawingPoints.length) return;
+      const svgNs = 'http://www.w3.org/2000/svg';
+      const polyline = document.createElementNS(svgNs, 'polyline');
+      polyline.setAttribute('points', drawingPoints.map((point) => `${point.x},${point.y}`).join(' '));
+      drawingLayer.append(polyline);
+    };
+
+    const stopDrawingArea = () => {
+      drawingArea = false;
+      root.classList.remove('is-drawing-area');
+      drawingPoints = [];
+      drawingLayer.replaceChildren();
+      drawAreaButton.classList.remove('is-active');
+      drawAreaButton.textContent = 'Dibujar área libre';
+      measureHint.hidden = true;
+    };
+
+    const finishDrawingArea = () => {
+      if (drawingPoints.length < 3) return;
+      const xs = drawingPoints.map((point) => point.x);
+      const ys = drawingPoints.map((point) => point.y);
+      const minX = Math.min(...xs);
+      const minY = Math.min(...ys);
+      const maxX = Math.max(...xs);
+      const maxY = Math.max(...ys);
+      if (maxX - minX < PIXELS_PER_METER * MIN_ELEMENT_METERS || maxY - minY < PIXELS_PER_METER * MIN_ELEMENT_METERS) return;
+      const element = createElement('zone', minX, minY);
+      if (!element) return;
+      element.width = maxX - minX;
+      element.height = maxY - minY;
+      element.points = drawingPoints.map((point) => ({ x: point.x, y: point.y }));
+      const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(element.id)}"]`);
+      node?.remove();
+      const rendered = renderPhysicalElement(element);
+      world.append(rendered);
+      bindElementInteraction(rendered, element);
+      selectElement(element.id);
+      rendered.focus();
+      markDirty();
+      stopDrawingArea();
+    };
+
+    drawAreaButton.onclick = () => {
+      if (drawingArea) {
+        stopDrawingArea();
+        return;
+      }
+      stopMeasuring();
+      drawingArea = true;
+      root.classList.add('is-drawing-area');
+      drawingPoints = [];
+      drawAreaButton.classList.add('is-active');
+      drawAreaButton.textContent = 'Cancelar dibujo';
+      measureHint.textContent = 'Marca al menos 3 puntos · toca el primer punto para cerrar';
+      measureHint.hidden = false;
+    };
+
     measureButton.onclick = () => {
       if (measuring) {
         stopMeasuring();
@@ -919,8 +998,19 @@ async function mountDistribucion(context) {
     };
 
     viewport.addEventListener('click', (event) => {
-      if (!measuring || event.target.closest('.distribution-table,.distribution-element')) return;
+      if (event.target.closest('.distribution-table,.distribution-element')) return;
       const point = camera.clientPointToWorld(event.clientX, event.clientY);
+      if (drawingArea) {
+        const first = drawingPoints[0];
+        if (first && drawingPoints.length >= 3 && Math.hypot(point.x - first.x, point.y - first.y) <= 14) {
+          finishDrawingArea();
+          return;
+        }
+        drawingPoints.push(point);
+        renderDrawingPreview();
+        return;
+      }
+      if (!measuring) return;
       if (!measureStart) {
         measureStart = point;
         measureHint.textContent = 'Marca el segundo punto';
