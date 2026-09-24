@@ -1,7 +1,7 @@
 import {
   readPlannerStorageKeys,
   writePlannerStorageKeys
-} from '../../services/planner-cloud.js?v=4';
+} from '../../services/planner-cloud.js?v=5';
 
 const GUEST_STORAGE_KEY = 'planificador_bodas_invitados_v1';
 const SHARED_STORAGE_KEY = 'planificador_bodas_datos_compartidos_v1';
