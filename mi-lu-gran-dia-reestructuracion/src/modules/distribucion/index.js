@@ -2,7 +2,7 @@ import { loadInvitadosSnapshot } from '../invitados/invitados-data.js?v=4';
 import { normalizeTableShape } from '../invitados/table-geometry.js?v=4';
 import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { setupDistributionCamera } from './camera.js?v=2';
+import { setupDistributionCamera } from './camera.js?v=3';
 import {
   DEFAULT_BACKGROUND_ID,
   addDistributionBackground,
@@ -272,6 +272,12 @@ function template() {
 
 function escapeText(value) {
   return String(value ?? '').trim();
+}
+
+function compactGuestName(value, maxLength = 18) {
+  const text = escapeText(value);
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, Math.max(1, maxLength - 1)).trimEnd()}…`;
 }
 
 function finiteNumber(value) {
@@ -633,7 +639,9 @@ function renderTable(item, guestIndex, placement) {
       label.dataset.guestId = escapeText(guest.id);
       label.dataset.tableId = tableId;
       label.dataset.seatIndex = String(seatIndex);
-      label.textContent = escapeText(guest.name) || 'Invitado';
+      const guestName = escapeText(guest.name) || 'Invitado';
+      label.textContent = compactGuestName(guestName);
+      label.title = guestName;
       node.append(label);
     }
   });

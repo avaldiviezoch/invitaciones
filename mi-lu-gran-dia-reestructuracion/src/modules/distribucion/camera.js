@@ -1,29 +1,10 @@
 const MIN_ZOOM = 0.45;
 const MAX_ZOOM = 1.6;
 const ZOOM_STEP = 0.12;
-const WORLD_PADDING = 90;
 
 function finiteNumber(value) {
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
-}
-
-function worldBounds(world, fallbackSize) {
-  const nodes = [...world.querySelectorAll('.distribution-table,.distribution-element')];
-  if (!nodes.length) return { minX: 0, minY: 0, maxX: fallbackSize.width, maxY: fallbackSize.height };
-  const bounds = nodes.map((node) => {
-    const left = finiteNumber(node.style.left) ?? 0;
-    const top = finiteNumber(node.style.top) ?? 0;
-    const width = finiteNumber(node.style.width) ?? node.offsetWidth;
-    const height = finiteNumber(node.style.height) ?? node.offsetHeight;
-    return { left, top, right: left + width, bottom: top + height };
-  });
-  return {
-    minX: Math.min(0, ...bounds.map((item) => item.left)) - WORLD_PADDING,
-    minY: Math.min(0, ...bounds.map((item) => item.top)) - WORLD_PADDING,
-    maxX: Math.max(fallbackSize.width, ...bounds.map((item) => item.right)) + WORLD_PADDING,
-    maxY: Math.max(fallbackSize.height, ...bounds.map((item) => item.bottom)) + WORLD_PADDING
-  };
 }
 
 export function setupDistributionCamera(root, world, worldSize) {
@@ -48,11 +29,12 @@ export function setupDistributionCamera(root, world, worldSize) {
   const fit = () => {
     const rect = viewport.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
-    const bounds = worldBounds(world, worldSize);
-    const width = Math.max(1, bounds.maxX - bounds.minX), height = Math.max(1, bounds.maxY - bounds.minY);
-    scale = clampScale(Math.min((rect.width - 36) / width, (rect.height - 36) / height, 1));
-    x = (rect.width - width * scale) / 2 - bounds.minX * scale;
-    y = (rect.height - height * scale) / 2 - bounds.minY * scale;
+    // Paridad con Distribución original: encajar por ancho, nunca reducir automáticamente
+    // por debajo de 65 %. El exceso vertical se navega con pan.
+    const fitWidth = Math.max(0.01, (rect.width - 24) / Math.max(1, worldSize.width));
+    scale = clampScale(Math.max(0.65, Math.min(1, fitWidth)));
+    x = Math.round((rect.width - worldSize.width * scale) / 2);
+    y = Math.round((rect.height - worldSize.height * scale) / 2);
     apply();
   };
 

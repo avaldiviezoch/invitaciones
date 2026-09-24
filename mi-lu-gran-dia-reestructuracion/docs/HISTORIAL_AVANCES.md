@@ -161,3 +161,10 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se recuperó el movimiento independiente del plano de referencia mediante offset local en IndexedDB, sin alterar escala, Firebase, Firestore, Storage ni el payload de Distribución.
 - Se retiró la escritura de asignaciones desde Distribución: ya no importa ni ejecuta `saveInvitadosSnapshot()` y no asigna `guest.tableId`, `guest.seatId` ni `guest.seatNumber`. Mesas vuelve a ser el único propietario de esas operaciones.
 - No se modificaron IDs de mesas/sillas/invitados, usuarios, reglas, Authentication, Storage ni contratos Firebase.
+
+
+## 2026-09-24 — Distribución: corrección visual posterior a escala física
+- Se corrigió el encaje inicial de cámara para recuperar la conducta del Distribución original: el ajuste automático se calcula por ancho del lienzo y nunca baja de 65 %. El botón Encajar conserva este mismo criterio; el usuario puede alejar manualmente hasta el mínimo de cámara si lo necesita.
+- Se eliminó la selección nativa de texto durante paneo/arrastre, que estaba mostrando nombres de invitados con resaltado azul.
+- Los nombres visibles de invitados vuelven a compactarse a 18 caracteres con el nombre completo disponible en tooltip.
+- Se recuperó una etiqueta visual clara y discreta para nombres, sin modificar la geometría física, asignaciones, IDs, Firebase, Firestore ni Storage.
