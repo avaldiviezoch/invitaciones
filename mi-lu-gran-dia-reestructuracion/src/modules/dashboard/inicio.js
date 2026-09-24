@@ -569,41 +569,23 @@ document.addEventListener('click', (event) => {
 });
 
 const moduleWorkspace = $('moduleWorkspace');
-const appModuleNav = $('appModuleNav');
-const appMobileMenu = $('appMobileMenu');
-const appMobileNavBackdrop = $('appMobileNavBackdrop');
-const moduleNavMedia = window.matchMedia('(max-width: 980px)');
-
-function closeModuleAccount() {
-  appNavAccountWrap.classList.remove('is-open');
-  $('appNavAccountButton').setAttribute('aria-expanded', 'false');
-}
-
-function setModuleNavigationOpen(open) {
-  const next = moduleNavMedia.matches && Boolean(open);
-  moduleWorkspace.classList.toggle('is-mobile-menu-open', next);
-  appMobileMenu.setAttribute('aria-expanded', String(next));
-  appMobileMenu.setAttribute('aria-label', next ? 'Cerrar navegación' : 'Abrir navegación');
-  appModuleNav.setAttribute('aria-hidden', moduleNavMedia.matches ? String(!next) : 'false');
-  appMobileNavBackdrop.setAttribute('aria-hidden', String(!next));
-  if (!next) closeModuleAccount();
-}
-
-appMobileMenu.addEventListener('click', () => {
-  setModuleNavigationOpen(!moduleWorkspace.classList.contains('is-mobile-menu-open'));
-});
-appMobileNavBackdrop.addEventListener('click', () => setModuleNavigationOpen(false));
-moduleNavMedia.addEventListener?.('change', () => setModuleNavigationOpen(false));
-setModuleNavigationOpen(false);
-
 const moduleLoader = $('moduleLoader');
 let moduleLoadEpoch = 0;
 let mountedModuleId = '';
 let mountedWeddingId = '';
 
 function setModuleLoading(loading) {
-  document.body.classList.toggle('is-module-loading', Boolean(loading));
-  moduleLoader.hidden = !loading;
+  if (!moduleLoader) return;
+  document.body.classList.toggle('is-module-loading', loading);
+  if (loading) {
+    moduleLoader.hidden = false;
+    moduleLoader.classList.remove('is-leaving');
+    return;
+  }
+  moduleLoader.classList.add('is-leaving');
+  window.setTimeout(() => {
+    if (moduleLoader.classList.contains('is-leaving')) moduleLoader.hidden = true;
+  }, 420);
 }
 
 const ACTIVE_MODULES = new Set(['checklist', 'presupuesto', 'proveedores', 'invitados', 'distribucion']);
@@ -623,7 +605,6 @@ async function openModule(moduleId, { updateHash = true } = {}) {
   if (!auth.currentUser || !weddingContext || !ACTIVE_MODULES.has(moduleId)) return;
   const sameMountedModule = mountedModuleId === moduleId && mountedWeddingId === weddingContext.id;
   const loadEpoch = ++moduleLoadEpoch;
-  if (!sameMountedModule) setModuleLoading(true);
   document.documentElement.classList.add('module-route');
   heroVideo?.pause();
   setMenu(false);
@@ -640,6 +621,7 @@ async function openModule(moduleId, { updateHash = true } = {}) {
     setModuleLoading(false);
     return;
   }
+  setModuleLoading(true);
   try {
     if (moduleId === 'checklist') {
       const { mountChecklist } = await import('../checklist/index.js?v=15');
@@ -658,7 +640,7 @@ async function openModule(moduleId, { updateHash = true } = {}) {
       await mountInvitados(weddingContext);
     }
     if (moduleId === 'distribucion') {
-      const { mountDistribucion } = await import('../distribucion/index.js?v=75');
+      const { mountDistribucion } = await import('../distribucion/index.js?v=76');
       await mountDistribucion(weddingContext);
     }
     if (loadEpoch === moduleLoadEpoch) {
@@ -671,7 +653,6 @@ async function openModule(moduleId, { updateHash = true } = {}) {
 }
 
 function closeModuleWorkspace() {
-  setModuleNavigationOpen(false);
   mountedModuleId = '';
   mountedWeddingId = '';
   document.documentElement.classList.remove('module-route');
@@ -685,10 +666,7 @@ $('appNavHome').onclick = closeModuleWorkspace;
 
 document.querySelectorAll('[data-app-module]').forEach((button) => {
   button.addEventListener('click', () => {
-    const moduleId = button.dataset.appModule;
-    if (!ACTIVE_MODULES.has(moduleId)) return;
-    setModuleNavigationOpen(false);
-    openModule(moduleId);
+    if (ACTIVE_MODULES.has(button.dataset.appModule)) openModule(button.dataset.appModule);
   });
 });
 
