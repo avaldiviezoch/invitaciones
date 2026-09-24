@@ -381,6 +381,7 @@ async function mountDistribucion(context) {
     let selectedTableId = '';
     let dirty = false;
     let saving = false;
+    let hasPersistedState = Boolean(storedState);
 
     world.style.width = `${layout.width}px`;
     world.style.height = `${layout.height}px`;
@@ -401,7 +402,7 @@ async function mountDistribucion(context) {
       if (!canEdit) status.textContent = 'Solo lectura · la distribución no puede modificarse';
       else if (saving) status.textContent = 'Guardando distribución…';
       else if (dirty) status.textContent = 'Cambios sin guardar';
-      else status.textContent = storedState ? 'Distribución guardada' : 'Distribución proyectada · aún sin guardar';
+      else status.textContent = hasPersistedState ? 'Distribución guardada' : 'Distribución proyectada · aún sin guardar';
     };
 
     const selectTable = (tableId) => {
@@ -409,7 +410,7 @@ async function mountDistribucion(context) {
       const placement = placementState.get(tableId);
       if (!entry || !placement) return;
       selectedTableId = tableId;
-      world.querySelectorAll('.distribution-table.is-selected').forEach((node) => {
+      world.querySelectorAll('.distribution-table').forEach((node) => {
         node.classList.toggle('is-selected', node.dataset.tableId === tableId);
       });
       renderInspector(root, entry.table, entry.index, guests, placement);
@@ -502,6 +503,7 @@ async function mountDistribucion(context) {
       try {
         await writePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, serializeDistribution(placementState, tableIds));
         dirty = false;
+        hasPersistedState = true;
         status.textContent = 'Distribución guardada';
       } catch (error) {
         console.error('No se pudo guardar Distribución:', error);
