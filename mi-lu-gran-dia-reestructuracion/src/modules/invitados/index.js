@@ -1,6 +1,6 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { loadInvitadosSnapshot, saveInvitadosSnapshot } from './invitados-data.js?v=4';
-import { createRsvpController } from './rsvp-controller.js?v=5';
+import { createRsvpController } from './rsvp-controller.js?v=6';
 import { createTablesController } from './tables-controller.js?v=15';
 
 let activeContext = null;
@@ -386,6 +386,7 @@ function bind(root) {
   });
 
   root.addEventListener('input', (event) => {
+    if (ensureRsvpController().handleInput(event)) return;
     if (ensureTablesController().handleInput(event)) return;
     if (!event.target.matches('[data-guests-search]')) return;
     search = event.target.value;
