@@ -14,12 +14,16 @@ const KEYBOARD_MOVE_STEP = 10;
 const KEYBOARD_MOVE_FINE_STEP = 1;
 const TABLE_GAP = 72;
 const WORLD_PADDING = 90;
+const PIXELS_PER_METER = 44;
+const MIN_ELEMENT_METERS = 0.5;
+const MAX_ELEMENT_METERS = 30;
 const PHYSICAL_ELEMENT_TYPES = Object.freeze({
   dance: Object.freeze({ label: 'Pista de baile', width: 220, height: 220 }),
   bar: Object.freeze({ label: 'Barra', width: 176, height: 54 }),
   dj: Object.freeze({ label: 'DJ / sonido', width: 132, height: 88 }),
   stage: Object.freeze({ label: 'Escenario', width: 176, height: 110 }),
-  column: Object.freeze({ label: 'Columna', width: 36, height: 36 })
+  column: Object.freeze({ label: 'Columna', width: 22, height: 22 }),
+  zone: Object.freeze({ label: 'Zona / área', width: 176, height: 132 })
 });
 
 let templatePromise = null;
@@ -179,11 +183,13 @@ function parseDistributionState(value) {
       const y = finiteNumber(element?.y);
       const rotation = finiteNumber(element?.rotation);
       const layer = finiteNumber(element?.layer) ?? 0;
+      const width = finiteNumber(element?.width) ?? PHYSICAL_ELEMENT_TYPES[type]?.width;
+      const height = finiteNumber(element?.height) ?? PHYSICAL_ELEMENT_TYPES[type]?.height;
       const locked = element?.locked === true;
-      if (!id || !PHYSICAL_ELEMENT_TYPES[type] || x === null || y === null || rotation === null) {
+      if (!id || !PHYSICAL_ELEMENT_TYPES[type] || x === null || y === null || rotation === null || width === null || height === null || width < PIXELS_PER_METER * MIN_ELEMENT_METERS || height < PIXELS_PER_METER * MIN_ELEMENT_METERS || width > PIXELS_PER_METER * MAX_ELEMENT_METERS || height > PIXELS_PER_METER * MAX_ELEMENT_METERS) {
         throw new Error('La distribución guardada contiene elementos físicos no válidos. No se modificó ningún dato.');
       }
-      return { id, type, x, y, rotation: normalizeRotation(rotation), layer, locked };
+      return { id, type, x, y, rotation: normalizeRotation(rotation), layer, locked, width, height };
     }) : [];
     return {
       id: escapeText(proposal.id),
@@ -235,7 +241,9 @@ function serializeDistribution(placementState, tableIds, elements) {
         y: Math.round(element.y * 100) / 100,
         rotation: normalizeRotation(element.rotation),
         layer: Number(element.layer || 0),
-        locked: element.locked === true
+        locked: element.locked === true,
+        width: Math.round(element.width * 100) / 100,
+        height: Math.round(element.height * 100) / 100
       }))
     }]
   };
@@ -305,8 +313,8 @@ function renderPhysicalElement(element) {
   node.style.zIndex = String(10 + Number(element.layer || 0));
   node.style.left = `${element.x}px`;
   node.style.top = `${element.y}px`;
-  node.style.width = `${definition.width}px`;
-  node.style.height = `${definition.height}px`;
+  node.style.width = `${element.width}px`;
+  node.style.height = `${element.height}px`;
   node.style.transform = `rotate(${normalizeRotation(element.rotation)}deg)`;
   node.innerHTML = '<strong></strong>';
   node.querySelector('strong').textContent = definition.label;
@@ -318,6 +326,8 @@ function applyElementPlacement(node, element) {
   node.style.zIndex = String(10 + Number(element.layer || 0));
   node.style.left = `${element.x}px`;
   node.style.top = `${element.y}px`;
+  node.style.width = `${element.width}px`;
+  node.style.height = `${element.height}px`;
   node.style.transform = `rotate(${normalizeRotation(element.rotation)}deg)`;
 }
 
@@ -334,6 +344,9 @@ function renderElementInspector(root, element) {
   root.querySelector('[data-distribution-selected-guests]').hidden = true;
   root.querySelector('[data-distribution-element-note]').hidden = false;
   root.querySelector('[data-distribution-element-actions]').hidden = false;
+  root.querySelector('[data-distribution-dimensions]').hidden = false;
+  root.querySelector('[data-distribution-width]').value = (element.width / PIXELS_PER_METER).toFixed(1);
+  root.querySelector('[data-distribution-height]').value = (element.height / PIXELS_PER_METER).toFixed(1);
   const lockButton = root.querySelector('[data-distribution-toggle-lock]');
   lockButton.textContent = element.locked ? 'Desbloquear' : 'Bloquear';
 }
@@ -445,6 +458,7 @@ function renderInspector(root, table, tableIndex, guests, placement) {
   root.querySelector('[data-distribution-selected-guests]').hidden = false;
   root.querySelector('[data-distribution-element-note]').hidden = true;
   root.querySelector('[data-distribution-element-actions]').hidden = true;
+  root.querySelector('[data-distribution-dimensions]').hidden = true;
   root.querySelector('[data-distribution-selection]').hidden = false;
   const capacity = capacityOf(table);
   const assigned = guests
@@ -581,7 +595,8 @@ async function mountDistribucion(context) {
     const createElement = (type, x, y, rotation = 0) => {
       if (!PHYSICAL_ELEMENT_TYPES[type]) return null;
       elementSequence += 1;
-      const element = { id: `element_${elementSequence}`, type, x, y, rotation: normalizeRotation(rotation), layer: physicalElements.length, locked: false };
+      const definition = PHYSICAL_ELEMENT_TYPES[type];
+      const element = { id: `element_${elementSequence}`, type, x, y, rotation: normalizeRotation(rotation), layer: physicalElements.length, locked: false, width: definition.width, height: definition.height };
       physicalElements.push(element);
       const node = renderPhysicalElement(element);
       world.append(node);
@@ -595,6 +610,9 @@ async function mountDistribucion(context) {
       if (!source || source.locked) return;
       const duplicate = createElement(source.type, source.x + 24, source.y + 24, source.rotation);
       if (!duplicate) return;
+      duplicate.width = source.width;
+      duplicate.height = source.height;
+      applyElementPlacement(world.querySelector(`.distribution-element[data-element-id="${CSS.escape(duplicate.id)}"]`), duplicate);
       selectElement(duplicate.id);
       world.querySelector(`.distribution-element[data-element-id="${CSS.escape(duplicate.id)}"]`)?.focus();
       markDirty();
@@ -618,7 +636,7 @@ async function mountDistribucion(context) {
       if (!selectedElementId) return;
       const source = physicalElements.find((item) => item.id === selectedElementId);
       if (!source) return;
-      copiedElement = { type: source.type, x: source.x, y: source.y, rotation: source.rotation };
+      copiedElement = { type: source.type, x: source.x, y: source.y, rotation: source.rotation, width: source.width, height: source.height };
       status.textContent = `${PHYSICAL_ELEMENT_TYPES[source.type].label} copiado`;
     };
 
@@ -627,6 +645,9 @@ async function mountDistribucion(context) {
       copiedElement = { ...copiedElement, x: copiedElement.x + 24, y: copiedElement.y + 24 };
       const pasted = createElement(copiedElement.type, copiedElement.x, copiedElement.y, copiedElement.rotation);
       if (!pasted) return;
+      pasted.width = copiedElement.width;
+      pasted.height = copiedElement.height;
+      applyElementPlacement(world.querySelector(`.distribution-element[data-element-id="${CSS.escape(pasted.id)}"]`), pasted);
       selectElement(pasted.id);
       world.querySelector(`.distribution-element[data-element-id="${CSS.escape(pasted.id)}"]`)?.focus();
       markDirty();
@@ -825,6 +846,26 @@ async function mountDistribucion(context) {
       renderElementInspector(root, element);
       markDirty();
     };
+
+    const updateSelectedDimension = (axis, input) => {
+      if (!canEdit || !selectedElementId) return;
+      const element = physicalElements.find((item) => item.id === selectedElementId);
+      const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
+      if (!element || !node || element.locked) {
+        if (element) input.value = ((axis === 'width' ? element.width : element.height) / PIXELS_PER_METER).toFixed(1);
+        return;
+      }
+      const meters = finiteNumber(input.value);
+      if (meters === null || meters < MIN_ELEMENT_METERS || meters > MAX_ELEMENT_METERS) {
+        input.value = ((axis === 'width' ? element.width : element.height) / PIXELS_PER_METER).toFixed(1);
+        return;
+      }
+      element[axis] = meters * PIXELS_PER_METER;
+      applyElementPlacement(node, element);
+      markDirty();
+    };
+    root.querySelector('[data-distribution-width]').onchange = (event) => updateSelectedDimension('width', event.currentTarget);
+    root.querySelector('[data-distribution-height]').onchange = (event) => updateSelectedDimension('height', event.currentTarget);
 
     root.querySelector('[data-distribution-show-tables]').onchange = (event) => {
       world.classList.toggle('hide-tables', !event.currentTarget.checked);
