@@ -57,7 +57,7 @@
         <p>Selecciona una mesa para moverla, rotarla y revisar sus asignaciones actuales.</p>
       </div>
       <div data-distribution-selection hidden>
-        <h2 data-distribution-selected-name>Mesa</h2>
+        <h2 data-distribution-selected-name>Selección</h2>
         <p data-distribution-selected-meta></p>
         <div class="distribution-placement-controls">
           <span>ROTACIÓN</span>
@@ -68,11 +68,12 @@
           </div>
           <small>La rotación solo cambia el plano. Los invitados permanecen en sus mismas sillas. También puedes mover la mesa con las flechas; Shift + flecha ajusta 1 px.</small>
         </div>
-        <div class="distribution-inspector-stats">
+        <div class="distribution-inspector-stats" data-distribution-table-stats>
           <span><strong data-distribution-selected-seated>0</strong> asignados</span>
           <span><strong data-distribution-selected-free>0</strong> libres</span>
         </div>
         <div class="distribution-guest-list" data-distribution-selected-guests></div>
+        <div class="distribution-element-note" data-distribution-element-note hidden>Elemento físico del plano. Su posición y rotación pertenecen únicamente a Distribución.</div>
       </div>
     </aside>
   </section>
