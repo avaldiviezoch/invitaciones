@@ -13,7 +13,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=38', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=39', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -824,6 +824,140 @@ async function mountDistribucion(context) {
     const proposalNew = root.querySelector('[data-distribution-proposal-new]');
     const proposalDuplicate = root.querySelector('[data-distribution-proposal-duplicate]');
     const proposalRename = root.querySelector('[data-distribution-proposal-rename]');
+    const mobileHub = root.querySelector('[data-distribution-mobile-hub]');
+    const mobileWheel = root.querySelector('[data-distribution-mobile-wheel]');
+    const mobileWheelLabel = root.querySelector('[data-distribution-mobile-wheel-label]');
+    const mobileSheet = root.querySelector('[data-distribution-mobile-sheet]');
+    const mobileSheetBackdrop = root.querySelector('[data-distribution-mobile-sheet-backdrop]');
+    const mobileSheetTitle = root.querySelector('[data-distribution-mobile-sheet-title]');
+    const mobileSheetBody = root.querySelector('[data-distribution-mobile-sheet-body]');
+    const mobileWheelToggle = root.querySelector('[data-distribution-mobile-wheel-toggle]');
+    const mobileActions = [...root.querySelectorAll('[data-mobile-action]')];
+    const mobileActionOrder = ['add', 'proposal', 'view', 'review', 'settings'];
+    const mobileActionLabels = { add: 'Añadir', proposal: 'Propuesta', view: 'Vista', review: 'Revisar', settings: 'Ajustes' };
+    let mobileWheelIndex = 0;
+
+    const mobileOnly = () => window.matchMedia('(max-width: 700px)').matches;
+    const proxyClick = (selector) => root.querySelector(selector)?.click();
+    const closeMobileSheet = () => {
+      mobileSheet.hidden = true;
+      mobileSheetBackdrop.hidden = true;
+      mobileSheetBody.replaceChildren();
+    };
+    const addMobileButton = (label, onClick, className = '') => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.textContent = label;
+      if (className) button.className = className;
+      button.addEventListener('click', onClick);
+      mobileSheetBody.append(button);
+      return button;
+    };
+    const openMobileSheet = (action) => {
+      if (!mobileOnly()) return;
+      mobileSheetTitle.textContent = mobileActionLabels[action] || 'Herramientas';
+      mobileSheetBody.replaceChildren();
+
+      if (action === 'add') {
+        [
+          ['Pista de baile', 'dance'],
+          ['Barra', 'bar'],
+          ['DJ / sonido', 'dj'],
+          ['Escenario', 'stage'],
+          ['Pantalla', 'screen']
+        ].forEach(([label, type]) => addMobileButton(label, () => {
+          proxyClick(`[data-distribution-add-element="${type}"]`);
+          closeMobileSheet();
+        }));
+        const note = document.createElement('p');
+        note.className = 'distribution-mobile-sheet-note';
+        note.textContent = 'Primera versión móvil: aquí iremos incorporando el resto del catálogo por grupos.';
+        mobileSheetBody.append(note);
+      } else if (action === 'proposal') {
+        const proposalName = proposalSelect?.selectedOptions?.[0]?.textContent || 'Propuesta activa';
+        const note = document.createElement('p');
+        note.className = 'distribution-mobile-sheet-note';
+        note.textContent = `Activa: ${proposalName}`;
+        mobileSheetBody.append(note);
+        addMobileButton('Nueva', () => proxyClick('[data-distribution-proposal-new]'));
+        addMobileButton('Duplicar', () => proxyClick('[data-distribution-proposal-duplicate]'));
+        addMobileButton('Renombrar', () => proxyClick('[data-distribution-proposal-rename]'));
+        addMobileButton('Eliminar', () => proxyClick('[data-distribution-proposal-delete]'), 'is-danger');
+      } else if (action === 'view') {
+        addMobileButton('Presentación', () => proxyClick('[data-distribution-presentation]'));
+        addMobileButton('Plano limpio', () => proxyClick('[data-distribution-clean-view]'));
+        addMobileButton('Imprimir / PDF', () => proxyClick('[data-distribution-print]'), 'is-wide');
+      } else if (action === 'review') {
+        [
+          ['Conflictos', '[data-distribution-validation-conflicts]'],
+          ['Alertas', '[data-distribution-validation-warnings]'],
+          ['Proximidad', '[data-distribution-validation-proximity]']
+        ].forEach(([label, selector]) => {
+          const metric = document.createElement('div');
+          metric.className = 'distribution-mobile-sheet-metric';
+          const value = document.createElement('strong');
+          value.textContent = root.querySelector(selector)?.textContent || '0';
+          const caption = document.createElement('span');
+          caption.textContent = label;
+          metric.append(value, caption);
+          mobileSheetBody.append(metric);
+        });
+        const detail = document.createElement('p');
+        detail.className = 'distribution-mobile-sheet-note';
+        detail.textContent = root.querySelector('[data-distribution-validation-list]')?.innerText?.trim() || 'Plano sin incidencias espaciales.';
+        mobileSheetBody.append(detail);
+      } else if (action === 'settings') {
+        addMobileButton('Medir distancia', () => proxyClick('[data-distribution-measure]'));
+        addMobileButton('Limpiar medida', () => proxyClick('[data-distribution-clear-measure]'));
+        const snapSource = root.querySelector('[data-distribution-snap]');
+        const snapLabel = document.createElement('label');
+        snapLabel.className = 'distribution-mobile-sheet-toggle';
+        snapLabel.append(document.createTextNode('Ajustar a cuadrícula'));
+        const snap = document.createElement('input');
+        snap.type = 'checkbox';
+        snap.checked = Boolean(snapSource?.checked);
+        snap.addEventListener('change', () => {
+          if (!snapSource) return;
+          snapSource.checked = snap.checked;
+          snapSource.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        snapLabel.append(snap);
+        mobileSheetBody.append(snapLabel);
+      }
+
+      mobileSheet.hidden = false;
+      mobileSheetBackdrop.hidden = false;
+    };
+    const renderMobileWheel = () => {
+      const action = mobileActionOrder[mobileWheelIndex];
+      const angle = -mobileWheelIndex * 72;
+      mobileWheel.style.setProperty('--wheel-angle', `${angle}deg`);
+      mobileWheelLabel.textContent = mobileActionLabels[action];
+      mobileActions.forEach((button) => button.classList.toggle('is-active', button.dataset.mobileAction === action));
+    };
+    const stepMobileWheel = (direction) => {
+      mobileWheelIndex = (mobileWheelIndex + direction + mobileActionOrder.length) % mobileActionOrder.length;
+      renderMobileWheel();
+    };
+    root.querySelector('[data-distribution-mobile-wheel-prev]').onclick = () => stepMobileWheel(-1);
+    root.querySelector('[data-distribution-mobile-wheel-next]').onclick = () => stepMobileWheel(1);
+    mobileWheelToggle.onclick = () => {
+      const collapsed = mobileHub.classList.toggle('is-collapsed');
+      mobileWheelToggle.setAttribute('aria-expanded', String(!collapsed));
+      mobileWheelToggle.setAttribute('aria-label', collapsed ? 'Mostrar herramientas' : 'Ocultar herramientas');
+    };
+    mobileActions.forEach((button) => {
+      button.onclick = () => {
+        mobileWheelIndex = Number(button.dataset.mobileWheelIndex) || 0;
+        renderMobileWheel();
+        openMobileSheet(button.dataset.mobileAction);
+      };
+    });
+    root.querySelector('[data-distribution-mobile-sheet-close]').onclick = closeMobileSheet;
+    root.querySelector('[data-distribution-mobile-sheet-cancel]').onclick = closeMobileSheet;
+    mobileSheetBackdrop.onclick = closeMobileSheet;
+    renderMobileWheel();
+
     const proposalDelete = root.querySelector('[data-distribution-proposal-delete]');
     const toolbarMenus = [...root.querySelectorAll('[data-distribution-menu]')];
     toolbarMenus.forEach((menu) => {

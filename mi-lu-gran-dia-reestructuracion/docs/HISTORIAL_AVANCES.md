@@ -292,3 +292,14 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - La capa de datos permanece restaurada a su comportamiento previo: planner-cloud.js sin deduplicación/caché añadida, Invitados y Distribución con sus imports de datos originales v4.
 - No se modificaron Firebase, Firestore, Storage, Authentication, usuarios ni datos persistentes.
 - Publicación de recuperación: dashboard CSS v40, JS v172.
+
+
+## 2026-09-24 — Distribución móvil: rueda de acciones y panel inferior
+- Se crea una experiencia exclusiva para móvil (<=700 px); desktop conserva su interfaz actual.
+- En móvil se ocultan hero, indicadores superiores, acciones extensas, panel lateral de herramientas e inspector. Se mantienen el plano y los cuatro switches de capas.
+- Se agrega una rueda flotante inferior con cinco categorías: Añadir, Propuesta, Vista, Revisar y Ajustes.
+- La rueda gira con flechas izquierda/derecha; el botón central permite plegarla/desplegarla.
+- Al tocar una categoría se abre un bottom sheet oscuro inspirado en la referencia móvil.
+- Las acciones reutilizan los controles existentes mediante proxy: no se duplica la lógica funcional.
+- Añadir ofrece accesos iniciales a Pista, Barra, DJ, Escenario y Pantalla; Propuesta reutiliza Nueva/Duplicar/Renombrar/Eliminar; Vista reutiliza Presentación/Plano limpio/Imprimir; Revisar refleja validaciones; Ajustes incorpora Medir/Limpiar y cuadrícula.
+- Sin !important, sin cambios en Firebase, Firestore, Storage, IDs, esquema persistente ni comportamiento desktop.

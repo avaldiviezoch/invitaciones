@@ -237,4 +237,33 @@
       </div>
     </aside>
   </section>
+
+  <section class="distribution-mobile-hub" data-distribution-mobile-hub aria-label="Herramientas móviles de distribución">
+    <div class="distribution-mobile-wheel-stage">
+      <button class="distribution-mobile-wheel-arrow is-left" type="button" data-distribution-mobile-wheel-prev aria-label="Herramienta anterior">‹</button>
+      <div class="distribution-mobile-wheel-label" data-distribution-mobile-wheel-label>Añadir</div>
+      <button class="distribution-mobile-wheel-arrow is-right" type="button" data-distribution-mobile-wheel-next aria-label="Herramienta siguiente">›</button>
+      <div class="distribution-mobile-wheel" data-distribution-mobile-wheel>
+        <button type="button" class="distribution-mobile-wheel-action" data-mobile-wheel-index="0" data-mobile-action="add" style="--i:0" aria-label="Añadir elementos"><span aria-hidden="true">＋</span></button>
+        <button type="button" class="distribution-mobile-wheel-action" data-mobile-wheel-index="1" data-mobile-action="proposal" style="--i:1" aria-label="Propuestas"><span aria-hidden="true">▤</span></button>
+        <button type="button" class="distribution-mobile-wheel-action" data-mobile-wheel-index="2" data-mobile-action="view" style="--i:2" aria-label="Vista"><span aria-hidden="true">◫</span></button>
+        <button type="button" class="distribution-mobile-wheel-action" data-mobile-wheel-index="3" data-mobile-action="review" style="--i:3" aria-label="Validación"><span aria-hidden="true">✓</span></button>
+        <button type="button" class="distribution-mobile-wheel-action" data-mobile-wheel-index="4" data-mobile-action="settings" style="--i:4" aria-label="Ajustes"><span aria-hidden="true">⌖</span></button>
+        <button type="button" class="distribution-mobile-wheel-center" data-distribution-mobile-wheel-toggle aria-expanded="true" aria-label="Ocultar herramientas"><span aria-hidden="true">⌘</span></button>
+      </div>
+    </div>
+  </section>
+
+  <div class="distribution-mobile-sheet-backdrop" data-distribution-mobile-sheet-backdrop hidden></div>
+  <section class="distribution-mobile-sheet" data-distribution-mobile-sheet hidden aria-modal="true" role="dialog" aria-labelledby="distribution-mobile-sheet-title">
+    <header>
+      <div>
+        <span>Distribución</span>
+        <h2 id="distribution-mobile-sheet-title" data-distribution-mobile-sheet-title>Herramientas</h2>
+      </div>
+      <button type="button" data-distribution-mobile-sheet-close aria-label="Cerrar panel">×</button>
+    </header>
+    <div class="distribution-mobile-sheet-body" data-distribution-mobile-sheet-body></div>
+    <button class="distribution-mobile-sheet-cancel" type="button" data-distribution-mobile-sheet-cancel>Cerrar</button>
+  </section>
 </div>
