@@ -475,36 +475,26 @@ function placementMapFor(layout, storedState) {
   }));
 }
 
-function serializeDistribution(placementState, tableIds, elements) {
+function serializeProposal(id, name, placementState, tableIds, elements) {
   return {
-    version: 1,
-    activeProposalId: DEFAULT_PROPOSAL_ID,
-    proposals: [{
-      id: DEFAULT_PROPOSAL_ID,
-      name: 'Propuesta principal',
-      placements: tableIds.map((tableId) => {
-        const placement = placementState.get(tableId);
-        return {
-          tableId,
-          x: Math.round(placement.x * 100) / 100,
-          y: Math.round(placement.y * 100) / 100,
-          rotation: normalizeRotation(placement.rotation)
-        };
-      }),
-      elements: elements.map((element) => ({
-        id: element.id,
-        type: element.type,
-        x: Math.round(element.x * 100) / 100,
-        y: Math.round(element.y * 100) / 100,
-        rotation: normalizeRotation(element.rotation),
-        layer: Number(element.layer || 0),
-        locked: element.locked === true,
-        width: Math.round(element.width * 100) / 100,
-        height: Math.round(element.height * 100) / 100,
-        ...(Array.isArray(element.points) ? { points: element.points.map((point) => ({ x: Math.round(point.x * 100) / 100, y: Math.round(point.y * 100) / 100 })) } : {})
-      }))
-    }]
+    id,
+    name,
+    placements: tableIds.map((tableId) => {
+      const placement = placementState.get(tableId);
+      return { tableId, x: Math.round(placement.x * 100) / 100, y: Math.round(placement.y * 100) / 100, rotation: normalizeRotation(placement.rotation) };
+    }),
+    elements: elements.map((element) => ({
+      id: element.id, type: element.type,
+      x: Math.round(element.x * 100) / 100, y: Math.round(element.y * 100) / 100,
+      rotation: normalizeRotation(element.rotation), layer: Number(element.layer || 0), locked: element.locked === true,
+      width: Math.round(element.width * 100) / 100, height: Math.round(element.height * 100) / 100,
+      ...(Array.isArray(element.points) ? { points: element.points.map((point) => ({ x: Math.round(point.x * 100) / 100, y: Math.round(point.y * 100) / 100 })) } : {})
+    }))
   };
+}
+
+function serializeDistribution(proposals, activeProposalId) {
+  return { version: 1, activeProposalId, proposals };
 }
 
 function applyPlacement(node, placement) {
@@ -851,6 +841,10 @@ async function mountDistribucion(context) {
     if (epoch !== mountEpoch) return;
 
     const storedState = parseDistributionState(storedValue);
+    const proposalState = storedState?.proposals?.length
+      ? storedState.proposals.map((proposal) => ({ ...proposal, placements: proposal.placements.map((placement) => ({ ...placement })), elements: proposal.elements.map((element) => ({ ...element, points: Array.isArray(element.points) ? element.points.map((point) => ({ ...point })) : null })) }))
+      : [{ id: DEFAULT_PROPOSAL_ID, name: 'Propuesta principal', placements: [], elements: [] }];
+    let activeProposalId = activeProposalOf(storedState)?.id || DEFAULT_PROPOSAL_ID;
     const tables = snapshot.canonical.tables;
     const guests = snapshot.canonical.guests;
     validateCanonicalIntegrity(tables, guests);
@@ -877,6 +871,26 @@ async function mountDistribucion(context) {
     const redoStack = [];
     const undoButton = root.querySelector('[data-distribution-undo]');
     const redoButton = root.querySelector('[data-distribution-redo]');
+    const proposalSelect = root.querySelector('[data-distribution-proposal]');
+    const proposalNew = root.querySelector('[data-distribution-proposal-new]');
+    const proposalDuplicate = root.querySelector('[data-distribution-proposal-duplicate]');
+    const proposalRename = root.querySelector('[data-distribution-proposal-rename]');
+    const proposalDelete = root.querySelector('[data-distribution-proposal-delete]');
+
+    const refreshProposalControls = () => {
+      proposalSelect.replaceChildren(...proposalState.map((proposal) => {
+        const option = document.createElement('option');
+        option.value = proposal.id;
+        option.textContent = proposal.name;
+        option.selected = proposal.id === activeProposalId;
+        return option;
+      }));
+      proposalDelete.disabled = !canEdit || proposalState.length <= 1;
+      proposalNew.disabled = !canEdit;
+      proposalDuplicate.disabled = !canEdit;
+      proposalRename.disabled = !canEdit;
+    };
+    refreshProposalControls();
 
     world.style.width = `${layout.width}px`;
     world.style.height = `${layout.height}px`;
@@ -947,6 +961,88 @@ async function mountDistribucion(context) {
       }
     };
     presentationButton.onclick = () => setPresentationMode(!presentationMode);
+
+    const persistCurrentProposalInMemory = () => {
+      const index = proposalState.findIndex((proposal) => proposal.id === activeProposalId);
+      if (index < 0) return;
+      proposalState[index] = serializeProposal(activeProposalId, proposalState[index].name, placementState, tableIds, physicalElements);
+    };
+    const proposalId = () => `proposal_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+    const switchProposal = (nextId) => {
+      if (dirty || saving || canonicalChanged) {
+        proposalSelect.value = activeProposalId;
+        status.textContent = 'Guarda los cambios antes de cambiar de propuesta';
+        return;
+      }
+      const next = proposalState.find((proposal) => proposal.id === nextId);
+      if (!next) return;
+      activeProposalId = next.id;
+      const nextState = { version: 1, activeProposalId, proposals: proposalState };
+      const nextPlacements = placementMapFor(layout, nextState);
+      placementState.clear();
+      nextPlacements.forEach((placement, tableId) => placementState.set(tableId, placement));
+      physicalElements.splice(0, physicalElements.length, ...next.elements.map((element) => ({ ...element, points: Array.isArray(element.points) ? element.points.map((point) => ({ ...point })) : null })));
+      world.querySelectorAll('.distribution-table,.distribution-element').forEach((node) => node.remove());
+      layout.items.forEach((item) => {
+        const tableId = escapeText(item.table?.id);
+        if (tableId) world.append(renderTable(item, guestIndex, placementState.get(tableId)));
+      });
+      physicalElements.forEach((element) => world.append(renderPhysicalElement(element)));
+      clearSelection();
+      undoStack.length = 0; redoStack.length = 0; updateHistoryState();
+      refreshProposalControls();
+      refreshSpatialConflicts();
+      requestAnimationFrame(() => camera.fit());
+      status.textContent = `${next.name} · propuesta activa`;
+    };
+    proposalSelect.onchange = () => switchProposal(proposalSelect.value);
+    proposalNew.onclick = () => {
+      if (!canEdit || dirty || saving || canonicalChanged) return;
+      persistCurrentProposalInMemory();
+      const id = proposalId();
+      const name = `Alternativa ${proposalState.length + 1}`;
+      const blank = serializeProposal(id, name, placementMapFor(layout, null), tableIds, []);
+      proposalState.push(blank);
+      activeProposalId = id;
+      refreshProposalControls();
+      switchProposal(id);
+      dirty = true; updateSaveState();
+    };
+    proposalDuplicate.onclick = () => {
+      if (!canEdit || dirty || saving || canonicalChanged) return;
+      persistCurrentProposalInMemory();
+      const source = proposalState.find((proposal) => proposal.id === activeProposalId);
+      if (!source) return;
+      const id = proposalId();
+      const copy = { ...source, id, name: `${source.name} · copia`, placements: source.placements.map((placement) => ({ ...placement })), elements: source.elements.map((element) => ({ ...element, id: `${element.id}_${id}`, points: Array.isArray(element.points) ? element.points.map((point) => ({ ...point })) : null })) };
+      proposalState.push(copy);
+      activeProposalId = id;
+      refreshProposalControls();
+      switchProposal(id);
+      dirty = true; updateSaveState();
+    };
+    proposalRename.onclick = () => {
+      if (!canEdit || saving || canonicalChanged) return;
+      const proposal = proposalState.find((item) => item.id === activeProposalId);
+      if (!proposal) return;
+      const name = window.prompt('Nombre de la propuesta', proposal.name);
+      if (name === null) return;
+      const clean = escapeText(name);
+      if (!clean || clean === proposal.name) return;
+      proposal.name = clean;
+      dirty = true; refreshProposalControls(); updateSaveState();
+    };
+    proposalDelete.onclick = () => {
+      if (!canEdit || dirty || saving || canonicalChanged || proposalState.length <= 1) return;
+      const current = proposalState.find((proposal) => proposal.id === activeProposalId);
+      if (!current || !window.confirm(`Eliminar "${current.name}"? Solo se eliminará este plano; mesas e invitados no cambian.`)) return;
+      const index = proposalState.findIndex((proposal) => proposal.id === activeProposalId);
+      proposalState.splice(index, 1);
+      activeProposalId = proposalState[Math.max(0, index - 1)].id;
+      refreshProposalControls();
+      switchProposal(activeProposalId);
+      dirty = true; updateSaveState();
+    };
 
     const editorSnapshot = () => ({
       dirty,
@@ -1819,7 +1915,10 @@ async function mountDistribucion(context) {
       saving = true;
       updateSaveState();
       try {
-        await writePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, serializeDistribution(placementState, tableIds, physicalElements));
+        const activeIndex = proposalState.findIndex((proposal) => proposal.id === activeProposalId);
+        const activeName = proposalState[activeIndex]?.name || 'Propuesta';
+        proposalState[activeIndex] = serializeProposal(activeProposalId, activeName, placementState, tableIds, physicalElements);
+        await writePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, serializeDistribution(proposalState, activeProposalId));
         hasPersistedState = true;
         if (canonicalChanged) {
           dirty = true;
