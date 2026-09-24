@@ -10,6 +10,8 @@ const MIN_ZOOM = 0.45;
 const MAX_ZOOM = 1.6;
 const ZOOM_STEP = 0.12;
 const ROTATION_STEP = 15;
+const KEYBOARD_MOVE_STEP = 10;
+const KEYBOARD_MOVE_FINE_STEP = 1;
 const TABLE_GAP = 72;
 const WORLD_PADDING = 90;
 
@@ -521,11 +523,25 @@ async function mountDistribucion(context) {
     });
 
     world.addEventListener('keydown', (event) => {
-      if (!['Enter', ' '].includes(event.key)) return;
       const node = event.target.closest('.distribution-table');
       if (!node) return;
+      if (['Enter', ' '].includes(event.key)) {
+        event.preventDefault();
+        selectTable(node.dataset.tableId);
+        return;
+      }
+      if (!canEdit || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+      const placement = placementState.get(node.dataset.tableId);
+      if (!placement) return;
       event.preventDefault();
+      const step = event.shiftKey ? KEYBOARD_MOVE_FINE_STEP : KEYBOARD_MOVE_STEP;
+      if (event.key === 'ArrowLeft') placement.x -= step;
+      if (event.key === 'ArrowRight') placement.x += step;
+      if (event.key === 'ArrowUp') placement.y -= step;
+      if (event.key === 'ArrowDown') placement.y += step;
+      applyPlacement(node, placement);
       selectTable(node.dataset.tableId);
+      markDirty();
     });
 
     const rotateSelected = (delta) => {
