@@ -1,6 +1,6 @@
 import { loadInvitadosSnapshot } from '../invitados/invitados-data.js?v=4';
 import { normalizeTableShape } from '../invitados/table-geometry.js?v=4';
-import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
+import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=5';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { setupDistributionCamera } from './camera.js?v=8';
 import {
@@ -13,7 +13,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=40', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=41', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -816,6 +816,10 @@ async function mountDistribucion(context) {
     let saving = false;
     let canonicalChanged = false;
     let hasPersistedState = Boolean(storedState);
+    let autosaveTimer = 0;
+    let cloudUnsubscribe = null;
+    let lastPersistedSignature = storedState ? JSON.stringify(storedState) : '';
+    let remoteRefreshQueued = false;
     const undoStack = [];
     const redoStack = [];
     const undoButton = root.querySelector('[data-distribution-undo]');
@@ -1004,6 +1008,16 @@ async function mountDistribucion(context) {
 
     const camera = setupDistributionCamera(root, world, layout);
 
+    const scheduleAutosave = (delay = 250) => {
+      if (!canEdit || saving || canonicalChanged || !dirty) return;
+      if (autosaveTimer) window.clearTimeout(autosaveTimer);
+      autosaveTimer = window.setTimeout(() => {
+        autosaveTimer = 0;
+        if (!dirty || saving || canonicalChanged) return;
+        saveButton.click();
+      }, delay);
+    };
+
     const updateSaveState = () => {
       const saveDisabled = !canEdit || !dirty || saving || canonicalChanged || !tables.length;
       saveButton.disabled = saveDisabled;
@@ -1020,17 +1034,18 @@ async function mountDistribucion(context) {
             : canonicalChanged
               ? 'Reabrir'
               : dirty
-                ? 'Sin guardar'
+                ? 'Sincronizando'
                 : hasPersistedState
-                  ? 'Guardado'
+                  ? 'Sincronizado'
                   : 'Sin guardar';
       }
       mobileSaveRow?.classList.toggle('is-dirty', dirty && !saving);
       mobileSaveRow?.classList.toggle('is-saving', saving);
       if (!canEdit) status.textContent = 'Solo lectura · la distribución no puede modificarse';
       else if (saving) status.textContent = 'Guardando distribución…';
-      else if (dirty) status.textContent = 'Cambios sin guardar';
-      else status.textContent = hasPersistedState ? 'Distribución guardada' : 'Distribución proyectada · aún sin guardar';
+      else if (dirty) status.textContent = 'Sincronizando cambios…';
+      else status.textContent = hasPersistedState ? 'Distribución sincronizada' : 'Distribución proyectada · aún sin guardar';
+      if (dirty && !saving && !canonicalChanged) scheduleAutosave();
     };
 
     const clearVisualSelection = () => {
@@ -2099,7 +2114,9 @@ async function mountDistribucion(context) {
         const activeIndex = proposalState.findIndex((proposal) => proposal.id === activeProposalId);
         const activeName = proposalState[activeIndex]?.name || 'Propuesta';
         proposalState[activeIndex] = serializeProposal(activeProposalId, activeName, placementState, tableIds, physicalElements);
-        await writePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, serializeDistribution(proposalState, activeProposalId));
+        const payload = serializeDistribution(proposalState, activeProposalId);
+        await writePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, payload);
+        lastPersistedSignature = JSON.stringify(payload);
         hasPersistedState = true;
         if (canonicalChanged) {
           dirty = true;
@@ -2109,7 +2126,7 @@ async function mountDistribucion(context) {
           undoStack.length = 0;
           redoStack.length = 0;
           updateHistoryState();
-          status.textContent = 'Distribución guardada';
+          status.textContent = 'Distribución sincronizada';
         }
       } catch (error) {
         console.error('No se pudo guardar Distribución:', error);
@@ -2117,6 +2134,12 @@ async function mountDistribucion(context) {
       } finally {
         saving = false;
         updateSaveState();
+        if (remoteRefreshQueued && !dirty && !canonicalChanged) {
+          remoteRefreshQueued = false;
+          window.setTimeout(() => {
+            if (!dirty && !saving && !canonicalChanged) void mountDistribucion(context);
+          }, 120);
+        }
       }
     };
 
@@ -2136,14 +2159,50 @@ async function mountDistribucion(context) {
     };
 
     const handleVisibilityChange = () => {
-      if (document.hidden || dirty || saving || canonicalChanged) return;
+      if (document.hidden) {
+        if (dirty && !saving && !canonicalChanged) {
+          if (autosaveTimer) {
+            window.clearTimeout(autosaveTimer);
+            autosaveTimer = 0;
+          }
+          saveButton.click();
+        }
+        return;
+      }
+      if (dirty || saving || canonicalChanged) return;
       void mountDistribucion(context);
     };
+
+    cloudUnsubscribe = subscribePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, (remoteValue) => {
+      let remoteState = null;
+      try {
+        remoteState = parseDistributionState(remoteValue);
+      } catch (error) {
+        console.error('No se pudo aplicar la sincronización remota de Distribución:', error);
+        return;
+      }
+      const remoteSignature = remoteState ? JSON.stringify(remoteState) : '';
+      if (!remoteSignature || remoteSignature === lastPersistedSignature) return;
+
+      if (dirty || saving || canonicalChanged) {
+        remoteRefreshQueued = true;
+        return;
+      }
+
+      lastPersistedSignature = remoteSignature;
+      status.textContent = 'Cambios recibidos de otro dispositivo';
+      void mountDistribucion(context);
+    }, (error) => {
+      console.error('No se pudo escuchar la sincronización de Distribución:', error);
+    });
+
     window.addEventListener('migrandia:datachange', handleCanonicalChange);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     activeDistributionCleanup = () => {
       window.removeEventListener('migrandia:datachange', handleCanonicalChange);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      cloudUnsubscribe?.();
+      if (autosaveTimer) window.clearTimeout(autosaveTimer);
       camera.destroy();
       if (referenceObjectUrl) {
         URL.revokeObjectURL(referenceObjectUrl);

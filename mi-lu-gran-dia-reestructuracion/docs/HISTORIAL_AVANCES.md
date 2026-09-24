@@ -345,3 +345,15 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - El botón móvil “Guardar cambios” reutiliza exactamente el mismo saveButton y la misma writePlannerStorageKey; no se crea una segunda ruta de persistencia.
 - Esto hace explícito cuándo un movimiento ya está disponible para otro dispositivo tras recargar.
 - Sin cambios en Firebase, Firestore, Storage, claves, geometría ni modelo de datos.
+
+
+## 2026-09-24 — Distribución: autoguardado y sincronización entre dispositivos
+- Se confirma que las posiciones de mesa ya se almacenan como x/y/rotation dentro de planificador_bodas_distribucion_v1; no se crea un segundo modelo ni otra clave.
+- Toda edición estable que deja Distribución en estado dirty programa autoguardado a los 250 ms usando la misma writePlannerStorageKey existente.
+- El autoguardado cubre movimientos finalizados de mesas/objetos y cualquier otra operación que ya marque el módulo como dirty (rotación, tamaño, creación, eliminación, propuestas, undo/redo).
+- Al ocultar la pestaña se intenta vaciar inmediatamente cualquier cambio pendiente mediante la misma ruta de guardado.
+- planner-cloud incorpora subscribePlannerStorageKey basado en onSnapshot del metadato cloudSync/main. Tras un cambio remoto relee únicamente la clave solicitada.
+- Distribución compara la firma del estado remoto con la última versión persistida; si está limpia, se remonta automáticamente con la versión recibida de desktop/móvil.
+- Si llega un evento remoto mientras existe una edición local en guardado, se difiere el refresco hasta terminar para no interrumpir el gesto.
+- El botón Guardar sigue existiendo como acción manual/estado de respaldo, pero ya no es requisito para conservar una edición estable.
+- No se cambian Firebase collections, esquema planificador_bodas_distribucion_v1, IDs, Firestore rules ni Storage.

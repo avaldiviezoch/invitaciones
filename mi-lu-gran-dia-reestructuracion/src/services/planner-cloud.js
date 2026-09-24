@@ -1,6 +1,7 @@
 import {
   doc,
   getDoc,
+  onSnapshot,
   serverTimestamp,
   runTransaction
 } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
@@ -130,4 +131,41 @@ async function writePlannerStorageKey(context, key, value) {
   return writePlannerStorageKeys(context, { [key]: value });
 }
 
-export { readPlannerStorageKey, readPlannerStorageKeys, writePlannerStorageKey, writePlannerStorageKeys };
+function subscribePlannerStorageKey(context, key, onValue, onError) {
+  if (!auth.currentUser || !context?.id) return () => {};
+  const metaRef = doc(db, 'weddings', context.id, 'cloudSync', 'main');
+  let initialized = false;
+  let lastSignature = '';
+
+  return onSnapshot(metaRef, async (snapshot) => {
+    if (!snapshot.exists()) return;
+    const data = snapshot.data() || {};
+    const updatedAt = typeof data.updatedAt?.toMillis === 'function'
+      ? data.updatedAt.toMillis()
+      : String(data.updatedAt || '');
+    const signature = `${Number(data.chunkCount || 0)}:${Number(data.bytes || 0)}:${updatedAt}`;
+
+    if (!initialized) {
+      initialized = true;
+      lastSignature = signature;
+      return;
+    }
+    if (signature === lastSignature) return;
+    lastSignature = signature;
+
+    try {
+      const value = await readPlannerStorageKey(context, key);
+      onValue?.(value);
+    } catch (error) {
+      onError?.(error);
+    }
+  }, (error) => onError?.(error));
+}
+
+export {
+  readPlannerStorageKey,
+  readPlannerStorageKeys,
+  subscribePlannerStorageKey,
+  writePlannerStorageKey,
+  writePlannerStorageKeys
+};
