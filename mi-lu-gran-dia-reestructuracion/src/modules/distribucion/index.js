@@ -327,8 +327,9 @@ function validateCanonicalIntegrity(tables, guests) {
     const seats = Array.isArray(table?.seats) ? table.seats : [];
     seats.forEach((seat) => {
       const seatId = escapeText(seat?.id);
-      if (!seatId || seatIds.has(seatId)) {
-        throw new Error('Mesas contiene sillas con identificadores vacíos o duplicados. Distribución no modificó ningún dato.');
+      if (!seatId) return;
+      if (seatIds.has(seatId)) {
+        throw new Error('Mesas contiene identificadores de silla duplicados. Distribución no modificó ningún dato.');
       }
       seatIds.add(seatId);
     });
@@ -343,12 +344,13 @@ function validateCanonicalIntegrity(tables, guests) {
     const table = tables.find((item) => escapeText(item?.id) === tableId);
     const seatNumber = Number(guest?.seatNumber);
     const seats = Array.isArray(table?.seats) ? table.seats : [];
-    if (!Number.isInteger(seatNumber) || seatNumber < 1 || seatNumber > seats.length) {
+    const capacity = capacityOf(table);
+    if (!Number.isInteger(seatNumber) || seatNumber < 1 || seatNumber > capacity) {
       throw new Error('Existe un invitado con una silla fuera de rango. Corrige la asignación en Mesas antes de editar Distribución.');
     }
     const seatId = escapeText(guest?.seatId);
     const canonicalSeatId = escapeText(seats[seatNumber - 1]?.id);
-    if (!seatId || seatId !== canonicalSeatId) {
+    if (seatId && canonicalSeatId && seatId !== canonicalSeatId) {
       throw new Error('Existe una asignación de silla inconsistente. Corrígela en Mesas antes de editar Distribución.');
     }
     const occupancyKey = `${tableId}::${seatNumber}`;
