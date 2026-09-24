@@ -263,7 +263,7 @@ let mountEpoch = 0;
 let activeDistributionCleanup = null;
 
 function template() {
-  if (!templatePromise) templatePromise = fetch(TEMPLATE_URL, { cache: 'no-store' }).then((response) => {
+  if (!templatePromise) templatePromise = fetch(TEMPLATE_URL, { cache: 'force-cache' }).then((response) => {
     if (!response.ok) throw new Error('No se pudo cargar la vista de Distribución.');
     return response.text();
   });
