@@ -116,3 +116,23 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Los placements persistidos de mesas eliminadas no recrean mesas. Una mesa canónica nueva recibe solo una posición proyectada en memoria hasta un guardado explícito.
 - Barrido estático final: sin escritura directa a Firestore, sin localStorage/sessionStorage/IndexedDB directo, sin escrituras de guest.tableId/seatId/seatNumber ni table.id/seat.id y sin `!important`.
 - Fase 4 cerrada. Siguiente hito: Fase 5, editor avanzado de Distribución, preservando estas invariantes.
+
+
+## 2026-09-24 — Distribución Fase 5R cerrada: editor avanzado, integración y limpieza arquitectónica
+- Se completó el editor avanzado de Distribución sobre el contrato persistente `version: 1`, sin crear almacenamiento paralelo ni cambiar IDs canónicos.
+- El plano admite propuestas independientes, posición/rotación de mesas, catálogo de elementos físicos, zonas poligonales, medición, ajuste a cuadrícula, alertas espaciales, capas de visibilidad, modo presentación, plano limpio, impresión/PDF y fondo de referencia transitorio.
+- El fondo de referencia permanece exclusivamente en memoria mediante Object URL; no se incorpora al payload persistido ni se guarda en Firebase, Firestore, Storage, localStorage, sessionStorage o IndexedDB.
+- La cámara quedó aislada en `src/modules/distribucion/camera.js` como único propietario de zoom, paneo, pinch, Fit, conversión pantalla↔mundo y enfoque. El motor espacial permanece en `index.js` porque comparte directamente escala, catálogo y reglas del dominio.
+- Mesas conserva la identidad canónica de mesas y sillas. Distribución renderiza únicamente las sillas presentes en `table.seats`; no inventa capacidad visual a partir de `table.capacity`.
+- La evolución respecto de la Fase 4 es explícita: Distribución puede mover un invitado ya existente a otra silla canónica libre mediante el adaptador de Invitados. La operación solo modifica `guest.tableId`, `guest.seatId` y `guest.seatNumber`, valida la integridad antes de persistir, revierte esos tres campos si falla y no crea mesas, sillas, invitados ni IDs. Intercambios o reemplazos sobre una silla ocupada siguen delegados a Mesas.
+- El evento posterior a una asignación usa `source: 'distribucion'`; el listener propio lo ignora y queda un único remontaje controlado, evitando el doble refresco del módulo.
+- Las propuestas rechazan IDs de propuesta duplicados y una referencia `activeProposalId` inexistente. Duplicar una propuesta genera IDs de elementos sin colisiones.
+- Al cambiar de propuesta se recalcula la secuencia de elementos y la creación comprueba los IDs existentes antes de aceptar un nuevo `element_N`.
+- Los placements de mesas que ya no existen canónicamente no recrean esas mesas. Al serializar la propuesta activa se escriben únicamente los `tableId` canónicos actuales.
+- Guardar establece una frontera limpia del historial: tras persistir correctamente se vacían Undo/Redo para impedir deshacer a un estado anterior al baseline guardado.
+- Los cambios canónicos externos siguen bloqueando un guardado local pendiente mediante `canonicalChanged`; no se mezclan ni reparan estados automáticamente.
+- Se corrigieron condiciones de ciclo de vida: un mount asíncrono obsoleto no toca el DOM, los listeners globales tienen cleanup equivalente y las Object URL del fondo se revocan al desmontar.
+- Auditoría HTML ↔ JS ↔ CSS: no se detectaron controles o selectores de Distribución huérfanos que justificaran eliminación; los controles de cámara pertenecen deliberadamente a `camera.js`.
+- Barrido estático de cierre: 0 Firestore directo, 0 localStorage/sessionStorage/IndexedDB directo, 0 polling, 0 MutationObserver, 0 postMessage, 0 `sharedTableId` legacy y 0 `!important`; los dos listeners globales del módulo tienen sus dos removals correspondientes.
+- No se modificaron reglas de Firestore, Storage, Authentication, usuarios, esquema de persistencia ni el repositorio `Wedding`.
+- Fase 5R cerrada. La siguiente fase es 5S: monkey test y regresión funcional final; esas pruebas todavía no forman parte de este cierre.
