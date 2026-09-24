@@ -118,3 +118,13 @@ HITO SHELL MÓVIL — HEADER + DRAWER:
 - Distribución mantiene todo el ancho móvil disponible bajo el header y su cámara sigue adaptándose al tamaño real del visor.
 - Desktop conserva la navegación horizontal vigente.
 - Sin cambios en Firebase, Firestore, Storage ni persistencia local.
+
+
+HITO SHELL MÓVIL — CORRECCIÓN ESTRUCTURAL:
+- Un solo breakpoint del shell: móvil/tablet estrecha hasta 980 px; desktop desde 981 px.
+- Header móvil + drawer sin barra lateral permanente ni botones flotantes.
+- Workspace móvil blanco, sin 100dvh redundante ni franja beige inferior del shell.
+- Head HTML corregido y assets publicados como dashboard CSS v38 / JS v170.
+- Distribución publicada como v75, con plantilla versionada cacheable.
+- planner-cloud comparte lecturas concurrentes idénticas sin persistir caché ni alterar datos.
+- Sin cambios de esquema, Firebase, Firestore, Storage, usuarios ni contratos persistentes.
