@@ -1,7 +1,7 @@
 import { loadInvitadosSnapshot } from '../invitados/invitados-data.js?v=4';
 import { normalizeTableShape, tableSeatGeometry } from '../invitados/table-geometry.js?v=1';
 
-const TEMPLATE_URL = new URL('./index.html?v=1', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=2', import.meta.url);
 const MIN_ZOOM = 0.45;
 const MAX_ZOOM = 1.6;
 const ZOOM_STEP = 0.12;
@@ -123,7 +123,7 @@ function renderTable(item, guestIndex) {
   return node;
 }
 
-function setupCamera(root, world, worldSize) {
+function setupCamera(root, world, worldSize, placementState) {
   const viewport = root.querySelector('[data-distribution-viewport]');
   const zoomOutput = root.querySelector('[data-distribution-zoom]');
   let scale = 1;
@@ -223,7 +223,7 @@ function setupCamera(root, world, worldSize) {
   return { fit };
 }
 
-function renderInspector(root, table, tableIndex, guests) {
+function renderInspector(root, table, tableIndex, guests, placement) {
   root.querySelector('[data-distribution-selection-empty]').hidden = true;
   root.querySelector('[data-distribution-selection]').hidden = false;
   const capacity = capacityOf(table);
@@ -232,6 +232,8 @@ function renderInspector(root, table, tableIndex, guests) {
     .sort((a, b) => Number(a.seatNumber || 999) - Number(b.seatNumber || 999));
   root.querySelector('[data-distribution-selected-name]').textContent = tableName(table, tableIndex);
   root.querySelector('[data-distribution-selected-meta]').textContent = `${normalizeTableShape(table.type)} · ${capacity} sillas`;
+  root.querySelector('[data-distribution-selected-rotation]').value = `${placement.rotation}°`;
+  root.querySelector('[data-distribution-selected-rotation]').textContent = `${placement.rotation}°`;
   root.querySelector('[data-distribution-selected-seated]').textContent = String(assigned.length);
   root.querySelector('[data-distribution-selected-free]').textContent = String(Math.max(0, capacity - assigned.length));
   const list = root.querySelector('[data-distribution-selected-guests]');
