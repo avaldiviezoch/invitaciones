@@ -1,5 +1,6 @@
 import {
   loadRsvpAdminSnapshot,
+  saveRsvpMusicConfig,
   saveRsvpManagement,
   deleteRsvpManagement,
   restoreRsvpManagement
@@ -138,6 +139,57 @@ function createRsvpController(api) {
     });
   }
 
+  function renderMusicConfig(root) {
+    const form = root.querySelector('[data-music-config-form]');
+    if (!form) return;
+    const config = state.config?.musicConfig;
+    if (!config) {
+      form.querySelectorAll('input,textarea,select,button').forEach((control) => { control.disabled = true; });
+      return;
+    }
+    form.elements.title.value = text(config.title);
+    form.elements.intro.value = text(config.intro);
+    form.elements.maxSongs.value = String(config.maxSongs || 5);
+    form.elements.messageLabel.value = text(config.messageLabel);
+    form.elements.enabled.checked = config.enabled !== false;
+    form.elements.askArtist.checked = config.askArtist !== false;
+    form.elements.askMessage.checked = config.askMessage !== false;
+    form.querySelectorAll('input,textarea,select,button').forEach((control) => { control.disabled = !api.canEdit(); });
+  }
+
+  async function submitMusicConfig(event) {
+    event.preventDefault();
+    if (!api.canEdit() || api.isSaving()) return true;
+    const form = event.target;
+    const status = api.getRoot()?.querySelector('[data-music-config-state]');
+    const button = form.querySelector('[data-music-config-save]');
+    const input = {
+      title: form.elements.title.value,
+      intro: form.elements.intro.value,
+      maxSongs: Number(form.elements.maxSongs.value),
+      messageLabel: form.elements.messageLabel.value,
+      enabled: form.elements.enabled.checked,
+      askArtist: form.elements.askArtist.checked,
+      askMessage: form.elements.askMessage.checked
+    };
+    api.setSaving(true);
+    if (button) button.disabled = true;
+    if (status) status.textContent = 'Guardando…';
+    try {
+      const saved = await saveRsvpMusicConfig(api.getContext(), input);
+      state.config = { ...(state.config || {}), musicConfig: saved.musicConfig };
+      if (status) status.textContent = 'Configuración guardada';
+      renderMusicConfig(api.getRoot());
+      api.emitDataChange('rsvp-music-config');
+    } catch (error) {
+      if (status) status.textContent = error?.message || 'No se pudo guardar la configuración.';
+    } finally {
+      api.setSaving(false);
+      if (button) button.disabled = !api.canEdit();
+    }
+    return true;
+  }
+
   function renderMusic(root) {
     const entries = musicEntries();
     const people = new Set(entries.map((item) => item.responseId || item.person)).size;
@@ -155,6 +207,7 @@ function createRsvpController(api) {
     const root = api.getRoot();
     if (!root) return;
     const responses = state.responses || [];
+    renderMusicConfig(root);
     renderMusic(root);
     const management = state.management || [];
     const confirmed = responses.filter((item) => item.attendance === 'confirmed');
@@ -529,6 +582,7 @@ function createRsvpController(api) {
   }
 
   async function handleSubmit(event) {
+    if (event.target.matches('[data-music-config-form]')) return submitMusicConfig(event);
     if (!event.target.matches('[data-rsvp-form]')) return false;
     return submit(event);
   }
