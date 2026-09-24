@@ -633,7 +633,7 @@ async function openModule(moduleId, { updateHash = true } = {}) {
       await mountProveedores(weddingContext);
     }
     if (moduleId === 'invitados') {
-      const { mountInvitados } = await import('../invitados/index.js?v=25');
+      const { mountInvitados } = await import('../invitados/index.js?v=26');
       await mountInvitados(weddingContext);
     }
     if (loadEpoch === moduleLoadEpoch) {
