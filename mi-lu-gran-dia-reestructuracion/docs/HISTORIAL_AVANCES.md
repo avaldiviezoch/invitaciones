@@ -203,3 +203,10 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - La sección lateral dejó de contener las capas y pasa a “Ajustes del plano”, donde permanecen catálogo de plano, separación, medición, cuadrícula y herramientas de dibujo.
 - En escritorio los switches permanecen junto al encabezado del plano; en anchos medios la toolbar puede envolver limpiamente y en móvil se muestran en una cuadrícula de dos columnas.
 - No se modificaron geometría, persistencia, mesas, sillas, invitados, Firebase, Firestore, Storage ni IDs.
+
+
+## 2026-09-24 — Distribución: nombre de mesa más compacto
+- Se ajustó únicamente el nombre mostrado dentro del tablero de la mesa.
+- La tipografía baja de 12 px a 10 px.
+- El nombre puede ocupar hasta dos líneas centradas; si excede ese espacio se recorta con puntos suspensivos.
+- No se modificaron geometría, sillas, etiquetas de invitados, asignaciones, persistencia ni escala física.
