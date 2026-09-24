@@ -155,9 +155,8 @@
   .ck-dialog-actions button{min-height:38px;padding:0 12px;border-radius:10px;font-size:10px}
 }
 @media(max-width:430px){
-.ck-original-eyebrow{font-size:10px}.ck-actions button span{margin-left:3px}.ck-segments button{padding:0 12px}.ck-group header h2{font-size:18px}.ck-original-task-copy strong{font-size:12px}
+.ck-original-eyebrow{font-size:10px}.ck-segments button{padding:0 12px}.ck-group header h2{font-size:18px}.ck-original-task-copy strong{font-size:12px}
 .ck-original-title-row h1{font-size:28px}
-  .ck-actions button{font-size:9px}
   .ck-segments button{padding:0 10px}
 .ck-original-task{grid-template-columns:14px 24px minmax(0,1fr) 78px 30px;gap:5px}.ck-task-status{width:78px;height:28px;padding:0 4px;font-size:8px}.ck-task-plus{width:28px;height:28px;font-size:16px}
 }
