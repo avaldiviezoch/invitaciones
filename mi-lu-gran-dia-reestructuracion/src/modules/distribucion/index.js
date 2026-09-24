@@ -29,18 +29,18 @@ const EDIT_CAPABILITIES = Object.freeze({
   physical: Object.freeze({ movable: true, rotatable: true, resizable: true, copyable: true, deletable: true, layerable: true, lockable: true })
 });
 
-const SPATIAL_FAMILIES = Object.freeze({
-  obstacle: Object.freeze({ tableOverlap: 'conflict', elementOverlap: 'conflict' }),
-  reserved: Object.freeze({ tableOverlap: 'conflict', elementOverlap: 'warning' }),
-  container: Object.freeze({ tableOverlap: 'allow', elementOverlap: 'allow' }),
-  circulation: Object.freeze({ tableOverlap: 'conflict', elementOverlap: 'conflict' }),
-  restricted: Object.freeze({ tableOverlap: 'conflict', elementOverlap: 'conflict' }),
-  informative: Object.freeze({ tableOverlap: 'allow', elementOverlap: 'allow' })
+const SPATIAL_INTERACTIONS = Object.freeze({
+  obstacle: Object.freeze({ table: 'conflict', obstacle: 'conflict', reserved: 'warning', container: 'allow', circulation: 'conflict', restricted: 'conflict', informative: 'allow' }),
+  reserved: Object.freeze({ table: 'conflict', obstacle: 'warning', reserved: 'warning', container: 'allow', circulation: 'warning', restricted: 'conflict', informative: 'allow' }),
+  container: Object.freeze({ table: 'allow', obstacle: 'allow', reserved: 'allow', container: 'allow', circulation: 'allow', restricted: 'allow', informative: 'allow' }),
+  circulation: Object.freeze({ table: 'conflict', obstacle: 'conflict', reserved: 'warning', container: 'allow', circulation: 'allow', restricted: 'conflict', informative: 'allow' }),
+  restricted: Object.freeze({ table: 'conflict', obstacle: 'conflict', reserved: 'conflict', container: 'allow', circulation: 'conflict', restricted: 'conflict', informative: 'allow' }),
+  informative: Object.freeze({ table: 'allow', obstacle: 'allow', reserved: 'allow', container: 'allow', circulation: 'allow', restricted: 'allow', informative: 'allow' })
 });
 
 function physicalType(label, widthMeters, heightMeters, options = {}) {
   const spatialFamily = options.spatialFamily || 'obstacle';
-  if (!SPATIAL_FAMILIES[spatialFamily]) throw new Error(`Familia espacial no reconocida: ${spatialFamily}`);
+  if (!SPATIAL_INTERACTIONS[spatialFamily]) throw new Error(`Familia espacial no reconocida: ${spatialFamily}`);
   return Object.freeze({
     label,
     widthMeters,
@@ -191,10 +191,14 @@ function spatialShapeForTable(table, placement, geometry) {
   };
 }
 
-function spatialRuleFor(element, targetKind) {
-  const family = PHYSICAL_ELEMENT_TYPES[element?.type]?.spatialFamily;
-  const rules = SPATIAL_FAMILIES[family] || SPATIAL_FAMILIES.informative;
-  return targetKind === 'table' ? rules.tableOverlap : rules.elementOverlap;
+function spatialFamilyFor(element) {
+  return PHYSICAL_ELEMENT_TYPES[element?.type]?.spatialFamily || 'informative';
+}
+
+function spatialRuleFor(element, target) {
+  const family = spatialFamilyFor(element);
+  const targetFamily = target === 'table' ? 'table' : spatialFamilyFor(target);
+  return SPATIAL_INTERACTIONS[family]?.[targetFamily] || 'allow';
 }
 
 function spatialShapesIntersect(a, b) {
@@ -996,7 +1000,6 @@ async function mountDistribucion(context) {
           if (gapMeters >= proximityMeters) return;
           [tableNode, second].forEach((node) => {
             node?.classList.add('has-proximity-warning');
-            if (node) node.dataset.proximityGap = gapMeters.toFixed(2);
           });
         });
       });
@@ -1005,11 +1008,7 @@ async function mountDistribucion(context) {
         const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(entry.element.id)}"]`);
         elementShapes.slice(index + 1).forEach((other) => {
           if (!spatialShapesIntersect(entry.shape, other.shape)) return;
-          const firstState = spatialRuleFor(entry.element, 'element');
-          const secondState = spatialRuleFor(other.element, 'element');
-          const state = firstState === 'conflict' || secondState === 'conflict'
-            ? 'conflict'
-            : firstState === 'warning' || secondState === 'warning' ? 'warning' : 'allow';
+          const state = spatialRuleFor(entry.element, other.element);
           markSpatialState(node, state);
           markSpatialState(world.querySelector(`.distribution-element[data-element-id="${CSS.escape(other.element.id)}"]`), state);
         });
@@ -1141,6 +1140,7 @@ async function mountDistribucion(context) {
         placement.x = move.x + dx;
         placement.y = move.y + dy;
         applyPlacement(node, placement);
+        refreshSpatialConflicts();
       });
 
       const finishMove = (event) => {
@@ -1212,6 +1212,7 @@ async function mountDistribucion(context) {
         element.x = move.x + dx;
         element.y = move.y + dy;
         applyElementPlacement(node, element);
+        refreshSpatialConflicts();
       });
       const finishMove = (event) => {
         if (!move || move.pointerId !== event.pointerId) return;
