@@ -433,7 +433,7 @@ function parseDistributionState(value) {
       const width = finiteNumber(element?.width) ?? PHYSICAL_ELEMENT_TYPES[type]?.width;
       const height = finiteNumber(element?.height) ?? PHYSICAL_ELEMENT_TYPES[type]?.height;
       const locked = element?.locked === true;
-      const points = type === 'zone' && Array.isArray(element?.points)
+      const points = Array.isArray(element?.points)
         ? element.points.map((point) => ({ x: finiteNumber(point?.x), y: finiteNumber(point?.y) }))
         : null;
       const validPoints = points === null || (
@@ -1606,6 +1606,9 @@ async function mountDistribucion(context) {
 
     root.querySelector('[data-distribution-show-tables]').onchange = (event) => {
       world.classList.toggle('hide-tables', !event.currentTarget.checked);
+    };
+    root.querySelector('[data-distribution-show-guest-labels]').onchange = (event) => {
+      world.classList.toggle('hide-guest-labels', !event.currentTarget.checked);
     };
     root.querySelector('[data-distribution-show-elements]').onchange = (event) => {
       world.classList.toggle('hide-elements', !event.currentTarget.checked);
