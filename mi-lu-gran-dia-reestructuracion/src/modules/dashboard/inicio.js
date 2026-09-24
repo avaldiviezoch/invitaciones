@@ -1,7 +1,4 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { mountChecklist } from '../checklist/index.js?v=14';
-import { mountPresupuesto } from '../presupuesto/index.js?v=11';
-import { mountProveedores } from '../proveedores/index.js?v=5';
 import { auth } from '../../services/firebase-client.js';
 import {
   listWeddingContexts,
@@ -616,11 +613,20 @@ async function openModule(moduleId, { updateHash = true } = {}) {
   if (updateHash && location.hash !== '#' + moduleId) history.replaceState(null, '', '#' + moduleId);
   setModuleLoading(true);
   try {
-    if (moduleId === 'checklist') await mountChecklist(weddingContext);
-    if (moduleId === 'presupuesto') await mountPresupuesto(weddingContext);
-    if (moduleId === 'proveedores') await mountProveedores(weddingContext);
+    if (moduleId === 'checklist') {
+      const { mountChecklist } = await import('../checklist/index.js?v=14');
+      await mountChecklist(weddingContext);
+    }
+    if (moduleId === 'presupuesto') {
+      const { mountPresupuesto } = await import('../presupuesto/index.js?v=11');
+      await mountPresupuesto(weddingContext);
+    }
+    if (moduleId === 'proveedores') {
+      const { mountProveedores } = await import('../proveedores/index.js?v=5');
+      await mountProveedores(weddingContext);
+    }
     if (moduleId === 'invitados') {
-      const { mountInvitados } = await import('../invitados/index.js?v=23');
+      const { mountInvitados } = await import('../invitados/index.js?v=24');
       await mountInvitados(weddingContext);
     }
   } finally {
