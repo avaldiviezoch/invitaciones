@@ -685,7 +685,9 @@ async function mountDistribucion(context) {
   const epoch = ++mountEpoch;
   const root = document.querySelector('[data-module-view="distribucion"]');
   if (!root) return;
-  root.innerHTML = await template();
+  const templateHtml = await template();
+  if (epoch !== mountEpoch || !root.isConnected) return;
+  root.innerHTML = templateHtml;
   const status = root.querySelector('[data-distribution-status]');
   const saveButton = root.querySelector('[data-distribution-save]');
   const canEdit = weddingCapabilities(context?.role).canEdit;
@@ -765,7 +767,7 @@ async function mountDistribucion(context) {
     const camera = setupDistributionCamera(root, world, layout);
 
     const updateSaveState = () => {
-      saveButton.disabled = !canEdit || !dirty || saving || !tables.length;
+      saveButton.disabled = !canEdit || !dirty || saving || canonicalChanged || !tables.length;
       saveButton.textContent = saving ? 'Guardando…' : 'Guardar distribución';
       if (!canEdit) status.textContent = 'Solo lectura · la distribución no puede modificarse';
       else if (saving) status.textContent = 'Guardando distribución…';
@@ -1874,6 +1876,10 @@ async function mountDistribucion(context) {
     activeDistributionCleanup = () => {
       window.removeEventListener('migrandia:datachange', handleCanonicalChange);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (referenceObjectUrl) {
+        URL.revokeObjectURL(referenceObjectUrl);
+        referenceObjectUrl = '';
+      }
     };
 
     refreshSpatialConflicts();
