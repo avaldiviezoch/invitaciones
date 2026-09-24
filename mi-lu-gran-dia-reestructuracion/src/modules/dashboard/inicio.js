@@ -466,7 +466,7 @@ weddingsList.onclick = async (event) => {
     const context = await selectActiveWedding(button.dataset.weddingId);
     applyWeddingContext(context);
     setWeddingSwitcher(false);
-    if (ACTIVE_MODULES.has(activeModule)) openModule(activeModule);
+    if (ACTIVE_MODULES.has(activeModule)) void openModule(activeModule);
   } catch (error) {
     console.error('No se pudo cambiar de boda:', error);
   }
@@ -568,24 +568,83 @@ document.addEventListener('click', (event) => {
 const moduleWorkspace = $('moduleWorkspace');
 const moduleLoader = $('moduleLoader');
 let moduleLoadEpoch = 0;
-let mountedModuleId = '';
-let mountedWeddingId = '';
+let moduleCacheWeddingId = '';
+const mountedModules = new Set();
+const pendingModuleMounts = new Map();
+
+const MODULES = Object.freeze({
+  checklist: {
+    load: () => import('../checklist/index.js?v=15'),
+    mount: 'mountChecklist'
+  },
+  presupuesto: {
+    load: () => import('../presupuesto/index.js?v=11'),
+    mount: 'mountPresupuesto'
+  },
+  proveedores: {
+    load: () => import('../proveedores/index.js?v=5'),
+    mount: 'mountProveedores'
+  },
+  invitados: {
+    load: () => import('../invitados/index.js?v=27'),
+    mount: 'mountInvitados'
+  },
+  distribucion: {
+    load: () => import('../distribucion/index.js?v=76'),
+    mount: 'mountDistribucion'
+  }
+});
+
+const ACTIVE_MODULES = new Set(Object.keys(MODULES));
+
+function resetModuleCache(weddingId = '') {
+  moduleLoadEpoch += 1;
+  mountedModules.clear();
+  pendingModuleMounts.clear();
+  moduleCacheWeddingId = weddingId;
+  setModuleLoading(false);
+}
+
+function ensureModuleCacheWedding(weddingId) {
+  if (moduleCacheWeddingId === weddingId) return;
+  resetModuleCache(weddingId);
+}
 
 function setModuleLoading(loading) {
   if (!moduleLoader) return;
-  document.body.classList.toggle('is-module-loading', loading);
-  if (loading) {
-    moduleLoader.hidden = false;
-    moduleLoader.classList.remove('is-leaving');
-    return;
-  }
-  moduleLoader.classList.add('is-leaving');
-  window.setTimeout(() => {
-    if (moduleLoader.classList.contains('is-leaving')) moduleLoader.hidden = true;
-  }, 420);
+  document.body.classList.toggle('is-module-loading', Boolean(loading));
+  moduleLoader.classList.remove('is-leaving');
+  moduleLoader.hidden = !loading;
 }
 
-const ACTIVE_MODULES = new Set(['checklist', 'presupuesto', 'proveedores', 'invitados', 'distribucion']);
+async function mountModuleOnce(moduleId, context) {
+  if (mountedModules.has(moduleId)) return;
+
+  const pending = pendingModuleMounts.get(moduleId);
+  if (pending) {
+    await pending;
+    return;
+  }
+
+  const definition = MODULES[moduleId];
+  if (!definition) return;
+  const weddingId = context.id;
+
+  const mountPromise = (async () => {
+    const module = await definition.load();
+    const mount = module[definition.mount];
+    if (typeof mount !== 'function') throw new Error(`El módulo ${moduleId} no expone ${definition.mount}.`);
+    await mount(context);
+    if (moduleCacheWeddingId === weddingId) mountedModules.add(moduleId);
+  })();
+
+  pendingModuleMounts.set(moduleId, mountPromise);
+  try {
+    await mountPromise;
+  } finally {
+    if (pendingModuleMounts.get(moduleId) === mountPromise) pendingModuleMounts.delete(moduleId);
+  }
+}
 
 function moduleFromHash() {
   const moduleId = location.hash.replace(/^#/, '');
@@ -595,63 +654,74 @@ function moduleFromHash() {
 function openModuleFromHash() {
   if (!auth.currentUser || !weddingContext) return;
   const moduleId = moduleFromHash();
-  if (moduleId) openModule(moduleId, { updateHash: false });
+  if (moduleId) void openModule(moduleId, { updateHash: false });
 }
 
 async function openModule(moduleId, { updateHash = true } = {}) {
   if (!auth.currentUser || !weddingContext || !ACTIVE_MODULES.has(moduleId)) return;
-  const sameMountedModule = mountedModuleId === moduleId && mountedWeddingId === weddingContext.id;
+
+  ensureModuleCacheWedding(weddingContext.id);
   const loadEpoch = ++moduleLoadEpoch;
+  const alreadyMounted = mountedModules.has(moduleId);
+
   document.documentElement.classList.add('module-route');
   heroVideo?.pause();
   setMenu(false);
   document.body.classList.add('module-open');
   moduleWorkspace.setAttribute('aria-hidden', 'false');
-  document.querySelectorAll('[data-module-view]').forEach((view) => { view.hidden = view.dataset.moduleView !== moduleId; });
+
+  document.querySelectorAll('[data-module-view]').forEach((view) => {
+    view.hidden = view.dataset.moduleView !== moduleId;
+  });
   document.querySelectorAll('[data-app-module]').forEach((button) => {
     const active = button.dataset.appModule === moduleId;
     button.classList.toggle('is-active', active);
     button.setAttribute('aria-current', active ? 'page' : 'false');
   });
-  if (updateHash && location.hash !== '#' + moduleId) history.replaceState(null, '', '#' + moduleId);
-  if (sameMountedModule) {
+
+  if (updateHash && location.hash !== '#' + moduleId) {
+    history.replaceState(null, '', '#' + moduleId);
+  }
+
+  if (alreadyMounted) {
     setModuleLoading(false);
     return;
   }
+
   setModuleLoading(true);
   try {
-    if (moduleId === 'checklist') {
-      const { mountChecklist } = await import('../checklist/index.js?v=15');
-      await mountChecklist(weddingContext);
-    }
-    if (moduleId === 'presupuesto') {
-      const { mountPresupuesto } = await import('../presupuesto/index.js?v=11');
-      await mountPresupuesto(weddingContext);
-    }
-    if (moduleId === 'proveedores') {
-      const { mountProveedores } = await import('../proveedores/index.js?v=5');
-      await mountProveedores(weddingContext);
-    }
-    if (moduleId === 'invitados') {
-      const { mountInvitados } = await import('../invitados/index.js?v=27');
-      await mountInvitados(weddingContext);
-    }
-    if (moduleId === 'distribucion') {
-      const { mountDistribucion } = await import('../distribucion/index.js?v=76');
-      await mountDistribucion(weddingContext);
-    }
-    if (loadEpoch === moduleLoadEpoch) {
-      mountedModuleId = moduleId;
-      mountedWeddingId = weddingContext.id;
+    await mountModuleOnce(moduleId, weddingContext);
+  } catch (error) {
+    console.error(`No se pudo montar ${moduleId}:`, error);
+    const view = document.querySelector(`[data-module-view="${moduleId}"]`);
+    if (view) {
+      view.innerHTML = '<div class="module-loading" role="alert">No se pudo cargar este módulo. Vuelve a tocarlo para reintentar.</div>';
     }
   } finally {
     if (loadEpoch === moduleLoadEpoch) setModuleLoading(false);
   }
 }
 
+function warmModuleCode() {
+  const schedule = window.requestIdleCallback
+    ? (callback) => window.requestIdleCallback(callback, { timeout: 2500 })
+    : (callback) => window.setTimeout(callback, 1200);
+
+  schedule(async () => {
+    for (const definition of Object.values(MODULES)) {
+      try {
+        await definition.load();
+      } catch (_) {
+        // La precarga es opcional; la navegación hará un nuevo intento al abrir el módulo.
+      }
+    }
+  });
+}
+
+warmModuleCode();
+
 function closeModuleWorkspace() {
-  mountedModuleId = '';
-  mountedWeddingId = '';
+  resetModuleCache('');
   document.documentElement.classList.remove('module-route');
   document.body.classList.remove('module-open');
   moduleWorkspace.setAttribute('aria-hidden', 'true');
@@ -663,14 +733,14 @@ $('appNavHome').onclick = closeModuleWorkspace;
 
 document.querySelectorAll('[data-app-module]').forEach((button) => {
   button.addEventListener('click', () => {
-    if (ACTIVE_MODULES.has(button.dataset.appModule)) openModule(button.dataset.appModule);
+    if (ACTIVE_MODULES.has(button.dataset.appModule)) void openModule(button.dataset.appModule);
   });
 });
 
 document.querySelectorAll('.module-link').forEach((link) => {
   link.addEventListener('click', (event) => {
     event.preventDefault();
-    if (ACTIVE_MODULES.has(link.dataset.module)) openModule(link.dataset.module);
+    if (ACTIVE_MODULES.has(link.dataset.module)) void openModule(link.dataset.module);
   });
 });
 
@@ -678,7 +748,7 @@ window.addEventListener('hashchange', () => {
   syncEntrySurface();
   if (!auth.currentUser) return;
   const moduleId = moduleFromHash();
-  if (moduleId) openModule(moduleId, { updateHash: false });
+  if (moduleId) void openModule(moduleId, { updateHash: false });
   else if (document.body.classList.contains('module-open')) closeModuleWorkspace();
 });
 
