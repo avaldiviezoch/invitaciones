@@ -104,3 +104,15 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se respeta `weddingCapabilities(context.role).canEdit`: usuarios sin edición pueden leer el plano pero no mover, rotar ni guardar.
 - Auditoría estática posterior: 0 `!important`, 0 escrituras Firestore directas, 0 localStorage/sessionStorage/IndexedDB directos y 0 asignaciones a `guest.tableId`, `guest.seatId`, `guest.seatNumber`, `table.id` o `seat.id`.
 - No se modificó el repositorio Wedding, reglas de Firestore, Storage, Authentication, usuarios ni contratos de Invitados/Mesas.
+
+
+## 2026-09-24 — Distribución Fase 4 cerrada: integración estructural e integridad
+- Distribución continúa consumiendo mesas, sillas, invitados y asignaciones como datos canónicos de Invitados/Mesas; no crea una segunda fuente de verdad.
+- Los cambios canónicos de Mesas/Invitados refrescan Distribución mediante el evento existente `migrandia:datachange`, con cleanup explícito y sin polling, MutationObserver, iframe ni puentes legacy.
+- Al volver a la aplicación desde segundo plano se relee el snapshot canónico cuando no existen movimientos visuales pendientes; si hay cambios locales sin guardar, no se mezclan estados.
+- Crear, eliminar o modificar capacidad de una mesa sigue siendo responsabilidad exclusiva de Mesas. Distribución conserva únicamente `tableId -> x/y/rotation`.
+- Antes de habilitar la edición del plano se valida en memoria: IDs de mesa únicos y no vacíos; IDs de silla únicos y no vacíos; referencias a mesas existentes; seatNumber dentro de rango; correspondencia seatId/seatNumber; y ausencia de doble ocupación de una silla.
+- Una inconsistencia canónica bloquea Distribución en modo seguro y no intenta reparar, migrar ni escribir datos.
+- Los placements persistidos de mesas eliminadas no recrean mesas. Una mesa canónica nueva recibe solo una posición proyectada en memoria hasta un guardado explícito.
+- Barrido estático final: sin escritura directa a Firestore, sin localStorage/sessionStorage/IndexedDB directo, sin escrituras de guest.tableId/seatId/seatNumber ni table.id/seat.id y sin `!important`.
+- Fase 4 cerrada. Siguiente hito: Fase 5, editor avanzado de Distribución, preservando estas invariantes.
