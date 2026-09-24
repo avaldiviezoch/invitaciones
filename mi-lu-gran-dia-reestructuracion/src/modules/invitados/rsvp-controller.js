@@ -3,7 +3,7 @@ import {
   saveRsvpManagement,
   deleteRsvpManagement,
   restoreRsvpManagement
-} from '../../services/rsvp-admin.js?v=4';
+} from '../../services/rsvp-admin.js?v=5';
 import { saveInvitadosSnapshot } from './invitados-data.js?v=3';
 
 function createRsvpController(api) {
