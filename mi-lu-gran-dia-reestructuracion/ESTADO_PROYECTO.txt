@@ -68,3 +68,19 @@ HITO DISTRIBUCIÓN — FASE 4 CERRADA:
 - Una inconsistencia se informa; Distribución no la repara ni escribe sobre los datos.
 - Sin escrituras directas de datos canónicos desde Distribución.
 - Próximo: Fase 5 — editor avanzado de Distribución.
+
+
+HITO DISTRIBUCIÓN — FASE 5R CERRADA:
+- Editor avanzado completado sobre el mismo contrato version: 1 y la misma clave planificador_bodas_distribucion_v1.
+- Propuestas, elementos físicos, zonas poligonales, medición, snap, alertas espaciales, capas, presentación, impresión/PDF y fondo de referencia transitorio implementados.
+- Cámara separada en camera.js como propietario único de zoom/pan/pinch/Fit y coordenadas de navegación.
+- Distribución renderiza solo sillas canónicas existentes; no crea capacidad ni IDs de silla.
+- Distribución puede mover un invitado existente únicamente a una silla canónica libre mediante el adaptador de Invitados; valida integridad, revierte en error y no crea ni repara datos.
+- Eliminado el doble remontaje posterior a una asignación realizada desde Distribución.
+- Propuestas e IDs de elementos protegidos contra colisiones; activeProposalId inválido falla cerrado.
+- Cambio de propuesta recalcula la secuencia de elementos y la creación verifica IDs existentes.
+- Guardado establece frontera de Undo/Redo y los cambios canónicos externos bloquean mezcla con ediciones locales pendientes.
+- Lifecycle auditado: mounts obsoletos no tocan DOM, listeners globales tienen cleanup y Object URL transitorias se revocan.
+- Barrido final: sin Firestore directo, sin localStorage/sessionStorage/IndexedDB directo, sin polling/MutationObserver/postMessage/sharedTableId y sin !important.
+- No se modificaron Firebase Rules, Storage, Authentication, usuarios, esquema persistente ni el repositorio Wedding.
+- Próximo: Fase 5S — monkey test y regresión funcional final. Todavía no ejecutada.
