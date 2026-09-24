@@ -194,3 +194,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se retiraron temporalmente Encajar y los controles de zoom del toolbar. El zoom se resolverá como una fase posterior, una vez cerrada la presentación base del plano.
 - Tablet y móvil conservan sus reglas responsive; en móvil vertical continúa el formato horizontal 16:9 con sugerencia de rotación.
 - No se modificaron mesas, sillas, etiquetas, escala física, Firebase, Firestore, Storage, IDs ni persistencia.
+
+
+## 2026-09-24 — Distribución: capas como switches en la barra superior
+- Los cuatro controles de visibilidad principales se movieron desde el panel lateral a la barra superior de “Plano de mesas”.
+- Se muestran como switches compactos: Plano, Mesas, Nombres y Elementos.
+- Se conservaron exactamente los mismos atributos data y la misma lógica existente; no se creó una segunda implementación ni listeners duplicados.
+- La sección lateral dejó de contener las capas y pasa a “Ajustes del plano”, donde permanecen catálogo de plano, separación, medición, cuadrícula y herramientas de dibujo.
+- En escritorio los switches permanecen junto al encabezado del plano; en anchos medios la toolbar puede envolver limpiamente y en móvil se muestran en una cuadrícula de dos columnas.
+- No se modificaron geometría, persistencia, mesas, sillas, invitados, Firebase, Firestore, Storage ni IDs.

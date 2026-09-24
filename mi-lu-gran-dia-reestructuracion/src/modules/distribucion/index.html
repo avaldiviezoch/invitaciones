@@ -17,9 +17,33 @@
   </header>
 
   <section class="distribution-toolbar" aria-label="Controles de distribución">
-    <div class="distribution-toolbar-copy">
-      <strong>Plano de mesas</strong>
-      <span data-distribution-status>Cargando distribución…</span>
+    <div class="distribution-toolbar-primary">
+      <div class="distribution-toolbar-copy">
+        <strong>Plano de mesas</strong>
+        <span data-distribution-status>Cargando distribución…</span>
+      </div>
+      <div class="distribution-layer-switches" role="group" aria-label="Capas visibles del plano">
+        <label class="distribution-layer-switch">
+          <input type="checkbox" data-distribution-show-reference checked>
+          <span class="distribution-switch-track" aria-hidden="true"><i></i></span>
+          <span>Plano</span>
+        </label>
+        <label class="distribution-layer-switch">
+          <input type="checkbox" data-distribution-show-tables checked>
+          <span class="distribution-switch-track" aria-hidden="true"><i></i></span>
+          <span>Mesas</span>
+        </label>
+        <label class="distribution-layer-switch">
+          <input type="checkbox" data-distribution-show-guest-labels checked>
+          <span class="distribution-switch-track" aria-hidden="true"><i></i></span>
+          <span>Nombres</span>
+        </label>
+        <label class="distribution-layer-switch">
+          <input type="checkbox" data-distribution-show-elements checked>
+          <span class="distribution-switch-track" aria-hidden="true"><i></i></span>
+          <span>Elementos</span>
+        </label>
+      </div>
     </div>
     <div class="distribution-toolbar-actions">
       <div class="distribution-proposal-controls" aria-label="Propuestas de distribución">
@@ -121,12 +145,7 @@
         </div>
       </section>
       <div class="distribution-layer-controls">
-        <span class="distribution-inspector-eyebrow">CAPAS</span>
-        <label><input type="checkbox" data-distribution-show-tables checked> Mesas y sillas</label>
-        <label><input type="checkbox" data-distribution-show-guest-labels checked> Nombres de invitados</label>
-        <label><input type="checkbox" data-distribution-show-elements checked> Elementos físicos</label>
-        <label><input type="checkbox" data-distribution-show-reference checked> Plano del recinto</label>
-        <small class="distribution-layer-help">Estas capas son solo de visualización. Ocultarlas no modifica mesas, sillas, invitados ni asignaciones.</small>
+        <span class="distribution-inspector-eyebrow">AJUSTES DEL PLANO</span>
         <div class="distribution-reference-controls">
           <label>Plano
             <select data-distribution-reference-catalog aria-label="Plano del recinto"></select>
