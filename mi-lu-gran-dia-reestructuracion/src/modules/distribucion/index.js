@@ -844,6 +844,7 @@ async function mountDistribucion(context) {
           y: placement.y
         };
         moved = false;
+        rememberEdit();
         selectTable(node.dataset.tableId);
       });
 
@@ -863,6 +864,10 @@ async function mountDistribucion(context) {
         node.classList.remove('is-moving');
         move = null;
         if (moved) markDirty();
+        else {
+          undoStack.pop();
+          updateHistoryState();
+        }
       };
       node.addEventListener('pointerup', finishMove);
       node.addEventListener('pointercancel', finishMove);
@@ -889,6 +894,7 @@ async function mountDistribucion(context) {
       const placement = placementState.get(node.dataset.tableId);
       if (!placement) return;
       event.preventDefault();
+      rememberEdit();
       const step = event.shiftKey ? KEYBOARD_MOVE_FINE_STEP : KEYBOARD_MOVE_STEP;
       if (event.key === 'ArrowLeft') placement.x -= step;
       if (event.key === 'ArrowRight') placement.x += step;
@@ -911,6 +917,7 @@ async function mountDistribucion(context) {
         node.classList.add('is-moving');
         move = { pointerId: event.pointerId, clientX: event.clientX, clientY: event.clientY, x: element.x, y: element.y };
         moved = false;
+        rememberEdit();
         selectElement(element.id);
       });
       node.addEventListener('pointermove', (event) => {
@@ -927,6 +934,10 @@ async function mountDistribucion(context) {
         node.classList.remove('is-moving');
         move = null;
         if (moved) markDirty();
+        else {
+          undoStack.pop();
+          updateHistoryState();
+        }
       };
       node.addEventListener('pointerup', finishMove);
       node.addEventListener('pointercancel', finishMove);
@@ -941,6 +952,7 @@ async function mountDistribucion(context) {
       node.addEventListener('keydown', (event) => {
         if (!canEdit || element.locked || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
         event.preventDefault();
+        rememberEdit();
         const step = event.shiftKey ? KEYBOARD_MOVE_FINE_STEP : KEYBOARD_MOVE_STEP;
         if (event.key === 'ArrowLeft') element.x -= step;
         if (event.key === 'ArrowRight') element.x += step;
@@ -1303,7 +1315,7 @@ async function mountDistribucion(context) {
     };
 
     const handleVisibilityChange = () => {
-      if (document.hidden || dirty || saving) return;
+      if (document.hidden || dirty || saving || canonicalChanged) return;
       void mountDistribucion(context);
     };
     window.addEventListener('migrandia:datachange', handleCanonicalChange);
