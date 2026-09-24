@@ -238,3 +238,15 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Al volver al inicio o ampliar la pantalla fuera del breakpoint móvil, la barra retorna al estado visible por defecto.
 - La cámara de Distribución observa cambios reales de tamaño de su viewport mediante ResizeObserver, además del resize de ventana, para reencajar el plano cuando cambia el espacio disponible sin modificar coordenadas lógicas, mesas, sillas ni persistencia.
 - Desktop conserva su barra horizontal actual; el cambio está limitado al layout móvil existente.
+
+
+## 2026-09-24 — Distribución: simplificación visual de acciones superiores
+- Se redujo la carga visual de la toolbar agrupando acciones secundarias sin retirar ninguna función.
+- El selector de propuesta activa permanece visible.
+- Nueva propuesta, Duplicar, Renombrar y Eliminar pasan al menú compacto “Propuesta”.
+- Presentación, Plano limpio e Imprimir/PDF pasan al menú compacto “Vista”.
+- Guardar permanece como acción primaria visible y se simplifica el texto de “Guardar distribución” a “Guardar”.
+- Deshacer y Rehacer permanecen visibles como botones compactos ↶ y ↷ con aria-label/title.
+- Los menús usan details/summary nativo, solo uno puede permanecer abierto y se cierran al ejecutar una acción.
+- En móvil el selector y menús se adaptan al ancho disponible sin volver a desplegar todas las acciones.
+- No se modificaron funciones, persistencia, geometría, capas, validaciones, Firebase, Firestore, Storage ni IDs.

@@ -13,7 +13,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=35', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=36', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -825,6 +825,18 @@ async function mountDistribucion(context) {
     const proposalDuplicate = root.querySelector('[data-distribution-proposal-duplicate]');
     const proposalRename = root.querySelector('[data-distribution-proposal-rename]');
     const proposalDelete = root.querySelector('[data-distribution-proposal-delete]');
+    const toolbarMenus = [...root.querySelectorAll('[data-distribution-menu]')];
+    toolbarMenus.forEach((menu) => {
+      menu.addEventListener('toggle', () => {
+        if (!menu.open) return;
+        toolbarMenus.forEach((other) => {
+          if (other !== menu) other.removeAttribute('open');
+        });
+      });
+      menu.querySelectorAll('button').forEach((button) => {
+        button.addEventListener('click', () => menu.removeAttribute('open'));
+      });
+    });
 
     const refreshProposalControls = () => {
       proposalSelect.replaceChildren(...proposalState.map((proposal) => {

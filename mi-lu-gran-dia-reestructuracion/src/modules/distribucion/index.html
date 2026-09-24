@@ -51,18 +51,28 @@
     <div class="distribution-toolbar-actions">
       <div class="distribution-proposal-controls" aria-label="Propuestas de distribución">
         <select data-distribution-proposal aria-label="Propuesta activa"></select>
-        <button type="button" data-distribution-proposal-new>Nueva</button>
-        <button type="button" data-distribution-proposal-duplicate>Duplicar</button>
-        <button type="button" data-distribution-proposal-rename>Renombrar</button>
-        <button type="button" data-distribution-proposal-delete>Eliminar</button>
+        <details class="distribution-action-menu" data-distribution-menu>
+          <summary>Propuesta <span aria-hidden="true">⌄</span></summary>
+          <div class="distribution-action-menu-panel" role="group" aria-label="Acciones de propuesta">
+            <button type="button" data-distribution-proposal-new>Nueva propuesta</button>
+            <button type="button" data-distribution-proposal-duplicate>Duplicar</button>
+            <button type="button" data-distribution-proposal-rename>Renombrar</button>
+            <button type="button" class="is-danger" data-distribution-proposal-delete>Eliminar</button>
+          </div>
+        </details>
       </div>
-      <button class="distribution-save" type="button" data-distribution-save disabled>Guardar distribución</button>
+      <button class="distribution-save" type="button" data-distribution-save disabled>Guardar</button>
       <div class="distribution-view-controls">
-        <button type="button" data-distribution-presentation aria-pressed="false">Presentación</button>
-        <button type="button" data-distribution-clean-view aria-pressed="false">Plano limpio</button>
-        <button type="button" data-distribution-print>Imprimir / PDF</button>
-        <button type="button" data-distribution-undo disabled>Deshacer</button>
-        <button type="button" data-distribution-redo disabled>Rehacer</button>
+        <details class="distribution-action-menu distribution-view-menu" data-distribution-menu>
+          <summary>Vista <span aria-hidden="true">⌄</span></summary>
+          <div class="distribution-action-menu-panel" role="group" aria-label="Opciones de vista">
+            <button type="button" data-distribution-presentation aria-pressed="false">Presentación</button>
+            <button type="button" data-distribution-clean-view aria-pressed="false">Plano limpio</button>
+            <button type="button" data-distribution-print>Imprimir / PDF</button>
+          </div>
+        </details>
+        <button class="distribution-history-button" type="button" data-distribution-undo disabled aria-label="Deshacer" title="Deshacer">↶</button>
+        <button class="distribution-history-button" type="button" data-distribution-redo disabled aria-label="Rehacer" title="Rehacer">↷</button>
       </div>
     </div>
   </section>
