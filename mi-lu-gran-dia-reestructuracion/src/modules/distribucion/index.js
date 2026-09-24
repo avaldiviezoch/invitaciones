@@ -13,7 +13,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=48', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=49', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -747,6 +747,23 @@ function renderPhysicalElement(element) {
   const label = document.createElement('strong');
   label.textContent = definition.label;
   node.append(label);
+
+  if (elementCapabilities(element).resizable) {
+    [
+      ['nw', -1, -1],
+      ['ne', 1, -1],
+      ['se', 1, 1],
+      ['sw', -1, 1]
+    ].forEach(([corner, xSign, ySign]) => {
+      const handle = document.createElement('span');
+      handle.className = `distribution-resize-handle is-${corner}`;
+      handle.dataset.distributionResizeHandle = corner;
+      handle.dataset.resizeX = String(xSign);
+      handle.dataset.resizeY = String(ySign);
+      handle.setAttribute('aria-hidden', 'true');
+      node.append(handle);
+    });
+  }
   return node;
 }
 
@@ -760,15 +777,27 @@ function applyElementPlacement(node, element) {
   node.style.transform = `rotate(${normalizeRotation(element.rotation)}deg)`;
 }
 
+function refreshElementGeometryNode(node, element) {
+  applyElementPlacement(node, element);
+  if (!Array.isArray(element.points)) return;
+  const svg = node.querySelector('.distribution-area-shape');
+  const polygon = svg?.querySelector('polygon');
+  if (!svg || !polygon) return;
+  svg.setAttribute('viewBox', `0 0 ${element.width} ${element.height}`);
+  polygon.setAttribute('points', element.points.map((point) => `${point.x},${point.y}`).join(' '));
+}
+
 function renderElementInspector(root, element) {
   const definition = PHYSICAL_ELEMENT_TYPES[element.type];
   root.querySelector('[data-distribution-selection-empty]').hidden = true;
   root.querySelector('[data-distribution-selection]').hidden = false;
   root.querySelector('[data-distribution-selected-name]').textContent = definition.label;
+  const widthMeters = element.width / PIXELS_PER_METER;
+  const heightMeters = element.height / PIXELS_PER_METER;
   const areaMeters = Array.isArray(element.points) ? polygonArea(element.points) / (PIXELS_PER_METER ** 2) : null;
   root.querySelector('[data-distribution-selected-meta]').textContent = areaMeters === null
-    ? 'Elemento físico del plano'
-    : `${definition.label} · ${areaMeters.toFixed(2)} m²`;
+    ? `${widthMeters.toFixed(2)} × ${heightMeters.toFixed(2)} m`
+    : `${widthMeters.toFixed(2)} × ${heightMeters.toFixed(2)} m · ${areaMeters.toFixed(2)} m²`;
   const rotationOutput = root.querySelector('[data-distribution-selected-rotation]');
   rotationOutput.value = `${normalizeRotation(element.rotation)}°`;
   rotationOutput.textContent = rotationOutput.value;
@@ -1042,6 +1071,45 @@ async function mountDistribucion(context) {
             await changeSelectedTableDimensions(null, null, { reset: true });
             closeMobileSheet();
           }, 'is-wide');
+        }
+        if (selectedElementId) {
+          const selectedElement = physicalElements.find((item) => item.id === selectedElementId);
+          if (selectedElement && elementCapabilities(selectedElement).resizable) {
+            const definition = PHYSICAL_ELEMENT_TYPES[selectedElement.type];
+            const sizeNote = document.createElement('p');
+            sizeNote.className = 'distribution-mobile-sheet-note';
+            sizeNote.textContent = `${definition.label} · ${(selectedElement.width / PIXELS_PER_METER).toFixed(2)} × ${(selectedElement.height / PIXELS_PER_METER).toFixed(2)} m`;
+            mobileSheetBody.append(sizeNote);
+
+            const sizeWrap = document.createElement('div');
+            sizeWrap.className = 'distribution-mobile-size-editor';
+            const widthField = document.createElement('label');
+            widthField.textContent = 'Ancho (m)';
+            const widthInput = document.createElement('input');
+            widthInput.type = 'number';
+            widthInput.min = String(MIN_ELEMENT_METERS);
+            widthInput.max = String(MAX_ELEMENT_METERS);
+            widthInput.step = '0.1';
+            widthInput.value = (selectedElement.width / PIXELS_PER_METER).toFixed(2);
+            widthField.append(widthInput);
+
+            const heightField = document.createElement('label');
+            heightField.textContent = 'Alto (m)';
+            const heightInput = document.createElement('input');
+            heightInput.type = 'number';
+            heightInput.min = String(MIN_ELEMENT_METERS);
+            heightInput.max = String(MAX_ELEMENT_METERS);
+            heightInput.step = '0.1';
+            heightInput.value = (selectedElement.height / PIXELS_PER_METER).toFixed(2);
+            heightField.append(heightInput);
+            sizeWrap.append(widthField, heightField);
+            mobileSheetBody.append(sizeWrap);
+
+            addMobileButton('Aplicar tamaño', () => {
+              changeSelectedElementDimensions(widthInput.value, heightInput.value);
+              closeMobileSheet();
+            }, 'is-wide');
+          }
         }
         addMobileButton('Medir distancia', () => proxyClick('[data-distribution-measure]'));
         addMobileButton('Limpiar medida', () => proxyClick('[data-distribution-clear-measure]'));
@@ -1910,21 +1978,94 @@ async function mountDistribucion(context) {
 
     const bindElementInteraction = (node, element) => {
       let move = null;
+      let resize = null;
       let moved = false;
+
+      const localDelta = (dx, dy, rotation) => {
+        const angle = -normalizeRotation(rotation) * Math.PI / 180;
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        return {
+          x: dx * cos - dy * sin,
+          y: dx * sin + dy * cos
+        };
+      };
+
       node.addEventListener('pointerdown', (event) => {
-        if (presentationMode) return;
-        if (event.button !== 0) return;
+        if (presentationMode || event.button !== 0) return;
         event.stopPropagation();
         selectElement(element.id);
+
+        const handle = event.target.closest('[data-distribution-resize-handle]');
+        if (handle) {
+          if (!canEdit || element.locked || !elementCapabilities(element).resizable) return;
+          node.setPointerCapture(event.pointerId);
+          node.classList.add('is-resizing');
+          resize = {
+            pointerId: event.pointerId,
+            clientX: event.clientX,
+            clientY: event.clientY,
+            x: element.x,
+            y: element.y,
+            width: element.width,
+            height: element.height,
+            rotation: normalizeRotation(element.rotation),
+            xSign: Number(handle.dataset.resizeX) || 1,
+            ySign: Number(handle.dataset.resizeY) || 1,
+            points: Array.isArray(element.points) ? element.points.map((point) => ({ ...point })) : null
+          };
+          moved = false;
+          rememberEdit();
+          return;
+        }
+
         if (!canEdit || element.locked || !elementCapabilities(element).movable) return;
         node.setPointerCapture(event.pointerId);
         node.classList.add('is-moving');
         move = { pointerId: event.pointerId, clientX: event.clientX, clientY: event.clientY, x: element.x, y: element.y };
         moved = false;
         rememberEdit();
-        selectElement(element.id);
       });
+
       node.addEventListener('pointermove', (event) => {
+        if (resize && resize.pointerId === event.pointerId) {
+          const worldDx = camera.clientDeltaToWorld(event.clientX - resize.clientX);
+          const worldDy = camera.clientDeltaToWorld(event.clientY - resize.clientY);
+          const delta = localDelta(worldDx, worldDy, resize.rotation);
+          const minSize = PIXELS_PER_METER * MIN_ELEMENT_METERS;
+          const maxSize = PIXELS_PER_METER * MAX_ELEMENT_METERS;
+          const nextWidth = Math.max(minSize, Math.min(maxSize, resize.width + resize.xSign * delta.x));
+          const nextHeight = Math.max(minSize, Math.min(maxSize, resize.height + resize.ySign * delta.y));
+          const widthDelta = nextWidth - resize.width;
+          const heightDelta = nextHeight - resize.height;
+          const angle = resize.rotation * Math.PI / 180;
+          const cos = Math.cos(angle);
+          const sin = Math.sin(angle);
+          const localCenterShiftX = resize.xSign * widthDelta / 2;
+          const localCenterShiftY = resize.ySign * heightDelta / 2;
+          const worldCenterShiftX = localCenterShiftX * cos - localCenterShiftY * sin;
+          const worldCenterShiftY = localCenterShiftX * sin + localCenterShiftY * cos;
+
+          element.width = nextWidth;
+          element.height = nextHeight;
+          element.x = resize.x + worldCenterShiftX - widthDelta / 2;
+          element.y = resize.y + worldCenterShiftY - heightDelta / 2;
+
+          if (resize.points) {
+            const widthRatio = resize.width > 0 ? nextWidth / resize.width : 1;
+            const heightRatio = resize.height > 0 ? nextHeight / resize.height : 1;
+            element.points = resize.points.map((point) => ({
+              x: point.x * widthRatio,
+              y: point.y * heightRatio
+            }));
+          }
+
+          moved = Math.abs(widthDelta) + Math.abs(heightDelta) > 1;
+          refreshElementGeometryNode(node, element);
+          refreshSpatialConflicts();
+          return;
+        }
+
         if (!move || move.pointerId !== event.pointerId) return;
         const dx = camera.clientDeltaToWorld(event.clientX - move.clientX);
         const dy = camera.clientDeltaToWorld(event.clientY - move.clientY);
@@ -1934,18 +2075,24 @@ async function mountDistribucion(context) {
         applyElementPlacement(node, element);
         refreshSpatialConflicts();
       });
-      const finishMove = (event) => {
-        if (!move || move.pointerId !== event.pointerId) return;
-        node.classList.remove('is-moving');
+
+      const finishInteraction = (event) => {
+        const wasResizing = resize && resize.pointerId === event.pointerId;
+        const wasMoving = move && move.pointerId === event.pointerId;
+        if (!wasResizing && !wasMoving) return;
+        node.classList.remove('is-moving', 'is-resizing');
         move = null;
-        if (moved) markDirty();
-        else {
+        resize = null;
+        if (moved) {
+          renderElementInspector(root, element);
+          markDirty();
+        } else {
           undoStack.pop();
           updateHistoryState();
         }
       };
-      node.addEventListener('pointerup', finishMove);
-      node.addEventListener('pointercancel', finishMove);
+      node.addEventListener('pointerup', finishInteraction);
+      node.addEventListener('pointercancel', finishInteraction);
       node.addEventListener('click', (event) => {
         event.stopPropagation();
         if (moved) {
@@ -2043,41 +2190,54 @@ async function mountDistribucion(context) {
       markDirty();
     };
 
-    const updateSelectedDimension = (axis, input) => {
-      if (!canEdit || !selectedElementId) return;
+    const changeSelectedElementDimensions = (widthMeters, heightMeters) => {
+      if (!canEdit || !selectedElementId) return false;
       const element = physicalElements.find((item) => item.id === selectedElementId);
       const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
-      if (!element || !node || element.locked || !elementCapabilities(element).resizable) {
-        if (element) input.value = ((axis === 'width' ? element.width : element.height) / PLAN_SCALE.pixelsPerMeter).toFixed(1);
-        return;
+      if (!element || !node || element.locked || !elementCapabilities(element).resizable) return false;
+
+      const width = finiteNumber(widthMeters);
+      const height = finiteNumber(heightMeters);
+      if (
+        width === null || height === null
+        || width < MIN_ELEMENT_METERS || width > MAX_ELEMENT_METERS
+        || height < MIN_ELEMENT_METERS || height > MAX_ELEMENT_METERS
+      ) {
+        renderElementInspector(root, element);
+        return false;
       }
-      const meters = finiteNumber(input.value);
-      if (meters === null || meters < MIN_ELEMENT_METERS || meters > MAX_ELEMENT_METERS) {
-        input.value = ((axis === 'width' ? element.width : element.height) / PLAN_SCALE.pixelsPerMeter).toFixed(1);
-        return;
-      }
+
+      const nextWidth = width * PIXELS_PER_METER;
+      const nextHeight = height * PIXELS_PER_METER;
+      if (Math.abs(nextWidth - element.width) < 0.01 && Math.abs(nextHeight - element.height) < 0.01) return true;
+
       rememberEdit();
-      const previousSize = element[axis];
-      const nextSize = meters * PLAN_SCALE.pixelsPerMeter;
-      if (Array.isArray(element.points) && previousSize > 0) {
-        const ratio = nextSize / previousSize;
-        element.points = element.points.map((point) => axis === 'width'
-          ? { x: point.x * ratio, y: point.y }
-          : { x: point.x, y: point.y * ratio });
-      }
-      element[axis] = nextSize;
+      const previousWidth = element.width;
+      const previousHeight = element.height;
       if (Array.isArray(element.points)) {
-        const replacement = renderPhysicalElement(element);
-        node.replaceWith(replacement);
-        bindElementInteraction(replacement, element);
-        selectElement(element.id);
-      } else {
-        applyElementPlacement(node, element);
+        const widthRatio = previousWidth > 0 ? nextWidth / previousWidth : 1;
+        const heightRatio = previousHeight > 0 ? nextHeight / previousHeight : 1;
+        element.points = element.points.map((point) => ({
+          x: point.x * widthRatio,
+          y: point.y * heightRatio
+        }));
       }
+      element.width = nextWidth;
+      element.height = nextHeight;
+      refreshElementGeometryNode(node, element);
+      renderElementInspector(root, element);
+      refreshSpatialConflicts();
       markDirty();
+      return true;
     };
-    root.querySelector('[data-distribution-width]').onchange = (event) => updateSelectedDimension('width', event.currentTarget);
-    root.querySelector('[data-distribution-height]').onchange = (event) => updateSelectedDimension('height', event.currentTarget);
+
+    const applyInspectorElementDimensions = () => {
+      const widthInput = root.querySelector('[data-distribution-width]');
+      const heightInput = root.querySelector('[data-distribution-height]');
+      changeSelectedElementDimensions(widthInput.value, heightInput.value);
+    };
+    root.querySelector('[data-distribution-width]').onchange = applyInspectorElementDimensions;
+    root.querySelector('[data-distribution-height]').onchange = applyInspectorElementDimensions;
     root.querySelector('[data-distribution-table-shape]').onchange = (event) => {
       void changeSelectedTableShape(event.currentTarget.value);
     };

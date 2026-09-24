@@ -464,3 +464,16 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Las dimensiones se persisten mediante saveInvitadosSnapshot sobre la mesa canónica, releyendo primero el snapshot vigente para reducir escrituras desde estado obsoleto.
 - x/y/rotation siguen siendo propiedad de Distribución y no incluyen dimensiones.
 - Los elementos físicos no-mesa mantienen su width/height existente por propuesta; esa persistencia ya estaba implementada.
+
+
+## 2026-09-24 — Distribución Fase 2: redimensionamiento directo de objetos físicos
+- Los elementos físicos redimensionables muestran cuatro tiradores de esquina al seleccionarse.
+- El gesto de resize vive en bindElementInteraction(), el mismo propietario de mover/seleccionar; no se agregan listeners globales ni una segunda ruta.
+- El cálculo respeta la rotación del objeto: el delta de puntero se transforma a ejes locales y el vértice opuesto permanece anclado.
+- width/height siguen siendo la única fuente de tamaño y se autoguardan mediante la serialización existente de Distribución.
+- Los polígonos dibujados escalan sus puntos desde el snapshot inicial del gesto, evitando acumulación de error.
+- refreshElementGeometryNode() centraliza la actualización DOM de tamaño/posición/polígono y reemplaza reconstrucciones innecesarias.
+- Un gesto completo genera una sola entrada de Undo/Redo y un solo dirty/autosave al terminar.
+- El inspector muestra ancho × alto actual; Ajustes móvil permite editar ambos con la misma changeSelectedElementDimensions().
+- Tiradores móviles usan 20 px para facilitar interacción táctil.
+- No se modifica Firebase, tablas, invitados, sillas ni dimensiones canónicas de mesas.
