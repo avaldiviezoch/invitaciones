@@ -20,6 +20,7 @@ const PLAN_SCALE = Object.freeze({
   pixelsToMeters: (pixels) => pixels / 44
 });
 const PIXELS_PER_METER = PLAN_SCALE.pixelsPerMeter;
+const PROXIMITY_OPTIONS_METERS = Object.freeze([0.6, 1, 1.5, 2]);
 const MIN_ELEMENT_METERS = 0.5;
 const MAX_ELEMENT_METERS = 30;
 const HISTORY_LIMIT = 50;
@@ -956,7 +957,7 @@ async function mountDistribucion(context) {
 
     proximitySelect?.addEventListener('change', () => {
       const next = Number(proximitySelect.value);
-      proximityMeters = [0.6, 1, 1.5, 2].includes(next) ? next : 1;
+      proximityMeters = PROXIMITY_OPTIONS_METERS.includes(next) ? next : 1;
       refreshSpatialConflicts();
       status.textContent = `Alerta de separación configurada en ${proximityMeters.toFixed(1)} m`;
     });
