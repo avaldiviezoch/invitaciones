@@ -490,3 +490,15 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Cambiar medidas desde Mesas emite table-updated mediante el persist existente; Distribución recibe el mismo tableId y redibuja la geometría canónica.
 - Cambiar medidas desde Distribución sigue escribiendo table.dimensions canónico; al reabrir Mesas se hidrata el mismo valor.
 - No se modifican IDs de mesa/silla, asignaciones, claves de almacenamiento, colecciones ni reglas de Firebase.
+
+
+## 2026-09-24 — Distribución Fase 3: geometría física consistente de mesas
+- Las sillas dejan de usar un factor proporcional al radio de mesas redondas.
+- Todas las formas usan una separación física estándar de 0.38 m entre borde del tablero y centro de silla.
+- Las etiquetas usan una separación física estándar de 0.72 m respecto al borde del tablero.
+- Esto evita sillas demasiado pegadas en mesas pequeñas y excesivamente alejadas en mesas grandes.
+- Se corrige una inconsistencia de estado: layout.items podía conservar geometry anterior después de editar table.dimensions.
+- syncLayoutTableGeometry() mantiene table, index, capacity y geometry del layout alineados con la mesa canónica actual.
+- redrawTableInPlace() y reconcileCanonicalTables() actualizan layout antes de redibujar.
+- refreshSpatialConflicts() deriva nuevamente la geometría desde tableById antes de calcular colisiones/proximidad, por lo que las validaciones siempre usan la medida física vigente.
+- No se cambian seatId, seatNumber, tableId, placements ni contratos de persistencia.

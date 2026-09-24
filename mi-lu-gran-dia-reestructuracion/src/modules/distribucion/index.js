@@ -21,7 +21,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=49', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=50', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -38,10 +38,8 @@ const PLAN_SCALE = Object.freeze({
 const PIXELS_PER_METER = PLAN_SCALE.pixelsPerMeter;
 const TABLE_FRAME = Object.freeze({ width: 300, height: 316, centerX: 150, centerY: 158 });
 const TABLE_CLEARANCE_MARGIN_METERS = 0.8;
-const ROUND_CHAIR_ORBIT_FACTOR = 1.33;
-const ROUND_LABEL_ORBIT_FACTOR = 2.18;
-const RECT_CHAIR_OFFSET_METERS = 0.38;
-const RECT_LABEL_OFFSET_METERS = 0.72;
+const TABLE_CHAIR_OFFSET_METERS = 0.38;
+const TABLE_LABEL_OFFSET_METERS = 0.72;
 const PROXIMITY_OPTIONS_METERS = Object.freeze([0.6, 1, 1.5, 2]);
 const MIN_ELEMENT_METERS = 0.5;
 const MAX_ELEMENT_METERS = 30;
@@ -439,8 +437,8 @@ function tablePhysicalGeometry(tableSource, capacity) {
   const positions = [];
   if (shape === 'round') {
     const tableRadius = table.width / 2;
-    const chairOrbit = tableRadius * ROUND_CHAIR_ORBIT_FACTOR;
-    const labelOrbit = tableRadius * ROUND_LABEL_ORBIT_FACTOR;
+    const chairOrbit = tableRadius + PLAN_SCALE.metersToPixels(TABLE_CHAIR_OFFSET_METERS);
+    const labelOrbit = tableRadius + PLAN_SCALE.metersToPixels(TABLE_LABEL_OFFSET_METERS);
     for (let index = 0; index < count; index += 1) {
       const angle = -Math.PI / 2 + Math.PI * 2 * index / count;
       const cos = Math.cos(angle), sin = Math.sin(angle);
@@ -448,8 +446,8 @@ function tablePhysicalGeometry(tableSource, capacity) {
     }
     return { shape, table, clearance, visualWidth, visualHeight, centerX, centerY, positions };
   }
-  const chairOffset = PLAN_SCALE.metersToPixels(RECT_CHAIR_OFFSET_METERS);
-  const labelOffset = PLAN_SCALE.metersToPixels(RECT_LABEL_OFFSET_METERS);
+  const chairOffset = PLAN_SCALE.metersToPixels(TABLE_CHAIR_OFFSET_METERS);
+  const labelOffset = PLAN_SCALE.metersToPixels(TABLE_LABEL_OFFSET_METERS);
   rectangularPerimeterPositions(count, table.width + chairOffset*2, table.height + chairOffset*2, centerX, centerY).forEach((point) => {
     const dx=point.x-centerX, dy=point.y-centerY, length=Math.hypot(dx,dy)||1, ux=dx/length, uy=dy/length;
     positions.push({ x:point.x, y:point.y, labelX:point.x+ux*labelOffset, labelY:point.y+uy*labelOffset, labelAlign:ux>.32?'left':ux<-.32?'right':'center' });
@@ -1224,6 +1222,15 @@ async function mountDistribucion(context) {
       rectangular: 'Rectangular'
     });
 
+    const syncLayoutTableGeometry = (tableId, table, index, capacity, geometry) => {
+      const item = layout.items.find((candidate) => escapeText(candidate?.table?.id) === escapeText(tableId));
+      if (!item) return;
+      item.table = table;
+      item.index = index;
+      item.capacity = capacity;
+      item.geometry = geometry;
+    };
+
     const redrawTableInPlace = (tableId) => {
       const entry = tableById.get(tableId);
       const table = entry?.table;
@@ -1233,6 +1240,7 @@ async function mountDistribucion(context) {
 
       const capacity = capacityOf(table);
       const geometry = tablePhysicalGeometry(table, capacity || 4);
+      syncLayoutTableGeometry(tableId, table, entry.index, capacity, geometry);
       const replacement = renderTable({
         table,
         index: entry.index,
@@ -1629,7 +1637,13 @@ async function mountDistribucion(context) {
       const issues = [];
       const tableShapes = layout.items.map((item) => {
         const tableId = escapeText(item.table?.id);
-        return { tableId, table: item.table, index: item.index, shape: spatialShapeForTable(item.table, placementState.get(tableId), item.geometry) };
+        const currentEntry = tableById.get(tableId);
+        const table = currentEntry?.table || item.table;
+        const index = currentEntry?.index ?? item.index;
+        const capacity = capacityOf(table);
+        const geometry = tablePhysicalGeometry(table, capacity || 4);
+        syncLayoutTableGeometry(tableId, table, index, capacity, geometry);
+        return { tableId, table, index, shape: spatialShapeForTable(table, placementState.get(tableId), geometry) };
       });
       const elementShapes = physicalElements.map((element) => ({
         element,
@@ -2569,6 +2583,7 @@ async function mountDistribucion(context) {
 
         const capacity = capacityOf(table);
         const geometry = tablePhysicalGeometry(table, capacity || 4);
+        syncLayoutTableGeometry(tableId, table, index, capacity, geometry);
         const replacement = renderTable({ table, index, capacity, geometry }, latestGuestIndex, placement);
         currentNode.replaceWith(replacement);
         bindTableInteraction(replacement);
