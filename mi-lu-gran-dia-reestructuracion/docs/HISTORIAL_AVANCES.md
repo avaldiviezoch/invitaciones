@@ -368,3 +368,14 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Si Firebase falla, dirty se conserva y no se presenta el estado como sincronizado.
 - Se mantiene la misma clave planificador_bodas_distribucion_v1 y la misma escritura writePlannerStorageKey.
 - No se modifican colecciones, reglas, IDs, esquema ni Storage.
+
+
+## 2026-09-24 — Distribución: cambio canónico de tipo de mesa
+- Se habilita cambiar la forma de una mesa desde Distribución con los mismos valores canónicos de Invitados: round, square y rectangular.
+- En desktop, el selector aparece en el inspector de la mesa seleccionada.
+- En móvil, las opciones Redonda/Cuadrada/Rectangular aparecen dentro de Ajustes cuando existe una mesa seleccionada.
+- El cambio actualiza table.type en la estructura canónica de Invitados y persiste mediante saveInvitadosSnapshot().
+- No se cambia capacidad, seats, seatId, seatNumber ni asignaciones de invitados.
+- Si hay una posición de Distribución pendiente, primero se sincroniza antes de guardar el cambio canónico de la mesa.
+- Tras guardar, Distribución se remonta para recalcular y redibujar la geometría física de la mesa conservando su placement.
+- Se emite migrandia:datachange con source=distribucion para mantener informados los demás módulos sin provocar autorrecarga por el listener de Distribución.

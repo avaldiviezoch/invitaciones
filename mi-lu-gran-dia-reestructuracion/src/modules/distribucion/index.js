@@ -1,4 +1,4 @@
-import { loadInvitadosSnapshot } from '../invitados/invitados-data.js?v=4';
+import { loadInvitadosSnapshot, saveInvitadosSnapshot } from '../invitados/invitados-data.js?v=4';
 import { normalizeTableShape } from '../invitados/table-geometry.js?v=4';
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=5';
 import { weddingCapabilities } from '../../core/app/permissions.js';
@@ -13,7 +13,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=42', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=43', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -714,6 +714,7 @@ function renderElementInspector(root, element) {
   rotationOutput.value = `${normalizeRotation(element.rotation)}°`;
   rotationOutput.textContent = rotationOutput.value;
   root.querySelector('[data-distribution-table-stats]').hidden = true;
+  root.querySelector('[data-distribution-table-shape-control]').hidden = true;
   root.querySelector('[data-distribution-selected-guests]').hidden = true;
   root.querySelector('[data-distribution-element-note]').hidden = false;
   root.querySelector('[data-distribution-element-actions]').hidden = false;
@@ -744,6 +745,8 @@ function renderInspector(root, table, tableIndex, guests, placement) {
     .sort((a, b) => Number(a.seatNumber || 999) - Number(b.seatNumber || 999));
   root.querySelector('[data-distribution-selected-name]').textContent = tableName(table, tableIndex);
   root.querySelector('[data-distribution-selected-meta]').textContent = `${normalizeTableShape(table.type)} · ${capacity} sillas`;
+  root.querySelector('[data-distribution-table-shape-control]').hidden = false;
+  root.querySelector('[data-distribution-table-shape]').value = normalizeTableShape(table.type || table.shape);
   const rotationOutput = root.querySelector('[data-distribution-selected-rotation]');
   rotationOutput.value = `${normalizeRotation(placement.rotation)}°`;
   rotationOutput.textContent = rotationOutput.value;
@@ -910,6 +913,25 @@ async function mountDistribucion(context) {
         detail.textContent = root.querySelector('[data-distribution-validation-list]')?.innerText?.trim() || 'Plano sin incidencias espaciales.';
         mobileSheetBody.append(detail);
       } else if (action === 'settings') {
+        if (selectedTableId) {
+          const selectedEntry = tableById.get(selectedTableId);
+          const currentShape = normalizeTableShape(selectedEntry?.table?.type || selectedEntry?.table?.shape);
+          const shapeNote = document.createElement('p');
+          shapeNote.className = 'distribution-mobile-sheet-note';
+          shapeNote.textContent = `Tipo de mesa: ${TABLE_SHAPE_LABELS[currentShape] || 'Mesa'}`;
+          mobileSheetBody.append(shapeNote);
+          [
+            ['Redonda', 'round'],
+            ['Cuadrada', 'square'],
+            ['Rectangular', 'rectangular']
+          ].forEach(([label, shape]) => {
+            const button = addMobileButton(label, async () => {
+              await changeSelectedTableShape(shape);
+              closeMobileSheet();
+            });
+            if (shape === currentShape) button.disabled = true;
+          });
+        }
         addMobileButton('Medir distancia', () => proxyClick('[data-distribution-measure]'));
         addMobileButton('Limpiar medida', () => proxyClick('[data-distribution-clear-measure]'));
         const snapSource = root.querySelector('[data-distribution-snap]');
@@ -1077,6 +1099,59 @@ async function mountDistribucion(context) {
       world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableId)}"]`)?.classList.add('is-selected');
       renderInspector(root, entry.table, entry.index, guests, placement);
     };
+
+    const TABLE_SHAPE_LABELS = Object.freeze({
+      round: 'Redonda',
+      square: 'Cuadrada',
+      rectangular: 'Rectangular'
+    });
+
+    async function changeSelectedTableShape(nextShape) {
+      if (!canEdit || !selectedTableId || saving || canonicalChanged) return;
+      const entry = tableById.get(selectedTableId);
+      const table = entry?.table;
+      if (!table) return;
+
+      const normalized = normalizeTableShape(nextShape);
+      const previousType = normalizeTableShape(table.type || table.shape);
+      if (normalized === previousType) return;
+
+      if (dirty) {
+        if (autosaveTimer) {
+          window.clearTimeout(autosaveTimer);
+          autosaveTimer = 0;
+        }
+        const persisted = await persistDistribution();
+        if (!persisted && dirty) {
+          status.textContent = 'No se pudo sincronizar la posición antes de cambiar el tipo de mesa';
+          root.querySelector('[data-distribution-table-shape]').value = previousType;
+          return;
+        }
+      }
+
+      table.type = normalized;
+      table.updatedAt = new Date().toISOString();
+      status.textContent = `Actualizando mesa a ${TABLE_SHAPE_LABELS[normalized]}…`;
+
+      try {
+        await saveInvitadosSnapshot(context, snapshot.canonical);
+        window.dispatchEvent(new CustomEvent('migrandia:datachange', {
+          detail: {
+            source: 'distribucion',
+            module: 'distribucion',
+            weddingId: context?.id || '',
+            tables: tables.length
+          }
+        }));
+        status.textContent = `Mesa actualizada a ${TABLE_SHAPE_LABELS[normalized]}`;
+        await mountDistribucion(context);
+      } catch (error) {
+        table.type = previousType;
+        root.querySelector('[data-distribution-table-shape]').value = previousType;
+        console.error('No se pudo actualizar el tipo de mesa:', error);
+        status.textContent = error?.message || 'No se pudo actualizar el tipo de mesa.';
+      }
+    }
 
     const selectElement = (elementId) => {
       const element = physicalElements.find((item) => item.id === elementId);
@@ -1788,6 +1863,9 @@ async function mountDistribucion(context) {
     };
     root.querySelector('[data-distribution-width]').onchange = (event) => updateSelectedDimension('width', event.currentTarget);
     root.querySelector('[data-distribution-height]').onchange = (event) => updateSelectedDimension('height', event.currentTarget);
+    root.querySelector('[data-distribution-table-shape]').onchange = (event) => {
+      void changeSelectedTableShape(event.currentTarget.value);
+    };
 
     const measureButton = root.querySelector('[data-distribution-measure]');
     const clearMeasureButton = root.querySelector('[data-distribution-clear-measure]');
