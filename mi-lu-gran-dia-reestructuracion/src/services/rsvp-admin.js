@@ -9,7 +9,8 @@ import {
   orderBy,
   query,
   serverTimestamp,
-  setDoc
+  setDoc,
+  writeBatch
 } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
 
 function cleanText(value, max = 300) {
@@ -43,6 +44,28 @@ function isMusicOnlyResponse(item) {
   return item?.source === 'music-widget' && !item?.attendance && !cleanText(item?.name);
 }
 
+const DEFAULT_MUSIC_CONFIG = Object.freeze({
+  enabled: true,
+  title: 'La música también la eligen ustedes',
+  intro: 'Ayúdanos a preparar la fiesta. Déjanos las canciones que te gustaría escuchar para tenerlas en cuenta con el DJ o grupo y que ese día solo tengas que disfrutar.',
+  maxSongs: 5,
+  askArtist: true,
+  askMessage: true,
+  messageLabel: 'Mensaje o dedicatoria (opcional)'
+});
+
+function normalizeMusicConfig(value = {}) {
+  return {
+    enabled: value.enabled !== false,
+    title: cleanText(value.title || DEFAULT_MUSIC_CONFIG.title, 110) || DEFAULT_MUSIC_CONFIG.title,
+    intro: cleanText(value.intro || DEFAULT_MUSIC_CONFIG.intro, 500) || DEFAULT_MUSIC_CONFIG.intro,
+    maxSongs: Math.max(1, Math.min(10, Math.floor(Number(value.maxSongs) || DEFAULT_MUSIC_CONFIG.maxSongs))),
+    askArtist: value.askArtist !== false,
+    askMessage: value.askMessage !== false,
+    messageLabel: cleanText(value.messageLabel || DEFAULT_MUSIC_CONFIG.messageLabel, 90) || DEFAULT_MUSIC_CONFIG.messageLabel
+  };
+}
+
 function managementDocId(token, responseId) {
   return `${cleanText(token, 180)}__${cleanText(responseId, 180)}`;
 }
@@ -52,7 +75,7 @@ async function loadRsvpAdminSnapshot(context) {
   const configSnap = await getDoc(doc(db, 'weddings', context.id, 'rsvpConfig', 'main'));
   if (!configSnap.exists()) return { config: null, token: '', responses: [], musicResponses: [], management: [] };
 
-  const config = { ...(configSnap.data() || {}) };
+  const config = { ...(configSnap.data() || {}), musicConfig: normalizeMusicConfig(configSnap.data()?.musicConfig || {}) };
   const token = cleanText(config.token, 160);
   if (!token) return { config, token: '', responses: [], musicResponses: [], management: [] };
 
@@ -81,6 +104,20 @@ async function loadRsvpAdminSnapshot(context) {
   const musicResponses = allResponses.filter((item) => Boolean(item?.customData?.mgdMusic) && (item?.attendance === 'confirmed' || item?.source === 'music-widget'));
 
   return { config, token, responses, musicResponses, management };
+}
+
+async function saveRsvpMusicConfig(context, input = {}) {
+  requireEditor(context);
+  const privateRef = doc(db, 'weddings', context.id, 'rsvpConfig', 'main');
+  const current = await getDoc(privateRef);
+  if (!current.exists()) throw new Error('RSVP aún no está configurado para esta boda.');
+  const token = cleanText(current.data()?.token, 160);
+  const musicConfig = normalizeMusicConfig(input);
+  const batch = writeBatch(db);
+  batch.set(privateRef, { musicConfig, updatedAt: serverTimestamp() }, { merge: true });
+  if (token) batch.set(doc(db, 'publicRsvp', token), { musicConfig, updatedAt: serverTimestamp() }, { merge: true });
+  await batch.commit();
+  return { token, musicConfig };
 }
 
 async function saveRsvpManagement(context, token, responseId, input = {}) {
@@ -127,4 +164,4 @@ async function restoreRsvpManagement(context, token, responseId, previous) {
   await deleteDoc(ref);
 }
 
-export { loadRsvpAdminSnapshot, saveRsvpManagement, deleteRsvpManagement, restoreRsvpManagement };
+export { loadRsvpAdminSnapshot, saveRsvpMusicConfig, saveRsvpManagement, deleteRsvpManagement, restoreRsvpManagement };
