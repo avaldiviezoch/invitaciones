@@ -1265,7 +1265,7 @@ async function mountDistribucion(context) {
       try {
         validateCanonicalIntegrity(tables, guests);
         await saveInvitadosSnapshot(context, snapshot.canonical);
-        window.dispatchEvent(new CustomEvent('migrandia:datachange', { detail: { weddingId: context?.id, source: 'distribution-guest-assigned' } }));
+        window.dispatchEvent(new CustomEvent('migrandia:datachange', { detail: { weddingId: context?.id, source: 'distribucion' } }));
         status.textContent = `${escapeText(guest.name) || 'Invitado'} · ${tableName(table, tables.indexOf(table))} · silla ${seatIndex + 1}`;
         void mountDistribucion(context);
         return true;
