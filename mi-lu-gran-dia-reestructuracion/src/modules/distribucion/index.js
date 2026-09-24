@@ -294,6 +294,9 @@ function renderPhysicalElement(element) {
   const node = document.createElement('article');
   node.className = `distribution-element is-${element.type}`;
   node.dataset.elementId = element.id;
+  node.tabIndex = 0;
+  node.setAttribute('role', 'button');
+  node.setAttribute('aria-label', definition.label);
   node.style.left = `${element.x}px`;
   node.style.top = `${element.y}px`;
   node.style.width = `${definition.width}px`;
@@ -302,6 +305,26 @@ function renderPhysicalElement(element) {
   node.innerHTML = '<strong></strong>';
   node.querySelector('strong').textContent = definition.label;
   return node;
+}
+
+function applyElementPlacement(node, element) {
+  node.style.left = `${element.x}px`;
+  node.style.top = `${element.y}px`;
+  node.style.transform = `rotate(${normalizeRotation(element.rotation)}deg)`;
+}
+
+function renderElementInspector(root, element) {
+  const definition = PHYSICAL_ELEMENT_TYPES[element.type];
+  root.querySelector('[data-distribution-selection-empty]').hidden = true;
+  root.querySelector('[data-distribution-selection]').hidden = false;
+  root.querySelector('[data-distribution-selected-name]').textContent = definition.label;
+  root.querySelector('[data-distribution-selected-meta]').textContent = 'Elemento físico del plano';
+  const rotationOutput = root.querySelector('[data-distribution-selected-rotation]');
+  rotationOutput.value = `${normalizeRotation(element.rotation)}°`;
+  rotationOutput.textContent = rotationOutput.value;
+  root.querySelector('[data-distribution-table-stats]').hidden = true;
+  root.querySelector('[data-distribution-selected-guests]').hidden = true;
+  root.querySelector('[data-distribution-element-note]').hidden = false;
 }
 
 function setupCamera(root, world, worldSize) {
@@ -407,6 +430,9 @@ function setupCamera(root, world, worldSize) {
 
 function renderInspector(root, table, tableIndex, guests, placement) {
   root.querySelector('[data-distribution-selection-empty]').hidden = true;
+  root.querySelector('[data-distribution-table-stats]').hidden = false;
+  root.querySelector('[data-distribution-selected-guests]').hidden = false;
+  root.querySelector('[data-distribution-element-note]').hidden = true;
   root.querySelector('[data-distribution-selection]').hidden = false;
   const capacity = capacityOf(table);
   const assigned = guests
@@ -474,6 +500,7 @@ async function mountDistribucion(context) {
     const world = root.querySelector('[data-distribution-world]');
     const tableById = new Map(tables.map((table, index) => [escapeText(table.id), { table, index }]));
     let selectedTableId = '';
+    let selectedElementId = '';
     let dirty = false;
     let saving = false;
     let hasPersistedState = Boolean(storedState);
@@ -501,15 +528,29 @@ async function mountDistribucion(context) {
       else status.textContent = hasPersistedState ? 'Distribución guardada' : 'Distribución proyectada · aún sin guardar';
     };
 
+    const clearVisualSelection = () => {
+      world.querySelectorAll('.distribution-table,.distribution-element').forEach((node) => node.classList.remove('is-selected'));
+    };
+
     const selectTable = (tableId) => {
       const entry = tableById.get(tableId);
       const placement = placementState.get(tableId);
       if (!entry || !placement) return;
       selectedTableId = tableId;
-      world.querySelectorAll('.distribution-table').forEach((node) => {
-        node.classList.toggle('is-selected', node.dataset.tableId === tableId);
-      });
+      selectedElementId = '';
+      clearVisualSelection();
+      world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableId)}"]`)?.classList.add('is-selected');
       renderInspector(root, entry.table, entry.index, guests, placement);
+    };
+
+    const selectElement = (elementId) => {
+      const element = physicalElements.find((item) => item.id === elementId);
+      if (!element) return;
+      selectedTableId = '';
+      selectedElementId = elementId;
+      clearVisualSelection();
+      world.querySelector(`.distribution-element[data-element-id="${CSS.escape(elementId)}"]`)?.classList.add('is-selected');
+      renderElementInspector(root, element);
     };
 
     const markDirty = () => {
@@ -591,16 +632,84 @@ async function mountDistribucion(context) {
       markDirty();
     });
 
+    const bindElementInteraction = (node, element) => {
+      let move = null;
+      let moved = false;
+      node.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0 || !canEdit) return;
+        event.stopPropagation();
+        node.setPointerCapture(event.pointerId);
+        node.classList.add('is-moving');
+        move = { pointerId: event.pointerId, clientX: event.clientX, clientY: event.clientY, x: element.x, y: element.y };
+        moved = false;
+        selectElement(element.id);
+      });
+      node.addEventListener('pointermove', (event) => {
+        if (!move || move.pointerId !== event.pointerId) return;
+        const dx = camera.clientDeltaToWorld(event.clientX - move.clientX);
+        const dy = camera.clientDeltaToWorld(event.clientY - move.clientY);
+        if (Math.abs(dx) + Math.abs(dy) > 1) moved = true;
+        element.x = move.x + dx;
+        element.y = move.y + dy;
+        applyElementPlacement(node, element);
+      });
+      const finishMove = (event) => {
+        if (!move || move.pointerId !== event.pointerId) return;
+        node.classList.remove('is-moving');
+        move = null;
+        if (moved) markDirty();
+      };
+      node.addEventListener('pointerup', finishMove);
+      node.addEventListener('pointercancel', finishMove);
+      node.addEventListener('click', (event) => {
+        event.stopPropagation();
+        if (moved) {
+          moved = false;
+          return;
+        }
+        selectElement(element.id);
+      });
+      node.addEventListener('keydown', (event) => {
+        if (!canEdit || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+        event.preventDefault();
+        const step = event.shiftKey ? KEYBOARD_MOVE_FINE_STEP : KEYBOARD_MOVE_STEP;
+        if (event.key === 'ArrowLeft') element.x -= step;
+        if (event.key === 'ArrowRight') element.x += step;
+        if (event.key === 'ArrowUp') element.y -= step;
+        if (event.key === 'ArrowDown') element.y += step;
+        applyElementPlacement(node, element);
+        selectElement(element.id);
+        markDirty();
+      });
+    };
+
+    world.querySelectorAll('.distribution-element').forEach((node) => {
+      const element = physicalElements.find((item) => item.id === node.dataset.elementId);
+      if (element) bindElementInteraction(node, element);
+    });
+
     const rotateSelected = (delta) => {
-      if (!canEdit || !selectedTableId) return;
-      const placement = placementState.get(selectedTableId);
-      const node = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(selectedTableId)}"]`);
-      const entry = tableById.get(selectedTableId);
-      if (!placement || !node || !entry) return;
-      placement.rotation = normalizeRotation(placement.rotation + delta);
-      applyPlacement(node, placement);
-      renderInspector(root, entry.table, entry.index, guests, placement);
-      markDirty();
+      if (!canEdit) return;
+      if (selectedTableId) {
+        const placement = placementState.get(selectedTableId);
+        const node = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(selectedTableId)}"]`);
+        const entry = tableById.get(selectedTableId);
+        if (!placement || !node || !entry) return;
+        placement.rotation = normalizeRotation(placement.rotation + delta);
+        applyPlacement(node, placement);
+        renderInspector(root, entry.table, entry.index, guests, placement);
+        markDirty();
+        return;
+      }
+      if (selectedElementId) {
+        const element = physicalElements.find((item) => item.id === selectedElementId);
+        const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
+        if (!element || !node) return;
+        element.rotation = normalizeRotation(element.rotation + delta);
+        applyElementPlacement(node, element);
+        renderElementInspector(root, element);
+        markDirty();
+      }
     };
 
     root.querySelectorAll('[data-distribution-add-element]').forEach((button) => {
@@ -618,7 +727,10 @@ async function mountDistribucion(context) {
           rotation: 0
         };
         physicalElements.push(element);
-        world.append(renderPhysicalElement(element));
+        const node = renderPhysicalElement(element);
+        world.append(node);
+        bindElementInteraction(node, element);
+        selectElement(element.id);
         markDirty();
       };
     });
