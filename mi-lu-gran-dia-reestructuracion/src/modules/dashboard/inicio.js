@@ -568,6 +568,8 @@ document.addEventListener('click', (event) => {
 const moduleWorkspace = $('moduleWorkspace');
 const moduleLoader = $('moduleLoader');
 let moduleLoadEpoch = 0;
+let mountedModuleId = '';
+let mountedWeddingId = '';
 
 function setModuleLoading(loading) {
   if (!moduleLoader) return;
@@ -598,6 +600,7 @@ function openModuleFromHash() {
 
 async function openModule(moduleId, { updateHash = true } = {}) {
   if (!auth.currentUser || !weddingContext || !ACTIVE_MODULES.has(moduleId)) return;
+  const sameMountedModule = mountedModuleId === moduleId && mountedWeddingId === weddingContext.id;
   const loadEpoch = ++moduleLoadEpoch;
   document.documentElement.classList.add('module-route');
   heroVideo?.pause();
@@ -611,6 +614,10 @@ async function openModule(moduleId, { updateHash = true } = {}) {
     button.setAttribute('aria-current', active ? 'page' : 'false');
   });
   if (updateHash && location.hash !== '#' + moduleId) history.replaceState(null, '', '#' + moduleId);
+  if (sameMountedModule) {
+    setModuleLoading(false);
+    return;
+  }
   setModuleLoading(true);
   try {
     if (moduleId === 'checklist') {
@@ -629,12 +636,18 @@ async function openModule(moduleId, { updateHash = true } = {}) {
       const { mountInvitados } = await import('../invitados/index.js?v=24');
       await mountInvitados(weddingContext);
     }
+    if (loadEpoch === moduleLoadEpoch) {
+      mountedModuleId = moduleId;
+      mountedWeddingId = weddingContext.id;
+    }
   } finally {
     if (loadEpoch === moduleLoadEpoch) setModuleLoading(false);
   }
 }
 
 function closeModuleWorkspace() {
+  mountedModuleId = '';
+  mountedWeddingId = '';
   document.documentElement.classList.remove('module-route');
   document.body.classList.remove('module-open');
   moduleWorkspace.setAttribute('aria-hidden', 'true');
