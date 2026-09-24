@@ -100,7 +100,12 @@
         <button type="button" data-distribution-measure>Medir distancia</button>
         <button type="button" data-distribution-clear-measure>Limpiar medida</button>
         <label class="distribution-snap-toggle"><input type="checkbox" data-distribution-snap> Ajustar a cuadrícula</label>
-        <button type="button" data-distribution-draw-area>Dibujar área libre</button>
+        <div class="distribution-drawing-tools" role="group" aria-label="Dibujar áreas">
+          <button type="button" data-distribution-draw-area="canopy">Dibujar toldo</button>
+          <button type="button" data-distribution-draw-area="circulation">Dibujar circulación</button>
+          <button type="button" data-distribution-draw-area="restricted">Dibujar zona restringida</button>
+          <button type="button" data-distribution-draw-area="zone">Dibujar área libre</button>
+        </div>
         <output class="distribution-cursor-coords" data-distribution-coords>x 0.00 m · y 0.00 m</output>
       </div>
     </aside>
