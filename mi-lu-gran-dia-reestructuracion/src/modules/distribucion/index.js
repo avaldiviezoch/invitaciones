@@ -772,6 +772,7 @@ function setupCamera(root, world, worldSize) {
 
   requestAnimationFrame(fit);
   return {
+    fit,
     clientDeltaToWorld: (delta) => delta / scale,
     clientPointToWorld: (clientX, clientY) => {
       const rect = viewport.getBoundingClientRect();
@@ -932,6 +933,20 @@ async function mountDistribucion(context) {
       root.querySelector('[data-distribution-selection]').hidden = true;
       root.querySelector('[data-distribution-selection-empty]').hidden = false;
     };
+
+    const presentationButton = root.querySelector('[data-distribution-presentation]');
+    let presentationMode = false;
+    const setPresentationMode = (enabled) => {
+      presentationMode = Boolean(enabled);
+      root.classList.toggle('is-presentation-mode', presentationMode);
+      presentationButton.setAttribute('aria-pressed', String(presentationMode));
+      presentationButton.textContent = presentationMode ? 'Volver a editar' : 'Presentación';
+      if (presentationMode) {
+        clearSelection();
+        requestAnimationFrame(() => camera.fit());
+      }
+    };
+    presentationButton.onclick = () => setPresentationMode(!presentationMode);
 
     const editorSnapshot = () => ({
       dirty,
@@ -1311,6 +1326,7 @@ async function mountDistribucion(context) {
       let moved = false;
 
       node.addEventListener('pointerdown', (event) => {
+        if (presentationMode) return;
         if (event.target.closest('[data-guest-id],.distribution-chair')) return;
         if (event.button !== 0 || !canEdit || !EDIT_CAPABILITIES.table.movable) return;
         event.stopPropagation();
@@ -1392,6 +1408,7 @@ async function mountDistribucion(context) {
       let move = null;
       let moved = false;
       node.addEventListener('pointerdown', (event) => {
+        if (presentationMode) return;
         if (event.button !== 0) return;
         event.stopPropagation();
         selectElement(element.id);
@@ -1743,6 +1760,10 @@ async function mountDistribucion(context) {
     updateHistoryState();
 
     world.addEventListener('keydown', (event) => {
+      if (presentationMode) {
+        if (event.key === 'Escape') setPresentationMode(false);
+        return;
+      }
       if (!canEdit) return;
       const target = event.target;
       if (target instanceof HTMLInputElement || target instanceof HTMLTextAreaElement || target instanceof HTMLSelectElement || target?.isContentEditable) return;
