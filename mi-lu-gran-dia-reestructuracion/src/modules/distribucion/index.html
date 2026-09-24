@@ -48,11 +48,13 @@
         <label><input type="checkbox" data-distribution-show-elements checked> Elementos</label>
         <button type="button" data-distribution-measure>Medir distancia</button>
         <button type="button" data-distribution-clear-measure>Limpiar medida</button>
+        <button type="button" data-distribution-draw-area>Dibujar área libre</button>
         <output class="distribution-cursor-coords" data-distribution-coords>x 0.00 m · y 0.00 m</output>
       </div>
     </aside>
     <div class="distribution-viewport" data-distribution-viewport tabindex="0" aria-label="Plano de distribución. Arrastra una mesa para moverla o el fondo para desplazarte.">
       <div class="distribution-world" data-distribution-world>
+        <svg class="distribution-drawing-layer" data-distribution-drawing-layer aria-hidden="true"></svg>
         <svg class="distribution-measure-layer" data-distribution-measure-layer aria-hidden="true"></svg>
       </div>
       <div class="distribution-measure-hint" data-distribution-measure-hint hidden>Marca el primer punto</div>
