@@ -572,7 +572,7 @@ const moduleWorkspace = $('moduleWorkspace');
 const appModuleNav = $('appModuleNav');
 const appMobileMenu = $('appMobileMenu');
 const appMobileNavBackdrop = $('appMobileNavBackdrop');
-const mobileModuleNavMedia = window.matchMedia('(max-width: 700px)');
+const mobileModuleNavMedia = window.matchMedia('(max-width: 700px), ((max-height: 520px) and (pointer: coarse) and (max-width: 1000px))');
 
 function setMobileModuleMenu(open, { moveFocus = false } = {}) {
   const next = Boolean(open) && mobileModuleNavMedia.matches;
