@@ -48,9 +48,16 @@ function parseStoredJson(value) {
   try { return JSON.parse(value); } catch { return null; }
 }
 
-async function readPlannerStorageKey(context, key) {
+async function readPlannerStorageKeys(context, keys) {
+  const requested = Array.isArray(keys) ? [...new Set(keys.map(String).filter(Boolean))] : [];
+  if (!requested.length) return {};
   const { backup } = await readPlannerBackup(context);
-  return parseStoredJson(backup?.localStorage?.[key]);
+  return Object.fromEntries(requested.map((key) => [key, parseStoredJson(backup?.localStorage?.[key])]));
+}
+
+async function readPlannerStorageKey(context, key) {
+  const values = await readPlannerStorageKeys(context, [key]);
+  return values[String(key)];
 }
 
 async function writePlannerStorageKeys(context, entries) {
@@ -123,4 +130,4 @@ async function writePlannerStorageKey(context, key, value) {
   return writePlannerStorageKeys(context, { [key]: value });
 }
 
-export { readPlannerStorageKey, writePlannerStorageKey, writePlannerStorageKeys };
+export { readPlannerStorageKey, readPlannerStorageKeys, writePlannerStorageKey, writePlannerStorageKeys };
