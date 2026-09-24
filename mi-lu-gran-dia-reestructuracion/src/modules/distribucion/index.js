@@ -67,7 +67,10 @@ const PHYSICAL_ELEMENT_TYPES = Object.freeze({
   circulation: physicalType('Circulación', 4, 1.2, { spatialFamily: 'circulation' }),
   restricted: physicalType('Zona restringida', 3, 3, { spatialFamily: 'restricted' }),
   entrance: physicalType('Entrada / salida', 2, 1.2, { spatialFamily: 'circulation' }),
-  plant: physicalType('Planta / árbol', 0.8, 0.8, { spatialFamily: 'obstacle', visualFit: 'contain' }),
+  plant: physicalType('Planta mediana', 0.8, 0.8, { spatialFamily: 'obstacle', visualFit: 'contain', visualPaddingRatio: 0.05 }),
+  plantSmall: physicalType('Planta pequeña', 0.5, 0.5, { spatialFamily: 'obstacle', visualFit: 'contain', visualPaddingRatio: 0.04 }),
+  tree: physicalType('Árbol / macetero grande', 1.2, 1.2, { spatialFamily: 'obstacle', visualFit: 'contain', visualPaddingRatio: 0.04 }),
+  planter: physicalType('Jardinera', 1.5, 0.6, { spatialFamily: 'obstacle', visualFit: 'contain', visualPaddingRatio: 0.05 }),
   zone: physicalType('Zona / área', 4, 3, { spatialFamily: 'informative' })
 });
 
