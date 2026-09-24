@@ -15,6 +15,7 @@ const WORLD_PADDING = 90;
 
 let templatePromise = null;
 let mountEpoch = 0;
+let activeDistributionCleanup = null;
 
 function template() {
   if (!templatePromise) templatePromise = fetch(TEMPLATE_URL).then((response) => {
@@ -350,6 +351,8 @@ function renderInspector(root, table, tableIndex, guests, placement) {
 }
 
 async function mountDistribucion(context) {
+  activeDistributionCleanup?.();
+  activeDistributionCleanup = null;
   const epoch = ++mountEpoch;
   const root = document.querySelector('[data-module-view="distribucion"]');
   if (!root) return;
@@ -510,6 +513,22 @@ async function mountDistribucion(context) {
     };
 
     const seated = guests.filter((guest) => escapeText(guest.tableId)).length;
+
+    const handleCanonicalChange = (event) => {
+      if (escapeText(event?.detail?.weddingId) !== escapeText(context?.id)) return;
+      const source = escapeText(event?.detail?.source);
+      if (!source || source === 'distribucion') return;
+      if (dirty || saving) {
+        status.textContent = 'Invitados o Mesas cambiaron · guarda o vuelve a abrir Distribución para actualizar sin mezclar estados';
+        return;
+      }
+      void mountDistribucion(context);
+    };
+    window.addEventListener('migrandia:datachange', handleCanonicalChange);
+    activeDistributionCleanup = () => {
+      window.removeEventListener('migrandia:datachange', handleCanonicalChange);
+    };
+
     updateSaveState();
     if (!dirty && canEdit && storedState) status.textContent = `Distribución guardada · ${seated} invitados ubicados`;
   } catch (error) {
