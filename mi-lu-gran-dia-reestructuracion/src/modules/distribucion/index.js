@@ -529,6 +529,7 @@ async function mountDistribucion(context) {
     let selectedElementId = '';
     let dirty = false;
     let saving = false;
+    let canonicalChanged = false;
     let hasPersistedState = Boolean(storedState);
 
     world.style.width = `${layout.width}px`;
@@ -908,7 +909,10 @@ async function mountDistribucion(context) {
     });
 
     saveButton.onclick = async () => {
-      if (!canEdit || !dirty || saving) return;
+      if (!canEdit || !dirty || saving || canonicalChanged) {
+        if (canonicalChanged) status.textContent = 'Invitados o Mesas cambiaron · vuelve a abrir Distribución antes de guardar';
+        return;
+      }
       saving = true;
       updateSaveState();
       try {
@@ -932,7 +936,9 @@ async function mountDistribucion(context) {
       const source = escapeText(event?.detail?.source);
       if (!source || source === 'distribucion') return;
       if (dirty || saving) {
-        status.textContent = 'Invitados o Mesas cambiaron · guarda o vuelve a abrir Distribución para actualizar sin mezclar estados';
+        canonicalChanged = true;
+        updateSaveState();
+        status.textContent = 'Invitados o Mesas cambiaron · vuelve a abrir Distribución antes de guardar';
         return;
       }
       void mountDistribucion(context);
