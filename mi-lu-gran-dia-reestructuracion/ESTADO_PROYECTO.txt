@@ -1,5 +1,5 @@
 MI LU GRAN DÍA — ESTADO DEL PROYECTO
-Actualizado: 2026-09-23
+Actualizado: 2026-09-24
 
 FUENTE DETALLADA:
 docs/HISTORIAL_AVANCES.md
@@ -47,3 +47,14 @@ HITO PRESUPUESTO:
 - Sin cambios de esquema, claves, reglas, Storage, Authentication ni usuarios.
 - Auditoría 2026-09-23: XSS revisado, color de etiquetas saneado, CSV endurecido y responsive corregido.
 - Pendiente para cierre total: tests de invariantes/no-pérdida y resolver, con autorización explícita, el riesgo de concurrencia del backup agregado de planner-cloud.
+
+
+HITO DISTRIBUCIÓN — FASE 3:
+- Posición y rotación de mesas ya tienen persistencia mínima por boda.
+- Se guarda solo proposal -> placements[{tableId,x,y,rotation}] mediante services/planner-cloud.js.
+- Clave: planificador_bodas_distribucion_v1.
+- Abrir el módulo no guarda automáticamente; la persistencia requiere “Guardar distribución”.
+- Invitados, mesas, sillas y asignaciones continúan siendo canónicos en Invitados/Mesas y no se reescriben desde Distribución.
+- Rotar una mesa hace orbitar sus sillas y mantiene horizontales las etiquetas de invitados.
+- Sin Firestore directo, sin localStorage/sessionStorage/IndexedDB directo y sin !important.
+- Próximo: Fase 4, integración estructural controlada, previa auditoría de operaciones permitidas.
