@@ -13,7 +13,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=43', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=44', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -1106,9 +1106,32 @@ async function mountDistribucion(context) {
       rectangular: 'Rectangular'
     });
 
+    const redrawTableInPlace = (tableId) => {
+      const entry = tableById.get(tableId);
+      const table = entry?.table;
+      const placement = placementState.get(tableId);
+      const currentNode = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableId)}"]`);
+      if (!entry || !table || !placement || !currentNode) return null;
+
+      const capacity = capacityOf(table);
+      const geometry = tablePhysicalGeometry(table.type || table.shape, capacity || 4);
+      const replacement = renderTable({
+        table,
+        index: entry.index,
+        capacity,
+        geometry
+      }, guestIndex, placement);
+
+      currentNode.replaceWith(replacement);
+      bindTableInteraction(replacement);
+      if (selectedTableId === tableId) replacement.classList.add('is-selected');
+      return replacement;
+    };
+
     async function changeSelectedTableShape(nextShape) {
       if (!canEdit || !selectedTableId || saving || canonicalChanged) return;
-      const entry = tableById.get(selectedTableId);
+      const tableId = selectedTableId;
+      const entry = tableById.get(tableId);
       const table = entry?.table;
       if (!table) return;
 
@@ -1131,7 +1154,9 @@ async function mountDistribucion(context) {
 
       table.type = normalized;
       table.updatedAt = new Date().toISOString();
-      status.textContent = `Actualizando mesa a ${TABLE_SHAPE_LABELS[normalized]}…`;
+      redrawTableInPlace(tableId);
+      renderInspector(root, table, entry.index, guests, placementState.get(tableId));
+      status.textContent = `Sincronizando mesa ${TABLE_SHAPE_LABELS[normalized]}…`;
 
       try {
         await saveInvitadosSnapshot(context, snapshot.canonical);
@@ -1144,9 +1169,11 @@ async function mountDistribucion(context) {
           }
         }));
         status.textContent = `Mesa actualizada a ${TABLE_SHAPE_LABELS[normalized]}`;
-        await mountDistribucion(context);
+        refreshSpatialConflicts();
       } catch (error) {
         table.type = previousType;
+        redrawTableInPlace(tableId);
+        renderInspector(root, table, entry.index, guests, placementState.get(tableId));
         root.querySelector('[data-distribution-table-shape]').value = previousType;
         console.error('No se pudo actualizar el tipo de mesa:', error);
         status.textContent = error?.message || 'No se pudo actualizar el tipo de mesa.';

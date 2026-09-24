@@ -379,3 +379,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Si hay una posición de Distribución pendiente, primero se sincroniza antes de guardar el cambio canónico de la mesa.
 - Tras guardar, Distribución se remonta para recalcular y redibujar la geometría física de la mesa conservando su placement.
 - Se emite migrandia:datachange con source=distribucion para mantener informados los demás módulos sin provocar autorrecarga por el listener de Distribución.
+
+
+## 2026-09-24 — Distribución: cambio de tipo de mesa instantáneo
+- Se elimina el mountDistribucion() posterior al cambio de forma de mesa.
+- El cambio round/square/rectangular actualiza inmediatamente la mesa seleccionada en memoria y reemplaza solo su nodo DOM.
+- Se recalcula tablePhysicalGeometry() con la misma capacidad y se vuelve a enlazar la interacción de arrastre.
+- Se conservan placement x/y, rotación, selección, cámara/zoom y el resto del plano sin desmontar.
+- Firebase se sincroniza en segundo plano mediante saveInvitadosSnapshot().
+- Si la persistencia falla, se restaura el tipo anterior y se redibuja únicamente esa mesa, sin reiniciar el módulo.
