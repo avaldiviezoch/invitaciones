@@ -82,6 +82,15 @@
           <label><input type="checkbox" name="askArtist"><span>Preguntar artista</span></label>
           <label><input type="checkbox" name="askMessage"><span>Permitir dedicatoria</span></label>
         </div>
+        <section class="music-config-preview music-config-wide" data-music-config-preview aria-label="Vista previa de la encuesta musical"></section>
+        <section class="music-integration music-config-wide">
+          <div class="music-integration-head"><div><strong>Integración Solo Música</strong><span>Usa el mismo token y la misma sesión RSVP de la invitación.</span></div></div>
+          <label class="guests-field"><span>Enlace público</span><input type="text" data-music-public-url readonly placeholder="RSVP aún no publicado"></label>
+          <div class="music-integration-actions">
+            <button type="button" data-music-copy-url>Copiar enlace</button>
+            <button type="button" data-music-open-url>Abrir vista</button>
+          </div>
+        </section>
         <div class="music-config-actions music-config-wide"><button class="guests-save" type="submit" data-music-config-save>Guardar configuración</button></div>
       </form>
     </section>
