@@ -110,4 +110,4 @@ async function saveInvitadosSnapshot(context, canonical) {
   return { canonicalValue, sharedValue };
 }
 
-export { loadInvitadosSnapshot, saveInvitadosSnapshot };
+export { GUEST_STORAGE_KEY, SHARED_STORAGE_KEY, loadInvitadosSnapshot, saveInvitadosSnapshot };

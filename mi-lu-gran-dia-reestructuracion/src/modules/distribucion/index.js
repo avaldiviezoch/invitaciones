@@ -1,6 +1,6 @@
-import { loadInvitadosSnapshot, saveInvitadosSnapshot } from '../invitados/invitados-data.js?v=4';
+import { GUEST_STORAGE_KEY, loadInvitadosSnapshot, saveInvitadosSnapshot } from '../invitados/invitados-data.js?v=5';
 import { normalizeTableShape } from '../invitados/table-geometry.js?v=4';
-import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=5';
+import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=6';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { setupDistributionCamera } from './camera.js?v=8';
 import {
@@ -13,7 +13,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=45', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=46', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -800,7 +800,7 @@ async function mountDistribucion(context) {
     const tables = snapshot.canonical.tables;
     const guests = snapshot.canonical.guests;
     validateCanonicalIntegrity(tables, guests);
-    const guestIndex = buildGuestIndex(guests);
+    let guestIndex = buildGuestIndex(guests);
     const layout = projectedLayout(tables);
     const placementState = placementMapFor(layout, storedState);
     const physicalElements = (activeProposalOf(storedState)?.elements || []).map((element) => ({ ...element }));
@@ -819,9 +819,10 @@ async function mountDistribucion(context) {
     let canonicalChanged = false;
     let hasPersistedState = Boolean(storedState);
     let autosaveTimer = 0;
-    let cloudUnsubscribe = null;
+    let distributionCloudUnsubscribe = null;
+    let canonicalCloudUnsubscribe = null;
     let lastPersistedSignature = storedState ? JSON.stringify(storedState) : '';
-    let remoteRefreshQueued = false;
+    let queuedRemoteDistributionSignature = '';
     const undoStack = [];
     const redoStack = [];
     const undoButton = root.querySelector('[data-distribution-undo]');
@@ -1058,11 +1059,18 @@ async function mountDistribucion(context) {
       } finally {
         saving = false;
         updateSaveState();
-        if (remoteRefreshQueued && !dirty && !canonicalChanged) {
-          remoteRefreshQueued = false;
+        if (
+          queuedRemoteDistributionSignature
+          && queuedRemoteDistributionSignature !== lastPersistedSignature
+          && !dirty
+          && !canonicalChanged
+        ) {
+          queuedRemoteDistributionSignature = '';
           window.setTimeout(() => {
             if (!dirty && !saving && !canonicalChanged) void mountDistribucion(context);
           }, 120);
+        } else {
+          queuedRemoteDistributionSignature = '';
         }
       }
     }
@@ -2250,6 +2258,7 @@ async function mountDistribucion(context) {
       tables.forEach((table, index) => tableById.set(escapeText(table.id), { table, index }));
 
       const latestGuestIndex = buildGuestIndex(guests);
+      guestIndex = latestGuestIndex;
       tables.forEach((table, index) => {
         const tableId = escapeText(table.id);
         const placement = placementState.get(tableId);
@@ -2306,10 +2315,12 @@ async function mountDistribucion(context) {
         return;
       }
       if (dirty || saving || canonicalChanged) return;
-      void mountDistribucion(context);
+      void reconcileCanonicalTables().catch((error) => {
+        console.error('No se pudo reconciliar Distribución al volver a la pestaña:', error);
+      });
     };
 
-    cloudUnsubscribe = subscribePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, (remoteValue) => {
+    distributionCloudUnsubscribe = subscribePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, (remoteValue) => {
       let remoteState = null;
       try {
         remoteState = parseDistributionState(remoteValue);
@@ -2321,7 +2332,7 @@ async function mountDistribucion(context) {
       if (!remoteSignature || remoteSignature === lastPersistedSignature) return;
 
       if (dirty || saving || canonicalChanged) {
-        remoteRefreshQueued = true;
+        queuedRemoteDistributionSignature = remoteSignature;
         return;
       }
 
@@ -2332,12 +2343,21 @@ async function mountDistribucion(context) {
       console.error('No se pudo escuchar la sincronización de Distribución:', error);
     });
 
+    canonicalCloudUnsubscribe = subscribePlannerStorageKey(context, GUEST_STORAGE_KEY, () => {
+      void reconcileCanonicalTables().catch((error) => {
+        console.error('No se pudo sincronizar Invitados/Mesas remotos con Distribución:', error);
+      });
+    }, (error) => {
+      console.error('No se pudo escuchar Invitados/Mesas en Distribución:', error);
+    });
+
     window.addEventListener('migrandia:datachange', handleCanonicalChange);
     document.addEventListener('visibilitychange', handleVisibilityChange);
     activeDistributionCleanup = () => {
       window.removeEventListener('migrandia:datachange', handleCanonicalChange);
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-      cloudUnsubscribe?.();
+      distributionCloudUnsubscribe?.();
+      canonicalCloudUnsubscribe?.();
       if (autosaveTimer) window.clearTimeout(autosaveTimer);
       camera.destroy();
       if (referenceObjectUrl) {

@@ -396,3 +396,14 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Distribución procesa eventos table-* de Invitados mediante reconcileCanonicalTables().
 - Si el conjunto de mesas es el mismo, se relee Firebase y se actualizan en caliente nombre, tipo, capacidad, sillas e invitados, conservando x/y, rotación, cámara y selección.
 - Solo crear/eliminar/reordenar estructuralmente puede requerir remonte cuando el conjunto/orden de mesas cambia.
+
+
+## 2026-09-24 — Distribución: auditoría y corrección de sincronización intermitente
+- Se identifica una carrera: el listener de Distribución podía recibir su propio autoguardado mientras saving=true, marcar un refresco remoto pendiente y remontar el módulo después dependiendo del orden de eventos.
+- subscribePlannerStorageKey ahora observa cambios reales por clave: inicializa la firma del valor actual, ignora escrituras globales que no cambian esa clave y descarta lecturas asíncronas obsoletas mediante generación.
+- Distribución reemplaza remoteRefreshQueued booleano por la firma exacta del estado remoto; un evento propio ya persistido no puede provocar remonte posterior.
+- Distribución se suscribe además a GUEST_STORAGE_KEY para recibir cambios canónicos de Invitados/Mesas desde otros dispositivos.
+- GUEST_STORAGE_KEY y SHARED_STORAGE_KEY se exportan desde invitados-data.js, evitando strings mágicos duplicados.
+- reconcileCanonicalTables actualiza también guestIndex para que redibujos posteriores usen asignaciones vigentes.
+- Al volver a una pestaña visible se reconcilian mesas/invitados en caliente en lugar de remontar Distribución innecesariamente.
+- Se mantienen una sola fuente Firebase, los mismos IDs, claves, placements y contratos de datos.

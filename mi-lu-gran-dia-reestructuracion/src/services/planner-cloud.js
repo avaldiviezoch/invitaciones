@@ -134,32 +134,56 @@ async function writePlannerStorageKey(context, key, value) {
 function subscribePlannerStorageKey(context, key, onValue, onError) {
   if (!auth.currentUser || !context?.id) return () => {};
   const metaRef = doc(db, 'weddings', context.id, 'cloudSync', 'main');
+  let stopped = false;
   let initialized = false;
-  let lastSignature = '';
+  let lastMetaSignature = '';
+  let lastValueSignature = null;
+  let readGeneration = 0;
 
-  return onSnapshot(metaRef, async (snapshot) => {
-    if (!snapshot.exists()) return;
-    const data = snapshot.data() || {};
-    const updatedAt = typeof data.updatedAt?.toMillis === 'function'
-      ? data.updatedAt.toMillis()
-      : String(data.updatedAt || '');
-    const signature = `${Number(data.chunkCount || 0)}:${Number(data.bytes || 0)}:${updatedAt}`;
+  const readCurrentValue = async ({ notify }) => {
+    const generation = ++readGeneration;
+    try {
+      const value = await readPlannerStorageKey(context, key);
+      if (stopped || generation !== readGeneration) return;
+      const valueSignature = JSON.stringify(value ?? null);
+      if (lastValueSignature === null) {
+        lastValueSignature = valueSignature;
+        return;
+      }
+      if (valueSignature === lastValueSignature) return;
+      lastValueSignature = valueSignature;
+      if (notify) onValue?.(value);
+    } catch (error) {
+      if (!stopped && generation === readGeneration) onError?.(error);
+    }
+  };
+
+  const unsubscribe = onSnapshot(metaRef, (snapshot) => {
+    if (!snapshot.exists() || stopped) return;
+    const meta = snapshot.data() || {};
+    const updatedAt = typeof meta.updatedAt?.toMillis === 'function'
+      ? meta.updatedAt.toMillis()
+      : String(meta.updatedAt || '');
+    const metaSignature = `${Number(meta.chunkCount || 0)}:${Number(meta.bytes || 0)}:${updatedAt}`;
 
     if (!initialized) {
       initialized = true;
-      lastSignature = signature;
+      lastMetaSignature = metaSignature;
+      void readCurrentValue({ notify: false });
       return;
     }
-    if (signature === lastSignature) return;
-    lastSignature = signature;
+    if (metaSignature === lastMetaSignature) return;
+    lastMetaSignature = metaSignature;
+    void readCurrentValue({ notify: true });
+  }, (error) => {
+    if (!stopped) onError?.(error);
+  });
 
-    try {
-      const value = await readPlannerStorageKey(context, key);
-      onValue?.(value);
-    } catch (error) {
-      onError?.(error);
-    }
-  }, (error) => onError?.(error));
+  return () => {
+    stopped = true;
+    readGeneration += 1;
+    unsubscribe();
+  };
 }
 
 export {
