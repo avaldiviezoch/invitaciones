@@ -449,7 +449,13 @@ function setupCamera(root, world, worldSize) {
   viewport.addEventListener('pointercancel', release);
 
   requestAnimationFrame(fit);
-  return { clientDeltaToWorld: (delta) => delta / scale };
+  return {
+    clientDeltaToWorld: (delta) => delta / scale,
+    clientPointToWorld: (clientX, clientY) => {
+      const rect = viewport.getBoundingClientRect();
+      return { x: (clientX - rect.left - x) / scale, y: (clientY - rect.top - y) / scale };
+    }
+  };
 }
 
 function renderInspector(root, table, tableIndex, guests, placement) {
@@ -867,6 +873,57 @@ async function mountDistribucion(context) {
     };
     root.querySelector('[data-distribution-width]').onchange = (event) => updateSelectedDimension('width', event.currentTarget);
     root.querySelector('[data-distribution-height]').onchange = (event) => updateSelectedDimension('height', event.currentTarget);
+
+    const measureButton = root.querySelector('[data-distribution-measure]');
+    const measureHint = root.querySelector('[data-distribution-measure-hint]');
+    const measureLayer = root.querySelector('[data-distribution-measure-layer]');
+    let measureStart = null;
+    let measuring = false;
+
+    const stopMeasuring = () => {
+      measuring = false;
+      measureStart = null;
+      measureButton.classList.remove('is-active');
+      measureButton.textContent = 'Medir distancia';
+      measureHint.hidden = true;
+    };
+
+    measureButton.onclick = () => {
+      if (measuring) {
+        stopMeasuring();
+        return;
+      }
+      measuring = true;
+      measureStart = null;
+      measureLayer.replaceChildren();
+      measureButton.classList.add('is-active');
+      measureButton.textContent = 'Cancelar medición';
+      measureHint.textContent = 'Marca el primer punto';
+      measureHint.hidden = false;
+    };
+
+    viewport.addEventListener('click', (event) => {
+      if (!measuring || event.target.closest('.distribution-table,.distribution-element')) return;
+      const point = camera.clientPointToWorld(event.clientX, event.clientY);
+      if (!measureStart) {
+        measureStart = point;
+        measureHint.textContent = 'Marca el segundo punto';
+        return;
+      }
+      const distanceMeters = Math.hypot(point.x - measureStart.x, point.y - measureStart.y) / PIXELS_PER_METER;
+      const svgNs = 'http://www.w3.org/2000/svg';
+      const line = document.createElementNS(svgNs, 'line');
+      line.setAttribute('x1', measureStart.x);
+      line.setAttribute('y1', measureStart.y);
+      line.setAttribute('x2', point.x);
+      line.setAttribute('y2', point.y);
+      const label = document.createElementNS(svgNs, 'text');
+      label.setAttribute('x', (measureStart.x + point.x) / 2);
+      label.setAttribute('y', (measureStart.y + point.y) / 2 - 8);
+      label.textContent = `${distanceMeters.toFixed(2)} m`;
+      measureLayer.replaceChildren(line, label);
+      stopMeasuring();
+    });
 
     root.querySelector('[data-distribution-show-tables]').onchange = (event) => {
       world.classList.toggle('hide-tables', !event.currentTarget.checked);
