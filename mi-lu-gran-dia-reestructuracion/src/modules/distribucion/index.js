@@ -410,6 +410,24 @@ function renderElementInspector(root, element) {
   lockButton.textContent = element.locked ? 'Desbloquear' : 'Bloquear';
 }
 
+function worldBounds(world, fallbackSize) {
+  const nodes = [...world.querySelectorAll('.distribution-table,.distribution-element')];
+  if (!nodes.length) return { minX: 0, minY: 0, maxX: fallbackSize.width, maxY: fallbackSize.height };
+  const bounds = nodes.map((node) => {
+    const left = finiteNumber(node.style.left) ?? 0;
+    const top = finiteNumber(node.style.top) ?? 0;
+    const width = finiteNumber(node.style.width) ?? node.offsetWidth;
+    const height = finiteNumber(node.style.height) ?? node.offsetHeight;
+    return { left, top, right: left + width, bottom: top + height };
+  });
+  return {
+    minX: Math.min(0, ...bounds.map((item) => item.left)) - WORLD_PADDING,
+    minY: Math.min(0, ...bounds.map((item) => item.top)) - WORLD_PADDING,
+    maxX: Math.max(fallbackSize.width, ...bounds.map((item) => item.right)) + WORLD_PADDING,
+    maxY: Math.max(fallbackSize.height, ...bounds.map((item) => item.bottom)) + WORLD_PADDING
+  };
+}
+
 function setupCamera(root, world, worldSize) {
   const viewport = root.querySelector('[data-distribution-viewport]');
   const zoomOutput = root.querySelector('[data-distribution-zoom]');
@@ -444,9 +462,12 @@ function setupCamera(root, world, worldSize) {
   const fit = () => {
     const rect = viewport.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
-    scale = clampScale(Math.min((rect.width - 36) / worldSize.width, (rect.height - 36) / worldSize.height, 1));
-    x = (rect.width - worldSize.width * scale) / 2;
-    y = (rect.height - worldSize.height * scale) / 2;
+    const bounds = worldBounds(world, worldSize);
+    const width = Math.max(1, bounds.maxX - bounds.minX);
+    const height = Math.max(1, bounds.maxY - bounds.minY);
+    scale = clampScale(Math.min((rect.width - 36) / width, (rect.height - 36) / height, 1));
+    x = (rect.width - width * scale) / 2 - bounds.minX * scale;
+    y = (rect.height - height * scale) / 2 - bounds.minY * scale;
     apply();
   };
 
@@ -813,8 +834,10 @@ async function mountDistribucion(context) {
       let move = null;
       let moved = false;
       node.addEventListener('pointerdown', (event) => {
-        if (event.button !== 0 || !canEdit || element.locked) return;
+        if (event.button !== 0) return;
         event.stopPropagation();
+        selectElement(element.id);
+        if (!canEdit || element.locked) return;
         node.setPointerCapture(event.pointerId);
         node.classList.add('is-moving');
         move = { pointerId: event.pointerId, clientX: event.clientX, clientY: event.clientY, x: element.x, y: element.y };
