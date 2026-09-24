@@ -18,14 +18,23 @@ const PIXELS_PER_METER = 44;
 const MIN_ELEMENT_METERS = 0.5;
 const MAX_ELEMENT_METERS = 30;
 const HISTORY_LIMIT = 50;
-const PHYSICAL_ELEMENT_TYPES = Object.freeze({
-  dance: Object.freeze({ label: 'Pista de baile', width: 220, height: 220 }),
-  bar: Object.freeze({ label: 'Barra', width: 176, height: 54 }),
-  dj: Object.freeze({ label: 'DJ / sonido', width: 132, height: 88 }),
-  stage: Object.freeze({ label: 'Escenario', width: 176, height: 110 }),
-  column: Object.freeze({ label: 'Columna', width: 22, height: 22 }),
-  zone: Object.freeze({ label: 'Zona / área', width: 176, height: 132 })
+const EDIT_CAPABILITIES = Object.freeze({
+  table: Object.freeze({ movable: true, rotatable: true, resizable: false, copyable: false, deletable: false, layerable: false, lockable: false }),
+  physical: Object.freeze({ movable: true, rotatable: true, resizable: true, copyable: true, deletable: true, layerable: true, lockable: true })
 });
+
+const PHYSICAL_ELEMENT_TYPES = Object.freeze({
+  dance: Object.freeze({ label: 'Pista de baile', width: 220, height: 220, capabilities: EDIT_CAPABILITIES.physical }),
+  bar: Object.freeze({ label: 'Barra', width: 176, height: 54, capabilities: EDIT_CAPABILITIES.physical }),
+  dj: Object.freeze({ label: 'DJ / sonido', width: 132, height: 88, capabilities: EDIT_CAPABILITIES.physical }),
+  stage: Object.freeze({ label: 'Escenario', width: 176, height: 110, capabilities: EDIT_CAPABILITIES.physical }),
+  column: Object.freeze({ label: 'Columna', width: 22, height: 22, capabilities: EDIT_CAPABILITIES.physical }),
+  zone: Object.freeze({ label: 'Zona / área', width: 176, height: 132, capabilities: EDIT_CAPABILITIES.physical })
+});
+
+function elementCapabilities(element) {
+  return PHYSICAL_ELEMENT_TYPES[element?.type]?.capabilities || EDIT_CAPABILITIES.physical;
+}
 
 let templatePromise = null;
 let mountEpoch = 0;
@@ -404,11 +413,17 @@ function renderElementInspector(root, element) {
   root.querySelector('[data-distribution-selected-guests]').hidden = true;
   root.querySelector('[data-distribution-element-note]').hidden = false;
   root.querySelector('[data-distribution-element-actions]').hidden = false;
-  root.querySelector('[data-distribution-dimensions]').hidden = false;
+  const capabilities = elementCapabilities(element);
+  root.querySelector('[data-distribution-dimensions]').hidden = !capabilities.resizable;
   root.querySelector('[data-distribution-width]').value = (element.width / PIXELS_PER_METER).toFixed(1);
   root.querySelector('[data-distribution-height]').value = (element.height / PIXELS_PER_METER).toFixed(1);
   const lockButton = root.querySelector('[data-distribution-toggle-lock]');
+  lockButton.hidden = !capabilities.lockable;
   lockButton.textContent = element.locked ? 'Desbloquear' : 'Bloquear';
+  root.querySelector('[data-distribution-bring-front]').hidden = !capabilities.layerable;
+  root.querySelector('[data-distribution-send-back]').hidden = !capabilities.layerable;
+  root.querySelector('[data-distribution-duplicate-element]').hidden = !capabilities.copyable;
+  root.querySelector('[data-distribution-delete-element]').hidden = !capabilities.deletable;
 }
 
 function worldBounds(world, fallbackSize) {
@@ -760,7 +775,7 @@ async function mountDistribucion(context) {
     const duplicateSelectedElement = () => {
       if (!canEdit || !selectedElementId) return;
       const source = physicalElements.find((item) => item.id === selectedElementId);
-      if (!source || source.locked) return;
+      if (!source || source.locked || !elementCapabilities(source).copyable) return;
       rememberEdit();
       const duplicate = createElement(source.type, source.x + 24, source.y + 24, source.rotation);
       if (!duplicate) return;
@@ -783,7 +798,7 @@ async function mountDistribucion(context) {
     const deleteSelectedElement = () => {
       if (!canEdit || !selectedElementId) return;
       const selected = physicalElements.find((item) => item.id === selectedElementId);
-      if (selected?.locked) return;
+      if (selected?.locked || !elementCapabilities(selected).deletable) return;
       const index = physicalElements.findIndex((item) => item.id === selectedElementId);
       if (index < 0) return;
       rememberEdit();
@@ -798,13 +813,13 @@ async function mountDistribucion(context) {
     const copySelectedElement = () => {
       if (!selectedElementId) return;
       const source = physicalElements.find((item) => item.id === selectedElementId);
-      if (!source) return;
+      if (!source || !elementCapabilities(source).copyable) return;
       copiedElement = { type: source.type, x: source.x, y: source.y, rotation: source.rotation, width: source.width, height: source.height, points: Array.isArray(source.points) ? source.points.map((point) => ({ ...point })) : null };
       status.textContent = `${PHYSICAL_ELEMENT_TYPES[source.type].label} copiado`;
     };
 
     const pasteCopiedElement = () => {
-      if (!canEdit || !copiedElement) return;
+      if (!canEdit || !copiedElement || !PHYSICAL_ELEMENT_TYPES[copiedElement.type]?.capabilities?.copyable) return;
       rememberEdit();
       copiedElement = { ...copiedElement, x: copiedElement.x + 24, y: copiedElement.y + 24 };
       const pasted = createElement(copiedElement.type, copiedElement.x, copiedElement.y, copiedElement.rotation);
@@ -830,7 +845,7 @@ async function mountDistribucion(context) {
       let moved = false;
 
       node.addEventListener('pointerdown', (event) => {
-        if (event.button !== 0 || !canEdit) return;
+        if (event.button !== 0 || !canEdit || !EDIT_CAPABILITIES.table.movable) return;
         event.stopPropagation();
         const placement = placementState.get(node.dataset.tableId);
         if (!placement) return;
@@ -890,7 +905,7 @@ async function mountDistribucion(context) {
         selectTable(node.dataset.tableId);
         return;
       }
-      if (!canEdit || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+      if (!canEdit || !EDIT_CAPABILITIES.table.movable || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
       const placement = placementState.get(node.dataset.tableId);
       if (!placement) return;
       event.preventDefault();
@@ -912,7 +927,7 @@ async function mountDistribucion(context) {
         if (event.button !== 0) return;
         event.stopPropagation();
         selectElement(element.id);
-        if (!canEdit || element.locked) return;
+        if (!canEdit || element.locked || !elementCapabilities(element).movable) return;
         node.setPointerCapture(event.pointerId);
         node.classList.add('is-moving');
         move = { pointerId: event.pointerId, clientX: event.clientX, clientY: event.clientY, x: element.x, y: element.y };
@@ -950,7 +965,7 @@ async function mountDistribucion(context) {
         selectElement(element.id);
       });
       node.addEventListener('keydown', (event) => {
-        if (!canEdit || element.locked || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+        if (!canEdit || element.locked || !elementCapabilities(element).movable || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
         event.preventDefault();
         rememberEdit();
         const step = event.shiftKey ? KEYBOARD_MOVE_FINE_STEP : KEYBOARD_MOVE_STEP;
@@ -975,7 +990,7 @@ async function mountDistribucion(context) {
         const placement = placementState.get(selectedTableId);
         const node = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(selectedTableId)}"]`);
         const entry = tableById.get(selectedTableId);
-        if (!placement || !node || !entry) return;
+        if (!placement || !node || !entry || !EDIT_CAPABILITIES.table.rotatable) return;
         rememberEdit();
         placement.rotation = normalizeRotation(placement.rotation + delta);
         applyPlacement(node, placement);
@@ -986,7 +1001,7 @@ async function mountDistribucion(context) {
       if (selectedElementId) {
         const element = physicalElements.find((item) => item.id === selectedElementId);
         const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
-        if (!element || !node || element.locked) return;
+        if (!element || !node || element.locked || !elementCapabilities(element).rotatable) return;
         rememberEdit();
         element.rotation = normalizeRotation(element.rotation + delta);
         applyElementPlacement(node, element);
@@ -1018,7 +1033,7 @@ async function mountDistribucion(context) {
       if (!canEdit || !selectedElementId) return;
       const element = physicalElements.find((item) => item.id === selectedElementId);
       const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
-      if (!element || !node) return;
+      if (!element || !node || !elementCapabilities(element).layerable) return;
       rememberEdit();
       const layers = physicalElements.map((item) => Number(item.layer || 0));
       element.layer = direction > 0 ? Math.max(0, ...layers) + 1 : Math.min(0, ...layers) - 1;
@@ -1030,7 +1045,7 @@ async function mountDistribucion(context) {
       if (!canEdit || !selectedElementId) return;
       const element = physicalElements.find((item) => item.id === selectedElementId);
       const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
-      if (!element || !node) return;
+      if (!element || !node || !elementCapabilities(element).lockable) return;
       rememberEdit();
       element.locked = !element.locked;
       applyElementPlacement(node, element);
@@ -1042,7 +1057,7 @@ async function mountDistribucion(context) {
       if (!canEdit || !selectedElementId) return;
       const element = physicalElements.find((item) => item.id === selectedElementId);
       const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
-      if (!element || !node || element.locked) {
+      if (!element || !node || element.locked || !elementCapabilities(element).resizable) {
         if (element) input.value = ((axis === 'width' ? element.width : element.height) / PIXELS_PER_METER).toFixed(1);
         return;
       }
