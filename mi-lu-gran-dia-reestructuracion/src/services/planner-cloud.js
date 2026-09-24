@@ -8,6 +8,7 @@ import { auth, db } from './firebase-client.js';
 import { weddingCapabilities } from '../core/app/permissions.js';
 
 const CHUNK_SIZE = 180000;
+const backupReadInFlight = new Map();
 
 function chunkText(text) {
   const chunks = [];
@@ -17,28 +18,41 @@ function chunkText(text) {
 
 async function readPlannerBackup(context) {
   if (!auth.currentUser || !context?.id) throw new Error('No hay una boda activa.');
-  const metaRef = doc(db, 'weddings', context.id, 'cloudSync', 'main');
-  const metaSnapshot = await getDoc(metaRef);
-  if (!metaSnapshot.exists()) return { backup: null, chunkCount: 0 };
+  const readKey = `${auth.currentUser.uid}:${context.id}`;
+  const existing = backupReadInFlight.get(readKey);
+  if (existing) return existing;
 
-  const chunkCount = Number(metaSnapshot.data()?.chunkCount || 0);
-  if (!Number.isInteger(chunkCount) || chunkCount < 0 || chunkCount > 500) {
-    throw new Error('La copia de Firebase tiene un formato no válido.');
-  }
-  if (!chunkCount) return { backup: null, chunkCount: 0 };
+  const readPromise = (async () => {
+    const metaRef = doc(db, 'weddings', context.id, 'cloudSync', 'main');
+    const metaSnapshot = await getDoc(metaRef);
+    if (!metaSnapshot.exists()) return { backup: null, chunkCount: 0 };
 
-  const chunks = await Promise.all(
-    Array.from({ length: chunkCount }, (_, index) =>
-      getDoc(doc(db, 'weddings', context.id, 'cloudChunks', String(index).padStart(5, '0')))
-    )
-  );
-  const raw = chunks.map((snapshot) => snapshot.exists() ? String(snapshot.data()?.data || '') : '').join('');
-  if (!raw) return { backup: null, chunkCount };
+    const chunkCount = Number(metaSnapshot.data()?.chunkCount || 0);
+    if (!Number.isInteger(chunkCount) || chunkCount < 0 || chunkCount > 500) {
+      throw new Error('La copia de Firebase tiene un formato no válido.');
+    }
+    if (!chunkCount) return { backup: null, chunkCount: 0 };
 
+    const chunks = await Promise.all(
+      Array.from({ length: chunkCount }, (_, index) =>
+        getDoc(doc(db, 'weddings', context.id, 'cloudChunks', String(index).padStart(5, '0')))
+      )
+    );
+    const raw = chunks.map((snapshot) => snapshot.exists() ? String(snapshot.data()?.data || '') : '').join('');
+    if (!raw) return { backup: null, chunkCount };
+
+    try {
+      return { backup: JSON.parse(raw), chunkCount };
+    } catch {
+      throw new Error('No se pudo interpretar la copia de Firebase de esta boda.');
+    }
+  })();
+
+  backupReadInFlight.set(readKey, readPromise);
   try {
-    return { backup: JSON.parse(raw), chunkCount };
-  } catch {
-    throw new Error('No se pudo interpretar la copia de Firebase de esta boda.');
+    return await readPromise;
+  } finally {
+    if (backupReadInFlight.get(readKey) === readPromise) backupReadInFlight.delete(readKey);
   }
 }
 
