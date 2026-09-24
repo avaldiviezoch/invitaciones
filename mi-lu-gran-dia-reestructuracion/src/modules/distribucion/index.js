@@ -881,6 +881,7 @@ async function mountDistribucion(context) {
       clearSelection();
       dirty = snapshot.dirty === true;
       updateSaveState();
+      refreshSpatialConflicts();
     };
 
     const undoEdit = () => {
@@ -897,9 +898,31 @@ async function mountDistribucion(context) {
       updateHistoryState();
     };
 
+    const refreshSpatialConflicts = () => {
+      const tableShapes = layout.items.map((item) => {
+        const tableId = escapeText(item.table?.id);
+        return { tableId, shape: spatialShapeForTable(item.table, placementState.get(tableId), item.geometry) };
+      });
+      const elementShapes = physicalElements.map((element) => ({
+        element,
+        shape: spatialShapeForElement(element)
+      })).filter((entry) => entry.shape);
+
+      world.querySelectorAll('.distribution-table,.distribution-element').forEach((node) => node.classList.remove('has-spatial-conflict'));
+
+      tableShapes.forEach((tableEntry) => {
+        elementShapes.forEach((elementEntry) => {
+          if (!spatialShapesIntersect(tableEntry.shape, elementEntry.shape)) return;
+          world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableEntry.tableId)}"]`)?.classList.add('has-spatial-conflict');
+          world.querySelector(`.distribution-element[data-element-id="${CSS.escape(elementEntry.element.id)}"]`)?.classList.add('has-spatial-conflict');
+        });
+      });
+    };
+
     const markDirty = () => {
       dirty = true;
       updateSaveState();
+      refreshSpatialConflicts();
     };
 
     const createElement = (type, x, y, rotation = 0) => {
@@ -1482,6 +1505,7 @@ async function mountDistribucion(context) {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
 
+    refreshSpatialConflicts();
     updateSaveState();
     if (!dirty && canEdit && storedState) status.textContent = `Distribución guardada · ${seated} invitados ubicados`;
   } catch (error) {
