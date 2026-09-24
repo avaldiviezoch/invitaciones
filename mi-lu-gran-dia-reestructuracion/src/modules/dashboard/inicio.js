@@ -574,23 +574,23 @@ const pendingModuleMounts = new Map();
 
 const MODULES = Object.freeze({
   checklist: {
-    load: () => import('../checklist/index.js?v=15'),
+    load: () => import('../checklist/index.js?v=16'),
     mount: 'mountChecklist'
   },
   presupuesto: {
-    load: () => import('../presupuesto/index.js?v=11'),
+    load: () => import('../presupuesto/index.js?v=12'),
     mount: 'mountPresupuesto'
   },
   proveedores: {
-    load: () => import('../proveedores/index.js?v=5'),
+    load: () => import('../proveedores/index.js?v=6'),
     mount: 'mountProveedores'
   },
   invitados: {
-    load: () => import('../invitados/index.js?v=27'),
+    load: () => import('../invitados/index.js?v=28'),
     mount: 'mountInvitados'
   },
   distribucion: {
-    load: () => import('../distribucion/index.js?v=76'),
+    load: () => import('../distribucion/index.js?v=77'),
     mount: 'mountDistribucion'
   }
 });
@@ -634,13 +634,15 @@ async function mountModuleOnce(moduleId, context) {
     const module = await definition.load();
     const mount = module[definition.mount];
     if (typeof mount !== 'function') throw new Error(`El módulo ${moduleId} no expone ${definition.mount}.`);
-    await mount(context);
+    const mounted = await mount(context);
+    if (mounted === false) return false;
     if (moduleCacheWeddingId === weddingId) mountedModules.add(moduleId);
+    return true;
   })();
 
   pendingModuleMounts.set(moduleId, mountPromise);
   try {
-    await mountPromise;
+    return await mountPromise;
   } finally {
     if (pendingModuleMounts.get(moduleId) === mountPromise) pendingModuleMounts.delete(moduleId);
   }
