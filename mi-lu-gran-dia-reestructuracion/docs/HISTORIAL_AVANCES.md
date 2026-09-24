@@ -282,3 +282,13 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - El adaptador planner-cloud deduplica únicamente lecturas concurrentes del mismo backup de la misma boda/usuario. No conserva caché persistente ni cambia el contrato de datos.
 - Invitados y Distribución comparten esa misma lectura cuando montan simultáneamente sus datos, evitando descargar dos veces cloudSync/main y sus chunks.
 - No se modificaron Firebase, Firestore, Storage, Authentication, usuarios, documentos, claves, payloads ni datos persistentes.
+
+
+## 2026-09-24 — Recuperación del shell estable
+- Se retiró por completo la implementación experimental de header móvil + drawer que había provocado una regresión del shell.
+- HTML del workspace, bloque CSS de navegación y ciclo JS de navegación/carga fueron restaurados desde el último estado estable previo a los cambios de barra (commit 0b8fb0646a9d3bb7ab23c73ee608687c2a7dbb72).
+- Se eliminó la referencia huérfana a appMobileWeddingName, que podía interrumpir applyWeddingContext y detener la inicialización completa de la aplicación.
+- Se preservó la versión actual de Distribución mediante import versionado v76; no se restauró ni modificó su lógica funcional.
+- La capa de datos permanece restaurada a su comportamiento previo: planner-cloud.js sin deduplicación/caché añadida, Invitados y Distribución con sus imports de datos originales v4.
+- No se modificaron Firebase, Firestore, Storage, Authentication, usuarios ni datos persistentes.
+- Publicación de recuperación: dashboard CSS v40, JS v172.
