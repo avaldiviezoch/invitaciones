@@ -3,8 +3,17 @@ import { normalizeTableShape, tableSeatGeometry } from '../invitados/table-geome
 import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { setupDistributionCamera } from './camera.js?v=1';
+import {
+  DEFAULT_BACKGROUND_ID,
+  addDistributionBackground,
+  listDistributionBackgrounds,
+  loadDistributionBackground,
+  readDistributionBackgroundPreference,
+  removeDistributionBackground,
+  writeDistributionBackgroundPreference
+} from './background-catalog.js?v=1';
 
-const TEMPLATE_URL = new URL('./index.html?v=27', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=28', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -846,7 +855,7 @@ async function mountDistribucion(context) {
       }
       const wasPresentation = presentationMode;
       const referenceWasHidden = world.classList.contains('hide-reference-image');
-      if (referenceObjectUrl && !referenceWasHidden) world.classList.add('print-reference-image');
+      if (world.classList.contains('has-reference-image') && !referenceWasHidden) world.classList.add('print-reference-image');
       if (!wasPresentation) setPresentationMode(true);
       root.classList.add('is-printing-plan');
       requestAnimationFrame(() => {
@@ -1764,39 +1773,109 @@ async function mountDistribucion(context) {
       applyVisibilityLayer('hide-elements', event.currentTarget.checked, 'element');
     };
     const referenceToggle = root.querySelector('[data-distribution-show-reference]');
+    const referenceCatalog = root.querySelector('[data-distribution-reference-catalog]');
     const referenceFile = root.querySelector('[data-distribution-reference-file]');
     const referenceOpacity = root.querySelector('[data-distribution-reference-opacity]');
     const referenceRemove = root.querySelector('[data-distribution-reference-remove]');
+    const referenceScopeId = context?.weddingId || context?.id || 'default';
     let referenceObjectUrl = '';
-    const clearReferenceImage = () => {
+    let activeReferenceId = DEFAULT_BACKGROUND_ID;
+
+    const releaseReferenceObjectUrl = () => {
       if (referenceObjectUrl) URL.revokeObjectURL(referenceObjectUrl);
       referenceObjectUrl = '';
-      world.style.removeProperty('--distribution-reference-image');
-      world.classList.remove('has-reference-image');
-      referenceToggle.checked = false;
-      referenceFile.value = '';
     };
-    referenceFile.onchange = () => {
-      const file = referenceFile.files?.[0];
-      if (!file || !['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-        clearReferenceImage();
-        if (file) status.textContent = 'El fondo debe ser PNG, JPG o WebP';
-        return;
-      }
-      if (referenceObjectUrl) URL.revokeObjectURL(referenceObjectUrl);
-      referenceObjectUrl = URL.createObjectURL(file);
-      world.style.setProperty('--distribution-reference-image', `url("${referenceObjectUrl}")`);
+    const persistReferencePreference = () => writeDistributionBackgroundPreference(referenceScopeId, {
+      backgroundId: activeReferenceId,
+      visible: referenceToggle.checked,
+      opacity: Number(referenceOpacity.value) / 100
+    }).catch(() => {
+      status.textContent = 'El plano sigue visible, pero el navegador no pudo guardar esta preferencia local';
+    });
+    const applyReferenceBackground = async (id) => {
+      const background = await loadDistributionBackground(id);
+      if (!root.isConnected) return;
+      releaseReferenceObjectUrl();
+      activeReferenceId = background.id;
+      const source = background.blob ? URL.createObjectURL(background.blob) : background.source;
+      if (background.blob) referenceObjectUrl = source;
+      world.style.setProperty('--distribution-reference-image', `url("${source}")`);
       world.classList.add('has-reference-image');
-      referenceToggle.checked = true;
-      status.textContent = 'Fondo de referencia cargado solo para esta sesión';
+      referenceCatalog.value = activeReferenceId;
+      referenceRemove.disabled = background.builtin;
+      referenceRemove.textContent = background.builtin ? 'Casa Acapulco · incluido' : 'Eliminar plano personalizado';
+    };
+    const refreshReferenceCatalog = async (selectedId = activeReferenceId) => {
+      const backgrounds = await listDistributionBackgrounds();
+      if (!root.isConnected) return;
+      referenceCatalog.replaceChildren(...backgrounds.map((background) => {
+        const option = document.createElement('option');
+        option.value = background.id;
+        option.textContent = background.builtin ? `${background.name} · por defecto` : background.name;
+        return option;
+      }));
+      const available = backgrounds.some((background) => background.id === selectedId);
+      await applyReferenceBackground(available ? selectedId : DEFAULT_BACKGROUND_ID);
+    };
+
+    const referencePreference = await readDistributionBackgroundPreference(referenceScopeId);
+    if (epoch !== mountEpoch || !root.isConnected) return;
+    referenceToggle.checked = referencePreference.visible;
+    referenceOpacity.value = String(Math.round(referencePreference.opacity * 100));
+    world.style.setProperty('--distribution-reference-opacity', String(referencePreference.opacity));
+    world.classList.toggle('hide-reference-image', !referencePreference.visible);
+    await refreshReferenceCatalog(referencePreference.backgroundId);
+    if (epoch !== mountEpoch || !root.isConnected) return;
+
+    referenceCatalog.onchange = async () => {
+      try {
+        await applyReferenceBackground(referenceCatalog.value);
+        referenceToggle.checked = true;
+        world.classList.remove('hide-reference-image');
+        await persistReferencePreference();
+        status.textContent = activeReferenceId === DEFAULT_BACKGROUND_ID ? 'Casa Acapulco seleccionado como plano base' : 'Plano local seleccionado';
+      } catch (_) {
+        status.textContent = 'No se pudo abrir el plano guardado en este navegador';
+      }
+    };
+    referenceFile.onchange = async () => {
+      const file = referenceFile.files?.[0];
+      if (!file) return;
+      try {
+        const background = await addDistributionBackground(file);
+        if (!root.isConnected) return;
+        await refreshReferenceCatalog(background.id);
+        referenceToggle.checked = true;
+        world.classList.remove('hide-reference-image');
+        await persistReferencePreference();
+        status.textContent = 'Plano agregado al catálogo local de este navegador';
+      } catch (error) {
+        status.textContent = error?.message || 'No se pudo guardar el plano en este navegador';
+      } finally {
+        referenceFile.value = '';
+      }
     };
     referenceToggle.onchange = () => {
       world.classList.toggle('hide-reference-image', !referenceToggle.checked);
+      void persistReferencePreference();
     };
     referenceOpacity.oninput = () => {
       world.style.setProperty('--distribution-reference-opacity', String(Math.max(0.1, Math.min(1, Number(referenceOpacity.value) / 100))));
+      void persistReferencePreference();
     };
-    referenceRemove.onclick = clearReferenceImage;
+    referenceRemove.onclick = async () => {
+      if (activeReferenceId === DEFAULT_BACKGROUND_ID) return;
+      try {
+        await removeDistributionBackground(activeReferenceId);
+        await refreshReferenceCatalog(DEFAULT_BACKGROUND_ID);
+        referenceToggle.checked = true;
+        world.classList.remove('hide-reference-image');
+        await persistReferencePreference();
+        status.textContent = 'Plano personalizado eliminado. Casa Acapulco vuelve a ser el plano base';
+      } catch (_) {
+        status.textContent = 'No se pudo eliminar el plano local';
+      }
+    };
     root.querySelector('[data-distribution-rotate-left]').onclick = () => rotateSelected(-ROTATION_STEP);
     root.querySelector('[data-distribution-rotate-right]').onclick = () => rotateSelected(ROTATION_STEP);
     root.querySelector('[data-distribution-bring-front]').onclick = () => updateElementLayer(1);
