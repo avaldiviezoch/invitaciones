@@ -128,3 +128,13 @@ HITO SHELL MÓVIL — CORRECCIÓN ESTRUCTURAL:
 - Distribución publicada como v75, con plantilla versionada cacheable.
 - planner-cloud comparte lecturas concurrentes idénticas sin persistir caché ni alterar datos.
 - Sin cambios de esquema, Firebase, Firestore, Storage, usuarios ni contratos persistentes.
+
+
+HITO 2026-09-24 — RECONSTRUCCIÓN LIMPIA DEL SHELL MÓVIL:
+- Se descartó la implementación incremental anterior del shell móvil.
+- Se reconstruyó el bloque de navegación responsive como una sola implementación: workspace fijo, header superior, drawer superpuesto y stage que ocupa exactamente el espacio restante.
+- No se usan excepciones por iOS, orientación, pointer, 100dvh del workspace, barra lateral plegable ni botones flotantes.
+- El loader no usa temporizadores de salida: se oculta cuando termina el montaje del módulo.
+- Se revirtieron íntegramente los cambios realizados por este trabajo en planner-cloud.js, invitados-data.js y los imports/lectura de Distribución. La capa de datos queda con su comportamiento previo.
+- Firebase, Firestore, Storage, Authentication, usuarios, claves, documentos y payloads no forman parte del shell y no deben modificarse para resolver responsive.
+- Publicación del shell: dashboard CSS v39 / JS v171.
