@@ -52,6 +52,39 @@ function normalizeRotation(value) {
   return ((number % 360) + 360) % 360;
 }
 
+function polygonArea(points) {
+  if (!Array.isArray(points) || points.length < 3) return 0;
+  const twiceArea = points.reduce((sum, point, index) => {
+    const next = points[(index + 1) % points.length];
+    return sum + point.x * next.y - next.x * point.y;
+  }, 0);
+  return Math.abs(twiceArea) / 2;
+}
+
+function segmentsIntersect(a, b, c, d) {
+  const cross = (p, q, r) => (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x);
+  const abC = cross(a, b, c);
+  const abD = cross(a, b, d);
+  const cdA = cross(c, d, a);
+  const cdB = cross(c, d, b);
+  return abC * abD < 0 && cdA * cdB < 0;
+}
+
+function polygonSelfIntersects(points) {
+  if (!Array.isArray(points) || points.length < 4) return false;
+  for (let i = 0; i < points.length; i += 1) {
+    const a = points[i];
+    const b = points[(i + 1) % points.length];
+    for (let j = i + 1; j < points.length; j += 1) {
+      if (j === i || j === i + 1 || (i === 0 && j === points.length - 1)) continue;
+      const c = points[j];
+      const d = points[(j + 1) % points.length];
+      if (segmentsIntersect(a, b, c, d)) return true;
+    }
+  }
+  return false;
+}
+
 function capacityOf(table) {
   const seats = Array.isArray(table?.seats) ? table.seats.length : 0;
   const declared = Number(table?.capacity || 0);
@@ -190,7 +223,12 @@ function parseDistributionState(value) {
       const points = type === 'zone' && Array.isArray(element?.points)
         ? element.points.map((point) => ({ x: finiteNumber(point?.x), y: finiteNumber(point?.y) }))
         : null;
-      const validPoints = points === null || (points.length >= 3 && points.every((point) => point.x !== null && point.y !== null));
+      const validPoints = points === null || (
+        points.length >= 3
+        && points.every((point) => point.x !== null && point.y !== null)
+        && polygonArea(points) >= 1
+        && !polygonSelfIntersects(points)
+      );
       if (!id || seenElements.has(id) || !PHYSICAL_ELEMENT_TYPES[type] || x === null || y === null || rotation === null || width === null || height === null || width < PIXELS_PER_METER * MIN_ELEMENT_METERS || height < PIXELS_PER_METER * MIN_ELEMENT_METERS || width > PIXELS_PER_METER * MAX_ELEMENT_METERS || height > PIXELS_PER_METER * MAX_ELEMENT_METERS || !validPoints) {
         throw new Error('La distribución guardada contiene elementos físicos no válidos. No se modificó ningún dato.');
       }
@@ -354,7 +392,10 @@ function renderElementInspector(root, element) {
   root.querySelector('[data-distribution-selection-empty]').hidden = true;
   root.querySelector('[data-distribution-selection]').hidden = false;
   root.querySelector('[data-distribution-selected-name]').textContent = definition.label;
-  root.querySelector('[data-distribution-selected-meta]').textContent = 'Elemento físico del plano';
+  const areaMeters = Array.isArray(element.points) ? polygonArea(element.points) / (PIXELS_PER_METER ** 2) : null;
+  root.querySelector('[data-distribution-selected-meta]').textContent = areaMeters === null
+    ? 'Elemento físico del plano'
+    : `Área libre · ${areaMeters.toFixed(2)} m²`;
   const rotationOutput = root.querySelector('[data-distribution-selected-rotation]');
   rotationOutput.value = `${normalizeRotation(element.rotation)}°`;
   rotationOutput.textContent = rotationOutput.value;
@@ -976,6 +1017,10 @@ async function mountDistribucion(context) {
 
     const finishDrawingArea = () => {
       if (drawingPoints.length < 3) return;
+      if (polygonSelfIntersects(drawingPoints) || polygonArea(drawingPoints) < 1) {
+        measureHint.textContent = 'El área se cruza o no tiene superficie válida';
+        return;
+      }
       const xs = drawingPoints.map((point) => point.x);
       const ys = drawingPoints.map((point) => point.y);
       const minX = Math.min(...xs);
