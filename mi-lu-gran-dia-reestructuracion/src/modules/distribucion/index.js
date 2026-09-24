@@ -1,10 +1,15 @@
 import { loadInvitadosSnapshot } from '../invitados/invitados-data.js?v=4';
 import { normalizeTableShape, tableSeatGeometry } from '../invitados/table-geometry.js?v=1';
+import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
+import { weddingCapabilities } from '../../core/app/permissions.js';
 
-const TEMPLATE_URL = new URL('./index.html?v=2', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=3', import.meta.url);
+const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
+const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const MIN_ZOOM = 0.45;
 const MAX_ZOOM = 1.6;
 const ZOOM_STEP = 0.12;
+const ROTATION_STEP = 15;
 const TABLE_GAP = 72;
 const WORLD_PADDING = 90;
 
@@ -21,6 +26,16 @@ function template() {
 
 function escapeText(value) {
   return String(value ?? '').trim();
+}
+
+function finiteNumber(value) {
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
+}
+
+function normalizeRotation(value) {
+  const number = finiteNumber(value) ?? 0;
+  return ((number % 360) + 360) % 360;
 }
 
 function capacityOf(table) {
@@ -77,8 +92,84 @@ function projectedLayout(tables) {
   };
 }
 
-function renderTable(item, guestIndex) {
-  const { table, index, capacity, geometry, x, y } = item;
+function parseDistributionState(value) {
+  if (value === null || value === undefined) return null;
+  if (!value || typeof value !== 'object' || Array.isArray(value) || Number(value.version) !== 1) {
+    throw new Error('La distribución guardada tiene un formato no reconocido. No se modificó ningún dato.');
+  }
+  if (!Array.isArray(value.proposals)) {
+    throw new Error('La distribución guardada no contiene propuestas reconocibles. No se modificó ningún dato.');
+  }
+  const proposals = value.proposals.map((proposal) => {
+    if (!proposal || typeof proposal !== 'object' || !escapeText(proposal.id) || !Array.isArray(proposal.placements)) {
+      throw new Error('La distribución guardada contiene una propuesta no válida. No se modificó ningún dato.');
+    }
+    const seen = new Set();
+    const placements = proposal.placements.map((placement) => {
+      const tableId = escapeText(placement?.tableId);
+      const x = finiteNumber(placement?.x);
+      const y = finiteNumber(placement?.y);
+      const rotation = finiteNumber(placement?.rotation);
+      if (!tableId || x === null || y === null || rotation === null || seen.has(tableId)) {
+        throw new Error('La distribución guardada contiene posiciones no válidas. No se modificó ningún dato.');
+      }
+      seen.add(tableId);
+      return { tableId, x, y, rotation: normalizeRotation(rotation) };
+    });
+    return {
+      id: escapeText(proposal.id),
+      name: escapeText(proposal.name) || 'Propuesta',
+      placements
+    };
+  });
+  const activeProposalId = escapeText(value.activeProposalId);
+  return { version: 1, activeProposalId, proposals };
+}
+
+function activeProposalOf(state) {
+  if (!state?.proposals?.length) return null;
+  return state.proposals.find((proposal) => proposal.id === state.activeProposalId) || state.proposals[0];
+}
+
+function placementMapFor(layout, storedState) {
+  const stored = new Map((activeProposalOf(storedState)?.placements || []).map((placement) => [placement.tableId, placement]));
+  return new Map(layout.items.map((item) => {
+    const tableId = escapeText(item.table?.id);
+    const placement = stored.get(tableId);
+    return [tableId, placement
+      ? { x: placement.x, y: placement.y, rotation: placement.rotation }
+      : { x: item.x, y: item.y, rotation: 0 }];
+  }));
+}
+
+function serializeDistribution(placementState, tableIds) {
+  return {
+    version: 1,
+    activeProposalId: DEFAULT_PROPOSAL_ID,
+    proposals: [{
+      id: DEFAULT_PROPOSAL_ID,
+      name: 'Propuesta principal',
+      placements: tableIds.map((tableId) => {
+        const placement = placementState.get(tableId);
+        return {
+          tableId,
+          x: Math.round(placement.x * 100) / 100,
+          y: Math.round(placement.y * 100) / 100,
+          rotation: normalizeRotation(placement.rotation)
+        };
+      })
+    }]
+  };
+}
+
+function applyPlacement(node, placement) {
+  node.style.left = `${placement.x}px`;
+  node.style.top = `${placement.y}px`;
+  node.style.setProperty('--table-rotation', `${normalizeRotation(placement.rotation)}deg`);
+}
+
+function renderTable(item, guestIndex, placement) {
+  const { table, index, capacity, geometry } = item;
   const tableId = escapeText(table?.id);
   const seats = Array.isArray(table?.seats) ? table.seats : [];
   const node = document.createElement('article');
@@ -87,10 +178,9 @@ function renderTable(item, guestIndex) {
   node.tabIndex = 0;
   node.setAttribute('role', 'button');
   node.setAttribute('aria-label', tableName(table, index));
-  node.style.left = `${x}px`;
-  node.style.top = `${y}px`;
   node.style.width = `${geometry.visualWidth}px`;
   node.style.height = `${geometry.visualHeight}px`;
+  applyPlacement(node, placement);
 
   const surface = document.createElement('div');
   surface.className = `distribution-tabletop is-${normalizeTableShape(table?.type)}`;
@@ -123,7 +213,7 @@ function renderTable(item, guestIndex) {
   return node;
 }
 
-function setupCamera(root, world, worldSize, placementState) {
+function setupCamera(root, world, worldSize) {
   const viewport = root.querySelector('[data-distribution-viewport]');
   const zoomOutput = root.querySelector('[data-distribution-zoom]');
   let scale = 1;
@@ -180,9 +270,10 @@ function setupCamera(root, world, worldSize, placementState) {
   }, { passive: false });
 
   viewport.addEventListener('pointerdown', (event) => {
+    if (event.target.closest('.distribution-table')) return;
     pointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
     viewport.setPointerCapture(event.pointerId);
-    if (pointers.size === 1 && !event.target.closest('.distribution-table')) {
+    if (pointers.size === 1) {
       drag = { pointerId: event.pointerId, startX: event.clientX, startY: event.clientY, x, y };
       viewport.classList.add('is-panning');
     }
@@ -220,7 +311,7 @@ function setupCamera(root, world, worldSize, placementState) {
   viewport.addEventListener('pointercancel', release);
 
   requestAnimationFrame(fit);
-  return { fit };
+  return { clientDeltaToWorld: (delta) => delta / scale };
 }
 
 function renderInspector(root, table, tableIndex, guests, placement) {
@@ -232,8 +323,9 @@ function renderInspector(root, table, tableIndex, guests, placement) {
     .sort((a, b) => Number(a.seatNumber || 999) - Number(b.seatNumber || 999));
   root.querySelector('[data-distribution-selected-name]').textContent = tableName(table, tableIndex);
   root.querySelector('[data-distribution-selected-meta]').textContent = `${normalizeTableShape(table.type)} · ${capacity} sillas`;
-  root.querySelector('[data-distribution-selected-rotation]').value = `${placement.rotation}°`;
-  root.querySelector('[data-distribution-selected-rotation]').textContent = `${placement.rotation}°`;
+  const rotationOutput = root.querySelector('[data-distribution-selected-rotation]');
+  rotationOutput.value = `${normalizeRotation(placement.rotation)}°`;
+  rotationOutput.textContent = rotationOutput.value;
   root.querySelector('[data-distribution-selected-seated]').textContent = String(assigned.length);
   root.querySelector('[data-distribution-selected-free]').textContent = String(Math.max(0, capacity - assigned.length));
   const list = root.querySelector('[data-distribution-selected-guests]');
@@ -262,45 +354,167 @@ async function mountDistribucion(context) {
   if (!root) return;
   root.innerHTML = await template();
   const status = root.querySelector('[data-distribution-status]');
-  status.textContent = 'Cargando mesas…';
+  const saveButton = root.querySelector('[data-distribution-save]');
+  const canEdit = weddingCapabilities(context?.role).canEdit;
+  status.textContent = 'Cargando mesas y distribución…';
 
   try {
-    const snapshot = await loadInvitadosSnapshot(context);
+    const [snapshot, storedValue] = await Promise.all([
+      loadInvitadosSnapshot(context),
+      readPlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY)
+    ]);
     if (epoch !== mountEpoch) return;
+
+    const storedState = parseDistributionState(storedValue);
     const tables = snapshot.canonical.tables;
     const guests = snapshot.canonical.guests;
     const guestIndex = buildGuestIndex(guests);
     const layout = projectedLayout(tables);
+    const placementState = placementMapFor(layout, storedState);
+    const tableIds = tables.map((table) => escapeText(table.id)).filter(Boolean);
     const world = root.querySelector('[data-distribution-world]');
+    const tableById = new Map(tables.map((table, index) => [escapeText(table.id), { table, index }]));
+    let selectedTableId = '';
+    let dirty = false;
+    let saving = false;
+
     world.style.width = `${layout.width}px`;
     world.style.height = `${layout.height}px`;
     root.querySelector('[data-distribution-table-count]').textContent = String(tables.length);
     root.querySelector('[data-distribution-empty]').hidden = tables.length > 0;
 
-    layout.items.forEach((item) => world.append(renderTable(item, guestIndex)));
-
-    world.addEventListener('click', (event) => {
-      const node = event.target.closest('.distribution-table');
-      if (!node) return;
-      world.querySelectorAll('.distribution-table.is-selected').forEach((item) => item.classList.remove('is-selected'));
-      node.classList.add('is-selected');
-      const index = tables.findIndex((table) => escapeText(table.id) === node.dataset.tableId);
-      if (index >= 0) renderInspector(root, tables[index], index, guests);
+    layout.items.forEach((item) => {
+      const tableId = escapeText(item.table?.id);
+      if (!tableId) return;
+      world.append(renderTable(item, guestIndex, placementState.get(tableId)));
     });
+
+    const camera = setupCamera(root, world, layout);
+
+    const updateSaveState = () => {
+      saveButton.disabled = !canEdit || !dirty || saving || !tables.length;
+      saveButton.textContent = saving ? 'Guardando…' : 'Guardar distribución';
+      if (!canEdit) status.textContent = 'Solo lectura · la distribución no puede modificarse';
+      else if (saving) status.textContent = 'Guardando distribución…';
+      else if (dirty) status.textContent = 'Cambios sin guardar';
+      else status.textContent = storedState ? 'Distribución guardada' : 'Distribución proyectada · aún sin guardar';
+    };
+
+    const selectTable = (tableId) => {
+      const entry = tableById.get(tableId);
+      const placement = placementState.get(tableId);
+      if (!entry || !placement) return;
+      selectedTableId = tableId;
+      world.querySelectorAll('.distribution-table.is-selected').forEach((node) => {
+        node.classList.toggle('is-selected', node.dataset.tableId === tableId);
+      });
+      renderInspector(root, entry.table, entry.index, guests, placement);
+    };
+
+    const markDirty = () => {
+      dirty = true;
+      updateSaveState();
+    };
+
+    world.querySelectorAll('.distribution-table').forEach((node) => {
+      let move = null;
+      let moved = false;
+
+      node.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0 || !canEdit) return;
+        event.stopPropagation();
+        const placement = placementState.get(node.dataset.tableId);
+        if (!placement) return;
+        node.setPointerCapture(event.pointerId);
+        node.classList.add('is-moving');
+        move = {
+          pointerId: event.pointerId,
+          clientX: event.clientX,
+          clientY: event.clientY,
+          x: placement.x,
+          y: placement.y
+        };
+        moved = false;
+        selectTable(node.dataset.tableId);
+      });
+
+      node.addEventListener('pointermove', (event) => {
+        if (!move || move.pointerId !== event.pointerId) return;
+        const dx = camera.clientDeltaToWorld(event.clientX - move.clientX);
+        const dy = camera.clientDeltaToWorld(event.clientY - move.clientY);
+        if (Math.abs(dx) + Math.abs(dy) > 1) moved = true;
+        const placement = placementState.get(node.dataset.tableId);
+        placement.x = move.x + dx;
+        placement.y = move.y + dy;
+        applyPlacement(node, placement);
+      });
+
+      const finishMove = (event) => {
+        if (!move || move.pointerId !== event.pointerId) return;
+        node.classList.remove('is-moving');
+        move = null;
+        if (moved) markDirty();
+      };
+      node.addEventListener('pointerup', finishMove);
+      node.addEventListener('pointercancel', finishMove);
+
+      node.addEventListener('click', (event) => {
+        event.stopPropagation();
+        if (moved) {
+          moved = false;
+          return;
+        }
+        selectTable(node.dataset.tableId);
+      });
+    });
+
     world.addEventListener('keydown', (event) => {
       if (!['Enter', ' '].includes(event.key)) return;
       const node = event.target.closest('.distribution-table');
       if (!node) return;
       event.preventDefault();
-      node.click();
+      selectTable(node.dataset.tableId);
     });
 
-    setupCamera(root, world, layout);
+    const rotateSelected = (delta) => {
+      if (!canEdit || !selectedTableId) return;
+      const placement = placementState.get(selectedTableId);
+      const node = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(selectedTableId)}"]`);
+      const entry = tableById.get(selectedTableId);
+      if (!placement || !node || !entry) return;
+      placement.rotation = normalizeRotation(placement.rotation + delta);
+      applyPlacement(node, placement);
+      renderInspector(root, entry.table, entry.index, guests, placement);
+      markDirty();
+    };
+
+    root.querySelector('[data-distribution-rotate-left]').onclick = () => rotateSelected(-ROTATION_STEP);
+    root.querySelector('[data-distribution-rotate-right]').onclick = () => rotateSelected(ROTATION_STEP);
+
+    saveButton.onclick = async () => {
+      if (!canEdit || !dirty || saving) return;
+      saving = true;
+      updateSaveState();
+      try {
+        await writePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, serializeDistribution(placementState, tableIds));
+        dirty = false;
+        status.textContent = 'Distribución guardada';
+      } catch (error) {
+        console.error('No se pudo guardar Distribución:', error);
+        status.textContent = error?.message || 'No se pudo guardar la distribución.';
+      } finally {
+        saving = false;
+        updateSaveState();
+      }
+    };
+
     const seated = guests.filter((guest) => escapeText(guest.tableId)).length;
-    status.textContent = `Lectura segura · ${seated} invitados ubicados`;
+    updateSaveState();
+    if (!dirty && canEdit && storedState) status.textContent = `Distribución guardada · ${seated} invitados ubicados`;
   } catch (error) {
     console.error('No se pudo cargar Distribución:', error);
     status.textContent = error?.message || 'No se pudo cargar la distribución.';
+    saveButton.disabled = true;
     root.querySelector('[data-distribution-empty]').hidden = false;
     root.querySelector('[data-distribution-empty] strong').textContent = 'No se pudo cargar el plano';
     root.querySelector('[data-distribution-empty] span').textContent = 'No se modificó ningún dato.';
