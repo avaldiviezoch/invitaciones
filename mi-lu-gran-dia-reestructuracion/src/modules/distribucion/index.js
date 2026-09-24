@@ -877,8 +877,10 @@ async function mountDistribucion(context) {
     root.querySelector('[data-distribution-height]').onchange = (event) => updateSelectedDimension('height', event.currentTarget);
 
     const measureButton = root.querySelector('[data-distribution-measure]');
+    const clearMeasureButton = root.querySelector('[data-distribution-clear-measure]');
     const measureHint = root.querySelector('[data-distribution-measure-hint]');
     const measureLayer = root.querySelector('[data-distribution-measure-layer]');
+    const coordsOutput = root.querySelector('[data-distribution-coords]');
     let measureStart = null;
     let measuring = false;
 
@@ -889,6 +891,18 @@ async function mountDistribucion(context) {
       measureButton.textContent = 'Medir distancia';
       measureHint.hidden = true;
     };
+
+    clearMeasureButton.onclick = () => {
+      measureLayer.replaceChildren();
+      stopMeasuring();
+    };
+
+    viewport.addEventListener('pointermove', (event) => {
+      if (event.pointerType === 'touch') return;
+      const point = camera.clientPointToWorld(event.clientX, event.clientY);
+      coordsOutput.value = `x ${(point.x / PIXELS_PER_METER).toFixed(2)} m · y ${(point.y / PIXELS_PER_METER).toFixed(2)} m`;
+      coordsOutput.textContent = coordsOutput.value;
+    });
 
     measureButton.onclick = () => {
       if (measuring) {
