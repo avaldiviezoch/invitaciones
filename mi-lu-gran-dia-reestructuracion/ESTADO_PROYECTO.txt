@@ -108,3 +108,11 @@ CORRECCIÓN DISTRIBUCIÓN — ESCALA FÍSICA Y PLANO BASE:
 - Preferencia de visibilidad, opacidad y posición del plano sigue siendo exclusivamente local en IndexedDB.
 - Sin migración del esquema planificador_bodas_distribucion_v1 ni cambios en Firebase/Firestore/Storage.
 - Assets: Distribución JS v63, plantilla v30, cámara v2, catálogo de planos v2, CSS v19, dashboard raíz v155.
+
+
+HITO SHELL MÓVIL — NAVEGACIÓN PLEGABLE:
+- La barra lateral móvil permanece abierta por defecto y puede recogerse desde la propia barra.
+- Cerrada, el módulo recupera el ancho reservado de navegación y usa márgenes laterales simétricos.
+- Un botón flotante translúcido inferior izquierdo restaura la barra sin reservar espacio del layout.
+- Distribución reencaja su cámara ante cambios del tamaño real del visor mediante ResizeObserver.
+- Estado únicamente visual y en memoria; sin cambios en Firebase, Firestore, Storage ni persistencia local.
