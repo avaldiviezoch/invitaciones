@@ -453,6 +453,13 @@ function parseDistributionState(value) {
       elements
     };
   });
+  const proposalIds = new Set();
+  proposals.forEach((proposal) => {
+    if (proposalIds.has(proposal.id)) {
+      throw new Error('La distribución guardada contiene propuestas con identificadores duplicados. No se modificó ningún dato.');
+    }
+    proposalIds.add(proposal.id);
+  });
   const activeProposalId = escapeText(value.activeProposalId);
   return { version: 1, activeProposalId, proposals };
 }
@@ -856,7 +863,25 @@ async function mountDistribucion(context) {
       if (index < 0) return;
       proposalState[index] = serializeProposal(activeProposalId, proposalState[index].name, placementState, tableIds, physicalElements);
     };
-    const proposalId = () => `proposal_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+    const proposalId = () => {
+      let id = '';
+      do {
+        id = `proposal_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 7)}`;
+      } while (proposalState.some((proposal) => proposal.id === id));
+      return id;
+    };
+    const elementIdsForProposal = (proposal) => new Set((proposal?.elements || []).map((element) => escapeText(element.id)).filter(Boolean));
+    const duplicateElementId = (sourceId, proposalIdValue, usedIds) => {
+      const base = `${escapeText(sourceId) || 'element'}_${proposalIdValue}`;
+      let id = base;
+      let suffix = 2;
+      while (usedIds.has(id)) {
+        id = `${base}_${suffix}`;
+        suffix += 1;
+      }
+      usedIds.add(id);
+      return id;
+    };
     const switchProposal = (nextId) => {
       if (dirty || saving || canonicalChanged) {
         proposalSelect.value = activeProposalId;
@@ -910,7 +935,8 @@ async function mountDistribucion(context) {
       const source = proposalState.find((proposal) => proposal.id === activeProposalId);
       if (!source) return;
       const id = proposalId();
-      const copy = { ...source, id, name: `${source.name} · copia`, placements: source.placements.map((placement) => ({ ...placement })), elements: source.elements.map((element) => ({ ...element, id: `${element.id}_${id}`, points: Array.isArray(element.points) ? element.points.map((point) => ({ ...point })) : null })) };
+      const usedElementIds = elementIdsForProposal(source);
+      const copy = { ...source, id, name: `${source.name} · copia`, placements: source.placements.map((placement) => ({ ...placement })), elements: source.elements.map((element) => ({ ...element, id: duplicateElementId(element.id, id, usedElementIds), points: Array.isArray(element.points) ? element.points.map((point) => ({ ...point })) : null })) };
       proposalState.push(copy);
       activeProposalId = id;
       refreshProposalControls();
@@ -1841,6 +1867,9 @@ async function mountDistribucion(context) {
           status.textContent = 'Invitados o Mesas cambiaron durante el guardado · vuelve a abrir Distribución antes de continuar';
         } else {
           dirty = false;
+          undoStack.length = 0;
+          redoStack.length = 0;
+          updateHistoryState();
           status.textContent = 'Distribución guardada';
         }
       } catch (error) {
