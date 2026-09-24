@@ -84,3 +84,14 @@ HITO DISTRIBUCIÓN — FASE 5R CERRADA:
 - Barrido final: sin Firestore directo, sin localStorage/sessionStorage/IndexedDB directo, sin polling/MutationObserver/postMessage/sharedTableId y sin !important.
 - No se modificaron Firebase Rules, Storage, Authentication, usuarios, esquema persistente ni el repositorio Wedding.
 - Próximo: Fase 5S — monkey test y regresión funcional final. Todavía no ejecutada.
+
+
+EXTENSIÓN DISTRIBUCIÓN — CATÁLOGO LOCAL DE PLANOS:
+- Casa Acapulco es el plano del recinto incluido y seleccionado por defecto.
+- Se pueden agregar planos PNG/JPG/WebP y conservarlos únicamente en IndexedDB del navegador.
+- Selección, visibilidad y opacidad del fondo son preferencias locales; los planos personalizados pueden eliminarse y Casa Acapulco no.
+- IndexedDB queda autorizado solo para esta responsabilidad visual en background-catalog.js; no almacena mesas, sillas, invitados, propuestas ni datos canónicos.
+- El esquema planificador_bodas_distribucion_v1 permanece en version: 1 y no contiene imágenes.
+- Sin cambios en Firebase, Firestore, Storage, Authentication ni usuarios.
+- Assets actuales: Distribución JS v53, CSS v17, dashboard raíz v145.
+- Fase 5S sigue pendiente.
