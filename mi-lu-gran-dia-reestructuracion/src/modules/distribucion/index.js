@@ -1,5 +1,5 @@
 import { loadInvitadosSnapshot } from '../invitados/invitados-data.js?v=4';
-import { normalizeTableShape, tableSeatGeometry } from '../invitados/table-geometry.js?v=1';
+import { normalizeTableShape, tableSeatGeometry } from '../invitados/table-geometry.js?v=4';
 import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 
