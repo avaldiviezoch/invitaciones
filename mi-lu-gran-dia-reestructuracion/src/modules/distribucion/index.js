@@ -570,6 +570,10 @@ function renderPhysicalElement(element) {
     polygon.append(shape);
     node.append(polygon);
   }
+  const visual = document.createElement('span');
+  visual.className = 'distribution-element-visual';
+  visual.setAttribute('aria-hidden', 'true');
+  node.append(visual);
   const label = document.createElement('strong');
   label.textContent = definition.label;
   node.append(label);
