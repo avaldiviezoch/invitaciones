@@ -136,3 +136,14 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Barrido estático de cierre: 0 Firestore directo, 0 localStorage/sessionStorage/IndexedDB directo, 0 polling, 0 MutationObserver, 0 postMessage, 0 `sharedTableId` legacy y 0 `!important`; los dos listeners globales del módulo tienen sus dos removals correspondientes.
 - No se modificaron reglas de Firestore, Storage, Authentication, usuarios, esquema de persistencia ni el repositorio `Wedding`.
 - Fase 5R cerrada. La siguiente fase es 5S: monkey test y regresión funcional final; esas pruebas todavía no forman parte de este cierre.
+
+
+## 2026-09-24 — Distribución: catálogo local de planos antes de Fase 5S
+- Se incorporó un catálogo de planos del recinto como extensión posterior al cierre arquitectónico 5R y previa a la regresión 5S.
+- Casa Acapulco queda incluido por defecto en la aplicación como plano base de referencia y no puede eliminarse.
+- El usuario puede agregar planos PNG/JPG/WebP, seleccionarlos, controlar visibilidad/opacidad y eliminar únicamente los personalizados.
+- Los planos personalizados y la preferencia de fondo se guardan exclusivamente en IndexedDB del navegador. Esta excepción está limitada a `background-catalog.js`; no se usa para mesas, sillas, invitados, asignaciones, propuestas ni geometría persistente.
+- No se incorporaron imágenes al payload `planificador_bodas_distribucion_v1`; su esquema continúa en `version: 1`.
+- No se modificaron Firebase, Firestore, Storage, Authentication, usuarios ni datos canónicos.
+- Si IndexedDB no está disponible, Casa Acapulco continúa disponible como fondo incluido y el módulo no intenta migrar datos a otro almacenamiento.
+- Fase 5S continúa pendiente para probar el conjunto completo, incluido catálogo, recarga, selección local y fallback a Casa Acapulco.
