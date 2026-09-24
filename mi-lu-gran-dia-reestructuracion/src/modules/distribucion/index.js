@@ -872,9 +872,16 @@ async function mountDistribucion(context) {
       world.querySelectorAll('.distribution-table,.distribution-element').forEach((node) => node.remove());
       layout.items.forEach((item) => {
         const tableId = escapeText(item.table?.id);
-        if (tableId) world.append(renderTable(item, guestIndex, placementState.get(tableId)));
+        if (!tableId) return;
+        const node = renderTable(item, guestIndex, placementState.get(tableId));
+        world.append(node);
+        bindTableInteraction(node);
       });
-      physicalElements.forEach((element) => world.append(renderPhysicalElement(element)));
+      physicalElements.forEach((element) => {
+        const node = renderPhysicalElement(element);
+        world.append(node);
+        bindElementInteraction(node, element);
+      });
       clearSelection();
       undoStack.length = 0; redoStack.length = 0; updateHistoryState();
       refreshProposalControls();
@@ -1288,7 +1295,7 @@ async function mountDistribucion(context) {
       clearGuestDropState();
     });
 
-    world.querySelectorAll('.distribution-table').forEach((node) => {
+    const bindTableInteraction = (node) => {
       let move = null;
       let moved = false;
 
@@ -1346,7 +1353,9 @@ async function mountDistribucion(context) {
         }
         selectTable(node.dataset.tableId);
       });
-    });
+    };
+
+    world.querySelectorAll('.distribution-table').forEach(bindTableInteraction);
 
     world.addEventListener('keydown', (event) => {
       const node = event.target.closest('.distribution-table');
