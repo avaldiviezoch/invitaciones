@@ -794,34 +794,65 @@ function refreshElementGeometryNode(node, element) {
   }
 }
 
-function setTableOnlyInspectorControls(root, visible) {
-  root.querySelector('[data-distribution-table-shape-control]').hidden = !visible;
-  root.querySelector('[data-distribution-table-dimensions]').hidden = !visible;
-  root.querySelector('[data-distribution-table-stats]').hidden = !visible;
-  root.querySelector('[data-distribution-selected-guests]').hidden = !visible;
+const INSPECTOR_SECTIONS = Object.freeze({
+  table: Object.freeze([
+    '[data-distribution-table-shape-control]',
+    '[data-distribution-table-dimensions]',
+    '[data-distribution-table-stats]',
+    '[data-distribution-selected-guests]'
+  ]),
+  element: Object.freeze([
+    '[data-distribution-element-note]',
+    '[data-distribution-dimensions]',
+    '[data-distribution-element-actions]'
+  ]),
+  area: Object.freeze([
+    '[data-distribution-polygon-stats]',
+    '[data-distribution-polygon-style]'
+  ])
+});
+
+function setInspectorMode(root, mode = 'empty') {
+  const selection = root.querySelector('[data-distribution-selection]');
+  const empty = root.querySelector('[data-distribution-selection-empty]');
+  selection.hidden = mode === 'empty';
+  empty.hidden = mode !== 'empty';
+
+  Object.values(INSPECTOR_SECTIONS).flat().forEach((selector) => {
+    root.querySelector(selector).hidden = true;
+  });
+
+  if (mode === 'table') {
+    INSPECTOR_SECTIONS.table.forEach((selector) => {
+      root.querySelector(selector).hidden = false;
+    });
+  }
+  if (mode === 'element' || mode === 'area') {
+    root.querySelector('[data-distribution-element-note]').hidden = false;
+    root.querySelector('[data-distribution-element-actions]').hidden = false;
+  }
+  if (mode === 'area') {
+    INSPECTOR_SECTIONS.area.forEach((selector) => {
+      root.querySelector(selector).hidden = false;
+    });
+  }
 }
 
 function renderElementInspector(root, element) {
-  setTableOnlyInspectorControls(root, false);
   const definition = getElementCatalogItem(element);
-  root.querySelector('[data-distribution-selection-empty]').hidden = true;
-  root.querySelector('[data-distribution-selection]').hidden = false;
+  const isPolygonArea = element.type === 'area';
+  setInspectorMode(root, isPolygonArea ? 'area' : 'element');
   root.querySelector('[data-distribution-selected-name]').textContent = definition.label;
   const widthMeters = element.width / PIXELS_PER_METER;
   const heightMeters = element.height / PIXELS_PER_METER;
   const areaMeters = Array.isArray(element.points) ? polygonArea(element.points) / (PIXELS_PER_METER ** 2) : null;
   const perimeterMeters = Array.isArray(element.points) ? polygonPerimeter(element.points) / PIXELS_PER_METER : null;
-  const isPolygonArea = element.type === 'area';
   root.querySelector('[data-distribution-selected-meta]').textContent = areaMeters === null
     ? `${widthMeters.toFixed(2)} × ${heightMeters.toFixed(2)} m`
     : `${widthMeters.toFixed(2)} × ${heightMeters.toFixed(2)} m · ${areaMeters.toFixed(2)} m²`;
   const rotationOutput = root.querySelector('[data-distribution-selected-rotation]');
   rotationOutput.value = `${normalizeRotation(element.rotation)}°`;
   rotationOutput.textContent = rotationOutput.value;
-  const polygonStats = root.querySelector('[data-distribution-polygon-stats]');
-  const polygonStyle = root.querySelector('[data-distribution-polygon-style]');
-  polygonStats.hidden = !isPolygonArea;
-  polygonStyle.hidden = !isPolygonArea;
   if (isPolygonArea) {
     root.querySelector('[data-distribution-polygon-area]').textContent = `${areaMeters.toFixed(2)} m²`;
     root.querySelector('[data-distribution-polygon-perimeter]').textContent = `${perimeterMeters.toFixed(2)} m`;
@@ -830,8 +861,6 @@ function renderElementInspector(root, element) {
     root.querySelector('[data-distribution-polygon-transparency-value]').value = `${element.transparency ?? 45}%`;
     root.querySelector('[data-distribution-polygon-transparency-value]').textContent = `${element.transparency ?? 45}%`;
   }
-  root.querySelector('[data-distribution-element-note]').hidden = false;
-  root.querySelector('[data-distribution-element-actions]').hidden = false;
   const capabilities = elementCapabilities(element);
   root.querySelector('[data-distribution-dimensions]').hidden = !capabilities.resizable;
   root.querySelector('[data-distribution-width]').value = (element.width / PLAN_SCALE.pixelsPerMeter).toFixed(1);
@@ -846,14 +875,7 @@ function renderElementInspector(root, element) {
 }
 
 function renderInspector(root, table, tableIndex, guests, placement) {
-  setTableOnlyInspectorControls(root, true);
-  root.querySelector('[data-distribution-selection-empty]').hidden = true;
-  root.querySelector('[data-distribution-polygon-stats]').hidden = true;
-  root.querySelector('[data-distribution-polygon-style]').hidden = true;
-  root.querySelector('[data-distribution-element-note]').hidden = true;
-  root.querySelector('[data-distribution-element-actions]').hidden = true;
-  root.querySelector('[data-distribution-dimensions]').hidden = true;
-  root.querySelector('[data-distribution-selection]').hidden = false;
+  setInspectorMode(root, 'table');
   const capacity = capacityOf(table);
   const assigned = guests
     .filter((guest) => escapeText(guest.tableId) === escapeText(table.id))
@@ -1743,8 +1765,7 @@ async function mountDistribucion(context) {
       selectedTableId = '';
       selectedElementId = '';
       clearVisualSelection();
-      root.querySelector('[data-distribution-selection]').hidden = true;
-      root.querySelector('[data-distribution-selection-empty]').hidden = false;
+      setInspectorMode(root, 'empty');
     };
 
     const presentationButton = root.querySelector('[data-distribution-presentation]');
