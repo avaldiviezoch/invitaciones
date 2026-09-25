@@ -943,3 +943,14 @@ Fases 1–8 cerradas para este bloque. Persistencia global V1 conservada. No se 
 Se retira la edición manual de vértices de las áreas dibujables. Las áreas conservan `points[]` como geometría primaria, el dibujo poligonal inicial, preview, cierre, validación de auto-intersección y vértices demasiado próximos durante la creación, medidas laterales, área, perímetro, movimiento, resize, rotación, historial, autosave, propuestas y serialización V1.
 
 La selección de un área ya no crea ni muestra handles de vértice ni registra una rama de interacción `vertexEdit`. El resize existente continúa escalando todos los puntos desde el snapshot inicial del gesto. No se modifica Firebase, Firestore, Storage, Auth, datos canónicos, catálogo, presets ni esquema persistido.
+
+
+---
+
+# Fase 10 — Blindaje del inspector de selección
+
+El inspector lateral usa un único controlador de estado con cuatro modos explícitos: `empty`, `table`, `element` y `area`. Antes de presentar una selección se ocultan todas las secciones específicas y se habilitan únicamente las correspondientes al modo actual.
+
+Las mesas son las únicas que muestran tipo de mesa, medida física canónica, estadísticas de asientos e invitados asignados. Los objetos ordinarios muestran únicamente controles de objeto según capabilities. Las áreas comparten los controles de objeto y añaden exclusivamente área/perímetro y estilo poligonal. Limpiar la selección restablece el modo vacío mediante la misma ruta.
+
+No se duplica HTML ni se crean inspectores desktop/móvil paralelos. No se modifica persistencia, Firebase/Firestore, datos canónicos, catálogo, propuestas, geometría ni sincronización.
