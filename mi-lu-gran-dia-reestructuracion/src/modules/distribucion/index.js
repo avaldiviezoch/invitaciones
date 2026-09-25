@@ -948,9 +948,7 @@ async function mountDistribucion(context) {
     const summary = document.createElement('summary');
     const label = document.createElement('span');
     label.textContent = group.label;
-    const count = document.createElement('small');
-    count.textContent = group.items.length + ' objetos';
-    summary.append(label, count);
+    summary.append(label);
     const list = document.createElement('div');
     list.className = 'distribution-tool-list';
     group.items.forEach((definition) => list.append(createCatalogButton(definition)));
@@ -963,9 +961,7 @@ async function mountDistribucion(context) {
   const areaSummary = document.createElement('summary');
   const areaLabel = document.createElement('span');
   areaLabel.textContent = 'Áreas dibujables';
-  const areaCount = document.createElement('small');
-  areaCount.textContent = areaPresets.length + ' áreas';
-  areaSummary.append(areaLabel, areaCount);
+  areaSummary.append(areaLabel);
   const areaList = document.createElement('div');
   areaList.className = 'distribution-tool-list';
   areaPresets.forEach((preset) => {
