@@ -2105,12 +2105,15 @@ async function mountDistribucion(context) {
       status.textContent = `Alerta de separación configurada en ${proximityMeters.toFixed(1)} m`;
     });
 
-    snapToggle?.addEventListener('change', () => {
-      snapEnabled = snapToggle.checked;
+    sharedActions.getSnapEnabled = () => snapEnabled;
+    sharedActions.setSnapEnabled = (enabled) => {
+      snapEnabled = Boolean(enabled);
+      if (snapToggle) snapToggle.checked = snapEnabled;
       status.textContent = snapEnabled
         ? `Ajuste a cuadrícula activo · pasos de ${SNAP_STEP_METERS.toFixed(2)} m`
         : 'Ajuste a cuadrícula desactivado';
-    });
+    };
+    snapToggle?.addEventListener('change', () => sharedActions.setSnapEnabled(snapToggle.checked));
 
     const markDirty = () => {
       dirty = true;
@@ -2541,23 +2544,24 @@ async function mountDistribucion(context) {
       }
     };
 
+    sharedActions.addElement = (requestedType) => {
+      if (!canEdit) return;
+      const type = escapeText(requestedType);
+      if (!getCatalogItem(type)) return;
+      rememberEdit();
+      const element = createElement(
+        type,
+        WORLD_PADDING + 40 + physicalElements.length * 18,
+        WORLD_PADDING + 40 + physicalElements.length * 18
+      );
+      if (!element) return;
+      selectElement(element.id);
+      world.querySelector(`.distribution-element[data-element-id="${CSS.escape(element.id)}"]`)?.focus();
+      markDirty();
+    };
     root.querySelectorAll('[data-distribution-add-element]').forEach((button) => {
       button.disabled = !canEdit;
-      button.onclick = () => {
-        if (!canEdit) return;
-        const type = escapeText(button.dataset.distributionAddElement);
-        if (!getCatalogItem(type)) return;
-        rememberEdit();
-        const element = createElement(
-          type,
-          WORLD_PADDING + 40 + physicalElements.length * 18,
-          WORLD_PADDING + 40 + physicalElements.length * 18
-        );
-        if (!element) return;
-        selectElement(element.id);
-        world.querySelector(`.distribution-element[data-element-id="${CSS.escape(element.id)}"]`)?.focus();
-        markDirty();
-      };
+      button.onclick = () => sharedActions.addElement(button.dataset.distributionAddElement);
     });
 
     const updateElementLayer = (direction) => {
@@ -2632,24 +2636,28 @@ async function mountDistribucion(context) {
     };
     root.querySelector('[data-distribution-width]').onchange = applyInspectorElementDimensions;
     root.querySelector('[data-distribution-height]').onchange = applyInspectorElementDimensions;
-    root.querySelector('[data-distribution-polygon-color]').onchange = (event) => {
+    sharedActions.updateAreaStyle = (color, transparency) => {
       const element = physicalElements.find((item) => item.id === selectedElementId);
       const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
-      if (!canEdit || !element || element.type !== 'area' || element.locked || !node) return;
+      if (!canEdit || !element || element.type !== 'area' || element.locked || !node) return false;
+      const nextColor = color || element.color;
+      const nextTransparency = Math.max(0, Math.min(90, Number(transparency) || 0));
+      if (nextColor === element.color && nextTransparency === (element.transparency ?? 45)) return true;
       rememberEdit();
-      element.color = event.currentTarget.value;
-      applyElementPlacement(node, element);
-      markDirty();
-    };
-    root.querySelector('[data-distribution-polygon-transparency]').onchange = (event) => {
-      const element = physicalElements.find((item) => item.id === selectedElementId);
-      const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
-      if (!canEdit || !element || element.type !== 'area' || element.locked || !node) return;
-      rememberEdit();
-      element.transparency = Math.max(0, Math.min(90, Number(event.currentTarget.value) || 0));
+      element.color = nextColor;
+      element.transparency = nextTransparency;
       applyElementPlacement(node, element);
       renderElementInspector(root, element);
       markDirty();
+      return true;
+    };
+    root.querySelector('[data-distribution-polygon-color]').onchange = (event) => {
+      const transparency = root.querySelector('[data-distribution-polygon-transparency]').value;
+      sharedActions.updateAreaStyle(event.currentTarget.value, transparency);
+    };
+    root.querySelector('[data-distribution-polygon-transparency]').onchange = (event) => {
+      const color = root.querySelector('[data-distribution-polygon-color]').value;
+      sharedActions.updateAreaStyle(color, event.currentTarget.value);
     };
     root.querySelector('[data-distribution-polygon-transparency]').oninput = (event) => {
       const output = root.querySelector('[data-distribution-polygon-transparency-value]');
