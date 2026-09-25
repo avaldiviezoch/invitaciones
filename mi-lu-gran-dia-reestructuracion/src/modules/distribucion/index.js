@@ -849,6 +849,25 @@ async function mountDistribucion(context) {
     let autosaveTimer = 0;
     let distributionCloudUnsubscribe = null;
     let canonicalCloudUnsubscribe = null;
+    const cleanupTasks = [];
+    let cleanedUp = false;
+    const registerCleanup = (cleanup) => {
+      if (typeof cleanup === 'function') cleanupTasks.push(cleanup);
+      return cleanup;
+    };
+    const cleanupMount = () => {
+      if (cleanedUp) return;
+      cleanedUp = true;
+      while (cleanupTasks.length) {
+        const cleanup = cleanupTasks.pop();
+        try {
+          cleanup();
+        } catch (error) {
+          console.error('No se pudo liberar un recurso de Distribución:', error);
+        }
+      }
+    };
+    activeDistributionCleanup = cleanupMount;
     let lastPersistedSignature = storedState ? JSON.stringify(storedState) : '';
     let queuedRemoteDistributionSignature = '';
     let lastPersistedState = storedState ? JSON.parse(JSON.stringify(storedState)) : null;
@@ -1197,6 +1216,7 @@ async function mountDistribucion(context) {
     physicalElements.forEach((element) => world.append(renderPhysicalElement(element)));
 
     const camera = setupDistributionCamera(root, world, layout);
+    registerCleanup(() => camera.destroy());
 
     const distributionProposalSignature = (proposal) => JSON.stringify(proposal ?? null);
 
@@ -3087,26 +3107,29 @@ async function mountDistribucion(context) {
     });
 
     window.addEventListener('migrandia:datachange', handleCanonicalChange);
+    registerCleanup(() => window.removeEventListener('migrandia:datachange', handleCanonicalChange));
     document.addEventListener('visibilitychange', handleVisibilityChange);
-    activeDistributionCleanup = () => {
-      window.removeEventListener('migrandia:datachange', handleCanonicalChange);
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-      distributionCloudUnsubscribe?.();
-      canonicalCloudUnsubscribe?.();
+    registerCleanup(() => document.removeEventListener('visibilitychange', handleVisibilityChange));
+    registerCleanup(() => distributionCloudUnsubscribe?.());
+    registerCleanup(() => canonicalCloudUnsubscribe?.());
+    registerCleanup(() => {
       closeMobileSheet();
       hideSyncConflict();
       if (autosaveTimer) window.clearTimeout(autosaveTimer);
-      camera.destroy();
       if (referenceObjectUrl) {
         URL.revokeObjectURL(referenceObjectUrl);
         referenceObjectUrl = '';
       }
-    };
+    });
 
     refreshSpatialConflicts();
     updateSaveState();
     if (!dirty && canEdit && storedState) status.textContent = `Distribución sincronizada · ${seated} invitados ubicados`;
   } catch (error) {
+    if (activeDistributionCleanup) {
+      activeDistributionCleanup();
+      activeDistributionCleanup = null;
+    }
     console.error('No se pudo inicializar Distribución:', error);
     status.textContent = error?.message || 'Distribución no pudo inicializarse.';
     return false;
