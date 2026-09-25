@@ -978,3 +978,14 @@ Se centraliza esa escritura en el adaptador existente `invitados-data.js` median
 Distribución deja de importar y llamar directamente `saveInvitadosSnapshot()`. Sus dos operaciones permitidas sobre datos de Mesas —tipo y dimensiones físicas— solicitan la actualización al adaptador y solo actualizan su espejo en memoria después de recibir la mesa ya persistida. Se elimina la mutación optimista previa y su rollback local. Los placements `x/y/rotation` continúan siendo propiedad exclusiva de Distribución.
 
 No se modifican IDs, invitados, sillas, asignaciones, capacidad, Firebase/Firestore, Storage, reglas, autenticación ni persistencia V1 de Distribución. La suscripción canónica y el evento existente de cambio se conservan en esta fase para no mezclar la frontera de escritura con una refactorización de sincronización.
+
+
+---
+
+# Fase 13 — Saneamiento estructural de index.js
+
+La auditoría midió `index.js` en 3,319 líneas y 117 declaraciones locales detectadas. Conforme a la regla de simplicidad, no se divide por tamaño ni se extraen UI, listeners, historial, propuestas o persistencia solo para reducir líneas. Se identificó una frontera funcional real ya consolidada: el motor geométrico/espacial puro usado por áreas, colisiones y proximidad.
+
+Se crea un único archivo `spatial-geometry.js` para esa responsabilidad. Allí quedan geometría poligonal, normalización de polígonos, auto-intersección, área/perímetro, shapes espaciales de objetos/mesas, reglas de interacción, intersección y distancia de bordes. `index.js` consume esas funciones y elimina sus definiciones anteriores en el mismo cambio: no existen dos motores.
+
+El archivo principal baja de 3,319 a 3,118 líneas; el motor separado tiene 239 líneas. No se modifica ningún algoritmo geométrico, escala, catálogo, UI, listeners, persistencia, Firebase/Firestore, datos canónicos, propuestas ni sincronización. La extracción mantiene la limitación ya documentada de SAT para polígonos cóncavos; esta fase no intenta cambiar comportamiento.
