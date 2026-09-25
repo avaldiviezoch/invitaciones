@@ -1625,9 +1625,6 @@ async function mountDistribucion(context) {
         }
       }
 
-      const previousDimensions = table.dimensions && typeof table.dimensions === 'object'
-        ? { ...table.dimensions }
-        : null;
       const target = reset
         ? standardTablePhysicalDimensions(table.type || table.shape)
         : {
@@ -1638,12 +1635,6 @@ async function mountDistribucion(context) {
               : normalizeTableMeters(widthMeters, tablePhysicalDimensions(table).width)
           };
 
-      table.dimensions = reset
-        ? undefined
-        : createTableDimensions(table.type || table.shape, target.width, target.height, table.dimensions);
-      redrawTableInPlace(tableId);
-      renderInspector(root, table, entry.index, guests, placementState.get(tableId));
-      refreshSpatialConflicts();
       status.textContent = 'Sincronizando medida de mesa…';
 
       try {
@@ -1653,6 +1644,9 @@ async function mountDistribucion(context) {
         });
         if (latestTable.dimensions) table.dimensions = { ...latestTable.dimensions };
         else delete table.dimensions;
+        redrawTableInPlace(tableId);
+        renderInspector(root, table, entry.index, guests, placementState.get(tableId));
+        refreshSpatialConflicts();
         window.dispatchEvent(new CustomEvent('migrandia:datachange', {
           detail: {
             source: 'distribucion',
@@ -1663,11 +1657,6 @@ async function mountDistribucion(context) {
         }));
         status.textContent = 'Medida de mesa sincronizada';
       } catch (error) {
-        if (previousDimensions) table.dimensions = previousDimensions;
-        else delete table.dimensions;
-        redrawTableInPlace(tableId);
-        renderInspector(root, table, entry.index, guests, placementState.get(tableId));
-        refreshSpatialConflicts();
         console.error('No se pudo actualizar la medida de mesa:', error);
         status.textContent = error?.message || 'No se pudo actualizar la medida de mesa.';
       }
@@ -1697,10 +1686,6 @@ async function mountDistribucion(context) {
         }
       }
 
-      table.type = normalized;
-      table.updatedAt = new Date().toISOString();
-      redrawTableInPlace(tableId);
-      renderInspector(root, table, entry.index, guests, placementState.get(tableId));
       status.textContent = `Sincronizando mesa ${TABLE_SHAPE_LABELS[normalized]}…`;
 
       try {
@@ -1710,6 +1695,8 @@ async function mountDistribucion(context) {
         table.type = latestTable.type;
         if (latestTable.dimensions) table.dimensions = { ...latestTable.dimensions };
         else delete table.dimensions;
+        redrawTableInPlace(tableId);
+        renderInspector(root, table, entry.index, guests, placementState.get(tableId));
         window.dispatchEvent(new CustomEvent('migrandia:datachange', {
           detail: {
             source: 'distribucion',
@@ -1721,9 +1708,6 @@ async function mountDistribucion(context) {
         status.textContent = `Mesa actualizada a ${TABLE_SHAPE_LABELS[normalized]}`;
         refreshSpatialConflicts();
       } catch (error) {
-        table.type = previousType;
-        redrawTableInPlace(tableId);
-        renderInspector(root, table, entry.index, guests, placementState.get(tableId));
         root.querySelector('[data-distribution-table-shape]').value = previousType;
         console.error('No se pudo actualizar el tipo de mesa:', error);
         status.textContent = error?.message || 'No se pudo actualizar el tipo de mesa.';
