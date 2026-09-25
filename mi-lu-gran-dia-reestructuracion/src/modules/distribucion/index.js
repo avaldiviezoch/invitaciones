@@ -1,4 +1,4 @@
-import { GUEST_STORAGE_KEY, loadInvitadosSnapshot, saveInvitadosSnapshot } from '../invitados/invitados-data.js?v=5';
+import { GUEST_STORAGE_KEY, loadInvitadosSnapshot, updateCanonicalTable } from '../invitados/invitados-data.js?v=6';
 import {
   MIN_TABLE_METERS,
   MAX_TABLE_METERS,
@@ -1606,16 +1606,6 @@ async function mountDistribucion(context) {
       return replacement;
     };
 
-    async function persistCanonicalTableChange(tableId, mutateLatestTable) {
-      const latest = await loadInvitadosSnapshot(context);
-      const latestTable = latest.canonical.tables.find((item) => escapeText(item?.id) === escapeText(tableId));
-      if (!latestTable) throw new Error('La mesa ya no existe en la información actual.');
-      mutateLatestTable(latestTable);
-      latestTable.updatedAt = new Date().toISOString();
-      await saveInvitadosSnapshot(context, latest.canonical);
-      return latestTable;
-    }
-
     async function changeSelectedTableDimensions(widthMeters, heightMeters, { reset = false } = {}) {
       if (!canEdit || !selectedTableId || saving || canonicalRefreshPending) return;
       const tableId = selectedTableId;
@@ -1657,7 +1647,7 @@ async function mountDistribucion(context) {
       status.textContent = 'Sincronizando medida de mesa…';
 
       try {
-        const latestTable = await persistCanonicalTableChange(tableId, (record) => {
+        const latestTable = await updateCanonicalTable(context, tableId, (record) => {
           if (reset) delete record.dimensions;
           else record.dimensions = createTableDimensions(record.type || record.shape, target.width, target.height, record.dimensions);
         });
@@ -1714,7 +1704,7 @@ async function mountDistribucion(context) {
       status.textContent = `Sincronizando mesa ${TABLE_SHAPE_LABELS[normalized]}…`;
 
       try {
-        const latestTable = await persistCanonicalTableChange(tableId, (record) => {
+        const latestTable = await updateCanonicalTable(context, tableId, (record) => {
           record.type = normalized;
         });
         table.type = latestTable.type;
