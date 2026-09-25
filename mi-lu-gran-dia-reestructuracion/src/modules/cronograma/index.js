@@ -259,12 +259,30 @@ function downloadExport(){
 function printExportPdf(){
   const canvas=renderExportCanvas();
   if(!canvas) return;
-  const root=document.querySelector('[data-module-view="cronograma"]');
-  root?.classList.add('timeline-print-export');
-  const cleanup=()=>root?.classList.remove('timeline-print-export');
-  window.addEventListener('afterprint',cleanup,{once:true});
-  window.print();
-  setTimeout(cleanup,2000);
+  const image=canvas.toDataURL('image/png');
+  const frame=document.createElement('iframe');
+  frame.setAttribute('aria-hidden','true');
+  frame.style.position='fixed';
+  frame.style.right='0';
+  frame.style.bottom='0';
+  frame.style.width='1px';
+  frame.style.height='1px';
+  frame.style.border='0';
+  document.body.append(frame);
+  const doc=frame.contentDocument;
+  doc.open();
+  doc.write('<!doctype html><html><head><meta charset="utf-8"><title>Programa de actividades</title><style>@page{size:A4 landscape;margin:0}html,body{margin:0;width:297mm;height:210mm;overflow:hidden;background:white}img{display:block;width:297mm;height:210mm;object-fit:contain}</style></head><body><img alt="Programa de actividades"></body></html>');
+  doc.close();
+  const imageNode=doc.querySelector('img');
+  const cleanup=()=>setTimeout(()=>frame.remove(),500);
+  imageNode.onload=()=>{
+    const target=frame.contentWindow;
+    target.addEventListener('afterprint',cleanup,{once:true});
+    target.focus();
+    target.print();
+    setTimeout(cleanup,3000);
+  };
+  imageNode.src=image;
 }
 
 function field(label,control,extra=''){ return `<label class="timeline-form-field ${extra}"><span>${label}</span>${control}</label>`; }
