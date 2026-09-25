@@ -781,3 +781,11 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - El bloque “Solicitada por” ocupa el ancho completo de la tarjeta en móvil para evitar que quede comprimido bajo una sola columna.
 - Se permite salto de línea en título, álbum, invitados y dedicatoria para evitar truncamientos innecesarios.
 - Se incrementa la versión CSS de Música para invalidar caché; no se modifica Firebase, Firestore, Storage, Wedding ni datos reales.
+
+## 2026-09-26 — Música: ajuste responsive fino 360–430 px
+- Se rehace la composición móvil de las tarjetas de Música para 360, 390 y 430 px sin alterar escritorio.
+- La carátula se mantiene protagonista (82 px base móvil, 76 px a 430 px y 70 px a 390 px) en vez de comportarse como un icono reducido.
+- Se elevan tamaños mínimos de título, artista, álbum, estados y acciones para evitar el aspecto microscópico de la versión anterior.
+- El enlace de canción pasa a una acción táctil de 28 px de alto; título, álbum, invitados y dedicatoria permiten salto de línea.
+- El bloque de solicitud ocupa el ancho completo bajo la carátula y se ajustan separaciones, radios y sombras para conservar la jerarquía visual de escritorio.
+- Se mantiene sin cambios la integración de catálogo, RSVP y cualquier persistencia. Se sube Música CSS a v5 para invalidar caché.
