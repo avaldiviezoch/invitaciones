@@ -149,6 +149,113 @@ function render(){
     : '<div class="timeline-empty"><span aria-hidden="true">◷</span><strong>No hay actividades para mostrar</strong><p>Agrega una actividad o cambia los filtros.</p></div>';
 }
 
+function exportWeddingName(){
+  const candidates=[activeContext?.name,activeContext?.title,document.querySelector('#appNavWeddingName')?.textContent,document.querySelector('#appMobileWeddingName')?.textContent];
+  return String(candidates.find((value)=>String(value||'').trim())||'Mi Gran Día').trim();
+}
+function exportRecords(){
+  return sortedRecords().map(({record})=>({
+    time:eventTime(record)||'—',
+    title:eventTitle(record)||'Actividad sin título',
+    duration:durationLabel(eventDuration(record)),
+    responsible:eventResponsible(record),
+    notes:eventNotes(record),
+    status:normalizedStatus(valueOf(record,'status'))
+  }));
+}
+function wrapCanvasText(ctx,text,maxWidth,maxLines=2){
+  const words=String(text||'').trim().split(/\s+/).filter(Boolean);
+  if(!words.length) return [];
+  const lines=[]; let line='';
+  for(const word of words){
+    const next=line?`${line} ${word}`:word;
+    if(ctx.measureText(next).width<=maxWidth||!line){ line=next; continue; }
+    lines.push(line); line=word;
+    if(lines.length===maxLines-1) break;
+  }
+  if(line&&lines.length<maxLines) lines.push(line);
+  const consumed=lines.join(' ').split(/\s+/).filter(Boolean).length;
+  if(consumed<words.length&&lines.length){
+    let last=lines[lines.length-1];
+    while(last.length>1&&ctx.measureText(last+'…').width>maxWidth) last=last.slice(0,-1);
+    lines[lines.length-1]=last.replace(/[ ,.;:-]+$/,'')+'…';
+  }
+  return lines;
+}
+function chooseExportLayout(count){
+  if(count<=8) return {columns:1,rows:Math.max(count,1),font:30,titleFont:36,metaFont:22,gap:28};
+  if(count<=18) return {columns:2,rows:Math.ceil(count/2),font:27,titleFont:33,metaFont:20,gap:24};
+  return {columns:3,rows:Math.ceil(count/3),font:24,titleFont:29,metaFont:18,gap:20};
+}
+function renderExportCanvas(){
+  const root=document.querySelector('[data-module-view="cronograma"]');
+  const canvas=root?.querySelector('[data-timeline-export-canvas]');
+  if(!canvas) return null;
+  const records=exportRecords();
+  const layout=chooseExportLayout(records.length);
+  const width=1600,height=1132,pad=94,headerH=238,footerH=76;
+  canvas.width=width;canvas.height=height;
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#f7f3ef';ctx.fillRect(0,0,width,height);
+  ctx.fillStyle='#fffdfb';ctx.fillRect(34,34,width-68,height-68);
+  ctx.strokeStyle='#e4dcd6';ctx.lineWidth=2;ctx.strokeRect(34,34,width-68,height-68);
+  ctx.textAlign='center';ctx.fillStyle='#7d8866';ctx.font='700 18px Arial';ctx.fillText('MI GRAN DÍA · PROGRAMA DE ACTIVIDADES',width/2,94);
+  ctx.fillStyle='#32312d';ctx.font='400 58px Georgia';ctx.fillText(exportWeddingName(),width/2,160);
+  ctx.fillStyle='#af7480';ctx.font='600 22px Arial';ctx.fillText(formatWeddingDate(state.root.settings?.weddingDate||activeContext?.date||''),width/2,202);
+  ctx.strokeStyle='#eadde0';ctx.beginPath();ctx.moveTo(pad,headerH);ctx.lineTo(width-pad,headerH);ctx.stroke();
+
+  const contentTop=headerH+36,contentBottom=height-footerH-42,contentH=contentBottom-contentTop;
+  const colGap=layout.columns===1?0:42;
+  const colW=(width-pad*2-colGap*(layout.columns-1))/layout.columns;
+  const rowH=contentH/layout.rows;
+  const totalUsed=Math.min(records.length,layout.rows)*rowH;
+  const singleOffset=layout.columns===1?Math.max(0,(contentH-totalUsed)/2):0;
+  records.forEach((record,index)=>{
+    const col=Math.floor(index/layout.rows);
+    const row=index%layout.rows;
+    const x=pad+col*(colW+colGap);
+    const y=contentTop+singleOffset+row*rowH;
+    if(col>0&&row===0){ctx.strokeStyle='#eee7e2';ctx.beginPath();ctx.moveTo(x-colGap/2,contentTop-8);ctx.lineTo(x-colGap/2,contentBottom+8);ctx.stroke();}
+    const timeW=layout.columns===1?150:112;
+    ctx.textAlign='left';ctx.fillStyle='#af7480';ctx.font=`600 ${layout.titleFont}px Georgia`;ctx.fillText(record.time,x,y+layout.titleFont);
+    const tx=x+timeW,tw=colW-timeW-10;
+    ctx.fillStyle='#32312d';ctx.font=`600 ${layout.font}px Arial`;
+    const titleLines=wrapCanvasText(ctx,record.title,tw,2);
+    titleLines.forEach((line,lineIndex)=>ctx.fillText(line,tx,y+layout.font+lineIndex*(layout.font+4)));
+    const metaY=y+layout.font+titleLines.length*(layout.font+4)+8;
+    const meta=[record.duration,record.responsible?`Responsable · ${record.responsible}`:''].filter(Boolean).join('   ·   ');
+    if(meta){ctx.fillStyle='#77736d';ctx.font=`400 ${layout.metaFont}px Arial`;wrapCanvasText(ctx,meta,tw,1).forEach((line)=>ctx.fillText(line,tx,metaY));}
+    const noteY=metaY+(meta?layout.metaFont+9:0);
+    if(record.notes&&rowH>82){ctx.fillStyle='#98928c';ctx.font=`400 ${Math.max(16,layout.metaFont-2)}px Arial`;wrapCanvasText(ctx,record.notes,tw,1).forEach((line)=>ctx.fillText(line,tx,noteY));}
+    if(row<layout.rows-1&&index<records.length-1){ctx.strokeStyle='#eee8e3';ctx.beginPath();ctx.moveTo(tx,y+rowH-10);ctx.lineTo(x+colW,y+rowH-10);ctx.stroke();}
+  });
+  if(!records.length){ctx.textAlign='center';ctx.fillStyle='#8b8680';ctx.font='400 28px Georgia';ctx.fillText('Aún no hay actividades registradas',width/2,(contentTop+contentBottom)/2);}
+  ctx.textAlign='center';ctx.fillStyle='#9a948e';ctx.font='700 15px Arial';ctx.fillText('MI LU GRAN DÍA',width/2,height-70);
+  const label=root.querySelector('[data-timeline-export-layout]');
+  if(label) label.textContent=`${layout.columns} ${layout.columns===1?'columna':'columnas'} · ${records.length} ${records.length===1?'actividad':'actividades'} · una sola hoja`;
+  return canvas;
+}
+function openExportPreview(){
+  const root=document.querySelector('[data-module-view="cronograma"]');
+  const dialog=root?.querySelector('[data-timeline-export-dialog]');
+  if(!dialog) return;
+  renderExportCanvas();
+  dialog.showModal();
+}
+function downloadExport(){
+  const canvas=renderExportCanvas();
+  if(!canvas) return;
+  canvas.toBlob((blob)=>{
+    if(!blob) return;
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    const safeName=exportWeddingName().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')||'boda';
+    link.href=url;link.download=`programa-${safeName}.png`;
+    document.body.append(link);link.click();link.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),0);
+  },'image/png');
+}
+
 function field(label,control,extra=''){ return `<label class="timeline-form-field ${extra}"><span>${label}</span>${control}</label>`; }
 
 function openDialog(record=null,index=-1){
@@ -244,6 +351,9 @@ function bind(root){
   });
   root.addEventListener('click',async(event)=>{
     if(event.target.closest('[data-timeline-close]')){ event.target.closest('dialog')?.close(); return; }
+    if(event.target.closest('[data-timeline-export-close]')){ event.target.closest('dialog')?.close(); return; }
+    if(event.target.closest('[data-timeline-export]')){ openExportPreview(); return; }
+    if(event.target.closest('[data-timeline-download]')){ downloadExport(); return; }
     if(event.target.closest('[data-timeline-new]')){ if(canEdit()) openDialog(); return; }
     const card=event.target.closest('[data-timeline-index]');
     if(card&&event.target.closest('[data-timeline-edit]')){

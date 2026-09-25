@@ -33,11 +33,19 @@
 
     <section class="timeline-list-head">
       <div><h2>Programa de actividades</h2><p>La secuencia se conserva según el orden y horario registrados.</p></div>
-      <span data-timeline-results>0 actividades</span>
+      <div class="timeline-list-actions"><span data-timeline-results>0 actividades</span><button type="button" data-timeline-export>Exportar programa</button></div>
     </section>
     <section class="timeline-list" data-timeline-list></section>
     <p class="timeline-read-state" data-timeline-state>Datos de la boda activa</p>
   </main>
+
+  <dialog class="timeline-export-dialog" data-timeline-export-dialog>
+    <div class="timeline-export-frame">
+      <header><div><span>PROGRAMA PARA COMPARTIR</span><h2>Vista previa</h2><p>Se acomoda automáticamente en una sola hoja.</p></div><button type="button" data-timeline-export-close aria-label="Cerrar">×</button></header>
+      <div class="timeline-export-preview"><canvas data-timeline-export-canvas></canvas></div>
+      <footer><span data-timeline-export-layout>Diseño automático</span><button type="button" data-timeline-export-close>Cancelar</button><button class="timeline-save" type="button" data-timeline-download>Descargar PNG</button></footer>
+    </div>
+  </dialog>
 
   <dialog class="timeline-dialog" data-timeline-dialog>
     <div class="timeline-dialog-frame">
