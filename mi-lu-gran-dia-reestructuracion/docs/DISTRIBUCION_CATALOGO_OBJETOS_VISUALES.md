@@ -1017,3 +1017,18 @@ La cola queda corregida: si el snapshot encolado coincide con lo recién persist
 El estado base remoto (`lastPersistedState/signature`) se actualiza al integrar un remoto no conflictivo y se mantiene la propuesta activa resultante del merge. La opción “Conservar este” continúa siendo la única ruta `force:true`; “Usar remoto” continúa reemplazando el estado local explícitamente. Autosave sigue bloqueado durante saving, canonicalRefreshPending o conflicto.
 
 No se modifican Firebase/Firestore, claves, schema V1, datos canónicos, catálogo, geometría ni reglas de permisos.
+
+
+---
+
+# Fase 16 — Undo/Redo, snapshots, autosave y regresión final
+
+La auditoría final revisa las 17 rutas que toman snapshot mediante `rememberEdit()`, las cancelaciones de gestos, Undo/Redo, creación/eliminación/duplicado, dimensiones, estilo, capas, bloqueo, teclado y dibujo de áreas. No se encontró una regresión que justifique cambiar el motor de historial.
+
+Los gestos continuos de mover, rotar y redimensionar toman un único snapshot al iniciar. `pointermove` no llama `rememberEdit()` ni `markDirty()`; durante el gesto solo actualiza la representación y conflictos. Al finalizar, si hubo cambio real se marca dirty una vez; si no hubo movimiento se descarta el snapshot provisional. El dibujo inválido también descarta su snapshot cuando corresponde.
+
+Undo y Redo restauran placements y elementos desde snapshots independientes, reconstruyen nodos, limpian selección, recalculan conflictos y marcan dirty. `updateSaveState()` mantiene el autosave centralizado con debounce de 250 ms; no hay escrituras por pointermove. Cambiar de propuesta limpia Undo/Redo para impedir que un snapshot de una propuesta se aplique sobre otra.
+
+La regresión contractual final conserva: tablas canónicas separadas de placements, objetos físicos separados de Mesas/Invitados, 38 objetos ordinarios registrados/37 visibles, 9 áreas modernas, 3 tipos legacy solo compatibles, persistencia V1, propuestas, conflicto multidispositivo, catálogo único, inspector por modos, acciones compartidas desktop/móvil, cleanup por montaje y motor geométrico único. No se modifica código funcional en esta fase porque la auditoría no encontró un defecto demostrable que justificara hacerlo.
+
+No se modifican Firebase/Firestore, Storage, Auth, reglas, datos canónicos, schema, geometría, catálogo ni UI. Esta fase cierra el plan de auditoría estructural 9–16 del módulo Distribución.
