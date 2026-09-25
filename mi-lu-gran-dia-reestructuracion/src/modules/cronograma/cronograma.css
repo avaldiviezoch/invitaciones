@@ -32,13 +32,13 @@
 
 @media print{
   @page{size:A4 landscape;margin:0}
-  body.timeline-program-print>*:not(.module-workspace){display:none}
-  body.timeline-program-print .app-mobile-header,body.timeline-program-print .app-module-nav{display:none}
-  body.timeline-program-print .module-workspace,body.timeline-program-print .module-stage,body.timeline-program-print [data-module-view="cronograma"]{display:block;position:static;width:100%;height:auto;margin:0;padding:0;background:#fff}
-  body.timeline-program-print .timeline-shell>*:not(.timeline-export-dialog){display:none}
-  body.timeline-program-print .timeline-export-dialog{display:block;position:static;width:297mm;max-width:none;height:210mm;max-height:none;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;background:#fff}
-  body.timeline-program-print .timeline-export-frame{display:block;max-height:none}
-  body.timeline-program-print .timeline-export-dialog header,body.timeline-program-print .timeline-export-dialog footer{display:none}
-  body.timeline-program-print .timeline-export-preview{display:grid;width:297mm;height:210mm;padding:0;overflow:hidden;place-items:center;background:#fff}
-  body.timeline-program-print .timeline-export-preview canvas{width:297mm;height:210mm;margin:0;box-shadow:none}
+  [data-module-view="cronograma"].timeline-print-export>*:not(.module-workspace){display:none}
+  [data-module-view="cronograma"].timeline-print-export .app-mobile-header,[data-module-view="cronograma"].timeline-print-export .app-module-nav{display:none}
+  [data-module-view="cronograma"].timeline-print-export .module-workspace,[data-module-view="cronograma"].timeline-print-export .module-stage,[data-module-view="cronograma"].timeline-print-export [data-module-view="cronograma"]{display:block;position:static;width:100%;height:auto;margin:0;padding:0;background:#fff}
+  [data-module-view="cronograma"].timeline-print-export .timeline-shell>*:not(.timeline-export-dialog){display:none}
+  [data-module-view="cronograma"].timeline-print-export .timeline-export-dialog{display:block;position:static;width:297mm;max-width:none;height:210mm;max-height:none;margin:0;padding:0;border:0;border-radius:0;box-shadow:none;background:#fff}
+  [data-module-view="cronograma"].timeline-print-export .timeline-export-frame{display:block;max-height:none}
+  [data-module-view="cronograma"].timeline-print-export .timeline-export-dialog header,[data-module-view="cronograma"].timeline-print-export .timeline-export-dialog footer{display:none}
+  [data-module-view="cronograma"].timeline-print-export .timeline-export-preview{display:grid;width:297mm;height:210mm;padding:0;overflow:hidden;place-items:center;background:#fff}
+  [data-module-view="cronograma"].timeline-print-export .timeline-export-preview canvas{width:297mm;height:210mm;margin:0;box-shadow:none}
 }
