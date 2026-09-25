@@ -538,7 +538,7 @@ function renderPhysicalElement(element) {
   label.textContent = definition.label;
   node.append(label);
 
-  if (elementCapabilities(element).resizable) {
+  if (element.type !== 'area' && elementCapabilities(element).resizable) {
     [
       ['nw', -1, -1],
       ['ne', 1, -1],
