@@ -563,3 +563,11 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 ## 2026-09-25 — Distribución: mayor visibilidad del control de rotación
 - La flecha en espiral de rotación pasa de 50% a 80% de opacidad (20% de transparencia) para mejorar su visibilidad.
 - No se modifica línea, color base, tamaño ni lógica de rotación.
+
+
+## 2026-09-25 — Distribución Fase 1: inventario maestro de objetos visuales
+- Se auditan la propuesta histórica de Wedding, distribucion-limpia y la reestructuración vigente.
+- Se crea un catálogo documental exclusivo de objetos visuales, separado de mesas/sillas canónicas y del futuro motor de áreas dibujables.
+- Se inventarían 42 entradas entre objetos actuales, faltantes, equivalentes y casos que requieren normalización.
+- Se detectan conflictos de nomenclatura gift/gifts, planter, entrada/salida y la diferencia entre canopy rectangular y tent poligonal.
+- No se modifica UI, persistencia, Firebase ni PHYSICAL_ELEMENT_TYPES en esta fase.
