@@ -866,3 +866,73 @@ No se modifica Firebase, Firestore, Storage, Auth, reglas, usuarios, IDs ni docu
 Se mantiene documentada la limitación SAT para polígonos cóncavos y el hit-test existente. Esta fase no reescribe geometría, zoom/pan ni rueda radial.
 
 No se realizó validación interactiva real en navegador en esta sesión; las comprobaciones son estáticas, contractuales y geométricas.
+
+
+---
+
+# Fase 8 — Auditoría final y regresión
+
+## Estado final auditado
+
+La auditoría de cierre confirma una única fuente ejecutable para el catálogo ordinario y una única fuente de presets para áreas modernas. El catálogo conserva 38 objetos registrados, 37 visibles y `chair` registrado pero oculto. Las áreas modernas son exactamente 9 (`tent`, `stage`, `lounge`, `children`, `buffet`, `technical`, `restricted`, `circulation`, `custom`) y comparten `type:'area'` + `areaKind`.
+
+Desktop y móvil consumen las mismas fuentes. No hay botones ordinarios manuales, catálogo móvil paralelo ni botones UI para crear los types legacy.
+
+## Validaciones de contrato
+
+- 38 objetos ordinarios; 37 visibles; `chair` fuera del orden visible.
+- 9 `areaKind` modernos únicos.
+- 3 types legacy soportados: `circulation`, `restricted`, `zone`.
+- 0 botones legacy de creación.
+- types ordinarios únicos; `areaKind` únicos.
+- único alias vigente: `gift -> gifts`, sin conflicto con types ordinarios.
+- separación conservada: `stage != area/stage`, `buffet != area/buffet`, `technical != area/technical`, `canopy != area/tent`.
+- `canopy` continúa rectangular, ordinario y 6 × 6 m.
+- parser V1 conserva `points[]`, valida `areaKind` y rechaza variantes modernas desconocidas.
+- serialización de `points[]` conserva precisión de cuatro decimales de píxel.
+- área, perímetro y medidas laterales continúan derivados y no se persisten como fuente de verdad.
+- copy/paste, duplicación de propuesta e historial clonan `points[]` y conservan metadata de área.
+
+## Regresión geométrica
+
+Con escala 32 px = 1 m:
+- rectángulo 4 × 6 m: área 24 m² y perímetro 20 m;
+- triángulo rectángulo 3-4-5: área 6 m² y perímetro 12 m;
+- movimiento mantiene `points[]` locales sin deformación;
+- resize 1.5 × 0.5 escala el área 24 m² a 18 m², consistente con el producto de escalas;
+- rotación se conserva como metadata separada y no modifica `points[]`, área ni perímetro.
+
+## Undo/Redo, autosave y propuestas
+
+Los gestos de movimiento, resize, rotación y edición de vértice toman una sola instantánea al iniciar y no crean historial por cada `pointermove`. Si un gesto no produce cambio, la instantánea se retira. Creación, eliminación, dimensiones, color y transparencia utilizan el mismo historial.
+
+El autosave continúa centralizado mediante el estado `dirty`; no se agregó botón Guardar ni persistencia por `pointermove`. Las propuestas mantienen placements y elementos aislados, clonan geometría al duplicarse y limpian el historial al cambiar de propuesta.
+
+## Legacy y datos canónicos
+
+`circulation`, `restricted` y `zone` legacy continúan resolviéndose por el catálogo legacy, parsean, renderizan y serializan sin migración. No pueden crearse desde la UI moderna.
+
+Mesas e Invitados permanecen fuera del catálogo de objetos. Distribución conserva `tableId` y placements; consume sillas/asignaciones canónicas y no convierte `chair` en asiento de mesa.
+
+El diff acumulado de Fases 1–7 solo afectó documentación, shell/cache y archivos del módulo Distribución; no modificó Firebase, Firestore, Storage, Auth, reglas, usuarios ni IDs.
+
+## Residuos reales corregidos
+
+La auditoría encontró dos residuos de la retirada de los botones legacy de dibujo:
+1. `drawingLabel()` y el estado `drawingType='zone'` habían quedado sin consumidor real. Se eliminaron y el flujo moderno crea explícitamente `type:'area'`.
+2. Las reglas CSS `.distribution-drawing-tools` habían quedado huérfanas después de retirar su HTML. Se eliminaron.
+
+No se encontraron otras funciones locales sin consumidor en `index.js` mediante el barrido estático realizado. El módulo continúa con cero `!important`.
+
+## Compatibilidad, UI y limitaciones
+
+El buscador sigue operando sobre objetos ordinarios y presets modernos, por lo que términos homónimos mantienen resultados separados. Desktop conserva categorías, acordeones y scroll existentes. Móvil sigue derivando Añadir y Áreas desde las mismas fuentes y usa el mismo motor de creación; no se implementó rueda radial nueva, pinch-to-zoom ni paneo nuevo.
+
+Limitaciones conocidas que permanecen:
+1. SAT puede ser menos preciso para polígonos cóncavos.
+2. El hit-test mantiene el comportamiento/bounding box existente.
+3. No se realizó validación interactiva real de mouse/touch en navegador durante esta auditoría; las comprobaciones de cierre fueron estáticas, contractuales, lógicas y geométricas.
+
+## Estado de cierre
+
+Fases 1–8 cerradas para este bloque. Persistencia global V1 conservada. No se crearon archivos, presets, objetos, migraciones ni funcionalidades nuevas.

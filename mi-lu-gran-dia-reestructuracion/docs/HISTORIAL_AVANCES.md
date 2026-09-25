@@ -636,3 +636,17 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Un areaKind desconocido se rechaza controladamente; no se convierte silenciosamente a custom.
 - canopy continúa ordinario rectangular 6 × 6 m; catálogo ordinario sigue 37/38 visible con chair oculto.
 - Se mantiene formato V1 y no se modifica Firebase/Firestore, Storage, Auth, reglas, usuarios, IDs ni documentos.
+
+
+## 2026-09-25 — Distribución Fase 8: auditoría final y regresión
+- Auditoría final sobre el HEAD de Fase 7, sin reabrir Fases 1–7 ni modificar Wedding.
+- Conteos verificados: 38 ordinarios, 37 visibles, 9 áreas modernas, 3 legacy soportados y 0 botones legacy de creación; chair permanece registrado/oculto.
+- Unicidad verificada para types, areaKinds y alias `gift -> gifts`; se conserva separación stage/area-stage, buffet/area-buffet, technical/area-technical y canopy/area-tent.
+- Parser/serialización V1 conservan areaKind y points; points mantienen precisión de cuatro decimales de píxel.
+- Regresión geométrica: rectángulo 4×6 = 24 m² / 20 m; triángulo 3-4-5 = 6 m² / 12 m; movimiento y rotación no deforman points y resize escala geometría.
+- Undo/Redo mantiene una instantánea por gesto; autosave continúa por dirty y no por pointermove; propuestas clonan points y permanecen aisladas.
+- Residuos reales retirados: función `drawingLabel()` y estado legacy `drawingType='zone'` sin consumidores, más CSS huérfano `.distribution-drawing-tools`.
+- Barrido estático posterior: cero funciones locales sin consumidor detectadas y cero `!important` en CSS del módulo.
+- Diff acumulado Fases 1–7 sin cambios en Firebase/Firestore/Storage/Auth/reglas/usuarios/IDs.
+- No hubo prueba interactiva real en navegador; cierre basado en validación estática, contractual, lógica y geométrica.
+- No se añadieron funcionalidades, archivos, presets, objetos, migraciones, rueda radial, zoom/pan, SAT ni hit-test nuevos.

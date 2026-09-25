@@ -2730,12 +2730,7 @@ async function mountDistribucion(context) {
     let drawingPoints = [];
     let drawingHoverPoint = null;
     let drawingArea = false;
-    let drawingType = 'zone';
     let drawingAreaKind = '';
-
-    const drawingLabel = (type, areaKind = '') => type === 'area'
-      ? getAreaCatalogItem(areaKind)?.label || 'Área'
-      : getCatalogItem(type)?.label || 'Área libre';
 
     const stopMeasuring = () => {
       measuring = false;
@@ -2807,8 +2802,8 @@ async function mountDistribucion(context) {
       const maxY = Math.max(...ys);
       if (maxX - minX < PIXELS_PER_METER * MIN_ELEMENT_METERS || maxY - minY < PIXELS_PER_METER * MIN_ELEMENT_METERS) return;
       rememberEdit();
-      const preset = drawingType === 'area' ? getAreaPreset(drawingAreaKind) : null;
-      const element = createElement(drawingType, minX, minY, 0, {
+      const preset = getAreaPreset(drawingAreaKind);
+      const element = createElement('area', minX, minY, 0, {
         areaKind: drawingAreaKind,
         color: preset?.color,
         transparency: preset?.transparency
@@ -2844,13 +2839,12 @@ async function mountDistribucion(context) {
         const preset = getAreaPreset(nextAreaKind);
         if (!preset) return;
         if (drawingArea) {
-          const sameMode = drawingType === 'area' && drawingAreaKind === nextAreaKind;
+          const sameMode = drawingAreaKind === nextAreaKind;
           stopDrawingArea();
           if (sameMode) return;
         }
         stopMeasuring();
         clearSelection();
-        drawingType = 'area';
         drawingAreaKind = nextAreaKind;
         drawingArea = true;
         root.classList.add('is-drawing-area');
