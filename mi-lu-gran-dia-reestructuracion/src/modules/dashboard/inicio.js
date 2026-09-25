@@ -51,7 +51,7 @@ let calendarCursor = new Date();
 const heroVideo = $('heroVideo');
 
 function syncEntrySurface() {
-  const directModule = ['#checklist', '#presupuesto', '#proveedores', '#invitados', '#distribucion'].includes(location.hash);
+  const directModule = ['#checklist', '#presupuesto', '#proveedores', '#invitados', '#distribucion', '#cronograma'].includes(location.hash);
   document.documentElement.classList.toggle('module-route', directModule);
   if (directModule) {
     heroVideo?.pause();

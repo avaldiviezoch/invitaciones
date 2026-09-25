@@ -1,0 +1,49 @@
+<div class="timeline-shell">
+  <section class="timeline-hero">
+    <div>
+      <p class="timeline-eyebrow">Módulo · Espacio de la boda</p>
+      <div class="timeline-title-row">
+        <div class="timeline-title-icon" aria-hidden="true">◷</div>
+        <div>
+          <h1>Cronograma</h1>
+          <p>Ordena actividades, horarios y responsables para que cada momento tenga su lugar.</p>
+        </div>
+      </div>
+    </div>
+    <div class="timeline-hero-total"><span>Próximo evento</span><strong data-timeline-next-time>—</strong><small data-timeline-next-name>Sin eventos</small></div>
+  </section>
+
+  <main class="timeline-content">
+    <section class="timeline-toolbar">
+      <button class="timeline-button timeline-primary" type="button" data-timeline-new><b aria-hidden="true">＋</b><span>Nueva actividad</span></button>
+      <div class="timeline-toolbar-filters">
+        <label class="timeline-search">⌕<input type="search" data-timeline-search placeholder="Buscar actividad o responsable"></label>
+        <label class="timeline-filter"><span>Estado</span><select data-timeline-status-filter>
+          <option value="all">Todos</option><option value="pending">Pendientes</option><option value="progress">En progreso</option><option value="completed">Completados</option>
+        </select></label>
+      </div>
+    </section>
+
+    <section class="timeline-overview">
+      <article><span>Actividades</span><strong data-timeline-total>0</strong><small>registradas</small></article>
+      <article><span>Pendientes</span><strong data-timeline-pending>0</strong><small>por realizar</small></article>
+      <article><span>Completadas</span><strong data-timeline-completed>0</strong><small>finalizadas</small></article>
+      <article><span>Fecha de boda</span><strong class="is-date" data-timeline-wedding-date>—</strong><small>según cronograma</small></article>
+    </section>
+
+    <section class="timeline-list-head">
+      <div><h2>Programa de actividades</h2><p>La secuencia se conserva según el orden y horario registrados.</p></div>
+      <span data-timeline-results>0 actividades</span>
+    </section>
+    <section class="timeline-list" data-timeline-list></section>
+    <p class="timeline-read-state" data-timeline-state>Datos de la boda activa</p>
+  </main>
+
+  <dialog class="timeline-dialog" data-timeline-dialog>
+    <div class="timeline-dialog-frame">
+      <header><div><span>CRONOGRAMA</span><h2 data-timeline-dialog-title>Actividad</h2></div><button type="button" data-timeline-close aria-label="Cerrar">×</button></header>
+      <div class="timeline-dialog-body" data-timeline-dialog-body></div>
+      <footer data-timeline-dialog-footer></footer>
+    </div>
+  </dialog>
+</div>

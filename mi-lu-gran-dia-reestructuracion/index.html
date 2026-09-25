@@ -7,7 +7,7 @@
 <script>
 (function(){
   var moduleId=location.hash.replace(/^#/,'');
-  if(moduleId==='checklist'||moduleId==='presupuesto'||moduleId==='proveedores'||moduleId==='invitados'||moduleId==='distribucion') document.documentElement.classList.add('module-route');
+  if(moduleId==='checklist'||moduleId==='presupuesto'||moduleId==='proveedores'||moduleId==='invitados'||moduleId==='distribucion'||moduleId==='cronograma') document.documentElement.classList.add('module-route');
 })();
 </script>
 <link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=44">
@@ -15,7 +15,7 @@
 <link rel="stylesheet" href="src/modules/presupuesto/presupuesto.css?v=26">
 <link rel="stylesheet" href="src/modules/proveedores/proveedores.css?v=4">
 <link rel="stylesheet" href="src/modules/invitados/invitados.css?v=30">
-<link rel="stylesheet" href="src/modules/distribucion/distribucion.css?v=50">
+<link rel="stylesheet" href="src/modules/distribucion/distribucion.css?v=50">\n<link rel="stylesheet" href="src/modules/cronograma/cronograma.css?v=1">
 </head>
 <body class="auth-locked">
 <main class="app">
@@ -471,7 +471,7 @@ Cancelar
     <section class="budget-review" data-module-view="presupuesto" hidden></section>
     <section class="provider-review" data-module-view="proveedores" hidden></section>
     <section class="guests-review" data-module-view="invitados" hidden></section>
-    <section class="distribution-review" data-module-view="distribucion" hidden></section>
+    <section class="distribution-review" data-module-view="distribucion" hidden></section>\n    <section class="timeline-review" data-module-view="cronograma" hidden></section>
   </main>
 </section><section class="access-manager" id="accessManager" aria-hidden="true">
 <div class="access-manager-backdrop" data-close-access></div>
@@ -492,7 +492,7 @@ Cancelar
 <form class="create-wedding-card" id="createWeddingForm" hidden><h3>Crear una nueva boda</h3><label><span>Nombre de la boda</span><input id="newWeddingName" type="text" maxlength="90" placeholder="Ej. Antonio & Lucero" required></label><label><span>Fecha</span><input id="newWeddingDate" type="date"></label><div><button type="button" id="cancelCreateWedding">Cancelar</button><button type="submit">Crear y abrir</button></div><p id="createWeddingStatus" aria-live="polite"></p></form>
 </div>
 </section>
-<script type="module" src="src/modules/dashboard/inicio.js?v=204">
+<script type="module" src="src/modules/dashboard/inicio.js?v=205">
 </script>
 </body>
 </html>

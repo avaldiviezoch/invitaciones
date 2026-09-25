@@ -726,3 +726,13 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - No se encontró defecto funcional demostrable; no se altera el motor de historial en esta fase.
 - Regresión contractual final sin cambios en Firebase/Firestore, datos canónicos, schema V1, catálogo, geometría o UI.
 - Con esta fase queda cerrado el plan de auditoría estructural de Distribución.
+
+
+## 2026-09-26 — Reconstrucción limpia del módulo Cronograma
+- Se activa Cronograma dentro del shell reestructurado y se mantiene una sola implementación responsive para escritorio y móvil.
+- El módulo conserva la clave auditada `planificador_bodas_cronograma_v1` y accede únicamente mediante el adaptador existente `planner-cloud.js`; no se crea una segunda persistencia.
+- La normalización exige el contrato existente `events[]` y preserva propiedades no conocidas de la raíz y de cada evento al editar.
+- Se implementan timeline, búsqueda, filtro por estado, indicadores, alta, edición, consulta de solo lectura y eliminación según permisos de la boda activa.
+- Los campos compatibles contemplan aliases históricos para título, hora, duración, responsable, estado, notas y orden sin renombrar datos existentes.
+- Un formato existente no reconocido bloquea la carga y no se sobrescribe con un estado vacío.
+- No se modifican Firebase/Firestore, Storage, Auth, reglas, usuarios, claves, colecciones ni contratos de sincronización.
