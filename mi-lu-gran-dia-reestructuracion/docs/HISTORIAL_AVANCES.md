@@ -650,3 +650,11 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Diff acumulado Fases 1–7 sin cambios en Firebase/Firestore/Storage/Auth/reglas/usuarios/IDs.
 - No hubo prueba interactiva real en navegador; cierre basado en validación estática, contractual, lógica y geométrica.
 - No se añadieron funcionalidades, archivos, presets, objetos, migraciones, rueda radial, zoom/pan, SAT ni hit-test nuevos.
+
+
+## 2026-09-25 — Distribución Fase 9: retiro de edición manual por vértices
+- Se eliminan los handles de vértice de las áreas seleccionadas y toda la rama de interacción vertexEdit asociada.
+- Se conserva points[] como geometría primaria y continúan dibujo inicial, validaciones, medidas laterales, área/perímetro, resize, rotación, movimiento, Undo/Redo, autosave, propuestas y persistencia V1.
+- El resize sigue escalando points[]; no se introduce una segunda geometría ni una segunda ruta de edición.
+- Se retira CSS huérfano de distribution-polygon-vertex e is-editing-vertex.
+- Sin cambios en Firebase/Firestore, Storage, Auth, datos canónicos, catálogo, presets ni esquema V1.
