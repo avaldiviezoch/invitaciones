@@ -828,8 +828,9 @@ function setInspectorMode(root, mode = 'empty') {
     });
   }
   if (mode === 'element' || mode === 'area') {
-    root.querySelector('[data-distribution-element-note]').hidden = false;
-    root.querySelector('[data-distribution-element-actions]').hidden = false;
+    INSPECTOR_SECTIONS.element.forEach((selector) => {
+      root.querySelector(selector).hidden = false;
+    });
   }
   if (mode === 'area') {
     INSPECTOR_SECTIONS.area.forEach((selector) => {
