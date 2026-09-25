@@ -504,6 +504,7 @@ function renderPhysicalElement(element) {
   node.style.width = `${element.width}px`;
   node.style.height = `${element.height}px`;
   node.style.transform = `rotate(${normalizeRotation(element.rotation)}deg)`;
+  node.style.setProperty('--element-rotation', `${normalizeRotation(element.rotation)}deg`);
   if (element.type === 'area') {
     node.style.setProperty('--area-fill', element.color || getAreaPreset(element.areaKind)?.color || '#c8ccb9');
     node.style.setProperty('--area-fill-opacity', String(1 - Math.max(0, Math.min(90, Number(element.transparency) || 0)) / 100));
@@ -565,6 +566,7 @@ function applyElementPlacement(node, element) {
   node.style.width = `${element.width}px`;
   node.style.height = `${element.height}px`;
   node.style.transform = `rotate(${normalizeRotation(element.rotation)}deg)`;
+  node.style.setProperty('--element-rotation', `${normalizeRotation(element.rotation)}deg`);
   if (element.type === 'area') {
     node.style.setProperty('--area-fill', element.color || getAreaPreset(element.areaKind)?.color || '#c8ccb9');
     node.style.setProperty('--area-fill-opacity', String(1 - Math.max(0, Math.min(90, Number(element.transparency) || 0)) / 100));
