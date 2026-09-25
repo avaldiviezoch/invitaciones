@@ -773,3 +773,11 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se elimina el estado permanente “Buscando coincidencia…” cuando la consulta ya terminó.
 - Se incrementan las versiones de carga del JS/CSS de Música para evitar servir la implementación anterior desde caché.
 - No se modifica Firebase, Firestore, Storage, Auth, reglas, usuarios, documentos, colecciones, `customData.mgdMusic`, Wedding ni las invitaciones públicas.
+
+## 2026-09-26 — Música: homologación responsive de tarjetas enriquecidas
+- Se corrige únicamente la presentación móvil de Música; no cambia la lógica de catálogo ni el contrato RSVP.
+- La carátula móvil deja de comprimirse a 48 px y pasa a 70 px para mantener una presencia visual equivalente a escritorio.
+- Título, artista, álbum y enlace externo mantienen jerarquía visible en pantallas pequeñas; el enlace se presenta como acción compacta y táctil.
+- El bloque “Solicitada por” ocupa el ancho completo de la tarjeta en móvil para evitar que quede comprimido bajo una sola columna.
+- Se permite salto de línea en título, álbum, invitados y dedicatoria para evitar truncamientos innecesarios.
+- Se incrementa la versión CSS de Música para invalidar caché; no se modifica Firebase, Firestore, Storage, Wedding ni datos reales.
