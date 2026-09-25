@@ -1,5 +1,5 @@
 import { loadRsvpAdminSnapshot } from '../../services/rsvp-admin.js?v=5';
-import { searchMusicCatalog } from '../../services/music-catalog.js?v=2';
+import { searchMusicCatalog } from '../../services/music-catalog.js?v=3';
 
 let activeMusicCleanup=null;
 const esc=(value)=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
@@ -38,14 +38,14 @@ function publicUrl(snapshot){
 function card(item){
   const people=[...new Set(item.requests.map(r=>r.person).filter(Boolean))];
   const messages=item.requests.filter(r=>r.message);
-  const catalog=item.catalog;
-  const catalogDone=Boolean(item.catalogDone);
+  const catalogResult=item.catalogResult||{status:'pending'};
+  const catalog=catalogResult.status==='matched'?catalogResult.track:null;
   const visual=catalog?.artwork
     ? `<a class="music-admin-cover" href="${esc(catalog.url)}" target="_blank" rel="noopener" aria-label="Abrir ${esc(catalog.title)} en Apple Music"><img src="${esc(catalog.artwork)}" alt="Portada de ${esc(catalog.album||catalog.title)}" loading="lazy"></a>`
     : '<span class="music-admin-note" aria-hidden="true">♫</span>';
   return `<article class="music-admin-card">
     ${visual}
-    <div class="music-admin-song"><div class="music-admin-song-head"><h3>${esc(catalog?.title||item.title)}</h3>${item.count>1?`<b>${item.count} solicitudes</b>`:''}</div><p>${esc(catalog?.artist||item.artist||'Artista no indicado')}</p>${catalog?.album?`<div class="music-admin-catalog-album"><span>ÁLBUM</span><strong>${esc(catalog.album)}</strong></div>`:''}${catalog?`<a class="music-admin-catalog-link" href="${esc(catalog.url)}" target="_blank" rel="noopener"><span>Abrir canción</span> ↗</a>`:catalogDone?'<small class="music-admin-catalog-state is-done">Sin coincidencia en catálogo · se conserva la solicitud original</small>':'<small class="music-admin-catalog-state is-loading"><i aria-hidden="true"></i>Buscando portada y datos…</small>'}</div>
+    <div class="music-admin-song"><div class="music-admin-song-head"><h3>${esc(catalog?.title||item.title)}</h3>${item.count>1?`<b>${item.count} solicitudes</b>`:''}</div><p>${esc(catalog?.artist||item.artist||'Artista no indicado')}</p>${catalog?.album?`<div class="music-admin-catalog-album"><span>ÁLBUM</span><strong>${esc(catalog.album)}</strong></div>`:''}${catalog?`<a class="music-admin-catalog-link" href="${esc(catalog.url)}" target="_blank" rel="noopener"><span>Abrir canción</span> ↗</a>`:catalogResult.status==='not-found'?'<small class="music-admin-catalog-state is-done">Sin coincidencia en catálogo · se conserva la solicitud original</small>':catalogResult.status==='error'?'<small class="music-admin-catalog-state is-error">Catálogo temporalmente no disponible</small>':'<small class="music-admin-catalog-state is-loading"><i aria-hidden="true"></i>Buscando portada y datos…</small>'}</div>
     <div class="music-admin-people"><span>SOLICITADA POR</span><strong>${esc(people.join(', ')||'Invitado')}</strong>${messages.length?`<small>“${esc(messages[0].message)}”${messages.length>1?` · +${messages.length-1} dedicatoria${messages.length===2?'':'s'}`:''}</small>`:'<small>Sin dedicatoria</small>'}</div>
   </article>`;
 }
@@ -61,7 +61,7 @@ export async function mountMusica(context){
   const list=root.querySelector('[data-music-list]'),state=root.querySelector('[data-music-state]'),open=root.querySelector('[data-music-open-public]');
 
   function render(){
-    const entries=entriesFrom(snapshot),groups=groupedEntries(entries);groups.forEach(group=>{const key=normalize(group.title)+'|'+normalize(group.artist);const enriched=catalogGroups.find(x=>x.key===key);if(enriched){group.catalog=enriched.catalog;group.catalogDone=true}});
+    const entries=entriesFrom(snapshot),groups=groupedEntries(entries);groups.forEach(group=>{const key=normalize(group.title)+'|'+normalize(group.artist);const enriched=catalogGroups.find(x=>x.key===key);if(enriched)group.catalogResult=enriched.result});
     const people=new Set(entries.map(item=>item.responseId||item.person)).size;
     const needle=normalize(search);
     const visible=groups.filter(item=>!needle||normalize([item.title,item.artist,...item.requests.map(r=>r.person)].join(' ')).includes(needle));
@@ -81,7 +81,7 @@ export async function mountMusica(context){
   async function enrichCatalog(){
     const current=++catalogEpoch;const groups=groupedEntries(entriesFrom(snapshot));
     if(!groups.length){catalogGroups=[];return}
-    const queue=[...groups];const enriched=[];const workers=Array.from({length:Math.min(3,queue.length)},async()=>{while(queue.length){const item=queue.shift();const catalog=await searchMusicCatalog(item,signal);if(current!==catalogEpoch)return;enriched.push({key:normalize(item.title)+'|'+normalize(item.artist),catalog});catalogGroups=[...enriched];render()}});await Promise.all(workers);if(current!==catalogEpoch)return;catalogGroups=[...enriched];render();
+    const queue=[...groups];const enriched=[];const workers=Array.from({length:Math.min(3,queue.length)},async()=>{while(queue.length){const item=queue.shift();const result=await searchMusicCatalog(item,signal);if(current!==catalogEpoch)return;enriched.push({key:normalize(item.title)+'|'+normalize(item.artist),result});catalogGroups=[...enriched];render()}});await Promise.all(workers);if(current!==catalogEpoch)return;catalogGroups=[...enriched];render();
   }
   async function load(announce=false){
     const current=++epoch;if(announce)state.textContent='Actualizando solicitudes…';

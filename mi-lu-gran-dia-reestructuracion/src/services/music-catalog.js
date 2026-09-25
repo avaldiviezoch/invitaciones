@@ -4,7 +4,7 @@ let nextRequestAt=0;
 let callbackSequence=0;
 
 const SEARCH_URL='https://itunes.apple.com/search';
-const SEARCH_LIMIT=8;
+const SEARCH_LIMIT=15;
 const REQUEST_GAP_MS=3100;
 const REQUEST_TIMEOUT_MS=9000;
 
@@ -148,28 +148,19 @@ function toTrack(best){
 
 async function lookup(item,signal){
   const title=text(item?.title);
-  const artist=text(item?.artist);
-  if(!title)return null;
+  if(!title)return {status:'not-found'};
 
-  const primary=[title,artist].filter(Boolean).join(' ');
-  let candidates=await queryCatalog(primary,item,signal);
-  let best=candidates[0];
-  const minimum=artist?7:5;
+  const candidates=await queryCatalog(title,item,signal);
+  const best=candidates[0];
+  const minimum=text(item?.artist)?6:5;
 
-  if(best&&best.score>=minimum)return toTrack(best);
-
-  if(artist){
-    candidates=await queryCatalog(title,item,signal);
-    best=candidates[0];
-    if(best&&best.score>=6)return toTrack(best);
-  }
-
-  return null;
+  if(!best||best.score<minimum)return {status:'not-found'};
+  return {status:'matched',track:toTrack(best)};
 }
 
 async function searchMusicCatalog(item,signal){
   const key=normalize([item?.title,item?.artist].filter(Boolean).join(' '));
-  if(!key)return null;
+  if(!key)return {status:'not-found'};
   if(cache.has(key))return cache.get(key);
 
   try{
@@ -178,7 +169,7 @@ async function searchMusicCatalog(item,signal){
     return result;
   }catch(error){
     if(error?.name==='AbortError')throw error;
-    return null;
+    return {status:'error',message:error?.message||'No se pudo consultar el catálogo musical.'};
   }
 }
 

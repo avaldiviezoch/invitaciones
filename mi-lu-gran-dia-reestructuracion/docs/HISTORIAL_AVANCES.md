@@ -834,3 +834,10 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se mantiene el bloque “Solicitada por” a ancho completo debajo del contenido musical.
 - Se incrementa Música CSS a v10 para invalidar caché. No se modifica RSVP, Firebase, Firestore, Storage ni datos reales.
 
+## 2026-09-26 — Música: resolución única de catálogo
+- Se reemplaza el flujo de dos búsquedas por canción por una sola consulta usando el título como término y el artista para puntuar candidatos.
+- El límite de candidatos pasa a 15 dentro de esa única respuesta, evitando la segunda llamada de fallback.
+- El adaptador devuelve estados explícitos `matched`, `not-found` y `error`; un fallo de red o de límite del proveedor ya no se interpreta como “sin coincidencia”.
+- Desktop y móvil consumen el mismo `catalogResult`; no existe lógica de catálogo condicionada por breakpoint o navegador.
+- La cola espaciada y la caché continúan únicamente en memoria, sin persistencia paralela.
+- Se incrementan music-catalog a v3 y Música JS a v8 para invalidar caché. No se modifica RSVP, Firebase, Firestore ni datos reales.
