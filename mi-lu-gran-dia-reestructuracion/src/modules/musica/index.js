@@ -1,5 +1,5 @@
 import { loadRsvpAdminSnapshot } from '../../services/rsvp-admin.js?v=5';
-import { searchMusicCatalog } from '../../services/music-catalog.js?v=1';
+import { searchMusicCatalog } from '../../services/music-catalog.js?v=2';
 
 let activeMusicCleanup=null;
 const esc=(value)=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");

@@ -803,3 +803,11 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - El nombre del álbum admite varias líneas y corte seguro de palabras largas; no usa ellipsis en móvil.
 - Desktop conserva la visual compacta; no se altera la lógica de catálogo ni la fuente RSVP.
 - Se incrementan Música JS a v4 y CSS a v7 para invalidar caché.
+
+## 2026-09-26 — Música: matching tolerante y fallback por título
+- Se corrige el reconocimiento de canciones cuyos artistas RSVP vienen parciales o incompletos frente al catálogo externo.
+- El puntaje de artista acepta coincidencias por inclusión y solapamiento de tokens sin rebajar una coincidencia exacta de título.
+- Si la búsqueda título + artista no alcanza el umbral, el adaptador realiza una segunda búsqueda solo por título y vuelve a puntuar los candidatos con el artista original como referencia.
+- Esto permite reconocer casos como “Dichavate / Ya ice dilan” frente a la ficha de catálogo con múltiples artistas, conservando intacto el texto RSVP original.
+- El enriquecimiento sigue siendo solo visual en memoria; no cambia Firebase, Firestore, Storage, RSVP ni datos reales.
+- Se incrementan music-catalog a v2 y Música JS a v5 para invalidar caché.

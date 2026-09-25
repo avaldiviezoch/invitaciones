@@ -56,14 +56,17 @@ function score(item,candidate){
   if(!wantedTitle||!title)return -Infinity;
 
   let value=0;
-  if(title===wantedTitle)value+=9;
-  else if(title.includes(wantedTitle)||wantedTitle.includes(title))value+=5;
-  else value+=Math.round(overlap(title,wantedTitle)*4);
+  if(title===wantedTitle)value+=10;
+  else if(title.includes(wantedTitle)||wantedTitle.includes(title))value+=6;
+  else value+=Math.round(overlap(title,wantedTitle)*5);
 
   if(wantedArtist){
+    const artistOverlap=overlap(artist,wantedArtist);
     if(artist===wantedArtist)value+=6;
-    else if(artist.includes(wantedArtist)||wantedArtist.includes(artist))value+=3;
-    else value+=Math.round(overlap(artist,wantedArtist)*3)-2;
+    else if(artist.includes(wantedArtist)||wantedArtist.includes(artist))value+=5;
+    else if(artistOverlap>=.5)value+=4;
+    else if(artistOverlap>0)value+=2;
+    else value-=2;
   }
   return value;
 }
@@ -116,27 +119,22 @@ function enqueue(task,signal){
   return result;
 }
 
-async function lookup(item,signal){
-  const query=[text(item?.title),text(item?.artist)].filter(Boolean).join(' ');
-  if(!query)return null;
-
+async function queryCatalog(term,item,signal){
   const url=new URL(SEARCH_URL);
-  url.searchParams.set('term',query);
+  url.searchParams.set('term',term);
   url.searchParams.set('country','PE');
   url.searchParams.set('media','music');
   url.searchParams.set('entity','song');
   url.searchParams.set('limit',String(SEARCH_LIMIT));
 
   const data=await jsonp(url,signal);
-  const candidates=(Array.isArray(data?.results)?data.results:[])
+  return (Array.isArray(data?.results)?data.results:[])
     .filter(candidate=>candidate?.kind==='song')
     .map(candidate=>({candidate,score:score(item,candidate)}))
     .sort((a,b)=>b.score-a.score);
+}
 
-  const best=candidates[0];
-  const minimum=text(item?.artist)?7:5;
-  if(!best||best.score<minimum)return null;
-
+function toTrack(best){
   return {
     trackId:String(best.candidate.trackId||''),
     title:text(best.candidate.trackName),
@@ -146,6 +144,27 @@ async function lookup(item,signal){
     url:text(best.candidate.trackViewUrl),
     score:best.score
   };
+}
+
+async function lookup(item,signal){
+  const title=text(item?.title);
+  const artist=text(item?.artist);
+  if(!title)return null;
+
+  const primary=[title,artist].filter(Boolean).join(' ');
+  let candidates=await queryCatalog(primary,item,signal);
+  let best=candidates[0];
+  const minimum=artist?7:5;
+
+  if(best&&best.score>=minimum)return toTrack(best);
+
+  if(artist){
+    candidates=await queryCatalog(title,item,signal);
+    best=candidates[0];
+    if(best&&best.score>=6)return toTrack(best);
+  }
+
+  return null;
 }
 
 async function searchMusicCatalog(item,signal){
