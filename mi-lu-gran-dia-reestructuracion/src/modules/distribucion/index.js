@@ -727,13 +727,6 @@ function renderPhysicalElement(element) {
         side.setAttribute('y', String((point.y + next.y) / 2 - 6));
         side.textContent = `${length.toFixed(2)} m`;
         polygon.append(side);
-        const handle = document.createElementNS(svgNs, 'circle');
-        handle.classList.add('distribution-polygon-vertex');
-        handle.dataset.distributionPolygonVertex = String(index);
-        handle.setAttribute('cx', String(point.x));
-        handle.setAttribute('cy', String(point.y));
-        handle.setAttribute('r', '7');
-        polygon.append(handle);
       });
     }
     node.append(polygon);
@@ -789,7 +782,6 @@ function refreshElementGeometryNode(node, element) {
   polygon.setAttribute('points', element.points.map((point) => `${point.x},${point.y}`).join(' '));
   if (element.type === 'area') {
     const measures = [...svg.querySelectorAll('.distribution-polygon-side-measure')];
-    const handles = [...svg.querySelectorAll('.distribution-polygon-vertex')];
     element.points.forEach((point, index) => {
       const next = element.points[(index + 1) % element.points.length];
       const measure = measures[index];
@@ -797,11 +789,6 @@ function refreshElementGeometryNode(node, element) {
         measure.setAttribute('x', String((point.x + next.x) / 2));
         measure.setAttribute('y', String((point.y + next.y) / 2 - 6));
         measure.textContent = `${PLAN_SCALE.pixelsToMeters(Math.hypot(next.x - point.x, next.y - point.y)).toFixed(2)} m`;
-      }
-      const handle = handles[index];
-      if (handle) {
-        handle.setAttribute('cx', String(point.x));
-        handle.setAttribute('cy', String(point.y));
       }
     });
   }
@@ -2369,7 +2356,6 @@ async function mountDistribucion(context) {
     const bindElementInteraction = (node, element) => {
       let move = null;
       let resize = null;
-      let vertexEdit = null;
       let moved = false;
 
       const localDelta = (dx, dy, rotation) => {
@@ -2386,25 +2372,6 @@ async function mountDistribucion(context) {
         if (presentationMode || event.button !== 0) return;
         event.stopPropagation();
         selectElement(element.id);
-
-        const vertexHandle = event.target.closest('[data-distribution-polygon-vertex]');
-        if (vertexHandle) {
-          if (!canEdit || element.locked || !Array.isArray(element.points)) return;
-          event.preventDefault();
-          node.setPointerCapture(event.pointerId);
-          node.classList.add('is-editing-vertex');
-          vertexEdit = {
-            pointerId: event.pointerId,
-            clientX: event.clientX,
-            clientY: event.clientY,
-            index: Number(vertexHandle.dataset.distributionPolygonVertex),
-            points: element.points.map((point) => ({ ...point })),
-            geometry: { x: element.x, y: element.y, width: element.width, height: element.height }
-          };
-          moved = false;
-          rememberEdit();
-          return;
-        }
 
         const handle = event.target.closest('[data-distribution-resize-handle]');
         if (handle) {
@@ -2438,30 +2405,6 @@ async function mountDistribucion(context) {
       });
 
       node.addEventListener('pointermove', (event) => {
-        if (vertexEdit && vertexEdit.pointerId === event.pointerId) {
-          event.preventDefault();
-          const worldDx = camera.clientDeltaToWorld(event.clientX - vertexEdit.clientX);
-          const worldDy = camera.clientDeltaToWorld(event.clientY - vertexEdit.clientY);
-          const delta = localDelta(worldDx, worldDy, element.rotation);
-          const candidate = vertexEdit.points.map((point) => ({ ...point }));
-          candidate[vertexEdit.index] = {
-            x: vertexEdit.points[vertexEdit.index].x + delta.x,
-            y: vertexEdit.points[vertexEdit.index].y + delta.y
-          };
-          if (polygonSelfIntersects(candidate) || polygonHasNearDuplicate(candidate)) return;
-          element.x = vertexEdit.geometry.x;
-          element.y = vertexEdit.geometry.y;
-          element.width = vertexEdit.geometry.width;
-          element.height = vertexEdit.geometry.height;
-          element.points = candidate;
-          normalizePolygonElementGeometry(element);
-          moved = Math.hypot(worldDx, worldDy) > 1;
-          refreshElementGeometryNode(node, element);
-          renderElementInspector(root, element);
-          refreshSpatialConflicts();
-          return;
-        }
-
         if (resize && resize.pointerId === event.pointerId) {
           const worldDx = camera.clientDeltaToWorld(event.clientX - resize.clientX);
           const worldDy = camera.clientDeltaToWorld(event.clientY - resize.clientY);
@@ -2513,12 +2456,10 @@ async function mountDistribucion(context) {
       const finishInteraction = (event) => {
         const wasResizing = resize && resize.pointerId === event.pointerId;
         const wasMoving = move && move.pointerId === event.pointerId;
-        const wasEditingVertex = vertexEdit && vertexEdit.pointerId === event.pointerId;
-        if (!wasResizing && !wasMoving && !wasEditingVertex) return;
-        node.classList.remove('is-moving', 'is-resizing', 'is-editing-vertex');
+        if (!wasResizing && !wasMoving) return;
+        node.classList.remove('is-moving', 'is-resizing');
         move = null;
         resize = null;
-        vertexEdit = null;
         if (moved) {
           renderElementInspector(root, element);
           markDirty();
