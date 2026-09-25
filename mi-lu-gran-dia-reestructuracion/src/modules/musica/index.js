@@ -1,5 +1,5 @@
 import { loadRsvpAdminSnapshot } from '../../services/rsvp-admin.js?v=5';
-import { searchMusicCatalog } from '../../services/music-catalog.js?v=5';
+import { searchMusicCatalog } from '../../services/music-catalog.js?v=6';
 
 let activeMusicCleanup=null;
 const esc=(value)=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
@@ -41,7 +41,7 @@ function card(item){
   const catalogResult=item.catalogResult||{status:'pending'};
   const catalog=catalogResult.status==='matched'?catalogResult.track:null;
   const visual=catalog?.artwork
-    ? `<a class="music-admin-cover" href="${esc(catalog.url)}" target="_blank" rel="noopener" aria-label="Abrir ${esc(catalog.title)} en Apple Music"><img src="${esc(catalog.artwork)}" alt="Portada de ${esc(catalog.album||catalog.title)}" loading="lazy"></a>`
+    ? `<a class="music-admin-cover" href="${esc(catalog.url)}" target="_blank" rel="noopener" aria-label="Abrir ${esc(catalog.title)}"><img src="${esc(catalog.artwork)}" alt="Portada de ${esc(catalog.album||catalog.title)}" loading="lazy"></a>`
     : '<span class="music-admin-note" aria-hidden="true">♫</span>';
   return `<article class="music-admin-card">
     ${visual}

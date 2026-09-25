@@ -1,10 +1,11 @@
 const cache=new Map();
 let requestQueue=Promise.resolve();
 let nextRequestAt=0;
+let callbackSequence=0;
 
-const SEARCH_URL='https://kpkcjmpbueqptdkzbzat.supabase.co/functions/v1/music-catalog';
+const SEARCH_URL='https://api.deezer.com/search';
 const SEARCH_LIMIT=15;
-const REQUEST_GAP_MS=3100;
+const REQUEST_GAP_MS=1200;
 const REQUEST_TIMEOUT_MS=9000;
 
 const text=(value)=>String(value??'').trim();
@@ -34,10 +35,6 @@ function delay(ms,signal){
   });
 }
 
-function artwork(url){
-  return text(url).replace('100x100bb','300x300bb').replace('100x100-75','300x300-75');
-}
-
 function overlap(left,right){
   const a=new Set(normalize(left).split(' ').filter(Boolean));
   const b=new Set(normalize(right).split(' ').filter(Boolean));
@@ -50,8 +47,8 @@ function overlap(left,right){
 function score(item,candidate){
   const wantedTitle=normalize(item?.title);
   const wantedArtist=normalize(item?.artist);
-  const title=normalize(candidate?.trackName);
-  const artist=normalize(candidate?.artistName);
+  const title=normalize(candidate?.title);
+  const artist=normalize(candidate?.artist?.name);
   if(!wantedTitle||!title)return -Infinity;
 
   let value=0;
@@ -67,7 +64,47 @@ function score(item,candidate){
     else if(artistOverlap>0)value+=2;
     else value-=2;
   }
+
   return value;
+}
+
+function jsonp(term,signal){
+  return new Promise((resolve,reject)=>{
+    if(signal?.aborted){reject(abortError());return}
+
+    const callbackName='mgdDeezerCatalog_'+Date.now()+'_'+(++callbackSequence);
+    const script=document.createElement('script');
+    const url=new URL(SEARCH_URL);
+    url.searchParams.set('q',term);
+    url.searchParams.set('limit',String(SEARCH_LIMIT));
+    url.searchParams.set('output','jsonp');
+    url.searchParams.set('callback',callbackName);
+
+    let settled=false;
+    let timer=0;
+
+    function cleanup(){
+      clearTimeout(timer);
+      signal?.removeEventListener('abort',onAbort);
+      script.remove();
+      try{delete window[callbackName]}catch{window[callbackName]=undefined}
+    }
+    function finish(handler,value){
+      if(settled)return;
+      settled=true;
+      cleanup();
+      handler(value);
+    }
+    function onAbort(){finish(reject,abortError())}
+
+    window[callbackName]=(payload)=>finish(resolve,payload);
+    script.async=true;
+    script.src=url.toString();
+    script.onerror=()=>finish(reject,new Error('No se pudo consultar el catálogo musical.'));
+    signal?.addEventListener('abort',onAbort,{once:true});
+    timer=setTimeout(()=>finish(reject,new Error('La consulta al catálogo excedió el tiempo de espera.')),REQUEST_TIMEOUT_MS);
+    document.head.appendChild(script);
+  });
 }
 
 function enqueue(task,signal){
@@ -83,47 +120,15 @@ function enqueue(task,signal){
   return result;
 }
 
-async function queryCatalog(term,item,signal){
-  const url=new URL(SEARCH_URL);
-  url.searchParams.set('term',term);
-  url.searchParams.set('limit',String(SEARCH_LIMIT));
-
-  const timeoutController=new AbortController();
-  const timeout=setTimeout(()=>timeoutController.abort(),REQUEST_TIMEOUT_MS);
-  const onAbort=()=>timeoutController.abort();
-  signal?.addEventListener('abort',onAbort,{once:true});
-
-  try{
-    const response=await fetch(url.toString(),{
-      method:'GET',
-      mode:'cors',
-      cache:'no-store',
-      signal:timeoutController.signal
-    });
-    if(!response.ok)throw new Error('El catálogo respondió '+response.status+'.');
-    const data=await response.json();
-    return (Array.isArray(data?.results)?data.results:[])
-      .filter(candidate=>candidate?.kind==='song')
-      .map(candidate=>({candidate,score:score(item,candidate)}))
-      .sort((a,b)=>b.score-a.score);
-  }catch(error){
-    if(signal?.aborted)throw abortError();
-    if(error?.name==='AbortError')throw new Error('La consulta al catálogo excedió el tiempo de espera.');
-    throw error;
-  }finally{
-    clearTimeout(timeout);
-    signal?.removeEventListener('abort',onAbort);
-  }
-}
-
 function toTrack(best){
+  const candidate=best.candidate;
   return {
-    trackId:String(best.candidate.trackId||''),
-    title:text(best.candidate.trackName),
-    artist:text(best.candidate.artistName),
-    album:text(best.candidate.collectionName),
-    artwork:artwork(best.candidate.artworkUrl100),
-    url:text(best.candidate.trackViewUrl),
+    trackId:String(candidate?.id||''),
+    title:text(candidate?.title),
+    artist:text(candidate?.artist?.name),
+    album:text(candidate?.album?.title),
+    artwork:text(candidate?.album?.cover_big||candidate?.album?.cover_medium||candidate?.album?.cover||''),
+    url:text(candidate?.link),
     score:best.score
   };
 }
@@ -132,11 +137,15 @@ async function lookup(item,signal){
   const title=text(item?.title);
   if(!title)return {status:'not-found'};
 
-  const candidates=await queryCatalog(title,item,signal);
+  const data=await jsonp(title,signal);
+  const candidates=(Array.isArray(data?.data)?data.data:[])
+    .map(candidate=>({candidate,score:score(item,candidate)}))
+    .sort((a,b)=>b.score-a.score);
+
   const best=candidates[0];
   const minimum=text(item?.artist)?6:5;
-
   if(!best||best.score<minimum)return {status:'not-found'};
+
   return {status:'matched',track:toTrack(best)};
 }
 

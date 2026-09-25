@@ -857,3 +857,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - No se modifica la presentación desktop, RSVP, Firebase, Firestore, Storage ni datos reales.
 - Se incrementan music-catalog a v5 y Música JS a v10 para invalidar caché.
 
+## 2026-09-26 — Música: proveedor único Deezer para navegador
+- Se reemplaza completamente la integración de catálogo anterior por Deezer Search como único proveedor del módulo.
+- El navegador consulta Deezer mediante JSONP, mecanismo soportado para consumo cross-site sin OAuth ni secretos, evitando dependencias de CORS en Safari móvil.
+- Se elimina del frontend toda referencia a Apple/iTunes y Supabase para el catálogo musical; no existe fallback ni doble proveedor.
+- El matching conserva una sola ruta: búsqueda por título, puntuación por título + artista y resultado explícito `matched/not-found/error`.
+- La metadata consumida sigue siendo únicamente visual y en memoria: título oficial, artista, álbum, portada y enlace.
+- Desktop y móvil consumen el mismo `catalogResult` y el mismo markup; no se modifica el responsive ni la persistencia.
+- Se incrementan music-catalog a v6 y Música JS a v11 para invalidar caché.
+
