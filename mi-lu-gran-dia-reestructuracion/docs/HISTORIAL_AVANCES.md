@@ -583,3 +583,13 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - circulation, restricted y zone quedan como representaciones rectangulares legacy compatibles con el futuro motor de áreas.
 - Silla suelta se mantiene únicamente como mobiliario espacial sin seatId, tableId, invitados ni asignación.
 - Se propone un contrato simple para Fase 3; no se implementa todavía.
+
+
+## 2026-09-25 — Distribución Fase 3: contrato único del catálogo
+- distribution-catalog.js pasa a ser la única fuente de verdad para 38 objetos ordinarios; circulation/restricted/zone permanecen en un bloque legacy separado.
+- Se centralizan labels, categorías, aliases, dimensiones, formas, familias espaciales, capabilities, behavior, iconos y visual.
+- gift se resuelve centralmente a gifts sin migrar el type leído desde legacy.
+- index.js elimina physicalType() y PHYSICAL_ELEMENT_TYPES; parser, creación, renderer, inspector, desktop y móvil consumen getCatalogItem().
+- Los botones desktop dejan de duplicar label/icono/dimensiones y se hidratan desde el catálogo.
+- canopy conserva el contrato rectangular; se elimina solo el botón histórico Dibujar toldo basado en canopy.
+- Sin cambios de Firebase/Firestore ni del formato persistido V1.

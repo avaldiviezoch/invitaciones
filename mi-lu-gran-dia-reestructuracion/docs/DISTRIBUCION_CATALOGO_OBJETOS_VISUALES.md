@@ -650,3 +650,49 @@ No se implementa todavía:
 - migraciones;
 - Firebase/Firestore;
 - cambios de datos.
+
+
+---
+
+# Fase 3 — Contrato único implementado
+
+## Archivo fuente de verdad
+
+`src/modules/distribucion/distribution-catalog.js`
+
+Única fuente ejecutable para los **38 objetos visuales ordinarios canónicos**. El mismo archivo mantiene un bloque separado de compatibilidad para `circulation`, `restricted` y `zone`; esos tres no se cuentan como objetos ordinarios nuevos.
+
+## Contrato definitivo
+
+Cada entrada ordinaria declara: `type`, `label`, `category`, `aliases`, `dimensions`, `shape`, `spatialFamily`, `capabilities`, `behavior`, `icon` y `visual`. Icono y visual se justifican porque ya tienen consumidores reales en la UI/renderer.
+
+## Aliases
+
+`resolveCatalogType()` centraliza aliases derivados de las propias entradas. El alias de type actualmente aprobado es `gift → gifts`. `getCatalogItem('gift')` obtiene la definición canónica, pero el parser conserva `element.type='gift'` al leer legacy; no migra datos. La creación nueva sí normaliza al type canónico.
+
+## Dimensiones
+
+Los defaults físicos están solo en el catálogo, en metros. `index.js` los convierte a píxeles con `PLAN_SCALE`. Parser y creación consumen la misma definición.
+
+## Desktop y móvil
+
+Los botones desktop conservan únicamente `data-distribution-add-element`; label, icono y dimensión se hidratan desde el catálogo. Móvil recorre esos mismos botones visibles y consulta el mismo `getCatalogItem()`. No existe catálogo móvil paralelo.
+
+## Compatibilidad legacy
+
+- `gifts` sigue canónico y `gift` es alias sin migración.
+- `planter` sigue siendo `planter`, mostrado como Jardinera / macetero.
+- `entrance` se conserva.
+- `exit` queda registrado como variante real, sin botón nuevo todavía.
+- `canopy` sigue siendo Cobertura rectangular / toldo modular.
+- Se retira el botón “Dibujar toldo” que reutilizaba `canopy` como polígono; no se implementa el Toldo nuevo.
+- `chair` queda como Silla suelta, behavior `detached-chair`, sin integración con Mesas/Invitados.
+- `circulation`, `restricted` y `zone` siguen reconocidos como legacy V1.
+
+## Estructuras eliminadas
+
+Se retiran `physicalType()`, `PHYSICAL_ELEMENT_TYPES`, las capabilities físicas duplicadas en `index.js` y los labels/iconos/dimensiones manuales de los botones HTML. `SPATIAL_INTERACTIONS` permanece porque es motor de colisiones, no catálogo.
+
+## Alcance
+
+No se agregan objetos faltantes a la UI, no se rediseña el catálogo, no se implementan áreas nuevas/Toldo y no se modifica Firebase/Firestore ni la estructura V1.

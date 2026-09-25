@@ -11,6 +11,7 @@ import {
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=6';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { setupDistributionCamera } from './camera.js?v=9';
+import { getCatalogItem, resolveCatalogType } from './distribution-catalog.js?v=1';
 import {
   DEFAULT_BACKGROUND_ID,
   addDistributionBackground,
@@ -21,7 +22,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=54', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=55', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 1;
@@ -44,9 +45,14 @@ const PROXIMITY_OPTIONS_METERS = Object.freeze([0.6, 1, 1.5, 2]);
 const MIN_ELEMENT_METERS = 0.5;
 const MAX_ELEMENT_METERS = 30;
 const HISTORY_LIMIT = 50;
-const EDIT_CAPABILITIES = Object.freeze({
-  table: Object.freeze({ movable: true, rotatable: true, resizable: false, copyable: false, deletable: false, layerable: false, lockable: false }),
-  physical: Object.freeze({ movable: true, rotatable: true, resizable: true, copyable: true, deletable: true, layerable: true, lockable: true })
+const TABLE_EDIT_CAPABILITIES = Object.freeze({
+  movable: true,
+  rotatable: true,
+  resizable: false,
+  copyable: false,
+  deletable: false,
+  layerable: false,
+  lockable: false
 });
 
 const SPATIAL_INTERACTIONS = Object.freeze({
@@ -58,59 +64,15 @@ const SPATIAL_INTERACTIONS = Object.freeze({
   informative: Object.freeze({ table: 'allow', obstacle: 'allow', reserved: 'allow', container: 'allow', circulation: 'allow', restricted: 'allow', informative: 'allow' })
 });
 
-function physicalType(label, widthMeters, heightMeters, options = {}) {
-  const spatialFamily = options.spatialFamily || 'obstacle';
-  if (!SPATIAL_INTERACTIONS[spatialFamily]) throw new Error(`Familia espacial no reconocida: ${spatialFamily}`);
-  return Object.freeze({
-    label,
-    widthMeters,
-    heightMeters,
-    width: PLAN_SCALE.metersToPixels(widthMeters),
-    height: PLAN_SCALE.metersToPixels(heightMeters),
-    capabilities: options.capabilities || EDIT_CAPABILITIES.physical,
-    spatialFamily,
-    visual: Object.freeze({
-      fit: options.visualFit || 'contain',
-      paddingRatio: Math.max(0, Math.min(0.35, Number(options.visualPaddingRatio ?? 0.08))),
-      anchor: options.visualAnchor || 'center'
-    })
-  });
+function catalogElementSize(definition) {
+  return {
+    width: PLAN_SCALE.metersToPixels(definition.dimensions.widthM),
+    height: PLAN_SCALE.metersToPixels(definition.dimensions.heightM)
+  };
 }
 
-const PHYSICAL_ELEMENT_TYPES = Object.freeze({
-  dance: physicalType('Pista de baile', 5, 5, { spatialFamily: 'reserved' }),
-  bar: physicalType('Barra', 4, 1.2),
-  dj: physicalType('DJ / sonido', 3, 2),
-  stage: physicalType('Escenario', 4, 2.5),
-  column: physicalType('Columna', 0.5, 0.5),
-  canopy: physicalType('Toldo / cobertura', 6, 6, { spatialFamily: 'container' }),
-  circulation: physicalType('Circulación', 4, 1.2, { spatialFamily: 'circulation' }),
-  restricted: physicalType('Zona restringida', 3, 3, { spatialFamily: 'restricted' }),
-  entrance: physicalType('Entrada / salida', 2, 1.2, { spatialFamily: 'circulation' }),
-  plant: physicalType('Planta mediana', 0.8, 0.8, { spatialFamily: 'obstacle', visualFit: 'contain', visualPaddingRatio: 0.05 }),
-  plantSmall: physicalType('Planta pequeña', 0.5, 0.5, { spatialFamily: 'obstacle', visualFit: 'contain', visualPaddingRatio: 0.04 }),
-  tree: physicalType('Árbol / macetero grande', 1.2, 1.2, { spatialFamily: 'obstacle', visualFit: 'contain', visualPaddingRatio: 0.04 }),
-  planter: physicalType('Jardinera', 1.5, 0.6, { spatialFamily: 'obstacle', visualFit: 'contain', visualPaddingRatio: 0.05 }),
-  buffet: physicalType('Buffet', 3, 0.9),
-  drinks: physicalType('Bebidas', 2, 0.8),
-  desserts: physicalType('Postres', 2.4, 0.8),
-  cake: physicalType('Torta', 1.8, 1.8),
-  gifts: physicalType('Regalos', 1.8, 0.75),
-  welcome: physicalType('Bienvenida', 1.8, 0.75),
-  booth360: physicalType('Cabina 360°', 2.5, 2.5, { spatialFamily: 'reserved' }),
-  photo: physicalType('Zona de fotos', 3, 2, { spatialFamily: 'reserved' }),
-  screen: physicalType('Pantalla', 2.5, 0.5),
-  altar: physicalType('Altar', 4, 2, { spatialFamily: 'reserved' }),
-  arch: physicalType('Arco decorativo', 2.4, 0.8),
-  restroom: physicalType('Baños', 2.5, 2),
-  kitchen: physicalType('Cocina / apoyo', 3, 2.5, { spatialFamily: 'restricted' }),
-  technical: physicalType('Zona técnica', 2, 1.5, { spatialFamily: 'restricted' }),
-  extinguisher: physicalType('Extintor', 0.5, 0.5),
-  zone: physicalType('Zona / área', 4, 3, { spatialFamily: 'informative' })
-});
-
 function elementCapabilities(element) {
-  return PHYSICAL_ELEMENT_TYPES[element?.type]?.capabilities || EDIT_CAPABILITIES.physical;
+  return getCatalogItem(element?.type)?.capabilities || null;
 }
 
 function rotateLocalPoint(point, rotation) {
@@ -186,7 +148,7 @@ function circlePolygonIntersects(circle, polygon) {
 }
 
 function spatialShapeForElement(element) {
-  const definition = PHYSICAL_ELEMENT_TYPES[element.type];
+  const definition = getCatalogItem(element.type);
   if (!definition) return null;
   if (Array.isArray(element.points)) {
     const center = { x: element.x + element.width / 2, y: element.y + element.height / 2 };
@@ -220,7 +182,7 @@ function spatialShapeForTable(table, placement, geometry) {
 }
 
 function spatialFamilyFor(element) {
-  return PHYSICAL_ELEMENT_TYPES[element?.type]?.spatialFamily || 'informative';
+  return getCatalogItem(element?.type)?.spatialFamily || 'informative';
 }
 
 function spatialRuleFor(element, target) {
@@ -502,8 +464,10 @@ function parseDistributionState(value) {
       const y = finiteNumber(element?.y);
       const rotation = finiteNumber(element?.rotation);
       const layer = finiteNumber(element?.layer) ?? 0;
-      const width = finiteNumber(element?.width) ?? PHYSICAL_ELEMENT_TYPES[type]?.width;
-      const height = finiteNumber(element?.height) ?? PHYSICAL_ELEMENT_TYPES[type]?.height;
+      const definition = getCatalogItem(type);
+      const defaults = definition ? catalogElementSize(definition) : null;
+      const width = finiteNumber(element?.width) ?? defaults?.width;
+      const height = finiteNumber(element?.height) ?? defaults?.height;
       const locked = element?.locked === true;
       const points = Array.isArray(element?.points)
         ? element.points.map((point) => ({ x: finiteNumber(point?.x), y: finiteNumber(point?.y) }))
@@ -514,7 +478,7 @@ function parseDistributionState(value) {
         && polygonArea(points) >= 1
         && !polygonSelfIntersects(points)
       );
-      if (!id || seenElements.has(id) || !PHYSICAL_ELEMENT_TYPES[type] || x === null || y === null || rotation === null || width === null || height === null || width < PIXELS_PER_METER * MIN_ELEMENT_METERS || height < PIXELS_PER_METER * MIN_ELEMENT_METERS || width > PIXELS_PER_METER * MAX_ELEMENT_METERS || height > PIXELS_PER_METER * MAX_ELEMENT_METERS || !validPoints) {
+      if (!id || seenElements.has(id) || !definition || x === null || y === null || rotation === null || width === null || height === null || width < PIXELS_PER_METER * MIN_ELEMENT_METERS || height < PIXELS_PER_METER * MIN_ELEMENT_METERS || width > PIXELS_PER_METER * MAX_ELEMENT_METERS || height > PIXELS_PER_METER * MAX_ELEMENT_METERS || !validPoints) {
         throw new Error('La distribución guardada contiene elementos físicos no válidos. No se modificó ningún dato.');
       }
       seenElements.add(id);
@@ -674,9 +638,10 @@ function applyElementVisualContract(node, definition) {
 }
 
 function renderPhysicalElement(element) {
-  const definition = PHYSICAL_ELEMENT_TYPES[element.type];
+  const definition = getCatalogItem(element.type);
+  const canonicalType = resolveCatalogType(element.type);
   const node = document.createElement('article');
-  node.className = `distribution-element is-${element.type}`;
+  node.className = `distribution-element is-${canonicalType}`;
   node.dataset.elementId = element.id;
   node.tabIndex = 0;
   node.setAttribute('role', 'button');
@@ -747,7 +712,7 @@ function refreshElementGeometryNode(node, element) {
 }
 
 function renderElementInspector(root, element) {
-  const definition = PHYSICAL_ELEMENT_TYPES[element.type];
+  const definition = getCatalogItem(element.type);
   root.querySelector('[data-distribution-selection-empty]').hidden = true;
   root.querySelector('[data-distribution-selection]').hidden = false;
   root.querySelector('[data-distribution-selected-name]').textContent = definition.label;
@@ -842,6 +807,23 @@ async function mountDistribucion(context) {
   const templateHtml = await template();
   if (epoch !== mountEpoch || !root.isConnected) return;
   root.innerHTML = templateHtml;
+  root.querySelectorAll('[data-distribution-add-element]').forEach((button) => {
+    const definition = getCatalogItem(button.dataset.distributionAddElement);
+    if (!definition) return;
+    const dimensions = definition.shape === 'circle' && definition.dimensions.widthM === definition.dimensions.heightM
+      ? `Ø ${definition.dimensions.widthM.toFixed(2)} m`
+      : `${definition.dimensions.widthM.toFixed(2)} × ${definition.dimensions.heightM.toFixed(2)} m`;
+    button.setAttribute('aria-label', definition.label);
+    button.replaceChildren();
+    const icon = document.createElement('strong');
+    icon.textContent = definition.icon;
+    const text = document.createElement('span');
+    text.textContent = definition.label;
+    const size = document.createElement('small');
+    size.textContent = dimensions;
+    text.append(size);
+    button.append(icon, text);
+  });
   const status = root.querySelector('[data-distribution-status]');
   const canEdit = weddingCapabilities(context?.role).canEdit;
   status.textContent = 'Cargando mesas y distribución…';
@@ -934,7 +916,7 @@ async function mountDistribucion(context) {
       if (action === 'add') {
         [...root.querySelectorAll('[data-distribution-add-element]')].forEach((sourceButton) => {
           const type = escapeText(sourceButton.dataset.distributionAddElement);
-          const definition = PHYSICAL_ELEMENT_TYPES[type];
+          const definition = getCatalogItem(type);
           if (!definition) return;
           addMobileButton(definition.label, () => {
             sourceButton.click();
@@ -1034,7 +1016,7 @@ async function mountDistribucion(context) {
         if (selectedElementId) {
           const selectedElement = physicalElements.find((item) => item.id === selectedElementId);
           if (selectedElement && elementCapabilities(selectedElement).resizable) {
-            const definition = PHYSICAL_ELEMENT_TYPES[selectedElement.type];
+            const definition = getCatalogItem(selectedElement.type);
             const sizeNote = document.createElement('p');
             sizeNote.className = 'distribution-mobile-sheet-note';
             sizeNote.textContent = `${definition.label} · ${(selectedElement.width / PIXELS_PER_METER).toFixed(2)} × ${(selectedElement.height / PIXELS_PER_METER).toFixed(2)} m`;
@@ -1767,7 +1749,7 @@ async function mountDistribucion(context) {
       })).filter((entry) => entry.shape);
 
       const tableLabel = (entry) => tableName(entry.table, entry.index);
-      const elementLabel = (element) => PHYSICAL_ELEMENT_TYPES[element.type]?.label || 'Elemento';
+      const elementLabel = (element) => getCatalogItem(element.type)?.label || 'Elemento';
 
       world.querySelectorAll('.distribution-table,.distribution-element').forEach((node) => {
         node.classList.remove('has-spatial-conflict', 'has-spatial-warning', 'has-proximity-warning');
@@ -1878,15 +1860,17 @@ async function mountDistribucion(context) {
     };
 
     const createElement = (type, x, y, rotation = 0) => {
-      if (!PHYSICAL_ELEMENT_TYPES[type]) return null;
+      const canonicalType = resolveCatalogType(type);
+      const definition = getCatalogItem(canonicalType);
+      if (!definition) return null;
       const usedIds = new Set(physicalElements.map((element) => escapeText(element.id)).filter(Boolean));
       let elementId = '';
       do {
         elementSequence += 1;
         elementId = `element_${elementSequence}`;
       } while (usedIds.has(elementId));
-      const definition = PHYSICAL_ELEMENT_TYPES[type];
-      const element = { id: elementId, type, x, y, rotation: normalizeRotation(rotation), layer: physicalElements.length, locked: false, width: definition.width, height: definition.height };
+      const defaults = catalogElementSize(definition);
+      const element = { id: elementId, type: canonicalType, x, y, rotation: normalizeRotation(rotation), layer: physicalElements.length, locked: false, width: defaults.width, height: defaults.height };
       physicalElements.push(element);
       const node = renderPhysicalElement(element);
       world.append(node);
@@ -1937,11 +1921,11 @@ async function mountDistribucion(context) {
       const source = physicalElements.find((item) => item.id === selectedElementId);
       if (!source || !elementCapabilities(source).copyable) return;
       copiedElement = { type: source.type, x: source.x, y: source.y, rotation: source.rotation, width: source.width, height: source.height, points: Array.isArray(source.points) ? source.points.map((point) => ({ ...point })) : null };
-      status.textContent = `${PHYSICAL_ELEMENT_TYPES[source.type].label} copiado`;
+      status.textContent = `${getCatalogItem(source.type).label} copiado`;
     };
 
     const pasteCopiedElement = () => {
-      if (!canEdit || !copiedElement || !PHYSICAL_ELEMENT_TYPES[copiedElement.type]?.capabilities?.copyable) return;
+      if (!canEdit || !copiedElement || !getCatalogItem(copiedElement.type)?.capabilities?.copyable) return;
       rememberEdit();
       copiedElement = { ...copiedElement, x: copiedElement.x + 24, y: copiedElement.y + 24 };
       const pasted = createElement(copiedElement.type, copiedElement.x, copiedElement.y, copiedElement.rotation);
@@ -1997,7 +1981,7 @@ async function mountDistribucion(context) {
         if (presentationMode || event.button !== 0) return;
         const rotationHandle = event.target.closest('[data-distribution-table-rotation-handle]');
         if (rotationHandle) {
-          if (!canEdit || !EDIT_CAPABILITIES.table.rotatable) return;
+          if (!canEdit || !TABLE_EDIT_CAPABILITIES.rotatable) return;
           event.preventDefault();
           event.stopPropagation();
           const placement = placementState.get(node.dataset.tableId);
@@ -2016,7 +2000,7 @@ async function mountDistribucion(context) {
         }
 
         if (event.target.closest('[data-guest-id],.distribution-chair')) return;
-        if (!canEdit || !EDIT_CAPABILITIES.table.movable) return;
+        if (!canEdit || !TABLE_EDIT_CAPABILITIES.movable) return;
         event.stopPropagation();
         const placement = placementState.get(node.dataset.tableId);
         if (!placement) return;
@@ -2097,7 +2081,7 @@ async function mountDistribucion(context) {
         selectTable(node.dataset.tableId);
         return;
       }
-      if (!canEdit || !EDIT_CAPABILITIES.table.movable || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
+      if (!canEdit || !TABLE_EDIT_CAPABILITIES.movable || !['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(event.key)) return;
       const placement = placementState.get(node.dataset.tableId);
       if (!placement) return;
       event.preventDefault();
@@ -2261,7 +2245,7 @@ async function mountDistribucion(context) {
       if (!canEdit) return;
       if (selectedTableId) {
         const placement = placementState.get(selectedTableId);
-        if (!placement || !EDIT_CAPABILITIES.table.rotatable) return;
+        if (!placement || !TABLE_EDIT_CAPABILITIES.rotatable) return;
         rememberEdit();
         if (!applyTableRotation(selectedTableId, placement.rotation + delta)) {
           undoStack.pop();
@@ -2288,7 +2272,7 @@ async function mountDistribucion(context) {
       button.onclick = () => {
         if (!canEdit) return;
         const type = escapeText(button.dataset.distributionAddElement);
-        if (!PHYSICAL_ELEMENT_TYPES[type]) return;
+        if (!getCatalogItem(type)) return;
         rememberEdit();
         const element = createElement(
           type,
@@ -2404,7 +2388,7 @@ async function mountDistribucion(context) {
     let drawingArea = false;
     let drawingType = 'zone';
 
-    const drawingLabel = (type) => PHYSICAL_ELEMENT_TYPES[type]?.label || 'Área libre';
+    const drawingLabel = (type) => getCatalogItem(type)?.label || 'Área libre';
 
     const stopMeasuring = () => {
       measuring = false;
@@ -2481,7 +2465,7 @@ async function mountDistribucion(context) {
       button.dataset.defaultLabel = button.textContent;
       button.onclick = () => {
         const nextType = button.dataset.distributionDrawArea || 'zone';
-        if (!PHYSICAL_ELEMENT_TYPES[nextType]) return;
+        if (!getCatalogItem(nextType)) return;
         if (drawingArea) {
           const switchingType = drawingType !== nextType;
           stopDrawingArea();
