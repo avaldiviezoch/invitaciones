@@ -658,3 +658,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - El resize sigue escalando points[]; no se introduce una segunda geometría ni una segunda ruta de edición.
 - Se retira CSS huérfano de distribution-polygon-vertex e is-editing-vertex.
 - Sin cambios en Firebase/Firestore, Storage, Auth, datos canónicos, catálogo, presets ni esquema V1.
+
+
+## 2026-09-25 — Distribución Fase 10: blindaje del inspector
+- Se sustituye el ocultamiento disperso del panel lateral por un único controlador de modos empty/table/element/area.
+- Cada cambio de selección primero limpia todas las secciones específicas y después habilita solo las que pertenecen al tipo actual.
+- Tipo de mesa, medida física canónica, asignados/libres e invitados quedan exclusivamente en modo table.
+- Objetos ordinarios usan controles de objeto según capabilities; áreas añaden área/perímetro y color/transparencia sin heredar controles de mesa.
+- clearSelection reutiliza el mismo controlador y vuelve a estado vacío.
+- Sin cambios en Firebase/Firestore, datos canónicos, persistencia, catálogo, propuestas o geometría.
