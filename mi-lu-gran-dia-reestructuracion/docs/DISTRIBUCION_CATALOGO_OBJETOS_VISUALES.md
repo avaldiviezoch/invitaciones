@@ -802,8 +802,6 @@ Con un mínimo de tres vértices se puede finalizar de tres formas: clic/tap cer
 
 Área: fórmula Shoelace sobre `points[]`, convertida con la escala vigente de 32 px/m. Perímetro: suma de las distancias de cada arista incluyendo último→primero. Las medidas laterales se calculan con la misma escala y se muestran solo cuando el Toldo está seleccionado.
 
-Los handles de vértice permiten drag individual. Durante el gesto se actualizan puntos, bounding box, medidas, área, perímetro y colisiones en memoria; el commit lógico ocurre al soltar el puntero. El bounding box se renormaliza sin cambiar la posición mundial de la geometría restante.
-
 Resize reutiliza el gesto genérico existente y escala todos los puntos desde el snapshot inicial del gesto. Rotación reutiliza `element.rotation`; los puntos permanecen en coordenadas locales, evitando almacenar una segunda geometría rotada.
 
 ## Estilo
@@ -812,7 +810,7 @@ El inspector muestra Toldo, ancho/alto derivados, Área, Perímetro, color y tra
 
 ## Persistencia, historial y propuestas
 
-`points[]`, `areaKind`, color y transparencia viajan por la serialización V1 existente. Los puntos conservan cuatro decimales de píxel al serializar para no degradar la geometría por redondeo visual. Undo/Redo reutiliza `editorSnapshot()` y cubre creación, movimiento, edición de vértices, resize, rotación, estilo y eliminación. Autosave sigue ocurriendo al finalizar una acción lógica mediante `markDirty()`. Duplicado/copy/paste preservan puntos y estilo con nuevo ID. Las propuestas clonan los puntos y metadatos sin compartir referencias.
+`points[]`, `areaKind`, color y transparencia viajan por la serialización V1 existente. Los puntos conservan cuatro decimales de píxel al serializar para no degradar la geometría por redondeo visual. Undo/Redo reutiliza `editorSnapshot()` y cubre creación, movimiento, resize, rotación, estilo y eliminación. Autosave sigue ocurriendo al finalizar una acción lógica mediante `markDirty()`. Duplicado/copy/paste preservan puntos y estilo con nuevo ID. Las propuestas clonan los puntos y metadatos sin compartir referencias.
 
 ## Compatibilidad
 
@@ -837,7 +835,7 @@ Cada preset define únicamente semántica/presentación necesaria: `areaKind`, l
 
 ## Motor común
 
-El motor de Fase 6 se generaliza para cualquier elemento `type:'area'`: dibujo, cierre, cancelación, preview, Shoelace, perímetro, medidas laterales, handles de vértice, resize, rotación, movimiento, historial, autosave, copy/paste, renderer e inspector. No existen motores ni listeners por preset.
+El motor de Fase 6 se generaliza para cualquier elemento `type:'area'`: dibujo, cierre, cancelación, preview, Shoelace, perímetro, medidas laterales, resize, rotación, movimiento, historial, autosave, copy/paste, renderer e inspector. No existen motores ni listeners por preset.
 
 El renderer resuelve label/capacidades mediante el preset de `areaKind`. Color y transparencia se toman del preset solo como valores iniciales y continúan siendo editables por instancia.
 
@@ -904,7 +902,7 @@ Con escala 32 px = 1 m:
 
 ## Undo/Redo, autosave y propuestas
 
-Los gestos de movimiento, resize, rotación y edición de vértice toman una sola instantánea al iniciar y no crean historial por cada `pointermove`. Si un gesto no produce cambio, la instantánea se retira. Creación, eliminación, dimensiones, color y transparencia utilizan el mismo historial.
+Los gestos de movimiento, resize y rotación toman una sola instantánea al iniciar y no crean historial por cada `pointermove`. Si un gesto no produce cambio, la instantánea se retira. Creación, eliminación, dimensiones, color y transparencia utilizan el mismo historial.
 
 El autosave continúa centralizado mediante el estado `dirty`; no se agregó botón Guardar ni persistencia por `pointermove`. Las propuestas mantienen placements y elementos aislados, clonan geometría al duplicarse y limpian el historial al cambiar de propuesta.
 
@@ -936,3 +934,12 @@ Limitaciones conocidas que permanecen:
 ## Estado de cierre
 
 Fases 1–8 cerradas para este bloque. Persistencia global V1 conservada. No se crearon archivos, presets, objetos, migraciones ni funcionalidades nuevas.
+
+
+---
+
+# Fase 9 — Retiro de edición manual por vértices
+
+Se retira la edición manual de vértices de las áreas dibujables. Las áreas conservan `points[]` como geometría primaria, el dibujo poligonal inicial, preview, cierre, validación de auto-intersección y vértices demasiado próximos durante la creación, medidas laterales, área, perímetro, movimiento, resize, rotación, historial, autosave, propuestas y serialización V1.
+
+La selección de un área ya no crea ni muestra handles de vértice ni registra una rama de interacción `vertexEdit`. El resize existente continúa escalando todos los puntos desde el snapshot inicial del gesto. No se modifica Firebase, Firestore, Storage, Auth, datos canónicos, catálogo, presets ni esquema persistido.
