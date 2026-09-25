@@ -965,3 +965,16 @@ Desktop y móvil conservan superficies visuales distintas, pero dejan de encaden
 Los controles desktop y la hoja móvil invocan esas mismas operaciones. La hoja móvil ya no usa `proxyClick`, `.click()` sobre botones desktop ni `dispatchEvent(new Event(...))` para color, transparencia o snap. El catálogo móvil continúa derivándose del mismo catálogo canónico y no se crea una segunda lista de objetos o presets.
 
 No se modifica persistencia V1, Firebase/Firestore, datos canónicos, geometría, propuestas almacenadas, catálogo ni permisos.
+
+
+---
+
+# Fase 12 — Frontera canónica Mesas ↔ Distribución
+
+La auditoría confirmó que la propiedad declarada en reglas es correcta: mesa/silla pertenece a Mesas y posición/rotación pertenece a Distribución. El hallazgo real era que Distribución importaba `saveInvitadosSnapshot()` y reconstruía localmente el flujo leer → localizar mesa → mutar → guardar el snapshot canónico completo para cambiar tipo o dimensiones de mesa.
+
+Se centraliza esa escritura en el adaptador existente `invitados-data.js` mediante `updateCanonicalTable(context, tableId, mutateTable)`. El adaptador carga el snapshot vigente, localiza la mesa canónica por ID, aplica únicamente la mutación solicitada, actualiza `updatedAt` y reutiliza la serialización/escritura ya existente. No se crea almacén, clave, schema, documento ni formato nuevo.
+
+Distribución deja de importar y llamar directamente `saveInvitadosSnapshot()`. Sus dos operaciones permitidas sobre datos de Mesas —tipo y dimensiones físicas— solicitan la actualización al adaptador y solo actualizan su espejo en memoria después de recibir la mesa ya persistida. Se elimina la mutación optimista previa y su rollback local. Los placements `x/y/rotation` continúan siendo propiedad exclusiva de Distribución.
+
+No se modifican IDs, invitados, sillas, asignaciones, capacidad, Firebase/Firestore, Storage, reglas, autenticación ni persistencia V1 de Distribución. La suscripción canónica y el evento existente de cambio se conservan en esta fase para no mezclar la frontera de escritura con una refactorización de sincronización.
