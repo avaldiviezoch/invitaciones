@@ -807,7 +807,15 @@ function refreshElementGeometryNode(node, element) {
   }
 }
 
+function setTableOnlyInspectorControls(root, visible) {
+  root.querySelector('[data-distribution-table-shape-control]').hidden = !visible;
+  root.querySelector('[data-distribution-table-dimensions]').hidden = !visible;
+  root.querySelector('[data-distribution-table-stats]').hidden = !visible;
+  root.querySelector('[data-distribution-selected-guests]').hidden = !visible;
+}
+
 function renderElementInspector(root, element) {
+  setTableOnlyInspectorControls(root, false);
   const definition = getElementCatalogItem(element);
   root.querySelector('[data-distribution-selection-empty]').hidden = true;
   root.querySelector('[data-distribution-selection]').hidden = false;
@@ -823,7 +831,6 @@ function renderElementInspector(root, element) {
   const rotationOutput = root.querySelector('[data-distribution-selected-rotation]');
   rotationOutput.value = `${normalizeRotation(element.rotation)}°`;
   rotationOutput.textContent = rotationOutput.value;
-  root.querySelector('[data-distribution-table-stats]').hidden = true;
   const polygonStats = root.querySelector('[data-distribution-polygon-stats]');
   const polygonStyle = root.querySelector('[data-distribution-polygon-style]');
   polygonStats.hidden = !isPolygonArea;
@@ -836,9 +843,6 @@ function renderElementInspector(root, element) {
     root.querySelector('[data-distribution-polygon-transparency-value]').value = `${element.transparency ?? 45}%`;
     root.querySelector('[data-distribution-polygon-transparency-value]').textContent = `${element.transparency ?? 45}%`;
   }
-  root.querySelector('[data-distribution-table-shape-control]').hidden = true;
-  root.querySelector('[data-distribution-table-dimensions]').hidden = true;
-  root.querySelector('[data-distribution-selected-guests]').hidden = true;
   root.querySelector('[data-distribution-element-note]').hidden = false;
   root.querySelector('[data-distribution-element-actions]').hidden = false;
   const capabilities = elementCapabilities(element);
@@ -855,11 +859,10 @@ function renderElementInspector(root, element) {
 }
 
 function renderInspector(root, table, tableIndex, guests, placement) {
+  setTableOnlyInspectorControls(root, true);
   root.querySelector('[data-distribution-selection-empty]').hidden = true;
-  root.querySelector('[data-distribution-table-stats]').hidden = false;
   root.querySelector('[data-distribution-polygon-stats]').hidden = true;
   root.querySelector('[data-distribution-polygon-style]').hidden = true;
-  root.querySelector('[data-distribution-selected-guests]').hidden = false;
   root.querySelector('[data-distribution-element-note]').hidden = true;
   root.querySelector('[data-distribution-element-actions]').hidden = true;
   root.querySelector('[data-distribution-dimensions]').hidden = true;
@@ -870,13 +873,11 @@ function renderInspector(root, table, tableIndex, guests, placement) {
     .sort((a, b) => Number(a.seatNumber || 999) - Number(b.seatNumber || 999));
   root.querySelector('[data-distribution-selected-name]').textContent = tableName(table, tableIndex);
   root.querySelector('[data-distribution-selected-meta]').textContent = `${normalizeTableShape(table.type)} · ${capacity} sillas`;
-  root.querySelector('[data-distribution-table-shape-control]').hidden = false;
   root.querySelector('[data-distribution-table-shape]').value = normalizeTableShape(table.type || table.shape);
   const tabletop = tablePhysicalDimensions(table);
   const tableDimensions = root.querySelector('[data-distribution-table-dimensions]');
   const widthLabel = root.querySelector('[data-distribution-table-width-label]');
   const heightLabel = root.querySelector('[data-distribution-table-height-label]');
-  tableDimensions.hidden = false;
   widthLabel.firstChild.textContent = tabletop.shape === 'round'
     ? 'Diámetro (m)'
     : tabletop.shape === 'square'
