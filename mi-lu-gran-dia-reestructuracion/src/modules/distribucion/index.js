@@ -1769,17 +1769,19 @@ async function mountDistribucion(context) {
         requestAnimationFrame(() => camera.fit());
       }
     };
-    presentationButton.onclick = () => setPresentationMode(!presentationMode);
+    sharedActions.togglePresentation = () => setPresentationMode(!presentationMode);
+    presentationButton.onclick = sharedActions.togglePresentation;
 
     const cleanViewButton = root.querySelector('[data-distribution-clean-view]');
     let cleanView = false;
-    cleanViewButton.onclick = () => {
+    sharedActions.toggleCleanView = () => {
       cleanView = !cleanView;
       root.classList.toggle('is-clean-plan', cleanView);
       cleanViewButton.setAttribute('aria-pressed', String(cleanView));
       cleanViewButton.textContent = cleanView ? 'Mostrar cuadrícula' : 'Plano limpio';
     };
-    root.querySelector('[data-distribution-print]').onclick = () => {
+    cleanViewButton.onclick = sharedActions.toggleCleanView;
+    sharedActions.printPlan = () => {
       if (dirty || saving || canonicalRefreshPending) {
         status.textContent = 'Guarda los cambios antes de imprimir o generar PDF';
         return;
@@ -1799,6 +1801,7 @@ async function mountDistribucion(context) {
         });
       });
     };
+    root.querySelector('[data-distribution-print]').onclick = sharedActions.printPlan;
 
     const persistCurrentProposalInMemory = () => {
       const index = proposalState.findIndex((proposal) => proposal.id === activeProposalId);
@@ -1863,7 +1866,7 @@ async function mountDistribucion(context) {
       status.textContent = `${next.name} · propuesta activa`;
     };
     proposalSelect.onchange = () => switchProposal(proposalSelect.value);
-    proposalNew.onclick = () => {
+    sharedActions.proposalNew = () => {
       if (!canEdit || dirty || saving || canonicalRefreshPending) return;
       persistCurrentProposalInMemory();
       const id = proposalId();
@@ -1875,7 +1878,8 @@ async function mountDistribucion(context) {
       switchProposal(id);
       dirty = true; updateSaveState();
     };
-    proposalDuplicate.onclick = () => {
+    proposalNew.onclick = sharedActions.proposalNew;
+    sharedActions.proposalDuplicate = () => {
       if (!canEdit || dirty || saving || canonicalRefreshPending) return;
       persistCurrentProposalInMemory();
       const source = proposalState.find((proposal) => proposal.id === activeProposalId);
@@ -1889,7 +1893,8 @@ async function mountDistribucion(context) {
       switchProposal(id);
       dirty = true; updateSaveState();
     };
-    proposalRename.onclick = () => {
+    proposalDuplicate.onclick = sharedActions.proposalDuplicate;
+    sharedActions.proposalRename = () => {
       if (!canEdit || saving || canonicalRefreshPending) return;
       const proposal = proposalState.find((item) => item.id === activeProposalId);
       if (!proposal) return;
@@ -1900,7 +1905,8 @@ async function mountDistribucion(context) {
       proposal.name = clean;
       dirty = true; refreshProposalControls(); updateSaveState();
     };
-    proposalDelete.onclick = () => {
+    proposalRename.onclick = sharedActions.proposalRename;
+    sharedActions.proposalDelete = () => {
       if (!canEdit || dirty || saving || canonicalRefreshPending || proposalState.length <= 1) return;
       const current = proposalState.find((proposal) => proposal.id === activeProposalId);
       if (!current || !window.confirm(`Eliminar "${current.name}"? Solo se eliminará este plano; mesas e invitados no cambian.`)) return;
@@ -1911,6 +1917,7 @@ async function mountDistribucion(context) {
       switchProposal(activeProposalId);
       dirty = true; updateSaveState();
     };
+    proposalDelete.onclick = sharedActions.proposalDelete;
 
     const editorSnapshot = () => ({
       placements: tableIds.map((tableId) => ({ tableId, ...placementState.get(tableId) })),
