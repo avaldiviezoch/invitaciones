@@ -796,3 +796,10 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Desktop conserva la presentación compacta existente; el cambio visual destacado aplica a pantallas móviles.
 - Se incrementan las versiones de carga de Música JS/CSS para invalidar caché.
 - No cambia la consulta al catálogo, RSVP, Firebase, Firestore, Storage ni datos reales.
+
+## 2026-09-26 — Música: álbum robusto en móvil
+- Se reemplaza el álbum renderizado como elemento `small` por un bloque semántico propio dentro de la tarjeta enriquecida.
+- En responsive el álbum se presenta como bloque visible con etiqueta “ÁLBUM”, nombre en negrita moderada, fondo y borde sutiles, evitando que reglas tipográficas o de elementos secundarios lo hagan imperceptible.
+- El nombre del álbum admite varias líneas y corte seguro de palabras largas; no usa ellipsis en móvil.
+- Desktop conserva la visual compacta; no se altera la lógica de catálogo ni la fuente RSVP.
+- Se incrementan Música JS a v4 y CSS a v7 para invalidar caché.
