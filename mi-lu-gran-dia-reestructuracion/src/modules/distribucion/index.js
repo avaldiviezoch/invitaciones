@@ -2522,14 +2522,7 @@ async function mountDistribucion(context) {
       const previewPoints = drawingHoverPoint ? [...drawingPoints, drawingHoverPoint] : drawingPoints;
       polyline.setAttribute('points', previewPoints.map((point) => `${point.x},${point.y}`).join(' '));
       drawingLayer.append(polyline);
-      drawingPoints.forEach((point, index) => {
-        const vertex = document.createElementNS(svgNs, 'circle');
-        vertex.setAttribute('cx', String(point.x));
-        vertex.setAttribute('cy', String(point.y));
-        vertex.setAttribute('r', index === 0 ? '7' : '5');
-        vertex.classList.add(index === 0 ? 'is-first' : 'is-draft');
-        drawingLayer.append(vertex);
-      });
+
     };
 
     const stopDrawingArea = () => {
