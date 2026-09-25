@@ -667,3 +667,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Objetos ordinarios usan controles de objeto según capabilities; áreas añaden área/perímetro y color/transparencia sin heredar controles de mesa.
 - clearSelection reutiliza el mismo controlador y vuelve a estado vacío.
 - Sin cambios en Firebase/Firestore, datos canónicos, persistencia, catálogo, propuestas o geometría.
+
+
+## 2026-09-25 — Distribución Fase 11: desacoplamiento desktop/móvil
+- Se elimina proxyClick y el disparo de eventos sintéticos desde la hoja móvil hacia controles desktop.
+- Desktop y móvil consumen las mismas operaciones compartidas para catálogo, áreas dibujables, propuestas, vista, impresión, medición, snap y estilo de áreas.
+- Añadir objetos y áreas sigue usando el catálogo/presets canónicos; no se crea catálogo móvil paralelo.
+- Color y transparencia de áreas se aplican mediante una única operación, con un único snapshot de historial cuando existe cambio real.
+- El estado de snap se modifica por operación compartida y mantiene sincronizado el checkbox desktop.
+- Sin cambios en Firebase/Firestore, datos canónicos, persistencia V1, geometría, permisos o contratos de sincronización.
