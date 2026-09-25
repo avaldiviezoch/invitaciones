@@ -841,3 +841,11 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Desktop y móvil consumen el mismo `catalogResult`; no existe lógica de catálogo condicionada por breakpoint o navegador.
 - La cola espaciada y la caché continúan únicamente en memoria, sin persistencia paralela.
 - Se incrementan music-catalog a v3 y Música JS a v8 para invalidar caché. No se modifica RSVP, Firebase, Firestore ni datos reales.
+
+## 2026-09-26 — Música: transporte único por fetch
+- Se elimina íntegramente la implementación JSONP del catálogo musical, incluido el callback global y la inyección dinámica de scripts.
+- El adaptador utiliza una única petición estándar `fetch` con CORS, timeout mediante `AbortController`, `cache: no-store` y cleanup del listener de aborto.
+- No existe fallback de transporte ni segunda ruta de proveedor: desktop y móvil ejecutan exactamente la misma petición al mismo endpoint.
+- Se mantienen los estados explícitos `matched`, `not-found` y `error`, la cola de solicitudes y la caché solo en memoria.
+- Se incrementan music-catalog a v4 y Música JS a v9 para invalidar caché. No se modifica RSVP, Firebase, Firestore, Storage ni datos reales.
+

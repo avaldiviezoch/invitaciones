@@ -1,7 +1,6 @@
 const cache=new Map();
 let requestQueue=Promise.resolve();
 let nextRequestAt=0;
-let callbackSequence=0;
 
 const SEARCH_URL='https://itunes.apple.com/search';
 const SEARCH_LIMIT=15;
@@ -71,41 +70,6 @@ function score(item,candidate){
   return value;
 }
 
-function jsonp(url,signal){
-  return new Promise((resolve,reject)=>{
-    if(signal?.aborted){reject(abortError());return}
-
-    const callbackName='__mgdMusicCatalog_'+Date.now()+'_'+(++callbackSequence);
-    const script=document.createElement('script');
-    const requestUrl=new URL(url);
-    requestUrl.searchParams.set('callback',callbackName);
-    let settled=false;
-    let timer=0;
-
-    function cleanup(){
-      clearTimeout(timer);
-      signal?.removeEventListener('abort',onAbort);
-      script.remove();
-      try{delete window[callbackName]}catch{window[callbackName]=undefined}
-    }
-    function finish(handler,value){
-      if(settled)return;
-      settled=true;
-      cleanup();
-      handler(value);
-    }
-    function onAbort(){finish(reject,abortError())}
-
-    window[callbackName]=(payload)=>finish(resolve,payload);
-    script.async=true;
-    script.src=requestUrl.toString();
-    script.onerror=()=>finish(reject,new Error('No se pudo consultar el catálogo musical.'));
-    signal?.addEventListener('abort',onAbort,{once:true});
-    timer=setTimeout(()=>finish(reject,new Error('La consulta al catálogo excedió el tiempo de espera.')),REQUEST_TIMEOUT_MS);
-    document.head.appendChild(script);
-  });
-}
-
 function enqueue(task,signal){
   const run=async()=>{
     if(signal?.aborted)throw abortError();
@@ -127,11 +91,32 @@ async function queryCatalog(term,item,signal){
   url.searchParams.set('entity','song');
   url.searchParams.set('limit',String(SEARCH_LIMIT));
 
-  const data=await jsonp(url,signal);
-  return (Array.isArray(data?.results)?data.results:[])
-    .filter(candidate=>candidate?.kind==='song')
-    .map(candidate=>({candidate,score:score(item,candidate)}))
-    .sort((a,b)=>b.score-a.score);
+  const timeoutController=new AbortController();
+  const timeout=setTimeout(()=>timeoutController.abort(),REQUEST_TIMEOUT_MS);
+  const onAbort=()=>timeoutController.abort();
+  signal?.addEventListener('abort',onAbort,{once:true});
+
+  try{
+    const response=await fetch(url.toString(),{
+      method:'GET',
+      mode:'cors',
+      cache:'no-store',
+      signal:timeoutController.signal
+    });
+    if(!response.ok)throw new Error('El catálogo respondió '+response.status+'.');
+    const data=await response.json();
+    return (Array.isArray(data?.results)?data.results:[])
+      .filter(candidate=>candidate?.kind==='song')
+      .map(candidate=>({candidate,score:score(item,candidate)}))
+      .sort((a,b)=>b.score-a.score);
+  }catch(error){
+    if(signal?.aborted)throw abortError();
+    if(error?.name==='AbortError')throw new Error('La consulta al catálogo excedió el tiempo de espera.');
+    throw error;
+  }finally{
+    clearTimeout(timeout);
+    signal?.removeEventListener('abort',onAbort);
+  }
 }
 
 function toTrack(best){
