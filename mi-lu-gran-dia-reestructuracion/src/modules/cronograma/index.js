@@ -256,6 +256,17 @@ function downloadExport(){
   },'image/png');
 }
 
+function printExportPdf(){
+  const canvas=renderExportCanvas();
+  if(!canvas) return;
+  const root=document.querySelector('[data-module-view="cronograma"]');
+  root?.classList.add('timeline-print-export');
+  const cleanup=()=>root?.classList.remove('timeline-print-export');
+  window.addEventListener('afterprint',cleanup,{once:true});
+  window.print();
+  setTimeout(cleanup,2000);
+}
+
 function field(label,control,extra=''){ return `<label class="timeline-form-field ${extra}"><span>${label}</span>${control}</label>`; }
 
 function openDialog(record=null,index=-1){
@@ -353,7 +364,7 @@ function bind(root){
     if(event.target.closest('[data-timeline-close]')){ event.target.closest('dialog')?.close(); return; }
     if(event.target.closest('[data-timeline-export-close]')){ event.target.closest('dialog')?.close(); return; }
     if(event.target.closest('[data-timeline-export]')){ openExportPreview(); return; }
-    if(event.target.closest('[data-timeline-download]')){ downloadExport(); return; }
+    if(event.target.closest('[data-timeline-download]')){ downloadExport(); return; }\n    if(event.target.closest('[data-timeline-pdf]')){ printExportPdf(); return; }
     if(event.target.closest('[data-timeline-new]')){ if(canEdit()) openDialog(); return; }
     const card=event.target.closest('[data-timeline-index]');
     if(card&&event.target.closest('[data-timeline-edit]')){

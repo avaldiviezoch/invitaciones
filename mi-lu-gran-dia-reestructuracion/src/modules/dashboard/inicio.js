@@ -621,7 +621,7 @@ const MODULES = Object.freeze({
     mount: 'mountDistribucion'
   },
   cronograma: {
-    load: () => import('../cronograma/index.js?v=2'),
+    load: () => import('../cronograma/index.js?v=3'),
     mount: 'mountCronograma'
   }
 });
