@@ -676,3 +676,13 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Color y transparencia de áreas se aplican mediante una única operación, con un único snapshot de historial cuando existe cambio real.
 - El estado de snap se modifica por operación compartida y mantiene sincronizado el checkbox desktop.
 - Sin cambios en Firebase/Firestore, datos canónicos, persistencia V1, geometría, permisos o contratos de sincronización.
+
+
+## 2026-09-25 — Distribución Fase 12: frontera Mesas ↔ Distribución
+- Auditoría: Distribución tenía 2 escrituras canónicas de mesa (tipo y dimensiones) mediante saveInvitadosSnapshot y un helper local de read/mutate/save.
+- Se añade updateCanonicalTable al adaptador existente invitados-data.js; la escritura canónica queda localizada en el propietario/adaptador de Invitados/Mesas.
+- Distribución queda con 0 referencias a saveInvitadosSnapshot y usa 2 llamadas explícitas a updateCanonicalTable.
+- Se elimina la mutación optimista de table.type/table.dimensions; el espejo local solo se actualiza después de persistir correctamente.
+- x/y/rotation siguen perteneciendo a Distribución; tipo/dimensiones siguen siendo canónicos de Mesas.
+- No se cambian claves, schemas, IDs, invitados, sillas, asignaciones, capacidad, Firebase/Firestore ni V1 de Distribución.
+- La sincronización canónica/evento existente no se refactoriza en esta fase para mantener el alcance quirúrgico.
