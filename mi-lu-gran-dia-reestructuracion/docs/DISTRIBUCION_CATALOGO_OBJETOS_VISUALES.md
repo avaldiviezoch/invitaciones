@@ -989,3 +989,16 @@ La auditoría midió `index.js` en 3,319 líneas y 117 declaraciones locales det
 Se crea un único archivo `spatial-geometry.js` para esa responsabilidad. Allí quedan geometría poligonal, normalización de polígonos, auto-intersección, área/perímetro, shapes espaciales de objetos/mesas, reglas de interacción, intersección y distancia de bordes. `index.js` consume esas funciones y elimina sus definiciones anteriores en el mismo cambio: no existen dos motores.
 
 El archivo principal baja de 3,319 a 3,118 líneas; el motor separado tiene 239 líneas. No se modifica ningún algoritmo geométrico, escala, catálogo, UI, listeners, persistencia, Firebase/Firestore, datos canónicos, propuestas ni sincronización. La extracción mantiene la limitación ya documentada de SAT para polígonos cóncavos; esta fase no intenta cambiar comportamiento.
+
+
+---
+
+# Fase 14 — Ciclo de vida, listeners y cleanup
+
+La auditoría distingue listeners locales ligados a nodos del propio módulo de recursos externos que sobreviven al reemplazo del DOM. Los listeners locales de botones, world, viewport y elementos no requieren desmontaje individual porque sus nodos se eliminan con la vista. Los recursos que sí exigen cleanup son: dos listeners globales (window/document), dos suscripciones cloud, la cámara, el temporizador de autosave y el Object URL del fondo de referencia.
+
+El hallazgo estructural era temporal: el cleanup global se asignaba únicamente al final de una inicialización extensa. Si una excepción ocurría después de crear la cámara u otro recurso pero antes de llegar a esa asignación, el montaje podía salir sin una ruta completa de liberación.
+
+Se incorpora un registro de cleanup por montaje, idempotente y LIFO. Se activa antes de crear recursos externos y cada recurso registra su liberación al momento de adquirirse. La cámara registra destroy inmediatamente; los listeners globales registran su remove correspondiente; las dos suscripciones registran unsubscribe; autosave, hoja móvil, conflicto y Object URL quedan en la liberación final. El catch ejecuta únicamente el cleanup perteneciente a su propio montaje y no puede desmontar accidentalmente una instancia posterior.
+
+No se añaden listeners globales, no se duplican rutas, no se modifica UI, persistencia, Firebase/Firestore, catálogo, geometría, datos canónicos ni sincronización funcional.
