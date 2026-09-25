@@ -364,7 +364,8 @@ function bind(root){
     if(event.target.closest('[data-timeline-close]')){ event.target.closest('dialog')?.close(); return; }
     if(event.target.closest('[data-timeline-export-close]')){ event.target.closest('dialog')?.close(); return; }
     if(event.target.closest('[data-timeline-export]')){ openExportPreview(); return; }
-    if(event.target.closest('[data-timeline-download]')){ downloadExport(); return; }\n    if(event.target.closest('[data-timeline-pdf]')){ printExportPdf(); return; }
+    if(event.target.closest('[data-timeline-download]')){ downloadExport(); return; }
+    if(event.target.closest('[data-timeline-pdf]')){ printExportPdf(); return; }
     if(event.target.closest('[data-timeline-new]')){ if(canEdit()) openDialog(); return; }
     const card=event.target.closest('[data-timeline-index]');
     if(card&&event.target.closest('[data-timeline-edit]')){
