@@ -714,3 +714,15 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - El merge remoto no conflictivo actualiza la base remota y conserva dirty para que autosave persista la combinación.
 - Conservar este sigue siendo la única escritura force:true; Usar remoto conserva reemplazo explícito.
 - Sin cambios en Firebase/Firestore, schema, datos canónicos, catálogo, geometría o permisos.
+
+
+## 2026-09-25 — Distribución Fase 16: Undo/Redo y cierre de regresión
+- Auditadas 17 rutas de rememberEdit, cancelaciones, Undo/Redo y autosave.
+- Los gestos continuos toman un snapshot al inicio; pointermove no crea snapshots ni escrituras/autosave.
+- Un gesto sin cambio descarta el snapshot provisional; dibujo inválido conserva su rollback existente.
+- Undo/Redo restauran placements/elementos, recalculan conflictos y marcan dirty para autosave centralizado.
+- Autosave conserva debounce de 250 ms y no escribe durante pointermove.
+- El cambio de propuesta limpia Undo/Redo y evita aplicar historia entre propuestas.
+- No se encontró defecto funcional demostrable; no se altera el motor de historial en esta fase.
+- Regresión contractual final sin cambios en Firebase/Firestore, datos canónicos, schema V1, catálogo, geometría o UI.
+- Con esta fase queda cerrado el plan de auditoría estructural de Distribución.
