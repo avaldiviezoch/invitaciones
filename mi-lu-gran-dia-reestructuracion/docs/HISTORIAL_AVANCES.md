@@ -593,3 +593,13 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Los botones desktop dejan de duplicar label/icono/dimensiones y se hidratan desde el catálogo.
 - canopy conserva el contrato rectangular; se elimina solo el botón histórico Dibujar toldo basado en canopy.
 - Sin cambios de Firebase/Firestore ni del formato persistido V1.
+
+
+## 2026-09-25 — Distribución Fase 4: incorporación de objetos ordinarios
+- Se incorporan a la UI 11 objetos ordinarios ya definidos por el contrato único: couple, mirror, backdrop, sign, divider, guestbook, favors, cocktail, snacks, supplier y exit.
+- La UI pasa de 26 a 37 objetos ordinarios visibles; chair permanece solo en catálogo como detached-chair para no confundirse con sillas canónicas.
+- Los botones nuevos contienen únicamente data-distribution-add-element; labels, iconos, dimensiones, capabilities y comportamiento siguen viniendo de distribution-catalog.js.
+- Desktop conserva los grupos existentes y móvil sigue derivándose de esos mismos botones mediante getCatalogItem(), sin catálogo paralelo.
+- circulation, restricted y zone permanecen legacy compatibles; no se implementa el motor de áreas ni Toldo poligonal.
+- canopy continúa rectangular 6 × 6 m y exit permanece separado de entrance.
+- Sin cambios en Firebase/Firestore, Storage, Auth, claves, IDs ni persistencia V1.

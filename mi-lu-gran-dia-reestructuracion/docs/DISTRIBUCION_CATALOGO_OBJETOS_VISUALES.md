@@ -696,3 +696,58 @@ Se retiran `physicalType()`, `PHYSICAL_ELEMENT_TYPES`, las capabilities físicas
 ## Alcance
 
 No se agregan objetos faltantes a la UI, no se rediseña el catálogo, no se implementan áreas nuevas/Toldo y no se modifica Firebase/Firestore ni la estructura V1.
+
+
+---
+
+# Fase 4 — Objetos ordinarios incorporados
+
+## Clasificación previa
+
+Antes de esta fase había **26 objetos ordinarios canónicos visibles** mediante `data-distribution-add-element`: `dance`, `bar`, `dj`, `stage`, `screen`, `canopy`, `column`, `entrance`, `plantSmall`, `plant`, `tree`, `planter`, `altar`, `arch`, `buffet`, `drinks`, `desserts`, `cake`, `gifts`, `welcome`, `booth360`, `photo`, `restroom`, `kitchen`, `technical` y `extinguisher`.
+
+Además, `circulation`, `restricted` y `zone` ya tenían controles legacy existentes. Se conservan por compatibilidad y no se contabilizan entre los 38 ordinarios.
+
+## Objetos incorporados
+
+Se exponen mediante el mismo flujo genérico existente **11 objetos ordinarios** que ya estaban definidos en `distribution-catalog.js`:
+
+- `couple` — Mesa de novios.
+- `mirror` — Espejo selfie.
+- `backdrop` — Panel floral / backdrop.
+- `sign` — Tótem / letrero.
+- `divider` — Separador / biombo.
+- `guestbook` — Mesa de firmas.
+- `favors` — Mesa de recuerdos.
+- `cocktail` — Mesa alta / cóctel.
+- `snacks` — Carrito de snacks.
+- `supplier` — Mesa de proveedores.
+- `exit` — Salida.
+
+Los botones solo declaran `data-distribution-add-element="<type>"`. Label, icono, dimensiones, capabilities, shape y comportamiento continúan proviniendo del catálogo único. No se agregó lógica individual por type.
+
+## Objeto ordinario no expuesto
+
+`chair` permanece únicamente en el catálogo con `behavior: 'detached-chair'`. No se agrega como herramienta visible en esta fase para evitar confusión con las sillas canónicas de Mesas. Sigue sin `tableId`, `seatId`, invitados ni asignaciones.
+
+Con ello quedan **37 de los 38 objetos ordinarios canónicos expuestos** y uno interno/especial (`chair`).
+
+## Desktop y móvil
+
+Desktop mantiene los grupos visuales existentes; no se crean acordeones, filtros ni buscador. Los nuevos botones se insertan en esos grupos sin repetir metadata.
+
+Móvil continúa derivando su lista de los mismos `[data-distribution-add-element]` del template y obtiene cada definición mediante `getCatalogItem()`. No existe una segunda lista móvil.
+
+## Legacy y áreas
+
+`circulation`, `restricted` y `zone` se mantienen compatibles con sus controles existentes, sin convertirlos a `type:'area'` ni ampliar el motor de áreas. No se implementa Toldo poligonal ni ninguna de las nueve áreas dibujables futuras.
+
+`canopy` continúa como Cobertura rectangular / toldo modular, 6 × 6 m y familia espacial `container`.
+
+## Validación de contrato
+
+La incorporación reutiliza las rutas genéricas existentes de creación, dimensiones desde catálogo, movimiento, resize, rotación, copy/delete, inspector, Undo/Redo, autosave, serialización V1 y propuestas. No se añadió persistencia ni comportamiento por objeto.
+
+Se comprobó por inspección del contrato que los 11 nuevos types resuelven mediante `getCatalogItem()`, tienen dimensiones canónicas y capabilities físicas comunes. `couple` sigue siendo mobiliario espacial y no una mesa canónica; `exit` permanece separado de `entrance`; `cocktail` conserva forma circular.
+
+No se modificaron Firebase, Firestore, Storage, Auth, reglas, IDs, claves ni estructura V1.
