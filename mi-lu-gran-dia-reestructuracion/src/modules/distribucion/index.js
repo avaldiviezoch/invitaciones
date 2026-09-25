@@ -2703,10 +2703,11 @@ async function mountDistribucion(context) {
       measureHint.hidden = true;
     };
 
-    clearMeasureButton.onclick = () => {
+    sharedActions.clearMeasure = () => {
       measureLayer.replaceChildren();
       stopMeasuring();
     };
+    clearMeasureButton.onclick = sharedActions.clearMeasure;
 
     viewport.addEventListener('pointermove', (event) => {
       if (event.pointerType === 'touch') return;
@@ -2794,33 +2795,35 @@ async function mountDistribucion(context) {
       stopDrawingArea();
     };
 
+    sharedActions.drawArea = (requestedAreaKind) => {
+      if (!canEdit) return;
+      const nextAreaKind = escapeText(requestedAreaKind);
+      const preset = getAreaPreset(nextAreaKind);
+      if (!preset) return;
+      if (drawingArea) {
+        const sameMode = drawingAreaKind === nextAreaKind;
+        stopDrawingArea();
+        if (sameMode) return;
+      }
+      stopMeasuring();
+      clearSelection();
+      drawingAreaKind = nextAreaKind;
+      drawingArea = true;
+      root.classList.add('is-drawing-area');
+      drawingPoints = [];
+      drawingHoverPoint = null;
+      const activeButton = modernAreaButtons.find((button) => button.dataset.distributionDrawAreaKind === nextAreaKind);
+      activeButton?.classList.add('is-active');
+      if (activeButton) activeButton.textContent = `Cancelar ${preset.label}`;
+      measureHint.textContent = `${preset.label} · marca al menos 3 vértices · cierra sobre el primer punto, doble clic o Enter`;
+      measureHint.hidden = false;
+    };
     modernAreaButtons.forEach((button) => {
       button.dataset.defaultLabel = button.textContent;
-      button.onclick = () => {
-        if (!canEdit) return;
-        const nextAreaKind = escapeText(button.dataset.distributionDrawAreaKind);
-        const preset = getAreaPreset(nextAreaKind);
-        if (!preset) return;
-        if (drawingArea) {
-          const sameMode = drawingAreaKind === nextAreaKind;
-          stopDrawingArea();
-          if (sameMode) return;
-        }
-        stopMeasuring();
-        clearSelection();
-        drawingAreaKind = nextAreaKind;
-        drawingArea = true;
-        root.classList.add('is-drawing-area');
-        drawingPoints = [];
-        drawingHoverPoint = null;
-        button.classList.add('is-active');
-        button.textContent = `Cancelar ${preset.label}`;
-        measureHint.textContent = `${preset.label} · marca al menos 3 vértices · cierra sobre el primer punto, doble clic o Enter`;
-        measureHint.hidden = false;
-      };
+      button.onclick = () => sharedActions.drawArea(button.dataset.distributionDrawAreaKind);
     });
 
-    measureButton.onclick = () => {
+    sharedActions.toggleMeasure = () => {
       if (measuring) {
         stopMeasuring();
         return;
@@ -2835,6 +2838,7 @@ async function mountDistribucion(context) {
       measureHint.textContent = 'Marca el primer punto';
       measureHint.hidden = false;
     };
+    measureButton.onclick = sharedActions.toggleMeasure;
 
     viewport.addEventListener('click', (event) => {
       if (event.target.closest('.distribution-table,.distribution-element')) return;
