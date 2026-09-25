@@ -617,7 +617,7 @@ const MODULES = Object.freeze({
     mount: 'mountInvitados'
   },
   distribucion: {
-    load: () => import('../distribucion/index.js?v=114'),
+    load: () => import('../distribucion/index.js?v=115'),
     mount: 'mountDistribucion'
   }
 });
