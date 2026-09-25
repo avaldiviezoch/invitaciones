@@ -6,64 +6,150 @@
 @media(max-width:760px){
 .music-admin-hero{padding:18px 16px 14px}
 .music-admin-eyebrow{margin-bottom:10px;font-size:8px}
-.music-admin-title-row{grid-template-columns:38px minmax(0,1fr);gap:12px}
+.music-admin-title-row{grid-template-columns:38px minmax(0,1fr);gap:11px}
 .music-admin-title-icon{width:38px;height:38px;border-radius:12px;font-size:18px}
-.music-admin-title-row h1{font-size:30px}
+.music-admin-title-row h1{font-size:clamp(28px,8vw,30px);font-weight:400;letter-spacing:-.035em}
 .music-admin-title-row p{margin-top:7px;font-size:10.5px;line-height:1.4}
 .music-admin-hero-total{display:none}
-.music-admin-kpis{width:calc(100% - 24px);grid-template-columns:repeat(2,1fr);margin-top:12px;border-radius:16px}
-.music-admin-kpis article{height:74px;padding:12px 13px}
-.music-admin-kpis article:nth-child(2){border-right:0}
+
+.music-admin-kpis{width:calc(100% - 24px);grid-template-columns:repeat(2,minmax(0,1fr));margin:12px auto 0;border-radius:16px}
+.music-admin-kpis article{height:74px;padding:11px 12px}
+.music-admin-kpis article:nth-child(2n){border-right:0}
 .music-admin-kpis article:nth-child(-n+2){border-bottom:1px solid #e8e2dd}
-.music-admin-kpis strong{font-size:20px}
-.music-admin-kpis strong.is-song{font-size:14px}
 .music-admin-kpis span{font-size:8px}
+.music-admin-kpis strong{font-size:20px}
+.music-admin-kpis strong.is-song{font-size:13px}
 .music-admin-kpis small{font-size:7.5px;line-height:1.25}
-.music-admin-content{width:calc(100% - 24px);margin-top:12px}
+
+.music-admin-content{width:calc(100% - 24px);margin:12px auto 0;padding-bottom:42px}
 .music-admin-toolbar{align-items:stretch;gap:7px;margin-bottom:15px}
-.music-admin-search{height:42px}
+.music-admin-search{min-width:0;height:42px}
 .music-admin-search input{font-size:11px}
 .music-admin-actions{flex:none}
 .music-admin-actions button{width:40px;height:40px;padding:0;font-size:15px}
 .music-admin-actions button span{display:none}
+
 .music-admin-head{align-items:flex-start;margin-bottom:11px}
 .music-admin-head h2{font-size:19px}
 .music-admin-head p{font-size:10px;line-height:1.45}
 .music-admin-head>span{padding-top:3px;font-size:8.5px}
 .music-admin-list{gap:10px}
-.music-admin-card{min-height:148px;grid-template-columns:84px minmax(0,1fr);align-items:start;gap:14px;padding:14px;border-radius:17px;box-shadow:0 3px 12px rgba(57,49,45,.035)}
-.music-admin-note,.music-admin-cover{width:82px;height:82px;border-radius:14px;font-size:21px}
-.music-admin-cover{border-color:#ddd4ce;box-shadow:0 5px 16px rgba(60,48,44,.10)}
+
+.music-admin-card{
+  min-height:0;
+  grid-template-columns:clamp(70px,21vw,82px) minmax(0,1fr);
+  align-items:start;
+  gap:12px;
+  padding:13px;
+  border-radius:16px
+}
+.music-admin-note,.music-admin-cover{
+  width:clamp(70px,21vw,82px);
+  height:clamp(70px,21vw,82px);
+  border-radius:13px;
+  font-size:20px
+}
+.music-admin-cover{border-color:#ddd4ce;box-shadow:0 4px 12px rgba(60,48,44,.08)}
 .music-admin-cover img{width:100%;height:100%;object-fit:cover}
-.music-admin-song{min-width:0;padding-top:1px}
-.music-admin-song-head{align-items:flex-start;flex-wrap:wrap;gap:6px 7px}
-.music-admin-song h3{width:100%;max-width:100%;font-size:17px;line-height:1.18;white-space:normal;text-overflow:clip}
+
+.music-admin-song{
+  min-width:0;
+  display:block;
+  overflow:visible;
+  padding:1px 0 0
+}
+.music-admin-song-head{
+  display:flex;
+  align-items:flex-start;
+  flex-wrap:wrap;
+  gap:5px 7px
+}
+.music-admin-song h3{
+  width:100%;
+  max-width:100%;
+  margin:0;
+  overflow:visible;
+  font-size:clamp(16px,4.6vw,17px);
+  line-height:1.18;
+  text-overflow:clip;
+  white-space:normal
+}
 .music-admin-song b{padding:4px 7px;font-size:7.5px}
-.music-admin-song p{margin-top:5px;font-size:10px;line-height:1.35}
-.music-admin-catalog-album{display:block;width:100%;margin-top:8px;padding:7px 9px;overflow:visible;border:1px solid #eee5e1;border-radius:10px;background:#faf7f5;color:#5f5b57;font-size:9.5px;line-height:1.35;text-overflow:clip;white-space:normal}.music-admin-catalog-album span{display:block;margin-bottom:2px;color:#9c7b82;font-size:7px;font-weight:800;letter-spacing:.09em}.music-admin-catalog-album strong{display:block;overflow-wrap:anywhere;color:#5f5b57;font-size:9.5px;font-weight:600;line-height:1.35}
-.music-admin-catalog-link{display:inline-flex;align-items:center;min-height:28px;margin-top:8px;padding:0 10px;border:1px solid #eadcdf;border-radius:999px;background:#fcf7f8;font-size:8.5px;line-height:1;text-decoration:none}
+.music-admin-song p{margin:5px 0 0;font-size:9.5px;line-height:1.35}
+
+.music-admin-catalog-album{
+  display:block;
+  width:100%;
+  margin:8px 0 0;
+  padding:7px 9px;
+  overflow:visible;
+  border:1px solid #eee5e1;
+  border-radius:10px;
+  background:#faf7f5;
+  color:#5f5b57;
+  white-space:normal;
+  text-overflow:clip
+}
+.music-admin-catalog-album span{
+  display:block;
+  margin:0 0 2px;
+  color:#9c7b82;
+  font-size:7px;
+  font-weight:800;
+  letter-spacing:.09em
+}
+.music-admin-catalog-album strong{
+  display:block;
+  margin:0;
+  overflow:visible;
+  color:#5f5b57;
+  font-size:9.5px;
+  font-weight:600;
+  line-height:1.35;
+  overflow-wrap:anywhere;
+  white-space:normal
+}
+.music-admin-catalog-link{
+  display:inline-flex;
+  align-items:center;
+  min-height:28px;
+  margin-top:8px;
+  padding:0 10px;
+  overflow:visible;
+  border:1px solid #eadcdf;
+  border-radius:999px;
+  background:#fcf7f8;
+  font-size:8.5px;
+  line-height:1;
+  text-overflow:clip;
+  white-space:normal
+}
 .music-admin-catalog-state{margin-top:8px;font-size:8px;line-height:1.4}
 .music-admin-catalog-state.is-loading i{width:9px;height:9px}
-.music-admin-people{grid-column:1/-1;padding:11px 0 0;border-top:1px solid #eee8e4;border-left:0}
+
+.music-admin-people{
+  grid-column:1/-1;
+  min-width:0;
+  padding:10px 0 0;
+  border-top:1px solid #eee8e4;
+  border-left:0
+}
 .music-admin-people>span{font-size:7.5px}
-.music-admin-people strong{margin-top:5px;font-size:9.5px;line-height:1.4;white-space:normal;text-overflow:clip}
-.music-admin-people small{margin-top:5px;font-size:8.5px;line-height:1.4;white-space:normal;text-overflow:clip}
+.music-admin-people strong{
+  margin-top:4px;
+  overflow:visible;
+  font-size:9.5px;
+  line-height:1.4;
+  text-overflow:clip;
+  white-space:normal
+}
+.music-admin-people small{
+  margin-top:4px;
+  overflow:visible;
+  font-size:8.5px;
+  line-height:1.4;
+  text-overflow:clip;
+  white-space:normal
+}
 .music-admin-state{margin-top:10px;font-size:8.5px;line-height:1.4}
-}
-@media(max-width:430px){
-.music-admin-title-row h1{font-size:28px}
-.music-admin-card{grid-template-columns:78px minmax(0,1fr);gap:12px;padding:13px}
-.music-admin-note,.music-admin-cover{width:76px;height:76px;border-radius:13px}
-.music-admin-song h3{font-size:16.5px}
-.music-admin-song p{font-size:9.5px}
-.music-admin-catalog-album{font-size:9px;padding:6px 8px}.music-admin-catalog-album strong{font-size:9px}
-.music-admin-catalog-link{font-size:8px}
-}
-@media(max-width:390px){
-.music-admin-content,.music-admin-kpis{width:calc(100% - 20px)}
-.music-admin-card{grid-template-columns:72px minmax(0,1fr);gap:11px;padding:12px}
-.music-admin-note,.music-admin-cover{width:70px;height:70px;border-radius:12px}
-.music-admin-song h3{font-size:16px}
-.music-admin-song b{font-size:7px}
-.music-admin-catalog-link{min-height:27px;padding:0 9px}
 }

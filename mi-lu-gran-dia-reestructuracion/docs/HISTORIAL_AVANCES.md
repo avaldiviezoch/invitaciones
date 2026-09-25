@@ -825,3 +825,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se retira el texto artificial “Pendiente de identificar”: el álbum solo se muestra cuando existe un álbum real devuelto por el catálogo.
 - Desktop y responsive usan el mismo dato y el mismo markup; únicamente cambia la distribución CSS por breakpoint.
 - Se incrementan Música JS a v7 y CSS a v9 para invalidar caché. No se modifica RSVP, Firebase ni persistencia.
+
+## 2026-09-26 — Música: responsive reconstruido desde cero
+- Se elimina íntegramente la implementación responsive anterior de Música, incluidas las variantes separadas para 430 px y 390 px.
+- Se reconstruye una única media query móvil hasta 760 px usando la misma estructura HTML y los mismos datos que desktop; solo cambia la distribución.
+- La tarjeta usa una sola cuadrícula fluida, con carátula dimensionada mediante `clamp()`, bloque de canción sin overflow y álbum como bloque visible de ancho completo dentro de la información musical.
+- Se eliminan reglas móviles superpuestas por breakpoint; no se añade `!important`, no existe segunda implementación móvil y no se modifica JavaScript ni lógica de catálogo.
+- Se mantiene el bloque “Solicitada por” a ancho completo debajo del contenido musical.
+- Se incrementa Música CSS a v10 para invalidar caché. No se modifica RSVP, Firebase, Firestore, Storage ni datos reales.
+
