@@ -538,3 +538,15 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - camera.focusNode() deja de ser un stub: las incidencias de validación ahora centran realmente el objeto seleccionado manteniendo el zoom actual.
 - Se elimina una regla CSS duplicada de acciones del inspector.
 - Barrido: 0 !important, 0 reload de página y 0 remonte estructural de Distribución por cambios de mesas.
+
+
+## 2026-09-25 — Distribución: rotación visual precisa de mesas
+- La rotación de mesas continúa teniendo una sola fuente de verdad: placement.rotation.
+- Cada mesa renderiza un control de rotación visual que solo aparece al seleccionarla: guía punteada semitransparente, línea, handle superior y lectura del ángulo.
+- Arrastrar el handle rota de forma continua siguiendo el puntero; el cálculo usa el centro visual de la mesa y normaliza correctamente el cruce 359°/0°.
+- applyTableRotation() centraliza la mutación visual de placement.rotation para el gesto y para los botones del inspector.
+- Un gesto completo registra un solo snapshot de Undo/Redo y dispara un solo dirty/autosave al finalizar.
+- Los botones ↺/↻ pasan de 15° a 1° por clic para ajuste fino.
+- El ángulo visible sobre la mesa se actualiza desde applyPlacement(), evitando un segundo estado visual.
+- En móvil el handle aumenta su área táctil, pero usa exactamente la misma lógica que desktop.
+- No se modifican IDs, invitados, sillas, table.dimensions, contratos de persistencia ni Firebase.

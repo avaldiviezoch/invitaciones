@@ -152,3 +152,16 @@
 .distribution-sync-conflict[hidden]{display:none}
 .distribution-sync-conflict button{min-height:24px;padding:0 7px;border:1px solid rgba(172,92,82,.22);border-radius:7px;background:#fff;color:#875951;font-size:7px;font-weight:800;cursor:pointer}
 @media(max-width:700px){.distribution-sync-conflict{grid-column:1/-1;flex-wrap:wrap}.distribution-sync-conflict span{flex:1 0 100%}}
+
+.distribution-table-rotation-guide{position:absolute;left:50%;top:50%;z-index:8;display:none;box-sizing:border-box;transform:translate(-50%,-50%);border:1px dashed rgba(156,100,112,.42);border-radius:14px;background:rgba(247,236,239,.035);pointer-events:none}
+.distribution-table.is-selected:not(.is-moving)>.distribution-table-rotation-guide{display:block}
+.distribution-table-rotation-stem{position:absolute;left:50%;top:-28px;width:1px;height:28px;transform:translateX(-50%);background:rgba(156,100,112,.42);pointer-events:none}
+.distribution-table-rotation-handle{position:absolute;left:50%;top:-38px;width:16px;height:16px;transform:translate(-50%,-50%);box-sizing:border-box;border:2px solid rgba(255,255,255,.9);border-radius:50%;background:rgba(173,116,128,.76);box-shadow:0 2px 8px rgba(93,62,68,.16);cursor:grab;pointer-events:auto;touch-action:none}
+.distribution-table.is-rotating>.distribution-table-rotation-guide{border-color:rgba(156,100,112,.68);background:rgba(247,236,239,.07)}
+.distribution-table.is-rotating .distribution-table-rotation-handle{cursor:grabbing;background:rgba(173,116,128,.92)}
+.distribution-table-rotation-angle{position:absolute;left:50%;top:-66px;min-width:34px;padding:4px 7px;transform:translateX(-50%) rotate(var(--counter-rotation,0deg));transform-origin:50% 50%;border:1px solid rgba(156,100,112,.2);border-radius:999px;background:rgba(255,253,250,.86);box-shadow:0 2px 8px rgba(70,65,57,.08);color:#875f68;font-size:8px;font-weight:850;line-height:1;text-align:center;pointer-events:none;backdrop-filter:blur(3px)}
+@media(max-width:700px){
+  .distribution-table-rotation-handle{top:-44px;width:24px;height:24px;border-width:3px}
+  .distribution-table-rotation-stem{top:-32px;height:32px}
+  .distribution-table-rotation-angle{top:-78px;min-width:40px;padding:5px 8px;font-size:9px}
+}

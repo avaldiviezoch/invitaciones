@@ -21,10 +21,10 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=53', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=54', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
-const ROTATION_STEP = 15;
+const ROTATION_STEP = 1;
 const KEYBOARD_MOVE_STEP = 10;
 const KEYBOARD_MOVE_FINE_STEP = 1;
 const WORLD_PADDING = 90;
@@ -581,10 +581,13 @@ function serializeDistribution(proposals, activeProposalId) {
 }
 
 function applyPlacement(node, placement) {
+  const rotation = normalizeRotation(placement.rotation);
   node.style.left = `${placement.x}px`;
   node.style.top = `${placement.y}px`;
-  node.style.setProperty('--table-rotation', `${normalizeRotation(placement.rotation)}deg`);
-  node.style.setProperty('--counter-rotation', `${-normalizeRotation(placement.rotation)}deg`);
+  node.style.setProperty('--table-rotation', `${rotation}deg`);
+  node.style.setProperty('--counter-rotation', `${-rotation}deg`);
+  const angle = node.querySelector('[data-distribution-table-rotation-angle]');
+  if (angle) angle.textContent = `${Math.round(rotation)}°`;
 }
 
 function renderTable(item, guestIndex, placement) {
@@ -614,6 +617,27 @@ function renderTable(item, guestIndex, placement) {
   surface.innerHTML = `<strong></strong><span>${capacity} sillas</span>`;
   surface.querySelector('strong').textContent = tableName(table, index);
   node.append(surface);
+
+  const rotationGuide = document.createElement('div');
+  rotationGuide.className = 'distribution-table-rotation-guide';
+  rotationGuide.style.width = `${Math.min(geometry.visualWidth - 28, Math.max(96, geometry.table.width + 54))}px`;
+  rotationGuide.style.height = `${Math.min(geometry.visualHeight - 34, Math.max(96, geometry.table.height + 54))}px`;
+  rotationGuide.setAttribute('aria-hidden', 'true');
+
+  const rotationStem = document.createElement('span');
+  rotationStem.className = 'distribution-table-rotation-stem';
+
+  const rotationHandle = document.createElement('span');
+  rotationHandle.className = 'distribution-table-rotation-handle';
+  rotationHandle.dataset.distributionTableRotationHandle = 'true';
+
+  const rotationAngle = document.createElement('span');
+  rotationAngle.className = 'distribution-table-rotation-angle';
+  rotationAngle.dataset.distributionTableRotationAngle = 'true';
+  rotationAngle.textContent = `${Math.round(normalizeRotation(placement.rotation))}°`;
+
+  rotationGuide.append(rotationStem, rotationHandle, rotationAngle);
+  node.append(rotationGuide);
 
   geometry.positions.slice(0, capacity).forEach((position, seatIndex) => {
     const seat = seats[seatIndex] || {};
@@ -1948,14 +1972,58 @@ async function mountDistribucion(context) {
     // Las asignaciones son canónicas de Invitados/Mesas y aquí son solo lectura.
     // Distribución no escribe guest.tableId, guest.seatId ni guest.seatNumber.
 
+    const applyTableRotation = (tableId, rotation, { inspector = true } = {}) => {
+      const placement = placementState.get(tableId);
+      const node = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableId)}"]`);
+      const entry = tableById.get(tableId);
+      if (!placement || !node || !entry) return false;
+      placement.rotation = normalizeRotation(rotation);
+      applyPlacement(node, placement);
+      if (inspector && selectedTableId === tableId) {
+        const rotationOutput = root.querySelector('[data-distribution-selected-rotation]');
+        rotationOutput.value = `${Math.round(placement.rotation)}°`;
+        rotationOutput.textContent = rotationOutput.value;
+      }
+      refreshSpatialConflicts();
+      return true;
+    };
+
     const bindTableInteraction = (node) => {
       let move = null;
+      let rotationGesture = null;
       let moved = false;
 
+      const pointerAngleFromTableCenter = (event) => {
+        const rect = node.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        return Math.atan2(event.clientY - centerY, event.clientX - centerX) * 180 / Math.PI;
+      };
+
       node.addEventListener('pointerdown', (event) => {
-        if (presentationMode) return;
+        if (presentationMode || event.button !== 0) return;
+        const rotationHandle = event.target.closest('[data-distribution-table-rotation-handle]');
+        if (rotationHandle) {
+          if (!canEdit || !EDIT_CAPABILITIES.table.rotatable) return;
+          event.preventDefault();
+          event.stopPropagation();
+          const placement = placementState.get(node.dataset.tableId);
+          if (!placement) return;
+          node.setPointerCapture(event.pointerId);
+          node.classList.add('is-rotating');
+          rotationGesture = {
+            pointerId: event.pointerId,
+            lastPointerAngle: pointerAngleFromTableCenter(event),
+            rotation: normalizeRotation(placement.rotation)
+          };
+          moved = false;
+          rememberEdit();
+          selectTable(node.dataset.tableId);
+          return;
+        }
+
         if (event.target.closest('[data-guest-id],.distribution-chair')) return;
-        if (event.button !== 0 || !canEdit || !EDIT_CAPABILITIES.table.movable) return;
+        if (!canEdit || !EDIT_CAPABILITIES.table.movable) return;
         event.stopPropagation();
         const placement = placementState.get(node.dataset.tableId);
         if (!placement) return;
@@ -1974,6 +2042,21 @@ async function mountDistribucion(context) {
       });
 
       node.addEventListener('pointermove', (event) => {
+        if (rotationGesture && rotationGesture.pointerId === event.pointerId) {
+          event.preventDefault();
+          const nextPointerAngle = pointerAngleFromTableCenter(event);
+          const rawDelta = nextPointerAngle - rotationGesture.lastPointerAngle;
+          const delta = Math.atan2(
+            Math.sin(rawDelta * Math.PI / 180),
+            Math.cos(rawDelta * Math.PI / 180)
+          ) * 180 / Math.PI;
+          rotationGesture.rotation = normalizeRotation(rotationGesture.rotation + delta);
+          rotationGesture.lastPointerAngle = nextPointerAngle;
+          moved = moved || Math.abs(delta) > 0.05;
+          applyTableRotation(node.dataset.tableId, rotationGesture.rotation);
+          return;
+        }
+
         if (!move || move.pointerId !== event.pointerId) return;
         const dx = camera.clientDeltaToWorld(event.clientX - move.clientX);
         const dy = camera.clientDeltaToWorld(event.clientY - move.clientY);
@@ -1985,18 +2068,21 @@ async function mountDistribucion(context) {
         refreshSpatialConflicts();
       });
 
-      const finishMove = (event) => {
-        if (!move || move.pointerId !== event.pointerId) return;
-        node.classList.remove('is-moving');
+      const finishInteraction = (event) => {
+        const wasMoving = move && move.pointerId === event.pointerId;
+        const wasRotating = rotationGesture && rotationGesture.pointerId === event.pointerId;
+        if (!wasMoving && !wasRotating) return;
+        node.classList.remove('is-moving', 'is-rotating');
         move = null;
+        rotationGesture = null;
         if (moved) markDirty();
         else {
           undoStack.pop();
           updateHistoryState();
         }
       };
-      node.addEventListener('pointerup', finishMove);
-      node.addEventListener('pointercancel', finishMove);
+      node.addEventListener('pointerup', finishInteraction);
+      node.addEventListener('pointercancel', finishInteraction);
 
       node.addEventListener('click', (event) => {
         event.stopPropagation();
@@ -2182,13 +2268,13 @@ async function mountDistribucion(context) {
       if (!canEdit) return;
       if (selectedTableId) {
         const placement = placementState.get(selectedTableId);
-        const node = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(selectedTableId)}"]`);
-        const entry = tableById.get(selectedTableId);
-        if (!placement || !node || !entry || !EDIT_CAPABILITIES.table.rotatable) return;
+        if (!placement || !EDIT_CAPABILITIES.table.rotatable) return;
         rememberEdit();
-        placement.rotation = normalizeRotation(placement.rotation + delta);
-        applyPlacement(node, placement);
-        renderInspector(root, entry.table, entry.index, guests, placement);
+        if (!applyTableRotation(selectedTableId, placement.rotation + delta)) {
+          undoStack.pop();
+          updateHistoryState();
+          return;
+        }
         markDirty();
         return;
       }
