@@ -3105,6 +3105,7 @@ async function mountDistribucion(context) {
             points: Array.isArray(element.points) ? element.points.map((point) => ({ ...point })) : null
           }))
         })));
+        activeProposalId = merged.state.activeProposalId;
         lastPersistedState = JSON.parse(JSON.stringify(remoteState));
         lastPersistedSignature = remoteSignature;
         updateSaveState();
