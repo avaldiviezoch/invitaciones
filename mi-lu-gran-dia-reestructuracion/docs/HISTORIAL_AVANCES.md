@@ -704,3 +704,13 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Los 2 addEventListener globales tienen sus 2 removeEventListener; las 2 suscripciones tienen unsubscribe; setupDistributionCamera tiene un destroy registrado.
 - El catch limpia solo los recursos de su propio montaje, sin riesgo de desmontar una instancia posterior.
 - Sin nuevos listeners globales y sin cambios en UI, persistencia, Firebase/Firestore, catálogo, geometría, datos o comportamiento de sincronización.
+
+
+## 2026-09-25 — Distribución Fase 15: sincronización y conflictos
+- Se auditan dirty/saving/canonicalRefreshPending, autosave, cola remota, merge por propuestas y resolución manual.
+- Hallazgo: un remoto recibido durante saving podía convertirse en conflicto artificial al finalizar un guardado local ya limpio.
+- La cola remota ahora descarta el eco de la propia escritura y aplica un remoto posterior cuando ya no existe edición local pendiente.
+- Si llega remoto con dirty real, se intenta merge a tres vías inmediatamente: propuestas distintas se integran; divergencia sobre la misma propuesta muestra conflicto.
+- El merge remoto no conflictivo actualiza la base remota y conserva dirty para que autosave persista la combinación.
+- Conservar este sigue siendo la única escritura force:true; Usar remoto conserva reemplazo explícito.
+- Sin cambios en Firebase/Firestore, schema, datos canónicos, catálogo, geometría o permisos.
