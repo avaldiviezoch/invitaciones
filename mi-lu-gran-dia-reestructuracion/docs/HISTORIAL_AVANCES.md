@@ -789,3 +789,10 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - El enlace de canción pasa a una acción táctil de 28 px de alto; título, álbum, invitados y dedicatoria permiten salto de línea.
 - El bloque de solicitud ocupa el ancho completo bajo la carátula y se ajustan separaciones, radios y sombras para conservar la jerarquía visual de escritorio.
 - Se mantiene sin cambios la integración de catálogo, RSVP y cualquier persistencia. Se sube Música CSS a v5 para invalidar caché.
+
+## 2026-09-26 — Música: álbum visible en responsive
+- Se mantiene el álbum de la coincidencia musical también en móvil y se refuerza su jerarquía visual.
+- En responsive el álbum se muestra explícitamente con la etiqueta “ÁLBUM”, sin recorte por overflow ni ellipsis y con contraste legible.
+- Desktop conserva la presentación compacta existente; el cambio visual destacado aplica a pantallas móviles.
+- Se incrementan las versiones de carga de Música JS/CSS para invalidar caché.
+- No cambia la consulta al catálogo, RSVP, Firebase, Firestore, Storage ni datos reales.
