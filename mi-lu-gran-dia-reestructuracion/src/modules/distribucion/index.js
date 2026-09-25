@@ -11,7 +11,7 @@ import {
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=6';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { setupDistributionCamera } from './camera.js?v=9';
-import { getAreaCatalogItem, getCatalogItem, getElementCatalogItem, getVisibleCatalogGroups, resolveCatalogType } from './distribution-catalog.js?v=3';
+import { getAreaCatalogItem, getAreaPreset, getCatalogItem, getElementCatalogItem, getVisibleAreaPresets, getVisibleCatalogGroups, resolveCatalogType } from './distribution-catalog.js?v=4';
 import {
   DEFAULT_BACKGROUND_ID,
   addDistributionBackground,
@@ -22,7 +22,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=58', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=59', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 1;
@@ -508,13 +508,14 @@ function parseDistributionState(value) {
       const rotation = finiteNumber(element?.rotation);
       const layer = finiteNumber(element?.layer) ?? 0;
       const areaKind = type === 'area' ? escapeText(element?.areaKind) : '';
+      const areaPreset = type === 'area' ? getAreaPreset(areaKind) : null;
       const definition = type === 'area' ? getAreaCatalogItem(areaKind) : getCatalogItem(type);
       const defaults = definition ? catalogElementSize(definition) : null;
       const width = finiteNumber(element?.width) ?? defaults?.width;
       const height = finiteNumber(element?.height) ?? defaults?.height;
       const locked = element?.locked === true;
-      const color = type === 'area' ? escapeText(element?.color) || '#d8c9a6' : '';
-      const transparency = type === 'area' ? Math.max(0, Math.min(90, finiteNumber(element?.transparency) ?? 45)) : 0;
+      const color = type === 'area' ? escapeText(element?.color) || areaPreset?.color || '#c8ccb9' : '';
+      const transparency = type === 'area' ? Math.max(0, Math.min(90, finiteNumber(element?.transparency) ?? areaPreset?.transparency ?? 45)) : 0;
       const points = Array.isArray(element?.points)
         ? element.points.map((point) => ({ x: finiteNumber(point?.x), y: finiteNumber(point?.y) }))
         : null;
@@ -705,7 +706,7 @@ function renderPhysicalElement(element) {
   node.style.height = `${element.height}px`;
   node.style.transform = `rotate(${normalizeRotation(element.rotation)}deg)`;
   if (element.type === 'area') {
-    node.style.setProperty('--area-fill', element.color || '#d8c9a6');
+    node.style.setProperty('--area-fill', element.color || getAreaPreset(element.areaKind)?.color || '#c8ccb9');
     node.style.setProperty('--area-fill-opacity', String(1 - Math.max(0, Math.min(90, Number(element.transparency) || 0)) / 100));
   }
   if (Array.isArray(element.points)) {
@@ -716,7 +717,7 @@ function renderPhysicalElement(element) {
     const shape = document.createElementNS(svgNs, 'polygon');
     shape.setAttribute('points', element.points.map((point) => `${point.x},${point.y}`).join(' '));
     polygon.append(shape);
-    if (element.type === 'area' && element.areaKind === 'tent') {
+    if (element.type === 'area') {
       element.points.forEach((point, index) => {
         const next = element.points[(index + 1) % element.points.length];
         const length = PLAN_SCALE.pixelsToMeters(Math.hypot(next.x - point.x, next.y - point.y));
@@ -773,7 +774,7 @@ function applyElementPlacement(node, element) {
   node.style.height = `${element.height}px`;
   node.style.transform = `rotate(${normalizeRotation(element.rotation)}deg)`;
   if (element.type === 'area') {
-    node.style.setProperty('--area-fill', element.color || '#d8c9a6');
+    node.style.setProperty('--area-fill', element.color || getAreaPreset(element.areaKind)?.color || '#c8ccb9');
     node.style.setProperty('--area-fill-opacity', String(1 - Math.max(0, Math.min(90, Number(element.transparency) || 0)) / 100));
   }
 }
@@ -786,7 +787,7 @@ function refreshElementGeometryNode(node, element) {
   if (!svg || !polygon) return;
   svg.setAttribute('viewBox', `0 0 ${element.width} ${element.height}`);
   polygon.setAttribute('points', element.points.map((point) => `${point.x},${point.y}`).join(' '));
-  if (element.type === 'area' && element.areaKind === 'tent') {
+  if (element.type === 'area') {
     const measures = [...svg.querySelectorAll('.distribution-polygon-side-measure')];
     const handles = [...svg.querySelectorAll('.distribution-polygon-vertex')];
     element.points.forEach((point, index) => {
@@ -815,7 +816,7 @@ function renderElementInspector(root, element) {
   const heightMeters = element.height / PIXELS_PER_METER;
   const areaMeters = Array.isArray(element.points) ? polygonArea(element.points) / (PIXELS_PER_METER ** 2) : null;
   const perimeterMeters = Array.isArray(element.points) ? polygonPerimeter(element.points) / PIXELS_PER_METER : null;
-  const isPolygonArea = element.type === 'area' && element.areaKind === 'tent';
+  const isPolygonArea = element.type === 'area';
   root.querySelector('[data-distribution-selected-meta]').textContent = areaMeters === null
     ? `${widthMeters.toFixed(2)} × ${heightMeters.toFixed(2)} m`
     : `${widthMeters.toFixed(2)} × ${heightMeters.toFixed(2)} m · ${areaMeters.toFixed(2)} m²`;
@@ -830,7 +831,7 @@ function renderElementInspector(root, element) {
   if (isPolygonArea) {
     root.querySelector('[data-distribution-polygon-area]').textContent = `${areaMeters.toFixed(2)} m²`;
     root.querySelector('[data-distribution-polygon-perimeter]').textContent = `${perimeterMeters.toFixed(2)} m`;
-    root.querySelector('[data-distribution-polygon-color]').value = element.color || '#d8c9a6';
+    root.querySelector('[data-distribution-polygon-color]').value = element.color || getAreaPreset(element.areaKind)?.color || '#c8ccb9';
     root.querySelector('[data-distribution-polygon-transparency]').value = String(element.transparency ?? 45);
     root.querySelector('[data-distribution-polygon-transparency-value]').value = `${element.transparency ?? 45}%`;
     root.querySelector('[data-distribution-polygon-transparency-value]').textContent = `${element.transparency ?? 45}%`;
@@ -919,8 +920,10 @@ async function mountDistribucion(context) {
   if (epoch !== mountEpoch || !root.isConnected) return;
   root.innerHTML = templateHtml;
   const catalogHost = root.querySelector('[data-distribution-tool-catalog]');
+  const areaCatalogHost = root.querySelector('[data-distribution-area-catalog]');
   const catalogSearch = root.querySelector('[data-distribution-catalog-search]');
   const catalogGroups = getVisibleCatalogGroups();
+  const areaPresets = getVisibleAreaPresets();
   const catalogButtons = [];
   const createCatalogButton = (definition) => {
     const button = document.createElement('button');
@@ -954,17 +957,50 @@ async function mountDistribucion(context) {
     details.append(summary, list);
     catalogHost.append(details);
   });
+  const areaGroup = document.createElement('details');
+  areaGroup.className = 'distribution-tool-group distribution-area-tool-group';
+  areaGroup.dataset.catalogCategory = 'drawn-areas';
+  const areaSummary = document.createElement('summary');
+  const areaLabel = document.createElement('span');
+  areaLabel.textContent = 'Áreas dibujables';
+  const areaCount = document.createElement('small');
+  areaCount.textContent = areaPresets.length + ' áreas';
+  areaSummary.append(areaLabel, areaCount);
+  const areaList = document.createElement('div');
+  areaList.className = 'distribution-tool-list';
+  areaPresets.forEach((preset) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.distributionDrawAreaKind = preset.areaKind;
+    button.dataset.defaultLabel = preset.label;
+    button.setAttribute('aria-label', preset.label);
+    button.title = preset.label;
+    const icon = document.createElement('strong');
+    icon.textContent = preset.icon;
+    icon.setAttribute('aria-hidden', 'true');
+    const label = document.createElement('span');
+    label.textContent = preset.label;
+    button.append(icon, label);
+    areaList.append(button);
+  });
+  areaGroup.append(areaSummary, areaList);
+  areaCatalogHost.append(areaGroup);
+
   const filterCatalog = () => {
     const query = escapeText(catalogSearch?.value).toLocaleLowerCase('es');
     catalogButtons.forEach(({ button, definition }) => {
       const searchable = [definition.label, ...definition.aliases].join(' ').toLocaleLowerCase('es');
       button.hidden = Boolean(query) && !searchable.includes(query);
     });
-    catalogHost.querySelectorAll('[data-catalog-category]').forEach((details) => {
-      const visible = [...details.querySelectorAll('[data-distribution-add-element]')].filter((button) => !button.hidden);
+    areaPresets.forEach((preset) => {
+      const button = areaCatalogHost.querySelector(`[data-distribution-draw-area-kind="${preset.areaKind}"]`);
+      if (button) button.hidden = Boolean(query) && !preset.label.toLocaleLowerCase('es').includes(query);
+    });
+    [catalogHost, areaCatalogHost].forEach((host) => host.querySelectorAll('[data-catalog-category]').forEach((details) => {
+      const visible = [...details.querySelectorAll('[data-distribution-add-element],[data-distribution-draw-area-kind]')].filter((button) => !button.hidden);
       details.hidden = visible.length === 0;
       if (query && visible.length) details.open = true;
-    });
+    }));
   };
   catalogSearch?.addEventListener('input', filterCatalog);
   const status = root.querySelector('[data-distribution-status]');
@@ -1091,24 +1127,26 @@ async function mountDistribucion(context) {
         const areaGroup = document.createElement('details');
         areaGroup.className = 'distribution-mobile-catalog-group';
         const areaSummary = document.createElement('summary');
-        areaSummary.textContent = 'Áreas dibujables · 1';
+        const areaPresets = getVisibleAreaPresets();
+        areaSummary.textContent = `Áreas dibujables · ${areaPresets.length}`;
         const areaList = document.createElement('div');
         areaList.className = 'distribution-mobile-catalog-grid';
-        const tentDefinition = getAreaCatalogItem('tent');
-        const tentButton = document.createElement('button');
-        tentButton.type = 'button';
-        tentButton.setAttribute('aria-label', tentDefinition.label);
-        const tentIcon = document.createElement('strong');
-        tentIcon.textContent = tentDefinition.icon;
-        tentIcon.setAttribute('aria-hidden', 'true');
-        const tentLabel = document.createElement('span');
-        tentLabel.textContent = 'Dibujar ' + tentDefinition.label;
-        tentButton.append(tentIcon, tentLabel);
-        tentButton.addEventListener('click', () => {
-          proxyClick('[data-distribution-draw-tent]');
-          closeMobileSheet();
+        areaPresets.forEach((preset) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.setAttribute('aria-label', preset.label);
+          const icon = document.createElement('strong');
+          icon.textContent = preset.icon;
+          icon.setAttribute('aria-hidden', 'true');
+          const label = document.createElement('span');
+          label.textContent = preset.label;
+          button.append(icon, label);
+          button.addEventListener('click', () => {
+            proxyClick(`[data-distribution-draw-area-kind="${preset.areaKind}"]`);
+            closeMobileSheet();
+          });
+          areaList.append(button);
         });
-        areaList.append(tentButton);
         areaGroup.append(areaSummary, areaList);
         mobileCatalog.append(areaGroup);
         mobileSheetBody.append(mobileCatalog);
@@ -1240,14 +1278,14 @@ async function mountDistribucion(context) {
               closeMobileSheet();
             }, 'is-wide');
 
-            if (selectedElement.type === 'area' && selectedElement.areaKind === 'tent') {
+            if (selectedElement.type === 'area') {
               const styleWrap = document.createElement('div');
               styleWrap.className = 'distribution-mobile-size-editor';
               const colorField = document.createElement('label');
               colorField.textContent = 'Color';
               const colorInput = document.createElement('input');
               colorInput.type = 'color';
-              colorInput.value = selectedElement.color || '#d8c9a6';
+              colorInput.value = selectedElement.color || getAreaPreset(selectedElement.areaKind)?.color || '#c8ccb9';
               colorField.append(colorInput);
               const transparencyField = document.createElement('label');
               transparencyField.textContent = 'Transparencia (%)';
@@ -2082,6 +2120,7 @@ async function mountDistribucion(context) {
     const createElement = (type, x, y, rotation = 0, options = {}) => {
       const canonicalType = resolveCatalogType(type);
       const areaKind = canonicalType === 'area' ? escapeText(options.areaKind) : '';
+      const areaPreset = canonicalType === 'area' ? getAreaPreset(areaKind) : null;
       const definition = canonicalType === 'area' ? getAreaCatalogItem(areaKind) : getCatalogItem(canonicalType);
       if (!definition) return null;
       const usedIds = new Set(physicalElements.map((element) => escapeText(element.id)).filter(Boolean));
@@ -2094,7 +2133,7 @@ async function mountDistribucion(context) {
       const element = {
         id: elementId,
         type: canonicalType,
-        ...(canonicalType === 'area' ? { areaKind, color: options.color || '#d8c9a6', transparency: Math.max(0, Math.min(90, finiteNumber(options.transparency) ?? 45)) } : {}),
+        ...(canonicalType === 'area' ? { areaKind, color: options.color || areaPreset.color, transparency: Math.max(0, Math.min(90, finiteNumber(options.transparency) ?? areaPreset.transparency)) } : {}),
         x, y, rotation: normalizeRotation(rotation), layer: physicalElements.length, locked: false, width: defaults.width, height: defaults.height
       };
       physicalElements.push(element);
@@ -2687,8 +2726,7 @@ async function mountDistribucion(context) {
     let measureStart = null;
     let measuring = false;
     const drawingLayer = root.querySelector('[data-distribution-drawing-layer]');
-    const drawAreaButtons = [...root.querySelectorAll('[data-distribution-draw-area]')];
-    const drawTentButton = root.querySelector('[data-distribution-draw-tent]');
+    const modernAreaButtons = [...root.querySelectorAll('[data-distribution-draw-area-kind]')];
     let drawingPoints = [];
     let drawingHoverPoint = null;
     let drawingArea = false;
@@ -2748,7 +2786,7 @@ async function mountDistribucion(context) {
       drawingHoverPoint = null;
       drawingAreaKind = '';
       drawingLayer.replaceChildren();
-      [...drawAreaButtons, drawTentButton].filter(Boolean).forEach((button) => {
+      modernAreaButtons.forEach((button) => {
         button.classList.remove('is-active');
         button.textContent = button.dataset.defaultLabel || button.textContent;
       });
@@ -2769,10 +2807,11 @@ async function mountDistribucion(context) {
       const maxY = Math.max(...ys);
       if (maxX - minX < PIXELS_PER_METER * MIN_ELEMENT_METERS || maxY - minY < PIXELS_PER_METER * MIN_ELEMENT_METERS) return;
       rememberEdit();
+      const preset = drawingType === 'area' ? getAreaPreset(drawingAreaKind) : null;
       const element = createElement(drawingType, minX, minY, 0, {
         areaKind: drawingAreaKind,
-        color: '#d8c9a6',
-        transparency: 45
+        color: preset?.color,
+        transparency: preset?.transparency
       });
       if (!element) return;
       element.width = maxX - minX;
@@ -2797,50 +2836,32 @@ async function mountDistribucion(context) {
       stopDrawingArea();
     };
 
-    drawAreaButtons.forEach((button) => {
+    modernAreaButtons.forEach((button) => {
       button.dataset.defaultLabel = button.textContent;
       button.onclick = () => {
-        const nextType = button.dataset.distributionDrawArea || 'zone';
-        if (!getCatalogItem(nextType)) return;
+        if (!canEdit) return;
+        const nextAreaKind = escapeText(button.dataset.distributionDrawAreaKind);
+        const preset = getAreaPreset(nextAreaKind);
+        if (!preset) return;
         if (drawingArea) {
-          const switchingType = drawingType !== nextType;
+          const sameMode = drawingType === 'area' && drawingAreaKind === nextAreaKind;
           stopDrawingArea();
-          if (!switchingType) return;
+          if (sameMode) return;
         }
         stopMeasuring();
         clearSelection();
-        drawingType = nextType;
+        drawingType = 'area';
+        drawingAreaKind = nextAreaKind;
         drawingArea = true;
         root.classList.add('is-drawing-area');
         drawingPoints = [];
+        drawingHoverPoint = null;
         button.classList.add('is-active');
-        button.textContent = 'Cancelar dibujo';
-        measureHint.textContent = `${drawingLabel(drawingType)} · marca al menos 3 puntos · toca el primer punto para cerrar`;
+        button.textContent = `Cancelar ${preset.label}`;
+        measureHint.textContent = `${preset.label} · marca al menos 3 vértices · cierra sobre el primer punto, doble clic o Enter`;
         measureHint.hidden = false;
       };
     });
-
-    drawTentButton.dataset.defaultLabel = drawTentButton.textContent;
-    drawTentButton.onclick = () => {
-      if (!canEdit) return;
-      if (drawingArea) {
-        const sameMode = drawingType === 'area' && drawingAreaKind === 'tent';
-        stopDrawingArea();
-        if (sameMode) return;
-      }
-      stopMeasuring();
-      clearSelection();
-      drawingType = 'area';
-      drawingAreaKind = 'tent';
-      drawingArea = true;
-      root.classList.add('is-drawing-area');
-      drawingPoints = [];
-      drawingHoverPoint = null;
-      drawTentButton.classList.add('is-active');
-      drawTentButton.textContent = 'Cancelar Toldo';
-      measureHint.textContent = 'Toldo · marca al menos 3 vértices · cierra sobre el primer punto, doble clic o Enter';
-      measureHint.hidden = false;
-    };
 
     measureButton.onclick = () => {
       if (measuring) {

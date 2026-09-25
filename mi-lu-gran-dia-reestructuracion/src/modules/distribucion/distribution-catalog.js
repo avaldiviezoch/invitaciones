@@ -69,9 +69,32 @@ const DISTRIBUTION_OBJECT_CATALOG = Object.freeze({
   canopy: catalogItem('canopy', 'Cobertura rectangular / toldo modular', 'venue', 6, 6, { spatialFamily: 'container', behavior: 'physical-container', icon: '⌂' })
 });
 
-const DRAWABLE_AREA_CATALOG = Object.freeze({
-  tent: catalogItem('area', 'Toldo', 'drawn-areas', 5, 4, { spatialFamily: 'container', behavior: 'polygon-area', icon: '⌂' })
+const DRAWABLE_AREA_PRESETS = Object.freeze({
+  tent: Object.freeze({ areaKind: 'tent', label: 'Toldo', icon: '⌂', color: '#d8c9a6', transparency: 45, dimensions: Object.freeze({ widthM: 5, heightM: 4 }), spatialFamily: 'container' }),
+  stage: Object.freeze({ areaKind: 'stage', label: 'Área de escenario', icon: '▔', color: '#c8b7ad', transparency: 45, dimensions: Object.freeze({ widthM: 5, heightM: 3 }), spatialFamily: 'reserved' }),
+  lounge: Object.freeze({ areaKind: 'lounge', label: 'Área lounge', icon: '◫', color: '#c9c2d8', transparency: 45, dimensions: Object.freeze({ widthM: 4, heightM: 4 }), spatialFamily: 'reserved' }),
+  children: Object.freeze({ areaKind: 'children', label: 'Área infantil', icon: '☆', color: '#d9c9b8', transparency: 45, dimensions: Object.freeze({ widthM: 4, heightM: 4 }), spatialFamily: 'reserved' }),
+  buffet: Object.freeze({ areaKind: 'buffet', label: 'Área de buffet', icon: '▤', color: '#c8d5bd', transparency: 45, dimensions: Object.freeze({ widthM: 4, heightM: 2 }), spatialFamily: 'reserved' }),
+  technical: Object.freeze({ areaKind: 'technical', label: 'Zona técnica', icon: '⚙', color: '#c2c7c8', transparency: 45, dimensions: Object.freeze({ widthM: 3, heightM: 2 }), spatialFamily: 'restricted' }),
+  restricted: Object.freeze({ areaKind: 'restricted', label: 'Zona restringida', icon: '⊘', color: '#d5bdb8', transparency: 45, dimensions: Object.freeze({ widthM: 3, heightM: 3 }), spatialFamily: 'restricted' }),
+  circulation: Object.freeze({ areaKind: 'circulation', label: 'Circulación', icon: '↔', color: '#bdced3', transparency: 45, dimensions: Object.freeze({ widthM: 4, heightM: 1.2 }), spatialFamily: 'circulation' }),
+  custom: Object.freeze({ areaKind: 'custom', label: 'Área personalizada', icon: '▧', color: '#c8ccb9', transparency: 45, dimensions: Object.freeze({ widthM: 4, heightM: 3 }), spatialFamily: 'informative' })
 });
+
+const DRAWABLE_AREA_ORDER = Object.freeze([
+  'tent', 'stage', 'lounge', 'children', 'buffet', 'technical', 'restricted', 'circulation', 'custom'
+]);
+
+const DRAWABLE_AREA_CATALOG = Object.freeze(Object.fromEntries(
+  DRAWABLE_AREA_ORDER.map((areaKind) => {
+    const preset = DRAWABLE_AREA_PRESETS[areaKind];
+    return [areaKind, catalogItem('area', preset.label, 'drawn-areas', preset.dimensions.widthM, preset.dimensions.heightM, {
+      spatialFamily: preset.spatialFamily,
+      behavior: 'polygon-area',
+      icon: preset.icon
+    })];
+  })
+));
 
 const LEGACY_AREA_CATALOG = Object.freeze({
   circulation: catalogItem('circulation', 'Circulación', 'drawn-areas', 4, 1.2, { spatialFamily: 'circulation', behavior: 'legacy-area', icon: '↔' }),
@@ -121,6 +144,14 @@ function resolveCatalogType(type) {
   return TYPE_ALIASES[value] || value;
 }
 
+function getAreaPreset(areaKind) {
+  return DRAWABLE_AREA_PRESETS[String(areaKind || '').trim()] || null;
+}
+
+function getVisibleAreaPresets() {
+  return DRAWABLE_AREA_ORDER.map((areaKind) => DRAWABLE_AREA_PRESETS[areaKind]).filter(Boolean);
+}
+
 function getAreaCatalogItem(areaKind) {
   return DRAWABLE_AREA_CATALOG[String(areaKind || '').trim()] || null;
 }
@@ -139,7 +170,11 @@ export {
   DISTRIBUTION_OBJECT_CATALOG,
   LEGACY_AREA_CATALOG,
   DRAWABLE_AREA_CATALOG,
+  DRAWABLE_AREA_PRESETS,
+  DRAWABLE_AREA_ORDER,
   getVisibleCatalogGroups,
+  getVisibleAreaPresets,
+  getAreaPreset,
   getAreaCatalogItem,
   getElementCatalogItem,
   getCatalogItem,

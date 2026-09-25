@@ -625,3 +625,14 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Duplicado/copy/paste y propuestas conservan points[], areaKind, color y transparencia con IDs independientes.
 - circulation/restricted/zone siguen legacy y canopy continúa rectangular 6 × 6 m.
 - Se mantiene formato V1 sin migraciones y no se modifica Firebase/Firestore, Storage, Auth, reglas, IDs ni usuarios.
+
+
+## 2026-09-25 — Distribución Fase 7: motor común de áreas dibujables
+- Se generaliza el motor poligonal de Fase 6 a nueve presets modernos: tent, stage, lounge, children, buffet, technical, restricted, circulation y custom.
+- Todas las variantes persisten type=area + areaKind y comparten dibujo, preview, cierre/cancelación, vértices, área, perímetro, medidas laterales, resize, rotación, Undo/Redo, autosave, copy/paste, renderer e inspector.
+- Desktop activa «Áreas dibujables» con nueve opciones; móvil deriva las mismas opciones de la misma fuente central.
+- La búsqueda de Fase 5 incluye las áreas sin confundir objetos ordinarios stage/buffet/technical con area/stage, area/buffet y area/technical.
+- Se retiran únicamente los controles de creación legacy; circulation, restricted y zone siguen soportados para lectura, render, edición y persistencia sin migración.
+- Un areaKind desconocido se rechaza controladamente; no se convierte silenciosamente a custom.
+- canopy continúa ordinario rectangular 6 × 6 m; catálogo ordinario sigue 37/38 visible con chair oculto.
+- Se mantiene formato V1 y no se modifica Firebase/Firestore, Storage, Auth, reglas, usuarios, IDs ni documentos.

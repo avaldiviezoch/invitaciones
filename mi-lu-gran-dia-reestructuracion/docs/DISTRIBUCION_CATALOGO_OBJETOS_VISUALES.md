@@ -823,3 +823,46 @@ El inspector muestra Toldo, ancho/alto derivados, Área, Perímetro, color y tra
 El motor espacial vigente ya consume polígonos y se reutiliza sin reescritura. Su intersección polígono-polígono está basada en los ejes de las aristas (SAT), por lo que su comportamiento es más sólido con polígonos convexos; no se reescribió el motor global para casos cóncavos en esta fase. La selección continúa perteneciendo al nodo/bounding box existente del elemento; no se introdujo un segundo hit-test poligonal.
 
 No se realizó validación interactiva real en navegador en esta sesión. Las validaciones de esta fase son estáticas y lógicas sobre contrato, serialización y fórmulas geométricas.
+
+
+---
+
+# Fase 7 — Motor común de áreas dibujables
+
+## Presets modernos
+
+La única fuente de valores permitidos es `DRAWABLE_AREA_PRESETS`, presentada mediante `DRAWABLE_AREA_ORDER`. Las nueve variantes modernas son: `tent`, `stage`, `lounge`, `children`, `buffet`, `technical`, `restricted`, `circulation` y `custom`.
+
+Cada preset define únicamente semántica/presentación necesaria: `areaKind`, label, icono, color inicial, transparencia inicial, referencia dimensional y familia espacial. Todos persisten `type:'area'`; no se crean types modernos separados.
+
+## Motor común
+
+El motor de Fase 6 se generaliza para cualquier elemento `type:'area'`: dibujo, cierre, cancelación, preview, Shoelace, perímetro, medidas laterales, handles de vértice, resize, rotación, movimiento, historial, autosave, copy/paste, renderer e inspector. No existen motores ni listeners por preset.
+
+El renderer resuelve label/capacidades mediante el preset de `areaKind`. Color y transparencia se toman del preset solo como valores iniciales y continúan siendo editables por instancia.
+
+## Catálogo desktop y móvil
+
+Desktop incorpora la octava categoría «Áreas dibujables» con las nueve variantes en orden explícito. La búsqueda existente filtra tanto objetos ordinarios como áreas y permite distinguir, por ejemplo, «Escenario» de «Área de escenario».
+
+Móvil deriva la sección «Áreas dibujables» directamente de los mismos presets; no existe una lista móvil paralela.
+
+## Legacy y modelo moderno
+
+Se conserva lectura, render, edición y serialización de `circulation`, `restricted` y `zone` legacy. No se migran ni reinterpretan. Los controles para crear nuevos legacy se retiran de la UI porque las alternativas modernas `area/circulation`, `area/restricted` y `area/custom` cubren la creación nueva. El soporte legacy permanece en parser, catálogo y motor geométrico.
+
+Un `areaKind` desconocido se rechaza de forma controlada por el parser al no existir en la fuente central; no se convierte silenciosamente a `custom`.
+
+## Persistencia y compatibilidad
+
+Se mantiene V1 y la geometría primaria sigue siendo `points[]`. `areaKind`, color y transparencia son metadata de las áreas modernas; área, perímetro, lados y bounding box continúan derivados.
+
+`canopy` permanece como objeto ordinario rectangular «Cobertura rectangular / toldo modular» 6 × 6 m. El catálogo ordinario conserva 38 definiciones y 37 visibles; `chair` sigue sin exponerse.
+
+No se modifica Firebase, Firestore, Storage, Auth, reglas, usuarios, IDs ni documentos.
+
+## Limitaciones
+
+Se mantiene documentada la limitación SAT para polígonos cóncavos y el hit-test existente. Esta fase no reescribe geometría, zoom/pan ni rueda radial.
+
+No se realizó validación interactiva real en navegador en esta sesión; las comprobaciones son estáticas, contractuales y geométricas.
