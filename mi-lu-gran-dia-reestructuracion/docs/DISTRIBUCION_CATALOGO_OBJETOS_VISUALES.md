@@ -780,3 +780,46 @@ Total: **37/38 objetos ordinarios visibles**. `chair` continúa excluido. `circu
 Validación estática/lógica: los 37 types visibles se derivan de `getVisibleCatalogGroups()`; cada botón obtiene label/icono/type desde su definición canónica; la creación sigue usando `createElement()` y las dimensiones del catálogo. Se verificó que no existen botones ordinarios hardcodeados en el template, catálogo móvil manual, metadata física duplicada ni `!important` nuevo.
 
 No se realizó validación interactiva real en navegador en esta sesión; la revisión visual se basó en la estructura HTML/CSS y breakpoints existentes. No se modificaron Firebase, Firestore, Storage, Auth, persistencia V1, canvas, geometría, propuestas ni el motor de áreas.
+
+
+---
+
+# Fase 6 — Toldo poligonal
+
+## Contrato
+
+El Toldo se incorpora como área dibujable moderna con `type: 'area'` y `areaKind: 'tent'`. No reutiliza ni modifica `canopy`. La geometría primaria es `points[]`, almacenada como vértices locales al bounding box del elemento; `x/y` ubican ese bounding box y `rotation` aplica la rotación del elemento sin reescribir los puntos. Ancho, alto, área, perímetro y medidas laterales se derivan de los puntos.
+
+El formato global continúa siendo V1. Solo los elementos `type: 'area'` incluyen de forma opcional y compatible `areaKind`, `color` y `transparency`. No existe migración de elementos anteriores.
+
+## Creación y finalización
+
+“Dibujar Toldo” reutiliza el motor de dibujo poligonal ya existente. Cada clic/tap agrega un vértice. Se muestra preview de segmentos, vértices y línea temporal al puntero. El primer vértice se distingue visualmente.
+
+Con un mínimo de tres vértices se puede finalizar de tres formas: clic/tap cerca del primer vértice, doble clic o Enter. Esc cancela y limpia preview/estado sin crear historial ni persistencia parcial. Se rechazan polígonos auto-intersectados, sin superficie válida o con segmentos prácticamente nulos.
+
+## Geometría y medidas
+
+Área: fórmula Shoelace sobre `points[]`, convertida con la escala vigente de 32 px/m. Perímetro: suma de las distancias de cada arista incluyendo último→primero. Las medidas laterales se calculan con la misma escala y se muestran solo cuando el Toldo está seleccionado.
+
+Los handles de vértice permiten drag individual. Durante el gesto se actualizan puntos, bounding box, medidas, área, perímetro y colisiones en memoria; el commit lógico ocurre al soltar el puntero. El bounding box se renormaliza sin cambiar la posición mundial de la geometría restante.
+
+Resize reutiliza el gesto genérico existente y escala todos los puntos desde el snapshot inicial del gesto. Rotación reutiliza `element.rotation`; los puntos permanecen en coordenadas locales, evitando almacenar una segunda geometría rotada.
+
+## Estilo
+
+El inspector muestra Toldo, ancho/alto derivados, Área, Perímetro, color y transparencia. Transparencia se limita a 0–90 %. Color y transparencia forman parte del elemento, no de la geometría. Móvil reutiliza los mismos campos mediante Ajustes.
+
+## Persistencia, historial y propuestas
+
+`points[]`, `areaKind`, color y transparencia viajan por la serialización V1 existente. Los puntos conservan cuatro decimales de píxel al serializar para no degradar la geometría por redondeo visual. Undo/Redo reutiliza `editorSnapshot()` y cubre creación, movimiento, edición de vértices, resize, rotación, estilo y eliminación. Autosave sigue ocurriendo al finalizar una acción lógica mediante `markDirty()`. Duplicado/copy/paste preservan puntos y estilo con nuevo ID. Las propuestas clonan los puntos y metadatos sin compartir referencias.
+
+## Compatibilidad
+
+`circulation`, `restricted` y `zone` continúan como tipos legacy y siguen usando el mismo motor de polígonos existente. `canopy` permanece como Cobertura rectangular / toldo modular 6 × 6 m. No se modifica Firebase, Firestore, Storage, Auth, claves, IDs ni esquema global.
+
+## Limitaciones reales
+
+El motor espacial vigente ya consume polígonos y se reutiliza sin reescritura. Su intersección polígono-polígono está basada en los ejes de las aristas (SAT), por lo que su comportamiento es más sólido con polígonos convexos; no se reescribió el motor global para casos cóncavos en esta fase. La selección continúa perteneciendo al nodo/bounding box existente del elemento; no se introdujo un segundo hit-test poligonal.
+
+No se realizó validación interactiva real en navegador en esta sesión. Las validaciones de esta fase son estáticas y lógicas sobre contrato, serialización y fórmulas geométricas.

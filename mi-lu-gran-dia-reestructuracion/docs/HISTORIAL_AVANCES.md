@@ -612,3 +612,16 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Móvil conserva el bottom sheet existente y genera las mismas categorías/objetos desde la misma fuente, sin lista móvil paralela.
 - Se mantienen 37/38 objetos expuestos; chair continúa sin botón y circulation/restricted/zone permanecen legacy.
 - No se modifica Firebase/Firestore, Storage, Auth, persistencia V1, canvas, geometría ni motor de áreas.
+
+
+## 2026-09-25 — Distribución Fase 6: Toldo poligonal
+- Se incorpora Toldo como `type: area` + `areaKind: tent`, independiente de canopy.
+- Se reutiliza el motor poligonal existente: points[] local es la geometría primaria; área, perímetro, bounding box y lados se derivan.
+- Dibujar Toldo permite cierre por primer vértice, doble clic o Enter; Esc cancela sin crear objeto parcial.
+- Preview muestra segmentos, vértices y línea al puntero; se rechazan auto-intersecciones y segmentos prácticamente nulos.
+- El Toldo seleccionado muestra medidas laterales y handles para editar vértices; un drag produce una sola entrada de Undo/Redo y autosave al finalizar.
+- Resize escala points[]; rotation continúa como transformación única del elemento; movimiento traslada x/y sin deformar los puntos.
+- Inspector incorpora área, perímetro, color y transparencia 0–90%; móvil reutiliza el mismo contrato desde Ajustes.
+- Duplicado/copy/paste y propuestas conservan points[], areaKind, color y transparencia con IDs independientes.
+- circulation/restricted/zone siguen legacy y canopy continúa rectangular 6 × 6 m.
+- Se mantiene formato V1 sin migraciones y no se modifica Firebase/Firestore, Storage, Auth, reglas, IDs ni usuarios.

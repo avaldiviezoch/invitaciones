@@ -122,6 +122,7 @@
         <button type="button" data-distribution-clear-measure>Limpiar medida</button>
         <label class="distribution-snap-toggle"><input type="checkbox" data-distribution-snap> Ajustar a cuadrícula</label>
         <div class="distribution-drawing-tools" role="group" aria-label="Dibujar áreas">
+          <button type="button" class="distribution-tent-draw-button" data-distribution-draw-tent>Dibujar Toldo</button>
           <button type="button" data-distribution-draw-area="circulation">Dibujar circulación</button>
           <button type="button" data-distribution-draw-area="restricted">Dibujar zona restringida</button>
           <button type="button" data-distribution-draw-area="zone">Dibujar área libre</button>
@@ -191,6 +192,14 @@
         <div class="distribution-dimensions" data-distribution-dimensions hidden>
           <label>Ancho (m)<input type="number" min="0.5" max="30" step="0.1" data-distribution-width></label>
           <label>Alto (m)<input type="number" min="0.5" max="30" step="0.1" data-distribution-height></label>
+        </div>
+        <div class="distribution-polygon-stats" data-distribution-polygon-stats hidden>
+          <span><strong data-distribution-polygon-area>0.00 m²</strong> Área</span>
+          <span><strong data-distribution-polygon-perimeter>0.00 m</strong> Perímetro</span>
+        </div>
+        <div class="distribution-polygon-style" data-distribution-polygon-style hidden>
+          <label>Color<input type="color" value="#d8c9a6" data-distribution-polygon-color></label>
+          <label>Transparencia <input type="range" min="0" max="90" step="5" value="45" data-distribution-polygon-transparency><output data-distribution-polygon-transparency-value>45%</output></label>
         </div>
         <div class="distribution-element-actions" data-distribution-element-actions hidden>
           <button type="button" data-distribution-bring-front>Traer al frente</button>

@@ -11,7 +11,7 @@ import {
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=6';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { setupDistributionCamera } from './camera.js?v=9';
-import { getCatalogItem, getVisibleCatalogGroups, resolveCatalogType } from './distribution-catalog.js?v=2';
+import { getAreaCatalogItem, getCatalogItem, getElementCatalogItem, getVisibleCatalogGroups, resolveCatalogType } from './distribution-catalog.js?v=3';
 import {
   DEFAULT_BACKGROUND_ID,
   addDistributionBackground,
@@ -22,7 +22,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=57', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=58', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 1;
@@ -72,7 +72,50 @@ function catalogElementSize(definition) {
 }
 
 function elementCapabilities(element) {
-  return getCatalogItem(element?.type)?.capabilities || null;
+  return getElementCatalogItem(element)?.capabilities || null;
+}
+
+function polygonPerimeter(points) {
+  if (!Array.isArray(points) || points.length < 2) return 0;
+  return points.reduce((sum, point, index) => {
+    const next = points[(index + 1) % points.length];
+    return sum + Math.hypot(next.x - point.x, next.y - point.y);
+  }, 0);
+}
+
+function polygonBounds(points) {
+  const xs = points.map((point) => point.x);
+  const ys = points.map((point) => point.y);
+  return { minX: Math.min(...xs), minY: Math.min(...ys), maxX: Math.max(...xs), maxY: Math.max(...ys) };
+}
+
+function normalizePolygonElementGeometry(element) {
+  if (!Array.isArray(element.points) || element.points.length < 3) return;
+  const oldWidth = element.width;
+  const oldHeight = element.height;
+  const bounds = polygonBounds(element.points);
+  const width = Math.max(1, bounds.maxX - bounds.minX);
+  const height = Math.max(1, bounds.maxY - bounds.minY);
+  const oldCenter = { x: oldWidth / 2, y: oldHeight / 2 };
+  const newCenterInOldLocal = { x: bounds.minX + width / 2, y: bounds.minY + height / 2 };
+  const centerShift = rotateLocalPoint({
+    x: newCenterInOldLocal.x - oldCenter.x,
+    y: newCenterInOldLocal.y - oldCenter.y
+  }, element.rotation);
+  const oldWorldCenter = { x: element.x + oldWidth / 2, y: element.y + oldHeight / 2 };
+  const newWorldCenter = { x: oldWorldCenter.x + centerShift.x, y: oldWorldCenter.y + centerShift.y };
+  element.points = element.points.map((point) => ({ x: point.x - bounds.minX, y: point.y - bounds.minY }));
+  element.width = width;
+  element.height = height;
+  element.x = newWorldCenter.x - width / 2;
+  element.y = newWorldCenter.y - height / 2;
+}
+
+function polygonHasNearDuplicate(points, minimumDistance = 4) {
+  return points.some((point, index) => {
+    const next = points[(index + 1) % points.length];
+    return Math.hypot(next.x - point.x, next.y - point.y) < minimumDistance;
+  });
 }
 
 function rotateLocalPoint(point, rotation) {
@@ -148,7 +191,7 @@ function circlePolygonIntersects(circle, polygon) {
 }
 
 function spatialShapeForElement(element) {
-  const definition = getCatalogItem(element.type);
+  const definition = getElementCatalogItem(element);
   if (!definition) return null;
   if (Array.isArray(element.points)) {
     const center = { x: element.x + element.width / 2, y: element.y + element.height / 2 };
@@ -182,7 +225,7 @@ function spatialShapeForTable(table, placement, geometry) {
 }
 
 function spatialFamilyFor(element) {
-  return getCatalogItem(element?.type)?.spatialFamily || 'informative';
+  return getElementCatalogItem(element)?.spatialFamily || 'informative';
 }
 
 function spatialRuleFor(element, target) {
@@ -464,11 +507,14 @@ function parseDistributionState(value) {
       const y = finiteNumber(element?.y);
       const rotation = finiteNumber(element?.rotation);
       const layer = finiteNumber(element?.layer) ?? 0;
-      const definition = getCatalogItem(type);
+      const areaKind = type === 'area' ? escapeText(element?.areaKind) : '';
+      const definition = type === 'area' ? getAreaCatalogItem(areaKind) : getCatalogItem(type);
       const defaults = definition ? catalogElementSize(definition) : null;
       const width = finiteNumber(element?.width) ?? defaults?.width;
       const height = finiteNumber(element?.height) ?? defaults?.height;
       const locked = element?.locked === true;
+      const color = type === 'area' ? escapeText(element?.color) || '#d8c9a6' : '';
+      const transparency = type === 'area' ? Math.max(0, Math.min(90, finiteNumber(element?.transparency) ?? 45)) : 0;
       const points = Array.isArray(element?.points)
         ? element.points.map((point) => ({ x: finiteNumber(point?.x), y: finiteNumber(point?.y) }))
         : null;
@@ -482,7 +528,10 @@ function parseDistributionState(value) {
         throw new Error('La distribución guardada contiene elementos físicos no válidos. No se modificó ningún dato.');
       }
       seenElements.add(id);
-      return { id, type, x, y, rotation: normalizeRotation(rotation), layer, locked, width, height, points };
+      return {
+        id, type, ...(type === 'area' ? { areaKind, color, transparency } : {}),
+        x, y, rotation: normalizeRotation(rotation), layer, locked, width, height, points
+      };
     }) : [];
     return {
       id: escapeText(proposal.id),
@@ -532,10 +581,11 @@ function serializeProposal(id, name, placementState, tableIds, elements) {
     }),
     elements: elements.map((element) => ({
       id: element.id, type: element.type,
+      ...(element.type === 'area' ? { areaKind: element.areaKind, color: element.color, transparency: element.transparency } : {}),
       x: Math.round(element.x * 100) / 100, y: Math.round(element.y * 100) / 100,
       rotation: normalizeRotation(element.rotation), layer: Number(element.layer || 0), locked: element.locked === true,
       width: Math.round(element.width * 100) / 100, height: Math.round(element.height * 100) / 100,
-      ...(Array.isArray(element.points) ? { points: element.points.map((point) => ({ x: Math.round(point.x * 100) / 100, y: Math.round(point.y * 100) / 100 })) } : {})
+      ...(Array.isArray(element.points) ? { points: element.points.map((point) => ({ x: Math.round(point.x * 10000) / 10000, y: Math.round(point.y * 10000) / 10000 })) } : {})
     }))
   };
 }
@@ -638,8 +688,8 @@ function applyElementVisualContract(node, definition) {
 }
 
 function renderPhysicalElement(element) {
-  const definition = getCatalogItem(element.type);
-  const canonicalType = resolveCatalogType(element.type);
+  const definition = getElementCatalogItem(element);
+  const canonicalType = element.type === 'area' ? 'area' : resolveCatalogType(element.type);
   const node = document.createElement('article');
   node.className = `distribution-element is-${canonicalType}`;
   node.dataset.elementId = element.id;
@@ -654,6 +704,10 @@ function renderPhysicalElement(element) {
   node.style.width = `${element.width}px`;
   node.style.height = `${element.height}px`;
   node.style.transform = `rotate(${normalizeRotation(element.rotation)}deg)`;
+  if (element.type === 'area') {
+    node.style.setProperty('--area-fill', element.color || '#d8c9a6');
+    node.style.setProperty('--area-fill-opacity', String(1 - Math.max(0, Math.min(90, Number(element.transparency) || 0)) / 100));
+  }
   if (Array.isArray(element.points)) {
     const svgNs = 'http://www.w3.org/2000/svg';
     const polygon = document.createElementNS(svgNs, 'svg');
@@ -662,6 +716,25 @@ function renderPhysicalElement(element) {
     const shape = document.createElementNS(svgNs, 'polygon');
     shape.setAttribute('points', element.points.map((point) => `${point.x},${point.y}`).join(' '));
     polygon.append(shape);
+    if (element.type === 'area' && element.areaKind === 'tent') {
+      element.points.forEach((point, index) => {
+        const next = element.points[(index + 1) % element.points.length];
+        const length = PLAN_SCALE.pixelsToMeters(Math.hypot(next.x - point.x, next.y - point.y));
+        const side = document.createElementNS(svgNs, 'text');
+        side.classList.add('distribution-polygon-side-measure');
+        side.setAttribute('x', String((point.x + next.x) / 2));
+        side.setAttribute('y', String((point.y + next.y) / 2 - 6));
+        side.textContent = `${length.toFixed(2)} m`;
+        polygon.append(side);
+        const handle = document.createElementNS(svgNs, 'circle');
+        handle.classList.add('distribution-polygon-vertex');
+        handle.dataset.distributionPolygonVertex = String(index);
+        handle.setAttribute('cx', String(point.x));
+        handle.setAttribute('cy', String(point.y));
+        handle.setAttribute('r', '7');
+        polygon.append(handle);
+      });
+    }
     node.append(polygon);
   }
   const visual = document.createElement('span');
@@ -699,6 +772,10 @@ function applyElementPlacement(node, element) {
   node.style.width = `${element.width}px`;
   node.style.height = `${element.height}px`;
   node.style.transform = `rotate(${normalizeRotation(element.rotation)}deg)`;
+  if (element.type === 'area') {
+    node.style.setProperty('--area-fill', element.color || '#d8c9a6');
+    node.style.setProperty('--area-fill-opacity', String(1 - Math.max(0, Math.min(90, Number(element.transparency) || 0)) / 100));
+  }
 }
 
 function refreshElementGeometryNode(node, element) {
@@ -709,16 +786,36 @@ function refreshElementGeometryNode(node, element) {
   if (!svg || !polygon) return;
   svg.setAttribute('viewBox', `0 0 ${element.width} ${element.height}`);
   polygon.setAttribute('points', element.points.map((point) => `${point.x},${point.y}`).join(' '));
+  if (element.type === 'area' && element.areaKind === 'tent') {
+    const measures = [...svg.querySelectorAll('.distribution-polygon-side-measure')];
+    const handles = [...svg.querySelectorAll('.distribution-polygon-vertex')];
+    element.points.forEach((point, index) => {
+      const next = element.points[(index + 1) % element.points.length];
+      const measure = measures[index];
+      if (measure) {
+        measure.setAttribute('x', String((point.x + next.x) / 2));
+        measure.setAttribute('y', String((point.y + next.y) / 2 - 6));
+        measure.textContent = `${PLAN_SCALE.pixelsToMeters(Math.hypot(next.x - point.x, next.y - point.y)).toFixed(2)} m`;
+      }
+      const handle = handles[index];
+      if (handle) {
+        handle.setAttribute('cx', String(point.x));
+        handle.setAttribute('cy', String(point.y));
+      }
+    });
+  }
 }
 
 function renderElementInspector(root, element) {
-  const definition = getCatalogItem(element.type);
+  const definition = getElementCatalogItem(element);
   root.querySelector('[data-distribution-selection-empty]').hidden = true;
   root.querySelector('[data-distribution-selection]').hidden = false;
   root.querySelector('[data-distribution-selected-name]').textContent = definition.label;
   const widthMeters = element.width / PIXELS_PER_METER;
   const heightMeters = element.height / PIXELS_PER_METER;
   const areaMeters = Array.isArray(element.points) ? polygonArea(element.points) / (PIXELS_PER_METER ** 2) : null;
+  const perimeterMeters = Array.isArray(element.points) ? polygonPerimeter(element.points) / PIXELS_PER_METER : null;
+  const isPolygonArea = element.type === 'area' && element.areaKind === 'tent';
   root.querySelector('[data-distribution-selected-meta]').textContent = areaMeters === null
     ? `${widthMeters.toFixed(2)} × ${heightMeters.toFixed(2)} m`
     : `${widthMeters.toFixed(2)} × ${heightMeters.toFixed(2)} m · ${areaMeters.toFixed(2)} m²`;
@@ -726,6 +823,18 @@ function renderElementInspector(root, element) {
   rotationOutput.value = `${normalizeRotation(element.rotation)}°`;
   rotationOutput.textContent = rotationOutput.value;
   root.querySelector('[data-distribution-table-stats]').hidden = true;
+  const polygonStats = root.querySelector('[data-distribution-polygon-stats]');
+  const polygonStyle = root.querySelector('[data-distribution-polygon-style]');
+  polygonStats.hidden = !isPolygonArea;
+  polygonStyle.hidden = !isPolygonArea;
+  if (isPolygonArea) {
+    root.querySelector('[data-distribution-polygon-area]').textContent = `${areaMeters.toFixed(2)} m²`;
+    root.querySelector('[data-distribution-polygon-perimeter]').textContent = `${perimeterMeters.toFixed(2)} m`;
+    root.querySelector('[data-distribution-polygon-color]').value = element.color || '#d8c9a6';
+    root.querySelector('[data-distribution-polygon-transparency]').value = String(element.transparency ?? 45);
+    root.querySelector('[data-distribution-polygon-transparency-value]').value = `${element.transparency ?? 45}%`;
+    root.querySelector('[data-distribution-polygon-transparency-value]').textContent = `${element.transparency ?? 45}%`;
+  }
   root.querySelector('[data-distribution-table-shape-control]').hidden = true;
   root.querySelector('[data-distribution-table-dimensions]').hidden = true;
   root.querySelector('[data-distribution-selected-guests]').hidden = true;
@@ -747,6 +856,8 @@ function renderElementInspector(root, element) {
 function renderInspector(root, table, tableIndex, guests, placement) {
   root.querySelector('[data-distribution-selection-empty]').hidden = true;
   root.querySelector('[data-distribution-table-stats]').hidden = false;
+  root.querySelector('[data-distribution-polygon-stats]').hidden = true;
+  root.querySelector('[data-distribution-polygon-style]').hidden = true;
   root.querySelector('[data-distribution-selected-guests]').hidden = false;
   root.querySelector('[data-distribution-element-note]').hidden = true;
   root.querySelector('[data-distribution-element-actions]').hidden = true;
@@ -977,6 +1088,29 @@ async function mountDistribucion(context) {
           details.append(summary, list);
           mobileCatalog.append(details);
         });
+        const areaGroup = document.createElement('details');
+        areaGroup.className = 'distribution-mobile-catalog-group';
+        const areaSummary = document.createElement('summary');
+        areaSummary.textContent = 'Áreas dibujables · 1';
+        const areaList = document.createElement('div');
+        areaList.className = 'distribution-mobile-catalog-grid';
+        const tentDefinition = getAreaCatalogItem('tent');
+        const tentButton = document.createElement('button');
+        tentButton.type = 'button';
+        tentButton.setAttribute('aria-label', tentDefinition.label);
+        const tentIcon = document.createElement('strong');
+        tentIcon.textContent = tentDefinition.icon;
+        tentIcon.setAttribute('aria-hidden', 'true');
+        const tentLabel = document.createElement('span');
+        tentLabel.textContent = 'Dibujar ' + tentDefinition.label;
+        tentButton.append(tentIcon, tentLabel);
+        tentButton.addEventListener('click', () => {
+          proxyClick('[data-distribution-draw-tent]');
+          closeMobileSheet();
+        });
+        areaList.append(tentButton);
+        areaGroup.append(areaSummary, areaList);
+        mobileCatalog.append(areaGroup);
         mobileSheetBody.append(mobileCatalog);
       } else if (action === 'proposal') {
         const proposalName = proposalSelect?.selectedOptions?.[0]?.textContent || 'Propuesta activa';
@@ -1071,7 +1205,7 @@ async function mountDistribucion(context) {
         if (selectedElementId) {
           const selectedElement = physicalElements.find((item) => item.id === selectedElementId);
           if (selectedElement && elementCapabilities(selectedElement).resizable) {
-            const definition = getCatalogItem(selectedElement.type);
+            const definition = getElementCatalogItem(selectedElement);
             const sizeNote = document.createElement('p');
             sizeNote.className = 'distribution-mobile-sheet-note';
             sizeNote.textContent = `${definition.label} · ${(selectedElement.width / PIXELS_PER_METER).toFixed(2)} × ${(selectedElement.height / PIXELS_PER_METER).toFixed(2)} m`;
@@ -1105,6 +1239,37 @@ async function mountDistribucion(context) {
               changeSelectedElementDimensions(widthInput.value, heightInput.value);
               closeMobileSheet();
             }, 'is-wide');
+
+            if (selectedElement.type === 'area' && selectedElement.areaKind === 'tent') {
+              const styleWrap = document.createElement('div');
+              styleWrap.className = 'distribution-mobile-size-editor';
+              const colorField = document.createElement('label');
+              colorField.textContent = 'Color';
+              const colorInput = document.createElement('input');
+              colorInput.type = 'color';
+              colorInput.value = selectedElement.color || '#d8c9a6';
+              colorField.append(colorInput);
+              const transparencyField = document.createElement('label');
+              transparencyField.textContent = 'Transparencia (%)';
+              const transparencyInput = document.createElement('input');
+              transparencyInput.type = 'number';
+              transparencyInput.min = '0';
+              transparencyInput.max = '90';
+              transparencyInput.step = '5';
+              transparencyInput.value = String(selectedElement.transparency ?? 45);
+              transparencyField.append(transparencyInput);
+              styleWrap.append(colorField, transparencyField);
+              mobileSheetBody.append(styleWrap);
+              addMobileButton('Aplicar estilo', () => {
+                const colorSource = root.querySelector('[data-distribution-polygon-color]');
+                const transparencySource = root.querySelector('[data-distribution-polygon-transparency]');
+                colorSource.value = colorInput.value;
+                colorSource.dispatchEvent(new Event('change', { bubbles: true }));
+                transparencySource.value = transparencyInput.value;
+                transparencySource.dispatchEvent(new Event('change', { bubbles: true }));
+                closeMobileSheet();
+              }, 'is-wide');
+            }
           }
         }
         addMobileButton('Medir distancia', () => proxyClick('[data-distribution-measure]'));
@@ -1804,7 +1969,7 @@ async function mountDistribucion(context) {
       })).filter((entry) => entry.shape);
 
       const tableLabel = (entry) => tableName(entry.table, entry.index);
-      const elementLabel = (element) => getCatalogItem(element.type)?.label || 'Elemento';
+      const elementLabel = (element) => getElementCatalogItem(element)?.label || 'Elemento';
 
       world.querySelectorAll('.distribution-table,.distribution-element').forEach((node) => {
         node.classList.remove('has-spatial-conflict', 'has-spatial-warning', 'has-proximity-warning');
@@ -1914,9 +2079,10 @@ async function mountDistribucion(context) {
       refreshSpatialConflicts();
     };
 
-    const createElement = (type, x, y, rotation = 0) => {
+    const createElement = (type, x, y, rotation = 0, options = {}) => {
       const canonicalType = resolveCatalogType(type);
-      const definition = getCatalogItem(canonicalType);
+      const areaKind = canonicalType === 'area' ? escapeText(options.areaKind) : '';
+      const definition = canonicalType === 'area' ? getAreaCatalogItem(areaKind) : getCatalogItem(canonicalType);
       if (!definition) return null;
       const usedIds = new Set(physicalElements.map((element) => escapeText(element.id)).filter(Boolean));
       let elementId = '';
@@ -1925,7 +2091,12 @@ async function mountDistribucion(context) {
         elementId = `element_${elementSequence}`;
       } while (usedIds.has(elementId));
       const defaults = catalogElementSize(definition);
-      const element = { id: elementId, type: canonicalType, x, y, rotation: normalizeRotation(rotation), layer: physicalElements.length, locked: false, width: defaults.width, height: defaults.height };
+      const element = {
+        id: elementId,
+        type: canonicalType,
+        ...(canonicalType === 'area' ? { areaKind, color: options.color || '#d8c9a6', transparency: Math.max(0, Math.min(90, finiteNumber(options.transparency) ?? 45)) } : {}),
+        x, y, rotation: normalizeRotation(rotation), layer: physicalElements.length, locked: false, width: defaults.width, height: defaults.height
+      };
       physicalElements.push(element);
       const node = renderPhysicalElement(element);
       world.append(node);
@@ -1938,7 +2109,9 @@ async function mountDistribucion(context) {
       const source = physicalElements.find((item) => item.id === selectedElementId);
       if (!source || source.locked || !elementCapabilities(source).copyable) return;
       rememberEdit();
-      const duplicate = createElement(source.type, source.x + 24, source.y + 24, source.rotation);
+      const duplicate = createElement(source.type, source.x + 24, source.y + 24, source.rotation, {
+        areaKind: source.areaKind, color: source.color, transparency: source.transparency
+      });
       if (!duplicate) return;
       duplicate.width = source.width;
       duplicate.height = source.height;
@@ -1975,15 +2148,21 @@ async function mountDistribucion(context) {
       if (!selectedElementId) return;
       const source = physicalElements.find((item) => item.id === selectedElementId);
       if (!source || !elementCapabilities(source).copyable) return;
-      copiedElement = { type: source.type, x: source.x, y: source.y, rotation: source.rotation, width: source.width, height: source.height, points: Array.isArray(source.points) ? source.points.map((point) => ({ ...point })) : null };
-      status.textContent = `${getCatalogItem(source.type).label} copiado`;
+      copiedElement = {
+        type: source.type, areaKind: source.areaKind, color: source.color, transparency: source.transparency,
+        x: source.x, y: source.y, rotation: source.rotation, width: source.width, height: source.height,
+        points: Array.isArray(source.points) ? source.points.map((point) => ({ ...point })) : null
+      };
+      status.textContent = `${getElementCatalogItem(source).label} copiado`;
     };
 
     const pasteCopiedElement = () => {
-      if (!canEdit || !copiedElement || !getCatalogItem(copiedElement.type)?.capabilities?.copyable) return;
+      if (!canEdit || !copiedElement || !getElementCatalogItem(copiedElement)?.capabilities?.copyable) return;
       rememberEdit();
       copiedElement = { ...copiedElement, x: copiedElement.x + 24, y: copiedElement.y + 24 };
-      const pasted = createElement(copiedElement.type, copiedElement.x, copiedElement.y, copiedElement.rotation);
+      const pasted = createElement(copiedElement.type, copiedElement.x, copiedElement.y, copiedElement.rotation, {
+        areaKind: copiedElement.areaKind, color: copiedElement.color, transparency: copiedElement.transparency
+      });
       if (!pasted) return;
       pasted.width = copiedElement.width;
       pasted.height = copiedElement.height;
@@ -2154,6 +2333,7 @@ async function mountDistribucion(context) {
     const bindElementInteraction = (node, element) => {
       let move = null;
       let resize = null;
+      let vertexEdit = null;
       let moved = false;
 
       const localDelta = (dx, dy, rotation) => {
@@ -2170,6 +2350,25 @@ async function mountDistribucion(context) {
         if (presentationMode || event.button !== 0) return;
         event.stopPropagation();
         selectElement(element.id);
+
+        const vertexHandle = event.target.closest('[data-distribution-polygon-vertex]');
+        if (vertexHandle) {
+          if (!canEdit || element.locked || !Array.isArray(element.points)) return;
+          event.preventDefault();
+          node.setPointerCapture(event.pointerId);
+          node.classList.add('is-editing-vertex');
+          vertexEdit = {
+            pointerId: event.pointerId,
+            clientX: event.clientX,
+            clientY: event.clientY,
+            index: Number(vertexHandle.dataset.distributionPolygonVertex),
+            points: element.points.map((point) => ({ ...point })),
+            geometry: { x: element.x, y: element.y, width: element.width, height: element.height }
+          };
+          moved = false;
+          rememberEdit();
+          return;
+        }
 
         const handle = event.target.closest('[data-distribution-resize-handle]');
         if (handle) {
@@ -2203,6 +2402,30 @@ async function mountDistribucion(context) {
       });
 
       node.addEventListener('pointermove', (event) => {
+        if (vertexEdit && vertexEdit.pointerId === event.pointerId) {
+          event.preventDefault();
+          const worldDx = camera.clientDeltaToWorld(event.clientX - vertexEdit.clientX);
+          const worldDy = camera.clientDeltaToWorld(event.clientY - vertexEdit.clientY);
+          const delta = localDelta(worldDx, worldDy, element.rotation);
+          const candidate = vertexEdit.points.map((point) => ({ ...point }));
+          candidate[vertexEdit.index] = {
+            x: vertexEdit.points[vertexEdit.index].x + delta.x,
+            y: vertexEdit.points[vertexEdit.index].y + delta.y
+          };
+          if (polygonSelfIntersects(candidate) || polygonHasNearDuplicate(candidate)) return;
+          element.x = vertexEdit.geometry.x;
+          element.y = vertexEdit.geometry.y;
+          element.width = vertexEdit.geometry.width;
+          element.height = vertexEdit.geometry.height;
+          element.points = candidate;
+          normalizePolygonElementGeometry(element);
+          moved = Math.hypot(worldDx, worldDy) > 1;
+          refreshElementGeometryNode(node, element);
+          renderElementInspector(root, element);
+          refreshSpatialConflicts();
+          return;
+        }
+
         if (resize && resize.pointerId === event.pointerId) {
           const worldDx = camera.clientDeltaToWorld(event.clientX - resize.clientX);
           const worldDy = camera.clientDeltaToWorld(event.clientY - resize.clientY);
@@ -2254,10 +2477,12 @@ async function mountDistribucion(context) {
       const finishInteraction = (event) => {
         const wasResizing = resize && resize.pointerId === event.pointerId;
         const wasMoving = move && move.pointerId === event.pointerId;
-        if (!wasResizing && !wasMoving) return;
-        node.classList.remove('is-moving', 'is-resizing');
+        const wasEditingVertex = vertexEdit && vertexEdit.pointerId === event.pointerId;
+        if (!wasResizing && !wasMoving && !wasEditingVertex) return;
+        node.classList.remove('is-moving', 'is-resizing', 'is-editing-vertex');
         move = null;
         resize = null;
+        vertexEdit = null;
         if (moved) {
           renderElementInspector(root, element);
           markDirty();
@@ -2413,6 +2638,30 @@ async function mountDistribucion(context) {
     };
     root.querySelector('[data-distribution-width]').onchange = applyInspectorElementDimensions;
     root.querySelector('[data-distribution-height]').onchange = applyInspectorElementDimensions;
+    root.querySelector('[data-distribution-polygon-color]').onchange = (event) => {
+      const element = physicalElements.find((item) => item.id === selectedElementId);
+      const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
+      if (!canEdit || !element || element.type !== 'area' || element.locked || !node) return;
+      rememberEdit();
+      element.color = event.currentTarget.value;
+      applyElementPlacement(node, element);
+      markDirty();
+    };
+    root.querySelector('[data-distribution-polygon-transparency]').onchange = (event) => {
+      const element = physicalElements.find((item) => item.id === selectedElementId);
+      const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(selectedElementId)}"]`);
+      if (!canEdit || !element || element.type !== 'area' || element.locked || !node) return;
+      rememberEdit();
+      element.transparency = Math.max(0, Math.min(90, Number(event.currentTarget.value) || 0));
+      applyElementPlacement(node, element);
+      renderElementInspector(root, element);
+      markDirty();
+    };
+    root.querySelector('[data-distribution-polygon-transparency]').oninput = (event) => {
+      const output = root.querySelector('[data-distribution-polygon-transparency-value]');
+      output.value = `${event.currentTarget.value}%`;
+      output.textContent = output.value;
+    };
     root.querySelector('[data-distribution-table-shape]').onchange = (event) => {
       void changeSelectedTableShape(event.currentTarget.value);
     };
@@ -2439,11 +2688,16 @@ async function mountDistribucion(context) {
     let measuring = false;
     const drawingLayer = root.querySelector('[data-distribution-drawing-layer]');
     const drawAreaButtons = [...root.querySelectorAll('[data-distribution-draw-area]')];
+    const drawTentButton = root.querySelector('[data-distribution-draw-tent]');
     let drawingPoints = [];
+    let drawingHoverPoint = null;
     let drawingArea = false;
     let drawingType = 'zone';
+    let drawingAreaKind = '';
 
-    const drawingLabel = (type) => getCatalogItem(type)?.label || 'Área libre';
+    const drawingLabel = (type, areaKind = '') => type === 'area'
+      ? getAreaCatalogItem(areaKind)?.label || 'Área'
+      : getCatalogItem(type)?.label || 'Área libre';
 
     const stopMeasuring = () => {
       measuring = false;
@@ -2463,6 +2717,10 @@ async function mountDistribucion(context) {
       const point = camera.clientPointToWorld(event.clientX, event.clientY);
       coordsOutput.value = `x ${(point.x / PLAN_SCALE.pixelsPerMeter).toFixed(2)} m · y ${(point.y / PLAN_SCALE.pixelsPerMeter).toFixed(2)} m`;
       coordsOutput.textContent = coordsOutput.value;
+      if (drawingArea && drawingPoints.length) {
+        drawingHoverPoint = point;
+        renderDrawingPreview();
+      }
     });
 
     const renderDrawingPreview = () => {
@@ -2470,16 +2728,27 @@ async function mountDistribucion(context) {
       if (!drawingPoints.length) return;
       const svgNs = 'http://www.w3.org/2000/svg';
       const polyline = document.createElementNS(svgNs, 'polyline');
-      polyline.setAttribute('points', drawingPoints.map((point) => `${point.x},${point.y}`).join(' '));
+      const previewPoints = drawingHoverPoint ? [...drawingPoints, drawingHoverPoint] : drawingPoints;
+      polyline.setAttribute('points', previewPoints.map((point) => `${point.x},${point.y}`).join(' '));
       drawingLayer.append(polyline);
+      drawingPoints.forEach((point, index) => {
+        const vertex = document.createElementNS(svgNs, 'circle');
+        vertex.setAttribute('cx', String(point.x));
+        vertex.setAttribute('cy', String(point.y));
+        vertex.setAttribute('r', index === 0 ? '7' : '5');
+        vertex.classList.add(index === 0 ? 'is-first' : 'is-draft');
+        drawingLayer.append(vertex);
+      });
     };
 
     const stopDrawingArea = () => {
       drawingArea = false;
       root.classList.remove('is-drawing-area');
       drawingPoints = [];
+      drawingHoverPoint = null;
+      drawingAreaKind = '';
       drawingLayer.replaceChildren();
-      drawAreaButtons.forEach((button) => {
+      [...drawAreaButtons, drawTentButton].filter(Boolean).forEach((button) => {
         button.classList.remove('is-active');
         button.textContent = button.dataset.defaultLabel || button.textContent;
       });
@@ -2500,11 +2769,23 @@ async function mountDistribucion(context) {
       const maxY = Math.max(...ys);
       if (maxX - minX < PIXELS_PER_METER * MIN_ELEMENT_METERS || maxY - minY < PIXELS_PER_METER * MIN_ELEMENT_METERS) return;
       rememberEdit();
-      const element = createElement(drawingType, minX, minY);
+      const element = createElement(drawingType, minX, minY, 0, {
+        areaKind: drawingAreaKind,
+        color: '#d8c9a6',
+        transparency: 45
+      });
       if (!element) return;
       element.width = maxX - minX;
       element.height = maxY - minY;
       element.points = drawingPoints.map((point) => ({ x: point.x - minX, y: point.y - minY }));
+      if (polygonHasNearDuplicate(element.points)) {
+        physicalElements.splice(physicalElements.indexOf(element), 1);
+        world.querySelector(`.distribution-element[data-element-id="${CSS.escape(element.id)}"]`)?.remove();
+        undoStack.pop();
+        updateHistoryState();
+        measureHint.textContent = 'Evita vértices demasiado juntos';
+        return;
+      }
       const node = world.querySelector(`.distribution-element[data-element-id="${CSS.escape(element.id)}"]`);
       node?.remove();
       const rendered = renderPhysicalElement(element);
@@ -2539,6 +2820,28 @@ async function mountDistribucion(context) {
       };
     });
 
+    drawTentButton.dataset.defaultLabel = drawTentButton.textContent;
+    drawTentButton.onclick = () => {
+      if (!canEdit) return;
+      if (drawingArea) {
+        const sameMode = drawingType === 'area' && drawingAreaKind === 'tent';
+        stopDrawingArea();
+        if (sameMode) return;
+      }
+      stopMeasuring();
+      clearSelection();
+      drawingType = 'area';
+      drawingAreaKind = 'tent';
+      drawingArea = true;
+      root.classList.add('is-drawing-area');
+      drawingPoints = [];
+      drawingHoverPoint = null;
+      drawTentButton.classList.add('is-active');
+      drawTentButton.textContent = 'Cancelar Toldo';
+      measureHint.textContent = 'Toldo · marca al menos 3 vértices · cierra sobre el primer punto, doble clic o Enter';
+      measureHint.hidden = false;
+    };
+
     measureButton.onclick = () => {
       if (measuring) {
         stopMeasuring();
@@ -2564,7 +2867,10 @@ async function mountDistribucion(context) {
           finishDrawingArea();
           return;
         }
+        const previous = drawingPoints.at(-1);
+        if (previous && Math.hypot(point.x - previous.x, point.y - previous.y) < 4) return;
         drawingPoints.push(point);
+        drawingHoverPoint = null;
         renderDrawingPreview();
         return;
       }
@@ -2587,6 +2893,12 @@ async function mountDistribucion(context) {
       label.textContent = `${distanceMeters.toFixed(2)} m`;
       measureLayer.replaceChildren(line, label);
       stopMeasuring();
+    });
+
+    viewport.addEventListener('dblclick', (event) => {
+      if (!drawingArea || drawingPoints.length < 3 || event.target.closest('.distribution-table,.distribution-element')) return;
+      event.preventDefault();
+      finishDrawingArea();
     });
 
     const applyVisibilityLayer = (className, visible, hiddenSelectionKind) => {

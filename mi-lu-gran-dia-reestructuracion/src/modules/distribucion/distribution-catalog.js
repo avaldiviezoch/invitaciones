@@ -69,6 +69,10 @@ const DISTRIBUTION_OBJECT_CATALOG = Object.freeze({
   canopy: catalogItem('canopy', 'Cobertura rectangular / toldo modular', 'venue', 6, 6, { spatialFamily: 'container', behavior: 'physical-container', icon: '⌂' })
 });
 
+const DRAWABLE_AREA_CATALOG = Object.freeze({
+  tent: catalogItem('area', 'Toldo', 'drawn-areas', 5, 4, { spatialFamily: 'container', behavior: 'polygon-area', icon: '⌂' })
+});
+
 const LEGACY_AREA_CATALOG = Object.freeze({
   circulation: catalogItem('circulation', 'Circulación', 'drawn-areas', 4, 1.2, { spatialFamily: 'circulation', behavior: 'legacy-area', icon: '↔' }),
   restricted: catalogItem('restricted', 'Zona restringida', 'drawn-areas', 3, 3, { spatialFamily: 'restricted', behavior: 'legacy-area', icon: '⊘' }),
@@ -117,6 +121,15 @@ function resolveCatalogType(type) {
   return TYPE_ALIASES[value] || value;
 }
 
+function getAreaCatalogItem(areaKind) {
+  return DRAWABLE_AREA_CATALOG[String(areaKind || '').trim()] || null;
+}
+
+function getElementCatalogItem(element) {
+  if (element?.type === 'area') return getAreaCatalogItem(element.areaKind);
+  return getCatalogItem(element?.type);
+}
+
 function getCatalogItem(type) {
   const resolved = resolveCatalogType(type);
   return DISTRIBUTION_OBJECT_CATALOG[resolved] || LEGACY_AREA_CATALOG[resolved] || null;
@@ -125,7 +138,10 @@ function getCatalogItem(type) {
 export {
   DISTRIBUTION_OBJECT_CATALOG,
   LEGACY_AREA_CATALOG,
+  DRAWABLE_AREA_CATALOG,
   getVisibleCatalogGroups,
+  getAreaCatalogItem,
+  getElementCatalogItem,
   getCatalogItem,
   resolveCatalogType
 };
