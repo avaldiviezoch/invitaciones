@@ -812,6 +812,7 @@ async function mountDistribucion(context) {
   const status = root.querySelector('[data-distribution-status]');
   const canEdit = weddingCapabilities(context?.role).canEdit;
   status.textContent = 'Cargando mesas y distribución…';
+  let currentMountCleanup = null;
 
   try {
     const [snapshot, storedValue] = await Promise.all([
@@ -867,6 +868,7 @@ async function mountDistribucion(context) {
         }
       }
     };
+    currentMountCleanup = cleanupMount;
     activeDistributionCleanup = cleanupMount;
     let lastPersistedSignature = storedState ? JSON.stringify(storedState) : '';
     let queuedRemoteDistributionSignature = '';
@@ -3126,10 +3128,8 @@ async function mountDistribucion(context) {
     updateSaveState();
     if (!dirty && canEdit && storedState) status.textContent = `Distribución sincronizada · ${seated} invitados ubicados`;
   } catch (error) {
-    if (activeDistributionCleanup) {
-      activeDistributionCleanup();
-      activeDistributionCleanup = null;
-    }
+    currentMountCleanup?.();
+    if (activeDistributionCleanup === currentMountCleanup) activeDistributionCleanup = null;
     console.error('No se pudo inicializar Distribución:', error);
     status.textContent = error?.message || 'Distribución no pudo inicializarse.';
     return false;
