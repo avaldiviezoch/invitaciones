@@ -1,0 +1,28 @@
+<div class="music-admin-shell">
+  <header class="music-admin-hero">
+    <span class="music-admin-eyebrow">MÓDULO · ESPACIO DE LA BODA</span>
+    <div class="music-admin-title-row">
+      <div class="music-admin-title-icon" aria-hidden="true">♫</div>
+      <div><h1>Música</h1><p>Revisa las canciones propuestas por tus invitados y prepara la selección para la fiesta.</p></div>
+      <div class="music-admin-hero-total"><strong data-music-total>0</strong><span>solicitudes musicales</span></div>
+    </div>
+  </header>
+  <section class="music-admin-kpis">
+    <article><span>Solicitudes</span><strong data-music-kpi-requests>0</strong><small>canciones recibidas</small></article>
+    <article><span>Canciones únicas</span><strong data-music-kpi-unique>0</strong><small>sin duplicados</small></article>
+    <article><span>Participantes</span><strong data-music-kpi-people>0</strong><small>invitados que propusieron</small></article>
+    <article><span>Más solicitada</span><strong class="is-song" data-music-kpi-top>—</strong><small data-music-kpi-top-count>sin solicitudes</small></article>
+  </section>
+  <main class="music-admin-content">
+    <section class="music-admin-toolbar">
+      <label class="music-admin-search"><span aria-hidden="true">⌕</span><input type="search" data-music-search placeholder="Buscar canción, artista o invitado"></label>
+      <div class="music-admin-actions"><button type="button" data-music-refresh>↻ <span>Actualizar</span></button><button type="button" data-music-open-public disabled>↗ <span>Vista para invitados</span></button></div>
+    </section>
+    <section class="music-admin-head">
+      <div><h2>Canciones sugeridas</h2><p>Las canciones repetidas se agrupan sin modificar las respuestas originales del RSVP.</p></div>
+      <span data-music-results>0 canciones</span>
+    </section>
+    <section class="music-admin-list" data-music-list></section>
+    <p class="music-admin-state" data-music-state></p>
+  </main>
+</div>

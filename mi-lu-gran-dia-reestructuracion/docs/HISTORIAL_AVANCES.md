@@ -745,3 +745,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Las plantillas públicas continúan separadas en Wedding; no se duplican ni migran sus HTML, scripts o recursos al núcleo nuevo.
 - El módulo no crea persistencia, no modifica localStorage y no toca Firebase, Firestore, Storage, Auth, reglas ni datos reales.
 - La presentación se homologa con las cabeceras y superficies actuales de Mi Lu Gran Día, sin !important y con cleanup de listeners y del iframe.
+
+
+## 2026-09-26 — Música Fase 1: módulo administrativo de lectura
+- Se crea el módulo independiente Música dentro del shell reestructurado.
+- La primera fase es deliberadamente de solo lectura: consume el mismo snapshot RSVP ya utilizado por Invitados y no crea una segunda persistencia musical.
+- Se muestran solicitudes, canciones únicas, participantes, canción más solicitada, búsqueda y agrupación de duplicados por canción/artista.
+- Se conserva el acceso a la vista pública Solo Música mediante el token RSVP existente.
+- No se modifica Firebase, Firestore, Storage, Auth, reglas, esquema ni datos; tampoco se crea una clave local paralela.
+- La interfaz replica la familia visual y responsive consolidada en Invitados/Checklist/Proveedores.

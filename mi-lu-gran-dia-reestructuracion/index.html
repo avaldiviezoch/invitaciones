@@ -7,7 +7,7 @@
 <script>
 (function(){
   var moduleId=location.hash.replace(/^#/,'');
-  if(moduleId==='checklist'||moduleId==='presupuesto'||moduleId==='proveedores'||moduleId==='invitados'||moduleId==='distribucion'||moduleId==='cronograma'||moduleId==='invitaciones') document.documentElement.classList.add('module-route');
+  if(moduleId==='checklist'||moduleId==='presupuesto'||moduleId==='proveedores'||moduleId==='invitados'||moduleId==='distribucion'||moduleId==='cronograma'||moduleId==='invitaciones'||moduleId==='musica') document.documentElement.classList.add('module-route');
 })();
 </script>
 <link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=44">
@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="src/modules/distribucion/distribucion.css?v=50">
 <link rel="stylesheet" href="src/modules/cronograma/cronograma.css?v=7">
 <link rel="stylesheet" href="src/modules/invitaciones/invitaciones.css?v=1">
+<link rel="stylesheet" href="src/modules/musica/musica.css?v=1">
 </head>
 <body class="auth-locked">
 <main class="app">
@@ -476,6 +477,7 @@ Cancelar
     <section class="distribution-review" data-module-view="distribucion" hidden></section>
     <section class="timeline-review" data-module-view="cronograma" hidden></section>
     <section class="invitations-review" data-module-view="invitaciones" hidden></section>
+    <section class="music-review" data-module-view="musica" hidden></section>
   </main>
 </section><section class="access-manager" id="accessManager" aria-hidden="true">
 <div class="access-manager-backdrop" data-close-access></div>
@@ -496,7 +498,7 @@ Cancelar
 <form class="create-wedding-card" id="createWeddingForm" hidden><h3>Crear una nueva boda</h3><label><span>Nombre de la boda</span><input id="newWeddingName" type="text" maxlength="90" placeholder="Ej. Antonio & Lucero" required></label><label><span>Fecha</span><input id="newWeddingDate" type="date"></label><div><button type="button" id="cancelCreateWedding">Cancelar</button><button type="submit">Crear y abrir</button></div><p id="createWeddingStatus" aria-live="polite"></p></form>
 </div>
 </section>
-<script type="module" src="src/modules/dashboard/inicio.js?v=211">
+<script type="module" src="src/modules/dashboard/inicio.js?v=212">
 </script>
 </body>
 </html>

@@ -51,7 +51,7 @@ let calendarCursor = new Date();
 const heroVideo = $('heroVideo');
 
 function syncEntrySurface() {
-  const directModule = ['#checklist', '#presupuesto', '#proveedores', '#invitados', '#distribucion', '#cronograma', '#invitaciones'].includes(location.hash);
+  const directModule = ['#checklist', '#presupuesto', '#proveedores', '#invitados', '#distribucion', '#cronograma', '#invitaciones', '#musica'].includes(location.hash);
   document.documentElement.classList.toggle('module-route', directModule);
   if (directModule) {
     heroVideo?.pause();
@@ -627,6 +627,10 @@ const MODULES = Object.freeze({
   invitaciones: {
     load: () => import('../invitaciones/index.js?v=1'),
     mount: 'mountInvitaciones'
+  },
+  musica: {
+    load: () => import('../musica/index.js?v=1'),
+    mount: 'mountMusica'
   }
 });
 
