@@ -1078,7 +1078,7 @@ async function mountDistribucion(context) {
     let mobileWheelIndex = 0;
 
     const mobileOnly = () => window.matchMedia('(max-width: 700px)').matches;
-    const proxyClick = (selector) => root.querySelector(selector)?.click();
+    const sharedActions = Object.create(null);
     const closeMobileSheet = () => {
       mobileSheet.hidden = true;
       mobileSheetBackdrop.hidden = true;
@@ -1111,8 +1111,6 @@ async function mountDistribucion(context) {
           const list = document.createElement('div');
           list.className = 'distribution-mobile-catalog-grid';
           group.items.forEach((definition) => {
-            const sourceButton = root.querySelector('[data-distribution-add-element="' + CSS.escape(definition.type) + '"]');
-            if (!sourceButton) return;
             const button = document.createElement('button');
             button.type = 'button';
             button.setAttribute('aria-label', definition.label);
@@ -1123,7 +1121,7 @@ async function mountDistribucion(context) {
             label.textContent = definition.label;
             button.append(icon, label);
             button.addEventListener('click', () => {
-              sourceButton.click();
+              sharedActions.addElement?.(definition.type);
               closeMobileSheet();
             });
             list.append(button);
@@ -1149,7 +1147,7 @@ async function mountDistribucion(context) {
           label.textContent = preset.label;
           button.append(icon, label);
           button.addEventListener('click', () => {
-            proxyClick(`[data-distribution-draw-area-kind="${preset.areaKind}"]`);
+            sharedActions.drawArea?.(preset.areaKind);
             closeMobileSheet();
           });
           areaList.append(button);
@@ -1163,14 +1161,14 @@ async function mountDistribucion(context) {
         note.className = 'distribution-mobile-sheet-note';
         note.textContent = `Activa: ${proposalName}`;
         mobileSheetBody.append(note);
-        addMobileButton('Nueva', () => proxyClick('[data-distribution-proposal-new]'));
-        addMobileButton('Duplicar', () => proxyClick('[data-distribution-proposal-duplicate]'));
-        addMobileButton('Renombrar', () => proxyClick('[data-distribution-proposal-rename]'));
-        addMobileButton('Eliminar', () => proxyClick('[data-distribution-proposal-delete]'), 'is-danger');
+        addMobileButton('Nueva', () => sharedActions.proposalNew?.());
+        addMobileButton('Duplicar', () => sharedActions.proposalDuplicate?.());
+        addMobileButton('Renombrar', () => sharedActions.proposalRename?.());
+        addMobileButton('Eliminar', () => sharedActions.proposalDelete?.(), 'is-danger');
       } else if (action === 'view') {
-        addMobileButton('Presentación', () => proxyClick('[data-distribution-presentation]'));
-        addMobileButton('Plano limpio', () => proxyClick('[data-distribution-clean-view]'));
-        addMobileButton('Imprimir / PDF', () => proxyClick('[data-distribution-print]'), 'is-wide');
+        addMobileButton('Presentación', () => sharedActions.togglePresentation?.());
+        addMobileButton('Plano limpio', () => sharedActions.toggleCleanView?.());
+        addMobileButton('Imprimir / PDF', () => sharedActions.printPlan?.(), 'is-wide');
       } else if (action === 'review') {
         [
           ['Conflictos', '[data-distribution-validation-conflicts]'],
@@ -1306,31 +1304,21 @@ async function mountDistribucion(context) {
               styleWrap.append(colorField, transparencyField);
               mobileSheetBody.append(styleWrap);
               addMobileButton('Aplicar estilo', () => {
-                const colorSource = root.querySelector('[data-distribution-polygon-color]');
-                const transparencySource = root.querySelector('[data-distribution-polygon-transparency]');
-                colorSource.value = colorInput.value;
-                colorSource.dispatchEvent(new Event('change', { bubbles: true }));
-                transparencySource.value = transparencyInput.value;
-                transparencySource.dispatchEvent(new Event('change', { bubbles: true }));
+                sharedActions.updateAreaStyle?.(colorInput.value, transparencyInput.value);
                 closeMobileSheet();
               }, 'is-wide');
             }
           }
         }
-        addMobileButton('Medir distancia', () => proxyClick('[data-distribution-measure]'));
-        addMobileButton('Limpiar medida', () => proxyClick('[data-distribution-clear-measure]'));
-        const snapSource = root.querySelector('[data-distribution-snap]');
+        addMobileButton('Medir distancia', () => sharedActions.toggleMeasure?.());
+        addMobileButton('Limpiar medida', () => sharedActions.clearMeasure?.());
         const snapLabel = document.createElement('label');
         snapLabel.className = 'distribution-mobile-sheet-toggle';
         snapLabel.append(document.createTextNode('Ajustar a cuadrícula'));
         const snap = document.createElement('input');
         snap.type = 'checkbox';
-        snap.checked = Boolean(snapSource?.checked);
-        snap.addEventListener('change', () => {
-          if (!snapSource) return;
-          snapSource.checked = snap.checked;
-          snapSource.dispatchEvent(new Event('change', { bubbles: true }));
-        });
+        snap.checked = Boolean(sharedActions.getSnapEnabled?.());
+        snap.addEventListener('change', () => sharedActions.setSnapEnabled?.(snap.checked));
         snapLabel.append(snap);
         mobileSheetBody.append(snapLabel);
       }
