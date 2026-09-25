@@ -954,3 +954,14 @@ El inspector lateral usa un único controlador de estado con cuatro modos explí
 Las mesas son las únicas que muestran tipo de mesa, medida física canónica, estadísticas de asientos e invitados asignados. Los objetos ordinarios muestran únicamente controles de objeto según capabilities. Las áreas comparten los controles de objeto y añaden exclusivamente área/perímetro y estilo poligonal. Limpiar la selección restablece el modo vacío mediante la misma ruta.
 
 No se duplica HTML ni se crean inspectores desktop/móvil paralelos. No se modifica persistencia, Firebase/Firestore, datos canónicos, catálogo, propuestas, geometría ni sincronización.
+
+
+---
+
+# Fase 11 — Desacoplamiento de acciones desktop/móvil
+
+Desktop y móvil conservan superficies visuales distintas, pero dejan de encadenar acciones mediante clicks o eventos sintéticos sobre controles de la otra interfaz. El montaje define operaciones compartidas de dominio/UI para añadir objetos, iniciar áreas dibujables, propuestas, presentación, plano limpio, impresión, medición, ajuste a cuadrícula y estilo de áreas.
+
+Los controles desktop y la hoja móvil invocan esas mismas operaciones. La hoja móvil ya no usa `proxyClick`, `.click()` sobre botones desktop ni `dispatchEvent(new Event(...))` para color, transparencia o snap. El catálogo móvil continúa derivándose del mismo catálogo canónico y no se crea una segunda lista de objetos o presets.
+
+No se modifica persistencia V1, Firebase/Firestore, datos canónicos, geometría, propuestas almacenadas, catálogo ni permisos.
