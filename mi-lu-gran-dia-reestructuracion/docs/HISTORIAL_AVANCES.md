@@ -754,3 +754,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se conserva el acceso a la vista pública Solo Música mediante el token RSVP existente.
 - No se modifica Firebase, Firestore, Storage, Auth, reglas, esquema ni datos; tampoco se crea una clave local paralela.
 - La interfaz replica la familia visual y responsive consolidada en Invitados/Checklist/Proveedores.
+
+
+## 2026-09-26 — Música: enriquecimiento visual de catálogo
+- Las solicitudes RSVP permanecen como fuente original e inmutable; el reconocimiento musical es solo una capa visual en memoria.
+- Se consulta el iTunes Search API de Apple desde el navegador para intentar reconocer título + artista y obtener nombre canónico, álbum, portada y enlace de tienda, sin credenciales ni secretos embebidos.
+- Las búsquedas usan storefront PE, máximo 5 candidatos, puntuación conservadora por coincidencia de título/artista, caché solo en memoria y hasta 3 consultas concurrentes.
+- Si no existe coincidencia suficiente o la API falla, la tarjeta conserva exactamente el texto RSVP original y sigue funcionando sin portada.
+- Las portadas enlazan al contenido de Apple; no se guardan en Storage, Firestore ni localStorage.
+- Spotify queda pendiente de una integración backend segura: su Web API requiere OAuth y las credenciales de aplicación no deben exponerse en GitHub Pages.
