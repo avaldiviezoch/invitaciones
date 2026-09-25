@@ -156,9 +156,9 @@
 .distribution-table-rotation-guide{position:absolute;left:50%;top:50%;z-index:8;display:none;box-sizing:border-box;transform:translate(-50%,-50%);pointer-events:none}
 .distribution-table.is-selected:not(.is-moving)>.distribution-table-rotation-guide{display:block}
 .distribution-table-rotation-stem{position:absolute;left:50%;top:-28px;width:1px;height:28px;transform:translateX(-50%);background:rgba(156,100,112,.42);pointer-events:none}
-.distribution-table-rotation-handle{position:absolute;left:50%;top:-40px;width:24px;height:24px;transform:translate(-50%,-50%);display:grid;place-items:center;box-sizing:border-box;border:0;border-radius:50%;background:transparent;color:rgba(173,116,128,.5);font-size:22px;font-weight:500;line-height:1;cursor:grab;pointer-events:auto;touch-action:none;text-shadow:0 1px 3px rgba(93,62,68,.12)}
+.distribution-table-rotation-handle{position:absolute;left:50%;top:-40px;width:24px;height:24px;transform:translate(-50%,-50%);display:grid;place-items:center;box-sizing:border-box;border:0;border-radius:50%;background:transparent;color:rgba(173,116,128,.8);font-size:22px;font-weight:500;line-height:1;cursor:grab;pointer-events:auto;touch-action:none;text-shadow:0 1px 3px rgba(93,62,68,.12)}
 .distribution-table-rotation-handle::before{content:"↻";display:block;transform:rotate(var(--counter-rotation,0deg));transform-origin:50% 50%}
-.distribution-table.is-rotating .distribution-table-rotation-handle{cursor:grabbing;color:rgba(173,116,128,.5)}
+.distribution-table.is-rotating .distribution-table-rotation-handle{cursor:grabbing;color:rgba(173,116,128,.8)}
 @media(max-width:700px){
   .distribution-table-rotation-handle{top:-46px;width:30px;height:30px;font-size:28px}
   .distribution-table-rotation-stem{top:-32px;height:32px}

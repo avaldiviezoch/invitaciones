@@ -558,3 +558,8 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se mantiene únicamente la línea de rotación y el handle superior.
 - El handle circular se reemplaza visualmente por una flecha en espiral ↻ con el mismo tono rosado y 50% de transparencia.
 - La lógica de arrastre, placement.rotation, Undo/Redo y autoguardado permanece sin cambios.
+
+
+## 2026-09-25 — Distribución: mayor visibilidad del control de rotación
+- La flecha en espiral de rotación pasa de 50% a 80% de opacidad (20% de transparencia) para mejorar su visibilidad.
+- No se modifica línea, color base, tamaño ni lógica de rotación.
