@@ -686,3 +686,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - x/y/rotation siguen perteneciendo a Distribución; tipo/dimensiones siguen siendo canónicos de Mesas.
 - No se cambian claves, schemas, IDs, invitados, sillas, asignaciones, capacidad, Firebase/Firestore ni V1 de Distribución.
 - La sincronización canónica/evento existente no se refactoriza en esta fase para mantener el alcance quirúrgico.
+
+
+## 2026-09-25 — Distribución Fase 13: saneamiento estructural de index.js
+- Auditoría inicial: index.js tenía 3,319 líneas y concentraba una frontera funcional clara de geometría/espacio junto al orquestador UI.
+- Se extrae únicamente esa frontera a spatial-geometry.js; no se divide el módulo por cantidad de líneas.
+- El nuevo archivo concentra geometría poligonal, normalización, área/perímetro, auto-intersección, shapes espaciales, reglas de colisión y distancias.
+- index.js elimina las definiciones trasladadas y queda en 3,118 líneas; spatial-geometry.js tiene 239 líneas.
+- No existe motor duplicado: index.js solo importa y consume las funciones extraídas.
+- Sin cambios de algoritmos, escala, UI, listeners, catálogo, persistencia, Firebase/Firestore, datos canónicos, propuestas o sincronización.
