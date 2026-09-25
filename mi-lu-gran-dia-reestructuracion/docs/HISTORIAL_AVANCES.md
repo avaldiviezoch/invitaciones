@@ -736,3 +736,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Los campos compatibles contemplan aliases históricos para título, hora, duración, responsable, estado, notas y orden sin renombrar datos existentes.
 - Un formato existente no reconocido bloquea la carga y no se sobrescribe con un estado vacío.
 - No se modifican Firebase/Firestore, Storage, Auth, reglas, usuarios, claves, colecciones ni contratos de sincronización.
+
+
+## 2026-09-26 — Invitaciones Fase 1: catálogo y vista previa
+- Se reconstruye el módulo administrativo de Invitaciones dentro del shell reestructurado con una sola implementación responsive.
+- El catálogo visible incorpora las invitaciones publicadas 0 a 7 y marca la Invitación 0 como principal.
+- Se conserva el patrón funcional del módulo original: selector de modelos, vista previa móvil, tamaños 360×800, 390×844 y 430×932, recarga, copia de enlace y apertura aparte.
+- Las plantillas públicas continúan separadas en Wedding; no se duplican ni migran sus HTML, scripts o recursos al núcleo nuevo.
+- El módulo no crea persistencia, no modifica localStorage y no toca Firebase, Firestore, Storage, Auth, reglas ni datos reales.
+- La presentación se homologa con las cabeceras y superficies actuales de Mi Lu Gran Día, sin !important y con cleanup de listeners y del iframe.

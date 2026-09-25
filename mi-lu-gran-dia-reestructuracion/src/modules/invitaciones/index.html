@@ -1,0 +1,61 @@
+<div class="invitations-shell">
+  <section class="invitations-hero">
+    <div>
+      <p class="invitations-eyebrow">Módulo · Espacio de la boda</p>
+      <div class="invitations-title-row">
+        <div class="invitations-title-icon" aria-hidden="true">✉</div>
+        <div>
+          <h1>Invitaciones</h1>
+          <p>Revisa todos los modelos publicados y comprueba cómo se ven antes de compartirlos.</p>
+        </div>
+      </div>
+    </div>
+    <div class="invitations-hero-total">
+      <span>Modelos disponibles</span>
+      <strong data-invitations-total>8</strong>
+    </div>
+  </section>
+
+  <main class="invitations-content">
+    <section class="invitations-workspace">
+      <aside class="invitations-selector">
+        <header>
+          <span>MODELOS DISPONIBLES</span>
+          <h2>Selecciona una invitación</h2>
+          <p>La Invitación 0 es la principal. Elige cualquier modelo para revisarlo en la vista móvil.</p>
+        </header>
+        <div class="invitations-list" data-invitations-list></div>
+      </aside>
+
+      <section class="invitations-preview">
+        <div class="invitations-toolbar">
+          <div>
+            <span>VISTA PREVIA MÓVIL</span>
+            <strong data-invitations-current>Invitación 0</strong>
+            <small data-invitations-badge>Invitación principal</small>
+          </div>
+          <div class="invitations-actions">
+            <button type="button" data-invitations-reload>↻ <span>Recargar</span></button>
+            <button type="button" data-invitations-copy>⧉ <span>Copiar enlace</span></button>
+            <a data-invitations-open target="_blank" rel="noopener">↗ <span>Abrir aparte</span></a>
+          </div>
+        </div>
+
+        <div class="invitations-device-bar">
+          <span>Simular tamaño real</span>
+          <div data-invitations-devices></div>
+        </div>
+
+        <div class="invitations-stage">
+          <div class="invitations-phone" data-invitations-phone>
+            <div class="invitations-phone-screen">
+              <div class="invitations-loading" data-invitations-loading>Cargando invitación…</div>
+              <iframe data-invitations-frame title="Vista previa de invitación" allow="autoplay; fullscreen"></iframe>
+            </div>
+          </div>
+        </div>
+        <p class="invitations-note">Desliza dentro de la pantalla para recorrer la invitación. “Abrir aparte” permite probarla en el viewport real.</p>
+      </section>
+    </section>
+  </main>
+</div>
