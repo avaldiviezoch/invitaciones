@@ -818,3 +818,10 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Esto evita que la tarjeta móvil cambie de estructura o parezca incompleta mientras el catálogo responde o cuando no existe coincidencia.
 - El estado pendiente usa una presentación visual secundaria sin ocultar la sección.
 - Se incrementan Música JS a v6 y CSS a v8 para invalidar caché; no se modifica RSVP, Firebase ni datos reales.
+
+## 2026-09-26 — Música: corrección estructural del álbum en responsive
+- Se elimina el selector genérico `.music-admin-song > div`, que afectaba tanto al encabezado como al bloque de álbum y provocaba comportamientos distintos en móvil.
+- El encabezado de canción pasa a usar la clase explícita `.music-admin-song-head`; el álbum conserva su propio bloque independiente y ancho completo.
+- Se retira el texto artificial “Pendiente de identificar”: el álbum solo se muestra cuando existe un álbum real devuelto por el catálogo.
+- Desktop y responsive usan el mismo dato y el mismo markup; únicamente cambia la distribución CSS por breakpoint.
+- Se incrementan Música JS a v7 y CSS a v9 para invalidar caché. No se modifica RSVP, Firebase ni persistencia.
