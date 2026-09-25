@@ -2,7 +2,7 @@ const cache=new Map();
 let requestQueue=Promise.resolve();
 let nextRequestAt=0;
 
-const SEARCH_URL='https://itunes.apple.com/search';
+const SEARCH_URL='https://kpkcjmpbueqptdkzbzat.supabase.co/functions/v1/music-catalog';
 const SEARCH_LIMIT=15;
 const REQUEST_GAP_MS=3100;
 const REQUEST_TIMEOUT_MS=9000;
@@ -86,9 +86,6 @@ function enqueue(task,signal){
 async function queryCatalog(term,item,signal){
   const url=new URL(SEARCH_URL);
   url.searchParams.set('term',term);
-  url.searchParams.set('country','PE');
-  url.searchParams.set('media','music');
-  url.searchParams.set('entity','song');
   url.searchParams.set('limit',String(SEARCH_LIMIT));
 
   const timeoutController=new AbortController();

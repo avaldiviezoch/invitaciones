@@ -849,3 +849,11 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se mantienen los estados explícitos `matched`, `not-found` y `error`, la cola de solicitudes y la caché solo en memoria.
 - Se incrementan music-catalog a v4 y Música JS a v9 para invalidar caché. No se modifica RSVP, Firebase, Firestore, Storage ni datos reales.
 
+## 2026-09-26 — Música: catálogo mediado por Edge Function
+- Se elimina del navegador la llamada directa al iTunes Search API, que presentaba fallos de transporte en Safari móvil.
+- Se despliega una única Edge Function pública `music-catalog` en la infraestructura Supabase existente. La función no usa base de datos, no persiste información y solo consulta el catálogo externo y devuelve JSON con CORS explícito.
+- `src/services/music-catalog.js` mantiene una sola ruta de integración y ahora consulta exclusivamente ese endpoint intermedio; desktop y móvil consumen exactamente la misma respuesta.
+- Se conservan el matching, estados `matched/not-found/error`, cola y caché solo en memoria del adaptador frontend.
+- No se modifica la presentación desktop, RSVP, Firebase, Firestore, Storage ni datos reales.
+- Se incrementan music-catalog a v5 y Música JS a v10 para invalidar caché.
+
