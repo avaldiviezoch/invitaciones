@@ -1325,22 +1325,21 @@ async function mountDistribucion(context) {
         return false;
       } finally {
         saving = false;
-        if (
-          queuedRemoteDistributionSignature
-          && queuedRemoteDistributionSignature !== lastPersistedSignature
-          && pendingRemoteDistributionState
-          && dirty === false
-        ) {
-          const activeIndex = proposalState.findIndex((proposal) => proposal.id === activeProposalId);
-          const activeName = proposalState[activeIndex]?.name || 'Propuesta';
-          proposalState[activeIndex] = serializeProposal(activeProposalId, activeName, placementState, tableIds, physicalElements);
-          const currentLocalState = serializeDistribution(proposalState, activeProposalId);
-          showSyncConflict(currentLocalState, pendingRemoteDistributionState);
-          dirty = true;
-        }
-        if (queuedRemoteDistributionSignature === lastPersistedSignature) {
-          queuedRemoteDistributionSignature = '';
-          pendingRemoteDistributionState = null;
+        if (queuedRemoteDistributionSignature && pendingRemoteDistributionState) {
+          if (queuedRemoteDistributionSignature === lastPersistedSignature) {
+            queuedRemoteDistributionSignature = '';
+            pendingRemoteDistributionState = null;
+          } else if (dirty === false) {
+            const queuedRemoteState = JSON.parse(JSON.stringify(pendingRemoteDistributionState));
+            const queuedRemoteSignature = queuedRemoteDistributionSignature;
+            queuedRemoteDistributionSignature = '';
+            pendingRemoteDistributionState = null;
+            if (applyRemoteDistributionState(queuedRemoteState)) {
+              lastPersistedSignature = queuedRemoteSignature;
+              lastPersistedState = JSON.parse(JSON.stringify(queuedRemoteState));
+              dirty = false;
+            }
+          }
         }
         if (canonicalRefreshPending) {
           canonicalRefreshPending = false;
@@ -3082,9 +3081,33 @@ async function mountDistribucion(context) {
       const remoteSignature = remoteState ? JSON.stringify(remoteState) : '';
       if (!remoteSignature || remoteSignature === lastPersistedSignature) return;
 
-      if (dirty || saving || canonicalRefreshPending) {
+      if (saving || canonicalRefreshPending) {
         queuedRemoteDistributionSignature = remoteSignature;
         pendingRemoteDistributionState = JSON.parse(JSON.stringify(remoteState));
+        return;
+      }
+
+      if (dirty) {
+        const activeIndex = proposalState.findIndex((proposal) => proposal.id === activeProposalId);
+        const activeName = proposalState[activeIndex]?.name || 'Propuesta';
+        proposalState[activeIndex] = serializeProposal(activeProposalId, activeName, placementState, tableIds, physicalElements);
+        const currentLocalState = serializeDistribution(proposalState, activeProposalId);
+        const merged = mergeDistributionStates(lastPersistedState, currentLocalState, remoteState);
+        if (merged.conflicts.length) {
+          showSyncConflict(currentLocalState, remoteState);
+          return;
+        }
+        proposalState.splice(0, proposalState.length, ...merged.state.proposals.map((proposal) => ({
+          ...proposal,
+          placements: proposal.placements.map((placement) => ({ ...placement })),
+          elements: proposal.elements.map((element) => ({
+            ...element,
+            points: Array.isArray(element.points) ? element.points.map((point) => ({ ...point })) : null
+          }))
+        })));
+        lastPersistedState = JSON.parse(JSON.stringify(remoteState));
+        lastPersistedSignature = remoteSignature;
+        updateSaveState();
         return;
       }
 
