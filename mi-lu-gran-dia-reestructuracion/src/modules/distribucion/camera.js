@@ -197,6 +197,14 @@ export function setupDistributionCamera(root, world, worldSize) {
         y: (clientY - rect.top - y) / scale
       };
     },
-    focusNode: () => {}
+    focusNode: (node) => {
+      if (!(node instanceof HTMLElement)) return;
+      const rect = viewportRect();
+      const centerX = node.offsetLeft + node.offsetWidth / 2;
+      const centerY = node.offsetTop + node.offsetHeight / 2;
+      x = rect.width / 2 - centerX * scale;
+      y = rect.height / 2 - centerY * scale;
+      apply();
+    }
   };
 }

@@ -525,3 +525,16 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Al mostrar o aplicar un estado remoto se cierra el bottom sheet móvil para evitar controles con valores obsoletos.
 - El cleanup del módulo cierra panel móvil y limpia el estado visual transitorio de conflicto.
 - No se añaden listeners globales ni una segunda ruta de catálogo/persistencia.
+
+
+## 2026-09-25 — Distribución Fase 6: barrido técnico final y reconciliación canónica
+- Se elimina el estado bloqueante canonicalChanged: podía activarse durante una sincronización y nunca volver a false, dejando autosave/edición bloqueados.
+- canonicalRefreshPending funciona ahora como cola temporal únicamente mientras existe una escritura en curso; al finalizar se reconcilia Invitados/Mesas y se limpia.
+- Crear, eliminar o reordenar mesas ya no remonta mountDistribucion(). La reconciliación actualiza tables, guests, tableIds, layout.items, placementState, tableById y nodos de mesa en caliente.
+- Mesas existentes conservan su x/y/rotation; mesas nuevas reciben una posición proyectada; mesas eliminadas retiran sus placements activos y referencias obsoletas de propuestas.
+- Los cambios estructurales marcan Distribución dirty para limpiar/persistir el conjunto vigente de placements sin perder trabajo local.
+- Se preservan cámara, zoom, propuesta activa, objetos físicos y selección cuando la mesa seleccionada sigue existiendo.
+- El listener cloud de Invitados/Mesas usa la misma cola si llega durante un save; no existe una segunda ruta de reconciliación.
+- camera.focusNode() deja de ser un stub: las incidencias de validación ahora centran realmente el objeto seleccionado manteniendo el zoom actual.
+- Se elimina una regla CSS duplicada de acciones del inspector.
+- Barrido: 0 !important, 0 reload de página y 0 remonte estructural de Distribución por cambios de mesas.

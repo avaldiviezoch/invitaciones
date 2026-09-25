@@ -10,7 +10,7 @@ import {
 } from '../invitados/table-geometry.js?v=5';
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=6';
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { setupDistributionCamera } from './camera.js?v=8';
+import { setupDistributionCamera } from './camera.js?v=9';
 import {
   DEFAULT_BACKGROUND_ID,
   addDistributionBackground,
@@ -21,7 +21,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=52', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=53', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 15;
@@ -860,7 +860,7 @@ async function mountDistribucion(context) {
     let selectedElementId = '';
     let dirty = false;
     let saving = false;
-    let canonicalChanged = false;
+    let canonicalRefreshPending = false;
     let hasPersistedState = Boolean(storedState);
     let autosaveTimer = 0;
     let distributionCloudUnsubscribe = null;
@@ -1204,7 +1204,7 @@ async function mountDistribucion(context) {
     };
 
     async function persistDistribution({ force = false } = {}) {
-      if (!canEdit || !dirty || saving || canonicalChanged || !tables.length) return false;
+      if (!canEdit || !dirty || saving || canonicalRefreshPending || !tables.length) return false;
       saving = true;
       updateSaveState();
       try {
@@ -1242,12 +1242,6 @@ async function mountDistribucion(context) {
         hasPersistedState = true;
         hideSyncConflict();
 
-        if (canonicalChanged) {
-          dirty = true;
-          status.textContent = 'Invitados o Mesas cambiaron durante la sincronización · vuelve a abrir Distribución';
-          return false;
-        }
-
         dirty = false;
         updateHistoryState();
         status.textContent = 'Distribución sincronizada';
@@ -1275,16 +1269,25 @@ async function mountDistribucion(context) {
           queuedRemoteDistributionSignature = '';
           pendingRemoteDistributionState = null;
         }
+        if (canonicalRefreshPending) {
+          canonicalRefreshPending = false;
+          try {
+            await reconcileCanonicalTables();
+          } catch (error) {
+            console.error('No se pudo reconciliar Invitados/Mesas después de sincronizar Distribución:', error);
+            status.textContent = 'No se pudo actualizar Invitados/Mesas en este momento';
+          }
+        }
         updateSaveState();
       }
     }
 
     const scheduleAutosave = (delay = 250) => {
-      if (!canEdit || saving || canonicalChanged || !dirty || hasSyncConflict()) return;
+      if (!canEdit || saving || canonicalRefreshPending || !dirty || hasSyncConflict()) return;
       if (autosaveTimer) window.clearTimeout(autosaveTimer);
       autosaveTimer = window.setTimeout(() => {
         autosaveTimer = 0;
-        if (!dirty || saving || canonicalChanged) return;
+        if (!dirty || saving || canonicalRefreshPending) return;
         void persistDistribution();
       }, delay);
     };
@@ -1295,7 +1298,7 @@ async function mountDistribucion(context) {
       else if (saving) status.textContent = 'Sincronizando distribución…';
       else if (dirty) status.textContent = 'Sincronizando cambios…';
       else status.textContent = hasPersistedState ? 'Distribución sincronizada' : 'Distribución proyectada · sincronización pendiente';
-      if (dirty && !saving && !canonicalChanged && !hasSyncConflict()) scheduleAutosave();
+      if (dirty && !saving && !canonicalRefreshPending && !hasSyncConflict()) scheduleAutosave();
     };
 
     const clearVisualSelection = () => {
@@ -1362,7 +1365,7 @@ async function mountDistribucion(context) {
     }
 
     async function changeSelectedTableDimensions(widthMeters, heightMeters, { reset = false } = {}) {
-      if (!canEdit || !selectedTableId || saving || canonicalChanged) return;
+      if (!canEdit || !selectedTableId || saving || canonicalRefreshPending) return;
       const tableId = selectedTableId;
       const entry = tableById.get(tableId);
       const table = entry?.table;
@@ -1429,7 +1432,7 @@ async function mountDistribucion(context) {
     }
 
     async function changeSelectedTableShape(nextShape) {
-      if (!canEdit || !selectedTableId || saving || canonicalChanged) return;
+      if (!canEdit || !selectedTableId || saving || canonicalRefreshPending) return;
       const tableId = selectedTableId;
       const entry = tableById.get(tableId);
       const table = entry?.table;
@@ -1526,7 +1529,7 @@ async function mountDistribucion(context) {
       cleanViewButton.textContent = cleanView ? 'Mostrar cuadrícula' : 'Plano limpio';
     };
     root.querySelector('[data-distribution-print]').onclick = () => {
-      if (dirty || saving || canonicalChanged) {
+      if (dirty || saving || canonicalRefreshPending) {
         status.textContent = 'Guarda los cambios antes de imprimir o generar PDF';
         return;
       }
@@ -1571,7 +1574,7 @@ async function mountDistribucion(context) {
       return id;
     };
     const switchProposal = (nextId) => {
-      if (dirty || saving || canonicalChanged) {
+      if (dirty || saving || canonicalRefreshPending) {
         proposalSelect.value = activeProposalId;
         status.textContent = 'Guarda los cambios antes de cambiar de propuesta';
         return;
@@ -1610,7 +1613,7 @@ async function mountDistribucion(context) {
     };
     proposalSelect.onchange = () => switchProposal(proposalSelect.value);
     proposalNew.onclick = () => {
-      if (!canEdit || dirty || saving || canonicalChanged) return;
+      if (!canEdit || dirty || saving || canonicalRefreshPending) return;
       persistCurrentProposalInMemory();
       const id = proposalId();
       const name = `Alternativa ${proposalState.length + 1}`;
@@ -1622,7 +1625,7 @@ async function mountDistribucion(context) {
       dirty = true; updateSaveState();
     };
     proposalDuplicate.onclick = () => {
-      if (!canEdit || dirty || saving || canonicalChanged) return;
+      if (!canEdit || dirty || saving || canonicalRefreshPending) return;
       persistCurrentProposalInMemory();
       const source = proposalState.find((proposal) => proposal.id === activeProposalId);
       if (!source) return;
@@ -1636,7 +1639,7 @@ async function mountDistribucion(context) {
       dirty = true; updateSaveState();
     };
     proposalRename.onclick = () => {
-      if (!canEdit || saving || canonicalChanged) return;
+      if (!canEdit || saving || canonicalRefreshPending) return;
       const proposal = proposalState.find((item) => item.id === activeProposalId);
       if (!proposal) return;
       const name = window.prompt('Nombre de la propuesta', proposal.name);
@@ -1647,7 +1650,7 @@ async function mountDistribucion(context) {
       dirty = true; refreshProposalControls(); updateSaveState();
     };
     proposalDelete.onclick = () => {
-      if (!canEdit || dirty || saving || canonicalChanged || proposalState.length <= 1) return;
+      if (!canEdit || dirty || saving || canonicalRefreshPending || proposalState.length <= 1) return;
       const current = proposalState.find((proposal) => proposal.id === activeProposalId);
       if (!current || !window.confirm(`Eliminar "${current.name}"? Solo se eliminará este plano; mesas e invitados no cambian.`)) return;
       const index = proposalState.findIndex((proposal) => proposal.id === activeProposalId);
@@ -2647,41 +2650,62 @@ async function mountDistribucion(context) {
       const latest = await loadInvitadosSnapshot(context);
       const latestTables = latest.canonical.tables;
       const latestGuests = latest.canonical.guests;
-      const currentIds = tables.map((table) => escapeText(table.id)).filter(Boolean);
+      validateCanonicalIntegrity(latestTables, latestGuests);
+
+      const previousIds = tableIds.slice();
       const latestIds = latestTables.map((table) => escapeText(table.id)).filter(Boolean);
+      const previousSet = new Set(previousIds);
+      const latestSet = new Set(latestIds);
+      const structureChanged = previousIds.length !== latestIds.length
+        || previousIds.some((id) => !latestSet.has(id))
+        || latestIds.some((id) => !previousSet.has(id));
 
-      const sameTableSet = currentIds.length === latestIds.length
-        && currentIds.every((id, index) => id === latestIds[index]);
-
-      if (!sameTableSet) {
-        if (!dirty && !saving) {
-          await mountDistribucion(context);
-          return true;
-        }
-        canonicalChanged = true;
-        updateSaveState();
-        status.textContent = 'La estructura de mesas cambió · se actualizará al terminar la sincronización';
-        return false;
-      }
+      const nextLayout = projectedLayout(latestTables);
+      const nextLayoutById = new Map(nextLayout.items.map((item) => [escapeText(item.table?.id), item]));
+      const activeProposal = proposalState.find((proposal) => proposal.id === activeProposalId);
+      const activeStoredPlacements = new Map((activeProposal?.placements || []).map((placement) => [escapeText(placement.tableId), placement]));
 
       tables.splice(0, tables.length, ...latestTables);
       guests.splice(0, guests.length, ...latestGuests);
+      tableIds.splice(0, tableIds.length, ...latestIds);
+      layout.items.splice(0, layout.items.length, ...nextLayout.items);
+      layout.width = nextLayout.width;
+      layout.height = nextLayout.height;
       tableById.clear();
       tables.forEach((table, index) => tableById.set(escapeText(table.id), { table, index }));
+      guestIndex = buildGuestIndex(guests);
 
-      const latestGuestIndex = buildGuestIndex(guests);
-      guestIndex = latestGuestIndex;
+      [...placementState.keys()].forEach((tableId) => {
+        if (!latestSet.has(tableId)) placementState.delete(tableId);
+      });
+      latestIds.forEach((tableId) => {
+        if (placementState.has(tableId)) return;
+        const stored = activeStoredPlacements.get(tableId);
+        const projected = nextLayoutById.get(tableId);
+        placementState.set(tableId, stored
+          ? { x: stored.x, y: stored.y, rotation: stored.rotation }
+          : { x: projected?.x ?? WORLD_PADDING, y: projected?.y ?? WORLD_PADDING, rotation: 0 });
+      });
+
+      proposalState.forEach((proposal) => {
+        proposal.placements = proposal.placements.filter((placement) => latestSet.has(escapeText(placement.tableId)));
+      });
+
+      world.querySelectorAll('.distribution-table').forEach((node) => {
+        if (!latestSet.has(escapeText(node.dataset.tableId))) node.remove();
+      });
+
       tables.forEach((table, index) => {
         const tableId = escapeText(table.id);
         const placement = placementState.get(tableId);
-        const currentNode = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableId)}"]`);
-        if (!placement || !currentNode) return;
-
+        if (!placement) return;
         const capacity = capacityOf(table);
         const geometry = tablePhysicalGeometry(table, capacity || 4);
         syncLayoutTableGeometry(tableId, table, index, capacity, geometry);
-        const replacement = renderTable({ table, index, capacity, geometry }, latestGuestIndex, placement);
-        currentNode.replaceWith(replacement);
+        const currentNode = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableId)}"]`);
+        const replacement = renderTable({ table, index, capacity, geometry }, guestIndex, placement);
+        if (currentNode) currentNode.replaceWith(replacement);
+        else world.append(replacement);
         bindTableInteraction(replacement);
         if (selectedTableId === tableId) {
           replacement.classList.add('is-selected');
@@ -2689,8 +2713,19 @@ async function mountDistribucion(context) {
         }
       });
 
+      if (selectedTableId && !latestSet.has(selectedTableId)) clearSelection();
+      root.querySelector('[data-distribution-table-count]').textContent = String(tables.length);
+      root.querySelector('[data-distribution-empty]').hidden = tables.length > 0;
+      canonicalRefreshPending = false;
+
+      if (structureChanged) {
+        dirty = true;
+        updateSaveState();
+      }
       refreshSpatialConflicts();
-      status.textContent = 'Mesas sincronizadas con Invitados';
+      status.textContent = structureChanged
+        ? 'Mesas actualizadas · sincronizando distribución'
+        : 'Mesas sincronizadas con Invitados';
       return true;
     };
 
@@ -2699,28 +2734,21 @@ async function mountDistribucion(context) {
       const source = escapeText(event?.detail?.source);
       if (!source || source === 'distribucion') return;
 
-      if (source.startsWith('table-')) {
-        void reconcileCanonicalTables().catch((error) => {
-          console.error('No se pudo sincronizar Mesas con Distribución:', error);
-          status.textContent = 'No se pudo actualizar Mesas en este momento';
-        });
+      if (saving) {
+        canonicalRefreshPending = true;
+        status.textContent = 'Invitados o Mesas cambiaron · se actualizarán al terminar la sincronización';
         return;
       }
 
-      if (dirty || saving) {
-        canonicalChanged = true;
-        updateSaveState();
-        status.textContent = 'Invitados cambiaron · se actualizará al terminar la sincronización';
-        return;
-      }
       void reconcileCanonicalTables().catch((error) => {
-        console.error('No se pudo reconciliar Invitados con Distribución:', error);
+        console.error('No se pudo reconciliar Invitados/Mesas con Distribución:', error);
+        status.textContent = 'No se pudo actualizar Invitados/Mesas en este momento';
       });
     };
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        if (dirty && !saving && !canonicalChanged) {
+        if (dirty && !saving && !canonicalRefreshPending) {
           if (autosaveTimer) {
             window.clearTimeout(autosaveTimer);
             autosaveTimer = 0;
@@ -2729,7 +2757,10 @@ async function mountDistribucion(context) {
         }
         return;
       }
-      if (dirty || saving || canonicalChanged) return;
+      if (saving) {
+        canonicalRefreshPending = true;
+        return;
+      }
       void reconcileCanonicalTables().catch((error) => {
         console.error('No se pudo reconciliar Distribución al volver a la pestaña:', error);
       });
@@ -2844,7 +2875,7 @@ async function mountDistribucion(context) {
       const remoteSignature = remoteState ? JSON.stringify(remoteState) : '';
       if (!remoteSignature || remoteSignature === lastPersistedSignature) return;
 
-      if (dirty || saving || canonicalChanged) {
+      if (dirty || saving || canonicalRefreshPending) {
         queuedRemoteDistributionSignature = remoteSignature;
         pendingRemoteDistributionState = JSON.parse(JSON.stringify(remoteState));
         return;
@@ -2859,6 +2890,10 @@ async function mountDistribucion(context) {
     });
 
     canonicalCloudUnsubscribe = subscribePlannerStorageKey(context, GUEST_STORAGE_KEY, () => {
+      if (saving) {
+        canonicalRefreshPending = true;
+        return;
+      }
       void reconcileCanonicalTables().catch((error) => {
         console.error('No se pudo sincronizar Invitados/Mesas remotos con Distribución:', error);
       });
