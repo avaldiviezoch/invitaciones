@@ -550,3 +550,11 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - El ángulo visible sobre la mesa se actualiza desde applyPlacement(), evitando un segundo estado visual.
 - En móvil el handle aumenta su área táctil, pero usa exactamente la misma lógica que desktop.
 - No se modifican IDs, invitados, sillas, table.dimensions, contratos de persistencia ni Firebase.
+
+
+## 2026-09-25 — Distribución: simplificación visual del control de rotación
+- Se elimina la guía/perímetro punteado alrededor de la mesa seleccionada.
+- Se elimina la lectura flotante de grados sobre la mesa; el inspector conserva la lectura numérica.
+- Se mantiene únicamente la línea de rotación y el handle superior.
+- El handle circular se reemplaza visualmente por una flecha en espiral ↻ con el mismo tono rosado y 50% de transparencia.
+- La lógica de arrastre, placement.rotation, Undo/Redo y autoguardado permanece sin cambios.

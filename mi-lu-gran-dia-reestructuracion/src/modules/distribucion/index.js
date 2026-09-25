@@ -586,8 +586,6 @@ function applyPlacement(node, placement) {
   node.style.top = `${placement.y}px`;
   node.style.setProperty('--table-rotation', `${rotation}deg`);
   node.style.setProperty('--counter-rotation', `${-rotation}deg`);
-  const angle = node.querySelector('[data-distribution-table-rotation-angle]');
-  if (angle) angle.textContent = `${Math.round(rotation)}°`;
 }
 
 function renderTable(item, guestIndex, placement) {
@@ -631,12 +629,7 @@ function renderTable(item, guestIndex, placement) {
   rotationHandle.className = 'distribution-table-rotation-handle';
   rotationHandle.dataset.distributionTableRotationHandle = 'true';
 
-  const rotationAngle = document.createElement('span');
-  rotationAngle.className = 'distribution-table-rotation-angle';
-  rotationAngle.dataset.distributionTableRotationAngle = 'true';
-  rotationAngle.textContent = `${Math.round(normalizeRotation(placement.rotation))}°`;
-
-  rotationGuide.append(rotationStem, rotationHandle, rotationAngle);
+  rotationGuide.append(rotationStem, rotationHandle);
   node.append(rotationGuide);
 
   geometry.positions.slice(0, capacity).forEach((position, seatIndex) => {
