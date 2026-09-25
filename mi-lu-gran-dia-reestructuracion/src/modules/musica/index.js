@@ -46,8 +46,12 @@ async function searchAppleCatalog(item,signal){
 function card(item){
   const people=[...new Set(item.requests.map(r=>r.person).filter(Boolean))];
   const messages=item.requests.filter(r=>r.message);
+  const catalog=item.catalog;
+  const visual=catalog?.artwork
+    ? `<a class="music-admin-cover" href="${esc(catalog.url)}" target="_blank" rel="noopener" aria-label="Abrir ${esc(catalog.title)} en Apple Music"><img src="${esc(catalog.artwork)}" alt="Portada de ${esc(catalog.album||catalog.title)}" loading="lazy"></a>`
+    : '<span class="music-admin-note" aria-hidden="true">♫</span>';
   return `<article class="music-admin-card">
-    <span class="music-admin-note" aria-hidden="true">♫</span>
+    ${visual}
     <div class="music-admin-song"><div><h3>${esc(catalog?.title||item.title)}</h3>${item.count>1?`<b>${item.count} solicitudes</b>`:''}</div><p>${esc(catalog?.artist||item.artist||'Artista no indicado')}</p>${catalog?`<a class="music-admin-catalog-link" href="${esc(catalog.url)}" target="_blank" rel="noopener"><span>Apple Music</span>${catalog.album?` · ${esc(catalog.album)}`:''} ↗</a>`:'<small class="music-admin-catalog-state">Buscando coincidencia…</small>'}</div>
     <div class="music-admin-people"><span>SOLICITADA POR</span><strong>${esc(people.join(', ')||'Invitado')}</strong>${messages.length?`<small>“${esc(messages[0].message)}”${messages.length>1?` · +${messages.length-1} dedicatoria${messages.length===2?'':'s'}`:''}</small>`:'<small>Sin dedicatoria</small>'}</div>
   </article>`;
