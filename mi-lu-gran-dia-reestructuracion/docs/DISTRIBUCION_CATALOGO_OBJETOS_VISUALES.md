@@ -1002,3 +1002,18 @@ El hallazgo estructural era temporal: el cleanup global se asignaba únicamente 
 Se incorpora un registro de cleanup por montaje, idempotente y LIFO. Se activa antes de crear recursos externos y cada recurso registra su liberación al momento de adquirirse. La cámara registra destroy inmediatamente; los listeners globales registran su remove correspondiente; las dos suscripciones registran unsubscribe; autosave, hoja móvil, conflicto y Object URL quedan en la liberación final. El catch ejecuta únicamente el cleanup perteneciente a su propio montaje y no puede desmontar accidentalmente una instancia posterior.
 
 No se añaden listeners globales, no se duplican rutas, no se modifica UI, persistencia, Firebase/Firestore, catálogo, geometría, datos canónicos ni sincronización funcional.
+
+
+---
+
+# Fase 15 — Sincronización, autosave y conflictos multi-dispositivo
+
+La auditoría revisa conjuntamente `dirty`, `saving`, `canonicalRefreshPending`, autosave, estado remoto en cola, merge por propuestas y resolución manual de conflictos. Se conserva el modelo existente de merge a tres vías por propuesta: cambios simultáneos en propuestas distintas pueden combinarse; cambios divergentes sobre la misma propuesta requieren decisión del usuario.
+
+Se detecta un fallo real en la cola remota durante una escritura local. Si llegaba un snapshot remoto mientras `saving=true`, se guardaba en cola. Tras terminar correctamente el guardado local, el bloque `finally` convertía cualquier snapshot remoto diferente en conflicto aunque el estado local ya estuviera limpio. Esto podía mostrar un conflicto artificial y obligar a elegir entre versiones cuando no quedaba edición local pendiente.
+
+La cola queda corregida: si el snapshot encolado coincide con lo recién persistido se descarta; si es diferente y el guardado terminó limpio, se aplica como nuevo estado remoto en lugar de fabricar un conflicto. Si existe edición local real, el callback remoto ejecuta inmediatamente el merge a tres vías: propuestas distintas se integran y mantienen `dirty` para que autosave persista el resultado; una divergencia en la misma propuesta conserva el flujo explícito de conflicto.
+
+El estado base remoto (`lastPersistedState/signature`) se actualiza al integrar un remoto no conflictivo y se mantiene la propuesta activa resultante del merge. La opción “Conservar este” continúa siendo la única ruta `force:true`; “Usar remoto” continúa reemplazando el estado local explícitamente. Autosave sigue bloqueado durante saving, canonicalRefreshPending o conflicto.
+
+No se modifican Firebase/Firestore, claves, schema V1, datos canónicos, catálogo, geometría ni reglas de permisos.
