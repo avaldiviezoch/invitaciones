@@ -538,6 +538,21 @@ function renderPhysicalElement(element) {
   label.textContent = definition.label;
   node.append(label);
 
+  if (element.type !== 'area' && elementCapabilities(element).rotatable) {
+    const rotationGuide = document.createElement('div');
+    rotationGuide.className = 'distribution-element-rotation-guide';
+    rotationGuide.setAttribute('aria-hidden', 'true');
+
+    const rotationStem = document.createElement('span');
+    rotationStem.className = 'distribution-element-rotation-stem';
+
+    const rotationHandle = document.createElement('span');
+    rotationHandle.className = 'distribution-element-rotation-handle';
+    rotationHandle.dataset.distributionElementRotationHandle = 'true';
+
+    rotationGuide.append(rotationStem, rotationHandle);
+    node.append(rotationGuide);
+  }
 
   return node;
 }
@@ -2155,6 +2170,7 @@ async function mountDistribucion(context) {
     const bindElementInteraction = (node, element) => {
       let move = null;
       let resize = null;
+      let rotationGesture = null;
       let moved = false;
 
       const localDelta = (dx, dy, rotation) => {
@@ -2171,6 +2187,25 @@ async function mountDistribucion(context) {
         if (presentationMode || event.button !== 0) return;
         event.stopPropagation();
         selectElement(element.id);
+
+        const rotationHandle = event.target.closest('[data-distribution-element-rotation-handle]');
+        if (rotationHandle) {
+          if (!canEdit || element.type === 'area' || element.locked || !elementCapabilities(element).rotatable) return;
+          event.preventDefault();
+          node.setPointerCapture(event.pointerId);
+          node.classList.add('is-rotating');
+          const rect = node.getBoundingClientRect();
+          rotationGesture = {
+            pointerId: event.pointerId,
+            centerX: rect.left + rect.width / 2,
+            centerY: rect.top + rect.height / 2,
+            lastPointerAngle: Math.atan2(event.clientY - (rect.top + rect.height / 2), event.clientX - (rect.left + rect.width / 2)) * 180 / Math.PI,
+            rotation: normalizeRotation(element.rotation)
+          };
+          moved = false;
+          rememberEdit();
+          return;
+        }
 
         const handle = event.target.closest('[data-distribution-resize-handle]');
         if (handle) {
@@ -2204,6 +2239,21 @@ async function mountDistribucion(context) {
       });
 
       node.addEventListener('pointermove', (event) => {
+        if (rotationGesture && rotationGesture.pointerId === event.pointerId) {
+          event.preventDefault();
+          const nextPointerAngle = Math.atan2(event.clientY - rotationGesture.centerY, event.clientX - rotationGesture.centerX) * 180 / Math.PI;
+          const rawDelta = nextPointerAngle - rotationGesture.lastPointerAngle;
+          const delta = Math.atan2(Math.sin(rawDelta * Math.PI / 180), Math.cos(rawDelta * Math.PI / 180)) * 180 / Math.PI;
+          rotationGesture.rotation = normalizeRotation(rotationGesture.rotation + delta);
+          rotationGesture.lastPointerAngle = nextPointerAngle;
+          moved = moved || Math.abs(delta) > 0.05;
+          element.rotation = rotationGesture.rotation;
+          applyElementPlacement(node, element);
+          renderElementInspector(root, element);
+          refreshSpatialConflicts();
+          return;
+        }
+
         if (resize && resize.pointerId === event.pointerId) {
           const worldDx = camera.clientDeltaToWorld(event.clientX - resize.clientX);
           const worldDy = camera.clientDeltaToWorld(event.clientY - resize.clientY);
@@ -2255,10 +2305,12 @@ async function mountDistribucion(context) {
       const finishInteraction = (event) => {
         const wasResizing = resize && resize.pointerId === event.pointerId;
         const wasMoving = move && move.pointerId === event.pointerId;
-        if (!wasResizing && !wasMoving) return;
-        node.classList.remove('is-moving', 'is-resizing');
+        const wasRotating = rotationGesture && rotationGesture.pointerId === event.pointerId;
+        if (!wasResizing && !wasMoving && !wasRotating) return;
+        node.classList.remove('is-moving', 'is-resizing', 'is-rotating');
         move = null;
         resize = null;
+        rotationGesture = null;
         if (moved) {
           renderElementInspector(root, element);
           markDirty();
