@@ -571,3 +571,15 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se inventarían 42 entradas entre objetos actuales, faltantes, equivalentes y casos que requieren normalización.
 - Se detectan conflictos de nomenclatura gift/gifts, planter, entrada/salida y la diferencia entre canopy rectangular y tent poligonal.
 - No se modifica UI, persistencia, Firebase ni PHYSICAL_ELEMENT_TYPES en esta fase.
+
+
+## 2026-09-25 — Distribución Fase 2: normalización y categorización del catálogo
+- Se normaliza el inventario de Fase 1 sin modificar UI, persistencia ni datos.
+- Se definen 38 objetos visuales ordinarios canónicos y 9 variantes de áreas dibujables, para 47 conceptos de catálogo.
+- Se establecen ocho categorías: Mesas y mobiliario; Comida y atención; Celebración y experiencias; Decoración; Infraestructura/recinto; Vegetación; Seguridad/circulación; Áreas dibujables.
+- Se conserva compatibilidad conceptual con todos los types aceptados por el parser V1; no se renombra ningún type persistido.
+- gift queda como alias histórico de gifts; planter conserva el type actual y normaliza su nombre a Jardinera/macetero.
+- canopy se conserva como Cobertura rectangular/toldo modular y convivirá con el futuro Toldo poligonal.
+- circulation, restricted y zone quedan como representaciones rectangulares legacy compatibles con el futuro motor de áreas.
+- Silla suelta se mantiene únicamente como mobiliario espacial sin seatId, tableId, invitados ni asignación.
+- Se propone un contrato simple para Fase 3; no se implementa todavía.

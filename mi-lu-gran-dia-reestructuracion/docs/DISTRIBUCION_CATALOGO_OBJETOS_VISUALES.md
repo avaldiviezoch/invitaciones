@@ -140,3 +140,513 @@ El Toldo completo queda reservado para la fase específica de Áreas dibujables.
 5. Dimensiones del catálogo son valores iniciales; cada instancia seguirá siendo editable cuando el tipo lo permita.
 6. Ningún objeto visual auxiliar puede crear/modificar `tableId`, `seatId`, `seatNumber` o invitados.
 7. Áreas dibujables se diseñarán después sobre un motor único; no introducir polígonos especiales durante la incorporación de objetos ordinarios.
+
+
+---
+
+# Fase 2 — Normalización y categorización
+
+## Alcance y decisión arquitectónica
+
+Esta fase transforma el inventario de Fase 1 en un **modelo canónico conceptual**. No modifica todavía `PHYSICAL_ELEMENT_TYPES`, HTML, persistencia, Firebase ni datos existentes.
+
+La normalización separa tres niveles que no deben confundirse:
+
+1. **type persistido/compatible**: identificador que el estado actual reconoce.
+2. **nombre canónico**: concepto funcional que queremos representar.
+3. **nombre mostrado**: etiqueta legible; puede cambiar sin renombrar datos.
+
+### Hallazgo de compatibilidad del parser V1
+
+La implementación vigente valida `proposal.elements[].type` contra `PHYSICAL_ELEMENT_TYPES`. Un type desconocido invalida la distribución completa. El serializer vuelve a guardar el `type` literalmente.
+
+Consecuencia: **los types actualmente aceptados no deben renombrarse en datos existentes**. Los aliases históricos se resolverán posteriormente en la única fuente de catálogo/adaptación, nunca mediante migración silenciosa.
+
+No se encontraron fixtures o snapshots versionados en el repositorio que permitan afirmar qué types están presentes en datos reales de bodas. Por ello, “persistencia existente” en esta fase significa **soporte actual del parser/serializer**, no evidencia de presencia en datos vivos.
+
+## Categorías canónicas propuestas
+
+Se adoptan ocho categorías, suficientes para la UI futura sin crear una taxonomía excesiva:
+
+1. **Mesas y mobiliario**
+2. **Comida y atención**
+3. **Celebración y experiencias**
+4. **Decoración**
+5. **Infraestructura / recinto**
+6. **Vegetación**
+7. **Seguridad / circulación**
+8. **Áreas dibujables**
+
+Las mesas canónicas de invitados y sus sillas quedan fuera de estas categorías porque pertenecen al dominio Mesas.
+
+## Contrato conceptual de capacidades
+
+Para objetos visuales ordinarios, salvo indicación expresa:
+
+- mover: sí;
+- resize / editableSize: sí;
+- rotar: sí;
+- copiar: sí;
+- eliminar: sí;
+- polígono: no;
+- assignable: no;
+- guestRelated: no;
+- specialBehavior: no.
+
+Las dimensiones indicadas son **dimensiones físicas iniciales en metros**, no restricciones rígidas. Cada instancia puede tener medidas diferentes mediante `width/height`.
+
+Para áreas dibujables:
+
+- mover: sí;
+- resize: sí;
+- rotar: sí;
+- copiar: sí;
+- eliminar: sí;
+- polígono: sí;
+- assignable: no;
+- guestRelated: no;
+- specialBehavior: sí: motor único de dibujo/edición de áreas.
+
+## Tabla maestra normalizada — objetos visuales ordinarios
+
+| type actual / histórico | type canónico | nombre actual/histórico | nombre canónico / mostrado | categoría | aliases | dimensiones iniciales | forma | resize | rotate | copy | delete | comportamiento especial | persistencia existente | estado |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| `dance` | `dance` | Pista de baile | Pista de baile | Celebración y experiencias | — | 5.00 × 5.00 m | rectangular | sí | sí | sí | sí | no | V1 actual | CONSERVAR |
+| `couple` | `couple` | Mesa de novios | Mesa de novios | Mesas y mobiliario | — | 3.00 × 1.20 m | rectangular | sí | sí | sí | sí | no; no es mesa canónica | histórico/propuesta; no aceptado por V1 actual | NORMALIZAR |
+| `bar` | `bar` | Barra | Barra | Comida y atención | — | 4.00 × 1.20 m | rectangular | sí | sí | sí | sí | no | V1 actual | CONSERVAR |
+| `dj` | `dj` | DJ / sonido | DJ / sonido | Celebración y experiencias | — | 3.00 × 2.00 m | rectangular | sí | sí | sí | sí | no | V1 actual | CONSERVAR |
+| `stage` | `stage` | Escenario | Escenario | Infraestructura / recinto | — | 4.00 × 2.50 m | rectangular | sí | sí | sí | sí | no como objeto físico | V1 actual | CONSERVAR |
+| `screen` | `screen` | Pantalla / proyector; Pantalla | Pantalla / proyector | Celebración y experiencias | — | 2.50 × 0.50 m | rectangular | sí | sí | sí | sí | no | V1 actual | NORMALIZAR |
+| `photo` | `photo` | Photobooth; Zona de fotos | Photobooth / zona de fotos | Celebración y experiencias | Photobooth, Zona de fotos | 3.00 × 2.00 m | rectangular | sí | sí | sí | sí | no | V1 actual | NORMALIZAR |
+| `booth360` | `booth360` | Cabina 360; Cabina 360° | Cabina 360° | Celebración y experiencias | — | 2.50 × 2.50 m | circular | sí | sí | sí | sí | no | V1 actual | CONSERVAR |
+| `mirror` | `mirror` | Espejo selfie | Espejo selfie | Celebración y experiencias | — | 1.00 × 0.20 m | rectangular | sí | sí | sí | sí | no | histórico/propuesta; no aceptado por V1 actual | NORMALIZAR |
+| `altar` | `altar` | Altar | Altar | Decoración | — | 4.00 × 2.00 m | rectangular | sí | sí | sí | sí | no | V1 actual | CONSERVAR |
+| `arch` | `arch` | Arco decorativo | Arco decorativo | Decoración | — | 2.40 × 0.80 m | rectangular | sí | sí | sí | sí | no | V1 actual | CONSERVAR |
+| `backdrop` | `backdrop` | Panel floral / backdrop | Panel floral / backdrop | Decoración | Panel floral | 2.50 × 0.60 m | rectangular | sí | sí | sí | sí | no | histórico/propuesta; no aceptado por V1 actual | NORMALIZAR |
+| `sign` | `sign` | Tótem / letrero | Tótem / letrero | Decoración | Tótem, Letrero | 0.80 × 0.50 m | rectangular | sí | sí | sí | sí | no | histórico/propuesta; no aceptado por V1 actual | NORMALIZAR |
+| `divider` | `divider` | Separador / biombo | Separador / biombo | Decoración | Biombo | 2.00 × 0.40 m | rectangular | sí | sí | sí | sí | no | histórico/propuesta; no aceptado por V1 actual | NORMALIZAR |
+| `plantSmall` | `plantSmall` | Planta pequeña | Planta pequeña | Vegetación | — | 0.50 × 0.50 m | sprite/obstáculo | sí | sí | sí | sí | no | V1 actual | CONSERVAR |
+| `plant` | `plant` | Planta mediana | Planta mediana | Vegetación | — | 0.80 × 0.80 m | sprite/obstáculo | sí | sí | sí | sí | no | V1 actual | CONSERVAR |
+| `tree` | `tree` | Árbol / macetero grande | Árbol / macetero grande | Vegetación | — | 1.20 × 1.20 m | sprite/obstáculo | sí | sí | sí | sí | no | V1 actual | CONSERVAR |
+| `planter` | `planter` | Macetero / decoración; Jardinera | Jardinera / macetero | Vegetación | Macetero, Jardinera | **1.50 × 0.60 m** para nuevos objetos; histórica 0.60 × 0.60 m | sprite/obstáculo | sí | sí | sí | sí | no | V1 actual; semántica histórica conflictiva | NORMALIZAR |
+| `buffet` | `buffet` | Buffet | Buffet | Comida y atención | — | 3.00 × 0.90 m | rectangular | sí | sí | sí | sí | no como objeto físico | V1 actual | CONSERVAR |
+| `drinks` | `drinks` | Estación de bebidas; Bebidas | Estación de bebidas | Comida y atención | Bebidas | 2.00 × 0.80 m | rectangular | sí | sí | sí | sí | no | V1 actual | NORMALIZAR |
+| `desserts` | `desserts` | Estación de postres; Postres | Estación de postres | Comida y atención | Postres | 2.40 × 0.80 m | rectangular | sí | sí | sí | sí | no | V1 actual | NORMALIZAR |
+| `cake` | `cake` | Mesa de torta; Torta | Mesa de torta | Mesas y mobiliario | Torta | Ø 1.80 m | circular | sí | sí | sí | sí | no; no es mesa canónica | V1 actual | NORMALIZAR |
+| `gift` histórico / `gifts` actual | `gifts` | Mesa de regalos; Regalos | Mesa de regalos | Mesas y mobiliario | `gift`, Regalos | 1.80 × 0.75 m | rectangular | sí | sí | sí | sí | no; no es mesa canónica | `gifts` aceptado por V1; `gift` solo histórico | ALIAS |
+| `guestbook` | `guestbook` | Mesa de firmas | Mesa de firmas | Mesas y mobiliario | — | 1.20 × 0.60 m | rectangular | sí | sí | sí | sí | no; no es mesa canónica | histórico/propuesta; no aceptado por V1 actual | NORMALIZAR |
+| `welcome` | `welcome` | Mesa de bienvenida; Bienvenida | Mesa de bienvenida | Mesas y mobiliario | Bienvenida | 1.80 × 0.75 m | rectangular | sí | sí | sí | sí | no; no es mesa canónica | V1 actual | NORMALIZAR |
+| `favors` | `favors` | Mesa de recuerdos | Mesa de recuerdos | Mesas y mobiliario | — | 1.50 × 0.70 m | rectangular | sí | sí | sí | sí | no; no es mesa canónica | histórico/propuesta; no aceptado por V1 actual | NORMALIZAR |
+| `cocktail` | `cocktail` | Mesa alta / cóctel | Mesa alta / cóctel | Mesas y mobiliario | — | Ø 0.80 m | circular | sí | sí | sí | sí | no; no es mesa canónica | histórico/propuesta; no aceptado por V1 actual | NORMALIZAR |
+| `snacks` | `snacks` | Carrito de snacks | Carrito de snacks | Comida y atención | Carrito de dulces / snacks | 1.50 × 0.80 m | rectangular | sí | sí | sí | sí | no | histórico/propuesta; no aceptado por V1 actual | NORMALIZAR |
+| `supplier` | `supplier` | Mesa de proveedores | Mesa de proveedores | Mesas y mobiliario | — | 1.80 × 0.75 m | rectangular | sí | sí | sí | sí | no; no es mesa canónica | histórico/propuesta; no aceptado por V1 actual | NORMALIZAR |
+| `entrance` | `entrance` | Entrada; Entrada / salida | Entrada / salida | Infraestructura / recinto | Entrada | 2.00 × 1.20 m | rectangular | sí | sí | sí | sí | no | V1 actual | CONSERVAR |
+| `exit` | `exit` | Salida | Salida | Infraestructura / recinto | — | 2.00 × 1.20 m | rectangular | sí | sí | sí | sí | no | histórico/propuesta; no aceptado por V1 actual | VARIANTE |
+| `restroom` | `restroom` | Baños | Baños | Infraestructura / recinto | — | 2.50 × 2.00 m | rectangular | sí | sí | sí | sí | no | V1 actual | CONSERVAR |
+| `kitchen` | `kitchen` | Cocina / servicio; Cocina / apoyo | Cocina / servicio | Infraestructura / recinto | Cocina / apoyo | 3.00 × 2.50 m | rectangular | sí | sí | sí | sí | no | V1 actual | NORMALIZAR |
+| `technical` | `technical` | Zona técnica | Zona técnica | Infraestructura / recinto | — | 2.00 × 1.50 m | rectangular | sí | sí | sí | sí | no como objeto rectangular | V1 actual | CONSERVAR |
+| `column` | `column` | Columna | Columna | Infraestructura / recinto | — | 0.50 × 0.50 m | rectangular | sí | sí | sí | sí | no | V1 actual | CONSERVAR |
+| `extinguisher` | `extinguisher` | Extintor / seguridad; Extintor | Extintor / seguridad | Seguridad / circulación | Extintor | **0.50 × 0.50 m** para nuevos objetos; histórica 0.40 × 0.40 m | rectangular | sí | sí | sí | sí | no | V1 actual | NORMALIZAR |
+| `chair` | `chair` | Silla; Silla suelta | Silla suelta | Mesas y mobiliario | Silla visual | 0.50 × 0.50 m | rectangular | sí | sí | sí | sí | **sí: separación estricta del dominio Mesas** | histórico/propuesta; no aceptado por V1 actual | ESPECIAL |
+| `canopy` | `canopy` | Toldo / cobertura | Cobertura rectangular / toldo modular | Infraestructura / recinto | Toldo rectangular | 6.00 × 6.00 m | rectangular/contenedor | sí | sí | sí | sí | **sí: contenedor espacial, pero no polígono** | V1 actual | VARIANTE |
+
+### Decisión sobre `canopy`
+
+`canopy` **debe convivir con el futuro Toldo poligonal**.
+
+No es alias de `tent` porque:
+
+- actualmente tiene identidad propia en el parser V1;
+- es rectangular y usa `width/height`;
+- su familia espacial es `container`;
+- no guarda vértices ni semántica de área dibujada;
+- puede representar una cobertura modular/cuadrada perfectamente válida aunque luego exista un Toldo libre.
+
+Por compatibilidad, `canopy` conserva su type. Solo se normaliza su nombre mostrado a **Cobertura rectangular / toldo modular** para no prometer el comportamiento del futuro Toldo dibujable.
+
+## Compatibilidad de áreas rectangulares actualmente persistibles
+
+La reestructuración vigente tiene tres types que conceptualmente anticipan áreas, pero hoy funcionan como objetos rectangulares ordinarios:
+
+| type vigente | concepto actual | decisión canónica | persistencia | estado |
+|---|---|---|---|---|
+| `circulation` | Circulación 4.00 × 1.20 m | compatibilidad rectangular del futuro Área de circulación | V1 actual | LEGADO |
+| `restricted` | Zona restringida 3.00 × 3.00 m | compatibilidad rectangular de futura Área restringida | V1 actual | LEGADO |
+| `zone` | Zona / área 4.00 × 3.00 m | compatibilidad rectangular de futura Área personalizada | V1 actual | LEGADO |
+
+Estos types **no se eliminan ni renombran**. Cuando exista el motor poligonal, podrán mantenerse para leer/editar objetos existentes, mientras la UI nueva crea áreas mediante el motor canónico. No se convertirán silenciosamente ni se migrarán.
+
+## Catálogo conceptual — Áreas dibujables
+
+Las áreas dibujables constituyen una categoría separada y un único comportamiento común. Conceptualmente, el futuro motor debería distinguir:
+
+- `type: 'area'` como entidad geométrica común;
+- `areaKind` como variante semántica.
+
+Esto se propone porque la referencia histórica ya necesitaba un discriminador equivalente (`areaKind`) para compartir un mismo motor sin nueve implementaciones distintas.
+
+**No se implementa ni persiste todavía este contrato.**
+
+| type conceptual | areaKind | nombre canónico | referencia inicial | forma | resize | rotate | copy | delete | especial | estado |
+|---|---|---|---|---|---|---|---|---|---|---|
+| `area` | `tent` | Toldo | 5.00 × 4.00 m sugerido | polígono libre | sí | sí | sí | sí | vértices, lados, área, perímetro, color, transparencia | ÁREA DIBUJABLE |
+| `area` | `stage` | Área de escenario | 4.00 × 2.50 m sugerido | polígono libre | sí | sí | sí | sí | motor de áreas | ÁREA DIBUJABLE |
+| `area` | `lounge` | Área lounge | 3.00 × 2.50 m sugerido | polígono libre | sí | sí | sí | sí | motor de áreas | ÁREA DIBUJABLE |
+| `area` | `kids` | Área infantil | 3.00 × 3.00 m sugerido | polígono libre | sí | sí | sí | sí | motor de áreas | ÁREA DIBUJABLE |
+| `area` | `buffet` | Área de buffet | 3.00 × 0.90 m sugerido | polígono libre | sí | sí | sí | sí | motor de áreas | ÁREA DIBUJABLE |
+| `area` | `technical` | Área técnica | 2.00 × 1.50 m sugerido | polígono libre | sí | sí | sí | sí | motor de áreas | ÁREA DIBUJABLE |
+| `area` | `restricted` | Área restringida | 2.00 × 2.00 m sugerido | polígono libre | sí | sí | sí | sí | motor de áreas | ÁREA DIBUJABLE |
+| `area` | `circulation` | Área de circulación | 1.20 × 4.00 m sugerido | polígono libre | sí | sí | sí | sí | motor de áreas | ÁREA DIBUJABLE |
+| `area` | `custom` | Área personalizada | 2.00 × 2.00 m sugerido | polígono libre | sí | sí | sí | sí | motor de áreas | ÁREA DIBUJABLE |
+
+Las medidas de áreas son referencias iniciales encontradas en la propuesta histórica. La geometría real vendrá de sus vértices; no deben persistirse como “área calculada” o “perímetro calculado”.
+
+## Duplicidades detectadas
+
+### 1. `gift` vs `gifts`
+
+- **A:** `gift` histórico.
+- **B:** `gifts` actual.
+- Representan la misma Mesa de regalos y comparten 1.80 × 0.75 m.
+- El parser actual solo reconoce `gifts`.
+- **Normalización:** `gifts` es type canónico; `gift` queda como alias histórico para una futura adaptación/importación.
+- **Riesgo:** renombrar objetos persistidos `gifts` a `gift` rompería el parser vigente.
+
+### 2. `photo`: Photobooth vs Zona de fotos
+
+- Mismo type y mismas dimensiones.
+- La diferencia es de microcopy, no de comportamiento.
+- **Normalización:** conservar `photo`; nombre mostrado “Photobooth / zona de fotos”.
+- No requiere alias de persistencia.
+
+### 3. `planter`: Macetero histórico vs Jardinera actual
+
+- Comparten type pero no dimensiones ni presentación histórica.
+- El actual usa 1.50 × 0.60 m; el histórico 0.60 × 0.60 m.
+- Como `width/height` se persisten por instancia, la dimensión concreta no depende obligatoriamente del default.
+- **Normalización:** conservar `planter`; nombre “Jardinera / macetero”; default nuevo actual 1.50 × 0.60 m.
+- Los tamaños históricos siguen representables sin cambiar type.
+- **Riesgo:** crear otro `planter` paralelo produciría dos fuentes semánticas.
+
+### 4. Entrada / salida
+
+- La propuesta histórica separaba `entrance` y `exit`.
+- La reestructuración actual usa `entrance` con nombre “Entrada / salida”.
+- Son físicamente similares pero semánticamente distintos cuando se necesita marcar evacuación o flujo.
+- **Normalización:** conservar `entrance` exactamente por compatibilidad y admitir `exit` posteriormente como **variante real**, no como alias.
+- No reinterpretar objetos `entrance` existentes como solo “Entrada”.
+
+### 5. `canopy` vs Toldo poligonal
+
+- Comparten palabra “Toldo”, pero no contrato.
+- `canopy`: rectángulo/contenedor con width/height; V1 actual.
+- Toldo dibujado: polígono libre con vértices y métricas derivadas.
+- **Normalización:** convivencia.
+- `canopy` → Cobertura rectangular / toldo modular.
+- futuro `area + areaKind=tent` → Toldo dibujable.
+- **Riesgo:** fusionarlos eliminaría información geométrica o forzaría comportamiento especial sobre objetos actuales.
+
+### 6. `stage` vs Área de escenario
+
+- `stage` es un objeto físico rectangular.
+- Área de escenario es una delimitación espacial dibujada.
+- Son **variantes reales**, no aliases.
+- Pueden coexistir en el mismo plano.
+
+### 7. `buffet` vs Área de buffet
+
+- `buffet` representa mobiliario/estación física.
+- Área de buffet representa superficie reservada.
+- Son variantes reales.
+
+### 8. `technical` vs Área técnica
+
+- `technical` actual es un elemento rectangular concreto.
+- Área técnica delimita una superficie.
+- Son variantes reales.
+
+### 9. `circulation`, `restricted`, `zone` vs futuras áreas
+
+- Los types actuales son rectángulos persistibles.
+- Las futuras áreas serán polígonos.
+- Los actuales quedan como **LEGADO compatible**, no se borran.
+- La UI futura deberá evitar crear dos conceptos indistinguibles, pero la compatibilidad de lectura permanece.
+
+## Decisiones de categorización
+
+### Mesas y mobiliario
+
+- Mesa de novios — `couple`
+- Mesa de torta — `cake`
+- Mesa de regalos — `gifts`
+- Mesa de firmas — `guestbook`
+- Mesa de bienvenida — `welcome`
+- Mesa de recuerdos — `favors`
+- Mesa alta / cóctel — `cocktail`
+- Mesa de proveedores — `supplier`
+- Silla suelta — `chair`
+
+Ninguno de estos crea `tableId`, `seatId`, `seatNumber` ni recibe invitados.
+
+### Comida y atención
+
+- Barra — `bar`
+- Buffet — `buffet`
+- Estación de bebidas — `drinks`
+- Estación de postres — `desserts`
+- Carrito de snacks — `snacks`
+
+### Celebración y experiencias
+
+- Pista de baile — `dance`
+- DJ / sonido — `dj`
+- Pantalla / proyector — `screen`
+- Photobooth / zona de fotos — `photo`
+- Cabina 360° — `booth360`
+- Espejo selfie — `mirror`
+
+### Decoración
+
+- Altar — `altar`
+- Arco decorativo — `arch`
+- Panel floral / backdrop — `backdrop`
+- Tótem / letrero — `sign`
+- Separador / biombo — `divider`
+
+### Infraestructura / recinto
+
+- Escenario — `stage`
+- Cobertura rectangular / toldo modular — `canopy`
+- Entrada / salida — `entrance`
+- Salida — `exit` como variante histórica/real
+- Baños — `restroom`
+- Cocina / servicio — `kitchen`
+- Zona técnica — `technical`
+- Columna — `column`
+
+### Vegetación
+
+- Planta pequeña — `plantSmall`
+- Planta mediana — `plant`
+- Árbol / macetero grande — `tree`
+- Jardinera / macetero — `planter`
+
+### Seguridad / circulación
+
+- Extintor / seguridad — `extinguisher`
+
+Los actuales `circulation`, `restricted` y `zone` se mantienen por compatibilidad, pero conceptualmente se trasladan al bloque de Áreas dibujables como representaciones rectangulares legacy.
+
+### Áreas dibujables
+
+- Toldo
+- Área de escenario
+- Área lounge
+- Área infantil
+- Área de buffet
+- Área técnica
+- Área restringida
+- Área de circulación
+- Área personalizada
+
+## Objetos especiales
+
+### Toldo
+
+Es **ÁREA DIBUJABLE**, no objeto rectangular ordinario. Su contrato posterior requiere:
+
+- mínimo 3 vértices;
+- edición de vértices;
+- lados en metros;
+- área derivada;
+- perímetro derivado;
+- resize;
+- rotación;
+- color;
+- transparencia;
+- Undo/Redo;
+- autosave;
+- persistencia de `points[]`.
+
+No se implementa en esta fase.
+
+### Áreas dibujables
+
+Comparten un único motor futuro. Las diferencias entre Toldo/Lounge/Infantil/etc. son semántica, valores iniciales y estilo; no justifican motores separados.
+
+### Silla suelta
+
+Se **mantiene conceptualmente** porque sirve como mobiliario espacial independiente, por ejemplo ceremonia, espera o asiento auxiliar.
+
+Reglas obligatorias:
+
+- no tiene `seatId`;
+- no recibe invitados;
+- no tiene `tableId`;
+- no participa en capacidad de mesas;
+- no participa en asignación;
+- no modifica Invitados/Mesas.
+
+Por esta separación recibe estado **ESPECIAL**, aunque su geometría use el motor ordinario.
+
+### Mesas canónicas
+
+Permanecen fuera del catálogo genérico. Son propiedad de Mesas y Distribución solo consume identidad, dimensiones y asignaciones para representarlas.
+
+### Pista de baile
+
+No necesita motor especial actualmente. Es un rectángulo redimensionable con familia espacial reservada. Su gran dimensión no justifica una implementación propia.
+
+### Escenario
+
+El objeto `stage` ordinario no requiere motor especial. Debe distinguirse de **Área de escenario**, que sí usa el motor de áreas.
+
+### Cobertura rectangular `canopy`
+
+Es especial solo por su semántica de contenedor espacial. Geométricamente sigue siendo un objeto rectangular ordinario.
+
+## Compatibilidad
+
+### Types V1 que no deben renombrarse
+
+`dance`, `bar`, `dj`, `stage`, `column`, `canopy`, `circulation`, `restricted`, `entrance`, `plant`, `plantSmall`, `tree`, `planter`, `buffet`, `drinks`, `desserts`, `cake`, `gifts`, `welcome`, `booth360`, `photo`, `screen`, `altar`, `arch`, `restroom`, `kitchen`, `technical`, `extinguisher`, `zone`.
+
+Estos son los types reconocidos actualmente por el parser V1. Cambiarlos directamente podría hacer ilegibles estados existentes.
+
+### Aliases históricos claros
+
+- `gift` → `gifts`
+- “Photobooth” / “Zona de fotos” → `photo`
+- “Bebidas” / “Estación de bebidas” → `drinks`
+- “Postres” / “Estación de postres” → `desserts`
+- “Torta” / “Mesa de torta” → `cake`
+- “Bienvenida” / “Mesa de bienvenida” → `welcome`
+- “Cocina / apoyo” / “Cocina / servicio” → `kitchen`
+
+Solo `gift` implica alias de **type**. Los demás son aliases de nombre mostrado.
+
+### Types históricos que pueden incorporarse sin renombrar conceptos actuales
+
+`couple`, `mirror`, `backdrop`, `sign`, `divider`, `guestbook`, `favors`, `cocktail`, `snacks`, `supplier`, `exit`, `chair`.
+
+Su incorporación futura exige ampliar el catálogo/parser de forma controlada, pero no migrar objetos existentes.
+
+### Compatibilidad legacy de áreas
+
+`circulation`, `restricted` y `zone` deben seguir siendo legibles como objetos rectangulares aunque la UI futura priorice el motor poligonal.
+
+El futuro Toldo no reutilizará ni sobrescribirá `canopy`.
+
+## Propuesta de contrato canónico
+
+Para objetos ordinarios, un objeto JavaScript simple es suficiente:
+
+```js
+{
+  type: 'bar',
+  label: 'Barra',
+  category: 'food-service',
+  aliases: [],
+  dimensions: { widthM: 4, heightM: 1.2 },
+  shape: 'rect',
+  spatialFamily: 'obstacle',
+  capabilities: {
+    movable: true,
+    resizable: true,
+    rotatable: true,
+    copyable: true,
+    deletable: true
+  },
+  behavior: 'physical'
+}
+```
+
+No se propone factory, registry anidado ni clases. La Fase 3 puede convertir el actual `PHYSICAL_ELEMENT_TYPES` en esta única fuente o reemplazarlo de manera controlada, migrando primero sus consumidores.
+
+### Campos justificados
+
+- `type`: ya es identidad funcional/persistida.
+- `label`: evita hardcodear microcopy por interfaz.
+- `category`: necesaria para agrupar el catálogo.
+- `aliases`: compatibilidad/nombres históricos cuando existan.
+- `dimensions`: defaults físicos actualmente ya existen.
+- `shape`: necesario para geometría común.
+- `spatialFamily`: ya existe en el motor de conflictos.
+- `capabilities`: ya existe como contrato de edición.
+- `behavior`: distingue objetos físicos ordinarios de futuras áreas sin condiciones dispersas.
+
+No se añaden propiedades decorativas que no tengan consumidor funcional.
+
+### Contrato conceptual de áreas
+
+Las áreas necesitan únicamente una extensión mínima del concepto:
+
+```js
+{
+  type: 'area',
+  areaKind: 'tent',
+  label: 'Toldo',
+  category: 'drawn-areas',
+  dimensions: { suggestedWidthM: 5, suggestedHeightM: 4 },
+  shape: 'polygon',
+  spatialFamily: 'container',
+  capabilities: {
+    movable: true,
+    resizable: true,
+    rotatable: true,
+    copyable: true,
+    deletable: true
+  },
+  behavior: 'draw-area'
+}
+```
+
+`areaKind` está justificado porque la referencia histórica ya compartía un solo motor de áreas y necesitaba distinguir Toldo, Lounge, Infantil, Buffet, Técnica, Restringida, Circulación y Personalizada.
+
+La definición de persistencia concreta de `area` queda para la fase específica de implementación y deberá preservar compatibilidad con V1. Esta fase no autoriza escribir este formato.
+
+## Resultado cuantitativo de Fase 2
+
+El modelo queda definido como:
+
+- **38 objetos visuales ordinarios canónicos**.
+- **9 variantes canónicas de áreas dibujables** bajo un único motor conceptual.
+- **47 conceptos canónicos de catálogo en total**.
+- **3 types rectangulares actuales de área** (`circulation`, `restricted`, `zone`) conservados como compatibilidad legacy, no como conceptos adicionales.
+- mesas canónicas y sillas canónicas siguen fuera del catálogo visual.
+
+## Respuestas al criterio de éxito
+
+1. **¿Cuántos objetos canónicos?** 38 ordinarios + 9 áreas = 47 conceptos.
+2. **¿Nombre de cada uno?** Definido en las tablas anteriores.
+3. **¿type interno?** Definido para los 38 ordinarios; áreas usan conceptualmente `area + areaKind`.
+4. **¿Aliases?** Identificados; `gift` es el único alias claro de type hacia `gifts`.
+5. **¿Categorías?** Ocho categorías.
+6. **¿Dimensiones?** Definidas desde fuentes históricas/actuales; son defaults físicos iniciales.
+7. **¿Forma?** Definida como rectangular, circular, sprite/obstáculo o polígono.
+8. **¿Capacidades?** Motor físico común para objetos ordinarios; motor de área común para polígonos.
+9. **¿Motor especial?** Áreas dibujables; silla suelta requiere aislamiento semántico; canopy conserva semántica de contenedor.
+10. **¿Qué pertenece a áreas?** Nueve `areaKind`.
+11. **¿Qué no se mezcla con Invitados/Mesas?** Todos los objetos del catálogo; en especial mesas auxiliares y silla suelta.
+12. **¿Qué types deben conservarse?** Todos los reconocidos por V1 listados en Compatibilidad.
+13. **¿Duplicidades resueltas?** Sí: gift/gifts, photo, planter, entrada/salida, canopy/tent y objetos vs áreas homónimas.
+14. **¿Contrato para Fase 3?** Objeto JS simple con identidad, categoría, defaults, forma, familia espacial, capacidades y comportamiento.
+
+## Cierre de Fase 2
+
+La Fase 2 termina aquí.
+
+No se implementa todavía:
+
+- catálogo único en código;
+- nuevos botones;
+- categorías visuales/acordeones;
+- búsqueda o filtros;
+- cambios en móvil;
+- nuevos types en parser;
+- motor poligonal;
+- Toldo;
+- vértices;
+- migraciones;
+- Firebase/Firestore;
+- cambios de datos.
