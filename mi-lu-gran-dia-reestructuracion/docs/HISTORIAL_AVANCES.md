@@ -811,3 +811,10 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Esto permite reconocer casos como “Dichavate / Ya ice dilan” frente a la ficha de catálogo con múltiples artistas, conservando intacto el texto RSVP original.
 - El enriquecimiento sigue siendo solo visual en memoria; no cambia Firebase, Firestore, Storage, RSVP ni datos reales.
 - Se incrementan music-catalog a v2 y Música JS a v5 para invalidar caché.
+
+## 2026-09-26 — Música: bloque de álbum siempre visible en responsive
+- El bloque ÁLBUM deja de depender de que exista una coincidencia de catálogo para renderizarse.
+- Cuando existe coincidencia se muestra el nombre real del álbum; cuando aún no existe, se muestra “Pendiente de identificar” en el mismo espacio.
+- Esto evita que la tarjeta móvil cambie de estructura o parezca incompleta mientras el catálogo responde o cuando no existe coincidencia.
+- El estado pendiente usa una presentación visual secundaria sin ocultar la sección.
+- Se incrementan Música JS a v6 y CSS a v8 para invalidar caché; no se modifica RSVP, Firebase ni datos reales.
