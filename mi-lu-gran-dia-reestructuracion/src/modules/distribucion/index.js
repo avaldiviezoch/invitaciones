@@ -538,22 +538,7 @@ function renderPhysicalElement(element) {
   label.textContent = definition.label;
   node.append(label);
 
-  if (element.type !== 'area' && elementCapabilities(element).resizable) {
-    [
-      ['nw', -1, -1],
-      ['ne', 1, -1],
-      ['se', 1, 1],
-      ['sw', -1, 1]
-    ].forEach(([corner, xSign, ySign]) => {
-      const handle = document.createElement('span');
-      handle.className = `distribution-resize-handle is-${corner}`;
-      handle.dataset.distributionResizeHandle = corner;
-      handle.dataset.resizeX = String(xSign);
-      handle.dataset.resizeY = String(ySign);
-      handle.setAttribute('aria-hidden', 'true');
-      node.append(handle);
-    });
-  }
+
   return node;
 }
 
