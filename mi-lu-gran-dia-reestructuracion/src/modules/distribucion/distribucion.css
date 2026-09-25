@@ -163,3 +163,11 @@
   .distribution-table-rotation-handle{top:-46px;width:30px;height:30px;font-size:28px}
   .distribution-table-rotation-stem{top:-32px;height:32px}
 }
+
+.distribution-element-rotation-guide{position:absolute;left:50%;top:50%;z-index:8;display:none;box-sizing:border-box;width:100%;height:100%;transform:translate(-50%,-50%);pointer-events:none}
+.distribution-element.is-selected:not(.is-moving):not(.is-locked)>.distribution-element-rotation-guide{display:block}
+.distribution-element-rotation-stem{position:absolute;left:50%;top:-28px;width:1px;height:28px;transform:translateX(-50%);background:rgba(156,100,112,.42);pointer-events:none}
+.distribution-element-rotation-handle{position:absolute;left:50%;top:-40px;width:24px;height:24px;transform:translate(-50%,-50%);display:grid;place-items:center;box-sizing:border-box;border:0;border-radius:50%;background:transparent;color:rgba(173,116,128,.8);font-size:22px;font-weight:500;line-height:1;cursor:grab;pointer-events:auto;touch-action:none;text-shadow:0 1px 3px rgba(93,62,68,.12)}
+.distribution-element-rotation-handle::before{content:"↻";display:block;transform:rotate(calc(-1 * var(--element-rotation,0deg)));transform-origin:50% 50%}
+.distribution-element.is-rotating .distribution-element-rotation-handle{cursor:grabbing;color:rgba(173,116,128,.8)}
+@media(max-width:700px){.distribution-element-rotation-handle{top:-46px;width:30px;height:30px;font-size:28px}.distribution-element-rotation-stem{top:-32px;height:32px}}
