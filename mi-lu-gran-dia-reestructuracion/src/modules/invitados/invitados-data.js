@@ -110,4 +110,16 @@ async function saveInvitadosSnapshot(context, canonical) {
   return { canonicalValue, sharedValue };
 }
 
-export { GUEST_STORAGE_KEY, SHARED_STORAGE_KEY, loadInvitadosSnapshot, saveInvitadosSnapshot };
+async function updateCanonicalTable(context, tableId, mutateTable) {
+  if (typeof mutateTable !== 'function') throw new Error('La actualización de mesa no es válida.');
+  const snapshot = await loadInvitadosSnapshot(context);
+  const targetId = String(tableId || '').trim();
+  const table = snapshot.canonical.tables.find((item) => String(item?.id || '').trim() === targetId);
+  if (!table) throw new Error('La mesa ya no existe en la información actual.');
+  mutateTable(table);
+  table.updatedAt = new Date().toISOString();
+  await saveInvitadosSnapshot(context, snapshot.canonical);
+  return { ...table, dimensions: table.dimensions && typeof table.dimensions === 'object' ? { ...table.dimensions } : undefined };
+}
+
+export { GUEST_STORAGE_KEY, SHARED_STORAGE_KEY, loadInvitadosSnapshot, saveInvitadosSnapshot, updateCanonicalTable };
