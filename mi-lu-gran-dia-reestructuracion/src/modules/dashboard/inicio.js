@@ -629,7 +629,7 @@ const MODULES = Object.freeze({
     mount: 'mountInvitaciones'
   },
   musica: {
-    load: () => import('../musica/index.js?v=1'),
+    load: () => import('../musica/index.js?v=2'),
     mount: 'mountMusica'
   }
 });

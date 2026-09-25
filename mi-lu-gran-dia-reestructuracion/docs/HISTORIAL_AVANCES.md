@@ -763,3 +763,13 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Si no existe coincidencia suficiente o la API falla, la tarjeta conserva exactamente el texto RSVP original y sigue funcionando sin portada.
 - Las portadas enlazan al contenido de Apple; no se guardan en Storage, Firestore ni localStorage.
 - Spotify queda pendiente de una integración backend segura: su Web API requiere OAuth y las credenciales de aplicación no deben exponerse en GitHub Pages.
+
+## 2026-09-26 — Música: estabilización del catálogo externo
+- Se crea `src/services/music-catalog.js` como único adaptador del catálogo musical externo.
+- La consulta a iTunes Search deja de ejecutarse con `fetch` directo desde la UI y pasa a JSONP compatible con navegación cross-site.
+- El adaptador usa caché solo en memoria, timeout, cleanup y una cola espaciada para evitar ráfagas de solicitudes.
+- Música conserva las respuestas RSVP como fuente canónica; portada, título oficial, artista, álbum y enlace son únicamente enriquecimiento visual.
+- Las tarjetas se actualizan progresivamente a medida que responde el catálogo, con portada más visible y estados diferenciados entre búsqueda y resultado sin coincidencia.
+- Se elimina el estado permanente “Buscando coincidencia…” cuando la consulta ya terminó.
+- Se incrementan las versiones de carga del JS/CSS de Música para evitar servir la implementación anterior desde caché.
+- No se modifica Firebase, Firestore, Storage, Auth, reglas, usuarios, documentos, colecciones, `customData.mgdMusic`, Wedding ni las invitaciones públicas.

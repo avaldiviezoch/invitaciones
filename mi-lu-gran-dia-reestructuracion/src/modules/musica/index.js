@@ -1,8 +1,7 @@
 import { loadRsvpAdminSnapshot } from '../../services/rsvp-admin.js?v=5';
+import { searchMusicCatalog } from '../../services/music-catalog.js?v=1';
 
 let activeMusicCleanup=null;
-const catalogCache=new Map();
-const CATALOG_LIMIT=5;
 const esc=(value)=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
 const text=(value)=>String(value??'').trim();
 const normalize=(value)=>text(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').replace(/\s+/g,' ');
@@ -36,23 +35,17 @@ function publicUrl(snapshot){
   const token=text(snapshot?.token);
   return token?`https://avaldiviezoch.github.io/Wedding/rsvp.html?token=${encodeURIComponent(token)}&view=music`:'';
 }
-function appleArtwork(url){return text(url).replace('100x100bb','160x160bb').replace('100x100-75','160x160-75');}
-async function searchAppleCatalog(item,signal){
-  const query=[item.title,item.artist].filter(Boolean).join(' ');if(!query)return null;
-  const key=normalize(query);if(catalogCache.has(key))return catalogCache.get(key);
-  const url=new URL('https://itunes.apple.com/search');url.searchParams.set('term',query);url.searchParams.set('country','PE');url.searchParams.set('media','music');url.searchParams.set('entity','song');url.searchParams.set('limit',String(CATALOG_LIMIT));
-  try{const response=await fetch(url,{signal});if(!response.ok)throw new Error('catalog');const data=await response.json();const wantedTitle=normalize(item.title),wantedArtist=normalize(item.artist);const candidates=(data.results||[]).filter(x=>x.kind==='song');const scored=candidates.map(x=>{const title=normalize(x.trackName),artist=normalize(x.artistName);let score=0;if(title===wantedTitle)score+=6;else if(title.includes(wantedTitle)||wantedTitle.includes(title))score+=3;if(wantedArtist){if(artist===wantedArtist)score+=5;else if(artist.includes(wantedArtist)||wantedArtist.includes(artist))score+=2}return {x,score}}).sort((a,b)=>b.score-a.score);const best=scored[0];const result=best&&best.score>=3?{trackId:String(best.x.trackId||''),title:text(best.x.trackName),artist:text(best.x.artistName),album:text(best.x.collectionName),artwork:appleArtwork(best.x.artworkUrl100),url:text(best.x.trackViewUrl),score:best.score}:null;catalogCache.set(key,result);return result}catch(error){if(error?.name==='AbortError')throw error;return null}
-}
 function card(item){
   const people=[...new Set(item.requests.map(r=>r.person).filter(Boolean))];
   const messages=item.requests.filter(r=>r.message);
   const catalog=item.catalog;
+  const catalogDone=Boolean(item.catalogDone);
   const visual=catalog?.artwork
     ? `<a class="music-admin-cover" href="${esc(catalog.url)}" target="_blank" rel="noopener" aria-label="Abrir ${esc(catalog.title)} en Apple Music"><img src="${esc(catalog.artwork)}" alt="Portada de ${esc(catalog.album||catalog.title)}" loading="lazy"></a>`
     : '<span class="music-admin-note" aria-hidden="true">♫</span>';
   return `<article class="music-admin-card">
     ${visual}
-    <div class="music-admin-song"><div><h3>${esc(catalog?.title||item.title)}</h3>${item.count>1?`<b>${item.count} solicitudes</b>`:''}</div><p>${esc(catalog?.artist||item.artist||'Artista no indicado')}</p>${catalog?`<a class="music-admin-catalog-link" href="${esc(catalog.url)}" target="_blank" rel="noopener"><span>Apple Music</span>${catalog.album?` · ${esc(catalog.album)}`:''} ↗</a>`:'<small class="music-admin-catalog-state">Buscando coincidencia…</small>'}</div>
+    <div class="music-admin-song"><div><h3>${esc(catalog?.title||item.title)}</h3>${item.count>1?`<b>${item.count} solicitudes</b>`:''}</div><p>${esc(catalog?.artist||item.artist||'Artista no indicado')}</p>${catalog?`${catalog.album?`<small class="music-admin-catalog-album">${esc(catalog.album)}</small>`:''}<a class="music-admin-catalog-link" href="${esc(catalog.url)}" target="_blank" rel="noopener"><span>Abrir canción</span> ↗</a>`:catalogDone?'<small class="music-admin-catalog-state is-done">Sin coincidencia en catálogo · se conserva la solicitud original</small>':'<small class="music-admin-catalog-state is-loading"><i aria-hidden="true"></i>Buscando portada y datos…</small>'}</div>
     <div class="music-admin-people"><span>SOLICITADA POR</span><strong>${esc(people.join(', ')||'Invitado')}</strong>${messages.length?`<small>“${esc(messages[0].message)}”${messages.length>1?` · +${messages.length-1} dedicatoria${messages.length===2?'':'s'}`:''}</small>`:'<small>Sin dedicatoria</small>'}</div>
   </article>`;
 }
@@ -68,7 +61,7 @@ export async function mountMusica(context){
   const list=root.querySelector('[data-music-list]'),state=root.querySelector('[data-music-state]'),open=root.querySelector('[data-music-open-public]');
 
   function render(){
-    const entries=entriesFrom(snapshot),groups=groupedEntries(entries);groups.forEach(group=>{const key=normalize(group.title)+'|'+normalize(group.artist);const enriched=catalogGroups.find(x=>x.key===key);if(enriched)group.catalog=enriched.catalog});
+    const entries=entriesFrom(snapshot),groups=groupedEntries(entries);groups.forEach(group=>{const key=normalize(group.title)+'|'+normalize(group.artist);const enriched=catalogGroups.find(x=>x.key===key);if(enriched){group.catalog=enriched.catalog;group.catalogDone=true}});
     const people=new Set(entries.map(item=>item.responseId||item.person)).size;
     const needle=normalize(search);
     const visible=groups.filter(item=>!needle||normalize([item.title,item.artist,...item.requests.map(r=>r.person)].join(' ')).includes(needle));
@@ -88,7 +81,7 @@ export async function mountMusica(context){
   async function enrichCatalog(){
     const current=++catalogEpoch;const groups=groupedEntries(entriesFrom(snapshot));
     if(!groups.length){catalogGroups=[];return}
-    const queue=[...groups];const enriched=[];const workers=Array.from({length:Math.min(3,queue.length)},async()=>{while(queue.length){const item=queue.shift();const catalog=await searchAppleCatalog(item,signal);if(current!==catalogEpoch)return;enriched.push({key:normalize(item.title)+'|'+normalize(item.artist),catalog})}});await Promise.all(workers);if(current!==catalogEpoch)return;catalogGroups=enriched;render();
+    const queue=[...groups];const enriched=[];const workers=Array.from({length:Math.min(3,queue.length)},async()=>{while(queue.length){const item=queue.shift();const catalog=await searchMusicCatalog(item,signal);if(current!==catalogEpoch)return;enriched.push({key:normalize(item.title)+'|'+normalize(item.artist),catalog});catalogGroups=[...enriched];render()}});await Promise.all(workers);if(current!==catalogEpoch)return;catalogGroups=[...enriched];render();
   }
   async function load(announce=false){
     const current=++epoch;if(announce)state.textContent='Actualizando solicitudes…';
