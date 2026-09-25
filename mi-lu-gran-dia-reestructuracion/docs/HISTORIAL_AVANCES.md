@@ -695,3 +695,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - index.js elimina las definiciones trasladadas y queda en 3,118 líneas; spatial-geometry.js tiene 239 líneas.
 - No existe motor duplicado: index.js solo importa y consume las funciones extraídas.
 - Sin cambios de algoritmos, escala, UI, listeners, catálogo, persistencia, Firebase/Firestore, datos canónicos, propuestas o sincronización.
+
+
+## 2026-09-25 — Distribución Fase 14: listeners y cleanup
+- Auditoría: 2 listeners globales, 2 suscripciones cloud, 1 cámara y recursos temporales requerían cleanup; los listeners locales viven en nodos reemplazables y no necesitan desmontaje manual individual.
+- Hallazgo: activeDistributionCleanup se asignaba al final del montaje, dejando una ventana de inicialización donde una excepción podía ocurrir después de adquirir recursos y antes de registrar su liberación completa.
+- Se implementa un registro cleanup por montaje, idempotente y LIFO; cada recurso externo registra su liberación cuando se adquiere.
+- Los 2 addEventListener globales tienen sus 2 removeEventListener; las 2 suscripciones tienen unsubscribe; setupDistributionCamera tiene un destroy registrado.
+- El catch limpia solo los recursos de su propio montaje, sin riesgo de desmontar una instancia posterior.
+- Sin nuevos listeners globales y sin cambios en UI, persistencia, Firebase/Firestore, catálogo, geometría, datos o comportamiento de sincronización.
