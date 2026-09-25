@@ -11,7 +11,7 @@ import {
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=6';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { setupDistributionCamera } from './camera.js?v=9';
-import { getCatalogItem, resolveCatalogType } from './distribution-catalog.js?v=1';
+import { getCatalogItem, getVisibleCatalogGroups, resolveCatalogType } from './distribution-catalog.js?v=2';
 import {
   DEFAULT_BACKGROUND_ID,
   addDistributionBackground,
@@ -22,7 +22,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=56', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=57', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 1;
@@ -807,23 +807,55 @@ async function mountDistribucion(context) {
   const templateHtml = await template();
   if (epoch !== mountEpoch || !root.isConnected) return;
   root.innerHTML = templateHtml;
-  root.querySelectorAll('[data-distribution-add-element]').forEach((button) => {
-    const definition = getCatalogItem(button.dataset.distributionAddElement);
-    if (!definition) return;
-    const dimensions = definition.shape === 'circle' && definition.dimensions.widthM === definition.dimensions.heightM
-      ? `Ø ${definition.dimensions.widthM.toFixed(2)} m`
-      : `${definition.dimensions.widthM.toFixed(2)} × ${definition.dimensions.heightM.toFixed(2)} m`;
+  const catalogHost = root.querySelector('[data-distribution-tool-catalog]');
+  const catalogSearch = root.querySelector('[data-distribution-catalog-search]');
+  const catalogGroups = getVisibleCatalogGroups();
+  const catalogButtons = [];
+  const createCatalogButton = (definition) => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.distributionAddElement = definition.type;
     button.setAttribute('aria-label', definition.label);
-    button.replaceChildren();
+    button.title = definition.label;
     const icon = document.createElement('strong');
     icon.textContent = definition.icon;
-    const text = document.createElement('span');
-    text.textContent = definition.label;
-    const size = document.createElement('small');
-    size.textContent = dimensions;
-    text.append(size);
-    button.append(icon, text);
+    icon.setAttribute('aria-hidden', 'true');
+    const label = document.createElement('span');
+    label.textContent = definition.label;
+    button.append(icon, label);
+    catalogButtons.push({ button, definition });
+    return button;
+  };
+  catalogGroups.forEach((group, groupIndex) => {
+    const details = document.createElement('details');
+    details.className = 'distribution-tool-group';
+    details.open = groupIndex === 0;
+    details.dataset.catalogCategory = group.id;
+    const summary = document.createElement('summary');
+    const label = document.createElement('span');
+    label.textContent = group.label;
+    const count = document.createElement('small');
+    count.textContent = group.items.length + ' objetos';
+    summary.append(label, count);
+    const list = document.createElement('div');
+    list.className = 'distribution-tool-list';
+    group.items.forEach((definition) => list.append(createCatalogButton(definition)));
+    details.append(summary, list);
+    catalogHost.append(details);
   });
+  const filterCatalog = () => {
+    const query = escapeText(catalogSearch?.value).toLocaleLowerCase('es');
+    catalogButtons.forEach(({ button, definition }) => {
+      const searchable = [definition.label, ...definition.aliases].join(' ').toLocaleLowerCase('es');
+      button.hidden = Boolean(query) && !searchable.includes(query);
+    });
+    catalogHost.querySelectorAll('[data-catalog-category]').forEach((details) => {
+      const visible = [...details.querySelectorAll('[data-distribution-add-element]')].filter((button) => !button.hidden);
+      details.hidden = visible.length === 0;
+      if (query && visible.length) details.open = true;
+    });
+  };
+  catalogSearch?.addEventListener('input', filterCatalog);
   const status = root.querySelector('[data-distribution-status]');
   const canEdit = weddingCapabilities(context?.role).canEdit;
   status.textContent = 'Cargando mesas y distribución…';
@@ -914,15 +946,38 @@ async function mountDistribucion(context) {
       mobileSheetBody.replaceChildren();
 
       if (action === 'add') {
-        [...root.querySelectorAll('[data-distribution-add-element]')].forEach((sourceButton) => {
-          const type = escapeText(sourceButton.dataset.distributionAddElement);
-          const definition = getCatalogItem(type);
-          if (!definition) return;
-          addMobileButton(definition.label, () => {
-            sourceButton.click();
-            closeMobileSheet();
+        const mobileCatalog = document.createElement('div');
+        mobileCatalog.className = 'distribution-mobile-catalog';
+        getVisibleCatalogGroups().forEach((group, groupIndex) => {
+          const details = document.createElement('details');
+          details.className = 'distribution-mobile-catalog-group';
+          details.open = groupIndex === 0;
+          const summary = document.createElement('summary');
+          summary.textContent = group.label + ' · ' + group.items.length;
+          const list = document.createElement('div');
+          list.className = 'distribution-mobile-catalog-grid';
+          group.items.forEach((definition) => {
+            const sourceButton = root.querySelector('[data-distribution-add-element="' + CSS.escape(definition.type) + '"]');
+            if (!sourceButton) return;
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.setAttribute('aria-label', definition.label);
+            const icon = document.createElement('strong');
+            icon.textContent = definition.icon;
+            icon.setAttribute('aria-hidden', 'true');
+            const label = document.createElement('span');
+            label.textContent = definition.label;
+            button.append(icon, label);
+            button.addEventListener('click', () => {
+              sourceButton.click();
+              closeMobileSheet();
+            });
+            list.append(button);
           });
+          details.append(summary, list);
+          mobileCatalog.append(details);
         });
+        mobileSheetBody.append(mobileCatalog);
       } else if (action === 'proposal') {
         const proposalName = proposalSelect?.selectedOptions?.[0]?.textContent || 'Propuesta activa';
         const note = document.createElement('p');

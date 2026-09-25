@@ -751,3 +751,32 @@ La incorporación reutiliza las rutas genéricas existentes de creación, dimens
 Se comprobó por inspección del contrato que los 11 nuevos types resuelven mediante `getCatalogItem()`, tienen dimensiones canónicas y capabilities físicas comunes. `couple` sigue siendo mobiliario espacial y no una mesa canónica; `exit` permanece separado de `entrance`; `cocktail` conserva forma circular.
 
 No se modificaron Firebase, Firestore, Storage, Auth, reglas, IDs, claves ni estructura V1.
+
+
+---
+
+# Fase 5 — Presentación del catálogo
+
+## Solución elegida
+
+El catálogo ordinario deja de mantener 37 botones escritos en HTML y pasa a renderizarse desde `distribution-catalog.js`. El contrato sigue siendo la única fuente de `type`, label, icono, aliases, dimensiones y capacidades. La presentación añade únicamente un orden explícito de categorías y objetos para evitar depender del orden accidental del objeto JavaScript.
+
+## Desktop
+
+El panel conserva su ubicación lateral real de 210 px (180 px en el breakpoint intermedio). Se utiliza un grid compacto de dos columnas dentro de categorías colapsables; solo la primera inicia abierta. Los botones muestran icono y nombre corto, sin repetir dimensiones. Se añade una búsqueda pequeña por label y aliases porque 37 objetos ya hacen costoso recorrer visualmente siete grupos.
+
+## Móvil
+
+Se conserva el bottom sheet y la acción Añadir ya existentes. Al abrir Añadir, el contenido se genera desde los mismos grupos del catálogo y se presenta como categorías colapsables con grid táctil de dos columnas. Al elegir un objeto se reutiliza el mismo botón/flujo genérico de creación y el sheet se cierra para volver al lienzo. No se crea catálogo móvil paralelo ni se modifica la rueda existente.
+
+## Categorías visibles
+
+Se respetan las categorías ordinarias aprobadas que tienen objetos expuestos: Mesas y mobiliario (8), Comida y atención (5), Celebración y experiencias (6), Decoración (5), Infraestructura / recinto (8), Vegetación (4) y Seguridad / circulación (1). La octava categoría aprobada, Áreas dibujables, permanece fuera de este catálogo porque corresponde a la fase posterior y no contiene objetos ordinarios expuestos.
+
+Total: **37/38 objetos ordinarios visibles**. `chair` continúa excluido. `circulation`, `restricted` y `zone` permanecen en sus controles legacy y no se absorben en el catálogo ordinario.
+
+## Validación
+
+Validación estática/lógica: los 37 types visibles se derivan de `getVisibleCatalogGroups()`; cada botón obtiene label/icono/type desde su definición canónica; la creación sigue usando `createElement()` y las dimensiones del catálogo. Se verificó que no existen botones ordinarios hardcodeados en el template, catálogo móvil manual, metadata física duplicada ni `!important` nuevo.
+
+No se realizó validación interactiva real en navegador en esta sesión; la revisión visual se basó en la estructura HTML/CSS y breakpoints existentes. No se modificaron Firebase, Firestore, Storage, Auth, persistencia V1, canvas, geometría, propuestas ni el motor de áreas.

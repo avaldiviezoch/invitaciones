@@ -79,6 +79,34 @@ if (Object.keys(DISTRIBUTION_OBJECT_CATALOG).length !== 38) {
   throw new Error('El catálogo ordinario de Distribución debe contener exactamente 38 objetos.');
 }
 
+const CATALOG_CATEGORY_PRESENTATION = Object.freeze([
+  Object.freeze({ id: 'furniture', label: 'Mesas y mobiliario' }),
+  Object.freeze({ id: 'food-service', label: 'Comida y atención' }),
+  Object.freeze({ id: 'celebration', label: 'Celebración y experiencias' }),
+  Object.freeze({ id: 'decoration', label: 'Decoración' }),
+  Object.freeze({ id: 'venue', label: 'Infraestructura / recinto' }),
+  Object.freeze({ id: 'vegetation', label: 'Vegetación' }),
+  Object.freeze({ id: 'safety-circulation', label: 'Seguridad / circulación' })
+]);
+
+const CATALOG_OBJECT_ORDER = Object.freeze([
+  'couple', 'cake', 'gifts', 'guestbook', 'welcome', 'favors', 'cocktail', 'supplier',
+  'bar', 'buffet', 'drinks', 'desserts', 'snacks',
+  'dance', 'dj', 'screen', 'photo', 'booth360', 'mirror',
+  'altar', 'arch', 'backdrop', 'sign', 'divider',
+  'stage', 'canopy', 'entrance', 'exit', 'restroom', 'kitchen', 'technical', 'column',
+  'plantSmall', 'plant', 'tree', 'planter',
+  'extinguisher'
+]);
+
+function getVisibleCatalogGroups() {
+  const visible = CATALOG_OBJECT_ORDER.map((type) => DISTRIBUTION_OBJECT_CATALOG[type]).filter(Boolean);
+  return CATALOG_CATEGORY_PRESENTATION.map((category) => Object.freeze({
+    ...category,
+    items: Object.freeze(visible.filter((item) => item.category === category.id))
+  })).filter((group) => group.items.length);
+}
+
 const TYPE_ALIASES = Object.freeze(Object.fromEntries(
   Object.values(DISTRIBUTION_OBJECT_CATALOG)
     .flatMap((item) => item.aliases.map((alias) => [alias, item.type]))
@@ -97,6 +125,7 @@ function getCatalogItem(type) {
 export {
   DISTRIBUTION_OBJECT_CATALOG,
   LEGACY_AREA_CATALOG,
+  getVisibleCatalogGroups,
   getCatalogItem,
   resolveCatalogType
 };

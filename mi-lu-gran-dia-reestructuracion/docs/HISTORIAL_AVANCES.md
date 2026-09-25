@@ -603,3 +603,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - circulation, restricted y zone permanecen legacy compatibles; no se implementa el motor de áreas ni Toldo poligonal.
 - canopy continúa rectangular 6 × 6 m y exit permanece separado de entrance.
 - Sin cambios en Firebase/Firestore, Storage, Auth, claves, IDs ni persistencia V1.
+
+
+## 2026-09-25 — Distribución Fase 5: presentación data-driven del catálogo
+- Se eliminan los 37 botones ordinarios hardcodeados del template; desktop renderiza el catálogo desde distribution-catalog.js.
+- Se centraliza únicamente el orden de presentación de las siete categorías ordinarias visibles y sus objetos; la categoría Áreas dibujables permanece reservada para la fase posterior.
+- Desktop usa categorías colapsables, grid compacto de dos columnas y búsqueda simple por label/aliases.
+- Móvil conserva el bottom sheet existente y genera las mismas categorías/objetos desde la misma fuente, sin lista móvil paralela.
+- Se mantienen 37/38 objetos expuestos; chair continúa sin botón y circulation/restricted/zone permanecen legacy.
+- No se modifica Firebase/Firestore, Storage, Auth, persistencia V1, canvas, geometría ni motor de áreas.
