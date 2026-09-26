@@ -866,3 +866,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Desktop y móvil consumen el mismo `catalogResult` y el mismo markup; no se modifica el responsive ni la persistencia.
 - Se incrementan music-catalog a v6 y Música JS a v11 para invalidar caché.
 
+
+## 2026-09-26 — Iconos originales en cabeceras de módulos
+- Se sustituyen los caracteres usados como iconos de cabecera por los PNG originales existentes en `Wedding/invitaciones/invitacion_0/assets`.
+- Mapeo aplicado: Checklist → checklist.png; Presupuesto → presupuesto_app.png; Proveedores → proveedores.png; Invitados → invitados.png; Distribución → dsitribucion.png; Cronograma → cronograma.png; Invitaciones → invitacion.png; Música → musica.png.
+- Los iconos se consumen desde la ruta pública estable de Wedding y no se duplican dentro de la reestructuración.
+- Se conserva la misma caja visual, alineación y responsive de cada cabecera; no se añaden reglas CSS, parches ni implementaciones paralelas.
+- Se actualizan únicamente versiones de carga para invalidar caché.
+- Sin cambios en Firebase, Firestore, Storage, Authentication, usuarios, persistencia ni datos reales.
+
