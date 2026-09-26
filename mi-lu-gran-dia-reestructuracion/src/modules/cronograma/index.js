@@ -413,7 +413,7 @@ async function mountCronograma(context){
   root.innerHTML='<div class="timeline-loading">Cargando Cronograma…</div>';
   try{
     const [template,stored]=await Promise.all([
-      fetch(new URL('./index.html?v=1',import.meta.url)).then((response)=>{if(!response.ok) throw new Error('No se pudo cargar la interfaz.');return response.text();}),
+      fetch(new URL('./index.html?v=2',import.meta.url)).then((response)=>{if(!response.ok) throw new Error('No se pudo cargar la interfaz.');return response.text();}),
       readPlannerStorageKey(context,STORAGE_KEY)
     ]);
     if(epoch!==mountEpoch||activeContext?.id!==context.id) return false;
