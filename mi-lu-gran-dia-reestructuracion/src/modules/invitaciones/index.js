@@ -48,7 +48,7 @@ export async function mountInvitaciones() {
   const controller = new AbortController();
   const { signal } = controller;
 
-  const response = await fetch('src/modules/invitaciones/index.html?v=1', { cache: 'no-store' });
+  const response = await fetch('src/modules/invitaciones/index.html?v=2', { cache: 'no-store' });
   if (!response.ok) throw new Error('No se pudo cargar la vista de Invitaciones.');
   root.innerHTML = await response.text();
 
