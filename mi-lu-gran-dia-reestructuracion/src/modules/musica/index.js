@@ -55,7 +55,7 @@ export async function mountMusica(context){
   activeMusicCleanup?.();
   const controller=new AbortController(),{signal}=controller;
   let snapshot=null,search='',epoch=0,catalogEpoch=0,catalogGroups=[];
-  const response=await fetch('src/modules/musica/index.html?v=1',{cache:'no-store'});
+  const response=await fetch('src/modules/musica/index.html?v=2',{cache:'no-store'});
   if(!response.ok)throw new Error('No se pudo cargar la interfaz de Música.');
   root.innerHTML=await response.text();
   const list=root.querySelector('[data-music-list]'),state=root.querySelector('[data-music-state]'),open=root.querySelector('[data-music-open-public]');
