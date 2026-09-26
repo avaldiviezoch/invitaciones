@@ -605,7 +605,7 @@ const MODULES = Object.freeze({
     mount: 'mountChecklist'
   },
   presupuesto: {
-    load: () => import('../presupuesto/index.js?v=13'),
+    load: () => import('../presupuesto/index.js?v=14'),
     mount: 'mountPresupuesto'
   },
   proveedores: {
