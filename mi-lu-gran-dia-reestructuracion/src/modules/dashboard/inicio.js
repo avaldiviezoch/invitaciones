@@ -601,35 +601,35 @@ const pendingModuleMounts = new Map();
 
 const MODULES = Object.freeze({
   checklist: {
-    load: () => import('../checklist/index.js?v=16'),
+    load: () => import('../checklist/index.js?v=17'),
     mount: 'mountChecklist'
   },
   presupuesto: {
-    load: () => import('../presupuesto/index.js?v=12'),
+    load: () => import('../presupuesto/index.js?v=13'),
     mount: 'mountPresupuesto'
   },
   proveedores: {
-    load: () => import('../proveedores/index.js?v=6'),
+    load: () => import('../proveedores/index.js?v=7'),
     mount: 'mountProveedores'
   },
   invitados: {
-    load: () => import('../invitados/index.js?v=32'),
+    load: () => import('../invitados/index.js?v=33'),
     mount: 'mountInvitados'
   },
   distribucion: {
-    load: () => import('../distribucion/index.js?v=115'),
+    load: () => import('../distribucion/index.js?v=116'),
     mount: 'mountDistribucion'
   },
   cronograma: {
-    load: () => import('../cronograma/index.js?v=5'),
+    load: () => import('../cronograma/index.js?v=6'),
     mount: 'mountCronograma'
   },
   invitaciones: {
-    load: () => import('../invitaciones/index.js?v=1'),
+    load: () => import('../invitaciones/index.js?v=2'),
     mount: 'mountInvitaciones'
   },
   musica: {
-    load: () => import('../musica/index.js?v=11'),
+    load: () => import('../musica/index.js?v=12'),
     mount: 'mountMusica'
   }
 });
