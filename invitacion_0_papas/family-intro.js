@@ -17,9 +17,9 @@
     { duration:4800, text:'Y aunque muchas veces<br>no hayan estado de acuerdo…', photos:['papas2.jpg'], mode:'single' },
     { duration:4700, text:'<strong>juntos construyeron<br>algo realmente hermoso.</strong>', photos:['papas.jpg','papas2.jpg'], mode:'duo' },
     { duration:5200, text:'<strong>Ustedes dos crearon una gran familia,</strong><br>rodeada de hijos y nietos,<br>a quienes queremos muchísimo.', photos:['papaymanolo.jpg','mamaykaren.jpg','manolo1.jpg','karencitas.jpg'], mode:'collage' },
-    { duration:5600, text:'Y esperamos que, así como han acompañado<br>nuestra historia hasta hoy,<br>también nos acompañen en esta nueva etapa<br>que estamos por comenzar.', photos:['hermanos.jpg','gemelos1.jpg','manolitos.jpg','manolitos2.jpg'], mode:'collage' },
+    { duration:5600, text:'Y esperamos que, así como han acompañado<br>nuestra historia hasta hoy,<br>también nos acompañen en esta nueva etapa<br>que estamos por comenzar.', photos:['manolitos2.jpg','gemelos1.jpg','manolitos.jpg','manolitos2.jpg'], mode:'collage' },
     { duration:5200, text:'<strong>Esta es la familia<br>que ustedes comenzaron.</strong>', photos:['FAMILIA.jpg','FAMILIA%202.JPG','papacontoos.jpg'], mode:'collage' },
-    { duration:3200, kicker:'Y ahora…', text:'esa historia también nos acompaña', photos:['papacontoos.jpg'], mode:'single' },
+    { duration:3200, kicker:'Y ahora…', text:'esa historia también nos acompaña', photos:['hermanos.jpg'], mode:'single' },
     { duration:5000, text:'en uno de los días más importantes<br>de nuestras vidas.', photos:['FAMILIA%202.JPG'], mode:'single' },
     { duration:6200, kicker:'Gracias', text:'por ser parte de nuestra historia.<br><strong>Lucero &amp; Antonio</strong>', photos:['antonioylucero.jpeg'], mode:'final' }
   ];
