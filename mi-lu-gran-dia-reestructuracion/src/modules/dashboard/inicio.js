@@ -58,7 +58,7 @@ function syncEntrySurface() {
     heroVideo?.removeAttribute('autoplay');
     return;
   }
-  if (heroVideo && auth.currentUser) {
+  if (heroVideo) {
     heroVideo.preload = 'auto';
     heroVideo.play().catch(() => {});
   }
