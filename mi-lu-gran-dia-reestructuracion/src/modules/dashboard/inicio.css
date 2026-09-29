@@ -779,7 +779,7 @@ body.menu-open .menu-button svg {
   transform:translate(calc(-50% - min(210px,14.5vw)),-50%);
   display:none;
   grid-template-columns:repeat(12,minmax(0,1fr));
-  grid-template-rows:250px 250px;
+  grid-template-rows:240px 270px;
   align-content:center;
   gap:14px;
   color:#f4f1eb;
@@ -886,9 +886,9 @@ body.menu-open .menu-button svg {
   margin:12px auto 8px
 }
 .checklist-ring {
-  width:132px;
-  height:132px;
-  margin:14px auto 12px
+  width:128px;
+  height:128px;
+  margin:10px auto 8px
 }
 .budget-ring {
   width:175px;
@@ -914,10 +914,11 @@ body.menu-open .menu-button svg {
 .home-caption {
   display:grid;
   grid-template-columns:1fr 1fr;
-  gap:10px
+  gap:8px;
+  margin-top:2px
 }
 .home-caption span {
-  padding:10px 8px;
+  padding:9px 8px;
   border-radius:15px;
   background:rgba(255,255,255,.045);
   border:1px solid rgba(255,255,255,.07);
