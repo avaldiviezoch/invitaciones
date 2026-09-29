@@ -116,6 +116,54 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('pageshow', tryPlayHeroVideo);
 
+const discoverOverlay = $('discoverOverlay');
+const discoverSlides = [...document.querySelectorAll('[data-discover-slide]')];
+const discoverDots = $('discoverDots');
+const discoverNextButton = $('discoverNextButton');
+const discoverSkipButton = $('discoverSkipButton');
+let discoverIndex = 0;
+let discoverSeenThisSession = false;
+
+function renderDiscover() {
+  discoverSlides.forEach((slide, index) => slide.classList.toggle('is-active', index === discoverIndex));
+  [...(discoverDots?.children || [])].forEach((dot, index) => dot.classList.toggle('is-active', index === discoverIndex));
+  if (discoverNextButton) discoverNextButton.textContent = discoverIndex === discoverSlides.length - 1 ? 'Entrar a Migrandia' : (discoverIndex === 0 ? 'Descubrir Migrandia' : 'Continuar');
+}
+
+function openDiscover() {
+  if (!discoverOverlay || discoverSeenThisSession) return;
+  discoverSeenThisSession = true;
+  discoverIndex = 0;
+  discoverOverlay.hidden = false;
+  renderDiscover();
+}
+
+function closeDiscover() {
+  if (discoverOverlay) discoverOverlay.hidden = true;
+}
+
+if (discoverDots) {
+  discoverSlides.forEach((_, index) => {
+    const dot = document.createElement('button');
+    dot.type = 'button';
+    dot.setAttribute('aria-label', `Ir a la pantalla ${index + 1}`);
+    dot.addEventListener('click', () => {
+      discoverIndex = index;
+      renderDiscover();
+    });
+    discoverDots.append(dot);
+  });
+}
+discoverNextButton?.addEventListener('click', () => {
+  if (discoverIndex < discoverSlides.length - 1) {
+    discoverIndex += 1;
+    renderDiscover();
+    return;
+  }
+  closeDiscover();
+});
+discoverSkipButton?.addEventListener('click', closeDiscover);
+
 function setMenu(open) {
   document.body.classList.toggle('menu-open', open);
   menu.setAttribute('aria-expanded', String(open));
@@ -481,6 +529,7 @@ $('logoutButton').onclick = async () => {
 onAuthStateChanged(auth, async (user) => {
   document.body.classList.toggle('auth-locked', !user);
   if (!user) {
+    openDiscover();
     applyWeddingContext(null);
     setWeddingSwitcher(false);
     closeModuleWorkspace();
