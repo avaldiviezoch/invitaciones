@@ -695,15 +695,21 @@ body.menu-open .menu-button svg {
   }
   .drawer {
     width:100%;
+    overflow-x:hidden;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:touch;
     border-left:0;
     background:transparent;
     backdrop-filter:none;
     box-shadow:none
   }
   .drawer-content {
+    flex:0 0 auto;
     max-width:520px;
     width:100%;
-    margin:auto
+    min-height:auto;
+    margin:0 auto;
+    overflow:visible
   }
 
 }
