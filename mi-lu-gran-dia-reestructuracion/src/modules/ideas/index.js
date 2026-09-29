@@ -1,1 +1,168 @@
-const TEMPLATE_URL=new URL('./index.html?v=1',import.meta.url);let templatePromise=null;const state={items:[],filter:'all',search:''};function esc(v=''){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}async function template(){if(!templatePromise)templatePromise=fetch(TEMPLATE_URL).then(r=>{if(!r.ok)throw new Error('No se pudo cargar Ideas.');return r.text()});return templatePromise}function render(root){const board=root.querySelector('[data-ideas-board]'),empty=root.querySelector('[data-ideas-empty]');const q=state.search.trim().toLowerCase();const items=state.items.filter(x=>(state.filter==='all'||x.type===state.filter)&&(!q||[x.title,x.category,x.notes].join(' ').toLowerCase().includes(q)));board.innerHTML=items.map(x=>`<article class="ideas-card"><div class="ideas-card-media" ${x.image?`style="background-image:url('&quot;${esc(x.image)}&quot;')"`:''}></div><div class="ideas-card-body"><div class="ideas-card-meta"><span>${esc(x.category)}</span><span>${x.type==='purchase'?'Compra':'Inspiración'}</span></div><h3>${esc(x.title)}</h3>${x.notes?`<p>${esc(x.notes)}</p>`:''}${x.price?`<strong class="ideas-card-price">S/ ${Number(x.price).toFixed(2)}</strong>`:''}</div></article>`).join('');empty.hidden=items.length>0}export async function mountIdeas(){const root=document.querySelector('[data-module-view="ideas"]');if(!root||root.dataset.mounted==='true')return false;root.innerHTML=await template();root.dataset.mounted='true';const dialog=root.querySelector('[data-ideas-dialog]'),form=root.querySelector('[data-ideas-form]');root.querySelectorAll('[data-ideas-open-form]').forEach(b=>b.onclick=()=>dialog.showModal());root.querySelectorAll('[data-ideas-close]').forEach(b=>b.onclick=()=>dialog.close());root.querySelectorAll('[data-ideas-filter]').forEach(b=>b.onclick=()=>{state.filter=b.dataset.ideasFilter;root.querySelectorAll('[data-ideas-filter]').forEach(x=>x.classList.toggle('is-active',x===b));render(root)});root.querySelector('[data-ideas-search]').oninput=e=>{state.search=e.currentTarget.value;render(root)};form.onsubmit=e=>{e.preventDefault();const title=form.querySelector('[data-ideas-title]').value.trim();if(!title){form.querySelector('[data-ideas-title]').focus();return}state.items.unshift({id:crypto.randomUUID(),title,type:form.querySelector('[data-ideas-type]').value,category:form.querySelector('[data-ideas-category]').value,price:form.querySelector('[data-ideas-price]').value,image:form.querySelector('[data-ideas-image]').value.trim(),url:form.querySelector('[data-ideas-url]').value.trim(),notes:form.querySelector('[data-ideas-notes]').value.trim()});form.reset();dialog.close();render(root)};render(root);return true}
+import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js';
+
+const TEMPLATE_URL = new URL('./index.html?v=2', import.meta.url);
+const STORAGE_KEY = 'planificador_bodas_ideas_v1';
+let templatePromise = null;
+let cleanup = () => {};
+
+const state = { items: [], filter: 'all', search: '', context: null };
+
+function escapeHtml(value = '') {
+  return String(value).replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+  })[character]);
+}
+
+function normalizeUrl(value = '') {
+  const text = String(value || '').trim();
+  if (!text) return '';
+  try {
+    const url = new URL(text);
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+  } catch {
+    return '';
+  }
+}
+
+function imageFromProductUrl(value = '') {
+  const source = normalizeUrl(value);
+  if (!source) return '';
+  try {
+    const url = new URL(source);
+    const candidates = ['top_gallery_url', 'thumb_url', '_web_cover'];
+    for (const key of candidates) {
+      const candidate = normalizeUrl(url.searchParams.get(key));
+      if (candidate) return candidate;
+    }
+  } catch {}
+  return '';
+}
+
+function normalizeItems(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((item) => ({
+    id: String(item?.id || crypto.randomUUID()),
+    title: String(item?.title || '').trim(),
+    type: item?.type === 'purchase' ? 'purchase' : 'inspiration',
+    category: String(item?.category || 'Otros'),
+    price: Math.max(0, Number(item?.price || 0)),
+    image: normalizeUrl(item?.image),
+    url: normalizeUrl(item?.url),
+    notes: String(item?.notes || '').trim()
+  })).filter((item) => item.title);
+}
+
+async function loadTemplate() {
+  if (!templatePromise) templatePromise = fetch(TEMPLATE_URL).then((response) => {
+    if (!response.ok) throw new Error('No se pudo cargar Ideas.');
+    return response.text();
+  });
+  return templatePromise;
+}
+
+function render(root) {
+  const board = root.querySelector('[data-ideas-board]');
+  const empty = root.querySelector('[data-ideas-empty]');
+  const query = state.search.trim().toLowerCase();
+  const items = state.items.filter((item) =>
+    (state.filter === 'all' || item.type === state.filter)
+    && (!query || [item.title, item.category, item.notes].join(' ').toLowerCase().includes(query))
+  );
+
+  board.innerHTML = items.map((item) => {
+    const image = item.image ? `<img class="ideas-card-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '<div class="ideas-card-placeholder" aria-hidden="true"></div>';
+    const link = item.url ? `<a class="ideas-card-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">Ver enlace</a>` : '';
+    return `<article class="ideas-card">${image}<div class="ideas-card-body"><div class="ideas-card-meta"><span>${escapeHtml(item.category)}</span><span>${item.type === 'purchase' ? 'Compra' : 'Inspiración'}</span></div><h3>${escapeHtml(item.title)}</h3>${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ''}${item.price ? `<strong class="ideas-card-price">S/ ${item.price.toFixed(2)}</strong>` : ''}${link}</div></article>`;
+  }).join('');
+  empty.hidden = items.length > 0;
+}
+
+async function persist(root) {
+  const status = root.querySelector('[data-ideas-status]');
+  try {
+    if (status) status.textContent = 'Guardando…';
+    await writePlannerStorageKey(state.context, STORAGE_KEY, state.items);
+    if (status) status.textContent = 'Guardado';
+  } catch (error) {
+    if (status) status.textContent = error?.message || 'No se pudo guardar';
+    throw error;
+  }
+}
+
+export async function mountIdeas(context) {
+  const root = document.querySelector('[data-module-view="ideas"]');
+  if (!root || root.dataset.mounted === 'true') return false;
+  root.innerHTML = await loadTemplate();
+  root.dataset.mounted = 'true';
+  state.context = context;
+  state.items = normalizeItems(await readPlannerStorageKey(context, STORAGE_KEY));
+
+  const dialog = root.querySelector('[data-ideas-dialog]');
+  const form = root.querySelector('[data-ideas-form]');
+  const urlInput = form.querySelector('[data-ideas-url]');
+  const imageInput = form.querySelector('[data-ideas-image]');
+
+  root.querySelectorAll('[data-ideas-open-form]').forEach((button) => {
+    button.onclick = () => dialog.showModal();
+  });
+  root.querySelectorAll('[data-ideas-close]').forEach((button) => {
+    button.onclick = () => dialog.close();
+  });
+  root.querySelectorAll('[data-ideas-filter]').forEach((button) => {
+    button.onclick = () => {
+      state.filter = button.dataset.ideasFilter;
+      root.querySelectorAll('[data-ideas-filter]').forEach((item) => item.classList.toggle('is-active', item === button));
+      render(root);
+    };
+  });
+  root.querySelector('[data-ideas-search]').oninput = (event) => {
+    state.search = event.currentTarget.value;
+    render(root);
+  };
+
+  urlInput.onchange = () => {
+    if (imageInput.value.trim()) return;
+    const image = imageFromProductUrl(urlInput.value);
+    if (image) imageInput.value = image;
+  };
+
+  form.onsubmit = async (event) => {
+    event.preventDefault();
+    const titleInput = form.querySelector('[data-ideas-title]');
+    const title = titleInput.value.trim();
+    if (!title) {
+      titleInput.focus();
+      return;
+    }
+    const url = normalizeUrl(urlInput.value);
+    const image = normalizeUrl(imageInput.value) || imageFromProductUrl(url);
+    const item = {
+      id: crypto.randomUUID(),
+      title,
+      type: form.querySelector('[data-ideas-type]').value,
+      category: form.querySelector('[data-ideas-category]').value,
+      price: Math.max(0, Number(form.querySelector('[data-ideas-price]').value || 0)),
+      image,
+      url,
+      notes: form.querySelector('[data-ideas-notes]').value.trim()
+    };
+    state.items.unshift(item);
+    render(root);
+    try {
+      await persist(root);
+      form.reset();
+      dialog.close();
+    } catch {
+      state.items = state.items.filter((current) => current.id !== item.id);
+      render(root);
+    }
+  };
+
+  cleanup();
+  cleanup = subscribePlannerStorageKey(context, STORAGE_KEY, (value) => {
+    state.items = normalizeItems(value);
+    render(root);
+  });
+  render(root);
+  return true;
+}
