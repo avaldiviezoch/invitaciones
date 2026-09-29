@@ -33,8 +33,10 @@
   function initPreIntro() {
     if (!preIntro || !preIntroVideo) return;
 
+    const ORIGINAL_ENTRY_VIDEO = 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/video_entrada.mp4#t=0.001';
     let playRequested = false;
     let started = false;
+    let phase = 'special';
 
     preIntroVideo.controls = false;
     preIntroVideo.muted = false;
@@ -65,7 +67,6 @@
 
       try {
         preIntroVideo.currentTime = 0;
-
         await preIntroVideo.play();
       } catch (_) {
         started = false;
@@ -76,10 +77,45 @@
     const requestPlayback = event => {
       if (event?.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') return;
       event?.preventDefault();
+      if (playRequested) return;
+
       playRequested = true;
       showLoader();
       preIntroVideo.load();
       tryStart();
+    };
+
+    const playOriginalEntry = async () => {
+      phase = 'entry';
+      started = true;
+      showLoader();
+
+      preIntroVideo.pause();
+      preIntroVideo.src = ORIGINAL_ENTRY_VIDEO;
+      preIntroVideo.load();
+
+      const startEntryWhenReady = async () => {
+        try {
+          preIntroVideo.currentTime = 0;
+          await preIntroVideo.play();
+          hideLoader();
+        } catch (_) {
+          showLoader();
+        }
+      };
+
+      if (preIntroVideo.readyState >= HTMLMediaElement.HAVE_FUTURE_DATA) {
+        await startEntryWhenReady();
+      } else {
+        preIntroVideo.addEventListener('canplay', startEntryWhenReady, { once:true });
+      }
+    };
+
+    const finishIntroSequence = () => {
+      preIntro.hidden = true;
+      closeEntry();
+      startFirstEntrance();
+      startSakeDeBinks();
     };
 
     preIntroVideo.addEventListener('loadedmetadata', tryStart);
@@ -89,14 +125,14 @@
     preIntroVideo.addEventListener('waiting', showLoader);
     preIntroVideo.addEventListener('stalled', showLoader);
 
-    preIntroVideo.addEventListener('ended', async () => {
-      preIntro.hidden = true;
-      try {
-        await entryVideo?.play();
-      } catch (_) {
-        // Si iOS exige un segundo gesto, la capa de entrada original queda disponible.
+    preIntroVideo.addEventListener('ended', () => {
+      if (phase === 'special') {
+        playOriginalEntry();
+        return;
       }
-    }, { once:true });
+
+      finishIntroSequence();
+    });
 
     preIntro.addEventListener('click', requestPlayback);
     preIntro.addEventListener('keydown', requestPlayback);
@@ -301,18 +337,7 @@
   if (entryVideo) {
     entryVideo.controls = false;
     entryVideo.muted = false;
-    entryVideo.addEventListener('ended', onEntryEnded, { once:true });
-  } else {
-    closeEntry();
-    startFirstEntrance();
   }
-
-  entryLayer?.addEventListener('click', startEntry);
-  entryLayer?.addEventListener('keydown', event => {
-    if (event.key !== 'Enter' && event.key !== ' ') return;
-    event.preventDefault();
-    startEntry();
-  });
 
   if (rsvpHost) rsvpHost.setAttribute('data-mgd-rsvp-token', RSVP_TOKEN);
   if (musicHost) musicHost.setAttribute('data-mgd-music-token', RSVP_TOKEN);
