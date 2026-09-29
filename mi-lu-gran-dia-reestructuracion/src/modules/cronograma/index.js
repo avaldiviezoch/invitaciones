@@ -76,9 +76,25 @@ function durationLabel(minutes){
   const hours=Math.floor(minutes/60), rest=minutes%60;
   return rest?`${hours} h ${rest} min`:`${hours} h`;
 }
-function sortedRecords(){
-  return state.events.map((record,index)=>({record,index,order:eventOrder(record,index),time:eventTime(record)}))
+function sortedRecords(source=state){
+  return source.events.map((record,index)=>({record,index,order:eventOrder(record,index),time:eventTime(record)}))
     .sort((a,b)=>a.order-b.order||a.time.localeCompare(b.time)||a.index-b.index);
+}
+
+function summarizeCronogramaValue(value) {
+  const source=normalizeStored(value);
+  const counts=source.events.reduce((acc,record)=>{acc[normalizedStatus(valueOf(record,'status'))]+=1;return acc;},{pending:0,progress:0,completed:0});
+  const ordered=sortedRecords(source);
+  const next=ordered.find(({record})=>normalizedStatus(valueOf(record,'status'))!=='completed')||ordered[0]||null;
+  return {
+    total:source.events.length,
+    pending:counts.pending,
+    progress:counts.progress,
+    completed:counts.completed,
+    percent:source.events.length?Math.round(counts.completed*100/source.events.length):0,
+    nextTitle:next?eventTitle(next.record)||'Actividad sin título':'Sin eventos',
+    nextTime:next?eventTime(next.record)||'—':'—'
+  };
 }
 function canUseTime(value){ return /^([01]\d|2[0-3]):[0-5]\d$/.test(String(value||'').slice(0,5)); }
 
@@ -432,4 +448,4 @@ async function mountCronograma(context){
   }
 }
 
-export { mountCronograma };
+export { STORAGE_KEY as TIMELINE_STORAGE_KEY, summarizeCronogramaValue, mountCronograma };
