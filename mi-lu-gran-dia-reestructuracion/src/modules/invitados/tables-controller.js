@@ -1,4 +1,4 @@
-import { saveInvitadosSnapshot, tableCapacity } from './invitados-data.js?v=6';
+import { saveInvitadosSnapshot, tableCapacity } from './invitados-data.js?v=7';
 import {
   MIN_TABLE_METERS,
   MAX_TABLE_METERS,
