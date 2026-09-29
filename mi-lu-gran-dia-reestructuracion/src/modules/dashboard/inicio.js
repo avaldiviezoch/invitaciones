@@ -57,7 +57,7 @@ let calendarCursor = new Date();
 let homeSummaryEpoch = 0;
 const heroVideo = $('heroVideo');
 const heroSurface = document.querySelector('.app');
-const MODULE_HASHES = new Set(['#checklist', '#presupuesto', '#proveedores', '#invitados', '#distribucion', '#cronograma', '#invitaciones', '#musica']);
+const MODULE_HASHES = new Set(['#checklist', '#presupuesto', '#proveedores', '#invitados', '#distribucion', '#cronograma', '#invitaciones', '#musica', '#ideas']);
 let heroPlaybackTimer = 0;
 
 function isDirectModuleRoute() {
@@ -988,6 +988,10 @@ const MODULES = Object.freeze({
   musica: {
     load: () => import('../musica/index.js?v=12'),
     mount: 'mountMusica'
+  },
+  ideas: {
+    load: () => import('../ideas/index.js?v=1'),
+    mount: 'mountIdeas'
   }
 });
 
