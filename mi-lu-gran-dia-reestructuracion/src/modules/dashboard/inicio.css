@@ -985,8 +985,73 @@ body.menu-open .menu-button svg {
 .home-tables-scroll {
   flex:1;
   min-height:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center
+}
+.home-mini-tables {
   display:grid;
-  place-items:center
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:12px;
+  align-content:center;
+  max-height:390px;
+  overflow:auto;
+  padding:4px 2px;
+  scrollbar-width:none
+}
+.home-mini-tables::-webkit-scrollbar {
+  display:none
+}
+.home-mini-table {
+  min-width:0;
+  display:grid;
+  place-items:center;
+  padding:6px
+}
+.home-mini-table-top {
+  width:100%;
+  min-height:78px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+  padding:9px 8px;
+  border:1px solid rgba(255,255,255,.13);
+  background:linear-gradient(145deg,rgba(197,174,141,.16),rgba(255,255,255,.035));
+  box-shadow:inset 0 1px rgba(255,255,255,.12),0 8px 18px rgba(0,0,0,.14);
+  text-align:center
+}
+.home-mini-table.is-round .home-mini-table-top {
+  width:92px;
+  min-height:92px;
+  border-radius:50%;
+  padding:8px
+}
+.home-mini-table.is-square .home-mini-table-top {
+  width:92px;
+  min-height:92px;
+  border-radius:16px
+}
+.home-mini-table.is-rectangular .home-mini-table-top {
+  border-radius:18px
+}
+.home-mini-table-top strong {
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#eee7dd;
+  font-size:10px
+}
+.home-mini-table-top b {
+  color:#ddc8aa;
+  font-size:18px;
+  line-height:1
+}
+.home-mini-table-top small {
+  color:#a9a39a;
+  font-size:8px
 }
 .home-empty {
   text-align:center;
