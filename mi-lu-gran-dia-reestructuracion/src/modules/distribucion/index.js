@@ -34,7 +34,7 @@ import {
   writeDistributionBackgroundPreference
 } from './background-catalog.js?v=3';
 
-const TEMPLATE_URL = new URL('./index.html?v=60', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=61', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 1;
@@ -2729,6 +2729,8 @@ async function mountDistribucion(context) {
       applyVisibilityLayer('hide-elements', event.currentTarget.checked, 'element');
     };
     const referenceToggle = root.querySelector('[data-distribution-show-reference]');
+    const backgroundButton = root.querySelector('[data-distribution-background-button]');
+    const backgroundControls = root.querySelector('[data-distribution-background-controls]');
     const referenceCatalog = root.querySelector('[data-distribution-reference-catalog]');
     const referenceFile = root.querySelector('[data-distribution-reference-file]');
     const referenceRemove = root.querySelector('[data-distribution-reference-remove]');
@@ -2778,6 +2780,11 @@ async function mountDistribucion(context) {
     world.classList.toggle('hide-reference-image', !referencePreference.visible);
     await refreshReferenceCatalog(referencePreference.backgroundId);
     if (epoch !== mountEpoch || !root.isConnected) return;
+
+    backgroundButton.onclick = () => {
+      backgroundControls?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      referenceCatalog?.focus({ preventScroll: true });
+    };
 
     referenceCatalog.onchange = async () => {
       await applyReferenceBackground(referenceCatalog.value);
