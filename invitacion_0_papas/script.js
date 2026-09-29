@@ -38,7 +38,7 @@
     let started = false;
     const foreverYoung = new Audio(FOREVER_YOUNG_URL);
     foreverYoung.preload = 'auto';
-    foreverYoung.volume = 0.30;
+    foreverYoung.volume = 0.06;
 
     preIntroVideo.controls = false;
     preIntroVideo.muted = false;
