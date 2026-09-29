@@ -1,6 +1,6 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { auth } from '../../services/firebase-client.js';
-import { readPlannerStorageKeys } from '../../services/planner-cloud.js?v=4';
+import { readPlannerStorageKeys, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
 import { GUEST_STORAGE_KEY, summarizeInvitadosValue } from '../invitados/invitados-data.js?v=7';
 import { CHECKLIST_STORAGE_KEY, summarizeChecklistValue } from '../checklist/index.js?v=18';
 import { BUDGET_STORAGE_KEY, summarizeBudgetValue } from '../presupuesto/index.js?v=15';
@@ -133,6 +133,56 @@ let discoverIndex = 0;
 let discoverSeenThisSession = false;
 const discoverAnswers = { role:'', stage:'', priorities:new Set(), guests:'', dateStatus:'', date:'', budgetStatus:'', budget:'' };
 
+const ONBOARDING_BUDGET_GUEST_MAP = {'menos-50':40,'50-100':75,'100-150':125,'mas-150':175};
+
+function onboardingBudgetNumber(value) {
+  const normalized = String(value || '').replace(/[^0-9.,]/g, '').replaceAll(',', '');
+  const number = Number(normalized);
+  return Number.isFinite(number) && number >= 0 ? number : 0;
+}
+
+async function applyOnboardingToWedding(context) {
+  if (!context?.id) return context;
+  let nextContext = context;
+  if (discoverAnswers.dateStatus === 'si' && /^\d{4}-\d{2}-\d{2}$/.test(discoverAnswers.date)) {
+    nextContext = await updateWeddingIdentity(nextContext, { date: discoverAnswers.date });
+  }
+
+  const guestCount = ONBOARDING_BUDGET_GUEST_MAP[discoverAnswers.guests] || 0;
+  const totalBudget = discoverAnswers.budgetStatus === 'definido' ? onboardingBudgetNumber(discoverAnswers.budget) : 0;
+  if (guestCount || totalBudget) {
+    const values = await readPlannerStorageKeys(nextContext, [BUDGET_STORAGE_KEY]);
+    const current = values[BUDGET_STORAGE_KEY] && typeof values[BUDGET_STORAGE_KEY] === 'object' ? values[BUDGET_STORAGE_KEY] : {};
+    const currentSettings = current.settings && typeof current.settings === 'object' ? current.settings : {};
+    await writePlannerStorageKey(nextContext, BUDGET_STORAGE_KEY, {
+      ...current,
+      settings: {
+        ...currentSettings,
+        ...(totalBudget ? { totalBudget } : {}),
+        ...(guestCount ? { guestCount } : {}),
+        currency: ['PEN','USD','EUR'].includes(currentSettings.currency) ? currentSettings.currency : 'PEN'
+      }
+    });
+  }
+  return nextContext;
+}
+
+async function finishOnboardingForNewUser(user) {
+  const weddings = await listWeddingContexts(user);
+  if (weddings.length) {
+    const context = await loadActiveWeddingContext(user);
+    applyWeddingContext(context);
+    return context;
+  }
+  const context = await createWedding({
+    name: user.displayName ? `Boda de ${String(user.displayName).split(/\s+/)[0]}` : 'Mi boda',
+    date: discoverAnswers.dateStatus === 'si' ? discoverAnswers.date : ''
+  });
+  const configured = await applyOnboardingToWedding(context);
+  applyWeddingContext(configured);
+  return configured;
+}
+
 function discoverAnswerLabel(name, value) {
   const labels = {
     role:{novia:'Novia',novio:'Novio',pareja:'Somos la pareja',organiza:'Ayudo a organizar'},
@@ -222,7 +272,10 @@ document.querySelectorAll('[data-answer]').forEach((button) => {
   });
 });
 
-discoverDateInput?.addEventListener('change', () => { discoverAnswers.date = discoverDateInput.value; });
+discoverDateInput?.addEventListener('change', () => {
+  discoverAnswers.date = discoverDateInput.value;
+  if (discoverAnswers.date) window.setTimeout(() => moveDiscover(1), 170);
+});
 discoverBudgetInput?.addEventListener('input', () => {
   discoverAnswers.budget = discoverBudgetInput.value.trim();
   discoverAnswers.budgetStatus = discoverAnswers.budget ? 'definido' : '';
@@ -566,7 +619,9 @@ $('authCloseButton').onclick = () => setAuth(false);
 $('emailLoginButton').onclick = async () => {
   status.textContent = 'Ingresando…';
   try {
-    await signInWithEmailAndPassword(auth, email.value.trim(), password.value);
+    const credential = await signInWithEmailAndPassword(auth, email.value.trim(), password.value);
+    const weddings = await listWeddingContexts(credential.user);
+    if (!weddings.length && discoverSeenThisSession) await finishOnboardingForNewUser(credential.user);
     setAuth(false);
     setMenu(true);
   } catch (error) {
@@ -581,8 +636,17 @@ $('googleLoginButton').onclick = async () => {
   try {
     const result = await signInWithPopup(auth, provider);
     if (result?.user) {
-      setAuth(false);
-      setMenu(true);
+      status.textContent = 'Preparando tu boda…';
+      try {
+        const weddings = await listWeddingContexts(result.user);
+        if (!weddings.length && discoverSeenThisSession) {
+          await finishOnboardingForNewUser(result.user);
+        }
+        setAuth(false);
+        setMenu(true);
+      } catch (setupError) {
+        status.textContent = setupError?.message || 'Ingresaste correctamente, pero no se pudo terminar la configuración.';
+      }
     }
   } catch (error) {
     const code = String(error?.code || '');
