@@ -7,3 +7,6 @@
 .ideas-card{position:relative}
 .ideas-card-delete{position:absolute;top:9px;right:9px;z-index:2;display:grid;width:28px;height:28px;padding:0;place-items:center;border:1px solid rgba(60,58,52,.12);border-radius:50%;background:rgba(255,255,255,.92);color:#5d5953;font-size:18px;line-height:1;box-shadow:0 4px 12px rgba(45,42,36,.12);cursor:pointer}
 .ideas-card-delete:hover{background:#fff;color:#9b4f4f}
+
+.ideas-card-edit{position:absolute;top:9px;right:45px;z-index:2;height:28px;padding:0 10px;border:1px solid rgba(60,58,52,.12);border-radius:14px;background:rgba(255,255,255,.92);color:#5d5953;font-size:8px;font-weight:800;box-shadow:0 4px 12px rgba(45,42,36,.1);cursor:pointer}
+.ideas-card-edit:hover{background:#fff;color:#65704f}
