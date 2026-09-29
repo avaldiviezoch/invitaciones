@@ -1427,3 +1427,8 @@ body.menu-open .menu-button svg {
  .discover-next{grid-column:1/3;grid-row:2}
  .discover-summary{grid-template-columns:1fr 1fr}
 }
+
+/* Iconos personalizados del onboarding: imágenes libres, sin pastilla ni fondo */
+.discover-icon-slot{border:0;background:transparent;overflow:visible}
+.discover-icon-slot img{width:100%;height:100%;display:block;object-fit:contain;filter:drop-shadow(0 7px 10px rgba(0,0,0,.18));pointer-events:none}
+.discover-options button:hover .discover-icon-slot,.discover-options button.is-selected .discover-icon-slot,.discover-unknown.is-selected .discover-icon-slot{background:transparent}
