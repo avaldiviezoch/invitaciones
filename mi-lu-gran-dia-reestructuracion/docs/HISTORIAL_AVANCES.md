@@ -893,3 +893,11 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se respetan los tipos de mesa round, square y rectangular para la forma visual de cada mini mesa.
 - Sin !important, sin cambios de esquema, Firebase Rules, Storage, Authentication, usuarios ni datos persistentes.
 
+
+
+## 2026-09-29 — Fase 3 · Ideas (base visual)
+- Se crea `src/modules/ideas/` con solo tres archivos propietarios: estructura, estilos y orquestador.
+- Tablero visual tipo Pinterest para inspiración y compras, filtros, búsqueda y alta en memoria.
+- El formulario admite enlace, nombre, tipo, categoría, precio, miniatura y notas.
+- Sin Firebase, Firestore, Storage, localStorage, IndexedDB ni cambios de contratos. La persistencia e integración de metadatos de enlaces quedan para una fase autorizada.
+- Se registra Ideas en el shell sin inventar icono; el icono personalizado se incorporará después.
