@@ -171,3 +171,7 @@
 .distribution-element-rotation-handle::before{content:"↻";display:block;transform:rotate(calc(-1 * var(--element-rotation,0deg)));transform-origin:50% 50%}
 .distribution-element.is-rotating .distribution-element-rotation-handle{cursor:grabbing;color:rgba(173,116,128,.8)}
 @media(max-width:700px){.distribution-element-rotation-handle{top:-46px;width:30px;height:30px;font-size:28px}.distribution-element-rotation-stem{top:-32px;height:32px}}
+
+.distribution-background-button{height:34px;padding:0 12px;border:1px solid rgba(127,137,98,.24);border-radius:10px;background:#eef1e8;color:#65704f;font-size:8px;font-weight:850;cursor:pointer}
+.distribution-background-button:hover{border-color:rgba(127,137,98,.42);background:#fff}
+.distribution-background-button:focus-visible{outline:2px solid rgba(127,137,98,.32);outline-offset:2px}
