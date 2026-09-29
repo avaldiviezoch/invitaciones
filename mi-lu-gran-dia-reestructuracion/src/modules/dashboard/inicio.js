@@ -120,14 +120,49 @@ const discoverOverlay = $('discoverOverlay');
 const discoverSlides = [...document.querySelectorAll('[data-discover-slide]')];
 const discoverDots = $('discoverDots');
 const discoverNextButton = $('discoverNextButton');
+const discoverBackButton = $('discoverBackButton');
 const discoverSkipButton = $('discoverSkipButton');
+const discoverMenuButton = $('discoverMenuButton');
+const discoverGoogleButton = $('discoverGoogleButton');
+const discoverEmailButton = $('discoverEmailButton');
+const discoverDateField = $('discoverDateField');
+const discoverDateInput = $('discoverDateInput');
+const discoverBudgetInput = $('discoverBudgetInput');
+const discoverSummary = $('discoverSummary');
 let discoverIndex = 0;
 let discoverSeenThisSession = false;
+const discoverAnswers = { role:'', stage:'', priorities:new Set(), guests:'', dateStatus:'', date:'', budgetStatus:'', budget:'' };
+
+function discoverAnswerLabel(name, value) {
+  const labels = {
+    role:{novia:'Novia',novio:'Novio',pareja:'Somos la pareja',organiza:'Ayudo a organizar'},
+    stage:{inicio:'Recién empezamos',algunas:'Ya tenemos algunas cosas',avanzado:'Vamos avanzados',final:'Últimos detalles'},
+    guests:{'menos-50':'Menos de 50','50-100':'50 – 100','100-150':'100 – 150','mas-150':'Más de 150','no-se':'Por definir'}
+  };
+  return labels[name]?.[value] || value;
+}
+
+function renderDiscoverSummary() {
+  if (!discoverSummary) return;
+  const items = [];
+  if (discoverAnswers.role) items.push(['Tu papel', discoverAnswerLabel('role', discoverAnswers.role)]);
+  if (discoverAnswers.stage) items.push(['Etapa', discoverAnswerLabel('stage', discoverAnswers.stage)]);
+  if (discoverAnswers.guests) items.push(['Invitados', discoverAnswerLabel('guests', discoverAnswers.guests)]);
+  if (discoverAnswers.priorities.size) items.push(['Primero', [...discoverAnswers.priorities].slice(0,3).join(' · ')]);
+  discoverSummary.innerHTML = items.map(([label,value]) => `<span><small>${label}</small><strong>${value}</strong></span>`).join('');
+}
 
 function renderDiscover() {
   discoverSlides.forEach((slide, index) => slide.classList.toggle('is-active', index === discoverIndex));
   [...(discoverDots?.children || [])].forEach((dot, index) => dot.classList.toggle('is-active', index === discoverIndex));
-  if (discoverNextButton) discoverNextButton.textContent = discoverIndex === discoverSlides.length - 1 ? 'Entrar a Migrandia' : (discoverIndex === 0 ? 'Descubrir Migrandia' : 'Continuar');
+  const slide = discoverSlides[discoverIndex];
+  const kind = slide?.dataset.discoverKind;
+  if (discoverBackButton) discoverBackButton.hidden = discoverIndex === 0;
+  if (discoverNextButton) {
+    discoverNextButton.hidden = kind === 'finish';
+    discoverNextButton.textContent = discoverIndex === 0 ? 'Descubrir Migrandia' : (kind === 'intro' ? 'Continuar' : 'Siguiente');
+  }
+  if (kind === 'finish') renderDiscoverSummary();
 }
 
 function openDiscover() {
@@ -142,6 +177,11 @@ function closeDiscover() {
   if (discoverOverlay) discoverOverlay.hidden = true;
 }
 
+function moveDiscover(delta) {
+  discoverIndex = Math.max(0, Math.min(discoverSlides.length - 1, discoverIndex + delta));
+  renderDiscover();
+}
+
 if (discoverDots) {
   discoverSlides.forEach((_, index) => {
     const dot = document.createElement('button');
@@ -154,15 +194,46 @@ if (discoverDots) {
     discoverDots.append(dot);
   });
 }
-discoverNextButton?.addEventListener('click', () => {
-  if (discoverIndex < discoverSlides.length - 1) {
-    discoverIndex += 1;
-    renderDiscover();
-    return;
-  }
-  closeDiscover();
+
+document.querySelectorAll('[data-answer]').forEach((button) => {
+  button.addEventListener('click', () => {
+    const name = button.dataset.answer;
+    const value = button.dataset.value;
+    if (name === 'priorities') {
+      const selected = discoverAnswers.priorities.has(value);
+      if (selected) discoverAnswers.priorities.delete(value);
+      else discoverAnswers.priorities.add(value);
+      button.classList.toggle('is-selected', !selected);
+      button.setAttribute('aria-pressed', String(!selected));
+      return;
+    }
+    if (name === 'dateStatus') {
+      discoverAnswers.dateStatus = value;
+      if (discoverDateField) discoverDateField.hidden = value !== 'si';
+    } else if (name === 'budgetStatus') {
+      discoverAnswers.budgetStatus = value;
+      if (discoverBudgetInput) discoverBudgetInput.value = '';
+      discoverAnswers.budget = '';
+    } else {
+      discoverAnswers[name] = value;
+    }
+    document.querySelectorAll(`[data-answer="${name}"]`).forEach((candidate) => candidate.classList.toggle('is-selected', candidate === button));
+    if (name !== 'dateStatus' || value === 'no') window.setTimeout(() => moveDiscover(1), 170);
+  });
 });
-discoverSkipButton?.addEventListener('click', closeDiscover);
+
+discoverDateInput?.addEventListener('change', () => { discoverAnswers.date = discoverDateInput.value; });
+discoverBudgetInput?.addEventListener('input', () => {
+  discoverAnswers.budget = discoverBudgetInput.value.trim();
+  discoverAnswers.budgetStatus = discoverAnswers.budget ? 'definido' : '';
+  document.querySelectorAll('[data-answer="budgetStatus"]').forEach((candidate) => candidate.classList.remove('is-selected'));
+});
+discoverNextButton?.addEventListener('click', () => moveDiscover(1));
+discoverBackButton?.addEventListener('click', () => moveDiscover(-1));
+discoverSkipButton?.addEventListener('click', () => { closeDiscover(); setAuth(true); });
+discoverMenuButton?.addEventListener('click', () => { closeDiscover(); setAuth(true); });
+discoverGoogleButton?.addEventListener('click', () => { closeDiscover(); $('googleLoginButton')?.click(); });
+discoverEmailButton?.addEventListener('click', () => { closeDiscover(); setAuth(true); window.setTimeout(() => email?.focus(), 0); });
 
 function setMenu(open) {
   document.body.classList.toggle('menu-open', open);
