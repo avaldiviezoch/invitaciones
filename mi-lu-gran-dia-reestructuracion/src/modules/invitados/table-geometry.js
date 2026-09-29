@@ -107,8 +107,9 @@ function tableSeatGeometry(type, capacity) {
   const shape = normalizeTableShape(type);
   const count = clamp(capacity, MIN_CAPACITY, MAX_CAPACITY);
   const table = tableVisualSize(shape, count);
-  const visualWidth = table.width + 172;
-  const visualHeight = table.height + 188;
+  const envelopes = ['round', 'square', 'rectangular'].map((candidate) => tableVisualSize(candidate, count));
+  const visualWidth = Math.max(...envelopes.map((item) => item.width)) + 172;
+  const visualHeight = Math.max(...envelopes.map((item) => item.height)) + 188;
   const centerX = visualWidth / 2;
   const centerY = visualHeight / 2;
   const positions = [];
