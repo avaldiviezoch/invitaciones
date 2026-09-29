@@ -20,7 +20,6 @@
   const musicBurst = document.getElementById('musicBurst');
   const closingWriting = document.getElementById('closingWriting');
   const SAKE_BINKS_URL = 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/sake_binks.mp3';
-  const FOREVER_YOUNG_URL = 'assets/Alphaville_-_Forever_Young_Video_Lyrics_(mp3.pm).mp3';
   const RSVP_TOKEN = '8c7e5b5c261e4b85ad15a220ca70e0cc66d1336feee740c08027d0c324646167';
   const RSVP_WIDGET_URL = 'https://avaldiviezoch.github.io/Wedding/app_integral/js/modules/invitados/rsvp-native-widget.js?v=20260820-5b2';
   const WEDDING_DATE = new Date('2027-01-16T00:00:00-05:00').getTime();
@@ -36,9 +35,6 @@
 
     let playRequested = false;
     let started = false;
-    const foreverYoung = new Audio(FOREVER_YOUNG_URL);
-    foreverYoung.preload = 'auto';
-    foreverYoung.volume = 0.06;
 
     preIntroVideo.controls = false;
     preIntroVideo.muted = false;
@@ -69,19 +65,10 @@
 
       try {
         preIntroVideo.currentTime = 0;
-        try {
-          foreverYoung.currentTime = 17;
-        } catch (_) {
-          foreverYoung.addEventListener('loadedmetadata', () => {
-            foreverYoung.currentTime = 17;
-          }, { once:true });
-        }
 
         await preIntroVideo.play();
-        foreverYoung.play().catch(() => {});
       } catch (_) {
         started = false;
-        foreverYoung.pause();
         showLoader();
       }
     };
@@ -103,8 +90,6 @@
     preIntroVideo.addEventListener('stalled', showLoader);
 
     preIntroVideo.addEventListener('ended', async () => {
-      foreverYoung.pause();
-      try { foreverYoung.currentTime = 17; } catch (_) {}
       preIntro.hidden = true;
       try {
         await entryVideo?.play();
