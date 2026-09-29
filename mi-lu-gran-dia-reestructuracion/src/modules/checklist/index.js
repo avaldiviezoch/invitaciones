@@ -137,13 +137,18 @@ function visibleTasks() {
     });
 }
 
-function summary() {
-  const total = state.tasks.length;
-  const completed = state.tasks.filter(isCompleted).length;
-  const progress = state.tasks.filter((task) => taskStatus(task) === 'progress').length;
-  const overdue = state.tasks.filter(isOverdue).length;
+function summarizeChecklistValue(value) {
+  const checklist = normalizedState(value);
+  const total = checklist.tasks.length;
+  const completed = checklist.tasks.filter(isCompleted).length;
+  const progress = checklist.tasks.filter((task) => taskStatus(task) === 'progress').length;
+  const overdue = checklist.tasks.filter(isOverdue).length;
   const pending = Math.max(0, total - completed - progress);
   return { total, completed, progress, overdue, pending, percent: total ? Math.round(completed * 100 / total) : 0 };
+}
+
+function summary() {
+  return summarizeChecklistValue(state);
 }
 
 function taskMarkup(task, index, editable) {
@@ -517,4 +522,4 @@ async function mountChecklist(context) {
   }
 }
 
-export { mountChecklist };
+export { STORAGE_KEY as CHECKLIST_STORAGE_KEY, summarizeChecklistValue, mountChecklist };
