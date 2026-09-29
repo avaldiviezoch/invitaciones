@@ -885,3 +885,11 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Los anillos de progreso usan una variable CSS de porcentaje sobre la implementación existente; no se agregó `!important`, CSS duplicado ni una segunda versión responsive.
 - No se modificaron Firebase Rules, Firestore schema, Storage, Authentication, usuarios, claves persistentes ni datos reales.
 
+## 2026-09-28 — Mini mesas en KPI de Distribución
+- El resumen de Distribución de la portada muestra cada mesa existente como una mini mesa visual con su nombre y la relación confirmados/capacidad.
+- La capacidad reutiliza la misma función canónica que usa el módulo Mesas; se eliminó la duplicación de esa regla en tables-controller.
+- Los confirmados por mesa se calculan exclusivamente desde los invitados canónicos asignados por tableId y con estado confirmed.
+- La portada sigue siendo solo lectura y no modifica mesas, sillas, RSVP ni asignaciones.
+- Se respetan los tipos de mesa round, square y rectangular para la forma visual de cada mini mesa.
+- Sin !important, sin cambios de esquema, Firebase Rules, Storage, Authentication, usuarios ni datos persistentes.
+
