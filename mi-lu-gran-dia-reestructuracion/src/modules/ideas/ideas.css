@@ -10,3 +10,9 @@
 
 .ideas-card-edit{position:absolute;top:9px;right:45px;z-index:2;height:28px;padding:0 10px;border:1px solid rgba(60,58,52,.12);border-radius:14px;background:rgba(255,255,255,.92);color:#5d5953;font-size:8px;font-weight:800;box-shadow:0 4px 12px rgba(45,42,36,.1);cursor:pointer}
 .ideas-card-edit:hover{background:#fff;color:#65704f}
+
+@media(max-width:700px){
+  .ideas-form input,.ideas-form select,.ideas-form textarea{font-size:16px}
+  .ideas-dialog{max-height:calc(100dvh - 20px);overflow:auto}
+  .ideas-form{padding:18px}
+}
