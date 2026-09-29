@@ -28,7 +28,7 @@
   if(moduleId==='checklist'||moduleId==='presupuesto'||moduleId==='proveedores'||moduleId==='invitados'||moduleId==='distribucion'||moduleId==='cronograma'||moduleId==='invitaciones'||moduleId==='musica') document.documentElement.classList.add('module-route');
 })();
 </script>
-<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=46">
+<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=47">
 <link rel="stylesheet" href="src/modules/checklist/checklist.css?v=19">
 <link rel="stylesheet" href="src/modules/presupuesto/presupuesto.css?v=27">
 <link rel="stylesheet" href="src/modules/proveedores/proveedores.css?v=4">
@@ -298,127 +298,89 @@ Fotos</span>
 </div>
 </article>
 </section>
-<section class="home-dashboard" id="homeDashboard" aria-label="Resumen de la boda" aria-hidden="true">
+<section class="home-dashboard" id="homeDashboard" aria-label="Resumen de la boda" aria-hidden="true" aria-busy="false">
 <article class="home-glass home-guests">
 <div class="home-head">
-<span>
-INVITADOS</span>
-<b>— / —</b>
+<span>INVITADOS</span>
+<b data-home-guests-ratio>— / —</b>
 </div>
-<div class="home-ring guest-ring">
+<div class="home-ring guest-ring" data-home-guests-ring>
 <div>
-<strong>
-—</strong>
+<strong data-home-guests-percent>—</strong>
 <small>confirmados</small>
 </div>
 </div>
 <div class="home-legend">
-<span>
-<i>
-</i>— confirmados</span>
-<span>
-<i>
-</i>— pendientes</span>
+<span><i></i><b data-home-guests-confirmed>—</b> confirmados</span>
+<span><i></i><b data-home-guests-pending>—</b> pendientes</span>
 </div>
 </article>
 <article class="home-glass home-checklist">
 <section class="home-split">
 <div class="home-head">
-<span>
-CHECKLIST</span>
-<b>— / —</b>
+<span>CHECKLIST</span>
+<b data-home-checklist-ratio>— / —</b>
 </div>
-<div class="home-ring checklist-ring">
+<div class="home-ring checklist-ring" data-home-checklist-ring>
 <div>
-<strong>
-—</strong>
+<strong data-home-checklist-percent>—</strong>
 <small>completado</small>
 </div>
 </div>
 <div class="home-caption">
-<span>
-<b>—</b> completadas</span>
-<span>
-<b>—</b> pendientes</span>
+<span><b data-home-checklist-completed>—</b> completadas</span>
+<span><b data-home-checklist-pending>—</b> pendientes</span>
 </div>
 </section>
 <section class="home-split home-timeline">
 <div class="home-head">
-<span>
-CRONOGRAMA</span>
-<b>— hitos</b>
+<span>CRONOGRAMA</span>
+<b data-home-timeline-total>— hitos</b>
 </div>
-<div class="home-ring timeline-ring">
+<div class="home-ring timeline-ring" data-home-timeline-ring>
 <div>
-<strong>
-—</strong>
+<strong data-home-wedding-date>—</strong>
 <small>fecha boda</small>
 </div>
 </div>
 <div class="home-next">
-<small>PRIMER EVENTO</small>
-<strong>
-Sin datos</strong>
-<span>
-—</span>
+<small>PRÓXIMO EVENTO</small>
+<strong data-home-timeline-next>Sin datos</strong>
+<span data-home-timeline-time>—</span>
 </div>
 </section>
 </article>
 <article class="home-glass home-budget">
 <div class="home-head">
-<span>
-PRESUPUESTO</span>
+<span>PRESUPUESTO</span>
 <b>Pagado vs. presupuestado</b>
 </div>
 <div class="home-budget-center">
-<div class="home-ring budget-ring">
+<div class="home-ring budget-ring" data-home-budget-ring>
 <div>
-<strong>
-—</strong>
+<strong data-home-budget-percent>—</strong>
 <small>pagado</small>
 </div>
 </div>
 <div class="home-budget-numbers">
-<span>
-<small>PAGADO</small>
-<strong>
-—</strong>
-</span>
-<span>
-<small>PRESUPUESTADO</small>
-<strong>
-—</strong>
-</span>
-<span>
-<small>SALDO</small>
-<strong>
-—</strong>
-</span>
+<span><small>PAGADO</small><strong data-home-budget-paid>—</strong></span>
+<span><small>PRESUPUESTADO</small><strong data-home-budget-total>—</strong></span>
+<span><small>SALDO</small><strong data-home-budget-balance>—</strong></span>
 </div>
 </div>
-<div class="home-progress">
-<i>
-</i>
-</div>
+<div class="home-progress"><i data-home-budget-progress></i></div>
 </article>
 <article class="home-glass home-tables">
 <div class="home-head">
-<span>
-DISTRIBUCIÓN DE MESAS</span>
-<b>— / — ubicadas</b>
+<span>DISTRIBUCIÓN DE MESAS</span>
+<b data-home-tables-ratio>— / — ubicadas</b>
 </div>
 <div class="home-table-summary">
-<strong>
-—</strong>
-<span>
-personas ya ubicadas<br>
-<b>de — confirmadas</b>
-</span>
+<strong data-home-tables-seated>—</strong>
+<span>personas confirmadas ubicadas<br><b data-home-tables-confirmed>de — confirmadas</b></span>
 </div>
 <div class="home-tables-scroll">
-<div class="home-empty">
-Sin datos todavía
-</div>
+<div class="home-empty" data-home-tables-note>Sin datos todavía</div>
 </div>
 </article>
 </section>
@@ -516,7 +478,7 @@ Cancelar
 <form class="create-wedding-card" id="createWeddingForm" hidden><h3>Crear una nueva boda</h3><label><span>Nombre de la boda</span><input id="newWeddingName" type="text" maxlength="90" placeholder="Ej. Antonio & Lucero" required></label><label><span>Fecha</span><input id="newWeddingDate" type="date"></label><div><button type="button" id="cancelCreateWedding">Cancelar</button><button type="submit">Crear y abrir</button></div><p id="createWeddingStatus" aria-live="polite"></p></form>
 </div>
 </section>
-<script type="module" src="src/modules/dashboard/inicio.js?v=214">
+<script type="module" src="src/modules/dashboard/inicio.js?v=215">
 </script>
 </body>
 </html>
