@@ -10,6 +10,14 @@ function cloneRecord(value) {
   return value && typeof value === 'object' ? { ...value } : {};
 }
 
+function guestStatus(guest) {
+  const status = String(guest?.status || '').trim().toLowerCase();
+  if (status === 'confirmed') return 'confirmed';
+  if (status === 'declined') return 'declined';
+  if (status === 'tentative') return 'tentative';
+  return 'pending';
+}
+
 function normalizeGuestState(value) {
   if (value === null || value === undefined || value === '') {
     return { mode: 'object', root: {}, guests: [], tables: [] };
@@ -89,6 +97,25 @@ function buildSharedState(canonical) {
   };
 }
 
+function summarizeInvitadosValue(value) {
+  const canonical = normalizeGuestState(value);
+  const guests = canonical.guests;
+  const confirmed = guests.filter((guest) => guestStatus(guest) === 'confirmed');
+  const pending = guests.filter((guest) => !['confirmed', 'declined'].includes(guestStatus(guest)));
+  const seated = guests.filter((guest) => String(guest?.tableId || '').trim());
+  const confirmedSeated = confirmed.filter((guest) => String(guest?.tableId || '').trim());
+  const usedTableIds = new Set(seated.map((guest) => String(guest.tableId || '').trim()).filter(Boolean));
+  return {
+    total: guests.length,
+    confirmed: confirmed.length,
+    pending: pending.length,
+    seated: seated.length,
+    confirmedSeated: confirmedSeated.length,
+    tablesUsed: usedTableIds.size,
+    confirmedPercent: guests.length ? Math.round(confirmed.length * 100 / guests.length) : 0
+  };
+}
+
 async function loadInvitadosSnapshot(context) {
   if (!context?.id) throw new Error('No hay una boda activa.');
   const values = await readPlannerStorageKeys(context, [GUEST_STORAGE_KEY, SHARED_STORAGE_KEY]);
@@ -122,4 +149,12 @@ async function updateCanonicalTable(context, tableId, mutateTable) {
   return { ...table, dimensions: table.dimensions && typeof table.dimensions === 'object' ? { ...table.dimensions } : undefined };
 }
 
-export { GUEST_STORAGE_KEY, SHARED_STORAGE_KEY, loadInvitadosSnapshot, saveInvitadosSnapshot, updateCanonicalTable };
+export {
+  GUEST_STORAGE_KEY,
+  SHARED_STORAGE_KEY,
+  guestStatus,
+  summarizeInvitadosValue,
+  loadInvitadosSnapshot,
+  saveInvitadosSnapshot,
+  updateCanonicalTable
+};
