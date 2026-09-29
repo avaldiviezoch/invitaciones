@@ -55,20 +55,66 @@ let calendarSelectedDate = '';
 let calendarCursor = new Date();
 let homeSummaryEpoch = 0;
 const heroVideo = $('heroVideo');
+const heroSurface = document.querySelector('.app');
+const MODULE_HASHES = new Set(['#checklist', '#presupuesto', '#proveedores', '#invitados', '#distribucion', '#cronograma', '#invitaciones', '#musica']);
+let heroPlaybackTimer = 0;
+
+function isDirectModuleRoute() {
+  return MODULE_HASHES.has(location.hash);
+}
+
+function setHeroFallback(active) {
+  if (!heroSurface || !window.matchMedia('(max-width: 980px)').matches) return;
+  heroSurface.classList.toggle('hero-video-fallback', Boolean(active));
+}
+
+function prepareHeroVideo() {
+  if (!heroVideo) return;
+  heroVideo.muted = true;
+  heroVideo.defaultMuted = true;
+  heroVideo.autoplay = true;
+  heroVideo.loop = true;
+  heroVideo.playsInline = true;
+  heroVideo.setAttribute('muted', '');
+  heroVideo.setAttribute('autoplay', '');
+  heroVideo.setAttribute('loop', '');
+  heroVideo.setAttribute('playsinline', '');
+  heroVideo.preload = 'auto';
+}
+
+function tryPlayHeroVideo() {
+  if (!heroVideo || document.hidden || isDirectModuleRoute()) return;
+  prepareHeroVideo();
+  clearTimeout(heroPlaybackTimer);
+  heroPlaybackTimer = window.setTimeout(() => {
+    if (heroVideo.paused) setHeroFallback(true);
+  }, 2200);
+  const playPromise = heroVideo.play();
+  if (playPromise?.catch) playPromise.catch(() => setHeroFallback(true));
+}
 
 function syncEntrySurface() {
-  const directModule = ['#checklist', '#presupuesto', '#proveedores', '#invitados', '#distribucion', '#cronograma', '#invitaciones', '#musica'].includes(location.hash);
+  const directModule = isDirectModuleRoute();
   document.documentElement.classList.toggle('module-route', directModule);
   if (directModule) {
     heroVideo?.pause();
-    heroVideo?.removeAttribute('autoplay');
     return;
   }
-  if (heroVideo) {
-    heroVideo.preload = 'auto';
-    heroVideo.play().catch(() => {});
-  }
+  tryPlayHeroVideo();
 }
+
+heroVideo?.addEventListener('playing', () => {
+  clearTimeout(heroPlaybackTimer);
+  setHeroFallback(false);
+});
+heroVideo?.addEventListener('error', () => setHeroFallback(true));
+heroVideo?.addEventListener('loadeddata', tryPlayHeroVideo);
+heroVideo?.addEventListener('canplay', tryPlayHeroVideo);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) heroVideo?.pause();
+  else tryPlayHeroVideo();
+});
+window.addEventListener('pageshow', tryPlayHeroVideo);
 
 function setMenu(open) {
   document.body.classList.toggle('menu-open', open);
