@@ -4,7 +4,6 @@ import { readPlannerStorageKeys } from '../../services/planner-cloud.js?v=4';
 import { GUEST_STORAGE_KEY, summarizeInvitadosValue } from '../invitados/invitados-data.js?v=5';
 import { CHECKLIST_STORAGE_KEY, summarizeChecklistValue } from '../checklist/index.js?v=18';
 import { BUDGET_STORAGE_KEY, summarizeBudgetValue } from '../presupuesto/index.js?v=15';
-import { TIMELINE_STORAGE_KEY, summarizeCronogramaValue } from '../cronograma/index.js?v=7';
 import {
   listWeddingContexts,
   loadActiveWeddingContext,
@@ -89,16 +88,6 @@ function formatDate(value) {
   return `${day}.${month}.${year}`;
 }
 
-function formatHomeDate(value) {
-  if (!value) return '—';
-  const date = new Date(String(value).slice(0, 10) + 'T12:00:00');
-  if (Number.isNaN(date.getTime())) return '—';
-  return new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: 'short' })
-    .format(date)
-    .replace('.', '')
-    .toUpperCase();
-}
-
 function formatHomeMoney(value, currency = 'PEN') {
   return new Intl.NumberFormat('es-PE', {
     style: 'currency',
@@ -118,7 +107,6 @@ function renderHomeSummary(summary, context) {
   const guests = summary?.guests || {};
   const checklist = summary?.checklist || {};
   const budget = summary?.budget || {};
-  const timeline = summary?.timeline || {};
 
   homeDashboard.querySelector('[data-home-guests-ratio]').textContent = `${guests.confirmed ?? 0} / ${guests.total ?? 0}`;
   homeDashboard.querySelector('[data-home-guests-percent]').textContent = `${guests.confirmedPercent ?? 0}%`;
@@ -132,12 +120,6 @@ function renderHomeSummary(summary, context) {
   homeDashboard.querySelector('[data-home-checklist-pending]').textContent = String((checklist.pending ?? 0) + (checklist.progress ?? 0));
   setHomeRing('[data-home-checklist-ring]', checklist.percent);
 
-  homeDashboard.querySelector('[data-home-timeline-total]').textContent = `${timeline.total ?? 0} hitos`;
-  homeDashboard.querySelector('[data-home-wedding-date]').textContent = formatHomeDate(context?.date);
-  homeDashboard.querySelector('[data-home-timeline-next]').textContent = timeline.nextTitle || 'Sin eventos';
-  homeDashboard.querySelector('[data-home-timeline-time]').textContent = timeline.nextTime || '—';
-  setHomeRing('[data-home-timeline-ring]', timeline.percent);
-
   homeDashboard.querySelector('[data-home-budget-percent]').textContent = `${budget.percent ?? 0}%`;
   homeDashboard.querySelector('[data-home-budget-paid]').textContent = formatHomeMoney(budget.paid, budget.currency);
   homeDashboard.querySelector('[data-home-budget-total]').textContent = formatHomeMoney(budget.budget, budget.currency);
@@ -146,9 +128,9 @@ function renderHomeSummary(summary, context) {
   if (budgetProgress) budgetProgress.style.width = `${budget.percent ?? 0}%`;
   setHomeRing('[data-home-budget-ring]', budget.percent);
 
-  homeDashboard.querySelector('[data-home-tables-ratio]').textContent = `${guests.confirmedSeated ?? 0} / ${guests.confirmed ?? 0} ubicadas`;
-  homeDashboard.querySelector('[data-home-tables-seated]').textContent = String(guests.confirmedSeated ?? 0);
-  homeDashboard.querySelector('[data-home-tables-confirmed]').textContent = `de ${guests.confirmed ?? 0} confirmadas`;
+  homeDashboard.querySelector('[data-home-tables-ratio]').textContent = `${guests.seated ?? 0} / ${guests.total ?? 0} ubicadas`;
+  homeDashboard.querySelector('[data-home-tables-seated]').textContent = String(guests.seated ?? 0);
+  homeDashboard.querySelector('[data-home-tables-confirmed]').textContent = `de ${guests.total ?? 0} invitados`;
   homeDashboard.querySelector('[data-home-tables-note]').textContent = guests.tablesUsed
     ? `${guests.tablesUsed} ${guests.tablesUsed === 1 ? 'mesa con invitados' : 'mesas con invitados'}`
     : 'Aún no hay invitados ubicados en mesas';
@@ -163,15 +145,13 @@ async function refreshHomeDashboard(context = weddingContext) {
     const values = await readPlannerStorageKeys(context, [
       GUEST_STORAGE_KEY,
       CHECKLIST_STORAGE_KEY,
-      BUDGET_STORAGE_KEY,
-      TIMELINE_STORAGE_KEY
+      BUDGET_STORAGE_KEY
     ]);
     if (epoch !== homeSummaryEpoch || weddingContext?.id !== weddingId) return;
     renderHomeSummary({
       guests: summarizeInvitadosValue(values[GUEST_STORAGE_KEY]),
       checklist: summarizeChecklistValue(values[CHECKLIST_STORAGE_KEY]),
-      budget: summarizeBudgetValue(values[BUDGET_STORAGE_KEY]),
-      timeline: summarizeCronogramaValue(values[TIMELINE_STORAGE_KEY])
+      budget: summarizeBudgetValue(values[BUDGET_STORAGE_KEY])
     }, context);
   } catch (error) {
     if (epoch === homeSummaryEpoch) console.error('No se pudo cargar el resumen de la portada:', error);
@@ -902,7 +882,7 @@ window.addEventListener('hashchange', () => {
 window.addEventListener('migrandia:datachange', (event) => {
   const detail = event.detail || {};
   if (!weddingContext?.id || detail.weddingId !== weddingContext.id) return;
-  if (!['checklist', 'presupuesto', 'invitados', 'cronograma'].includes(detail.module)) return;
+  if (!['checklist', 'presupuesto', 'invitados'].includes(detail.module)) return;
   void refreshHomeDashboard(weddingContext);
 });
 
