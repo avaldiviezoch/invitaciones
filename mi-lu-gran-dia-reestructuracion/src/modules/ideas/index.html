@@ -20,7 +20,7 @@
   </div>
   <dialog class="ideas-dialog" data-ideas-dialog>
     <form method="dialog" class="ideas-form" data-ideas-form>
-      <header><div><span>NUEVA IDEA</span><h2>Guarda algo que te inspire</h2></div><button type="button" data-ideas-close aria-label="Cerrar">×</button></header>
+      <header><div><span data-ideas-dialog-label>NUEVA IDEA</span><h2 data-ideas-dialog-title>Guarda algo que te inspire</h2></div><button type="button" data-ideas-close aria-label="Cerrar">×</button></header>
       <label>Enlace<input type="url" data-ideas-url placeholder="https://…" autocomplete="url"><small>Pinterest, Temu, AliExpress o cualquier página.</small></label>
       <div class="ideas-form-grid">
         <label>Nombre<input type="text" data-ideas-title maxlength="100" placeholder="Ej. Luces cálidas para las mesas"></label>
@@ -30,7 +30,7 @@
       </div>
       <label>Imagen<input type="url" data-ideas-image placeholder="URL de la imagen"><small>Si el enlace de producto incluye su miniatura, Migrandia la detectará. También puedes indicar otra imagen.</small></label>
       <label>Notas<textarea data-ideas-notes maxlength="400" rows="3" placeholder="Color, cantidad, medidas, para qué parte de la boda…"></textarea></label>
-      <footer><button type="button" class="ideas-secondary" data-ideas-close>Cancelar</button><button type="submit" class="ideas-primary">Agregar al tablero</button></footer>
+      <footer><button type="button" class="ideas-secondary" data-ideas-close>Cancelar</button><button type="submit" class="ideas-primary" data-ideas-submit>Agregar al tablero</button></footer>
     </form>
   </dialog>
 </div>

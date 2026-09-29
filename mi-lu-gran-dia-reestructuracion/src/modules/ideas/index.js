@@ -5,7 +5,7 @@ const STORAGE_KEY = 'planificador_bodas_ideas_v1';
 let templatePromise = null;
 let cleanup = () => {};
 
-const state = { items: [], filter: 'all', search: '', context: null };
+const state = { items: [], filter: 'all', search: '', context: null, editingId: '' };
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, (character) => ({
@@ -72,9 +72,12 @@ function render(root) {
   board.innerHTML = items.map((item) => {
     const image = item.image ? `<img class="ideas-card-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '<div class="ideas-card-placeholder" aria-hidden="true"></div>';
     const link = item.url ? `<a class="ideas-card-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">Ver enlace</a>` : '';
-    return `<article class="ideas-card" data-idea-id="${escapeHtml(item.id)}"><button class="ideas-card-delete" type="button" data-idea-delete="${escapeHtml(item.id)}" aria-label="Eliminar ${escapeHtml(item.title)}">×</button>${image}<div class="ideas-card-body"><div class="ideas-card-meta"><span>${escapeHtml(item.category)}</span><span>${item.type === 'purchase' ? 'Compra' : 'Inspiración'}</span></div><h3>${escapeHtml(item.title)}</h3>${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ''}${item.price ? `<strong class="ideas-card-price">S/ ${item.price.toFixed(2)}</strong>` : ''}${link}</div></article>`;
+    return `<article class="ideas-card" data-idea-id="${escapeHtml(item.id)}"><button class="ideas-card-edit" type="button" data-idea-edit="${escapeHtml(item.id)}" aria-label="Editar ${escapeHtml(item.title)}">Editar</button><button class="ideas-card-delete" type="button" data-idea-delete="${escapeHtml(item.id)}" aria-label="Eliminar ${escapeHtml(item.title)}">×</button>${image}<div class="ideas-card-body"><div class="ideas-card-meta"><span>${escapeHtml(item.category)}</span><span>${item.type === 'purchase' ? 'Compra' : 'Inspiración'}</span></div><h3>${escapeHtml(item.title)}</h3>${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ''}${item.price ? `<strong class="ideas-card-price">S/ ${item.price.toFixed(2)}</strong>` : ''}${link}</div></article>`;
   }).join('');
   empty.hidden = items.length > 0;
+  board.querySelectorAll('[data-idea-edit]').forEach((button) => {
+    button.onclick = () => openEditor(root, button.dataset.ideaEdit);
+  });
   board.querySelectorAll('[data-idea-delete]').forEach((button) => {
     button.onclick = async () => {
       const id = button.dataset.ideaDelete;
@@ -89,6 +92,32 @@ function render(root) {
       }
     };
   });
+}
+
+function openEditor(root, id) {
+  const item = state.items.find((current) => current.id === id);
+  if (!item) return;
+  const form = root.querySelector('[data-ideas-form]');
+  state.editingId = id;
+  form.querySelector('[data-ideas-url]').value = item.url;
+  form.querySelector('[data-ideas-title]').value = item.title;
+  form.querySelector('[data-ideas-type]').value = item.type;
+  form.querySelector('[data-ideas-category]').value = item.category;
+  form.querySelector('[data-ideas-price]').value = item.price || '';
+  form.querySelector('[data-ideas-image]').value = item.image;
+  form.querySelector('[data-ideas-notes]').value = item.notes;
+  root.querySelector('[data-ideas-dialog-label]').textContent = 'EDITAR IDEA';
+  root.querySelector('[data-ideas-dialog-title]').textContent = 'Actualiza tu idea';
+  root.querySelector('[data-ideas-submit]').textContent = 'Guardar cambios';
+  root.querySelector('[data-ideas-dialog]').showModal();
+}
+
+function resetEditor(root) {
+  state.editingId = '';
+  root.querySelector('[data-ideas-form]').reset();
+  root.querySelector('[data-ideas-dialog-label]').textContent = 'NUEVA IDEA';
+  root.querySelector('[data-ideas-dialog-title]').textContent = 'Guarda algo que te inspire';
+  root.querySelector('[data-ideas-submit]').textContent = 'Agregar al tablero';
 }
 
 async function persist(root) {
@@ -117,10 +146,10 @@ export async function mountIdeas(context) {
   const imageInput = form.querySelector('[data-ideas-image]');
 
   root.querySelectorAll('[data-ideas-open-form]').forEach((button) => {
-    button.onclick = () => dialog.showModal();
+    button.onclick = () => { resetEditor(root); dialog.showModal(); };
   });
   root.querySelectorAll('[data-ideas-close]').forEach((button) => {
-    button.onclick = () => dialog.close();
+    button.onclick = () => { dialog.close(); resetEditor(root); };
   });
   root.querySelectorAll('[data-ideas-filter]').forEach((button) => {
     button.onclick = () => {
@@ -160,14 +189,20 @@ export async function mountIdeas(context) {
       url,
       notes: form.querySelector('[data-ideas-notes]').value.trim()
     };
-    state.items.unshift(item);
+    const previous = state.items;
+    if (state.editingId) {
+      item.id = state.editingId;
+      state.items = state.items.map((current) => current.id === state.editingId ? item : current);
+    } else {
+      state.items.unshift(item);
+    }
     render(root);
     try {
       await persist(root);
-      form.reset();
       dialog.close();
+      resetEditor(root);
     } catch {
-      state.items = state.items.filter((current) => current.id !== item.id);
+      state.items = previous;
       render(root);
     }
   };
