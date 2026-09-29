@@ -63,6 +63,8 @@ async function loadTemplate() {
 function render(root) {
   const board = root.querySelector('[data-ideas-board]');
   const empty = root.querySelector('[data-ideas-empty]');
+  const total = root.querySelector('[data-ideas-total]');
+  if (total) total.textContent = String(state.items.length);
   const query = state.search.trim().toLowerCase();
   const items = state.items.filter((item) =>
     (state.filter === 'all' || item.type === state.filter)
