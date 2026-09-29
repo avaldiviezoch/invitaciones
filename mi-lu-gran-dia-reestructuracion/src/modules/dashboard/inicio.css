@@ -808,14 +808,6 @@ body.menu-open .menu-button svg {
   animation-delay:-1.1s
 }
 .home-tables {
-  grid-column:1/5;
-  grid-row:3;
-  padding:18px;
-  display:flex;
-  flex-direction:column;
-  animation-delay:-3.8s
-}
-.home-checklist {
   grid-column:5/9;
   grid-row:1/4;
   padding:20px;
@@ -823,6 +815,14 @@ body.menu-open .menu-button svg {
   flex-direction:column;
   height:560px;
   align-self:center;
+  animation-delay:-3.8s
+}
+.home-checklist {
+  grid-column:1/5;
+  grid-row:3;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
   animation-delay:-2.4s
 }
 .home-budget {
@@ -884,7 +884,7 @@ body.menu-open .menu-button svg {
   height:132px;
   margin:auto
 }
-.checklist-ring,.timeline-ring {
+.checklist-ring {
   width:145px;
   height:145px;
   margin:auto
@@ -1055,7 +1055,7 @@ body.menu-open .menu-button svg {
     height:auto;
     min-height:290px
   }
-  .home-checklist,.home-budget {
+  .home-tables,.home-budget {
     min-height:390px
   }
 
@@ -1097,7 +1097,7 @@ body.menu-open .menu-button svg {
     height:118px;
     margin:18px auto
   }
-  .checklist-ring,.timeline-ring {
+  .checklist-ring {
     width:126px;
     height:126px;
     margin:18px auto
@@ -1105,9 +1105,6 @@ body.menu-open .menu-button svg {
   .budget-ring {
     width:140px;
     height:140px
-  }
-  .home-split {
-    min-height:250px
   }
   .home-budget-center {
     gap:14px;
