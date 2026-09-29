@@ -1,5 +1,5 @@
 MI LU GRAN DÍA — ESTADO DEL PROYECTO
-Actualizado: 2026-09-24
+Actualizado: 2026-09-28
 
 FUENTE DETALLADA:
 docs/HISTORIAL_AVANCES.md
@@ -138,3 +138,13 @@ HITO 2026-09-24 — RECONSTRUCCIÓN LIMPIA DEL SHELL MÓVIL:
 - Se revirtieron íntegramente los cambios realizados por este trabajo en planner-cloud.js, invitados-data.js y los imports/lectura de Distribución. La capa de datos queda con su comportamiento previo.
 - Firebase, Firestore, Storage, Authentication, usuarios, claves, documentos y payloads no forman parte del shell y no deben modificarse para resolver responsive.
 - Publicación del shell: dashboard CSS v39 / JS v171.
+
+HITO 2026-09-28 — KPIS DE PORTADA CONECTADOS:
+- Invitados, Checklist, Presupuesto, Cronograma y resumen de mesas muestran datos reales de la boda activa.
+- Una sola lectura agregada obtiene las claves necesarias; la portada es solo lectura.
+- Los cálculos pertenecen a sus módulos propietarios y se reutilizan en Inicio; no hay fórmulas paralelas.
+- Presupuesto respeta paquetes integrales y evita doble conteo.
+- Mesas se calcula desde la asignación canónica de Invitados, sin leer posiciones de Distribución.
+- Refresco al cambiar de boda, abrir la portada y tras migrandia:datachange.
+- Sin !important, sin cambios de esquema, reglas, Storage, Authentication, usuarios ni datos persistentes.
+
