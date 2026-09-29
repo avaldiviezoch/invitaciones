@@ -1,6 +1,9 @@
 'use strict';
 
 (() => {
+  const preIntro = document.getElementById('preIntro');
+  const preIntroVideo = document.getElementById('preIntroVideo');
+  const preIntroLoader = document.getElementById('preIntroLoader');
   const entryLayer = document.getElementById('entryLayer');
   const entryVideo = document.getElementById('entryVideo');
   const firstEntrance = document.getElementById('firstEntrance');
@@ -25,6 +28,81 @@
     'M9 4v10.2a3.7 3.7 0 1 0 2 3.3V8.2l7-1.6v6.1a3.7 3.7 0 1 0 2 3.3V3.4L9 5.8V4Z',
     'M14 3v11.1a4 4 0 1 0 2 3.7V7h5V3h-7Z'
   ];
+
+
+  function initPreIntro() {
+    if (!preIntro || !preIntroVideo) return;
+
+    let playRequested = false;
+    let started = false;
+
+    preIntroVideo.controls = false;
+    preIntroVideo.muted = false;
+    preIntroVideo.volume = 1;
+
+    const showLoader = () => {
+      if (preIntroLoader) preIntroLoader.hidden = false;
+    };
+
+    const hideLoader = () => {
+      if (preIntroLoader) preIntroLoader.hidden = true;
+    };
+
+    const hasEnoughBuffer = () => {
+      if (preIntroVideo.readyState >= HTMLMediaElement.HAVE_ENOUGH_DATA) return true;
+      if (!Number.isFinite(preIntroVideo.duration) || preIntroVideo.duration <= 0) return false;
+      if (!preIntroVideo.buffered.length) return false;
+
+      const bufferedEnd = preIntroVideo.buffered.end(preIntroVideo.buffered.length - 1);
+      const remaining = preIntroVideo.duration - bufferedEnd;
+      return remaining <= 0.75;
+    };
+
+    const tryStart = async () => {
+      if (!playRequested || started || !hasEnoughBuffer()) return;
+      started = true;
+      hideLoader();
+
+      try {
+        preIntroVideo.currentTime = 0;
+        await preIntroVideo.play();
+      } catch (_) {
+        started = false;
+        showLoader();
+      }
+    };
+
+    const requestPlayback = event => {
+      if (event?.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') return;
+      event?.preventDefault();
+      playRequested = true;
+      showLoader();
+      preIntroVideo.load();
+      tryStart();
+    };
+
+    preIntroVideo.addEventListener('loadedmetadata', tryStart);
+    preIntroVideo.addEventListener('progress', tryStart);
+    preIntroVideo.addEventListener('canplaythrough', tryStart);
+    preIntroVideo.addEventListener('playing', hideLoader);
+    preIntroVideo.addEventListener('waiting', showLoader);
+    preIntroVideo.addEventListener('stalled', showLoader);
+
+    preIntroVideo.addEventListener('ended', async () => {
+      preIntro.hidden = true;
+      try {
+        await entryVideo?.play();
+      } catch (_) {
+        // Si iOS exige un segundo gesto, la capa de entrada original queda disponible.
+      }
+    }, { once:true });
+
+    preIntro.addEventListener('click', requestPlayback);
+    preIntro.addEventListener('keydown', requestPlayback);
+
+    showLoader();
+    preIntroVideo.load();
+  }
 
   function createPetals() {
     if (!petals) return;
@@ -212,6 +290,7 @@
     }
   }
 
+  initPreIntro();
   createPetals();
   renderCountdown();
   initHandsReveal();
