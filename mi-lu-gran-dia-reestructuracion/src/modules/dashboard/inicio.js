@@ -1,7 +1,7 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { auth } from '../../services/firebase-client.js';
 import { readPlannerStorageKeys } from '../../services/planner-cloud.js?v=4';
-import { GUEST_STORAGE_KEY, summarizeInvitadosValue } from '../invitados/invitados-data.js?v=5';
+import { GUEST_STORAGE_KEY, summarizeInvitadosValue } from '../invitados/invitados-data.js?v=6';
 import { CHECKLIST_STORAGE_KEY, summarizeChecklistValue } from '../checklist/index.js?v=18';
 import { BUDGET_STORAGE_KEY, summarizeBudgetValue } from '../presupuesto/index.js?v=15';
 import {
@@ -131,9 +131,28 @@ function renderHomeSummary(summary, context) {
   homeDashboard.querySelector('[data-home-tables-ratio]').textContent = `${guests.seated ?? 0} / ${guests.total ?? 0} ubicadas`;
   homeDashboard.querySelector('[data-home-tables-seated]').textContent = String(guests.seated ?? 0);
   homeDashboard.querySelector('[data-home-tables-confirmed]').textContent = `de ${guests.total ?? 0} invitados`;
-  homeDashboard.querySelector('[data-home-tables-note]').textContent = guests.tablesUsed
-    ? `${guests.tablesUsed} ${guests.tablesUsed === 1 ? 'mesa con invitados' : 'mesas con invitados'}`
-    : 'Aún no hay invitados ubicados en mesas';
+
+  const tableGrid = homeDashboard.querySelector('[data-home-tables-grid]');
+  const tableNote = homeDashboard.querySelector('[data-home-tables-note]');
+  const tables = Array.isArray(guests.tables) ? guests.tables : [];
+  if (tableGrid) {
+    tableGrid.innerHTML = tables.map((table) => {
+      const shape = ['round', 'square', 'rectangular'].includes(table.shape) ? table.shape : 'round';
+      const confirmed = Number(table.confirmed) || 0;
+      const capacity = Number(table.capacity) || 0;
+      return `<article class="home-mini-table is-${shape}" aria-label="${escapeHtml(table.name)}: ${confirmed} confirmados de ${capacity}">
+        <div class="home-mini-table-top">
+          <strong>${escapeHtml(table.name)}</strong>
+          <b>${confirmed}/${capacity}</b>
+          <small>confirmados</small>
+        </div>
+      </article>`;
+    }).join('');
+  }
+  if (tableNote) {
+    tableNote.hidden = tables.length > 0;
+    tableNote.textContent = 'Aún no hay mesas creadas';
+  }
 }
 
 async function refreshHomeDashboard(context = weddingContext) {
@@ -695,7 +714,7 @@ const MODULES = Object.freeze({
     mount: 'mountProveedores'
   },
   invitados: {
-    load: () => import('../invitados/index.js?v=34'),
+    load: () => import('../invitados/index.js?v=35'),
     mount: 'mountInvitados'
   },
   distribucion: {
