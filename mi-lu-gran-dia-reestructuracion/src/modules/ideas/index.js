@@ -238,10 +238,10 @@ export async function mountIdeas(context) {
       state.items.unshift(item);
     }
     render(root);
+    dialog.close();
+    resetEditor(root);
     try {
       await persist(root);
-      dialog.close();
-      resetEditor(root);
     } catch {
       state.items = previous;
       render(root);
