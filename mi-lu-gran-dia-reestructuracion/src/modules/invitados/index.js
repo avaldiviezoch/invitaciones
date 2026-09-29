@@ -1,5 +1,5 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { loadInvitadosSnapshot, saveInvitadosSnapshot } from './invitados-data.js?v=4';
+import { guestStatus, loadInvitadosSnapshot, saveInvitadosSnapshot } from './invitados-data.js?v=5';
 import { createRsvpController } from './rsvp-controller.js?v=7';
 import { createTablesController } from './tables-controller.js?v=21';
 
@@ -31,14 +31,6 @@ function canEdit() {
 function deepClone(value) {
   if (typeof structuredClone === 'function') return structuredClone(value);
   return JSON.parse(JSON.stringify(value));
-}
-
-function guestStatus(guest) {
-  const status = text(guest?.status).toLowerCase();
-  if (status === 'confirmed') return 'confirmed';
-  if (status === 'declined') return 'declined';
-  if (status === 'tentative') return 'tentative';
-  return 'pending';
 }
 
 function statusLabel(status) {
