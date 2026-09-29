@@ -67,6 +67,10 @@ function syncEntrySurface() {
 function setMenu(open) {
   document.body.classList.toggle('menu-open', open);
   menu.setAttribute('aria-expanded', String(open));
+  if (open) {
+    const drawerContent = document.querySelector('.drawer-content');
+    if (drawerContent) drawerContent.scrollTop = 0;
+  }
 }
 
 function setAuth(open, message = '') {
