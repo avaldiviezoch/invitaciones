@@ -2,6 +2,7 @@ import {
   readPlannerStorageKeys,
   writePlannerStorageKeys
 } from '../../services/planner-cloud.js?v=4';
+import { normalizeTableShape } from './table-geometry.js?v=5';
 
 const GUEST_STORAGE_KEY = 'planificador_bodas_invitados_v1';
 const SHARED_STORAGE_KEY = 'planificador_bodas_datos_compartidos_v1';
@@ -120,7 +121,7 @@ function summarizeInvitadosValue(value) {
     return {
       id: tableId || `legacy-table-${index}`,
       name: String(table?.name || `Mesa ${index + 1}`).trim(),
-      shape: String(table?.type || table?.shape || 'round').trim().toLowerCase(),
+      shape: normalizeTableShape(table?.type || table?.shape),
       capacity: tableCapacity(table),
       assigned: assigned.length,
       confirmed: confirmedAtTable
