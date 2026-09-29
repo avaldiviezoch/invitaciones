@@ -9,6 +9,7 @@ import {
   loadActiveWeddingContext,
   selectActiveWedding,
   updateWeddingIdentity,
+  saveWeddingOnboarding,
   listWeddingMembers,
   listWeddingInvitations,
   inviteWeddingMember,
@@ -126,14 +127,14 @@ const discoverMenuButton = $('discoverMenuButton');
 const discoverGoogleButton = $('discoverGoogleButton');
 const discoverEmailButton = $('discoverEmailButton');
 const discoverDateField = $('discoverDateField');
+const discoverGuestExactField = $('discoverGuestExactField');
+const discoverGuestExactInput = $('discoverGuestExactInput');
 const discoverDateInput = $('discoverDateInput');
 const discoverBudgetInput = $('discoverBudgetInput');
 const discoverSummary = $('discoverSummary');
 let discoverIndex = 0;
 let discoverSeenThisSession = false;
-const discoverAnswers = { role:'', stage:'', priorities:new Set(), guests:'', dateStatus:'', date:'', budgetStatus:'', budget:'' };
-
-const ONBOARDING_BUDGET_GUEST_MAP = {'menos-50':40,'50-100':75,'100-150':125,'mas-150':175};
+const discoverAnswers = { role:'', stage:'', priorities:new Set(), guests:'', guestCount:0, dateStatus:'', date:'', budgetStatus:'', budget:'' };
 
 function onboardingBudgetNumber(value) {
   const normalized = String(value || '').replace(/[^0-9.,]/g, '').replaceAll(',', '');
@@ -148,7 +149,7 @@ async function applyOnboardingToWedding(context) {
     nextContext = await updateWeddingIdentity(nextContext, { date: discoverAnswers.date });
   }
 
-  const guestCount = ONBOARDING_BUDGET_GUEST_MAP[discoverAnswers.guests] || 0;
+  const guestCount = Number.isInteger(discoverAnswers.guestCount) && discoverAnswers.guestCount > 0 ? discoverAnswers.guestCount : 0;
   const totalBudget = discoverAnswers.budgetStatus === 'definido' ? onboardingBudgetNumber(discoverAnswers.budget) : 0;
   if (guestCount || totalBudget) {
     const values = await readPlannerStorageKeys(nextContext, [BUDGET_STORAGE_KEY]);
@@ -164,6 +165,11 @@ async function applyOnboardingToWedding(context) {
       }
     });
   }
+  await saveWeddingOnboarding(nextContext, {
+    role: discoverAnswers.role,
+    stage: discoverAnswers.stage,
+    priorities: [...discoverAnswers.priorities]
+  });
   return nextContext;
 }
 
@@ -197,7 +203,7 @@ function renderDiscoverSummary() {
   const items = [];
   if (discoverAnswers.role) items.push(['Tu papel', discoverAnswerLabel('role', discoverAnswers.role)]);
   if (discoverAnswers.stage) items.push(['Etapa', discoverAnswerLabel('stage', discoverAnswers.stage)]);
-  if (discoverAnswers.guests) items.push(['Invitados', discoverAnswerLabel('guests', discoverAnswers.guests)]);
+  if (discoverAnswers.guests) items.push(['Invitados', discoverAnswers.guestCount ? `${discoverAnswers.guestCount} aprox.` : discoverAnswerLabel('guests', discoverAnswers.guests)]);
   if (discoverAnswers.priorities.size) items.push(['Primero', [...discoverAnswers.priorities].slice(0,3).join(' · ')]);
   discoverSummary.innerHTML = items.map(([label,value]) => `<span><small>${label}</small><strong>${value}</strong></span>`).join('');
 }
@@ -257,6 +263,19 @@ document.querySelectorAll('[data-answer]').forEach((button) => {
       button.setAttribute('aria-pressed', String(!selected));
       return;
     }
+    if (name === 'guests') {
+      discoverAnswers.guests = value;
+      discoverAnswers.guestCount = 0;
+      document.querySelectorAll('[data-answer="guests"]').forEach((candidate) => candidate.classList.toggle('is-selected', candidate === button));
+      if (discoverGuestExactField) discoverGuestExactField.hidden = value === 'no-se';
+      if (value === 'no-se') {
+        if (discoverGuestExactInput) discoverGuestExactInput.value = '';
+        window.setTimeout(() => moveDiscover(1), 170);
+      } else {
+        window.setTimeout(() => discoverGuestExactInput?.focus(), 0);
+      }
+      return;
+    }
     if (name === 'dateStatus') {
       discoverAnswers.dateStatus = value;
       if (discoverDateField) discoverDateField.hidden = value !== 'si';
@@ -272,6 +291,13 @@ document.querySelectorAll('[data-answer]').forEach((button) => {
   });
 });
 
+discoverGuestExactInput?.addEventListener('input', () => {
+  const value = Math.max(0, Math.min(9999, Math.floor(Number(discoverGuestExactInput.value) || 0)));
+  discoverAnswers.guestCount = value;
+});
+discoverGuestExactInput?.addEventListener('change', () => {
+  if (discoverAnswers.guestCount > 0) window.setTimeout(() => moveDiscover(1), 170);
+});
 discoverDateInput?.addEventListener('change', () => {
   discoverAnswers.date = discoverDateInput.value;
   if (discoverAnswers.date) window.setTimeout(() => moveDiscover(1), 170);
