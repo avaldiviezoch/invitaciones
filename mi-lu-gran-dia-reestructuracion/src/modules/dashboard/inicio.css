@@ -79,10 +79,10 @@ body.menu-open .menu-button svg {
   position:fixed;
   inset:0;
   z-index:30;
-  background:rgba(0,0,0,.18);
+  background:transparent;
   opacity:0;
   visibility:hidden;
-  transition:.28s
+  transition:opacity .28s,visibility .28s
 }
 .menu-open .backdrop {
   opacity:1;
