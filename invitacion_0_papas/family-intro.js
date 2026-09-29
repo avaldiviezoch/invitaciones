@@ -10,7 +10,7 @@
   const memoryAudio = new Audio(ASSET + 'Alphaville_-_Forever_Young_Video_Lyrics_(mp3.pm).mp3');
 
   memoryAudio.preload = 'auto';
-  memoryAudio.volume = 0.036;
+  memoryAudio.volume = 0.30;
 
   let state = 'idle';
 
@@ -24,11 +24,9 @@
       '<span>Toca para comenzar</span>' +
     '</div>' +
     '<div class="family-intro-stage">' +
-      '<div class="family-intro-media">' +
-        '<video id="familyMemoryVideo" class="family-intro-video" playsinline webkit-playsinline preload="auto">' +
-          '<source src="' + encodeURI(MEMORY_VIDEO) + '" type="video/mp4">' +
-        '</video>' +
-      '</div>' +
+      '<video id="familyMemoryVideo" class="family-intro-video" playsinline webkit-playsinline preload="auto">' +
+        '<source src="' + encodeURI(MEMORY_VIDEO) + '" type="video/mp4">' +
+      '</video>' +
     '</div>';
 
   entryLayer.appendChild(shell);
@@ -39,7 +37,7 @@
     return new Promise(resolve => window.setTimeout(resolve, ms));
   }
 
-  function beginForeverYoung() {
+  function startBackgroundMusic() {
     try {
       memoryAudio.currentTime = 17;
     } catch (_) {
@@ -50,16 +48,19 @@
     memoryAudio.play().catch(() => {});
   }
 
-  function stopMemoryAudio() {
+  function stopBackgroundMusic() {
     memoryAudio.pause();
     try { memoryAudio.currentTime = 17; } catch (_) {}
   }
 
   async function handoffToOriginalVideo() {
+    if (state === 'handoff' || state === 'done') return;
+
     state = 'handoff';
-    stopMemoryAudio();
+    stopBackgroundMusic();
     shell.classList.add('is-leaving');
-    await wait(700);
+
+    await wait(650);
 
     try {
       await entryVideo.play();
@@ -82,34 +83,40 @@
     }
   }
 
-  async function playFamilyIntro() {
+  async function playFamilyVideo() {
     if (state !== 'idle') return;
 
     state = 'playing';
     shell.classList.add('is-started');
-
-    beginForeverYoung();
 
     if (!memoryVideo) {
       await handoffToOriginalVideo();
       return;
     }
 
-    memoryVideo.muted = true;
+    memoryVideo.muted = false;
+    memoryVideo.volume = 1;
     memoryVideo.currentTime = 0;
+
+    startBackgroundMusic();
 
     memoryVideo.addEventListener('ended', handoffToOriginalVideo, { once:true });
 
     try {
       await memoryVideo.play();
-    } catch (_) {}
+    } catch (_) {
+      stopBackgroundMusic();
+      state = 'idle';
+      shell.classList.remove('is-started');
+    }
   }
 
   function interceptEntry(event) {
     if (state === 'done' || state === 'handoff' || state === 'awaiting-video') return;
+
     event.preventDefault();
     event.stopImmediatePropagation();
-    playFamilyIntro();
+    playFamilyVideo();
   }
 
   entryLayer.addEventListener('click', interceptEntry, true);
