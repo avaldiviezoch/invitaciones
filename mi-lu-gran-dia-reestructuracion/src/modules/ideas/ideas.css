@@ -31,3 +31,15 @@
   .ideas-actions-row,.ideas-toolbar,.ideas-board,.ideas-empty,.ideas-save-status{width:calc(100% - 28px)}
   .ideas-actions-row{padding-top:14px}
 }
+
+@media(max-width:700px){
+  .ideas-board{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;columns:auto}
+  .ideas-card{display:flex;min-width:0;height:100%;margin:0;flex-direction:column}
+  .ideas-card-image,.ideas-card-placeholder{height:auto;aspect-ratio:4/3}
+  .ideas-card-body{display:flex;min-height:128px;flex:1;flex-direction:column}
+  .ideas-card-link{margin-top:auto;padding-top:10px}
+  .ideas-card h3{overflow-wrap:anywhere}
+}
+@media(max-width:350px){
+  .ideas-board{grid-template-columns:1fr}
+}
