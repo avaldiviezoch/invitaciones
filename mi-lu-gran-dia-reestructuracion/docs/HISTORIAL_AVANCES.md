@@ -875,3 +875,13 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Se actualizan únicamente versiones de carga para invalidar caché.
 - Sin cambios en Firebase, Firestore, Storage, Authentication, usuarios, persistencia ni datos reales.
 
+## 2026-09-28 — Portada: KPIs conectados a la boda activa
+- Se conecta el resumen visual de la carátula a los datos reales existentes de Invitados, Checklist, Presupuesto y Cronograma.
+- La portada realiza una sola lectura agregada mediante `readPlannerStorageKeys` y no escribe datos.
+- Cada módulo conserva la propiedad de su interpretación: Invitados expone estado canónico y resumen de mesas; Checklist, Presupuesto y Cronograma exponen funciones puras de resumen reutilizando sus reglas vigentes.
+- Presupuesto conserva el cálculo existente de paquetes integrales para evitar doble conteo; la portada no implementa una fórmula paralela.
+- Distribución de mesas se resume desde las asignaciones canónicas `tableId` de Invitados; no consulta ni modifica posiciones gráficas de Distribución.
+- Los KPI se refrescan al cambiar de boda, al abrir la portada y ante el evento único `migrandia:datachange` de los módulos compatibles.
+- Los anillos de progreso usan una variable CSS de porcentaje sobre la implementación existente; no se agregó `!important`, CSS duplicado ni una segunda versión responsive.
+- No se modificaron Firebase Rules, Firestore schema, Storage, Authentication, usuarios, claves persistentes ni datos reales.
+
