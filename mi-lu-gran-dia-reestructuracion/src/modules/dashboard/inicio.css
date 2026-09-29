@@ -1432,3 +1432,19 @@ body.menu-open .menu-button svg {
 .discover-icon-slot{border:0;background:transparent;overflow:visible}
 .discover-icon-slot img{width:100%;height:100%;display:block;object-fit:contain;filter:drop-shadow(0 7px 10px rgba(0,0,0,.18));pointer-events:none}
 .discover-options button:hover .discover-icon-slot,.discover-options button.is-selected .discover-icon-slot,.discover-unknown.is-selected .discover-icon-slot{background:transparent}
+
+/* Refine UX onboarding: iconografía protagonista y legible */
+.discover-options button,.discover-unknown{grid-template-columns:88px 1fr;min-height:126px;column-gap:20px;padding:16px 22px}
+.discover-icon-slot{width:88px;height:88px}
+.discover-options-compact button{grid-template-columns:70px 1fr;min-height:106px}
+.discover-options-compact .discover-icon-slot{width:70px;height:70px}
+.discover-options button strong,.discover-unknown strong{font-size:13px}
+.discover-options button small{font-size:10px}
+@media(max-width:640px){
+ .discover-options button,.discover-unknown{grid-template-columns:72px 1fr;min-height:102px;column-gap:14px;padding:12px 14px}
+ .discover-icon-slot{width:72px;height:72px}
+ .discover-options-compact button{grid-template-columns:62px 1fr;min-height:90px}
+ .discover-options-compact .discover-icon-slot{width:62px;height:62px}
+ .discover-options-role button{grid-template-columns:1fr;grid-template-rows:82px auto auto;min-height:142px;padding:12px 8px}
+ .discover-options-role .discover-icon-slot{grid-row:1;width:82px;height:82px}
+}
