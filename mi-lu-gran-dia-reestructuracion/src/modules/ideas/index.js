@@ -36,8 +36,11 @@ async function resolvePinterestPreview(value = '') {
     if (!response.ok) return null;
     const data = await response.json();
     if (!data?.ok) return null;
+    const originalImage = normalizeUrl(data.image);
     return {
-      image: normalizeUrl(data.image),
+      image: originalImage
+        ? `https://migrandia-dev.avaldiviezoch.workers.dev/api/image-proxy?url=${encodeURIComponent(originalImage)}`
+        : '',
       title: String(data.title || '').trim()
     };
   } catch {
