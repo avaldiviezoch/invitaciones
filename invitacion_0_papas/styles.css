@@ -470,3 +470,49 @@ body.entry-open{overflow:hidden}
   .music-burst svg{display:none;animation:none}
   .faq-item[open] .faq-answer,.faq-item[open] .faq-answer img{animation:none}
 }
+/* Video previo especial: sin textos, fotos ni audio adicional */
+.preintro{
+  position:fixed;
+  inset:0;
+  z-index:10000;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+  background:#000;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.preintro[hidden]{display:none}
+.preintro video{
+  display:block;
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  object-position:center;
+  background:#000;
+}
+.preintro-loader{
+  position:absolute;
+  inset:0;
+  z-index:2;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:#000;
+  pointer-events:none;
+  transition:opacity .2s ease;
+}
+.preintro-loader[hidden]{display:none}
+.preintro-loader span{
+  width:38px;
+  height:38px;
+  border:3px solid rgba(255,255,255,.28);
+  border-top-color:#fff;
+  border-radius:50%;
+  animation:preintroSpin .8s linear infinite;
+}
+@keyframes preintroSpin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){
+  .preintro-loader span{animation-duration:1.6s}
+}
