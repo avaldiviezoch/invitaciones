@@ -30,7 +30,7 @@
   if(moduleId==='checklist'||moduleId==='presupuesto'||moduleId==='proveedores'||moduleId==='invitados'||moduleId==='distribucion'||moduleId==='cronograma'||moduleId==='invitaciones'||moduleId==='musica') document.documentElement.classList.add('module-route');
 })();
 </script>
-<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=55">
+<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=56">
 <link rel="stylesheet" href="src/modules/checklist/checklist.css?v=19">
 <link rel="stylesheet" href="src/modules/presupuesto/presupuesto.css?v=27">
 <link rel="stylesheet" href="src/modules/proveedores/proveedores.css?v=4">
@@ -375,36 +375,117 @@ Antonio Valdiviezo © Derechos reservados
 </aside>
 </main>
 <section class="discover-overlay" id="discoverOverlay" aria-label="Descubre Migrandia" hidden>
+  <button class="discover-menu-button" id="discoverMenuButton" type="button" aria-label="Iniciar sesión" aria-haspopup="dialog">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+  </button>
   <div class="discover-shell">
     <button class="discover-skip" id="discoverSkipButton" type="button">Omitir</button>
     <div class="discover-brand" aria-hidden="true"><img src="assets/branding/LOGO_MGD.png" alt=""></div>
     <div class="discover-track" id="discoverTrack">
-      <article class="discover-slide is-active" data-discover-slide>
+      <article class="discover-slide is-active" data-discover-slide data-discover-kind="intro">
         <span class="discover-kicker">MIGRANDIA</span>
         <h2>Todo tu gran día<br>en un solo lugar</h2>
         <p>Organiza, inspira, invita y disfruta cada etapa de tu boda desde un mismo espacio.</p>
         <div class="discover-orbit" aria-hidden="true"><span>✓</span><span>S/</span><span>♡</span><span>♪</span></div>
       </article>
-      <article class="discover-slide" data-discover-slide>
+      <article class="discover-slide" data-discover-slide data-discover-kind="intro">
         <span class="discover-kicker">ORGANIZA</span>
         <h2>Del primer pendiente<br>al último pago</h2>
         <p>Checklist, presupuesto, proveedores y cronograma conectados para que siempre sepas qué sigue.</p>
         <div class="discover-feature-row" aria-hidden="true"><span>✓<small>Checklist</small></span><span>S/<small>Presupuesto</small></span><span>⌁<small>Proveedores</small></span></div>
       </article>
-      <article class="discover-slide" data-discover-slide>
+      <article class="discover-slide" data-discover-slide data-discover-kind="intro">
         <span class="discover-kicker">TUS INVITADOS</span>
         <h2>Cada persona<br>en su lugar</h2>
         <p>Gestiona invitados, confirmaciones, mesas y distribución sin perder de vista ningún detalle.</p>
         <div class="discover-table" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><b>10</b></div>
       </article>
-      <article class="discover-slide" data-discover-slide>
+      <article class="discover-slide" data-discover-slide data-discover-kind="intro">
         <span class="discover-kicker">TU HISTORIA</span>
         <h2>Una boda que<br>se sienta como ustedes</h2>
-        <p>Invitaciones, música y nuevas herramientas creativas crecerán contigo dentro de Migrandia.</p>
+        <p>Antes de comenzar, cuéntanos un poco sobre tu gran día para preparar una experiencia más cercana a ustedes.</p>
         <div class="discover-heart" aria-hidden="true">♡</div>
+      </article>
+
+      <article class="discover-slide discover-question" data-discover-slide data-discover-kind="question" data-question="role">
+        <span class="discover-step">01 · SOBRE TI</span>
+        <h2>¿Cuál es tu papel<br>en este gran día?</h2>
+        <p>Elige la opción que mejor te represente.</p>
+        <div class="discover-options discover-options-role">
+          <button type="button" data-answer="role" data-value="novia"><span class="discover-icon-slot" data-icon-slot="role-bride">N</span><strong>Novia</strong><small>Estoy organizando mi boda</small></button>
+          <button type="button" data-answer="role" data-value="novio"><span class="discover-icon-slot" data-icon-slot="role-groom">N</span><strong>Novio</strong><small>Estoy organizando mi boda</small></button>
+          <button type="button" data-answer="role" data-value="pareja"><span class="discover-icon-slot" data-icon-slot="role-couple">P</span><strong>Somos la pareja</strong><small>La organizamos juntos</small></button>
+          <button type="button" data-answer="role" data-value="organiza"><span class="discover-icon-slot" data-icon-slot="role-planner">O</span><strong>Ayudo a organizar</strong><small>Acompaño a la pareja</small></button>
+        </div>
+      </article>
+
+      <article class="discover-slide discover-question" data-discover-slide data-discover-kind="question" data-question="stage">
+        <span class="discover-step">02 · SU MOMENTO</span>
+        <h2>¿En qué etapa<br>se encuentran?</h2>
+        <div class="discover-options">
+          <button type="button" data-answer="stage" data-value="inicio"><span class="discover-icon-slot" data-icon-slot="stage-start">01</span><strong>Recién empezamos</strong><small>Queremos ordenar las primeras ideas</small></button>
+          <button type="button" data-answer="stage" data-value="algunas"><span class="discover-icon-slot" data-icon-slot="stage-some">02</span><strong>Ya tenemos algunas cosas</strong><small>Hay decisiones tomadas y otras pendientes</small></button>
+          <button type="button" data-answer="stage" data-value="avanzado"><span class="discover-icon-slot" data-icon-slot="stage-advanced">03</span><strong>Vamos avanzados</strong><small>Queremos tener todo bajo control</small></button>
+          <button type="button" data-answer="stage" data-value="final"><span class="discover-icon-slot" data-icon-slot="stage-final">04</span><strong>Últimos detalles</strong><small>Estamos cerca del gran día</small></button>
+        </div>
+      </article>
+
+      <article class="discover-slide discover-question" data-discover-slide data-discover-kind="question" data-question="priorities">
+        <span class="discover-step">03 · TU PRIORIDAD</span>
+        <h2>¿Qué quieres organizar<br>primero?</h2>
+        <p>Puedes elegir más de una opción.</p>
+        <div class="discover-options discover-options-compact">
+          <button type="button" data-answer="priorities" data-value="checklist" aria-pressed="false"><span class="discover-icon-slot" data-icon-slot="priority-checklist">✓</span><strong>Checklist</strong></button>
+          <button type="button" data-answer="priorities" data-value="presupuesto" aria-pressed="false"><span class="discover-icon-slot" data-icon-slot="priority-budget">S/</span><strong>Presupuesto</strong></button>
+          <button type="button" data-answer="priorities" data-value="invitados" aria-pressed="false"><span class="discover-icon-slot" data-icon-slot="priority-guests">I</span><strong>Invitados</strong></button>
+          <button type="button" data-answer="priorities" data-value="proveedores" aria-pressed="false"><span class="discover-icon-slot" data-icon-slot="priority-vendors">P</span><strong>Proveedores</strong></button>
+          <button type="button" data-answer="priorities" data-value="mesas" aria-pressed="false"><span class="discover-icon-slot" data-icon-slot="priority-tables">M</span><strong>Mesas</strong></button>
+          <button type="button" data-answer="priorities" data-value="invitaciones" aria-pressed="false"><span class="discover-icon-slot" data-icon-slot="priority-invitations">✉</span><strong>Invitaciones</strong></button>
+        </div>
+      </article>
+
+      <article class="discover-slide discover-question" data-discover-slide data-discover-kind="question" data-question="guests">
+        <span class="discover-step">04 · INVITADOS</span>
+        <h2>¿Cuántas personas<br>imaginan celebrar?</h2>
+        <div class="discover-options discover-options-compact">
+          <button type="button" data-answer="guests" data-value="menos-50"><span class="discover-icon-slot" data-icon-slot="guests-small">&lt;50</span><strong>Menos de 50</strong></button>
+          <button type="button" data-answer="guests" data-value="50-100"><span class="discover-icon-slot" data-icon-slot="guests-medium">50</span><strong>50 – 100</strong></button>
+          <button type="button" data-answer="guests" data-value="100-150"><span class="discover-icon-slot" data-icon-slot="guests-large">100</span><strong>100 – 150</strong></button>
+          <button type="button" data-answer="guests" data-value="mas-150"><span class="discover-icon-slot" data-icon-slot="guests-xl">150+</span><strong>Más de 150</strong></button>
+          <button type="button" data-answer="guests" data-value="no-se"><span class="discover-icon-slot" data-icon-slot="guests-unknown">?</span><strong>Aún no sabemos</strong></button>
+        </div>
+      </article>
+
+      <article class="discover-slide discover-question" data-discover-slide data-discover-kind="question" data-question="date">
+        <span class="discover-step">05 · LA FECHA</span>
+        <h2>¿Ya tienen fecha<br>para el gran día?</h2>
+        <div class="discover-options discover-options-two">
+          <button type="button" data-answer="dateStatus" data-value="si"><span class="discover-icon-slot" data-icon-slot="date-yes">D</span><strong>Sí, ya tenemos fecha</strong></button>
+          <button type="button" data-answer="dateStatus" data-value="no"><span class="discover-icon-slot" data-icon-slot="date-no">♡</span><strong>Todavía no</strong><small>Podemos empezar sin ella</small></button>
+        </div>
+        <label class="discover-field" id="discoverDateField" hidden><span>Fecha aproximada</span><input id="discoverDateInput" type="date"></label>
+      </article>
+
+      <article class="discover-slide discover-question" data-discover-slide data-discover-kind="question" data-question="budget">
+        <span class="discover-step">06 · PRESUPUESTO</span>
+        <h2>¿Tienen un presupuesto<br>aproximado?</h2>
+        <div class="discover-budget">
+          <label class="discover-field"><span>Monto aproximado</span><div class="discover-money"><b>S/</b><input id="discoverBudgetInput" inputmode="numeric" autocomplete="off" placeholder="35,000"></div></label>
+          <button type="button" class="discover-unknown" data-answer="budgetStatus" data-value="no-se"><span class="discover-icon-slot" data-icon-slot="budget-unknown">?</span><strong>Todavía no lo sabemos</strong></button>
+        </div>
+      </article>
+
+      <article class="discover-slide discover-finish" data-discover-slide data-discover-kind="finish">
+        <span class="discover-kicker">LISTO PARA EMPEZAR</span>
+        <h2>Migrandia se adapta<br>a su gran día</h2>
+        <p>Ya tenemos una idea de lo que necesitan. Inicia sesión para entrar a su espacio y continuar.</p>
+        <div class="discover-summary" id="discoverSummary"></div>
+        <button class="discover-google" id="discoverGoogleButton" type="button"><span>G</span> Continuar con Google</button>
+        <button class="discover-email" id="discoverEmailButton" type="button">Usar correo</button>
       </article>
     </div>
     <div class="discover-footer">
+      <button class="discover-back" id="discoverBackButton" type="button" hidden>← Atrás</button>
       <div class="discover-dots" id="discoverDots" aria-label="Progreso"></div>
       <button class="discover-next" id="discoverNextButton" type="button">Descubrir Migrandia</button>
     </div>
