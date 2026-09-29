@@ -3,3 +3,7 @@
 .ideas-card-image,.ideas-card-placeholder{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#ebe8e1}
 .ideas-card-link{display:inline-block;margin-top:10px;color:#697553;font-size:9px;font-weight:850;text-decoration:none}
 .ideas-card-link:hover{text-decoration:underline}
+
+.ideas-card{position:relative}
+.ideas-card-delete{position:absolute;top:9px;right:9px;z-index:2;display:grid;width:28px;height:28px;padding:0;place-items:center;border:1px solid rgba(60,58,52,.12);border-radius:50%;background:rgba(255,255,255,.92);color:#5d5953;font-size:18px;line-height:1;box-shadow:0 4px 12px rgba(45,42,36,.12);cursor:pointer}
+.ideas-card-delete:hover{background:#fff;color:#9b4f4f}
