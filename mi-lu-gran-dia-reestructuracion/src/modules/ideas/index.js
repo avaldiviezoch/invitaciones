@@ -29,21 +29,20 @@ async function resolvePinterestPreview(value = '') {
   if (!source) return null;
   let host = '';
   try { host = new URL(source).hostname.toLowerCase(); } catch { return null; }
-  if (!['pin.it', 'www.pinterest.com', 'pinterest.com'].includes(host)) return null;
-  const endpoints = [
-    `https://www.pinterest.com/oembed.json?url=${encodeURIComponent(source)}`,
-    `https://www.pinterest.com/oembed.json?url=${source}`
-  ];
-  for (const endpoint of endpoints) {
-    try {
-      const response = await fetch(endpoint, { mode: 'cors', credentials: 'omit' });
-      if (!response.ok) continue;
-      const data = await response.json();
-      const image = normalizeUrl(data?.thumbnail_url);
-      if (image) return { image, title: String(data?.title || '').trim() };
-    } catch {}
+  if (!['pin.it', 'www.pinterest.com', 'pinterest.com'].includes(host) && !host.endsWith('.pinterest.com')) return null;
+  try {
+    const endpoint = `https://migrandia-dev.avaldiviezoch.workers.dev/api/link-preview?url=${encodeURIComponent(source)}`;
+    const response = await fetch(endpoint, { mode: 'cors', credentials: 'omit' });
+    if (!response.ok) return null;
+    const data = await response.json();
+    if (!data?.ok) return null;
+    return {
+      image: normalizeUrl(data.image),
+      title: String(data.title || '').trim()
+    };
+  } catch {
+    return null;
   }
-  return null;
 }
 
 async function resolveLinkPreview(value = '') {
