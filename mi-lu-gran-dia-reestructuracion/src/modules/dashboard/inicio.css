@@ -775,11 +775,12 @@ body.menu-open .menu-button svg {
   left:50%;
   top:50%;
   width:min(950px,calc(100vw - min(420px,29vw) - 5vw));
-  height:660px;
+  height:560px;
   transform:translate(calc(-50% - min(210px,14.5vw)),-50%);
   display:none;
   grid-template-columns:repeat(12,minmax(0,1fr));
-  grid-template-rows:230px 14px 416px;
+  grid-template-rows:250px 250px;
+  align-content:center;
   gap:14px;
   color:#f4f1eb;
   pointer-events:auto
@@ -809,7 +810,7 @@ body.menu-open .menu-button svg {
 }
 .home-tables {
   grid-column:5/9;
-  grid-row:1/4;
+  grid-row:1/3;
   padding:20px;
   display:flex;
   flex-direction:column;
@@ -819,7 +820,7 @@ body.menu-open .menu-button svg {
 }
 .home-checklist {
   grid-column:1/5;
-  grid-row:3;
+  grid-row:2;
   padding:18px;
   display:flex;
   flex-direction:column;
@@ -827,7 +828,7 @@ body.menu-open .menu-button svg {
 }
 .home-budget {
   grid-column:9/13;
-  grid-row:1/4;
+  grid-row:1/3;
   padding:20px;
   display:flex;
   flex-direction:column;
@@ -880,14 +881,14 @@ body.menu-open .menu-button svg {
   color:#bbb
 }
 .guest-ring {
-  width:132px;
-  height:132px;
-  margin:auto
+  width:124px;
+  height:124px;
+  margin:12px auto 8px
 }
 .checklist-ring {
-  width:145px;
-  height:145px;
-  margin:auto
+  width:132px;
+  height:132px;
+  margin:14px auto 12px
 }
 .budget-ring {
   width:175px;
@@ -916,7 +917,7 @@ body.menu-open .menu-button svg {
   gap:10px
 }
 .home-caption span {
-  padding:14px 10px;
+  padding:10px 8px;
   border-radius:15px;
   background:rgba(255,255,255,.045);
   border:1px solid rgba(255,255,255,.07);
