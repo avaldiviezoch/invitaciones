@@ -72,9 +72,23 @@ function render(root) {
   board.innerHTML = items.map((item) => {
     const image = item.image ? `<img class="ideas-card-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '<div class="ideas-card-placeholder" aria-hidden="true"></div>';
     const link = item.url ? `<a class="ideas-card-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">Ver enlace</a>` : '';
-    return `<article class="ideas-card">${image}<div class="ideas-card-body"><div class="ideas-card-meta"><span>${escapeHtml(item.category)}</span><span>${item.type === 'purchase' ? 'Compra' : 'Inspiración'}</span></div><h3>${escapeHtml(item.title)}</h3>${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ''}${item.price ? `<strong class="ideas-card-price">S/ ${item.price.toFixed(2)}</strong>` : ''}${link}</div></article>`;
+    return `<article class="ideas-card" data-idea-id="${escapeHtml(item.id)}"><button class="ideas-card-delete" type="button" data-idea-delete="${escapeHtml(item.id)}" aria-label="Eliminar ${escapeHtml(item.title)}">×</button>${image}<div class="ideas-card-body"><div class="ideas-card-meta"><span>${escapeHtml(item.category)}</span><span>${item.type === 'purchase' ? 'Compra' : 'Inspiración'}</span></div><h3>${escapeHtml(item.title)}</h3>${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ''}${item.price ? `<strong class="ideas-card-price">S/ ${item.price.toFixed(2)}</strong>` : ''}${link}</div></article>`;
   }).join('');
   empty.hidden = items.length > 0;
+  board.querySelectorAll('[data-idea-delete]').forEach((button) => {
+    button.onclick = async () => {
+      const id = button.dataset.ideaDelete;
+      const previous = state.items;
+      state.items = state.items.filter((item) => item.id !== id);
+      render(root);
+      try {
+        await persist(root);
+      } catch {
+        state.items = previous;
+        render(root);
+      }
+    };
+  });
 }
 
 async function persist(root) {
