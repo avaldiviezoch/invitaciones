@@ -30,7 +30,7 @@
   if(moduleId==='checklist'||moduleId==='presupuesto'||moduleId==='proveedores'||moduleId==='invitados'||moduleId==='distribucion'||moduleId==='cronograma'||moduleId==='invitaciones'||moduleId==='musica') document.documentElement.classList.add('module-route');
 })();
 </script>
-<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=54">
+<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=55">
 <link rel="stylesheet" href="src/modules/checklist/checklist.css?v=19">
 <link rel="stylesheet" href="src/modules/presupuesto/presupuesto.css?v=27">
 <link rel="stylesheet" href="src/modules/proveedores/proveedores.css?v=4">
@@ -374,6 +374,42 @@ Antonio Valdiviezo © Derechos reservados
 </div>
 </aside>
 </main>
+<section class="discover-overlay" id="discoverOverlay" aria-label="Descubre Migrandia" hidden>
+  <div class="discover-shell">
+    <button class="discover-skip" id="discoverSkipButton" type="button">Omitir</button>
+    <div class="discover-brand" aria-hidden="true"><img src="assets/branding/LOGO_MGD.png" alt=""></div>
+    <div class="discover-track" id="discoverTrack">
+      <article class="discover-slide is-active" data-discover-slide>
+        <span class="discover-kicker">MIGRANDIA</span>
+        <h2>Todo tu gran día<br>en un solo lugar</h2>
+        <p>Organiza, inspira, invita y disfruta cada etapa de tu boda desde un mismo espacio.</p>
+        <div class="discover-orbit" aria-hidden="true"><span>✓</span><span>S/</span><span>♡</span><span>♪</span></div>
+      </article>
+      <article class="discover-slide" data-discover-slide>
+        <span class="discover-kicker">ORGANIZA</span>
+        <h2>Del primer pendiente<br>al último pago</h2>
+        <p>Checklist, presupuesto, proveedores y cronograma conectados para que siempre sepas qué sigue.</p>
+        <div class="discover-feature-row" aria-hidden="true"><span>✓<small>Checklist</small></span><span>S/<small>Presupuesto</small></span><span>⌁<small>Proveedores</small></span></div>
+      </article>
+      <article class="discover-slide" data-discover-slide>
+        <span class="discover-kicker">TUS INVITADOS</span>
+        <h2>Cada persona<br>en su lugar</h2>
+        <p>Gestiona invitados, confirmaciones, mesas y distribución sin perder de vista ningún detalle.</p>
+        <div class="discover-table" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><b>10</b></div>
+      </article>
+      <article class="discover-slide" data-discover-slide>
+        <span class="discover-kicker">TU HISTORIA</span>
+        <h2>Una boda que<br>se sienta como ustedes</h2>
+        <p>Invitaciones, música y nuevas herramientas creativas crecerán contigo dentro de Migrandia.</p>
+        <div class="discover-heart" aria-hidden="true">♡</div>
+      </article>
+    </div>
+    <div class="discover-footer">
+      <div class="discover-dots" id="discoverDots" aria-label="Progreso"></div>
+      <button class="discover-next" id="discoverNextButton" type="button">Descubrir Migrandia</button>
+    </div>
+  </div>
+</section>
 <section id="authOverlay" class="auth-overlay">
 <div class="auth-card">
 <h2>
@@ -462,7 +498,7 @@ Cancelar
 <form class="create-wedding-card" id="createWeddingForm" hidden><h3>Crear una nueva boda</h3><label><span>Nombre de la boda</span><input id="newWeddingName" type="text" maxlength="90" placeholder="Ej. Antonio & Lucero" required></label><label><span>Fecha</span><input id="newWeddingDate" type="date"></label><div><button type="button" id="cancelCreateWedding">Cancelar</button><button type="submit">Crear y abrir</button></div><p id="createWeddingStatus" aria-live="polite"></p></form>
 </div>
 </section>
-<script type="module" src="src/modules/dashboard/inicio.js?v=218">
+<script type="module" src="src/modules/dashboard/inicio.js?v=219">
 </script>
 </body>
 </html>
