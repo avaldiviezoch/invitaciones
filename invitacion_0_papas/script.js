@@ -34,13 +34,13 @@
     if (!preIntro || !preIntroVideo) return;
 
     const ORIGINAL_ENTRY_VIDEO = 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/video_entrada.mp4#t=0.001';
-    let playRequested = false;
-    let started = false;
     let phase = 'special';
+    let started = false;
 
     preIntroVideo.controls = false;
     preIntroVideo.muted = false;
     preIntroVideo.volume = 1;
+    preIntroVideo.autoplay = true;
 
     const showLoader = () => {
       if (preIntroLoader) preIntroLoader.hidden = false;
@@ -60,29 +60,20 @@
       return remaining <= 0.75;
     };
 
-    const tryStart = async () => {
-      if (!playRequested || started || !hasEnoughBuffer()) return;
+    const startSpecialVideo = async () => {
+      if (started || phase !== 'special' || !hasEnoughBuffer()) return;
+
       started = true;
-      hideLoader();
+      showLoader();
 
       try {
         preIntroVideo.currentTime = 0;
         await preIntroVideo.play();
+        hideLoader();
       } catch (_) {
         started = false;
         showLoader();
       }
-    };
-
-    const requestPlayback = event => {
-      if (event?.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') return;
-      event?.preventDefault();
-      if (playRequested) return;
-
-      playRequested = true;
-      showLoader();
-      preIntroVideo.load();
-      tryStart();
     };
 
     const playOriginalEntry = async () => {
@@ -118,9 +109,9 @@
       startSakeDeBinks();
     };
 
-    preIntroVideo.addEventListener('loadedmetadata', tryStart);
-    preIntroVideo.addEventListener('progress', tryStart);
-    preIntroVideo.addEventListener('canplaythrough', tryStart);
+    preIntroVideo.addEventListener('loadedmetadata', startSpecialVideo);
+    preIntroVideo.addEventListener('progress', startSpecialVideo);
+    preIntroVideo.addEventListener('canplaythrough', startSpecialVideo);
     preIntroVideo.addEventListener('playing', hideLoader);
     preIntroVideo.addEventListener('waiting', showLoader);
     preIntroVideo.addEventListener('stalled', showLoader);
@@ -134,11 +125,9 @@
       finishIntroSequence();
     });
 
-    preIntro.addEventListener('click', requestPlayback);
-    preIntro.addEventListener('keydown', requestPlayback);
-
     showLoader();
     preIntroVideo.load();
+    startSpecialVideo();
   }
 
   function createPetals() {
