@@ -93,6 +93,24 @@ async function updateWeddingIdentity(context, changes = {}) {
 
 
 
+async function saveWeddingOnboarding(context, profile = {}) {
+  const user = auth.currentUser;
+  if (!user || !context?.id) throw new Error('No hay una boda activa.');
+  if (normalizeWeddingRole(context.role) !== 'owner') throw new Error('Solo el propietario puede configurar el onboarding de esta boda.');
+  const priorities = Array.isArray(profile.priorities) ? profile.priorities.map(String).filter(Boolean).slice(0, 12) : [];
+  await updateDoc(doc(db, 'weddings', context.id), {
+    onboarding: {
+      completed: true,
+      role: String(profile.role || ''),
+      stage: String(profile.stage || ''),
+      priorities,
+      completedBy: user.uid,
+      completedAt: serverTimestamp()
+    },
+    updatedAt: serverTimestamp()
+  });
+}
+
 async function createWedding({ name, date = '' } = {}) {
   const user = auth.currentUser;
   if (!user) throw new Error('Debes iniciar sesión.');
@@ -233,7 +251,7 @@ async function cancelWeddingInvitation(context, inviteId) {
 
 export {
   listWeddingContexts, loadActiveWeddingContext, selectActiveWedding, updateWeddingIdentity,
-  createWedding, listPendingInvitations, acceptWeddingInvitation,
+  saveWeddingOnboarding, createWedding, listPendingInvitations, acceptWeddingInvitation,
   listWeddingMembers, listWeddingInvitations, inviteWeddingMember,
   updateWeddingMemberRole, removeWeddingMember, cancelWeddingInvitation
 };
