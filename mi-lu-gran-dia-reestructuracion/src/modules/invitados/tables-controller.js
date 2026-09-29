@@ -7,7 +7,7 @@ import {
   standardTablePhysicalDimensions,
   tablePhysicalDimensions,
   tableSeatGeometry
-} from './table-geometry.js?v=5';
+} from './table-geometry.js?v=6';
 
 const SHAPE_LABELS = Object.freeze({
   round: 'Redonda',
