@@ -1,4 +1,4 @@
-import { saveInvitadosSnapshot } from './invitados-data.js?v=3';
+import { saveInvitadosSnapshot, tableCapacity } from './invitados-data.js?v=6';
 import {
   MIN_TABLE_METERS,
   MAX_TABLE_METERS,
@@ -53,14 +53,6 @@ function createTablesController(api) {
   function normalizeCapacity(value) {
     const number = Number(value);
     return Number.isInteger(number) && number >= 4 && number <= 16 ? number : 10;
-  }
-
-  function tableCapacity(table) {
-    const direct = Number(table?.capacity);
-    if (Number.isInteger(direct) && direct >= 4 && direct <= 16) return direct;
-    const seatCount = Array.isArray(table?.seats) ? table.seats.length : 0;
-    if (Number.isInteger(seatCount) && seatCount >= 4 && seatCount <= 16) return seatCount;
-    return 10;
   }
 
   function seatAt(table, index) {
