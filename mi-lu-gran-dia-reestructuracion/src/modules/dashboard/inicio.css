@@ -1378,3 +1378,52 @@ body.menu-open .menu-button svg {
   .discover-feature-row span{width:84px}
 }
 @media(prefers-reduced-motion:reduce){.discover-slide,.discover-dots button{transition:none}}
+
+/* Onboarding personalizado — estructura lista para sustituir placeholders por ilustraciones propias */
+.discover-menu-button{position:fixed;z-index:123;top:max(18px,env(safe-area-inset-top));right:18px;width:44px;height:44px;display:grid;place-items:center;border:1px solid rgba(241,229,218,.16);border-radius:14px;background:rgba(15,16,13,.74);color:#f1e5da;backdrop-filter:blur(12px);cursor:pointer}
+.discover-menu-button svg{width:20px;fill:none;stroke:currentColor;stroke-width:1.8}
+.discover-options{width:min(720px,100%);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:28px}
+.discover-options button,.discover-unknown{min-height:104px;display:grid;grid-template-columns:56px 1fr;grid-template-rows:auto auto;align-items:center;column-gap:14px;padding:14px 16px;border:1px solid rgba(241,229,218,.12);border-radius:20px;background:rgba(241,229,218,.045);color:#f7f1e9;text-align:left;cursor:pointer;transition:border-color .18s ease,background .18s ease,transform .18s ease}
+.discover-options button:hover,.discover-options button.is-selected,.discover-unknown.is-selected{border-color:rgba(174,185,145,.62);background:rgba(142,155,111,.15);transform:translateY(-2px)}
+.discover-options button strong,.discover-unknown strong{align-self:end;font:700 12px/1.25 Arial,sans-serif}
+.discover-options button small{align-self:start;color:rgba(247,241,233,.48);font:500 9px/1.4 Arial,sans-serif}
+.discover-icon-slot{grid-row:1/3;width:56px;height:56px;display:grid;place-items:center;border:1px dashed rgba(200,207,173,.35);border-radius:17px;background:rgba(200,207,173,.07);color:#c8cfad;font:500 13px Georgia,serif}
+.discover-options-compact{grid-template-columns:repeat(3,minmax(0,1fr))}
+.discover-options-compact button{min-height:82px;grid-template-columns:42px 1fr}
+.discover-options-compact .discover-icon-slot{width:42px;height:42px;border-radius:13px}
+.discover-options-two{grid-template-columns:repeat(2,minmax(0,240px));justify-content:center}
+.discover-step{margin-bottom:13px;color:#aeb991;font:800 8px Arial,sans-serif;letter-spacing:.22em}
+.discover-question h2{font-size:clamp(34px,5vw,58px)}
+.discover-field{width:min(420px,100%);display:grid;gap:7px;margin:18px auto 0;color:rgba(247,241,233,.58);font:700 9px Arial,sans-serif;text-align:left}
+.discover-field[hidden]{display:none}
+.discover-field input{width:100%;min-height:48px;box-sizing:border-box;padding:0 14px;border:1px solid rgba(241,229,218,.14);border-radius:14px;background:rgba(255,255,255,.055);color:#f7f1e9;font:600 13px Arial,sans-serif;color-scheme:dark}
+.discover-budget{width:min(480px,100%);margin-top:26px}
+.discover-money{position:relative}
+.discover-money b{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:#aeb991;font:700 12px Arial,sans-serif}
+.discover-money input{padding-left:42px}
+.discover-unknown{width:100%;margin-top:12px}
+.discover-summary{width:min(600px,100%);display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:25px auto 18px}
+.discover-summary span{display:grid;gap:4px;padding:11px 13px;border:1px solid rgba(241,229,218,.1);border-radius:14px;background:rgba(255,255,255,.035);text-align:left}
+.discover-summary small{color:rgba(247,241,233,.42);font:700 7px Arial,sans-serif;text-transform:uppercase;letter-spacing:.12em}
+.discover-summary strong{font:700 10px Arial,sans-serif;text-transform:capitalize}
+.discover-google,.discover-email{width:min(330px,100%);min-height:48px;border-radius:999px;cursor:pointer;font:800 10px Arial,sans-serif}
+.discover-google{margin-top:4px;border:0;background:#f1e5da;color:#34382c}
+.discover-google span{display:inline-grid;width:22px;height:22px;margin-right:8px;place-items:center;border-radius:50%;background:#fff;color:#333}
+.discover-email{margin-top:8px;border:1px solid rgba(241,229,218,.14);background:transparent;color:rgba(247,241,233,.72)}
+.discover-back{grid-column:1;justify-self:start;border:0;background:transparent;color:rgba(247,241,233,.55);font:700 9px Arial,sans-serif;cursor:pointer}
+@media(max-width:640px){
+ .discover-menu-button{right:14px}
+ .discover-skip{margin-right:64px}
+ .discover-question{justify-content:flex-start;padding-top:94px;overflow:auto}
+ .discover-question h2{font-size:clamp(32px,10vw,44px)}
+ .discover-options,.discover-options-compact,.discover-options-two{grid-template-columns:1fr;width:100%;margin-top:20px}
+ .discover-options button{min-height:78px}
+ .discover-options-role{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .discover-options-role button{grid-template-columns:1fr;grid-template-rows:48px auto auto;justify-items:center;text-align:center}
+ .discover-options-role .discover-icon-slot{grid-row:1;width:46px;height:46px}
+ .discover-footer{grid-template-columns:auto 1fr;column-gap:12px}
+ .discover-back{grid-column:1;grid-row:1}
+ .discover-dots{grid-column:2;grid-row:1;justify-self:end}
+ .discover-next{grid-column:1/3;grid-row:2}
+ .discover-summary{grid-template-columns:1fr 1fr}
+}
