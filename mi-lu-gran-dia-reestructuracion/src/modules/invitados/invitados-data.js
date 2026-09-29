@@ -18,6 +18,14 @@ function guestStatus(guest) {
   return 'pending';
 }
 
+function tableCapacity(table) {
+  const direct = Number(table?.capacity);
+  if (Number.isInteger(direct) && direct >= 4 && direct <= 16) return direct;
+  const seatCount = Array.isArray(table?.seats) ? table.seats.length : 0;
+  if (Number.isInteger(seatCount) && seatCount >= 4 && seatCount <= 16) return seatCount;
+  return 10;
+}
+
 function normalizeGuestState(value) {
   if (value === null || value === undefined || value === '') {
     return { mode: 'object', root: {}, guests: [], tables: [] };
@@ -105,6 +113,19 @@ function summarizeInvitadosValue(value) {
   const seated = guests.filter((guest) => String(guest?.tableId || '').trim());
   const confirmedSeated = confirmed.filter((guest) => String(guest?.tableId || '').trim());
   const usedTableIds = new Set(seated.map((guest) => String(guest.tableId || '').trim()).filter(Boolean));
+  const tables = canonical.tables.map((table, index) => {
+    const tableId = String(table?.id || '').trim();
+    const assigned = guests.filter((guest) => String(guest?.tableId || '').trim() === tableId);
+    const confirmedAtTable = assigned.filter((guest) => guestStatus(guest) === 'confirmed').length;
+    return {
+      id: tableId || `legacy-table-${index}`,
+      name: String(table?.name || `Mesa ${index + 1}`).trim(),
+      shape: String(table?.type || table?.shape || 'round').trim().toLowerCase(),
+      capacity: tableCapacity(table),
+      assigned: assigned.length,
+      confirmed: confirmedAtTable
+    };
+  });
   return {
     total: guests.length,
     confirmed: confirmed.length,
@@ -112,6 +133,7 @@ function summarizeInvitadosValue(value) {
     seated: seated.length,
     confirmedSeated: confirmedSeated.length,
     tablesUsed: usedTableIds.size,
+    tables,
     confirmedPercent: guests.length ? Math.round(confirmed.length * 100 / guests.length) : 0
   };
 }
@@ -153,6 +175,7 @@ export {
   GUEST_STORAGE_KEY,
   SHARED_STORAGE_KEY,
   guestStatus,
+  tableCapacity,
   summarizeInvitadosValue,
   loadInvitadosSnapshot,
   saveInvitadosSnapshot,
