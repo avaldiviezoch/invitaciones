@@ -24,6 +24,34 @@ function normalizeUrl(value = '') {
   }
 }
 
+async function resolvePinterestPreview(value = '') {
+  const source = normalizeUrl(value);
+  if (!source) return null;
+  let host = '';
+  try { host = new URL(source).hostname.toLowerCase(); } catch { return null; }
+  if (!['pin.it', 'www.pinterest.com', 'pinterest.com'].includes(host)) return null;
+  try {
+    const endpoint = `https://www.pinterest.com/oembed.json?url=${encodeURIComponent(source)}`;
+    const response = await fetch(endpoint, { headers: { Accept: 'application/json' } });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return {
+      image: normalizeUrl(data?.thumbnail_url),
+      title: String(data?.title || '').trim()
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function resolveLinkPreview(value = '') {
+  const source = normalizeUrl(value);
+  if (!source) return null;
+  const directImage = imageFromProductUrl(source);
+  if (directImage) return { image: directImage, title: '' };
+  return resolvePinterestPreview(source);
+}
+
 function imageFromProductUrl(value = '') {
   const source = normalizeUrl(value);
   if (!source) return '';
@@ -165,10 +193,12 @@ export async function mountIdeas(context) {
     render(root);
   };
 
-  urlInput.onchange = () => {
+  urlInput.onchange = async () => {
     if (imageInput.value.trim()) return;
-    const image = imageFromProductUrl(urlInput.value);
-    if (image) imageInput.value = image;
+    const preview = await resolveLinkPreview(urlInput.value);
+    if (preview?.image) imageInput.value = preview.image;
+    const titleInput = form.querySelector('[data-ideas-title]');
+    if (!titleInput.value.trim() && preview?.title) titleInput.value = preview.title;
   };
 
   form.onsubmit = async (event) => {
@@ -180,7 +210,12 @@ export async function mountIdeas(context) {
       return;
     }
     const url = normalizeUrl(urlInput.value);
-    const image = normalizeUrl(imageInput.value) || imageFromProductUrl(url);
+    let image = normalizeUrl(imageInput.value) || imageFromProductUrl(url);
+    if (!image && url) {
+      const preview = await resolveLinkPreview(url);
+      image = preview?.image || '';
+      if (!titleInput.value.trim() && preview?.title) titleInput.value = preview.title;
+    }
     const item = {
       id: crypto.randomUUID(),
       title,
