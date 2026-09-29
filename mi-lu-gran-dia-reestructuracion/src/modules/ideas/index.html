@@ -1,0 +1,35 @@
+<div class="ideas-shell">
+  <header class="ideas-hero">
+    <div><p class="ideas-eyebrow">INSPIRACIÓN · COMPRAS</p><h1>Ideas</h1><p>Guarda inspiración y cosas que quieras comprar para tu gran día.</p></div>
+    <button class="ideas-add-button" type="button" data-ideas-open-form>+ Agregar idea</button>
+  </header>
+  <section class="ideas-toolbar" aria-label="Filtros de ideas">
+    <div class="ideas-tabs" role="group" aria-label="Tipo de idea">
+      <button type="button" class="is-active" data-ideas-filter="all">Todo</button>
+      <button type="button" data-ideas-filter="inspiration">Inspiración</button>
+      <button type="button" data-ideas-filter="purchase">Por comprar</button>
+    </div>
+    <input type="search" data-ideas-search placeholder="Buscar en mis ideas…" aria-label="Buscar ideas">
+  </section>
+  <section class="ideas-board" data-ideas-board aria-live="polite"></section>
+  <div class="ideas-empty" data-ideas-empty>
+    <strong>Empieza tu tablero de ideas</strong>
+    <span>Pega un enlace de Pinterest, Temu, AliExpress u otra tienda, o crea una idea propia.</span>
+    <button type="button" data-ideas-open-form>Agregar mi primera idea</button>
+  </div>
+  <dialog class="ideas-dialog" data-ideas-dialog>
+    <form method="dialog" class="ideas-form" data-ideas-form>
+      <header><div><span>NUEVA IDEA</span><h2>Guarda algo que te inspire</h2></div><button type="button" data-ideas-close aria-label="Cerrar">×</button></header>
+      <label>Enlace<input type="url" data-ideas-url placeholder="https://…" autocomplete="url"><small>Pinterest, Temu, AliExpress o cualquier página.</small></label>
+      <div class="ideas-form-grid">
+        <label>Nombre<input type="text" data-ideas-title maxlength="100" placeholder="Ej. Luces cálidas para las mesas"></label>
+        <label>Tipo<select data-ideas-type><option value="inspiration">Inspiración</option><option value="purchase">Compra</option></select></label>
+        <label>Categoría<select data-ideas-category><option>Decoración</option><option>Flores</option><option>Recuerdos</option><option>Vestuario</option><option>Torta</option><option>Mobiliario</option><option>Iluminación</option><option>Fotografía</option><option>Otros</option></select></label>
+        <label>Precio estimado<input type="number" data-ideas-price min="0" step="0.01" placeholder="0.00"></label>
+      </div>
+      <label>Imagen<input type="url" data-ideas-image placeholder="URL de la imagen"><small>La miniatura automática se conectará en la integración de enlaces. Por ahora puedes indicar una imagen.</small></label>
+      <label>Notas<textarea data-ideas-notes maxlength="400" rows="3" placeholder="Color, cantidad, medidas, para qué parte de la boda…"></textarea></label>
+      <footer><button type="button" class="ideas-secondary" data-ideas-close>Cancelar</button><button type="submit" class="ideas-primary">Agregar al tablero</button></footer>
+    </form>
+  </dialog>
+</div>
