@@ -7,7 +7,7 @@ import {
   normalizeTableShape,
   standardTablePhysicalDimensions,
   tablePhysicalDimensions
-} from '../invitados/table-geometry.js?v=5';
+} from '../invitados/table-geometry.js?v=6';
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=6';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { setupDistributionCamera } from './camera.js?v=9';
