@@ -1227,7 +1227,8 @@ body.menu-open .menu-button svg {
 .module-loader{position:fixed;z-index:90;inset:100px 0 0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:rgba(247,245,241,.96);backdrop-filter:blur(12px);text-align:center}
 .module-loader[hidden]{display:none}
 .module-loader-mark{position:relative;width:86px;height:86px;display:grid;place-items:center;margin-bottom:22px}
-.module-loader-mark span{width:58px;height:58px;display:grid;place-items:center;border-radius:50%;overflow:hidden;background:linear-gradient(145deg,#778263,#4f5b43);box-shadow:0 12px 30px rgba(75,87,62,.2)}\n.module-loader-mark span img{width:100%;height:100%;display:block;object-fit:contain}
+.module-loader-mark span{width:58px;height:58px;display:grid;place-items:center;border-radius:50%;overflow:hidden;background:linear-gradient(145deg,#778263,#4f5b43);box-shadow:0 12px 30px rgba(75,87,62,.2)}
+.module-loader-mark span img{width:100%;height:100%;display:block;object-fit:contain}
 .module-loader-mark i{position:absolute;inset:0;border:1.5px solid rgba(119,130,99,.16);border-top-color:#849168;border-right-color:#b77783;border-radius:50%;animation:mgdLoaderSpin 1.15s linear infinite}
 .module-loader>strong{color:#3e3a36;font:500 24px/1.15 Georgia,serif}
 .module-loader-copy{margin-top:8px;color:#8c8781;font:500 10px/1.4 Arial,sans-serif}
