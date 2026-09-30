@@ -351,14 +351,20 @@ function homePriority(summary) {
   const checklist = summary?.checklist || {};
   const budget = summary?.budget || {};
   const total = Number(guests.total) || 0;
+  const confirmed = Number(guests.confirmed) || 0;
   const pendingGuests = Number(guests.pending) || 0;
-  const unseated = Math.max(0, total - (Number(guests.seated) || 0));
-  const pendingTasks = (Number(checklist.pending) || 0) + (Number(checklist.progress) || 0);
-  if (pendingTasks > 0) return { module:'checklist', title:`${pendingTasks} ${pendingTasks === 1 ? 'tarea necesita' : 'tareas necesitan'} atención`, detail:'Revisa el Checklist y continúa con los pendientes de la boda.' };
-  if (pendingGuests > 0) return { module:'invitados', title:`${pendingGuests} ${pendingGuests === 1 ? 'invitado está' : 'invitados están'} pendiente de confirmar`, detail:'Revisa las confirmaciones antes de cerrar la organización de mesas.' };
-  if (unseated > 0) return { module:'distribucion', title:`${unseated} ${unseated === 1 ? 'invitado falta' : 'invitados faltan'} por ubicar`, detail:'Completa la distribución de mesas para tener a todos ubicados.' };
-  if ((Number(budget.budget) || 0) > 0 && (Number(budget.balance) || 0) > 0) return { module:'presupuesto', title:`${formatHomeMoney(budget.balance, budget.currency)} disponibles en presupuesto`, detail:'Consulta los gastos y pagos pendientes de tu planificación.' };
-  return { module:'', title:'Todo va tomando forma', detail:'Tus principales áreas están al día. Sigue avanzando desde el módulo que necesites.' };
+  const confirmedUnseated = Math.max(0, confirmed - (Number(guests.confirmedSeated) || 0));
+  const pendingTasks = Number(checklist.pending) || 0;
+  const progressTasks = Number(checklist.progress) || 0;
+  const overdueTasks = Number(checklist.overdue) || 0;
+  if (overdueTasks > 0) return { module:'checklist', title: overdueTasks + (overdueTasks === 1 ? ' tarea está atrasada' : ' tareas están atrasadas'), detail:'Empieza por los pendientes que ya superaron su fecha prevista.' };
+  if (confirmedUnseated > 0) return { module:'distribucion', title: confirmedUnseated + (confirmedUnseated === 1 ? ' confirmado falta por ubicar' : ' confirmados faltan por ubicar'), detail:'Ya confirmaron asistencia; asígnales una mesa para cerrar su ubicación.' };
+  if (pendingGuests > 0) return { module:'invitados', title: pendingGuests + (pendingGuests === 1 ? ' invitado está pendiente de confirmar' : ' invitados están pendientes de confirmar'), detail:'Revisa las confirmaciones pendientes antes de cerrar la distribución.' };
+  if (progressTasks > 0) return { module:'checklist', title: progressTasks + (progressTasks === 1 ? ' tarea sigue en proceso' : ' tareas siguen en proceso'), detail:'Continúa lo que ya empezaste antes de abrir nuevos pendientes.' };
+  if (pendingTasks > 0) return { module:'checklist', title: pendingTasks + (pendingTasks === 1 ? ' tarea queda pendiente' : ' tareas quedan pendientes'), detail:'Revisa el Checklist y elige el siguiente pendiente de la boda.' };
+  if ((Number(budget.budget) || 0) > 0 && (Number(budget.balance) || 0) > 0) return { module:'presupuesto', title: formatHomeMoney(budget.balance, budget.currency) + ' disponibles en presupuesto', detail:'Consulta lo presupuestado y los pagos registrados antes de la siguiente decisión.' };
+  if (!total && !Number(checklist.total) && !(Number(budget.budget) || 0)) return { module:'', title:'Empieza a darle forma a tu boda', detail:'Agrega tus primeros invitados, tareas o presupuesto para ver aquí qué sigue.' };
+  return { module:'', title:'Tus principales pendientes están al día', detail:'Puedes continuar desde el módulo que quieras organizar ahora.' };
 }
 
 function renderHomeSummary(summary, context) {
