@@ -992,7 +992,7 @@ const pendingModuleMounts = new Map();
 
 const MODULES = Object.freeze({
   checklist: {
-    load: () => import('../checklist/index.js?v=18'),
+    load: () => import('../checklist/index.js?v=19'),
     mount: 'mountChecklist'
   },
   presupuesto: {
@@ -1087,8 +1087,14 @@ function moduleFromHash() {
   return ACTIVE_MODULES.has(moduleId) ? moduleId : '';
 }
 
-function applyHomeFocusTarget(moduleId, target = '') {
-  if (moduleId !== 'invitados' || !target) return;
+async function applyHomeFocusTarget(moduleId, target = '') {
+  if (!target) return;
+  if (moduleId === 'checklist') {
+    const checklistModule = await MODULES.checklist.load();
+    checklistModule.focusChecklist?.(target);
+    return;
+  }
+  if (moduleId !== 'invitados') return;
   const root = document.querySelector('[data-module-view="invitados"]');
   if (!root) return;
   if (target === 'pending-rsvp') {
@@ -1135,14 +1141,14 @@ async function openModule(moduleId, { updateHash = true, focusTarget = '' } = {}
 
   if (alreadyMounted) {
     setModuleLoading(false);
-    applyHomeFocusTarget(moduleId, focusTarget);
+    await applyHomeFocusTarget(moduleId, focusTarget);
     return;
   }
 
   setModuleLoading(true);
   try {
     const mounted = await mountModuleOnce(moduleId, weddingContext);
-    if (mounted !== false) applyHomeFocusTarget(moduleId, focusTarget);
+    if (mounted !== false) await applyHomeFocusTarget(moduleId, focusTarget);
   } catch (error) {
     console.error(`No se pudo montar ${moduleId}:`, error);
     const view = document.querySelector(`[data-module-view="${moduleId}"]`);
