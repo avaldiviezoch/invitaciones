@@ -346,11 +346,32 @@ function setHomeRing(selector, percent) {
   if (ring) ring.style.setProperty('--p', String(Math.max(0, Math.min(100, Number(percent) || 0))));
 }
 
+function homePriority(summary) {
+  const guests = summary?.guests || {};
+  const checklist = summary?.checklist || {};
+  const budget = summary?.budget || {};
+  const total = Number(guests.total) || 0;
+  const pendingGuests = Number(guests.pending) || 0;
+  const unseated = Math.max(0, total - (Number(guests.seated) || 0));
+  const pendingTasks = (Number(checklist.pending) || 0) + (Number(checklist.progress) || 0);
+  if (pendingTasks > 0) return { module:'checklist', title:`${pendingTasks} ${pendingTasks === 1 ? 'tarea necesita' : 'tareas necesitan'} atención`, detail:'Revisa el Checklist y continúa con los pendientes de la boda.' };
+  if (pendingGuests > 0) return { module:'invitados', title:`${pendingGuests} ${pendingGuests === 1 ? 'invitado está' : 'invitados están'} pendiente de confirmar`, detail:'Revisa las confirmaciones antes de cerrar la organización de mesas.' };
+  if (unseated > 0) return { module:'distribucion', title:`${unseated} ${unseated === 1 ? 'invitado falta' : 'invitados faltan'} por ubicar`, detail:'Completa la distribución de mesas para tener a todos ubicados.' };
+  if ((Number(budget.budget) || 0) > 0 && (Number(budget.balance) || 0) > 0) return { module:'presupuesto', title:`${formatHomeMoney(budget.balance, budget.currency)} disponibles en presupuesto`, detail:'Consulta los gastos y pagos pendientes de tu planificación.' };
+  return { module:'', title:'Todo va tomando forma', detail:'Tus principales áreas están al día. Sigue avanzando desde el módulo que necesites.' };
+}
+
 function renderHomeSummary(summary, context) {
   if (!homeDashboard) return;
   const guests = summary?.guests || {};
   const checklist = summary?.checklist || {};
   const budget = summary?.budget || {};
+  const focus = homePriority(summary);
+  homeDashboard.querySelector('[data-home-focus-title]').textContent = focus.title;
+  homeDashboard.querySelector('[data-home-focus-detail]').textContent = focus.detail;
+  const focusAction = homeDashboard.querySelector('[data-home-focus-action]');
+  focusAction.hidden = !focus.module;
+  focusAction.dataset.module = focus.module;
 
   homeDashboard.querySelector('[data-home-guests-ratio]').textContent = `${guests.confirmed ?? 0} / ${guests.total ?? 0}`;
   homeDashboard.querySelector('[data-home-guests-percent]').textContent = `${guests.confirmedPercent ?? 0}%`;
@@ -422,6 +443,11 @@ async function refreshHomeDashboard(context = weddingContext) {
     if (epoch === homeSummaryEpoch) homeDashboard.setAttribute('aria-busy', 'false');
   }
 }
+
+homeDashboard?.querySelector('[data-home-focus-action]')?.addEventListener('click', (event) => {
+  const module = event.currentTarget.dataset.module;
+  if (module && MODULE_HASHES.has(`#${module}`)) location.hash = module;
+});
 
 function applyWeddingContext(context) {
   weddingContext = context;
