@@ -52,6 +52,7 @@ const TABLE_FRAME = Object.freeze({ width: 300, height: 316, centerX: 150, cente
 const TABLE_CLEARANCE_MARGIN_METERS = 0.8;
 const TABLE_CHAIR_OFFSET_METERS = 0.38;
 const TABLE_LABEL_OFFSET_METERS = 0.72;
+const ROUND_TABLE_LABEL_ORBIT_FACTOR = 2.18;
 const PROXIMITY_OPTIONS_METERS = Object.freeze([0.6, 1, 1.5, 2]);
 const MIN_ELEMENT_METERS = 0.5;
 const MAX_ELEMENT_METERS = 30;
@@ -241,7 +242,7 @@ function tablePhysicalGeometry(tableSource, capacity) {
   if (shape === 'round') {
     const tableRadius = table.width / 2;
     const chairOrbit = tableRadius + PLAN_SCALE.metersToPixels(TABLE_CHAIR_OFFSET_METERS);
-    const labelOrbit = tableRadius + PLAN_SCALE.metersToPixels(TABLE_LABEL_OFFSET_METERS);
+    const labelOrbit = tableRadius * ROUND_TABLE_LABEL_ORBIT_FACTOR;
     for (let index = 0; index < count; index += 1) {
       const angle = -Math.PI / 2 + Math.PI * 2 * index / count;
       const cos = Math.cos(angle), sin = Math.sin(angle);
