@@ -529,8 +529,7 @@ function renderTable(item, guestIndex, placement) {
   seatsLayer.className = 'distribution-seats-layer';
   seatsLayer.style.width = `${geometry.visualWidth}px`;
   seatsLayer.style.height = `${geometry.visualHeight}px`;
-  seatsLayer.style.transformOrigin = `${geometry.centerX}px ${geometry.centerY}px`;
-  seatsLayer.style.transform = `rotate(${normalizeRotation(placement.rotation)}deg)`;
+  seatsLayer.style.transform = 'none';
   node.append(seatsLayer);
 
   geometry.positions.slice(0, capacity).forEach((position, seatIndex) => {
@@ -575,6 +574,7 @@ function renderTable(item, guestIndex, placement) {
       seatsLayer.append(labelWrapper);
     }
   });
+  applySeatAndLabelRotation(node, normalizeRotation(placement.rotation));
   return node;
 }
 
