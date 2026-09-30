@@ -228,6 +228,16 @@ function rectangularPerimeterPositions(count, width, height, centerX, centerY) {
   return positions;
 }
 
+function labelAlignmentForSeat(position) {
+  if (position?.side === 'right') return 'left';
+  if (position?.side === 'left') return 'right';
+  if (position?.side === 'top' || position?.side === 'bottom') return 'center';
+  const cosine = Math.cos(Number(position?.angle) || 0);
+  if (cosine > 0.28) return 'left';
+  if (cosine < -0.28) return 'right';
+  return 'center';
+}
+
 function tablePhysicalGeometry(tableSource, capacity) {
   const source = tableSource && typeof tableSource === 'object' ? tableSource : { type: tableSource };
   const physical = tablePhysicalDimensions(source);
@@ -255,7 +265,8 @@ function tablePhysicalGeometry(tableSource, capacity) {
         x: chairX,
         y: chairY,
         labelX: centerX + (chairX - centerX) * 1.64,
-        labelY: centerY + (chairY - centerY) * 1.64
+        labelY: centerY + (chairY - centerY) * 1.64,
+        angle
       });
     }
     return { shape, table, clearance, visualWidth, visualHeight, centerX, centerY, positions };
@@ -483,13 +494,9 @@ function renderTable(item, guestIndex, placement) {
       labelWrapper.dataset.seatIndex = String(seatIndex);
       labelWrapper.style.left = `${position.labelX}px`;
       labelWrapper.style.top = `${position.labelY}px`;
-      labelWrapper.style.transform = 'rotate(var(--counter-rotation,0deg))';
+      labelWrapper.style.transform = `rotate(${-normalizeRotation(placement.rotation)}deg)`;
 
-      const localX = position.labelX - geometry.centerX;
-      const localY = position.labelY - geometry.centerY;
-      const angle = normalizeRotation(placement.rotation) * Math.PI / 180;
-      const worldX = localX * Math.cos(angle) - localY * Math.sin(angle);
-      const align = worldX > 8 ? 'left' : worldX < -8 ? 'right' : 'center';
+      const align = labelAlignmentForSeat(position);
 
       const label = document.createElement('span');
       label.className = 'distribution-seat-label';
