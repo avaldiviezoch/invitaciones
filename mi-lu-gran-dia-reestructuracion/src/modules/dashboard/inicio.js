@@ -1,7 +1,7 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { auth } from '../../services/firebase-client.js';
 import { readPlannerStorageKeys, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
-import { GUEST_STORAGE_KEY, summarizeInvitadosValue } from '../invitados/invitados-data.js?v=8';
+import { GUEST_STORAGE_KEY, summarizeInvitadosValue } from '../invitados/invitados-data.js?v=9';
 import { CHECKLIST_STORAGE_KEY, summarizeChecklistValue } from '../checklist/index.js?v=19';
 import { BUDGET_STORAGE_KEY, summarizeBudgetValue } from '../presupuesto/index.js?v=16';
 import {
@@ -402,7 +402,11 @@ function renderHomeSummary(summary, context) {
 
   homeDashboard.querySelector('[data-home-tables-ratio]').textContent = `${guests.seated ?? 0} / ${guests.total ?? 0} ubicadas`;
   homeDashboard.querySelector('[data-home-tables-seated]').textContent = String(guests.seated ?? 0);
-  homeDashboard.querySelector('[data-home-tables-confirmed]').textContent = `${guests.confirmedSeated ?? 0} confirmados ubicados`;
+  const confirmedWithoutTable = Array.isArray(guests.confirmedWithoutTable) ? guests.confirmedWithoutTable : [];
+  const confirmedDiagnostic = confirmedWithoutTable.length
+    ? ` · SIN MESA: ${confirmedWithoutTable.map((guest) => guest.name).join(', ')}`
+    : ' · SIN MESA CONFIRMADO: ninguno';
+  homeDashboard.querySelector('[data-home-tables-confirmed]').textContent = `${guests.confirmedSeated ?? 0} confirmados ubicados${confirmedDiagnostic}`;
 
   const tableGrid = homeDashboard.querySelector('[data-home-tables-grid]');
   const tableNote = homeDashboard.querySelector('[data-home-tables-note]');
