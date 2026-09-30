@@ -228,16 +228,6 @@ function rectangularPerimeterPositions(count, width, height, centerX, centerY) {
   return positions;
 }
 
-function labelAlignmentForSeat(position, rotation) {
-  const localX = Number(position?.labelX);
-  const localY = Number(position?.labelY);
-  const angle = normalizeRotation(rotation) * Math.PI / 180;
-  const worldX = localX * Math.cos(angle) - localY * Math.sin(angle);
-  if (worldX > 8) return 'left';
-  if (worldX < -8) return 'right';
-  return 'center';
-}
-
 function tablePhysicalGeometry(tableSource, capacity) {
   const source = tableSource && typeof tableSource === 'object' ? tableSource : { type: tableSource };
   const physical = tablePhysicalDimensions(source);
@@ -475,7 +465,6 @@ function applyPlacement(node, placement) {
   node.style.left = `${placement.x}px`;
   node.style.top = `${placement.y}px`;
   node.style.setProperty('--table-rotation', '0deg');
-  node.style.setProperty('--counter-rotation', '0deg');
   applySeatAndLabelRotation(node, normalizeRotation(placement.rotation));
 }
 
