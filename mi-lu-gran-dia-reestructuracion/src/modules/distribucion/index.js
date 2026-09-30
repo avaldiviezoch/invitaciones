@@ -417,22 +417,6 @@ function applyPlacement(node, placement) {
   node.style.setProperty('--counter-rotation', `${-rotation}deg`);
 }
 
-function guestLabelAlign(position, geometry, rotation) {
-  const localX = Number(position?.labelX) - Number(geometry?.centerX);
-  const localY = Number(position?.labelY) - Number(geometry?.centerY);
-  const angle = normalizeRotation(rotation) * Math.PI / 180;
-  const worldX = localX * Math.cos(angle) - localY * Math.sin(angle);
-  if (worldX > 8) return 'left';
-  if (worldX < -8) return 'right';
-  return 'center';
-}
-
-function applyGuestLabelTransform(wrapper, position, geometry, rotation) {
-  wrapper.style.left = `${Number(position?.labelX) || geometry.centerX}px`;
-  wrapper.style.top = `${Number(position?.labelY) || geometry.centerY}px`;
-  wrapper.style.transform = `rotate(${-normalizeRotation(rotation)}deg)`;
-}
-
 function renderTable(item, guestIndex, placement) {
   const { table, index, capacity, geometry } = item;
   const tableId = escapeText(table?.id);
@@ -457,7 +441,7 @@ function renderTable(item, guestIndex, placement) {
   surface.className = `distribution-tabletop is-${geometry.shape}`;
   surface.style.width = `${geometry.table.width}px`;
   surface.style.height = `${geometry.table.height}px`;
-  surface.innerHTML = `<div class="distribution-tabletop-copy"><strong></strong><span>${capacity} sillas</span></div>`;
+  surface.innerHTML = `<strong></strong><span>${capacity} sillas</span>`;
   surface.querySelector('strong').textContent = tableName(table, index);
   node.append(surface);
 
@@ -497,11 +481,19 @@ function renderTable(item, guestIndex, placement) {
       const labelWrapper = document.createElement('span');
       labelWrapper.className = 'distribution-seat-label-wrap';
       labelWrapper.dataset.seatIndex = String(seatIndex);
-      applyGuestLabelTransform(labelWrapper, position, geometry, placement.rotation);
+      labelWrapper.style.left = `${position.labelX}px`;
+      labelWrapper.style.top = `${position.labelY}px`;
+      labelWrapper.style.transform = 'rotate(var(--counter-rotation,0deg))';
+
+      const localX = position.labelX - geometry.centerX;
+      const localY = position.labelY - geometry.centerY;
+      const angle = normalizeRotation(placement.rotation) * Math.PI / 180;
+      const worldX = localX * Math.cos(angle) - localY * Math.sin(angle);
+      const align = worldX > 8 ? 'left' : worldX < -8 ? 'right' : 'center';
 
       const label = document.createElement('span');
       label.className = 'distribution-seat-label';
-      label.dataset.align = guestLabelAlign(position, geometry, placement.rotation);
+      label.dataset.align = align;
       label.dataset.guestId = escapeText(guest.id);
       label.dataset.tableId = tableId;
       label.dataset.seatIndex = String(seatIndex);
@@ -2059,18 +2051,6 @@ async function mountDistribucion(context) {
     // Las asignaciones son canónicas de Invitados/Mesas y aquí son solo lectura.
     // Distribución no escribe guest.tableId, guest.seatId ni guest.seatNumber.
 
-    const refreshTableLabelOrientation = (node, entry, rotation) => {
-      const positions = entry?.geometry?.positions || [];
-      node.querySelectorAll('.distribution-seat-label-wrap[data-seat-index]').forEach((wrapper) => {
-        const seatIndex = Number(wrapper.dataset.seatIndex);
-        const position = positions[seatIndex];
-        if (!position) return;
-        applyGuestLabelTransform(wrapper, position, entry.geometry, rotation);
-        const label = wrapper.querySelector('.distribution-seat-label');
-        if (label) label.dataset.align = guestLabelAlign(position, entry.geometry, rotation);
-      });
-    };
-
     const applyTableRotation = (tableId, rotation, { inspector = true } = {}) => {
       const placement = placementState.get(tableId);
       const node = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableId)}"]`);
@@ -2078,7 +2058,6 @@ async function mountDistribucion(context) {
       if (!placement || !node || !entry) return false;
       placement.rotation = normalizeRotation(rotation);
       applyPlacement(node, placement);
-      refreshTableLabelOrientation(node, entry, placement.rotation);
       if (inspector && selectedTableId === tableId) {
         const rotationOutput = root.querySelector('[data-distribution-selected-rotation]');
         rotationOutput.value = `${Math.round(placement.rotation)}°`;
