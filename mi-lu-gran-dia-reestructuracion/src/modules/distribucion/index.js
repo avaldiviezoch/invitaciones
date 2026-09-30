@@ -474,10 +474,16 @@ function renderTable(item, guestIndex, placement) {
     node.append(chair);
 
     if (guest) {
+      const labelAnchor = document.createElement('span');
+      labelAnchor.className = 'distribution-seat-label-anchor';
+      labelAnchor.style.left = `${position.labelX}px`;
+      labelAnchor.style.top = `${position.labelY}px`;
+
+      const labelRotator = document.createElement('span');
+      labelRotator.className = 'distribution-seat-label-rotator';
+
       const label = document.createElement('span');
       label.className = 'distribution-seat-label';
-      label.style.left = `${position.labelX}px`;
-      label.style.top = `${position.labelY}px`;
       label.dataset.align = guestLabelAlign(position, geometry, placement.rotation);
       label.dataset.guestId = escapeText(guest.id);
       label.dataset.tableId = tableId;
@@ -485,7 +491,10 @@ function renderTable(item, guestIndex, placement) {
       const guestName = escapeText(guest.name) || 'Invitado';
       label.textContent = compactGuestName(guestName);
       label.title = guestName;
-      node.append(label);
+
+      labelRotator.append(label);
+      labelAnchor.append(labelRotator);
+      node.append(labelAnchor);
     }
   });
   return node;
