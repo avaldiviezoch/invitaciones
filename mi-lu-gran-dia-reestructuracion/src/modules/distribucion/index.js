@@ -32,7 +32,7 @@ import {
   removeDistributionBackground
 } from './background-catalog.js?v=5';
 
-const TEMPLATE_URL = new URL('./index.html?v=63', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=64', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DISTRIBUTION_VIEW_STORAGE_KEY = 'planificador_bodas_distribucion_vista_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
