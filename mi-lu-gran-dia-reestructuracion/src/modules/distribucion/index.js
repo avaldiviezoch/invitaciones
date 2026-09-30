@@ -29,13 +29,12 @@ import {
   addDistributionBackground,
   listDistributionBackgrounds,
   loadDistributionBackground,
-  readDistributionBackgroundPreference,
-  removeDistributionBackground,
-  writeDistributionBackgroundPreference
-} from './background-catalog.js?v=4';
+  removeDistributionBackground
+} from './background-catalog.js?v=5';
 
 const TEMPLATE_URL = new URL('./index.html?v=63', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
+const DISTRIBUTION_VIEW_STORAGE_KEY = 'planificador_bodas_distribucion_vista_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 1;
 const KEYBOARD_MOVE_STEP = 10;
@@ -2796,13 +2795,23 @@ async function mountDistribucion(context) {
       const available = backgrounds.some((background) => background.id === selectedId);
       await applyReferenceBackground(available ? selectedId : DEFAULT_BACKGROUND_ID);
     };
-    const persistReferencePreference = () => writeDistributionBackgroundPreference(referenceScopeId, {
-      backgroundId: activeReferenceId,
-      visible: referenceToggle.checked,
-      ...referenceTransform
-    }).catch(() => {});
+    let referenceSaveTimer = 0;
+    const persistReferencePreference = ({ immediate = false } = {}) => {
+      window.clearTimeout(referenceSaveTimer);
+      const save = () => writePlannerStorageKey(context, DISTRIBUTION_VIEW_STORAGE_KEY, {
+        backgroundId: activeReferenceId,
+        visible: referenceToggle.checked,
+        ...referenceTransform
+      }).catch(() => {});
+      if (immediate) return save();
+      referenceSaveTimer = window.setTimeout(save, 220);
+      return Promise.resolve();
+    };
 
-    const referencePreference = await readDistributionBackgroundPreference(referenceScopeId);
+    const storedReferencePreference = await readPlannerStorageKey(context, DISTRIBUTION_VIEW_STORAGE_KEY).catch(() => null);
+    const referencePreference = storedReferencePreference && typeof storedReferencePreference === 'object'
+      ? storedReferencePreference
+      : { backgroundId: DEFAULT_BACKGROUND_ID, visible: true, scale:1, offsetX:0, offsetY:0 };
     if (epoch !== mountEpoch || !root.isConnected) return;
     referenceToggle.checked = referencePreference.visible;
     referenceTransform = {
@@ -2838,7 +2847,7 @@ async function mountDistribucion(context) {
       await applyReferenceBackground(referenceCatalog.value);
       referenceToggle.checked = true;
       world.classList.remove('hide-reference-image');
-      await persistReferencePreference();
+      await persistReferencePreference({ immediate:true });
       camera.fit();
       status.textContent = activeReferenceId === DEFAULT_BACKGROUND_ID ? 'Casa Acapulco seleccionado como plano base' : 'Plano local seleccionado';
     };
@@ -2851,7 +2860,7 @@ async function mountDistribucion(context) {
         await refreshReferenceCatalog(background.id);
         referenceToggle.checked = true;
         world.classList.remove('hide-reference-image');
-        await persistReferencePreference();
+        await persistReferencePreference({ immediate:true });
         camera.fit();
         status.textContent = 'Plano agregado al catálogo local de este navegador';
       } catch (error) {
@@ -2862,7 +2871,7 @@ async function mountDistribucion(context) {
     };
     referenceToggle.onchange = () => {
       world.classList.toggle('hide-reference-image', !referenceToggle.checked);
-      void persistReferencePreference();
+      void persistReferencePreference({ immediate:true });
     };
     referenceRemove.onclick = async () => {
       if (activeReferenceId === DEFAULT_BACKGROUND_ID) return;
@@ -2870,7 +2879,7 @@ async function mountDistribucion(context) {
       await refreshReferenceCatalog(DEFAULT_BACKGROUND_ID);
       referenceToggle.checked = true;
       world.classList.remove('hide-reference-image');
-      await persistReferencePreference();
+      await persistReferencePreference({ immediate:true });
       camera.fit();
       status.textContent = 'Plano personalizado eliminado. Casa Acapulco vuelve a ser el plano base';
     };
