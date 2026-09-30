@@ -1,7 +1,6 @@
 const DB_NAME = 'mi_lu_gran_dia_distribution_backgrounds';
 const DB_VERSION = 1;
 const BACKGROUNDS_STORE = 'backgrounds';
-const PREFERENCES_STORE = 'preferences';
 const DEFAULT_BACKGROUND_ID = 'venue_casa_acapulco';
 
 const DEFAULT_BACKGROUND = Object.freeze({
@@ -55,9 +54,6 @@ function openDatabase() {
       if (!database.objectStoreNames.contains(BACKGROUNDS_STORE)) {
         database.createObjectStore(BACKGROUNDS_STORE, { keyPath: 'id' });
       }
-      if (!database.objectStoreNames.contains(PREFERENCES_STORE)) {
-        database.createObjectStore(PREFERENCES_STORE, { keyPath: 'id' });
-      }
     };
     request.onsuccess = () => resolve(request.result);
     request.onerror = () => reject(request.error || new Error('No se pudo abrir el catálogo local de planos.'));
@@ -90,10 +86,6 @@ async function withStore(storeName, mode, operation) {
 
 function defaultSource() {
   return new URL('../../../assets/distribucion/casa-acapulco.png?v=1', import.meta.url).href;
-}
-
-function preferenceId(scopeId) {
-  return `selection:${String(scopeId || 'default')}`;
 }
 
 export function defaultDistributionBackground() {
@@ -139,34 +131,6 @@ export async function removeDistributionBackground(id) {
   if (!id || id === DEFAULT_BACKGROUND_ID) return false;
   await withStore(BACKGROUNDS_STORE, 'readwrite', (store) => requestValue(store.delete(id)));
   return true;
-}
-
-export async function readDistributionBackgroundPreference(scopeId) {
-  try {
-    const item = await withStore(PREFERENCES_STORE, 'readonly', (store) => requestValue(store.get(preferenceId(scopeId))));
-    return {
-      backgroundId: item?.backgroundId || DEFAULT_BACKGROUND_ID,
-      visible: item?.visible !== false,
-      scale: Math.max(0.5, Math.min(2.5, Number(item?.scale) || 1)),
-      offsetX: Math.max(-600, Math.min(600, Number(item?.offsetX) || 0)),
-      offsetY: Math.max(-450, Math.min(450, Number(item?.offsetY) || 0))
-    };
-  } catch (_) {
-    return { backgroundId: DEFAULT_BACKGROUND_ID, visible: true, scale:1, offsetX:0, offsetY:0 };
-  }
-}
-
-export async function writeDistributionBackgroundPreference(scopeId, preference) {
-  const value = {
-    id: preferenceId(scopeId),
-    backgroundId: preference?.backgroundId || DEFAULT_BACKGROUND_ID,
-    visible: preference?.visible !== false,
-    scale: Math.max(0.5, Math.min(2.5, Number(preference?.scale) || 1)),
-    offsetX: Math.max(-600, Math.min(600, Number(preference?.offsetX) || 0)),
-    offsetY: Math.max(-450, Math.min(450, Number(preference?.offsetY) || 0))
-  };
-  await withStore(PREFERENCES_STORE, 'readwrite', (store) => requestValue(store.put(value)));
-  return value;
 }
 
 export { DEFAULT_BACKGROUND_ID };
