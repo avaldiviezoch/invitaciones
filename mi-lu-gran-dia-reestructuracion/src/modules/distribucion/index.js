@@ -420,14 +420,63 @@ function serializeDistribution(proposals, activeProposalId) {
   return { version: 1, activeProposalId, proposals };
 }
 
+function rotatePointAroundCenter(x, y, centerX, centerY, rotation) {
+  const radians = normalizeRotation(rotation) * Math.PI / 180;
+  const dx = Number(x) - Number(centerX);
+  const dy = Number(y) - Number(centerY);
+  const cos = Math.cos(radians);
+  const sin = Math.sin(radians);
+  return {
+    x: Number(centerX) + dx * cos - dy * sin,
+    y: Number(centerY) + dx * sin + dy * cos
+  };
+}
+
+function applySeatAndLabelRotation(node, rotation) {
+  const centerX = Number(node.dataset.rotationCenterX);
+  const centerY = Number(node.dataset.rotationCenterY);
+  if (!Number.isFinite(centerX) || !Number.isFinite(centerY)) return;
+
+  node.querySelectorAll('.distribution-chair[data-base-x]').forEach((chair) => {
+    const point = rotatePointAroundCenter(
+      chair.dataset.baseX,
+      chair.dataset.baseY,
+      centerX,
+      centerY,
+      rotation
+    );
+    chair.style.left = `${point.x}px`;
+    chair.style.top = `${point.y}px`;
+  });
+
+  node.querySelectorAll('.distribution-seat-label-wrap[data-base-x]').forEach((wrapper) => {
+    const point = rotatePointAroundCenter(
+      wrapper.dataset.baseX,
+      wrapper.dataset.baseY,
+      centerX,
+      centerY,
+      rotation
+    );
+    wrapper.style.left = `${point.x}px`;
+    wrapper.style.top = `${point.y}px`;
+
+    const label = wrapper.querySelector('.distribution-seat-label');
+    if (label) {
+      const localX = Number(wrapper.dataset.baseX) - centerX;
+      const localY = Number(wrapper.dataset.baseY) - centerY;
+      const radians = normalizeRotation(rotation) * Math.PI / 180;
+      const worldX = localX * Math.cos(radians) - localY * Math.sin(radians);
+      label.dataset.align = worldX > 8 ? 'left' : worldX < -8 ? 'right' : 'center';
+    }
+  });
+}
+
 function applyPlacement(node, placement) {
-  const rotation = normalizeRotation(placement.rotation);
   node.style.left = `${placement.x}px`;
   node.style.top = `${placement.y}px`;
   node.style.setProperty('--table-rotation', '0deg');
-  node.style.setProperty('--counter-rotation', `${-rotation}deg`);
-  const seatsLayer = node.querySelector('.distribution-seats-layer');
-  if (seatsLayer) seatsLayer.style.transform = `rotate(${rotation}deg)`;
+  node.style.setProperty('--counter-rotation', '0deg');
+  applySeatAndLabelRotation(node, normalizeRotation(placement.rotation));
 }
 
 function renderTable(item, guestIndex, placement) {
@@ -442,6 +491,8 @@ function renderTable(item, guestIndex, placement) {
   node.setAttribute('aria-label', tableName(table, index));
   node.style.width = `${geometry.visualWidth}px`;
   node.style.height = `${geometry.visualHeight}px`;
+  node.dataset.rotationCenterX = String(geometry.centerX);
+  node.dataset.rotationCenterY = String(geometry.centerY);
   applyPlacement(node, placement);
 
   const clearance = document.createElement('div');
@@ -490,6 +541,8 @@ function renderTable(item, guestIndex, placement) {
     chair.dataset.tableId = tableId;
     chair.dataset.seatIndex = String(seatIndex);
     chair.dataset.seatId = escapeText(seat?.id);
+    chair.dataset.baseX = String(position.x);
+    chair.dataset.baseY = String(position.y);
     if (guest) {
       chair.dataset.guestId = escapeText(guest.id);
     }
@@ -502,9 +555,11 @@ function renderTable(item, guestIndex, placement) {
       const labelWrapper = document.createElement('span');
       labelWrapper.className = 'distribution-seat-label-wrap';
       labelWrapper.dataset.seatIndex = String(seatIndex);
+      labelWrapper.dataset.baseX = String(position.labelX);
+      labelWrapper.dataset.baseY = String(position.labelY);
       labelWrapper.style.left = `${position.labelX}px`;
       labelWrapper.style.top = `${position.labelY}px`;
-      const align = labelAlignmentForSeat(position, placement.rotation);
+      const align = 'center';
 
       const label = document.createElement('span');
       label.className = 'distribution-seat-label';
