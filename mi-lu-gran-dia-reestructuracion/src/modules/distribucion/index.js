@@ -32,9 +32,9 @@ import {
   readDistributionBackgroundPreference,
   removeDistributionBackground,
   writeDistributionBackgroundPreference
-} from './background-catalog.js?v=3';
+} from './background-catalog.js?v=4';
 
-const TEMPLATE_URL = new URL('./index.html?v=60', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=61', import.meta.url);
 const DISTRIBUTION_STORAGE_KEY = 'planificador_bodas_distribucion_v1';
 const DEFAULT_PROPOSAL_ID = 'proposal_main';
 const ROTATION_STEP = 1;
@@ -2733,9 +2733,27 @@ async function mountDistribucion(context) {
     const referenceFile = root.querySelector('[data-distribution-reference-file]');
     const referenceRemove = root.querySelector('[data-distribution-reference-remove]');
     const referenceImage = root.querySelector('[data-distribution-reference-image]');
+    const referenceScale = root.querySelector('[data-distribution-reference-scale]');
+    const referenceScaleOutput = root.querySelector('[data-distribution-reference-scale-output]');
+    const referenceX = root.querySelector('[data-distribution-reference-x]');
+    const referenceY = root.querySelector('[data-distribution-reference-y]');
+    const referenceReset = root.querySelector('[data-distribution-reference-reset]');
     const referenceScopeId = context?.weddingId || context?.id || 'default';
     let referenceObjectUrl = '';
     let activeReferenceId = DEFAULT_BACKGROUND_ID;
+    let referenceTransform = { scale:1, offsetX:0, offsetY:0 };
+
+    const renderReferenceTransform = () => {
+      const scale = Math.max(0.5, Math.min(2.5, Number(referenceTransform.scale) || 1));
+      const offsetX = Math.max(-600, Math.min(600, Number(referenceTransform.offsetX) || 0));
+      const offsetY = Math.max(-450, Math.min(450, Number(referenceTransform.offsetY) || 0));
+      referenceTransform = { scale, offsetX, offsetY };
+      referenceImage.style.transform = `translate(${offsetX}px,${offsetY}px) scale(${scale})`;
+      if (referenceScale) referenceScale.value = String(Math.round(scale * 100));
+      if (referenceScaleOutput) referenceScaleOutput.textContent = `${Math.round(scale * 100)}%`;
+      if (referenceX) referenceX.value = String(offsetX);
+      if (referenceY) referenceY.value = String(offsetY);
+    };
 
     const releaseReferenceObjectUrl = () => {
       if (referenceObjectUrl) URL.revokeObjectURL(referenceObjectUrl);
@@ -2758,26 +2776,63 @@ async function mountDistribucion(context) {
     const refreshReferenceCatalog = async (selectedId = activeReferenceId) => {
       const backgrounds = await listDistributionBackgrounds();
       if (!root.isConnected) return;
-      referenceCatalog.replaceChildren(...backgrounds.map((background) => {
-        const option = document.createElement('option');
-        option.value = background.id;
-        option.textContent = background.builtin ? `${background.name} · por defecto` : background.name;
-        return option;
+      const groups = new Map();
+      backgrounds.forEach((background) => {
+        const groupName = background.group || (background.builtin ? 'Migrandia' : 'Mis imágenes');
+        if (!groups.has(groupName)) groups.set(groupName, []);
+        groups.get(groupName).push(background);
+      });
+      referenceCatalog.replaceChildren(...[...groups.entries()].map(([groupName, items]) => {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = groupName;
+        items.forEach((background) => {
+          const option = document.createElement('option');
+          option.value = background.id;
+          option.textContent = background.name;
+          optgroup.append(option);
+        });
+        return optgroup;
       }));
       const available = backgrounds.some((background) => background.id === selectedId);
       await applyReferenceBackground(available ? selectedId : DEFAULT_BACKGROUND_ID);
     };
     const persistReferencePreference = () => writeDistributionBackgroundPreference(referenceScopeId, {
       backgroundId: activeReferenceId,
-      visible: referenceToggle.checked
+      visible: referenceToggle.checked,
+      ...referenceTransform
     }).catch(() => {});
 
     const referencePreference = await readDistributionBackgroundPreference(referenceScopeId);
     if (epoch !== mountEpoch || !root.isConnected) return;
     referenceToggle.checked = referencePreference.visible;
+    referenceTransform = {
+      scale: referencePreference.scale,
+      offsetX: referencePreference.offsetX,
+      offsetY: referencePreference.offsetY
+    };
+    renderReferenceTransform();
     world.classList.toggle('hide-reference-image', !referencePreference.visible);
     await refreshReferenceCatalog(referencePreference.backgroundId);
     if (epoch !== mountEpoch || !root.isConnected) return;
+
+    const updateReferenceTransform = () => {
+      referenceTransform = {
+        scale: Number(referenceScale?.value || 100) / 100,
+        offsetX: Number(referenceX?.value || 0),
+        offsetY: Number(referenceY?.value || 0)
+      };
+      renderReferenceTransform();
+      persistReferencePreference();
+    };
+    referenceScale?.addEventListener('input', updateReferenceTransform);
+    referenceX?.addEventListener('input', updateReferenceTransform);
+    referenceY?.addEventListener('input', updateReferenceTransform);
+    referenceReset?.addEventListener('click', () => {
+      referenceTransform = { scale:1, offsetX:0, offsetY:0 };
+      renderReferenceTransform();
+      persistReferencePreference();
+      status.textContent = 'Encuadre del ambiente restablecido';
+    });
 
     referenceCatalog.onchange = async () => {
       await applyReferenceBackground(referenceCatalog.value);
