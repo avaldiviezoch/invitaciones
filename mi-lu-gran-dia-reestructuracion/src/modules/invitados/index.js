@@ -222,6 +222,7 @@ function openEditor(guest = null) {
   form.elements.guestId.value = guest ? String(guest.id ?? '') : '';
   form.elements.name.value = guest ? text(guest.name) : '';
   form.elements.status.value = guest ? guestStatus(guest) : 'pending';
+  form.elements.status.disabled = Boolean(guest && text(guest.rsvpResponseId));
   form.elements.side.value = ['novio','novia','ambos'].includes(text(guest?.side)) ? text(guest.side) : 'ambos';
   form.elements.relation.value = guest ? text(guest.relation) : '';
   form.elements.restriction.value = guest ? text(guest.restriction || 'Ninguna') : 'Ninguna';
@@ -273,9 +274,12 @@ async function handleGuestSubmit(event) {
 
   const previous = deepClone(snapshot);
   const guestId = text(data.get('guestId'));
+  const existingGuest = guestId ? findGuest(guestId) : null;
   const patch = {
     name,
-    status: text(data.get('status')) || 'pending',
+    status: existingGuest && text(existingGuest.rsvpResponseId)
+      ? guestStatus(existingGuest)
+      : (text(data.get('status')) || 'pending'),
     side: text(data.get('side')) || 'ambos',
     relation: text(data.get('relation')),
     restriction: text(data.get('restriction')) || 'Ninguna',
