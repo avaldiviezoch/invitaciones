@@ -52,7 +52,6 @@ const TABLE_FRAME = Object.freeze({ width: 300, height: 316, centerX: 150, cente
 const TABLE_CLEARANCE_MARGIN_METERS = 0.8;
 const TABLE_CHAIR_OFFSET_METERS = 0.38;
 const TABLE_LABEL_OFFSET_METERS = 0.72;
-const ROUND_TABLE_LABEL_ORBIT_FACTOR = 2.18;
 const PROXIMITY_OPTIONS_METERS = Object.freeze([0.6, 1, 1.5, 2]);
 const MIN_ELEMENT_METERS = 0.5;
 const MAX_ELEMENT_METERS = 30;
@@ -205,21 +204,26 @@ function rectangularPerimeterPositions(count, width, height, centerX, centerY) {
     let distance = (perimeter * index / count + width / 2) % perimeter;
     let x;
     let y;
+    let side;
     if (distance < width) {
       x = centerX - width / 2 + distance;
       y = centerY - height / 2;
+      side = 'top';
     } else if ((distance -= width) < height) {
       x = centerX + width / 2;
       y = centerY - height / 2 + distance;
+      side = 'right';
     } else if ((distance -= height) < width) {
       x = centerX + width / 2 - distance;
       y = centerY + height / 2;
+      side = 'bottom';
     } else {
       distance -= width;
       x = centerX - width / 2;
       y = centerY + height / 2 - distance;
+      side = 'left';
     }
-    positions.push({ x, y });
+    positions.push({ x, y, side });
   }
   return positions;
 }
@@ -242,19 +246,30 @@ function tablePhysicalGeometry(tableSource, capacity) {
   if (shape === 'round') {
     const tableRadius = table.width / 2;
     const chairOrbit = tableRadius + PLAN_SCALE.metersToPixels(TABLE_CHAIR_OFFSET_METERS);
-    const labelOrbit = tableRadius * ROUND_TABLE_LABEL_ORBIT_FACTOR;
     for (let index = 0; index < count; index += 1) {
       const angle = -Math.PI / 2 + Math.PI * 2 * index / count;
       const cos = Math.cos(angle), sin = Math.sin(angle);
-      positions.push({ x:centerX + cos*chairOrbit, y:centerY + sin*chairOrbit, labelX:centerX + cos*labelOrbit, labelY:centerY + sin*labelOrbit });
+      const chairX = centerX + cos * chairOrbit;
+      const chairY = centerY + sin * chairOrbit;
+      positions.push({
+        x: chairX,
+        y: chairY,
+        labelX: centerX + (chairX - centerX) * 1.64,
+        labelY: centerY + (chairY - centerY) * 1.64
+      });
     }
     return { shape, table, clearance, visualWidth, visualHeight, centerX, centerY, positions };
   }
   const chairOffset = PLAN_SCALE.metersToPixels(TABLE_CHAIR_OFFSET_METERS);
   const labelOffset = PLAN_SCALE.metersToPixels(TABLE_LABEL_OFFSET_METERS);
   rectangularPerimeterPositions(count, table.width + chairOffset*2, table.height + chairOffset*2, centerX, centerY).forEach((point) => {
-    const dx=point.x-centerX, dy=point.y-centerY, length=Math.hypot(dx,dy)||1, ux=dx/length, uy=dy/length;
-    positions.push({ x:point.x, y:point.y, labelX:point.x+ux*labelOffset, labelY:point.y+uy*labelOffset });
+    let labelX = point.x;
+    let labelY = point.y;
+    if (point.side === 'top') labelY -= labelOffset;
+    else if (point.side === 'bottom') labelY += labelOffset;
+    else if (point.side === 'right') labelX += labelOffset;
+    else labelX -= labelOffset;
+    positions.push({ x:point.x, y:point.y, labelX, labelY });
   });
   return { shape, table, clearance, visualWidth, visualHeight, centerX, centerY, positions };
 }
@@ -403,13 +418,12 @@ function applyPlacement(node, placement) {
 }
 
 function guestLabelAlign(position, geometry, rotation) {
-  const dx = Number(position?.labelX) - Number(geometry?.centerX);
-  const dy = Number(position?.labelY) - Number(geometry?.centerY);
-  const localAngle = Math.atan2(dy, dx);
-  const worldAngle = localAngle + normalizeRotation(rotation) * Math.PI / 180;
-  const horizontal = Math.cos(worldAngle);
-  if (horizontal > 0.28) return 'left';
-  if (horizontal < -0.28) return 'right';
+  const localX = Number(position?.labelX) - Number(geometry?.centerX);
+  const localY = Number(position?.labelY) - Number(geometry?.centerY);
+  const angle = normalizeRotation(rotation) * Math.PI / 180;
+  const worldX = localX * Math.cos(angle) - localY * Math.sin(angle);
+  if (worldX > 8) return 'left';
+  if (worldX < -8) return 'right';
   return 'center';
 }
 
@@ -437,7 +451,7 @@ function renderTable(item, guestIndex, placement) {
   surface.className = `distribution-tabletop is-${geometry.shape}`;
   surface.style.width = `${geometry.table.width}px`;
   surface.style.height = `${geometry.table.height}px`;
-  surface.innerHTML = `<strong></strong><span>${capacity} sillas</span>`;
+  surface.innerHTML = `<div class="distribution-tabletop-copy"><strong></strong><span>${capacity} sillas</span></div>`;
   surface.querySelector('strong').textContent = tableName(table, index);
   node.append(surface);
 
