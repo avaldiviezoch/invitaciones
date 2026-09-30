@@ -401,6 +401,17 @@ function applyPlacement(node, placement) {
   node.style.setProperty('--counter-rotation', `${-rotation}deg`);
 }
 
+function guestLabelAlign(position, geometry, rotation) {
+  const dx = Number(position?.labelX) - Number(geometry?.centerX);
+  const dy = Number(position?.labelY) - Number(geometry?.centerY);
+  const localAngle = Math.atan2(dy, dx);
+  const worldAngle = localAngle + normalizeRotation(rotation) * Math.PI / 180;
+  const horizontal = Math.cos(worldAngle);
+  if (horizontal > 0.28) return 'left';
+  if (horizontal < -0.28) return 'right';
+  return 'center';
+}
+
 function renderTable(item, guestIndex, placement) {
   const { table, index, capacity, geometry } = item;
   const tableId = escapeText(table?.id);
@@ -425,7 +436,7 @@ function renderTable(item, guestIndex, placement) {
   surface.className = `distribution-tabletop is-${geometry.shape}`;
   surface.style.width = `${geometry.table.width}px`;
   surface.style.height = `${geometry.table.height}px`;
-  surface.innerHTML = `<div class="distribution-tabletop-copy"><strong></strong><span>${capacity} sillas</span></div>`;
+  surface.innerHTML = `<strong></strong><span>${capacity} sillas</span>`;
   surface.querySelector('strong').textContent = tableName(table, index);
   node.append(surface);
 
@@ -466,6 +477,7 @@ function renderTable(item, guestIndex, placement) {
       label.className = 'distribution-seat-label';
       label.style.left = `${position.labelX}px`;
       label.style.top = `${position.labelY}px`;
+      label.dataset.align = guestLabelAlign(position, geometry, placement.rotation);
       label.dataset.guestId = escapeText(guest.id);
       label.dataset.tableId = tableId;
       label.dataset.seatIndex = String(seatIndex);
