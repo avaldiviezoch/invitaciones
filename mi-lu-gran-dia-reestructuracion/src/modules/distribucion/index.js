@@ -2057,6 +2057,16 @@ async function mountDistribucion(context) {
     // Las asignaciones son canónicas de Invitados/Mesas y aquí son solo lectura.
     // Distribución no escribe guest.tableId, guest.seatId ni guest.seatNumber.
 
+    const refreshTableLabelOrientation = (node, entry, rotation) => {
+      const positions = entry?.geometry?.positions || [];
+      node.querySelectorAll('.distribution-seat-label[data-seat-index]').forEach((label) => {
+        const seatIndex = Number(label.dataset.seatIndex);
+        const position = positions[seatIndex];
+        if (!position) return;
+        label.dataset.align = guestLabelAlign(position, entry.geometry, rotation);
+      });
+    };
+
     const applyTableRotation = (tableId, rotation, { inspector = true } = {}) => {
       const placement = placementState.get(tableId);
       const node = world.querySelector(`.distribution-table[data-table-id="${CSS.escape(tableId)}"]`);
@@ -2064,6 +2074,7 @@ async function mountDistribucion(context) {
       if (!placement || !node || !entry) return false;
       placement.rotation = normalizeRotation(rotation);
       applyPlacement(node, placement);
+      refreshTableLabelOrientation(node, entry, placement.rotation);
       if (inspector && selectedTableId === tableId) {
         const rotationOutput = root.querySelector('[data-distribution-selected-rotation]');
         rotationOutput.value = `${Math.round(placement.rotation)}°`;
