@@ -146,6 +146,7 @@ function summarizeInvitadosValue(value) {
     pending: pending.length,
     seated: seated.length,
     confirmedSeated: confirmedSeated.length,
+    confirmedWithoutTable,
     tablesUsed: usedTableIds.size,
     tables,
     confirmedPercent: guests.length ? Math.round(confirmed.length * 100 / guests.length) : 0
