@@ -451,13 +451,10 @@ async function refreshHomeDashboard(context = weddingContext) {
   }
 }
 
-let pendingHomeFocusTarget = null;
-
 homeDashboard?.querySelector('[data-home-focus-action]')?.addEventListener('click', (event) => {
   const module = event.currentTarget.dataset.module;
   if (!module || !MODULE_HASHES.has(`#${module}`)) return;
-  pendingHomeFocusTarget = { module, target: event.currentTarget.dataset.target || '' };
-  void openModule(module);
+  void openModule(module, { focusTarget: event.currentTarget.dataset.target || '' });
 });
 
 function applyWeddingContext(context) {
@@ -1090,22 +1087,17 @@ function moduleFromHash() {
   return ACTIVE_MODULES.has(moduleId) ? moduleId : '';
 }
 
-function applyHomeFocusTarget(moduleId) {
-  const focus = pendingHomeFocusTarget;
-  if (!focus || focus.module !== moduleId) return;
-  pendingHomeFocusTarget = null;
-
-  if (moduleId === 'invitados') {
-    const root = document.querySelector('[data-module-view="invitados"]');
-    if (!root) return;
-    if (focus.target === 'pending-rsvp') {
-      root.querySelector('[data-guests-view="rsvp"]')?.click();
-      return;
-    }
-    if (focus.target === 'confirmed-unseated') {
-      root.querySelector('[data-guests-view="list"]')?.click();
-      root.querySelector('[data-guests-filter="unseated"]')?.click();
-    }
+function applyHomeFocusTarget(moduleId, target = '') {
+  if (moduleId !== 'invitados' || !target) return;
+  const root = document.querySelector('[data-module-view="invitados"]');
+  if (!root) return;
+  if (target === 'pending-rsvp') {
+    root.querySelector('[data-guests-view="rsvp"]')?.click();
+    return;
+  }
+  if (target === 'confirmed-unseated') {
+    root.querySelector('[data-guests-view="list"]')?.click();
+    root.querySelector('[data-guests-filter="unseated"]')?.click();
   }
 }
 
@@ -1115,7 +1107,7 @@ function openModuleFromHash() {
   if (moduleId) void openModule(moduleId, { updateHash: false });
 }
 
-async function openModule(moduleId, { updateHash = true } = {}) {
+async function openModule(moduleId, { updateHash = true, focusTarget = '' } = {}) {
   if (!auth.currentUser || !weddingContext || !ACTIVE_MODULES.has(moduleId)) return;
 
   ensureModuleCacheWedding(weddingContext.id);
@@ -1143,14 +1135,14 @@ async function openModule(moduleId, { updateHash = true } = {}) {
 
   if (alreadyMounted) {
     setModuleLoading(false);
-    applyHomeFocusTarget(moduleId);
+    applyHomeFocusTarget(moduleId, focusTarget);
     return;
   }
 
   setModuleLoading(true);
   try {
     const mounted = await mountModuleOnce(moduleId, weddingContext);
-    if (mounted !== false) applyHomeFocusTarget(moduleId);
+    if (mounted !== false) applyHomeFocusTarget(moduleId, focusTarget);
   } catch (error) {
     console.error(`No se pudo montar ${moduleId}:`, error);
     const view = document.querySelector(`[data-module-view="${moduleId}"]`);
