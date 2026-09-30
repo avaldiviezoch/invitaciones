@@ -52,6 +52,20 @@
   .distribution-switch-track i{width:9px;height:9px}
   .distribution-layer-switch input:checked+.distribution-switch-track i{transform:translateX(9px)}
   .distribution-validation-indicators,.distribution-toolbar-actions{display:none}
+  .distribution-toolbar-environment{width:100%;min-width:0;display:block;padding-top:8px;overflow:hidden}
+  .distribution-toolbar-environment .distribution-environment-title{display:block;margin-bottom:7px;font-size:10px}
+  .distribution-toolbar-environment .distribution-reference-controls{display:grid;grid-template-columns:1fr;gap:8px;width:100%;min-width:0}
+  .distribution-toolbar-environment .distribution-reference-controls>label,.distribution-toolbar-environment .distribution-reference-controls>label:first-child,.distribution-toolbar-environment .distribution-reference-controls>label:has(input[type=file]){width:100%;min-width:0;max-width:100%;font-size:10px}
+  .distribution-toolbar-environment .distribution-reference-controls select{width:100%;min-width:0;font-size:10px}
+  .distribution-toolbar-environment .distribution-reference-calibration{display:grid;grid-template-columns:1fr;gap:7px;width:100%;min-width:0}
+  .distribution-toolbar-environment .distribution-reference-calibration>strong,.distribution-toolbar-environment .distribution-reference-calibration>label,.distribution-toolbar-environment .distribution-reference-position label,.distribution-toolbar-environment .distribution-reference-controls button{font-size:10px}
+  .distribution-toolbar-environment .distribution-reference-calibration>label{display:grid;grid-template-columns:auto auto 1fr;min-width:0;width:100%}
+  .distribution-toolbar-environment .distribution-reference-calibration>label input[type=range]{width:100%;min-width:0}
+  .distribution-toolbar-environment .distribution-reference-position{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;min-width:0}
+  .distribution-toolbar-environment .distribution-reference-position label{display:grid;grid-template-columns:auto 1fr;min-width:0}
+  .distribution-toolbar-environment .distribution-reference-position input[type=range]{width:100%;min-width:0}
+  .distribution-toolbar-environment .distribution-reference-controls input[type=file]{width:100%;min-width:0;font-size:10px}
+
   .distribution-workspace{display:block;min-height:0}
   .distribution-tools,.distribution-inspector{display:none}
   .distribution-viewport{width:100%;height:auto;min-height:0;aspect-ratio:16/9;border-radius:14px}
