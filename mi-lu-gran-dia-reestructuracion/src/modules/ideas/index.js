@@ -1,11 +1,11 @@
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js';
 
-const TEMPLATE_URL = new URL('./index.html?v=2', import.meta.url);
+const TEMPLATE_URL = new URL('./index.html?v=3', import.meta.url);
 const STORAGE_KEY = 'planificador_bodas_ideas_v1';
 let templatePromise = null;
 let cleanup = () => {};
 
-const state = { items: [], filter: 'all', search: '', context: null, editingId: '' };
+const state = { items: [], filter: 'all', search: '', context: null, editingId: '', usingId: '' };
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, (character) => ({
@@ -106,9 +106,13 @@ function render(root) {
   board.innerHTML = items.map((item) => {
     const image = item.image ? `<img class="ideas-card-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '<div class="ideas-card-placeholder" aria-hidden="true"></div>';
     const link = item.url ? `<a class="ideas-card-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">Ver enlace</a>` : '';
-    return `<article class="ideas-card" data-idea-id="${escapeHtml(item.id)}"><button class="ideas-card-edit" type="button" data-idea-edit="${escapeHtml(item.id)}" aria-label="Editar ${escapeHtml(item.title)}">Editar</button><button class="ideas-card-delete" type="button" data-idea-delete="${escapeHtml(item.id)}" aria-label="Eliminar ${escapeHtml(item.title)}">×</button>${image}<div class="ideas-card-body"><div class="ideas-card-meta"><span>${escapeHtml(item.category)}</span><span>${item.type === 'purchase' ? 'Compra' : 'Inspiración'}</span></div><h3>${escapeHtml(item.title)}</h3>${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ''}${item.price ? `<strong class="ideas-card-price">S/ ${item.price.toFixed(2)}</strong>` : ''}${link}</div></article>`;
+    const use = `<button class="ideas-card-use" type="button" data-idea-use="${escapeHtml(item.id)}">Usar esta idea</button>`;
+    return `<article class="ideas-card" data-idea-id="${escapeHtml(item.id)}"><button class="ideas-card-edit" type="button" data-idea-edit="${escapeHtml(item.id)}" aria-label="Editar ${escapeHtml(item.title)}">Editar</button><button class="ideas-card-delete" type="button" data-idea-delete="${escapeHtml(item.id)}" aria-label="Eliminar ${escapeHtml(item.title)}">×</button>${image}<div class="ideas-card-body"><div class="ideas-card-meta"><span>${escapeHtml(item.category)}</span><span>${item.type === 'purchase' ? 'Compra' : 'Inspiración'}</span></div><h3>${escapeHtml(item.title)}</h3>${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ''}${item.price ? `<strong class="ideas-card-price">S/ ${item.price.toFixed(2)}</strong>` : ''}${link}${use}</div></article>`;
   }).join('');
   empty.hidden = items.length > 0;
+  board.querySelectorAll('[data-idea-use]').forEach((button) => {
+    button.onclick = () => openUseDialog(root, button.dataset.ideaUse);
+  });
   board.querySelectorAll('[data-idea-edit]').forEach((button) => {
     button.onclick = () => openEditor(root, button.dataset.ideaEdit);
   });
@@ -126,6 +130,28 @@ function render(root) {
       }
     };
   });
+}
+
+function openUseDialog(root, id) {
+  const item = state.items.find((current) => current.id === id);
+  const dialog = root.querySelector('[data-ideas-use-dialog]');
+  if (!item || !dialog) return;
+  state.usingId = id;
+  root.querySelector('[data-ideas-use-title]').textContent = item.title;
+  dialog.showModal();
+}
+
+function closeUseDialog(root) {
+  state.usingId = '';
+  root.querySelector('[data-ideas-use-dialog]')?.close();
+}
+
+function useIdea(root, target) {
+  const item = state.items.find((current) => current.id === state.usingId);
+  if (!item || !['checklist', 'presupuesto', 'proveedores'].includes(target)) return;
+  sessionStorage.setItem('migrandia:idea-draft', JSON.stringify({ target, title: item.title, category: item.category, price: item.price, url: item.url, notes: item.notes }));
+  closeUseDialog(root);
+  location.hash = target;
 }
 
 function openEditor(root, id) {
@@ -178,6 +204,8 @@ export async function mountIdeas(context) {
   const form = root.querySelector('[data-ideas-form]');
   const urlInput = form.querySelector('[data-ideas-url]');
   const imageInput = form.querySelector('[data-ideas-image]');
+  root.querySelector('[data-ideas-use-close]').onclick = () => closeUseDialog(root);
+  root.querySelectorAll('[data-ideas-use]').forEach((button) => { button.onclick = () => useIdea(root, button.dataset.ideasUse); });
 
   root.querySelectorAll('[data-ideas-open-form]').forEach((button) => {
     button.onclick = () => { resetEditor(root); dialog.showModal(); };

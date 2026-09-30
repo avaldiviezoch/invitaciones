@@ -498,6 +498,20 @@ function bindRoot(root) {
   root.addEventListener('dragend', handleDragEnd);
 }
 
+function consumeIdeaDraft() {
+  try {
+    const raw = sessionStorage.getItem('migrandia:idea-draft');
+    const draft = raw ? JSON.parse(raw) : null;
+    if (!draft || draft.target !== 'checklist') return;
+    sessionStorage.removeItem('migrandia:idea-draft');
+    openForm(-1);
+    const form = document.querySelector('[data-checklist-form]');
+    if (!form) return;
+    form.elements.title.value = draft.title || '';
+    form.elements.notes.value = [draft.notes, draft.url].filter(Boolean).join('\n');
+  } catch {}
+}
+
 async function mountChecklist(context) {
   const root = document.querySelector('[data-module-view="checklist"]');
   if (!root || !context?.id) return;
@@ -514,6 +528,7 @@ async function mountChecklist(context) {
     responsibleFilter = 'all';
     priorityFilter = 'all';
     render();
+    consumeIdeaDraft();
     return true;
   } catch (error) {
     if (epoch !== mountEpoch) return;
