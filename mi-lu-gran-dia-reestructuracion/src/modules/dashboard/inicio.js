@@ -357,12 +357,12 @@ function homePriority(summary) {
   const pendingTasks = Number(checklist.pending) || 0;
   const progressTasks = Number(checklist.progress) || 0;
   const overdueTasks = Number(checklist.overdue) || 0;
-  if (overdueTasks > 0) return { module:'checklist', title: overdueTasks + (overdueTasks === 1 ? ' tarea está atrasada' : ' tareas están atrasadas'), detail:'Empieza por los pendientes que ya superaron su fecha prevista.' };
-  if (confirmedUnseated > 0) return { module:'distribucion', title: confirmedUnseated + (confirmedUnseated === 1 ? ' invitado confirmado aún no tiene mesa' : ' invitados confirmados aún no tienen mesa'), detail:'La distribución general puede incluir invitados pendientes; aquí priorizamos a quienes ya confirmaron asistencia.' };
-  if (pendingGuests > 0) return { module:'invitados', title: pendingGuests + (pendingGuests === 1 ? ' invitado está pendiente de confirmar' : ' invitados están pendientes de confirmar'), detail:'Revisa las confirmaciones pendientes antes de cerrar la distribución.' };
-  if (progressTasks > 0) return { module:'checklist', title: progressTasks + (progressTasks === 1 ? ' tarea sigue en proceso' : ' tareas siguen en proceso'), detail:'Continúa lo que ya empezaste antes de abrir nuevos pendientes.' };
-  if (pendingTasks > 0) return { module:'checklist', title: pendingTasks + (pendingTasks === 1 ? ' tarea queda pendiente' : ' tareas quedan pendientes'), detail:'Revisa el Checklist y elige el siguiente pendiente de la boda.' };
-  if ((Number(budget.budget) || 0) > 0 && (Number(budget.balance) || 0) > 0) return { module:'presupuesto', title: formatHomeMoney(budget.balance, budget.currency) + ' disponibles en presupuesto', detail:'Consulta lo presupuestado y los pagos registrados antes de la siguiente decisión.' };
+  if (overdueTasks > 0) return { module:'checklist', target:'overdue', title: overdueTasks + (overdueTasks === 1 ? ' tarea está atrasada' : ' tareas están atrasadas'), detail:'Empieza por los pendientes que ya superaron su fecha prevista.' };
+  if (confirmedUnseated > 0) return { module:'invitados', target:'confirmed-unseated', title: confirmedUnseated + (confirmedUnseated === 1 ? ' invitado confirmado aún no tiene mesa' : ' invitados confirmados aún no tienen mesa'), detail:'La distribución general puede incluir invitados pendientes; aquí priorizamos a quienes ya confirmaron asistencia.' };
+  if (pendingGuests > 0) return { module:'invitados', target:'pending-rsvp', title: pendingGuests + (pendingGuests === 1 ? ' invitado está pendiente de confirmar' : ' invitados están pendientes de confirmar'), detail:'Revisa las confirmaciones pendientes antes de cerrar la distribución.' };
+  if (progressTasks > 0) return { module:'checklist', target:'progress', title: progressTasks + (progressTasks === 1 ? ' tarea sigue en proceso' : ' tareas siguen en proceso'), detail:'Continúa lo que ya empezaste antes de abrir nuevos pendientes.' };
+  if (pendingTasks > 0) return { module:'checklist', target:'pending', title: pendingTasks + (pendingTasks === 1 ? ' tarea queda pendiente' : ' tareas quedan pendientes'), detail:'Revisa el Checklist y elige el siguiente pendiente de la boda.' };
+  if ((Number(budget.budget) || 0) > 0 && (Number(budget.balance) || 0) > 0) return { module:'presupuesto', target:'overview', title: formatHomeMoney(budget.balance, budget.currency) + ' disponibles en presupuesto', detail:'Consulta lo presupuestado y los pagos registrados antes de la siguiente decisión.' };
   if (!total && !Number(checklist.total) && !(Number(budget.budget) || 0)) return { module:'', title:'Empieza a darle forma a tu boda', detail:'Agrega tus primeros invitados, tareas o presupuesto para ver aquí qué sigue.' };
   return { module:'', title:'Tus principales pendientes están al día', detail:'Puedes continuar desde el módulo que quieras organizar ahora.' };
 }
@@ -378,6 +378,7 @@ function renderHomeSummary(summary, context) {
   const focusAction = homeDashboard.querySelector('[data-home-focus-action]');
   focusAction.hidden = !focus.module;
   focusAction.dataset.module = focus.module;
+  focusAction.dataset.target = focus.target || '';
 
   homeDashboard.querySelector('[data-home-guests-ratio]').textContent = `${guests.confirmed ?? 0} / ${guests.total ?? 0}`;
   homeDashboard.querySelector('[data-home-guests-percent]').textContent = `${guests.confirmedPercent ?? 0}%`;
@@ -450,9 +451,13 @@ async function refreshHomeDashboard(context = weddingContext) {
   }
 }
 
+let pendingHomeFocusTarget = null;
+
 homeDashboard?.querySelector('[data-home-focus-action]')?.addEventListener('click', (event) => {
   const module = event.currentTarget.dataset.module;
-  if (module && MODULE_HASHES.has(`#${module}`)) location.hash = module;
+  if (!module || !MODULE_HASHES.has(`#${module}`)) return;
+  pendingHomeFocusTarget = { module, target: event.currentTarget.dataset.target || '' };
+  void openModule(module);
 });
 
 function applyWeddingContext(context) {
@@ -1085,6 +1090,25 @@ function moduleFromHash() {
   return ACTIVE_MODULES.has(moduleId) ? moduleId : '';
 }
 
+function applyHomeFocusTarget(moduleId) {
+  const focus = pendingHomeFocusTarget;
+  if (!focus || focus.module !== moduleId) return;
+  pendingHomeFocusTarget = null;
+
+  if (moduleId === 'invitados') {
+    const root = document.querySelector('[data-module-view="invitados"]');
+    if (!root) return;
+    if (focus.target === 'pending-rsvp') {
+      root.querySelector('[data-guests-view="rsvp"]')?.click();
+      return;
+    }
+    if (focus.target === 'confirmed-unseated') {
+      root.querySelector('[data-guests-view="list"]')?.click();
+      root.querySelector('[data-guests-filter="unseated"]')?.click();
+    }
+  }
+}
+
 function openModuleFromHash() {
   if (!auth.currentUser || !weddingContext) return;
   const moduleId = moduleFromHash();
@@ -1119,12 +1143,14 @@ async function openModule(moduleId, { updateHash = true } = {}) {
 
   if (alreadyMounted) {
     setModuleLoading(false);
+    applyHomeFocusTarget(moduleId);
     return;
   }
 
   setModuleLoading(true);
   try {
-    await mountModuleOnce(moduleId, weddingContext);
+    const mounted = await mountModuleOnce(moduleId, weddingContext);
+    if (mounted !== false) applyHomeFocusTarget(moduleId);
   } catch (error) {
     console.error(`No se pudo montar ${moduleId}:`, error);
     const view = document.querySelector(`[data-module-view="${moduleId}"]`);
