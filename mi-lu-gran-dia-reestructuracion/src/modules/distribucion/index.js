@@ -428,11 +428,9 @@ function guestLabelAlign(position, geometry, rotation) {
 }
 
 function applyGuestLabelTransform(wrapper, position, geometry, rotation) {
-  const localX = Number(position?.labelX) - Number(geometry?.centerX);
-  const localY = Number(position?.labelY) - Number(geometry?.centerY);
-  wrapper.style.left = `${geometry.centerX}px`;
-  wrapper.style.top = `${geometry.centerY}px`;
-  wrapper.style.transform = `translate(${localX}px, ${localY}px) rotate(${-normalizeRotation(rotation)}deg)`;
+  wrapper.style.left = `${Number(position?.labelX) || geometry.centerX}px`;
+  wrapper.style.top = `${Number(position?.labelY) || geometry.centerY}px`;
+  wrapper.style.transform = `rotate(${-normalizeRotation(rotation)}deg)`;
 }
 
 function renderTable(item, guestIndex, placement) {
