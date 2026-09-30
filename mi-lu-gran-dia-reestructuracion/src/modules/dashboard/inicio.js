@@ -358,7 +358,7 @@ function homePriority(summary) {
   const progressTasks = Number(checklist.progress) || 0;
   const overdueTasks = Number(checklist.overdue) || 0;
   if (overdueTasks > 0) return { module:'checklist', title: overdueTasks + (overdueTasks === 1 ? ' tarea está atrasada' : ' tareas están atrasadas'), detail:'Empieza por los pendientes que ya superaron su fecha prevista.' };
-  if (confirmedUnseated > 0) return { module:'distribucion', title: confirmedUnseated + (confirmedUnseated === 1 ? ' confirmado falta por ubicar' : ' confirmados faltan por ubicar'), detail:'Ya confirmaron asistencia; asígnales una mesa para cerrar su ubicación.' };
+  if (confirmedUnseated > 0) return { module:'distribucion', title: confirmedUnseated + (confirmedUnseated === 1 ? ' invitado confirmado aún no tiene mesa' : ' invitados confirmados aún no tienen mesa'), detail:'La distribución general puede incluir invitados pendientes; aquí priorizamos a quienes ya confirmaron asistencia.' };
   if (pendingGuests > 0) return { module:'invitados', title: pendingGuests + (pendingGuests === 1 ? ' invitado está pendiente de confirmar' : ' invitados están pendientes de confirmar'), detail:'Revisa las confirmaciones pendientes antes de cerrar la distribución.' };
   if (progressTasks > 0) return { module:'checklist', title: progressTasks + (progressTasks === 1 ? ' tarea sigue en proceso' : ' tareas siguen en proceso'), detail:'Continúa lo que ya empezaste antes de abrir nuevos pendientes.' };
   if (pendingTasks > 0) return { module:'checklist', title: pendingTasks + (pendingTasks === 1 ? ' tarea queda pendiente' : ' tareas quedan pendientes'), detail:'Revisa el Checklist y elige el siguiente pendiente de la boda.' };
