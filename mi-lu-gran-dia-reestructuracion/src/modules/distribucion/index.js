@@ -245,7 +245,7 @@ function tablePhysicalGeometry(tableSource, capacity) {
     for (let index = 0; index < count; index += 1) {
       const angle = -Math.PI / 2 + Math.PI * 2 * index / count;
       const cos = Math.cos(angle), sin = Math.sin(angle);
-      positions.push({ x:centerX + cos*chairOrbit, y:centerY + sin*chairOrbit, labelX:centerX + cos*labelOrbit, labelY:centerY + sin*labelOrbit, labelAlign:cos>.28?'left':cos<-.28?'right':'center' });
+      positions.push({ x:centerX + cos*chairOrbit, y:centerY + sin*chairOrbit, labelX:centerX + cos*labelOrbit, labelY:centerY + sin*labelOrbit });
     }
     return { shape, table, clearance, visualWidth, visualHeight, centerX, centerY, positions };
   }
@@ -253,7 +253,7 @@ function tablePhysicalGeometry(tableSource, capacity) {
   const labelOffset = PLAN_SCALE.metersToPixels(TABLE_LABEL_OFFSET_METERS);
   rectangularPerimeterPositions(count, table.width + chairOffset*2, table.height + chairOffset*2, centerX, centerY).forEach((point) => {
     const dx=point.x-centerX, dy=point.y-centerY, length=Math.hypot(dx,dy)||1, ux=dx/length, uy=dy/length;
-    positions.push({ x:point.x, y:point.y, labelX:point.x+ux*labelOffset, labelY:point.y+uy*labelOffset, labelAlign:ux>.32?'left':ux<-.32?'right':'center' });
+    positions.push({ x:point.x, y:point.y, labelX:point.x+ux*labelOffset, labelY:point.y+uy*labelOffset });
   });
   return { shape, table, clearance, visualWidth, visualHeight, centerX, centerY, positions };
 }
@@ -425,7 +425,7 @@ function renderTable(item, guestIndex, placement) {
   surface.className = `distribution-tabletop is-${geometry.shape}`;
   surface.style.width = `${geometry.table.width}px`;
   surface.style.height = `${geometry.table.height}px`;
-  surface.innerHTML = `<strong></strong><span>${capacity} sillas</span>`;
+  surface.innerHTML = `<div class="distribution-tabletop-copy"><strong></strong><span>${capacity} sillas</span></div>`;
   surface.querySelector('strong').textContent = tableName(table, index);
   node.append(surface);
 
@@ -466,7 +466,6 @@ function renderTable(item, guestIndex, placement) {
       label.className = 'distribution-seat-label';
       label.style.left = `${position.labelX}px`;
       label.style.top = `${position.labelY}px`;
-      label.dataset.align = position.labelAlign;
       label.dataset.guestId = escapeText(guest.id);
       label.dataset.tableId = tableId;
       label.dataset.seatIndex = String(seatIndex);
