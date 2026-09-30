@@ -1,7 +1,7 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { auth } from '../../services/firebase-client.js';
 import { readPlannerStorageKeys, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
-import { GUEST_STORAGE_KEY, summarizeInvitadosValue } from '../invitados/invitados-data.js?v=7';
+import { GUEST_STORAGE_KEY, summarizeInvitadosValue } from '../invitados/invitados-data.js?v=8';
 import { CHECKLIST_STORAGE_KEY, summarizeChecklistValue } from '../checklist/index.js?v=19';
 import { BUDGET_STORAGE_KEY, summarizeBudgetValue } from '../presupuesto/index.js?v=16';
 import {
