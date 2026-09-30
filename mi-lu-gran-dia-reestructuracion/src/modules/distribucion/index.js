@@ -494,8 +494,6 @@ function renderTable(item, guestIndex, placement) {
       labelWrapper.dataset.seatIndex = String(seatIndex);
       labelWrapper.style.left = `${position.labelX}px`;
       labelWrapper.style.top = `${position.labelY}px`;
-      labelWrapper.style.transform = `rotate(${-normalizeRotation(placement.rotation)}deg)`;
-
       const align = labelAlignmentForSeat(position);
 
       const label = document.createElement('span');
