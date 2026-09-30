@@ -2771,7 +2771,7 @@ async function mountDistribucion(context) {
       world.classList.add('has-reference-image');
       referenceCatalog.value = activeReferenceId;
       referenceRemove.disabled = background.builtin;
-      referenceRemove.textContent = background.builtin ? 'Casa Acapulco · incluido' : 'Eliminar plano personalizado';
+      referenceRemove.textContent = background.builtin ? `${background.name} · incluido` : 'Eliminar plano personalizado';
     };
     const refreshReferenceCatalog = async (selectedId = activeReferenceId) => {
       const backgrounds = await listDistributionBackgrounds();
