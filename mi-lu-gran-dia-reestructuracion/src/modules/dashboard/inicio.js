@@ -256,11 +256,14 @@ document.querySelectorAll('[data-answer]').forEach((button) => {
     const name = button.dataset.answer;
     const value = button.dataset.value;
     if (name === 'priorities') {
-      const selected = discoverAnswers.priorities.has(value);
-      if (selected) discoverAnswers.priorities.delete(value);
-      else discoverAnswers.priorities.add(value);
-      button.classList.toggle('is-selected', !selected);
-      button.setAttribute('aria-pressed', String(!selected));
+      discoverAnswers.priorities.clear();
+      discoverAnswers.priorities.add(value);
+      document.querySelectorAll('[data-answer="priorities"]').forEach((candidate) => {
+        const selected = candidate === button;
+        candidate.classList.toggle('is-selected', selected);
+        candidate.setAttribute('aria-pressed', String(selected));
+      });
+      window.setTimeout(() => moveDiscover(1), 170);
       return;
     }
     if (name === 'guests') {
