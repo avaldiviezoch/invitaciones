@@ -490,8 +490,10 @@ function renderTable(item, guestIndex, placement) {
     if (guest) {
       const labelAnchor = document.createElement('span');
       labelAnchor.className = 'distribution-seat-label-anchor';
-      labelAnchor.style.left = `${position.labelX}px`;
-      labelAnchor.style.top = `${position.labelY}px`;
+      labelAnchor.style.left = `${geometry.centerX}px`;
+      labelAnchor.style.top = `${geometry.centerY}px`;
+      labelAnchor.style.setProperty('--label-local-x', `${position.labelX - geometry.centerX}px`);
+      labelAnchor.style.setProperty('--label-local-y', `${position.labelY - geometry.centerY}px`);
 
       const labelRotator = document.createElement('span');
       labelRotator.className = 'distribution-seat-label-rotator';
