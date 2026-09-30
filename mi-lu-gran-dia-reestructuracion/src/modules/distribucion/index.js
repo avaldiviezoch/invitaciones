@@ -424,8 +424,10 @@ function applyPlacement(node, placement) {
   const rotation = normalizeRotation(placement.rotation);
   node.style.left = `${placement.x}px`;
   node.style.top = `${placement.y}px`;
-  node.style.setProperty('--table-rotation', `${rotation}deg`);
+  node.style.setProperty('--table-rotation', '0deg');
   node.style.setProperty('--counter-rotation', `${-rotation}deg`);
+  const seatsLayer = node.querySelector('.distribution-seats-layer');
+  if (seatsLayer) seatsLayer.style.transform = `rotate(${rotation}deg)`;
 }
 
 function renderTable(item, guestIndex, placement) {
@@ -472,6 +474,14 @@ function renderTable(item, guestIndex, placement) {
   rotationGuide.append(rotationStem, rotationHandle);
   node.append(rotationGuide);
 
+  const seatsLayer = document.createElement('div');
+  seatsLayer.className = 'distribution-seats-layer';
+  seatsLayer.style.width = `${geometry.visualWidth}px`;
+  seatsLayer.style.height = `${geometry.visualHeight}px`;
+  seatsLayer.style.transformOrigin = `${geometry.centerX}px ${geometry.centerY}px`;
+  seatsLayer.style.transform = `rotate(${normalizeRotation(placement.rotation)}deg)`;
+  node.append(seatsLayer);
+
   geometry.positions.slice(0, capacity).forEach((position, seatIndex) => {
     const seat = seats[seatIndex] || {};
     const guest = guestForSeat(guestIndex, tableId, seat, seatIndex);
@@ -486,7 +496,7 @@ function renderTable(item, guestIndex, placement) {
     chair.style.left = `${position.x}px`;
     chair.style.top = `${position.y}px`;
     chair.title = guest ? escapeText(guest.name) : `Silla ${seatIndex + 1}`;
-    node.append(chair);
+    seatsLayer.append(chair);
 
     if (guest) {
       const labelWrapper = document.createElement('span');
@@ -507,7 +517,7 @@ function renderTable(item, guestIndex, placement) {
       label.title = guestName;
 
       labelWrapper.append(label);
-      node.append(labelWrapper);
+      seatsLayer.append(labelWrapper);
     }
   });
   return node;
