@@ -901,3 +901,10 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - El formulario admite enlace, nombre, tipo, categoría, precio, miniatura y notas.
 - Sin Firebase, Firestore, Storage, localStorage, IndexedDB ni cambios de contratos. La persistencia e integración de metadatos de enlaces quedan para una fase autorizada.
 - Se registra Ideas en el shell sin inventar icono; el icono personalizado se incorporará después.
+
+
+## 2026-09-29 — Desarrollo sincronizado con correcciones de Mesas
+- Desarrollo incorpora la fuente canónica de medidas y acepta centésimas para Ø 1.83 m.
+- Editar dimensiones conserva el placement de Distribución (x, y y rotación).
+- Reducir capacidad reacomoda únicamente invitados cuyas sillas quedarían fuera, siempre que la nueva capacidad alcance; no elimina ni desasigna invitados.
+- Producción PR #506/#507 permanece sin fusionar hasta aprobación en desarrollo.

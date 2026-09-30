@@ -67,7 +67,6 @@
         </details>
       </div>
       <div class="distribution-view-controls">
-        <button class="distribution-background-button" type="button" data-distribution-background-button>Fondo</button>
         <details class="distribution-action-menu distribution-view-menu" data-distribution-menu>
           <summary>Vista <span aria-hidden="true">⌄</span></summary>
           <div class="distribution-action-menu-panel" role="group" aria-label="Opciones de vista">
@@ -103,7 +102,7 @@
       </section>
       <div class="distribution-layer-controls">
         <span class="distribution-inspector-eyebrow">AJUSTES DEL PLANO</span>
-        <div class="distribution-reference-controls" data-distribution-background-controls>
+        <div class="distribution-reference-controls">
           <label>Plano
             <select data-distribution-reference-catalog aria-label="Plano del recinto"></select>
           </label>
@@ -174,8 +173,8 @@
         <div class="distribution-table-dimensions" data-distribution-table-dimensions hidden>
           <span>MEDIDA FÍSICA</span>
           <div class="distribution-dimensions">
-            <label data-distribution-table-width-label>Diámetro (m)<input type="number" min="0.5" max="4" step="0.1" data-distribution-table-width></label>
-            <label data-distribution-table-height-label hidden>Fondo (m)<input type="number" min="0.5" max="4" step="0.1" data-distribution-table-height></label>
+            <label data-distribution-table-width-label>Diámetro (m)<input type="number" min="0.5" max="4" step="0.01" data-distribution-table-width></label>
+            <label data-distribution-table-height-label hidden>Fondo (m)<input type="number" min="0.5" max="4" step="0.01" data-distribution-table-height></label>
           </div>
           <button type="button" data-distribution-table-size-reset>Usar medida estándar</button>
           <small>La medida pertenece a esta mesa y se conserva aunque cambies su posición en el plano.</small>

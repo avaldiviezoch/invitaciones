@@ -87,6 +87,34 @@ function createTablesController(api) {
     });
   }
 
+  function compactGuestsIntoCapacity(table, nextSeats, occupiedGuests) {
+    if (occupiedGuests.length > nextSeats.length) return false;
+    const used = new Set();
+    const pending = [];
+
+    occupiedGuests.forEach((guest) => {
+      const seatIndex = Number(guest.seatNumber) - 1;
+      if (Number.isInteger(seatIndex) && seatIndex >= 0 && seatIndex < nextSeats.length && !used.has(seatIndex)) {
+        used.add(seatIndex);
+        guest.seatNumber = seatIndex + 1;
+        guest.seatId = text(nextSeats[seatIndex]?.id);
+      } else {
+        pending.push(guest);
+      }
+    });
+
+    const free = [];
+    for (let index = 0; index < nextSeats.length; index += 1) {
+      if (!used.has(index)) free.push(index);
+    }
+    pending.forEach((guest, index) => {
+      const seatIndex = free[index];
+      guest.seatNumber = seatIndex + 1;
+      guest.seatId = text(nextSeats[seatIndex]?.id);
+    });
+    return true;
+  }
+
   function assertSeatIdentityPreserved(table, nextSeats, occupiedGuests) {
     const previousSeats = Array.isArray(table?.seats) ? table.seats : [];
     previousSeats.slice(0, nextSeats.length).forEach((seat, index) => {
@@ -745,13 +773,16 @@ function createTablesController(api) {
       if (!table) throw new Error('La mesa ya no existe en la información actual.');
 
       const occupied = guestsAtTable(table.id);
-      const invalidOccupied = occupied.filter((guest) => Number(guest.seatNumber) > capacity);
-      if (invalidOccupied.length || occupied.length > capacity) {
-        if (dialogState) dialogState.textContent = `No se puede reducir a ${capacity} lugares porque hay invitados en sillas que desaparecerían.`;
+      if (occupied.length > capacity) {
+        if (dialogState) dialogState.textContent = `No se puede reducir a ${capacity} lugares porque la mesa tiene ${occupied.length} invitados asignados.`;
         return true;
       }
 
       const nextSeats = ensureSeats(table, capacity);
+      if (!compactGuestsIntoCapacity(table, nextSeats, occupied)) {
+        if (dialogState) dialogState.textContent = `No se puede reducir a ${capacity} lugares porque no caben todos los invitados asignados.`;
+        return true;
+      }
       reconcileGuestSeatIdentity(table, nextSeats, occupied);
       assertSeatIdentityPreserved(table, nextSeats, occupied);
 
