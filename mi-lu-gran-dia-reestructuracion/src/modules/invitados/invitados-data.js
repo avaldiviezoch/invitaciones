@@ -113,19 +113,6 @@ function summarizeInvitadosValue(value) {
   const pending = guests.filter((guest) => !['confirmed', 'declined'].includes(guestStatus(guest)));
   const seated = guests.filter((guest) => String(guest?.tableId || '').trim());
   const confirmedSeated = confirmed.filter((guest) => String(guest?.tableId || '').trim());
-  const confirmedWithoutTable = confirmed
-    .filter((guest) => !String(guest?.tableId || '').trim())
-    .map((guest) => ({
-      name: String(guest?.name || '').trim() || '(sin nombre)',
-      status: guestStatus(guest),
-      tableId: String(guest?.tableId || '').trim(),
-      rsvpResponseId: String(guest?.rsvpResponseId || '').trim()
-    }));
-  if (confirmedWithoutTable.length) {
-    console.group('[Migrandia diagnóstico temporal] Confirmados sin mesa');
-    console.table(confirmedWithoutTable);
-    console.groupEnd();
-  }
   const usedTableIds = new Set(seated.map((guest) => String(guest.tableId || '').trim()).filter(Boolean));
   const tables = canonical.tables.map((table, index) => {
     const tableId = String(table?.id || '').trim();
@@ -146,7 +133,6 @@ function summarizeInvitadosValue(value) {
     pending: pending.length,
     seated: seated.length,
     confirmedSeated: confirmedSeated.length,
-    confirmedWithoutTable,
     tablesUsed: usedTableIds.size,
     tables,
     confirmedPercent: guests.length ? Math.round(confirmed.length * 100 / guests.length) : 0
