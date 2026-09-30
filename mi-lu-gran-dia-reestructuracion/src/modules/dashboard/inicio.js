@@ -401,7 +401,7 @@ function renderHomeSummary(summary, context) {
 
   homeDashboard.querySelector('[data-home-tables-ratio]').textContent = `${guests.seated ?? 0} / ${guests.total ?? 0} ubicadas`;
   homeDashboard.querySelector('[data-home-tables-seated]').textContent = String(guests.seated ?? 0);
-  homeDashboard.querySelector('[data-home-tables-confirmed]').textContent = `de ${guests.total ?? 0} invitados`;
+  homeDashboard.querySelector('[data-home-tables-confirmed]').textContent = `${guests.confirmedSeated ?? 0} confirmados ubicados`;
 
   const tableGrid = homeDashboard.querySelector('[data-home-tables-grid]');
   const tableNote = homeDashboard.querySelector('[data-home-tables-note]');
