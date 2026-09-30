@@ -233,8 +233,8 @@ function createRsvpController(api) {
     renderMusicConfig(root);
     renderMusic(root);
     const management = state.management || [];
-    const confirmed = responses.filter((item) => item.attendance === 'confirmed');
-    const people = confirmed.reduce((sum, item) => sum + Math.max(1, Number(item.quantity || 1)), 0);
+    const canonicalGuests = api.getSnapshot()?.canonical?.guests || [];
+    const people = canonicalGuests.filter((guest) => text(guest?.status).toLowerCase() === 'confirmed').length;
     const declined = responses.filter((item) => item.attendance === 'declined').length;
     const reviewed = new Set(management.filter((item) => item.reviewed).map((item) => String(item.responseId)));
     const unreviewed = responses.filter((item) => !reviewed.has(String(item.id))).length;
