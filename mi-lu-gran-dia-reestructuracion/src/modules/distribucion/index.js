@@ -427,6 +427,14 @@ function guestLabelAlign(position, geometry, rotation) {
   return 'center';
 }
 
+function applyGuestLabelTransform(wrapper, position, geometry, rotation) {
+  const localX = Number(position?.labelX) - Number(geometry?.centerX);
+  const localY = Number(position?.labelY) - Number(geometry?.centerY);
+  wrapper.style.left = `${geometry.centerX}px`;
+  wrapper.style.top = `${geometry.centerY}px`;
+  wrapper.style.transform = `translate(${localX}px, ${localY}px) rotate(${-normalizeRotation(rotation)}deg)`;
+}
+
 function renderTable(item, guestIndex, placement) {
   const { table, index, capacity, geometry } = item;
   const tableId = escapeText(table?.id);
@@ -488,15 +496,10 @@ function renderTable(item, guestIndex, placement) {
     node.append(chair);
 
     if (guest) {
-      const labelAnchor = document.createElement('span');
-      labelAnchor.className = 'distribution-seat-label-anchor';
-      labelAnchor.style.left = `${geometry.centerX}px`;
-      labelAnchor.style.top = `${geometry.centerY}px`;
-      labelAnchor.style.setProperty('--label-local-x', `${position.labelX - geometry.centerX}px`);
-      labelAnchor.style.setProperty('--label-local-y', `${position.labelY - geometry.centerY}px`);
-
-      const labelRotator = document.createElement('span');
-      labelRotator.className = 'distribution-seat-label-rotator';
+      const labelWrapper = document.createElement('span');
+      labelWrapper.className = 'distribution-seat-label-wrap';
+      labelWrapper.dataset.seatIndex = String(seatIndex);
+      applyGuestLabelTransform(labelWrapper, position, geometry, placement.rotation);
 
       const label = document.createElement('span');
       label.className = 'distribution-seat-label';
@@ -508,9 +511,8 @@ function renderTable(item, guestIndex, placement) {
       label.textContent = compactGuestName(guestName);
       label.title = guestName;
 
-      labelRotator.append(label);
-      labelAnchor.append(labelRotator);
-      node.append(labelAnchor);
+      labelWrapper.append(label);
+      node.append(labelWrapper);
     }
   });
   return node;
@@ -2061,11 +2063,13 @@ async function mountDistribucion(context) {
 
     const refreshTableLabelOrientation = (node, entry, rotation) => {
       const positions = entry?.geometry?.positions || [];
-      node.querySelectorAll('.distribution-seat-label[data-seat-index]').forEach((label) => {
-        const seatIndex = Number(label.dataset.seatIndex);
+      node.querySelectorAll('.distribution-seat-label-wrap[data-seat-index]').forEach((wrapper) => {
+        const seatIndex = Number(wrapper.dataset.seatIndex);
         const position = positions[seatIndex];
         if (!position) return;
-        label.dataset.align = guestLabelAlign(position, entry.geometry, rotation);
+        applyGuestLabelTransform(wrapper, position, entry.geometry, rotation);
+        const label = wrapper.querySelector('.distribution-seat-label');
+        if (label) label.dataset.align = guestLabelAlign(position, entry.geometry, rotation);
       });
     };
 
