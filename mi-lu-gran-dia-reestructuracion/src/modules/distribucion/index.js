@@ -850,6 +850,7 @@ async function mountDistribucion(context) {
     let hasPersistedState = Boolean(storedState);
     let autosaveTimer = 0;
     let distributionCloudUnsubscribe = null;
+    let distributionViewCloudUnsubscribe = null;
     let canonicalCloudUnsubscribe = null;
     const cleanupTasks = [];
     let cleanedUp = false;
@@ -2737,7 +2738,6 @@ async function mountDistribucion(context) {
     const referenceX = root.querySelector('[data-distribution-reference-x]');
     const referenceY = root.querySelector('[data-distribution-reference-y]');
     const referenceReset = root.querySelector('[data-distribution-reference-reset]');
-    const referenceScopeId = context?.weddingId || context?.id || 'default';
     let referenceObjectUrl = '';
     let activeReferenceId = DEFAULT_BACKGROUND_ID;
     let referenceTransform = { scale:1, offsetX:0, offsetY:0 };
@@ -2808,20 +2808,33 @@ async function mountDistribucion(context) {
       return Promise.resolve();
     };
 
-    const storedReferencePreference = await readPlannerStorageKey(context, DISTRIBUTION_VIEW_STORAGE_KEY).catch(() => null);
-    const referencePreference = storedReferencePreference && typeof storedReferencePreference === 'object'
-      ? storedReferencePreference
-      : { backgroundId: DEFAULT_BACKGROUND_ID, visible: true, scale:1, offsetX:0, offsetY:0 };
-    if (epoch !== mountEpoch || !root.isConnected) return;
-    referenceToggle.checked = referencePreference.visible;
-    referenceTransform = {
-      scale: referencePreference.scale,
-      offsetX: referencePreference.offsetX,
-      offsetY: referencePreference.offsetY
+    const normalizeReferencePreference = (value) => {
+      const preference = value && typeof value === 'object' ? value : {};
+      return {
+        backgroundId: String(preference.backgroundId || DEFAULT_BACKGROUND_ID),
+        visible: preference.visible !== false,
+        scale: Math.max(0.5, Math.min(2.5, Number(preference.scale) || 1)),
+        offsetX: Math.max(-600, Math.min(600, Number(preference.offsetX) || 0)),
+        offsetY: Math.max(-450, Math.min(450, Number(preference.offsetY) || 0))
+      };
     };
-    renderReferenceTransform();
-    world.classList.toggle('hide-reference-image', !referencePreference.visible);
-    await refreshReferenceCatalog(referencePreference.backgroundId);
+    const applyReferencePreference = async (value) => {
+      if (!root.isConnected) return;
+      const preference = normalizeReferencePreference(value);
+      referenceToggle.checked = preference.visible;
+      referenceTransform = {
+        scale: preference.scale,
+        offsetX: preference.offsetX,
+        offsetY: preference.offsetY
+      };
+      renderReferenceTransform();
+      world.classList.toggle('hide-reference-image', !preference.visible);
+      await refreshReferenceCatalog(preference.backgroundId);
+    };
+
+    const storedReferencePreference = await readPlannerStorageKey(context, DISTRIBUTION_VIEW_STORAGE_KEY).catch(() => null);
+    if (epoch !== mountEpoch || !root.isConnected) return;
+    await applyReferencePreference(storedReferencePreference);
     if (epoch !== mountEpoch || !root.isConnected) return;
 
     const updateReferenceTransform = () => {
@@ -3166,6 +3179,14 @@ async function mountDistribucion(context) {
       }
     };
 
+    distributionViewCloudUnsubscribe = subscribePlannerStorageKey(context, DISTRIBUTION_VIEW_STORAGE_KEY, (remoteValue) => {
+      void applyReferencePreference(remoteValue).catch((error) => {
+        console.error('No se pudo aplicar la sincronización remota del ambiente:', error);
+      });
+    }, (error) => {
+      console.error('No se pudo escuchar la sincronización del ambiente:', error);
+    });
+
     distributionCloudUnsubscribe = subscribePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY, (remoteValue) => {
       let remoteState = null;
       try {
@@ -3233,11 +3254,13 @@ async function mountDistribucion(context) {
     document.addEventListener('visibilitychange', handleVisibilityChange);
     registerCleanup(() => document.removeEventListener('visibilitychange', handleVisibilityChange));
     registerCleanup(() => distributionCloudUnsubscribe?.());
+    registerCleanup(() => distributionViewCloudUnsubscribe?.());
     registerCleanup(() => canonicalCloudUnsubscribe?.());
     registerCleanup(() => {
       closeMobileSheet();
       hideSyncConflict();
       if (autosaveTimer) window.clearTimeout(autosaveTimer);
+      if (referenceSaveTimer) window.clearTimeout(referenceSaveTimer);
       if (referenceObjectUrl) {
         URL.revokeObjectURL(referenceObjectUrl);
         referenceObjectUrl = '';
