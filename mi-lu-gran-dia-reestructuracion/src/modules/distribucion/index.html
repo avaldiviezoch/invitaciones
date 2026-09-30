@@ -81,6 +81,32 @@
     </div>
   </section>
 
+
+  <section class="distribution-environment-toolbar" aria-label="Ambiente y escala del plano">
+    <span class="distribution-environment-title">AMBIENTE</span>
+    <div class="distribution-reference-controls">
+      <label>Plano
+        <select data-distribution-reference-catalog aria-label="Plano del recinto"></select>
+      </label>
+      <div class="distribution-reference-calibration">
+        <strong>Ajustar ambiente a tus mesas</strong>
+        <label>Escala <output data-distribution-reference-scale-output>100%</output>
+          <input type="range" min="50" max="250" step="1" value="100" data-distribution-reference-scale>
+        </label>
+        <div class="distribution-reference-position">
+          <label>Horizontal <input type="range" min="-600" max="600" step="5" value="0" data-distribution-reference-x></label>
+          <label>Vertical <input type="range" min="-450" max="450" step="5" value="0" data-distribution-reference-y></label>
+        </div>
+        <button type="button" data-distribution-reference-reset>Restablecer encuadre</button>
+        <small>Las mesas mantienen sus medidas reales. Ajusta el fondo hasta que su tamaño visual coincida con la escala que percibes en el lugar.</small>
+      </div>
+      <label>Agregar tu propia imagen<input type="file" accept="image/png,image/jpeg,image/webp" data-distribution-reference-file></label>
+      <button type="button" data-distribution-reference-remove>Eliminar plano personalizado</button>
+      <small>Los ambientes incluidos vienen del catálogo de Migrandia. Tus imágenes personales se guardan solo en este navegador.</small>
+    </div>
+  </section>
+
+
   <section class="distribution-workspace">
     <aside class="distribution-tools" aria-label="Herramientas del plano">
       <span class="distribution-inspector-eyebrow">ELEMENTOS</span>
@@ -102,26 +128,6 @@
       </section>
       <div class="distribution-layer-controls">
         <span class="distribution-inspector-eyebrow">AJUSTES DEL PLANO</span>
-        <div class="distribution-reference-controls">
-          <label>Plano
-            <select data-distribution-reference-catalog aria-label="Plano del recinto"></select>
-          </label>
-          <div class="distribution-reference-calibration">
-            <strong>Ajustar ambiente a tus mesas</strong>
-            <label>Escala <output data-distribution-reference-scale-output>100%</output>
-              <input type="range" min="50" max="250" step="1" value="100" data-distribution-reference-scale>
-            </label>
-            <div class="distribution-reference-position">
-              <label>Horizontal <input type="range" min="-600" max="600" step="5" value="0" data-distribution-reference-x></label>
-              <label>Vertical <input type="range" min="-450" max="450" step="5" value="0" data-distribution-reference-y></label>
-            </div>
-            <button type="button" data-distribution-reference-reset>Restablecer encuadre</button>
-            <small>Las mesas mantienen sus medidas reales. Ajusta el fondo hasta que su tamaño visual coincida con la escala que percibes en el lugar.</small>
-          </div>
-          <label>Agregar tu propia imagen<input type="file" accept="image/png,image/jpeg,image/webp" data-distribution-reference-file></label>
-          <button type="button" data-distribution-reference-remove>Eliminar plano personalizado</button>
-          <small>Los ambientes incluidos vienen del catálogo de Migrandia. Tus imágenes personales se guardan solo en este navegador.</small>
-        </div>
         <label class="distribution-proximity-control">Separación entre mesas
           <select data-distribution-proximity>
             <option value="0.6">0.6 m</option>
