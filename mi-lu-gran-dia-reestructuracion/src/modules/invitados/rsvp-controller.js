@@ -233,8 +233,14 @@ function createRsvpController(api) {
     renderMusicConfig(root);
     renderMusic(root);
     const management = state.management || [];
-    const canonicalGuests = api.getSnapshot()?.canonical?.guests || [];
-    const people = canonicalGuests.filter((guest) => text(guest?.status).toLowerCase() === 'confirmed').length;
+    const confirmedResponseIds = new Set(
+      responses.filter((item) => item.attendance === 'confirmed').map((item) => String(item.id))
+    );
+    const people = new Set(
+      management
+        .filter((item) => confirmedResponseIds.has(String(item.responseId)))
+        .flatMap((item) => Array.isArray(item.linkedGuestIds) ? item.linkedGuestIds.map(String) : [])
+    ).size;
     const declined = responses.filter((item) => item.attendance === 'declined').length;
     const reviewed = new Set(management.filter((item) => item.reviewed).map((item) => String(item.responseId)));
     const unreviewed = responses.filter((item) => !reviewed.has(String(item.id))).length;
@@ -402,9 +408,11 @@ function createRsvpController(api) {
     return [...new Set(tags.filter(Boolean))];
   }
 
-  function removeRsvpMetadata(guest, responseId) {
+  function removeRsvpMetadata(guest, responseId, responseAttendance = '') {
     if (String(guest.rsvpResponseId || '') !== String(responseId)) return { ...guest };
     const next = { ...guest };
+    const rsvpStatus = guestStatusFromAttendance(responseAttendance);
+    if (text(next.status).toLowerCase() === rsvpStatus) next.status = 'pending';
     delete next.rsvpResponseId;
     delete next.rsvpResponseName;
     delete next.rsvpGroup;
@@ -436,7 +444,7 @@ function createRsvpController(api) {
       let next = { ...guest };
 
       if (previousLinked.has(id) && !selected.has(id)) {
-        next = removeRsvpMetadata(next, response.id);
+        next = removeRsvpMetadata(next, response.id, response.attendance);
       }
       if (!selected.has(id)) return next;
 
@@ -554,7 +562,7 @@ function createRsvpController(api) {
     try {
       await deleteRsvpManagement(context, state.token, responseId);
       const snapshot = api.getSnapshot();
-      snapshot.canonical.guests = snapshot.canonical.guests.map((guest) => removeRsvpMetadata(guest, responseId));
+      snapshot.canonical.guests = snapshot.canonical.guests.map((guest) => removeRsvpMetadata(guest, responseId, response.attendance));
       try {
         await saveInvitadosSnapshot(context, snapshot.canonical);
       } catch (guestError) {
