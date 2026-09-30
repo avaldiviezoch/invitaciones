@@ -228,13 +228,13 @@ function rectangularPerimeterPositions(count, width, height, centerX, centerY) {
   return positions;
 }
 
-function labelAlignmentForSeat(position) {
-  if (position?.side === 'right') return 'left';
-  if (position?.side === 'left') return 'right';
-  if (position?.side === 'top' || position?.side === 'bottom') return 'center';
-  const cosine = Math.cos(Number(position?.angle) || 0);
-  if (cosine > 0.28) return 'left';
-  if (cosine < -0.28) return 'right';
+function labelAlignmentForSeat(position, rotation) {
+  const localX = Number(position?.labelX);
+  const localY = Number(position?.labelY);
+  const angle = normalizeRotation(rotation) * Math.PI / 180;
+  const worldX = localX * Math.cos(angle) - localY * Math.sin(angle);
+  if (worldX > 8) return 'left';
+  if (worldX < -8) return 'right';
   return 'center';
 }
 
@@ -504,7 +504,7 @@ function renderTable(item, guestIndex, placement) {
       labelWrapper.dataset.seatIndex = String(seatIndex);
       labelWrapper.style.left = `${position.labelX}px`;
       labelWrapper.style.top = `${position.labelY}px`;
-      const align = labelAlignmentForSeat(position);
+      const align = labelAlignmentForSeat(position, placement.rotation);
 
       const label = document.createElement('span');
       label.className = 'distribution-seat-label';
