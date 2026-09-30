@@ -367,6 +367,18 @@ function homePriority(summary) {
   return { module:'', title:'Tus principales pendientes están al día', detail:'Puedes continuar desde el módulo que quieras organizar ahora.' };
 }
 
+function renderHomeLoadError() {
+  if (!homeDashboard) return;
+  homeDashboard.querySelector('[data-home-focus-title]').textContent = 'No pudimos actualizar el resumen';
+  homeDashboard.querySelector('[data-home-focus-detail]').textContent = 'Tus datos siguen guardados. Vuelve a Inicio para intentar cargarlos otra vez.';
+  const focusAction = homeDashboard.querySelector('[data-home-focus-action]');
+  if (focusAction) {
+    focusAction.hidden = true;
+    focusAction.dataset.module = '';
+    focusAction.dataset.target = '';
+  }
+}
+
 function renderHomeSummary(summary, context) {
   if (!homeDashboard) return;
   const guests = summary?.guests || {};
@@ -445,7 +457,10 @@ async function refreshHomeDashboard(context = weddingContext) {
       budget: summarizeBudgetValue(values[BUDGET_STORAGE_KEY])
     }, context);
   } catch (error) {
-    if (epoch === homeSummaryEpoch) console.error('No se pudo cargar el resumen de la portada:', error);
+    if (epoch === homeSummaryEpoch) {
+      console.error('No se pudo cargar el resumen de la portada:', error);
+      renderHomeLoadError();
+    }
   } finally {
     if (epoch === homeSummaryEpoch) homeDashboard.setAttribute('aria-busy', 'false');
   }
