@@ -117,34 +117,40 @@ export async function mountMusica(context){
     const remove=event.target.closest('[data-remove-song]');
     if(remove){const moment=plan.moments.find(m=>m.id===remove.dataset.removeSong);if(!moment)return;moment.songs=moment.songs.filter(s=>s.id!==remove.dataset.songId);render(plan,requests,search);await save();return}
     if(event.target.closest('[data-music-add-moment]')){dialog.showModal();return}
-    const addPlaylist=event.target.closest('[data-add-playlist]');
-    if(addPlaylist){
-      const url=window.prompt('Pega la URL de tu playlist de Spotify, YouTube Music o Apple Music:','');
-      const platform=playlistPlatform(url);
-      if(!platform){window.alert('Usa una URL válida de Spotify, YouTube Music o Apple Music.');return}
-      const media=await enrichMedia(String(url).trim());
-      const choices=plan.moments.map((m,i)=>(i+1)+'. '+m.name).join('\n');
-      const selection=window.prompt('¿Dónde quieres usar esta playlist?\n\n'+choices+'\n'+(plan.moments.length+1)+'. Combinado (varios momentos)\n'+(plan.moments.length+2)+'. ＋ Crear mi propia categoría','');
+    const addWeddingMusic=event.target.closest('[data-add-wedding-music]');
+    if(addWeddingMusic){
+      const categories=plan.moments.filter(m=>!['invitados','invitacion'].includes(m.id));
+      const choices=categories.map((m,i)=>(i+1)+'. '+m.name).join('\n');
+      const special1=categories.length+1, special2=categories.length+2;
+      const selection=window.prompt('¿Para qué momento de la boda?\n\n'+choices+'\n'+special1+'. Combinado (varios momentos)\n'+special2+'. ＋ Crear mi propia categoría','');
       if(!selection)return;
-      const selectedNumber=Number(selection);
+      const n=Number(selection);
       let targets=[];
-      if(selectedNumber===plan.moments.length+1){
+      if(n===special1){
         const nums=window.prompt('Escribe los números de los momentos separados por coma. Ej.: 1, 4, 7','');
-        targets=String(nums||'').split(',').map(v=>plan.moments[Number(v.trim())-1]).filter(Boolean);
-      }else if(selectedNumber===plan.moments.length+2){
+        targets=String(nums||'').split(',').map(v=>categories[Number(v.trim())-1]).filter(Boolean);
+      }else if(n===special2){
         const custom=clean(window.prompt('Nombre de tu nueva categoría:',''),80);
         if(!custom)return;
         const moment={id:crypto.randomUUID(),name:custom,description:'Momento musical personalizado.',songs:[],playlist:null};
         plan.moments.push(moment); targets=[moment];
-      }else if(plan.moments[selectedNumber-1]){
-        targets=[plan.moments[selectedNumber-1]];
+      }else if(categories[n-1]){
+        targets=[categories[n-1]];
       }
       if(!targets.length)return;
-      const playlist={platform,url:String(url).trim(),name:clean(media.title,120)||'Playlist vinculada',coverUrl:media.coverUrl||'',embedUrl:embedUrl(parseMediaUrl(String(url).trim()))};
+      const source=window.prompt('¿Cómo quieres agregar la música?\n\n1. Spotify\n2. YouTube Music\n3. Apple Music\n4. Enlace de canción','1');
+      if(!source)return;
+      const url=window.prompt('Pega aquí la URL de la playlist o canción:','');
+      if(!url)return;
+      const media=await enrichMedia(String(url).trim());
+      if(!media.platform){window.alert('No reconocí la URL. Usa Spotify, YouTube Music o Apple Music.');return}
+      const playlist={platform:media.platform,url:String(url).trim(),name:clean(media.title,120)||'Música de boda',coverUrl:media.coverUrl||'',embedUrl:embedUrl(parseMediaUrl(String(url).trim()))};
       targets.forEach(moment=>{moment.playlist={...playlist}});
-      render(plan,requests,search); await save('Playlist vinculada.');
+      render(plan,requests,search); await save('Música de boda vinculada.');
       return;
     }
+    const addPlaylist=event.target.closest('[data-add-playlist]');
+    if(addPlaylist)return; 
     const previewPlaylist=event.target.closest('[data-preview-playlist]');
     const previewSong=event.target.closest('[data-preview-song]');
     if(previewPlaylist||previewSong){
