@@ -47,7 +47,7 @@
 .music-board-head p{margin:5px 0 0;color:#918a84;font-size:8px}
 .music-board-count{flex:none;padding:7px 10px;border-radius:999px;background:#f5f1ec;color:#8a827b;font-size:8px;font-weight:800}
 .music-reference-list{display:grid}
-.music-reference-row{display:grid;grid-template-columns:58px minmax(0,1fr) auto auto;align-items:center;gap:13px;padding:10px 14px;border-bottom:1px solid #eee9e5;min-height:76px}
+.music-reference-row{display:grid;grid-template-columns:58px minmax(0,1fr) auto auto auto;align-items:center;gap:13px;padding:10px 14px;border-bottom:1px solid #eee9e5;min-height:76px}
 .music-reference-row:last-child{border-bottom:0}
 .music-reference-row>img,.music-reference-row>.music-cover{width:58px;height:58px;min-width:58px;border-radius:9px;object-fit:cover}
 .music-reference-row .music-cover span{font-size:20px}
