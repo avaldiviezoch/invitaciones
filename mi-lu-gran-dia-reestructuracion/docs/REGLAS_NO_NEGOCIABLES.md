@@ -85,6 +85,19 @@ La privacidad es por **boda**, no necesariamente por usuario: varios usuarios co
 
 Los únicos datos que pueden ser compartidos entre bodas son los catálogos o recursos definidos explícitamente como globales por arquitectura.
 
+### Excepción explícita: biblioteca personal de Invitaciones
+
+El módulo **Invitaciones** mantiene una biblioteca personal de enlaces publicada a nivel de **cuenta (`uid`)**, no a nivel de boda. Esta excepción está definida por diseño: una misma cuenta puede administrar varias bodas y conservar sus referencias de invitaciones sin duplicarlas entre bodas.
+
+- Ruta canónica: `users/{uid}/invitations/{invitationId}`.
+- El propietario del dato es el usuario autenticado (`uid`).
+- Una invitación guardada por un usuario no debe aparecer para otro usuario.
+- Cambiar de usuario debe desmontar la suscripción anterior y cargar exclusivamente la biblioteca del nuevo `uid`.
+- Esta biblioteca no sustituye ni duplica los datos operativos propios de una boda.
+- La futura creación de invitaciones también deberá definir explícitamente si el recurso pertenece a la cuenta o a una boda antes de persistirlo.
+
+Esta es una excepción documentada al aislamiento operativo por `weddingId`; no autoriza a otros módulos a usar `uid` como sustituto de `weddingId`.
+
 ### Prueba obligatoria de aislamiento
 
 Todo módulo que persista o mantenga estado específico de una boda debe validar como mínimo:
