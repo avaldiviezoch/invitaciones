@@ -27,7 +27,7 @@ function normalizePlan(value){
   const moments=Array.isArray(value?.moments)&&value.moments.length
     ? value.moments.map((m)=>({id:clean(m?.id,80)||crypto.randomUUID(),name:clean(m?.name,80)||'Momento musical',description:clean(m?.description,180),songs:Array.isArray(m?.songs)?m.songs.map(s=>({id:clean(s?.id,80)||crypto.randomUUID(),title:clean(s?.title),artist:clean(s?.artist,120),source:clean(s?.source,30)||'manual',requestKey:clean(s?.requestKey,240)})).filter(s=>s.title||s.artist):[]}))
     : cloneDefault();
-  return {version:1,moments};
+  return {version:2,moments:moments.map(m=>({...m,playlist:m.playlist&&m.playlist.url?{platform:m.playlist.platform||playlistPlatform(m.playlist.url),url:m.playlist.url,name:m.playlist.name||''}:null}))};
 }
 function requestEntries(snapshot){
   return (snapshot?.musicResponses||[]).flatMap(response=>{
@@ -39,7 +39,34 @@ function requestEntries(snapshot){
   });
 }
 function songId(){return crypto.randomUUID();}
+function playlistPlatform(url){
+  const value=String(url||'').trim();
+  try{
+    const host=new URL(value).hostname.toLowerCase().replace(/^www\./,'');
+    if(host.includes('spotify.com')) return 'spotify';
+    if(host.includes('music.youtube.com')||host.includes('youtube.com')||host.includes('youtu.be')) return 'youtube';
+    if(host.includes('music.apple.com')) return 'apple';
+  }catch{}
+  return '';
+}
+function platformLabel(platform){
+  return platform==='spotify'?'Spotify':platform==='youtube'?'YouTube Music':platform==='apple'?'Apple Music':'';
+}
+function renderPlaylists(plan){
+  const root=document.querySelector('[data-music-playlists]');
+  if(!root)return;
+  root.innerHTML=plan.moments.map(moment=>{
+    const playlist=moment.playlist;
+    return '<article class="music-playlist-card"><div class="music-playlist-head"><div><span class="music-admin-section-label">MOMENTO</span><h3>'+esc(moment.name)+'</h3></div><span class="music-playlist-platform">'+esc(playlist?.platform?platformLabel(playlist.platform):'Sin playlist')+'</span></div>'+
+      (playlist?
+        '<p class="music-playlist-name">'+esc(playlist.name||'Playlist vinculada')+'</p><p class="music-playlist-url">'+esc(playlist.url)+'</p><div class="music-playlist-actions"><a href="'+esc(playlist.url)+'" target="_blank" rel="noopener noreferrer">Abrir playlist</a><button type="button" data-unlink-playlist="'+esc(moment.id)+'">Desvincular</button></div>'
+        :
+        '<p class="music-playlist-empty">Vincula Spotify, YouTube Music o Apple Music para este momento.</p><button type="button" class="music-link-playlist" data-link-playlist="'+esc(moment.id)+'">+ Vincular playlist</button>')+
+      '</article>';
+  }).join('');
+}
 function render(plan,requests,search){
+  renderPlaylists(plan);
   const moments=document.querySelector('[data-music-moments]');
   const needle=normalize(search);
   moments.innerHTML=plan.moments.map(moment=>{
@@ -76,6 +103,23 @@ export async function mountMusica(context){
     const remove=event.target.closest('[data-remove-song]');
     if(remove){const moment=plan.moments.find(m=>m.id===remove.dataset.removeSong);if(!moment)return;moment.songs=moment.songs.filter(s=>s.id!==remove.dataset.songId);render(plan,requests,search);await save();return}
     if(event.target.closest('[data-music-add-moment]')){dialog.showModal();return}
+    const link=event.target.closest('[data-link-playlist]');
+    if(link){
+      const moment=plan.moments.find(m=>m.id===link.dataset.linkPlaylist); if(!moment)return;
+      const url=window.prompt('Pega la URL de tu playlist de Spotify, YouTube Music o Apple Music:','');
+      const platform=playlistPlatform(url);
+      if(!platform){window.alert('Usa una URL de Spotify, YouTube Music o Apple Music.');return}
+      const name=window.prompt('Nombre de la playlist (opcional):','')||'';
+      moment.playlist={platform,url:String(url).trim(),name:clean(name,120)};
+      render(plan,requests,search); await save('Playlist vinculada.');
+      return;
+    }
+    const unlink=event.target.closest('[data-unlink-playlist]');
+    if(unlink){
+      const moment=plan.moments.find(m=>m.id===unlink.dataset.unlinkPlaylist); if(!moment)return;
+      moment.playlist=null; render(plan,requests,search); await save('Playlist desvinculada.');
+      return;
+    }
   },{signal});
   root.addEventListener('submit',async event=>{
     if(event.target.matches('[data-music-form]')){event.preventDefault();const data=new FormData(event.target);if(event.submitter?.value==='save'){plan.moments.push({id:crypto.randomUUID(),name:clean(data.get('name'),80),description:clean(data.get('description'),180),songs:[]});dialog.close();event.target.reset();render(plan,requests,search);await save('Nuevo momento guardado.')}else dialog.close();return}
