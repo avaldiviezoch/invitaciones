@@ -70,7 +70,7 @@ function renderPlaylists(plan){
   if(!root)return;
   root.innerHTML=plan.moments.map(moment=>{
     const playlist=moment.playlist;
-    return '<article class="music-playlist-card"><div class="music-playlist-head"><div><span class="music-admin-section-label">MOMENTO</span><h3>'+esc(moment.name)+'</h3></div><span class="music-playlist-platform">'+esc(playlist?.platform?platformLabel(playlist.platform):'Sin playlist')+'</span></div>'+
+    return '<article class="music-playlist-card">'+(playlist?.coverUrl?'<div class="music-playlist-cover"><img src="'+esc(playlist.coverUrl)+'" alt="" loading="lazy"><button type="button" data-preview-playlist="'+esc(moment.id)+'">▶</button></div>':visualFallback(playlist?.platform,'Playlist'))+'<div class="music-playlist-content"><div class="music-playlist-head"><div><span class="music-admin-section-label">MOMENTO</span><h3>'+esc(moment.name)+'</h3></div><span class="music-playlist-platform">'+esc(playlist?.platform?platformLabel(playlist.platform):'Sin playlist')+'</span></div>'+
       (playlist?
         '<p class="music-playlist-name">'+esc(playlist.name||'Playlist vinculada')+'</p><p class="music-playlist-url">'+esc(playlist.url)+'</p><div class="music-playlist-actions"><a href="'+esc(playlist.url)+'" target="_blank" rel="noopener noreferrer">Abrir playlist</a><button type="button" data-unlink-playlist="'+esc(moment.id)+'">Desvincular</button></div>'
         :
