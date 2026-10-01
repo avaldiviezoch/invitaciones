@@ -99,6 +99,22 @@ async function hydratePlaylistCovers(plan){
   return changed;
 }
 function visualFallback(platform){return '<div class="music-cover music-cover-'+esc(platform||'generic')+'"><span>♫</span></div>';}
+function openMusicPreview(item,media,url){
+  document.querySelector('[data-music-preview-overlay]')?.remove();
+  const overlay=document.createElement('div');
+  overlay.className='music-preview-overlay';
+  overlay.dataset.musicPreviewOverlay='';
+  overlay.innerHTML='<div class="music-preview-card" role="dialog" aria-modal="true" aria-label="Vista de música">'+
+    '<div class="music-preview-head"><div><span class="music-admin-section-label">MÚSICA</span><h2>Música</h2></div><button type="button" class="music-preview-close" aria-label="Cerrar">×</button></div>'+
+    '<div class="music-preview-content"><div class="music-preview-cover">'+(item?.coverUrl?'<img src="'+esc(item.coverUrl)+'" alt="" loading="lazy">':visualFallback(media?.platform||'generic'))+'</div>'+
+    '<div class="music-preview-info"><span>'+esc(platformLabel(media?.platform)||'Música')+'</span><h3>'+esc(item?.name||'Música de boda')+'</h3><p>Esta referencia conserva su playlist original. Ábrela en su plataforma para ver todas las canciones y reproducirlas.</p><a class="music-preview-open" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Abrir playlist</a></div></div></div>';
+  document.body.appendChild(overlay);
+  const close=()=>overlay.remove();
+  overlay.querySelector('.music-preview-close').addEventListener('click',close);
+  overlay.addEventListener('click',event=>{if(event.target===overlay)close()});
+  const onKey=event=>{if(event.key==='Escape'){close();document.removeEventListener('keydown',onKey)}};
+  document.addEventListener('keydown',onKey);
+}
 
 function normalizePlan(value){
   const source=Array.isArray(value?.moments)&&value.moments.length?value.moments:cloneDefault();
@@ -170,7 +186,6 @@ export async function mountMusica(context){
   if(coversChanged)await writePlannerStorageKey(context,STORAGE_KEY,normalizePlan(plan));
   render(plan,requests,search);
   const addDialog=document.querySelector('[data-add-music-dialog]');
-  const previewDialog=document.querySelector('[data-music-preview]');
   const editCoverDialog=document.querySelector('[data-edit-cover-dialog]');
   const updateMode=()=>{
     const mode=root.querySelector('[data-moment-mode]').value;
@@ -202,17 +217,8 @@ export async function mountMusica(context){
     const preview=event.target.closest('[data-preview-url]');
     if(preview){
       const url=preview.dataset.previewUrl,media=parseMediaUrl(url);
-      const dialog=previewDialog;
       const item=plan.moments.flatMap(m=>m.playlist?[{playlist:m.playlist}]:[]).find(x=>x.playlist?.url===url)?.playlist;
-      if(dialog&&url){
-        const cover=dialog.querySelector('[data-preview-cover]');
-        cover.innerHTML=item?.coverUrl?'<img src="'+esc(item.coverUrl)+'" alt="" loading="lazy">':visualFallback(media?.platform||'generic');
-        dialog.querySelector('[data-preview-title]').textContent=item?.name||preview.dataset.previewTitle||'Música';
-        dialog.querySelector('[data-preview-name]').textContent=item?.name||preview.dataset.previewTitle||'Música de boda';
-        dialog.querySelector('[data-preview-platform]').textContent=platformLabel(media?.platform)||'Música';
-        dialog.querySelector('[data-preview-open]').href=url;
-        dialog.showModal();
-      }
+      openMusicPreview(item,media,url);
       return
     }
 
@@ -220,7 +226,6 @@ export async function mountMusica(context){
 
   root.addEventListener('change',event=>{if(event.target.matches('[data-moment-mode]'))updateMode();},{signal});
 
-  previewDialog?.querySelector('[data-close-preview]')?.addEventListener('click',()=>previewDialog.close(),{signal});
   editCoverDialog?.querySelectorAll('[data-close-edit-cover]').forEach(button=>button.addEventListener('click',()=>editCoverDialog.close(),{signal}));
 
   root.querySelector('[data-edit-cover-form]').addEventListener('submit',async event=>{
