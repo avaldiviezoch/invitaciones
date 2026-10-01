@@ -14,6 +14,7 @@ const BUILTIN_BACKGROUNDS = Object.freeze([
   { id:'venue_rustic_area', name:'Área rústica', group:'Campo y bosque', file:'area_rustica.png' },
   { id:'venue_forest', name:'Bosque', group:'Campo y bosque', file:'bosque.png' },
   { id:'venue_forest_2', name:'Bosque · opción 2', group:'Campo y bosque', file:'bosque_2.png' },
+  { id:'venue_casa_acapulco', name:'Casa Acapulco', group:'Casas y jardines', file:'casa-acapulco.png', localAsset:true },
   { id:'venue_country_1', name:'Casa de campo · opción 1', group:'Casas y jardines', file:'casa de campo1.png' },
   { id:'venue_country_2', name:'Casa de campo · opción 2', group:'Casas y jardines', file:'casa de campo2.png' },
   { id:'venue_country_3', name:'Casa de campo · opción 3', group:'Casas y jardines', file:'casa de campo3.png' },
@@ -49,7 +50,14 @@ function builtinSource(file) {
 }
 
 function builtinBackgrounds() {
-  return BUILTIN_BACKGROUNDS.map((item) => ({ ...item, builtin:true, mimeType:'image/png', source:builtinSource(item.file) }));
+  return BUILTIN_BACKGROUNDS.map((item) => ({
+    ...item,
+    builtin:true,
+    mimeType:'image/png',
+    source:item.localAsset
+      ? new URL('../../../assets/distribucion/casa-acapulco.png?v=1', import.meta.url).href
+      : builtinSource(item.file)
+  }));
 }
 
 function openDatabase() {
