@@ -169,7 +169,9 @@ export async function mountMusica(context){
   const save=async message=>{await writePlannerStorageKey(context,STORAGE_KEY,normalizePlan(plan));root.querySelector('[data-music-state]').textContent=message||'Cambios guardados en la boda.'};
   if(coversChanged)await writePlannerStorageKey(context,STORAGE_KEY,normalizePlan(plan));
   render(plan,requests,search);
-  const addDialog=root.querySelector('[data-add-music-dialog]');
+  const addDialog=document.querySelector('[data-add-music-dialog]');
+  const previewDialog=document.querySelector('[data-music-preview]');
+  const editCoverDialog=document.querySelector('[data-edit-cover-dialog]');
   const updateMode=()=>{
     const mode=root.querySelector('[data-moment-mode]').value;
     root.querySelector('[data-single-category]').hidden=mode!=='single';
@@ -183,7 +185,7 @@ export async function mountMusica(context){
     if(event.target.closest('[data-close-add-music]')){addDialog.close();return}
     const editCover=event.target.closest('[data-edit-cover-url]');
     if(editCover){
-      const dialog=root.querySelector('[data-edit-cover-dialog]');
+      const dialog=editCoverDialog;
       const playlist=plan.moments.find(m=>m.playlist?.url===editCover.dataset.editCoverUrl)?.playlist;
       dialog.querySelector('[data-edit-cover-url-input]').value=playlist?.coverSource==='custom'?playlist?.coverUrl||'':'';
       dialog.querySelector('[data-edit-cover-title]').textContent=editCover.dataset.editCoverTitle||'Portada';
@@ -200,7 +202,7 @@ export async function mountMusica(context){
     const preview=event.target.closest('[data-preview-url]');
     if(preview){
       const url=preview.dataset.previewUrl,media=parseMediaUrl(url);
-      const dialog=root.querySelector('[data-music-preview]');
+      const dialog=previewDialog;
       const item=plan.moments.flatMap(m=>m.playlist?[{playlist:m.playlist}]:[]).find(x=>x.playlist?.url===url)?.playlist;
       if(dialog&&url){
         const cover=dialog.querySelector('[data-preview-cover]');
@@ -213,11 +215,13 @@ export async function mountMusica(context){
       }
       return
     }
-    if(event.target.closest('[data-close-preview]'))root.querySelector('[data-music-preview]').close();
-    if(event.target.closest('[data-close-edit-cover]'))root.querySelector('[data-edit-cover-dialog]').close();
+
   },{signal});
 
   root.addEventListener('change',event=>{if(event.target.matches('[data-moment-mode]'))updateMode();},{signal});
+
+  previewDialog?.querySelector('[data-close-preview]')?.addEventListener('click',()=>previewDialog.close(),{signal});
+  editCoverDialog?.querySelectorAll('[data-close-edit-cover]').forEach(button=>button.addEventListener('click',()=>editCoverDialog.close(),{signal}));
 
   root.querySelector('[data-edit-cover-form]').addEventListener('submit',async event=>{
     event.preventDefault();
