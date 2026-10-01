@@ -1,3 +1,13 @@
+## Fase 5 — Invitaciones: biblioteca personal por cuenta
+
+- Se eliminó el catálogo hardcodeado de invitaciones del módulo; una cuenta nueva inicia sin invitaciones.
+- Las referencias se guardan en `users/{uid}/invitations/{invitationId}` mediante `src/services/personal-invitations.js`.
+- La suscripción y el cleanup están vinculados al usuario autenticado.
+- Se validó con dos cuentas: una invitación agregada en la cuenta A no aparece en la cuenta B y reaparece al volver a A.
+- Los enlaces publicados de las invitaciones permanecen fuera de Firestore; la base conserva la referencia personal.
+- Se documentó esta biblioteca como excepción explícita al aislamiento operativo por `weddingId`.
+- Pendiente antes de producción: validar consola, responsive, reglas efectivas y el futuro módulo de creación de invitaciones.
+
 ## Fase 4 — Distribución: aislamiento de fondos y primer estado vacío
 
 - Se eliminó el comportamiento de Casa Acapulco como fondo predeterminado universal.
