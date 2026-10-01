@@ -88,3 +88,26 @@ Actualizar `docs/HISTORIAL_AVANCES.md` al cerrar cada hito estructural o funcion
 ## Regla de simplicidad y mantenibilidad
 
 Antes de crear archivos, listeners, eventos, abstracciones o implementaciones nuevas, cumplir `docs/REGLA_SIMPLICIDAD_MANTENIBILIDAD.md`. La prioridad es mantener una sola ruta vigente por funcionalidad, pocos archivos y responsabilidades localizables.
+
+## Aislamiento obligatorio por boda
+
+Toda información operativa o personal de la aplicación pertenece a una única boda identificada por `weddingId`. La boda activa es el contexto obligatorio para leer, escribir, suscribirse o mantener estado específico de una boda.
+
+La separación debe mantenerse en dos niveles:
+
+- **Persistencia:** los datos específicos de una boda deben resolverse dentro del contexto de esa boda; no se permite usar una fuente global para hacer aparecer datos de otra boda.
+- **Frontend:** ningún módulo puede conservar estado, listeners, cachés, DOM o resultados asíncronos de una boda anterior después de cambiar de `weddingId` o cerrar sesión.
+
+Al cambiar de boda o usuario, los módulos con estado propio deben ejecutar su ciclo de destrucción antes de montarse con el nuevo contexto. El cleanup debe cancelar listeners/subscriptions, limpiar estado y DOM propio e invalidar operaciones asíncronas obsoletas.
+
+La privacidad es por **boda**, no por usuario individual: los usuarios autorizados de una misma boda comparten sus datos según sus permisos.
+
+Solo pueden compartirse entre bodas los catálogos o recursos definidos explícitamente como globales.
+
+Cualquier nuevo módulo que maneje datos de boda debe incluir en su contrato:
+- `weddingId/context` utilizado;
+- datos que lee;
+- datos que escribe;
+- listeners/subscriptions que crea;
+- función o mecanismo de cleanup;
+- prueba de aislamiento entre dos bodas y dos usuarios.
