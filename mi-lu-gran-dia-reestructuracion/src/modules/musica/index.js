@@ -36,20 +36,41 @@ function embedUrl(media){
   if(media.platform==='apple')return media.url.replace('https://music.apple.com/','https://embed.music.apple.com/');
   return'';
 }
+const MUSIC_PREVIEW_ENDPOINT='https://migrandia-dev.avaldiviezoch.workers.dev/api/music-preview';
+
 async function enrichMedia(url){
-  const media=parseMediaUrl(url);if(!media)return null;
-  if(media.platform==='spotify'){
-    try{const r=await fetch('https://open.spotify.com/oembed?url='+encodeURIComponent(media.url));if(r.ok){const d=await r.json();return{...media,coverUrl:d.thumbnail_url||'',title:d.title||''};}}catch{}
+  const media=parseMediaUrl(url);
+  if(!media)return null;
+
+  try{
+    const endpoint=MUSIC_PREVIEW_ENDPOINT+'?url='+encodeURIComponent(media.url);
+    const response=await fetch(endpoint,{method:'GET',headers:{Accept:'application/json'}});
+    if(response.ok){
+      const data=await response.json();
+      if(data?.ok){
+        return{
+          ...media,
+          url:data.originalUrl||media.url,
+          coverUrl:clean(data.image,1000),
+          title:clean(data.title,140)
+        };
+      }
+    }
+  }catch{}
+
+  if(media.platform==='youtube'&&media.type==='track'){
+    return{
+      ...media,
+      coverUrl:'https://i.ytimg.com/vi/'+encodeURIComponent(media.id)+'/hqdefault.jpg',
+      title:''
+    };
   }
-  if(media.platform==='youtube'){
-    try{
-      const youtubeUrl='https://www.youtube.com/'+(media.type==='playlist'?'playlist?list='+encodeURIComponent(media.id):'watch?v='+encodeURIComponent(media.id));
-      const r=await fetch('https://www.youtube.com/oembed?url='+encodeURIComponent(youtubeUrl)+'&format=json');
-      if(r.ok){const d=await r.json();return{...media,coverUrl:d.thumbnail_url||'',title:d.title||''};}
-    }catch{}
-    if(media.type==='track')return{...media,coverUrl:'https://i.ytimg.com/vi/'+media.id+'/hqdefault.jpg',title:''};
-  }
-  return{...media,coverUrl:'',title:''};
+
+  return{
+    ...media,
+    coverUrl:'',
+    title:''
+  };
 }
 async function hydratePlaylistCovers(plan){
   let changed=false;
