@@ -52,6 +52,19 @@ function playlistPlatform(url){
 function platformLabel(platform){
   return platform==='spotify'?'Spotify':platform==='youtube'?'YouTube Music':platform==='apple'?'Apple Music':'';
 }
+function parseMediaUrl(url){
+  try{
+    const u=new URL(String(url||'').trim());
+    const host=u.hostname.toLowerCase().replace(/^www\./,'');
+    if(host.includes('spotify.com')){const parts=u.pathname.split('/').filter(Boolean);if(parts[0]&&parts[1]&&['playlist','album','track'].includes(parts[0]))return {platform:'spotify',type:parts[0],id:parts[1],url:u.href};}
+    if(host.includes('youtube.com')||host==='youtu.be'||host.includes('music.youtube.com')){const playlist=u.searchParams.get('list');const video=u.searchParams.get('v')||(host==='youtu.be'?u.pathname.slice(1):'');if(playlist)return {platform:'youtube',type:'playlist',id:playlist,url:u.href};if(video)return {platform:'youtube',type:'track',id:video,url:u.href};}
+    if(host.includes('music.apple.com')){const parts=u.pathname.split('/').filter(Boolean);const type=parts.includes('playlist')?'playlist':parts.includes('album')?'album':parts.includes('song')?'track':'';if(type)return {platform:'apple',type,id:parts[parts.indexOf(type)+1]||'',url:u.href};}
+  }catch{}
+  return null;
+}
+function embedUrl(media){if(!media)return '';if(media.platform==='spotify')return 'https://open.spotify.com/embed/'+media.type+'/'+media.id+'?utm_source=generator';if(media.platform==='youtube')return media.type==='playlist'?'https://www.youtube.com/embed?listType=playlist&list='+encodeURIComponent(media.id)+'&playsinline=1':'https://www.youtube.com/embed/'+encodeURIComponent(media.id)+'?playsinline=1';if(media.platform==='apple')return media.url.replace('https://music.apple.com/','https://embed.music.apple.com/');return '';}
+async function enrichMedia(url){const media=parseMediaUrl(url);if(!media)return {url:'',platform:'',coverUrl:'',title:''};if(media.platform==='spotify'){try{const response=await fetch('https://open.spotify.com/oembed?url='+encodeURIComponent(media.url),{headers:{Accept:'application/json'}});if(response.ok){const data=await response.json();return {url:media.url,platform:'spotify',coverUrl:data.thumbnail_url||'',title:data.title||''};}}catch{}}if(media.platform==='youtube'&&media.type==='track')return {url:media.url,platform:'youtube',coverUrl:'https://i.ytimg.com/vi/'+media.id+'/hqdefault.jpg',title:''};return {url:media.url,platform:media.platform,coverUrl:'',title:''};}
+function visualFallback(platform,label){return '<div class="music-cover music-cover-'+esc(platform||'generic')+'"><span>♫</span><small>'+esc(label||'Música')+'</small></div>';}
 function renderPlaylists(plan){
   const root=document.querySelector('[data-music-playlists]');
   if(!root)return;
