@@ -4,6 +4,7 @@ const TEMPLATE_URL = new URL('./index.html?v=3', import.meta.url);
 const STORAGE_KEY = 'planificador_bodas_ideas_v1';
 let templatePromise = null;
 let cleanup = () => {};
+let lifecycleToken = 0;
 
 const state = { items: [], filter: 'all', search: '', context: null, editingId: '', usingId: '' };
 
@@ -192,13 +193,44 @@ async function persist(root) {
   }
 }
 
+export function destroyIdeas() {
+  lifecycleToken += 1;
+  cleanup();
+  cleanup = () => {};
+  state.items = [];
+  state.filter = 'all';
+  state.search = '';
+  state.context = null;
+  state.editingId = '';
+  state.usingId = '';
+  const root = document.querySelector('[data-module-view="ideas"]');
+  if (!root) return;
+  root.innerHTML = '';
+  delete root.dataset.mounted;
+  delete root.dataset.weddingId;
+}
+
 export async function mountIdeas(context) {
   const root = document.querySelector('[data-module-view="ideas"]');
-  if (!root || root.dataset.mounted === 'true') return false;
+  if (!root || !context?.id) return false;
+  if (root.dataset.mounted === 'true') {
+    if (root.dataset.weddingId === String(context.id)) return true;
+    destroyIdeas();
+  }
+
+  const token = ++lifecycleToken;
   root.innerHTML = await loadTemplate();
+  if (token !== lifecycleToken) return false;
   root.dataset.mounted = 'true';
+  root.dataset.weddingId = String(context.id);
   state.context = context;
-  state.items = normalizeItems(await readPlannerStorageKey(context, STORAGE_KEY));
+  try {
+    state.items = normalizeItems(await readPlannerStorageKey(context, STORAGE_KEY));
+  } catch (error) {
+    if (token === lifecycleToken) destroyIdeas();
+    throw error;
+  }
+  if (token !== lifecycleToken) return false;
 
   const dialog = root.querySelector('[data-ideas-dialog]');
   const form = root.querySelector('[data-ideas-form]');
@@ -276,6 +308,7 @@ export async function mountIdeas(context) {
     }
   };
 
+  if (token !== lifecycleToken) return false;
   cleanup();
   cleanup = subscribePlannerStorageKey(context, STORAGE_KEY, (value) => {
     state.items = normalizeItems(value);
