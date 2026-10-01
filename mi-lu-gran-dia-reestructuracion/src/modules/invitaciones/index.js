@@ -1,13 +1,8 @@
-const INVITATIONS = Object.freeze([
-  { id: 0, name: 'Invitación 0', url: 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_0/', principal: true },
-  { id: 1, name: 'Invitación 1', url: 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_1/' },
-  { id: 2, name: 'Invitación 2', url: 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_2/' },
-  { id: 3, name: 'Invitación 3', url: 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_3/' },
-  { id: 4, name: 'Invitación 4', url: 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_4/' },
-  { id: 5, name: 'Invitación 5', url: 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_5/' },
-  { id: 6, name: 'Invitación 6', url: 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_6/' },
-  { id: 7, name: 'Invitación 7', url: 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_7/' }
-]);
+import {
+  subscribePersonalInvitations,
+  addPersonalInvitation,
+  deletePersonalInvitation
+} from '../../services/personal-invitations.js';
 
 const DEVICES = Object.freeze([
   { id: 'compact', label: 'Compacto', width: 360, height: 800 },
@@ -31,13 +26,22 @@ function stopFrame(frame) {
 
 function invitationButton(item, active) {
   return `<button class="invitations-option${active ? ' is-active' : ''}" type="button" data-invitation-id="${item.id}">
-    <span class="invitations-number">${item.id}</span>
-    <span><strong>${item.name}</strong><small>Vista publicada</small>${item.principal ? '<b>Principal</b>' : ''}</span>
+    <span class="invitations-number">↗</span>
+    <span><strong>${item.name}</strong><small>Enlace guardado</small>${item.principal ? '<b>Principal</b>' : ''}</span>
   </button>`;
 }
 
 function deviceButton(device, active) {
   return `<button class="${active ? 'is-active' : ''}" type="button" data-invitation-device="${device.id}">${device.label} · ${device.width}×${device.height}</button>`;
+}
+
+function escapeHtml(value = '') {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 }
 
 export async function mountInvitaciones() {
@@ -48,7 +52,7 @@ export async function mountInvitaciones() {
   const controller = new AbortController();
   const { signal } = controller;
 
-  const response = await fetch('src/modules/invitaciones/index.html?v=2', { cache: 'no-store' });
+  const response = await fetch('src/modules/invitaciones/index.html?v=3', { cache: 'no-store' });
   if (!response.ok) throw new Error('No se pudo cargar la vista de Invitaciones.');
   root.innerHTML = await response.text();
 
@@ -61,13 +65,50 @@ export async function mountInvitaciones() {
   const badge = root.querySelector('[data-invitations-badge]');
   const open = root.querySelector('[data-invitations-open]');
   const copy = root.querySelector('[data-invitations-copy]');
-  let selected = INVITATIONS[0];
+  const total = root.querySelector('[data-invitations-total]');
+  const empty = root.querySelector('[data-invitations-empty]');
+  const addForm = root.querySelector('[data-invitations-add-form]');
+  const addName = root.querySelector('[data-invitations-add-name]');
+  const addUrl = root.querySelector('[data-invitations-add-url]');
+  const addStatus = root.querySelector('[data-invitations-add-status]');
+  const createButton = root.querySelector('[data-invitations-create]');
+
+  let invitations = [];
+  let selected = null;
   let selectedDevice = DEVICES[1];
   let loadEpoch = 0;
 
-  root.querySelector('[data-invitations-total]').textContent = String(INVITATIONS.length);
-  list.innerHTML = INVITATIONS.map((item) => invitationButton(item, item.id === selected.id)).join('');
+  total.textContent = '0';
   devices.innerHTML = DEVICES.map((device) => deviceButton(device, device.id === selectedDevice.id)).join('');
+
+  function renderList() {
+    total.textContent = String(invitations.length);
+    empty.hidden = invitations.length > 0;
+    list.innerHTML = invitations.map((item) => invitationButton(item, selected?.id === item.id)).join('');
+
+    if (!invitations.length) {
+      selected = null;
+      stopFrame(frame);
+      frame.hidden = true;
+      loading.hidden = true;
+      current.textContent = 'Sin invitaciones';
+      badge.textContent = 'Agrega una invitación para comenzar';
+      badge.classList.remove('is-principal');
+      open.removeAttribute('href');
+      copy.disabled = true;
+      return;
+    }
+
+    frame.hidden = false;
+    copy.disabled = false;
+    if (!selected || !invitations.some((item) => item.id === selected.id)) {
+      loadInvitation(invitations[0]);
+    } else {
+      list.querySelectorAll('[data-invitation-id]').forEach((button) => {
+        button.classList.toggle('is-active', button.dataset.invitationId === selected.id);
+      });
+    }
+  }
 
   function applyDevice(device) {
     selectedDevice = device;
@@ -79,17 +120,20 @@ export async function mountInvitaciones() {
   }
 
   function loadInvitation(item) {
+    if (!item) return;
     selected = item;
     const epoch = ++loadEpoch;
     stopFrame(frame);
     current.textContent = item.name;
-    badge.textContent = item.principal ? 'Invitación principal' : 'Modelo publicado';
+    badge.textContent = item.principal ? 'Invitación principal' : 'Invitación personal';
     badge.classList.toggle('is-principal', Boolean(item.principal));
     open.href = item.url;
     loading.textContent = `Cargando ${item.name}…`;
     loading.hidden = false;
+    frame.hidden = false;
+    copy.disabled = false;
     list.querySelectorAll('[data-invitation-id]').forEach((button) => {
-      button.classList.toggle('is-active', Number(button.dataset.invitationId) === item.id);
+      button.classList.toggle('is-active', button.dataset.invitationId === item.id);
     });
     frame.title = `Vista previa de ${item.name}`;
     frame.onload = () => {
@@ -102,7 +146,7 @@ export async function mountInvitaciones() {
   list.addEventListener('click', (event) => {
     const button = event.target.closest('[data-invitation-id]');
     if (!button) return;
-    const item = INVITATIONS.find((candidate) => candidate.id === Number(button.dataset.invitationId));
+    const item = invitations.find((candidate) => candidate.id === button.dataset.invitationId);
     if (item) loadInvitation(item);
   }, { signal });
 
@@ -113,8 +157,12 @@ export async function mountInvitaciones() {
     if (device) applyDevice(device);
   }, { signal });
 
-  root.querySelector('[data-invitations-reload]').addEventListener('click', () => loadInvitation(selected), { signal });
+  root.querySelector('[data-invitations-reload]').addEventListener('click', () => {
+    if (selected) loadInvitation(selected);
+  }, { signal });
+
   copy.addEventListener('click', async () => {
+    if (!selected) return;
     const before = copy.innerHTML;
     try {
       await navigator.clipboard.writeText(selected.url);
@@ -125,13 +173,48 @@ export async function mountInvitaciones() {
     window.setTimeout(() => { if (copy.isConnected) copy.innerHTML = before; }, 1200);
   }, { signal });
 
+  addForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    addStatus.textContent = 'Guardando…';
+    addStatus.className = 'invitations-add-status is-loading';
+    try {
+      await addPersonalInvitation({ name: addName.value, url: addUrl.value });
+      addForm.reset();
+      addStatus.textContent = '✓ Invitación agregada a tu cuenta';
+      addStatus.className = 'invitations-add-status is-success';
+    } catch (error) {
+      addStatus.textContent = error?.message || 'No se pudo guardar la invitación.';
+      addStatus.className = 'invitations-add-status is-error';
+    }
+  }, { signal });
+
+  createButton.addEventListener('click', () => {
+    addStatus.textContent = 'El creador de invitaciones se habilitará en su módulo correspondiente.';
+    addStatus.className = 'invitations-add-status';
+    addUrl.focus();
+  }, { signal });
+
   applyDevice(selectedDevice);
-  loadInvitation(selected);
+
+  const unsubscribe = subscribePersonalInvitations((items) => {
+    invitations = items;
+    renderList();
+  }, (error) => {
+    addStatus.textContent = error?.message || 'No se pudieron cargar tus invitaciones.';
+    addStatus.className = 'invitations-add-status is-error';
+  });
 
   activeInvitationsCleanup = () => {
     controller.abort();
+    unsubscribe();
     stopFrame(frame);
     activeInvitationsCleanup = null;
   };
+
   return true;
+}
+
+export function destroyInvitaciones() {
+  activeInvitationsCleanup?.();
+  activeInvitationsCleanup = null;
 }
