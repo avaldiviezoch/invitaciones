@@ -101,15 +101,18 @@ async function hydratePlaylistCovers(plan){
 function visualFallback(platform){return '<div class="music-cover music-cover-'+esc(platform||'generic')+'"><span>♫</span></div>';}
 function openMusicPreview(item,media,url){
   document.querySelector('[data-music-preview-overlay]')?.remove();
+  const embed=embedUrl(media);
+  if(!embed)return;
   const overlay=document.createElement('div');
   overlay.className='music-preview-overlay';
   overlay.dataset.musicPreviewOverlay='';
-  overlay.innerHTML='<div class="music-preview-card" role="dialog" aria-modal="true" aria-label="Vista de música">'+
-    '<div class="music-preview-head"><div><span class="music-admin-section-label">MÚSICA</span><h2>Música</h2></div><button type="button" class="music-preview-close" aria-label="Cerrar">×</button></div>'+
-    '<div class="music-preview-content"><div class="music-preview-cover">'+(item?.coverUrl?'<img src="'+esc(item.coverUrl)+'" alt="" loading="lazy">':visualFallback(media?.platform||'generic'))+'</div>'+
-    '<div class="music-preview-info"><span>'+esc(platformLabel(media?.platform)||'Música')+'</span><h3>'+esc(item?.name||'Música de boda')+'</h3><p>Esta referencia conserva su playlist original. Ábrela en su plataforma para ver todas las canciones y reproducirlas.</p><a class="music-preview-open" href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Abrir playlist</a></div></div></div>';
+  overlay.innerHTML='<div class="music-preview-card music-preview-player" role="dialog" aria-modal="true" aria-label="Reproductor de música">'+
+    '<div class="music-preview-head"><div><span class="music-admin-section-label">REPRODUCTOR</span><h2>'+esc(item?.name||'Música de boda')+'</h2></div><button type="button" class="music-preview-close" aria-label="Cerrar">×</button></div>'+
+    '<div class="music-preview-frame"><iframe src="'+esc(embed)+'" title="'+esc(item?.name||'Playlist de boda')+'" loading="eager" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe></div>'+
+    '<div class="music-preview-meta"><span>'+esc(platformLabel(media?.platform)||'Música')+'</span><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Abrir en la plataforma ↗</a></div>'+
+    '</div>';
   document.body.appendChild(overlay);
-  const close=()=>overlay.remove();
+  const close=()=>{overlay.remove()};
   overlay.querySelector('.music-preview-close').addEventListener('click',close);
   overlay.addEventListener('click',event=>{if(event.target===overlay)close()});
   const onKey=event=>{if(event.key==='Escape'){close();document.removeEventListener('keydown',onKey)}};
