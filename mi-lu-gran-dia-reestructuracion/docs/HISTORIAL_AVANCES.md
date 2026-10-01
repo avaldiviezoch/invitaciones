@@ -1,3 +1,10 @@
+## 2026-09-30 — Música: portada personalizada sin duplicar persistencia
+- Se incorpora una única propiedad de portada dentro de la referencia musical existente: la URL automática sigue siendo la base y una portada personalizada puede reemplazarla explícitamente.
+- La personalización se gestiona dentro del módulo Música mediante el mismo modelo playlist.coverUrl; no se crea otra fuente de datos ni otro almacenamiento.
+- El alta de una referencia permite indicar opcionalmente una URL de portada personalizada y cada referencia existente puede cambiar o retirar su portada desde la misma fila.
+- La solución mantiene una sola implementación responsive y no agrega listeners globales ni archivos nuevos.
+- Se elimina el !important existente en la acción del diálogo de Música para cumplir las reglas del módulo.
+- No se modifican Firebase, Firestore, Storage, Auth, reglas, usuarios, RSVP, Invitados, Mesas ni otros módulos.
 # Historial de avances — Mi Lu Gran Día
 
 Este documento es la bitácora canónica de la reconstrucción. Debe actualizarse al cerrar cada hito importante. No sustituye contratos técnicos; enlaza decisiones, estado y motivos.
