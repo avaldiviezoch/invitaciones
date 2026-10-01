@@ -32,7 +32,7 @@ function parseMediaUrl(url){
 function embedUrl(media){
   if(!media)return'';
   if(media.platform==='spotify')return'https://open.spotify.com/embed/'+media.type+'/'+media.id+'?utm_source=generator';
-  if(media.platform==='youtube')return media.type==='playlist'?'https://www.youtube.com/embed/videoseries?list='+encodeURIComponent(media.id)+'&playsinline=1':'https://www.youtube.com/embed/'+encodeURIComponent(media.id)+'?playsinline=1';
+  if(media.platform==='youtube')return media.type==='playlist'?'https://www.youtube.com/embed?listType=playlist&list='+encodeURIComponent(media.id)+'&playsinline=1&rel=0':'https://www.youtube.com/embed/'+encodeURIComponent(media.id)+'?playsinline=1&rel=0';
   if(media.platform==='apple')return media.url.replace('https://music.apple.com/','https://embed.music.apple.com/');
   return'';
 }
