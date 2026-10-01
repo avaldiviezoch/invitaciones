@@ -68,15 +68,16 @@ function visualFallback(platform,label){return '<div class="music-cover music-co
 function renderPlaylists(plan){
   const root=document.querySelector('[data-music-playlists]');
   if(!root)return;
-  root.innerHTML=plan.moments.map(moment=>{
-    const playlist=moment.playlist;
-    return '<article class="music-playlist-card">'+(playlist?.coverUrl?'<div class="music-playlist-cover"><img src="'+esc(playlist.coverUrl)+'" alt="" loading="lazy"><button type="button" data-preview-playlist="'+esc(moment.id)+'">▶</button></div>':visualFallback(playlist?.platform,'Playlist'))+'<div class="music-playlist-content"><div class="music-playlist-head"><div><span class="music-admin-section-label">MOMENTO</span><h3>'+esc(moment.name)+'</h3></div><span class="music-playlist-platform">'+esc(playlist?.platform?platformLabel(playlist.platform):'Sin playlist')+'</span></div>'+
-      (playlist?
-        '<p class="music-playlist-name">'+esc(playlist.name||'Playlist vinculada')+'</p><p class="music-playlist-url">'+esc(playlist.url)+'</p><div class="music-playlist-actions"><a href="'+esc(playlist.url)+'" target="_blank" rel="noopener noreferrer">Abrir playlist</a><button type="button" data-unlink-playlist="'+esc(moment.id)+'">Desvincular</button></div>'
-        :
-        '<p class="music-playlist-empty">Vincula Spotify, YouTube Music o Apple Music para este momento.</p><button type="button" class="music-link-playlist" data-link-playlist="'+esc(moment.id)+'">+ Vincular playlist</button>')+
-      '</article>';
-  }).join('');
+  const items=plan.moments.filter(m=>m.playlist);
+  root.innerHTML='<div class="music-playlist-list">'+
+    (items.length?items.map(moment=>{
+      const p=moment.playlist;
+      return '<button type="button" class="music-playlist-row" data-preview-playlist="'+esc(moment.id)+'">'+
+        (p.coverUrl?'<img src="'+esc(p.coverUrl)+'" alt="" loading="lazy">':visualFallback(p.platform,'♫'))+
+        '<span class="music-playlist-row-main"><strong>'+esc(p.name||'Playlist vinculada')+'</strong><small>'+esc(moment.name)+' · '+esc(platformLabel(p.platform))+'</small></span>'+
+        '<span class="music-playlist-row-action">▶</span></button>';
+    }).join(''):'<div class="music-playlist-empty-row">Todavía no tienes playlists vinculadas.</div>')+
+    '<button type="button" class="music-add-playlist" data-add-playlist>＋ Agregar playlist</button></div>';
 }
 function render(plan,requests,search){
   renderPlaylists(plan);
@@ -116,16 +117,23 @@ export async function mountMusica(context){
     const remove=event.target.closest('[data-remove-song]');
     if(remove){const moment=plan.moments.find(m=>m.id===remove.dataset.removeSong);if(!moment)return;moment.songs=moment.songs.filter(s=>s.id!==remove.dataset.songId);render(plan,requests,search);await save();return}
     if(event.target.closest('[data-music-add-moment]')){dialog.showModal();return}
-    const link=event.target.closest('[data-link-playlist]');
-    if(link){
-      const moment=plan.moments.find(m=>m.id===link.dataset.linkPlaylist); if(!moment)return;
+    const addPlaylist=event.target.closest('[data-add-playlist]');
+    if(addPlaylist){
       const url=window.prompt('Pega la URL de tu playlist de Spotify, YouTube Music o Apple Music:','');
       const platform=playlistPlatform(url);
-      if(!platform){window.alert('Usa una URL de Spotify, YouTube Music o Apple Music.');return}
-      const name=window.prompt('Nombre de la playlist (opcional):','')||'';
+      if(!platform){window.alert('Usa una URL válida de Spotify, YouTube Music o Apple Music.');return}
       const media=await enrichMedia(String(url).trim());
-      const parsed=parseMediaUrl(String(url).trim());
-      moment.playlist={platform,url:String(url).trim(),name:clean(name,120),coverUrl:media.coverUrl||'',embedUrl:embedUrl(parsed)};
+      const choices=plan.moments.map((m,i)=>(i+1)+'. '+m.name).join('\n');
+      const selection=window.prompt('¿Para qué momento? Escribe el número. También puedes escribir una categoría nueva.\n\n'+choices+'\n'+(plan.moments.length+1)+'. ＋ Crear mi propia categoría','');
+      if(!selection)return;
+      let moment=plan.moments[Number(selection)-1];
+      if(!moment){
+        const custom=clean(selection,80);
+        if(!custom)return;
+        moment={id:crypto.randomUUID(),name:custom,description:'Momento musical personalizado.',songs:[],playlist:null};
+        plan.moments.push(moment);
+      }
+      moment.playlist={platform,url:String(url).trim(),name:clean(media.title,120)||'Playlist vinculada',coverUrl:media.coverUrl||'',embedUrl:embedUrl(parseMediaUrl(String(url).trim()))};
       render(plan,requests,search); await save('Playlist vinculada.');
       return;
     }
