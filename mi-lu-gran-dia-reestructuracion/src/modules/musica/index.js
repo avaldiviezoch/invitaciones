@@ -61,15 +61,27 @@ function selectableMoments(plan){return plan.moments.filter(m=>!['invitados','in
 
 function render(plan,requests,search){
   const root=document.querySelector('[data-music-playlists]');
-  const items=selectableMoments(plan).filter(m=>m.playlist);
-  root.innerHTML=items.length?items.map(m=>{
-    const p=m.playlist;
-    return '<div class="music-selection-row">'+(p.coverUrl?'<img src="'+esc(p.coverUrl)+'" alt="" loading="lazy">':visualFallback(p.platform))+
-      '<div class="music-selection-main"><strong>'+esc(p.name||'Música de boda')+'</strong><span>'+esc(m.name)+' · '+esc(platformLabel(p.platform))+'</span></div>'+
-      '<button type="button" class="music-row-play" data-preview-playlist="'+esc(m.id)+'" aria-label="Reproducir">▶</button>'+
-      '<a class="music-row-open" href="'+esc(p.url)+'" target="_blank" rel="noopener noreferrer">Abrir</a>'+
-      '<button type="button" class="music-row-remove" data-remove-playlist="'+esc(m.id)+'" aria-label="Quitar">×</button></div>';
-  }).join(''):'<div class="music-empty-selection">Todavía no has agregado música de boda.<br><span>Usa “＋ Agregar música de boda” para comenzar.</span></div>';
+  const grouped=new Map();
+  selectableMoments(plan).forEach(m=>{
+    if(!m.playlist?.url)return;
+    const key=m.playlist.url;
+    if(!grouped.has(key))grouped.set(key,{playlist:m.playlist,moments:[]});
+    grouped.get(key).moments.push(m.name);
+  });
+  const items=[...grouped.values()];
+  root.innerHTML='<div class="music-board">'+
+    '<div class="music-board-head"><div><span class="music-admin-section-label">MÚSICA DE BODA</span><h3>Mis referencias musicales</h3><p>Todas las playlists y canciones que has agregado a tu boda.</p></div><span class="music-board-count">'+items.length+' '+(items.length===1?'referencia':'referencias')+'</span></div>'+
+    '<div class="music-reference-list">'+
+    (items.length?items.map((item,i)=>{
+      const p=item.playlist;
+      return '<article class="music-reference-row">'+
+        (p.coverUrl?'<img src="'+esc(p.coverUrl)+'" alt="" loading="lazy">':visualFallback(p.platform))+
+        '<div class="music-reference-main"><strong>'+esc(p.name||'Música de boda')+'</strong><div class="music-reference-moments">'+item.moments.map(name=>'<span>'+esc(name)+'</span>').join('')+'</div><small>'+esc(platformLabel(p.platform))+' · <a href="'+esc(p.url)+'" target="_blank" rel="noopener noreferrer">ver referencia</a></small></div>'+
+        '<button type="button" class="music-row-play" data-preview-url="'+esc(p.url)+'" data-preview-title="'+esc(p.name||'Música de boda')+'" aria-label="Reproducir">▶</button>'+
+        '<button type="button" class="music-row-remove" data-remove-url="'+esc(p.url)+'" aria-label="Quitar referencia">×</button>'+
+      '</article>';
+    }).join(''):'<div class="music-empty-selection">Todavía no has agregado música de boda.<br><span>Usa “＋ Agregar música de boda” para comenzar.</span></div>')+
+    '</div></div>';
 
   const needle=normalize(search);
   const visible=requests.filter(x=>!needle||normalize([x.title,x.artist,x.person].join(' ')).includes(needle));
@@ -110,10 +122,18 @@ export async function mountMusica(context){
   root.addEventListener('click',async event=>{
     if(event.target.closest('[data-add-wedding-music]')){fillCategoryControls(plan,root);root.querySelector('[data-music-kind]').value='playlist';root.querySelector('[data-moment-mode]').value='single';updateMode();addDialog.showModal();return}
     if(event.target.closest('[data-close-add-music]')){addDialog.close();return}
-    const remove=event.target.closest('[data-remove-playlist]');
-    if(remove){const m=plan.moments.find(x=>x.id===remove.dataset.removePlaylist);if(!m)return;m.playlist=null;render(plan,requests,search);await save('Música desvinculada.');return}
-    const preview=event.target.closest('[data-preview-playlist]');
-    if(preview){const m=plan.moments.find(x=>x.id===preview.dataset.previewPlaylist),url=embedUrl(parseMediaUrl(m?.playlist?.url));if(url){root.querySelector('[data-preview-title]').textContent=m.playlist.name||m.name;root.querySelector('[data-preview-body]').innerHTML='<iframe src="'+esc(url)+'" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';root.querySelector('[data-music-preview]').showModal();}return}
+    const remove=event.target.closest('[data-remove-url]');
+    if(remove){
+      const url=remove.dataset.removeUrl;
+      plan.moments.forEach(m=>{if(m.playlist?.url===url)m.playlist=null});
+      render(plan,requests,search);await save('Música desvinculada.');return
+    }
+    const preview=event.target.closest('[data-preview-url]');
+    if(preview){
+      const url=preview.dataset.previewUrl,media=parseMediaUrl(url),embed=embedUrl(media);
+      if(embed){root.querySelector('[data-preview-title]').textContent=preview.dataset.previewTitle||'Música de boda';root.querySelector('[data-preview-body]').innerHTML='<iframe src="'+esc(embed)+'" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';root.querySelector('[data-music-preview]').showModal();}
+      return
+    }
     if(event.target.closest('[data-close-preview]'))root.querySelector('[data-music-preview]').close();
   },{signal});
 
