@@ -1035,8 +1035,9 @@ const MODULES = Object.freeze({
     mount: 'mountCronograma'
   },
   invitaciones: {
-    load: () => import('../invitaciones/index.js?v=2'),
-    mount: 'mountInvitaciones'
+    load: () => import('../invitaciones/index.js?v=3'),
+    mount: 'mountInvitaciones',
+    destroy: 'destroyInvitaciones'
   },
   musica: {
     load: () => import('../musica/index.js?v=15'),
