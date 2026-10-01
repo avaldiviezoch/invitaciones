@@ -2,27 +2,76 @@
   <header class="music-admin-hero">
     <span class="music-admin-eyebrow">MÓDULO · ESPACIO DE LA BODA</span>
     <div class="music-admin-title-row">
-      <div class="music-admin-title-icon" aria-hidden="true"><img src="https://raw.githubusercontent.com/avaldiviezoch/Wedding/main/invitaciones/invitacion_0/assets/musica.png" width="34" height="34" alt=""></div>
-      <div><h1>Música</h1><p>Revisa las canciones propuestas por tus invitados y prepara la selección para la fiesta.</p></div>
-      <div class="music-admin-hero-total"><strong data-music-total>0</strong><span>solicitudes musicales</span></div>
+      <div class="music-admin-title-icon" aria-hidden="true">♫</div>
+      <div>
+        <h1>Música</h1>
+        <p>Organiza la música de cada momento de tu boda y administra las solicitudes de tus invitados.</p>
+      </div>
+      <div class="music-admin-hero-total"><strong data-music-total>0</strong><span>canciones organizadas</span></div>
     </div>
   </header>
-  <section class="music-admin-kpis">
-    <article><span>Solicitudes</span><strong data-music-kpi-requests>0</strong><small>canciones recibidas</small></article>
-    <article><span>Canciones únicas</span><strong data-music-kpi-unique>0</strong><small>sin duplicados</small></article>
-    <article><span>Participantes</span><strong data-music-kpi-people>0</strong><small>invitados que propusieron</small></article>
-    <article><span>Más solicitada</span><strong class="is-song" data-music-kpi-top>—</strong><small data-music-kpi-top-count>sin solicitudes</small></article>
-  </section>
+
   <main class="music-admin-content">
+    <section class="music-admin-kpis">
+      <article><span>Momentos</span><strong data-music-kpi-moments>0</strong><small>de la boda</small></article>
+      <article><span>Canciones</span><strong data-music-kpi-songs>0</strong><small>en tu selección</small></article>
+      <article><span>Invitados</span><strong data-music-kpi-guests>0</strong><small>con solicitudes</small></article>
+      <article><span>Solicitudes</span><strong data-music-kpi-requests>0</strong><small>recibidas</small></article>
+    </section>
+
+    <section class="music-admin-intro">
+      <div><span class="music-admin-section-label">CÓMO FUNCIONA</span>
+        <h2>Una sola música para toda la boda</h2>
+        <p>Primero organiza tus canciones por momento. Después podrás elegir qué selección utilizar en tu invitación. Las solicitudes de invitados permanecen separadas y conservan sus respuestas originales.</p>
+      </div>
+      <div class="music-admin-flow">
+        <span><b>01</b> Elige un momento</span><i>→</i>
+        <span><b>02</b> Agrega canciones</span><i>→</i>
+        <span><b>03</b> Revisa invitados</span><i>→</i>
+        <span><b>04</b> Usa una selección en tu invitación</span>
+      </div>
+    </section>
+
     <section class="music-admin-toolbar">
-      <label class="music-admin-search"><span aria-hidden="true">⌕</span><input type="search" data-music-search placeholder="Buscar canción, artista o invitado"></label>
-      <div class="music-admin-actions"><button type="button" data-music-refresh>↻ <span>Actualizar</span></button><button type="button" data-music-open-public disabled>↗ <span>Vista para invitados</span></button></div>
+      <div>
+        <span class="music-admin-section-label">MOMENTOS MUSICALES</span>
+        <h2>La música de tu boda</h2>
+      </div>
+      <button type="button" class="music-primary" data-music-add-moment>+ Nuevo momento</button>
     </section>
-    <section class="music-admin-head">
-      <div><h2>Canciones sugeridas</h2><p>Las canciones repetidas se agrupan sin modificar las respuestas originales del RSVP.</p></div>
-      <span data-music-results>0 canciones</span>
+
+    <section class="music-moments" data-music-moments></section>
+
+    <section class="music-guests-section">
+      <div class="music-admin-toolbar compact">
+        <div><span class="music-admin-section-label">MÚSICA DE INVITADOS</span><h2>Solicitudes recibidas</h2><p>Solo muestra lo que tus invitados enviaron mediante RSVP.</p></div>
+        <label class="music-search"><span>⌕</span><input type="search" data-music-search placeholder="Buscar canción o invitado"></label>
+      </div>
+      <section class="music-request-list" data-music-list></section>
     </section>
-    <section class="music-admin-list" data-music-list></section>
+
+    <section class="music-invitation-guide">
+      <div><span class="music-admin-section-label">MÚSICA PARA TU INVITACIÓN</span>
+        <h2>¿Cómo se agrega música a una invitación?</h2>
+        <p>La música se prepara aquí. Cuando construyamos el editor de invitaciones, esta selección estará disponible para vincularla a una invitación sin duplicar canciones.</p>
+      </div>
+      <ol>
+        <li><b>1</b><span><strong>Prepara la canción</strong> Agrégala a una selección musical.</span></li>
+        <li><b>2</b><span><strong>Marca su uso para invitación</strong> La canción queda disponible para el constructor.</span></li>
+        <li><b>3</b><span><strong>Elige la invitación</strong> Desde el editor seleccionarás la música preparada.</span></li>
+        <li><b>4</b><span><strong>Previsualiza y publica</strong> La invitación utiliza la selección sin crear otra copia.</span></li>
+      </ol>
+    </section>
+
     <p class="music-admin-state" data-music-state></p>
   </main>
+
+  <dialog class="music-dialog" data-music-dialog>
+    <form method="dialog" data-music-form>
+      <div class="music-dialog-head"><div><span>NUEVO MOMENTO</span><h2>Agregar momento musical</h2></div><button type="submit" value="cancel" aria-label="Cerrar">×</button></div>
+      <label>Nombre del momento<input name="name" maxlength="80" required placeholder="Ej. Entrada de los novios"></label>
+      <label>Descripción<textarea name="description" maxlength="180" rows="3" placeholder="¿Qué música quieres para este momento?"></textarea></label>
+      <div class="music-dialog-actions"><button type="submit" value="cancel">Cancelar</button><button class="music-primary" value="save">Crear momento</button></div>
+    </form>
+  </dialog>
 </div>

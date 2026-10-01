@@ -1,98 +1,87 @@
 import { loadRsvpAdminSnapshot } from '../../services/rsvp-admin.js?v=5';
-import { searchMusicCatalog } from '../../services/music-catalog.js?v=6';
+import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=3';
 
-let activeMusicCleanup=null;
-const esc=(value)=>String(value??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
-const text=(value)=>String(value??'').trim();
-const normalize=(value)=>text(value).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').replace(/\s+/g,' ');
+const STORAGE_KEY='migrandia.music.v1';
+const DEFAULT_MOMENTS=[
+  ['espera','Música de espera','Antes de comenzar la ceremonia o recepción.'],
+  ['ceremonia','Ceremonia','Entrada, ceremonia y salida.'],
+  ['ingreso','Ingreso de los novios','La entrada principal de los novios.'],
+  ['recepcion','Recepción','Llegada y bienvenida de los invitados.'],
+  ['coctel','Cóctel','Música para el momento social previo a la comida.'],
+  ['cena','Cena','Ambiente musical durante la comida.'],
+  ['primer-baile','Primer baile','La canción o canciones del primer baile.'],
+  ['baile','Baile','Selección principal para bailar.'],
+  ['hora-loca','Hora loca','Música para la fiesta y actividades.'],
+  ['torta','Corte de torta','Música para el corte de torta.'],
+  ['momentos','Momentos especiales','Canciones para otros momentos de la boda.'],
+  ['invitados','Música de invitados','Selección de solicitudes recibidas de invitados.'],
+  ['invitacion','Música para invitación','Canciones preparadas para utilizar en invitaciones.']
+].map(([id,name,description])=>({id,name,description,songs:[]}));
 
-function parseMusic(value){
-  if(!value)return {songs:[],message:'',guestName:''};
-  if(typeof value==='string'){try{value=JSON.parse(value)}catch{return {songs:[],message:'',guestName:''}}}
-  return {
-    songs:Array.isArray(value?.songs)?value.songs.map(item=>({title:text(item?.title).slice(0,140),artist:text(item?.artist).slice(0,140)})).filter(item=>item.title||item.artist).slice(0,10):[],
-    message:text(value?.message).slice(0,500),
-    guestName:text(value?.guestName).slice(0,120)
-  };
+let cleanup=null;
+const esc=(v)=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
+const clean=(v,n=140)=>String(v??'').trim().slice(0,n);
+const normalize=(v)=>clean(v,200).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es').replace(/\s+/g,' ');
+const cloneDefault=()=>DEFAULT_MOMENTS.map(x=>({...x,songs:[]}));
+function normalizePlan(value){
+  const moments=Array.isArray(value?.moments)&&value.moments.length
+    ? value.moments.map((m)=>({id:clean(m?.id,80)||crypto.randomUUID(),name:clean(m?.name,80)||'Momento musical',description:clean(m?.description,180),songs:Array.isArray(m?.songs)?m.songs.map(s=>({id:clean(s?.id,80)||crypto.randomUUID(),title:clean(s?.title),artist:clean(s?.artist,120),source:clean(s?.source,30)||'manual',requestKey:clean(s?.requestKey,240)})).filter(s=>s.title||s.artist):[]}))
+    : cloneDefault();
+  return {version:1,moments};
 }
-function entriesFrom(snapshot){
+function requestEntries(snapshot){
   return (snapshot?.musicResponses||[]).flatMap(response=>{
-    const music=parseMusic(response?.customData?.mgdMusic);
-    const person=text(music.guestName||response?.name)||'Invitado';
-    return music.songs.map(song=>({responseId:String(response?.id||''),person,title:song.title||'Canción sin título',artist:song.artist,message:music.message}));
+    let value=response?.customData?.mgdMusic;
+    if(typeof value==='string'){try{value=JSON.parse(value)}catch{value=null}}
+    const songs=Array.isArray(value?.songs)?value.songs:[];
+    const person=clean(value?.guestName||response?.name,120)||'Invitado';
+    return songs.map(song=>({key:String(response?.id||'')+'|'+normalize(song?.title)+'|'+normalize(song?.artist),person,title:clean(song?.title)||'Canción sin título',artist:clean(song?.artist,120),message:clean(value?.message,500)}));
   });
 }
-function groupedEntries(entries){
-  const map=new Map();
-  entries.forEach(item=>{
-    const key=normalize(item.title)+'|'+normalize(item.artist);
-    const current=map.get(key)||{title:item.title,artist:item.artist,requests:[],count:0};
-    current.count+=1;current.requests.push(item);map.set(key,current);
-  });
-  return [...map.values()].sort((a,b)=>b.count-a.count||a.title.localeCompare(b.title,'es'));
-}
-function publicUrl(snapshot){
-  const token=text(snapshot?.token);
-  return token?`https://avaldiviezoch.github.io/Wedding/rsvp.html?token=${encodeURIComponent(token)}&view=music`:'';
-}
-function card(item){
-  const people=[...new Set(item.requests.map(r=>r.person).filter(Boolean))];
-  const messages=item.requests.filter(r=>r.message);
-  const catalogResult=item.catalogResult||{status:'pending'};
-  const catalog=catalogResult.status==='matched'?catalogResult.track:null;
-  const visual=catalog?.artwork
-    ? `<a class="music-admin-cover" href="${esc(catalog.url)}" target="_blank" rel="noopener" aria-label="Abrir ${esc(catalog.title)}"><img src="${esc(catalog.artwork)}" alt="Portada de ${esc(catalog.album||catalog.title)}" loading="lazy"></a>`
-    : '<span class="music-admin-note" aria-hidden="true">♫</span>';
-  return `<article class="music-admin-card">
-    ${visual}
-    <div class="music-admin-song"><div class="music-admin-song-head"><h3>${esc(catalog?.title||item.title)}</h3>${item.count>1?`<b>${item.count} solicitudes</b>`:''}</div><p>${esc(catalog?.artist||item.artist||'Artista no indicado')}</p>${catalog?.album?`<div class="music-admin-catalog-album"><span>ÁLBUM</span><strong>${esc(catalog.album)}</strong></div>`:''}${catalog?`<a class="music-admin-catalog-link" href="${esc(catalog.url)}" target="_blank" rel="noopener"><span>Abrir canción</span> ↗</a>`:catalogResult.status==='not-found'?'<small class="music-admin-catalog-state is-done">Sin coincidencia en catálogo · se conserva la solicitud original</small>':catalogResult.status==='error'?'<small class="music-admin-catalog-state is-error">Catálogo temporalmente no disponible</small>':'<small class="music-admin-catalog-state is-loading"><i aria-hidden="true"></i>Buscando portada y datos…</small>'}</div>
-    <div class="music-admin-people"><span>SOLICITADA POR</span><strong>${esc(people.join(', ')||'Invitado')}</strong>${messages.length?`<small>“${esc(messages[0].message)}”${messages.length>1?` · +${messages.length-1} dedicatoria${messages.length===2?'':'s'}`:''}</small>`:'<small>Sin dedicatoria</small>'}</div>
-  </article>`;
+function songId(){return crypto.randomUUID();}
+function render(plan,requests,search){
+  const moments=document.querySelector('[data-music-moments]');
+  const needle=normalize(search);
+  moments.innerHTML=plan.moments.map(moment=>{
+    const songs=moment.songs||[];
+    return '<article class="music-moment">'+
+      '<div class="music-moment-head"><div><h3>'+esc(moment.name)+'</h3><p>'+esc(moment.description||'Sin descripción')+'</p></div><span class="music-moment-count">'+songs.length+' '+(songs.length===1?'canción':'canciones')+'</span></div>'+
+      '<div class="music-moment-list">'+(songs.length?songs.map(song=>'<div class="music-moment-song"><span><strong>'+esc(song.title||'Canción')+'</strong>'+(song.artist?' · '+esc(song.artist):'')+'</span><button type="button" data-remove-song="'+esc(moment.id)+'" data-song-id="'+esc(song.id)+'" aria-label="Quitar canción">×</button></div>').join(''):'<div class="music-moment-empty">Todavía no hay canciones en este momento.</div>')+'</div>'+
+      '<form class="music-moment-add" data-add-song="'+esc(moment.id)+'"><input name="title" maxlength="140" placeholder="Agregar canción"><input name="artist" maxlength="120" placeholder="Artista"><button>Agregar</button></form>'+
+      '</article>';
+  }).join('');
+  const visible=requests.filter(x=>!needle||normalize([x.title,x.artist,x.person].join(' ')).includes(needle));
+  const list=document.querySelector('[data-music-list]');
+  list.innerHTML=visible.length?visible.map(x=>'<article class="music-request-card"><span class="music-request-icon">♫</span><div class="music-request-song"><strong>'+esc(x.title)+'</strong><span>'+esc(x.artist||'Artista no indicado')+'</span></div><div class="music-request-person"><strong>'+esc(x.person)+'</strong><span>'+(x.message?esc(x.message):'Sin dedicatoria')+'</span></div></article>').join(''):'<div class="music-empty">Aún no hay solicitudes musicales que mostrar.</div>';
+  document.querySelector('[data-music-kpi-moments]').textContent=String(plan.moments.length);
+  document.querySelector('[data-music-kpi-songs]').textContent=String(plan.moments.reduce((n,m)=>n+(m.songs?.length||0),0));
+  document.querySelector('[data-music-kpi-guests]').textContent=String(new Set(requests.map(x=>x.person)).size);
+  document.querySelector('[data-music-kpi-requests]').textContent=String(requests.length);
+  document.querySelector('[data-music-total]').textContent=String(plan.moments.reduce((n,m)=>n+(m.songs?.length||0),0));
 }
 export async function mountMusica(context){
-  const root=document.querySelector('[data-module-view="musica"]');
-  if(!root||!context?.id)return false;
-  activeMusicCleanup?.();
-  const controller=new AbortController(),{signal}=controller;
-  let snapshot=null,search='',epoch=0,catalogEpoch=0,catalogGroups=[];
-  const response=await fetch('src/modules/musica/index.html?v=2',{cache:'no-store'});
+  const root=document.querySelector('[data-module-view="musica"]'); if(!root||!context?.id)return false;
+  cleanup?.();
+  const controller=new AbortController(); const {signal}=controller;
+  const response=await fetch('src/modules/musica/index.html?v=3',{cache:'no-store'});
   if(!response.ok)throw new Error('No se pudo cargar la interfaz de Música.');
   root.innerHTML=await response.text();
-  const list=root.querySelector('[data-music-list]'),state=root.querySelector('[data-music-state]'),open=root.querySelector('[data-music-open-public]');
-
-  function render(){
-    const entries=entriesFrom(snapshot),groups=groupedEntries(entries);groups.forEach(group=>{const key=normalize(group.title)+'|'+normalize(group.artist);const enriched=catalogGroups.find(x=>x.key===key);if(enriched)group.catalogResult=enriched.result});
-    const people=new Set(entries.map(item=>item.responseId||item.person)).size;
-    const needle=normalize(search);
-    const visible=groups.filter(item=>!needle||normalize([item.title,item.artist,...item.requests.map(r=>r.person)].join(' ')).includes(needle));
-    root.querySelector('[data-music-total]').textContent=String(entries.length);
-    root.querySelector('[data-music-kpi-requests]').textContent=String(entries.length);
-    root.querySelector('[data-music-kpi-unique]').textContent=String(groups.length);
-    root.querySelector('[data-music-kpi-people]').textContent=String(people);
-    const top=groups[0];
-    root.querySelector('[data-music-kpi-top]').textContent=top?.title||'—';
-    root.querySelector('[data-music-kpi-top-count]').textContent=top?(top.count===1?'1 solicitud':`${top.count} solicitudes`):'sin solicitudes';
-    root.querySelector('[data-music-results]').textContent=`${visible.length} ${visible.length===1?'canción':'canciones'}`;
-    if(!snapshot?.token)list.innerHTML='<div class="music-admin-empty"><strong>RSVP aún no está configurado</strong><span>Música utiliza el mismo token y las mismas respuestas de Invitados.</span></div>';
-    else if(!visible.length)list.innerHTML=needle?'<div class="music-admin-empty"><strong>Sin coincidencias</strong><span>Prueba con otra canción, artista o invitado.</span></div>':'<div class="music-admin-empty"><strong>Aún no hay canciones sugeridas</strong><span>Las solicitudes enviadas desde las invitaciones aparecerán aquí.</span></div>';
-    else list.innerHTML=visible.map(card).join('');
-    const url=publicUrl(snapshot);open.disabled=!url;open.dataset.url=url;
-  }
-  async function enrichCatalog(){
-    const current=++catalogEpoch;const groups=groupedEntries(entriesFrom(snapshot));
-    if(!groups.length){catalogGroups=[];return}
-    const queue=[...groups];const enriched=[];const workers=Array.from({length:Math.min(3,queue.length)},async()=>{while(queue.length){const item=queue.shift();const result=await searchMusicCatalog(item,signal);if(current!==catalogEpoch)return;enriched.push({key:normalize(item.title)+'|'+normalize(item.artist),result});catalogGroups=[...enriched];render()}});await Promise.all(workers);if(current!==catalogEpoch)return;catalogGroups=[...enriched];render();
-  }
-  async function load(announce=false){
-    const current=++epoch;if(announce)state.textContent='Actualizando solicitudes…';
-    try{const loaded=await loadRsvpAdminSnapshot(context);if(current!==epoch)return;snapshot=loaded;catalogGroups=[];render();void enrichCatalog();state.textContent=loaded.token?(announce?'Solicitudes actualizadas.':'Datos del RSVP de la boda activa.'):'RSVP aún no está configurado.'}
-    catch(error){if(current!==epoch)return;snapshot={token:'',musicResponses:[]};render();state.textContent=error?.message||'No se pudieron cargar las solicitudes musicales.'}
-  }
-  root.addEventListener('input',event=>{if(!event.target.matches('[data-music-search]'))return;search=event.target.value;render()},{signal});
-  root.addEventListener('click',event=>{
-    if(event.target.closest('[data-music-refresh]')){void load(true);return}
-    const button=event.target.closest('[data-music-open-public]');if(button&&!button.disabled&&button.dataset.url)window.open(button.dataset.url,'_blank','noopener');
+  let plan=normalizePlan(await readPlannerStorageKey(context,STORAGE_KEY));
+  const snapshot=await loadRsvpAdminSnapshot(context);
+  let requests=requestEntries(snapshot),search='';
+  const save=async(message)=>{await writePlannerStorageKey(context,STORAGE_KEY,normalizePlan(plan));document.querySelector('[data-music-state]').textContent=message||'Cambios guardados en la boda.'};
+  render(plan,requests,search);
+  const dialog=root.querySelector('[data-music-dialog]');
+  root.addEventListener('click',async event=>{
+    const remove=event.target.closest('[data-remove-song]');
+    if(remove){const moment=plan.moments.find(m=>m.id===remove.dataset.removeSong);if(!moment)return;moment.songs=moment.songs.filter(s=>s.id!==remove.dataset.songId);render(plan,requests,search);await save();return}
+    if(event.target.closest('[data-music-add-moment]')){dialog.showModal();return}
   },{signal});
-  activeMusicCleanup=()=>{controller.abort();epoch+=1;catalogEpoch+=1;activeMusicCleanup=null};
-  await load(false);return true;
+  root.addEventListener('submit',async event=>{
+    if(event.target.matches('[data-music-form]')){event.preventDefault();const data=new FormData(event.target);if(event.submitter?.value==='save'){plan.moments.push({id:crypto.randomUUID(),name:clean(data.get('name'),80),description:clean(data.get('description'),180),songs:[]});dialog.close();event.target.reset();render(plan,requests,search);await save('Nuevo momento guardado.')}else dialog.close();return}
+    const form=event.target.closest('[data-add-song]');if(form){event.preventDefault();const data=new FormData(form);const title=clean(data.get('title'));const artist=clean(data.get('artist'),120);if(!title)return;const moment=plan.moments.find(m=>m.id===form.dataset.addSong);if(!moment)return;moment.songs.push({id:songId(),title,artist,source:'manual',requestKey:''});form.reset();render(plan,requests,search);await save('Canción guardada.')}
+  },{signal});
+  root.addEventListener('input',event=>{if(event.target.matches('[data-music-search]')){search=event.target.value;render(plan,requests,search)}},{signal});
+  cleanup=()=>{controller.abort();cleanup=null};
+  return true;
 }
