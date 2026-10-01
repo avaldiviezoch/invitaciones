@@ -106,7 +106,22 @@
         <input name="url" type="url" required maxlength="700" placeholder="Pega aquí el enlace de tu playlist o canción">
       </label>
 
+      <label>Portada personalizada <span class="music-field-optional">opcional</span>
+        <input name="coverUrl" type="url" maxlength="1000" placeholder="URL de una imagen · si la dejas vacía usaremos la automática">
+      </label>
+
       <div class="music-dialog-actions"><button type="button" data-close-add-music>Cancelar</button><button class="music-primary" type="submit">Agregar a mi música</button></div>
+    </form>
+  </dialog>
+
+  <dialog class="music-dialog music-cover-dialog" data-edit-cover-dialog>
+    <form data-edit-cover-form>
+      <div class="music-dialog-head"><div><span>PORTADA DE LA REFERENCIA</span><h2 data-edit-cover-title>Música</h2></div><button type="button" data-close-edit-cover aria-label="Cerrar">×</button></div>
+      <label>URL de la portada
+        <input name="coverUrl" type="url" data-edit-cover-url-input maxlength="1000" placeholder="https://...">
+      </label>
+      <p class="music-dialog-hint">Puedes dejar el campo vacío para quitar la portada personalizada y volver a usar la portada automática.</p>
+      <div class="music-dialog-actions"><button type="button" data-close-edit-cover>Cancelar</button><button class="music-primary" type="submit">Guardar portada</button></div>
     </form>
   </dialog>
 
