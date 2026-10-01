@@ -39,90 +39,55 @@ function embedUrl(media){
 const MUSIC_PREVIEW_ENDPOINT='https://migrandia-dev.avaldiviezoch.workers.dev/api/music-preview';
 
 async function enrichMedia(url){
-  const media=parseMediaUrl(url);
-  if(!media)return null;
-
+  const media=parseMediaUrl(url); if(!media)return null;
   try{
-    const endpoint=MUSIC_PREVIEW_ENDPOINT+'?url='+encodeURIComponent(media.url);
-    const response=await fetch(endpoint,{method:'GET',headers:{Accept:'application/json'}});
+    const response=await fetch(MUSIC_PREVIEW_ENDPOINT+'?url='+encodeURIComponent(media.url),{headers:{Accept:'application/json'}});
     if(response.ok){
       const data=await response.json();
-      if(data?.ok){
-        return{
-          ...media,
-          url:data.originalUrl||media.url,
-          coverUrl:clean(data.image,1000),
-          title:clean(data.title,140)
-        };
-      }
+      if(data?.ok)return {...media,url:data.originalUrl||media.url,coverUrl:clean(data.image,1000),title:clean(data.title,140),
+        tracks:Array.isArray(data.items)?data.items.map((x,i)=>({position:Number(x.position??i),title:clean(x.title,180),artist:clean(x.artist||x.channelTitle,140),coverUrl:clean(x.image||x.thumbnail,1000),videoId:clean(x.videoId,80),url:clean(x.url||'',700)})).filter(x=>x.title):[],
+        totalResults:Number(data.totalResults||data.pageInfo?.totalResults||0)};
     }
   }catch{}
-
-  if(media.platform==='youtube'&&media.type==='track'){
-    return{
-      ...media,
-      coverUrl:'https://i.ytimg.com/vi/'+encodeURIComponent(media.id)+'/hqdefault.jpg',
-      title:''
-    };
-  }
-
-  return{
-    ...media,
-    coverUrl:'',
-    title:''
-  };
+  if(media.platform==='youtube'&&media.type==='track')return {...media,coverUrl:'https://i.ytimg.com/vi/'+encodeURIComponent(media.id)+'/hqdefault.jpg',title:'',tracks:[]};
+  return {...media,coverUrl:'',title:'',tracks:[]};
 }
 async function hydratePlaylistCovers(plan){
-  let changed=false;
-  const seen=new Set();
+  let changed=false; const seen=new Set();
   for(const moment of plan.moments){
-    const p=moment.playlist;
-    if(!p?.url||seen.has(p.url))continue;
-    seen.add(p.url);
-    const media=parseMediaUrl(p.url);
-    const needsRefresh=media?.platform==='youtube'&&media?.type==='playlist'
-      ? p.coverSource!=='youtube-api-v2'
-      : !p.coverUrl;
-    if(!needsRefresh)continue;
-    const enriched=await enrichMedia(p.url);
-    if(enriched?.coverUrl){
-      plan.moments.forEach(m=>{
-        if(m.playlist?.url===p.url){
-          m.playlist.coverUrl=enriched.coverUrl;
-          m.playlist.coverSource=media.platform==='youtube'&&media.type==='playlist'?'youtube-api-v2':'preview';
-          if(!m.playlist.name||m.playlist.name==='Playlist de boda'||m.playlist.name==='Música de boda')m.playlist.name=enriched.title||m.playlist.name;
-        }
-      });
-      changed=true;
-    }
-  }
-  return changed;
+    const p=moment.playlist; if(!p?.url||seen.has(p.url))continue; seen.add(p.url);
+    const media=parseMediaUrl(p.url); const enriched=await enrichMedia(p.url); if(!enriched)continue;
+    const changedData=Boolean(enriched.coverUrl||enriched.title||enriched.tracks?.length);
+    if(!changedData)continue;
+    plan.moments.forEach(m=>{if(m.playlist?.url===p.url){
+      if(enriched.coverUrl)m.playlist.coverUrl=enriched.coverUrl;
+      if(enriched.title)m.playlist.name=enriched.title;
+      if(Array.isArray(enriched.tracks))m.playlist.tracks=enriched.tracks;
+      if(enriched.totalResults)m.playlist.totalResults=enriched.totalResults;
+      m.playlist.coverSource=media?.platform==='youtube'&&media?.type==='playlist'?'youtube-api-v3':(m.playlist.coverSource||'preview');
+    }}); changed=true;
+  } return changed;
 }
 function visualFallback(platform){return '<div class="music-cover music-cover-'+esc(platform||'generic')+'"><span>♫</span></div>';}
 function openMusicPreview(item,media,url){
   document.querySelector('[data-music-preview-overlay]')?.remove();
-  const embed=embedUrl(media);
-  if(!embed)return;
-  const overlay=document.createElement('div');
-  overlay.className='music-preview-overlay';
-  overlay.dataset.musicPreviewOverlay='';
-  overlay.innerHTML='<div class="music-preview-card music-preview-player" role="dialog" aria-modal="true" aria-label="Reproductor de música">'+
-    '<div class="music-preview-head"><div><span class="music-admin-section-label">REPRODUCTOR</span><h2>'+esc(item?.name||'Música de boda')+'</h2></div><button type="button" class="music-preview-close" aria-label="Cerrar">×</button></div>'+
-    '<div class="music-preview-frame"><iframe src="'+esc(embed)+'" title="'+esc(item?.name||'Playlist de boda')+'" loading="eager" allow="autoplay; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe></div>'+
-    '<div class="music-preview-meta"><span>'+esc(platformLabel(media?.platform)||'Música')+'</span><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Abrir en la plataforma ↗</a></div>'+
-    '</div>';
+  const tracks=Array.isArray(item?.tracks)?item.tracks:[];
+  const rows=tracks.length?tracks.map((t,i)=>'<a class="music-track-row" href="'+esc(t.url||('https://www.youtube.com/watch?v='+encodeURIComponent(t.videoId||'')))+'" target="_blank" rel="noopener noreferrer">'+(t.coverUrl?'<img src="'+esc(t.coverUrl)+'" alt="" loading="lazy">':'<span class="music-track-cover">♫</span>')+'<span class="music-track-index">'+String(i+1).padStart(2,'0')+'</span><span class="music-track-info"><strong>'+esc(t.title)+'</strong><small>'+esc(t.artist||'')+'</small></span><span class="music-track-play">↗</span></a>').join(''):'<div class="music-empty-selection">Todavía no se han importado las canciones de esta playlist.</div>';
+  const overlay=document.createElement('div'); overlay.className='music-preview-overlay'; overlay.dataset.musicPreviewOverlay='';
+  overlay.innerHTML='<div class="music-preview-card music-playlist-view" role="dialog" aria-modal="true"><div class="music-preview-head"><div><span class="music-admin-section-label">PLAYLIST</span><h2>'+esc(item?.name||'Música de boda')+'</h2><p class="music-preview-sub">'+esc(platformLabel(media?.platform)||'Música')+' · '+(item?.totalResults||tracks.length||0)+' canciones</p></div><button type="button" class="music-preview-close" aria-label="Cerrar">×</button></div><div class="music-playlist-summary">'+(item?.coverUrl?'<img src="'+esc(item.coverUrl)+'" alt="" loading="lazy">':visualFallback(media?.platform||'generic'))+'<div><strong>'+esc(item?.name||'Música de boda')+'</strong><span>'+esc(platformLabel(media?.platform)||'Música')+'</span><a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Ver playlist original ↗</a></div></div><div class="music-track-list">'+rows+'</div></div>';
   document.body.appendChild(overlay);
-  const close=()=>{overlay.remove()};
-  overlay.querySelector('.music-preview-close').addEventListener('click',close);
-  overlay.addEventListener('click',event=>{if(event.target===overlay)close()});
-  const onKey=event=>{if(event.key==='Escape'){close();document.removeEventListener('keydown',onKey)}};
-  document.addEventListener('keydown',onKey);
+  const close=()=>overlay.remove(); overlay.querySelector('.music-preview-close').addEventListener('click',close); overlay.addEventListener('click',event=>{if(event.target===overlay)close()});
+  const onKey=event=>{if(event.key==='Escape'){close();document.removeEventListener('keydown',onKey)}}; document.addEventListener('keydown',onKey);
 }
 
 function normalizePlan(value){
   const source=Array.isArray(value?.moments)&&value.moments.length?value.moments:cloneDefault();
-  const moments=source.map(m=>({id:clean(m?.id,80)||crypto.randomUUID(),name:clean(m?.name,80)||'Momento musical',description:clean(m?.description,180),songs:Array.isArray(m?.songs)?m.songs.map(s=>({id:clean(s?.id,80)||crypto.randomUUID(),title:clean(s?.title),artist:clean(s?.artist,120),url:clean(s?.url,700),coverUrl:clean(s?.coverUrl,1000),platform:clean(s?.platform,30)||'manual',album:clean(s?.album,160)})).filter(s=>s.title||s.artist):[],playlist:m?.playlist?.url?{platform:m.playlist.platform||playlistPlatform(m.playlist.url),url:clean(m.playlist.url,700),name:clean(m.playlist.name,140),coverUrl:clean(m.playlist.coverUrl,1000),coverSource:clean(m.playlist.coverSource,60),embedUrl:m.playlist.embedUrl||embedUrl(parseMediaUrl(m.playlist.url))}:null}));
-  return{version:4,moments};
+  const moments=source.map(m=>({id:clean(m?.id,80)||crypto.randomUUID(),name:clean(m?.name,80)||'Momento musical',description:clean(m?.description,180),
+    songs:Array.isArray(m?.songs)?m.songs.map(s=>({id:clean(s?.id,80)||crypto.randomUUID(),title:clean(s?.title),artist:clean(s?.artist,120),url:clean(s?.url,700),coverUrl:clean(s?.coverUrl,1000),platform:clean(s?.platform,30)||'manual',album:clean(s?.album,160)})).filter(s=>s.title||s.artist):[],
+    playlist:m?.playlist?.url?{platform:m.playlist.platform||playlistPlatform(m.playlist.url),url:clean(m.playlist.url,700),name:clean(m.playlist.name,140),coverUrl:clean(m.playlist.coverUrl,1000),coverSource:clean(m.playlist.coverSource,60),
+      tracks:Array.isArray(m.playlist.tracks)?m.playlist.tracks.map((t,i)=>({position:Number(t?.position??i),title:clean(t?.title,180),artist:clean(t?.artist,140),coverUrl:clean(t?.coverUrl,1000),videoId:clean(t?.videoId,80),url:clean(t?.url,700)})).filter(t=>t.title):[],
+      totalResults:Number(m.playlist.totalResults||0)}:null}));
+  return{version:5,moments};
 }
 function requestEntries(snapshot){
   return(snapshot?.musicResponses||[]).flatMap(response=>{
@@ -153,7 +118,7 @@ function render(plan,requests,search){
         (p.coverUrl?'<img src="'+esc(p.coverUrl)+'" alt="" loading="lazy">':visualFallback(p.platform))+
         '<div class="music-reference-main"><strong>'+esc(p.name||'Música de boda')+'</strong><div class="music-reference-moments">'+item.moments.map(name=>'<span>'+esc(name)+'</span>').join('')+'</div><small>'+esc(platformLabel(p.platform))+' · <a href="'+esc(p.url)+'" target="_blank" rel="noopener noreferrer">ver referencia</a>'+(p.coverSource==='custom'?' · portada personalizada':'')+'</small></div>'+
         '<button type="button" class="music-row-cover" data-edit-cover-url="'+esc(p.url)+'" data-edit-cover-title="'+esc(p.name||'Música de boda')+'" aria-label="Cambiar portada">▧</button>'+
-        '<button type="button" class="music-row-play" data-preview-url="'+esc(p.url)+'" data-preview-title="'+esc(p.name||'Música de boda')+'" aria-label="Reproducir">▶</button>'+
+        '<button type="button" class="music-row-play" data-preview-url="'+esc(p.url)+'" data-preview-title="'+esc(p.name||'Música de boda')+'" aria-label="Ver canciones">♫</button>'+
         '<button type="button" class="music-row-remove" data-remove-url="'+esc(p.url)+'" aria-label="Quitar referencia">×</button>'+
       '</article>';
     }).join(''):'<div class="music-empty-selection">Todavía no has agregado música de boda.<br><span>Usa “＋ Agregar música de boda” para comenzar.</span></div>')+
@@ -259,7 +224,7 @@ export async function mountMusica(context){
     if(!targets.length){root.querySelector('[data-music-state]').textContent='Selecciona al menos un momento.';return}
     const kind=data.get('kind');
     if(kind==='playlist'){
-      const playlist={platform:media.platform,url:media.url,name:clean(media.title,140)||'Playlist de boda',coverUrl:customCoverUrl||media.coverUrl||'',coverSource:customCoverUrl?'custom':(media.coverUrl?'preview':''),embedUrl:embedUrl(media)};
+      const playlist={platform:media.platform,url:media.url,name:clean(media.title,140)||'Playlist de boda',coverUrl:customCoverUrl||media.coverUrl||'',coverSource:customCoverUrl?'custom':(media.coverUrl?'preview':''),tracks:Array.isArray(media.tracks)?media.tracks:[],totalResults:Number(media.totalResults||0)};
       targets.forEach(m=>m.playlist={...playlist});
     }else{
       const title=clean(media.title,140)||'Canción';
