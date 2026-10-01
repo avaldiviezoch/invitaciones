@@ -2820,6 +2820,9 @@ async function mountDistribucion(context) {
     const referenceToggle = root.querySelector('[data-distribution-show-reference]');
     const referenceCatalog = root.querySelector('[data-distribution-reference-catalog]');
     const referenceFile = root.querySelector('[data-distribution-reference-file]');
+    const backgroundOnboarding = root.querySelector('[data-distribution-background-onboarding]');
+    const onboardingCatalog = root.querySelector('[data-distribution-onboarding-catalog]');
+    const onboardingUpload = root.querySelector('[data-distribution-onboarding-upload]');
     const referenceRemove = root.querySelector('[data-distribution-reference-remove]');
     const referenceImage = root.querySelector('[data-distribution-reference-image]');
     const referenceScale = root.querySelector('[data-distribution-reference-scale]');
@@ -2861,8 +2864,10 @@ async function mountDistribucion(context) {
         referenceCatalog.value = NONE_BACKGROUND_ID;
         referenceRemove.disabled = true;
         referenceRemove.textContent = 'Sin plano seleccionado';
+        if (backgroundOnboarding) backgroundOnboarding.hidden = false;
         return;
       }
+      if (backgroundOnboarding) backgroundOnboarding.hidden = true;
       const source = background.blob ? URL.createObjectURL(background.blob) : background.source;
       if (background.blob) referenceObjectUrl = source;
       referenceImage.src = source;
@@ -2960,6 +2965,14 @@ async function mountDistribucion(context) {
       renderReferenceTransform();
       persistReferencePreference();
       status.textContent = 'Encuadre del ambiente restablecido';
+    });
+
+    onboardingCatalog?.addEventListener('click', () => {
+      referenceCatalog?.focus();
+      referenceCatalog?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+    onboardingUpload?.addEventListener('click', () => {
+      referenceFile?.click();
     });
 
     referenceCatalog.onchange = async () => {
