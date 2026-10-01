@@ -1,3 +1,7 @@
+## Regla arquitectónica — aislamiento obligatorio por boda
+
+Se incorporó como no negociable que toda información operativa/personal pertenece a una única boda mediante `weddingId`. La regla cubre persistencia y estado de frontend: listeners, cachés, DOM, estado JavaScript y operaciones asíncronas no pueden conservar información de una boda anterior. Se estableció además la prueba obligatoria Boda A ↔ Boda B y Usuario A ↔ Usuario B antes de producción.
+
 ## Fase 2 — Aislamiento del ciclo de vida de Ideas
 
 - `Ideas` ahora tiene `destroyIdeas()` para cancelar su listener, limpiar estado y DOM, y retirar el contexto de boda anterior.
