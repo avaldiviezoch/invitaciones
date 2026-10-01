@@ -74,11 +74,27 @@ async function enrichMedia(url){
 }
 async function hydratePlaylistCovers(plan){
   let changed=false;
+  const seen=new Set();
   for(const moment of plan.moments){
     const p=moment.playlist;
-    if(!p?.url||p.coverUrl)continue;
-    const media=await enrichMedia(p.url);
-    if(media?.coverUrl){p.coverUrl=media.coverUrl;if(!p.name||p.name==='Playlist de boda'||p.name==='Música de boda')p.name=media.title||p.name;changed=true;}
+    if(!p?.url||seen.has(p.url))continue;
+    seen.add(p.url);
+    const media=parseMediaUrl(p.url);
+    const needsRefresh=media?.platform==='youtube'&&media?.type==='playlist'
+      ? p.coverSource!=='youtube-api-v2'
+      : !p.coverUrl;
+    if(!needsRefresh)continue;
+    const enriched=await enrichMedia(p.url);
+    if(enriched?.coverUrl){
+      plan.moments.forEach(m=>{
+        if(m.playlist?.url===p.url){
+          m.playlist.coverUrl=enriched.coverUrl;
+          m.playlist.coverSource=media.platform==='youtube'&&media.type==='playlist'?'youtube-api-v2':'preview';
+          if(!m.playlist.name||m.playlist.name==='Playlist de boda'||m.playlist.name==='Música de boda')m.playlist.name=enriched.title||m.playlist.name;
+        }
+      });
+      changed=true;
+    }
   }
   return changed;
 }
@@ -86,8 +102,8 @@ function visualFallback(platform){return '<div class="music-cover music-cover-'+
 
 function normalizePlan(value){
   const source=Array.isArray(value?.moments)&&value.moments.length?value.moments:cloneDefault();
-  const moments=source.map(m=>({id:clean(m?.id,80)||crypto.randomUUID(),name:clean(m?.name,80)||'Momento musical',description:clean(m?.description,180),songs:Array.isArray(m?.songs)?m.songs.map(s=>({id:clean(s?.id,80)||crypto.randomUUID(),title:clean(s?.title),artist:clean(s?.artist,120),url:clean(s?.url,700),coverUrl:clean(s?.coverUrl,1000),platform:clean(s?.platform,30)||'manual',album:clean(s?.album,160)})).filter(s=>s.title||s.artist):[],playlist:m?.playlist?.url?{platform:m.playlist.platform||playlistPlatform(m.playlist.url),url:clean(m.playlist.url,700),name:clean(m.playlist.name,140),coverUrl:clean(m.playlist.coverUrl,1000),embedUrl:m.playlist.embedUrl||embedUrl(parseMediaUrl(m.playlist.url))}:null}));
-  return{version:3,moments};
+  const moments=source.map(m=>({id:clean(m?.id,80)||crypto.randomUUID(),name:clean(m?.name,80)||'Momento musical',description:clean(m?.description,180),songs:Array.isArray(m?.songs)?m.songs.map(s=>({id:clean(s?.id,80)||crypto.randomUUID(),title:clean(s?.title),artist:clean(s?.artist,120),url:clean(s?.url,700),coverUrl:clean(s?.coverUrl,1000),platform:clean(s?.platform,30)||'manual',album:clean(s?.album,160)})).filter(s=>s.title||s.artist):[],playlist:m?.playlist?.url?{platform:m.playlist.platform||playlistPlatform(m.playlist.url),url:clean(m.playlist.url,700),name:clean(m.playlist.name,140),coverUrl:clean(m.playlist.coverUrl,1000),coverSource:clean(m.playlist.coverSource,60),embedUrl:m.playlist.embedUrl||embedUrl(parseMediaUrl(m.playlist.url))}:null}));
+  return{version:4,moments};
 }
 function requestEntries(snapshot){
   return(snapshot?.musicResponses||[]).flatMap(response=>{
