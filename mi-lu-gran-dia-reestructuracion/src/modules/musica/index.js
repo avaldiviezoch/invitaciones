@@ -38,9 +38,28 @@ function embedUrl(media){
 }
 async function enrichMedia(url){
   const media=parseMediaUrl(url);if(!media)return null;
-  if(media.platform==='spotify'){try{const r=await fetch('https://open.spotify.com/oembed?url='+encodeURIComponent(media.url),{headers:{Accept:'application/json'}});if(r.ok){const d=await r.json();return{...media,coverUrl:d.thumbnail_url||'',title:d.title||''};}}catch{}}
-  if(media.platform==='youtube'&&media.type==='track')return{...media,coverUrl:'https://i.ytimg.com/vi/'+media.id+'/hqdefault.jpg',title:''};
+  if(media.platform==='spotify'){
+    try{const r=await fetch('https://open.spotify.com/oembed?url='+encodeURIComponent(media.url),{headers:{Accept:'application/json'}});if(r.ok){const d=await r.json();return{...media,coverUrl:d.thumbnail_url||'',title:d.title||''};}}catch{}
+  }
+  if(media.platform==='youtube'){
+    try{
+      const youtubeUrl='https://www.youtube.com/'+(media.type==='playlist'?'playlist?list='+encodeURIComponent(media.id):'watch?v='+encodeURIComponent(media.id));
+      const r=await fetch('https://www.youtube.com/oembed?url='+encodeURIComponent(youtubeUrl)+'&format=json',{headers:{Accept:'application/json'}});
+      if(r.ok){const d=await r.json();return{...media,coverUrl:d.thumbnail_url||'',title:d.title||''};}
+    }catch{}
+    if(media.type==='track')return{...media,coverUrl:'https://i.ytimg.com/vi/'+media.id+'/hqdefault.jpg',title:''};
+  }
   return{...media,coverUrl:'',title:''};
+}
+async function hydratePlaylistCovers(plan){
+  let changed=false;
+  for(const moment of plan.moments){
+    const p=moment.playlist;
+    if(!p?.url||p.coverUrl)continue;
+    const media=await enrichMedia(p.url);
+    if(media?.coverUrl){p.coverUrl=media.coverUrl;if(!p.name||p.name==='Playlist de boda'||p.name==='Música de boda')p.name=media.title||p.name;changed=true;}
+  }
+  return changed;
 }
 function visualFallback(platform){return '<div class="music-cover music-cover-'+esc(platform||'generic')+'"><span>♫</span></div>';}
 
@@ -107,8 +126,10 @@ export async function mountMusica(context){
   const response=await fetch('src/modules/musica/index.html?v=4',{cache:'no-store'});if(!response.ok)throw new Error('No se pudo cargar la interfaz de Música.');
   root.innerHTML=await response.text();
   let plan=normalizePlan(await readPlannerStorageKey(context,STORAGE_KEY));
+  const coversChanged=await hydratePlaylistCovers(plan);
   const snapshot=await loadRsvpAdminSnapshot(context);let requests=requestEntries(snapshot),search='';
   const save=async message=>{await writePlannerStorageKey(context,STORAGE_KEY,normalizePlan(plan));root.querySelector('[data-music-state]').textContent=message||'Cambios guardados en la boda.'};
+  if(coversChanged)await writePlannerStorageKey(context,STORAGE_KEY,normalizePlan(plan));
   render(plan,requests,search);
   const addDialog=root.querySelector('[data-add-music-dialog]');
   const updateMode=()=>{
