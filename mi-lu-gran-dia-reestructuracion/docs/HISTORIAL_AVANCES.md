@@ -1,3 +1,10 @@
+## Fase 2 — Aislamiento del ciclo de vida de Ideas
+
+- `Ideas` ahora tiene `destroyIdeas()` para cancelar su listener, limpiar estado y DOM, y retirar el contexto de boda anterior.
+- El shell registra el módulo montado y ejecuta su cleanup al cambiar de `weddingId`, cerrar sesión o cerrar el espacio de módulos.
+- Se añadió protección contra montajes asíncronos obsoletos: si cambia la boda mientras un módulo todavía está cargando, el resultado no queda activo.
+- No se modificaron Firebase, Firestore Rules, Auth, Storage ni contratos de persistencia.
+
 ## 2026-09-30 — Música: portada personalizada sin duplicar persistencia
 - Se incorpora una única propiedad de portada dentro de la referencia musical existente: la URL automática sigue siendo la base y una portada personalizada puede reemplazarla explícitamente.
 - La personalización se gestiona dentro del módulo Música mediante el mismo modelo playlist.coverUrl; no se crea otra fuente de datos ni otro almacenamiento.
