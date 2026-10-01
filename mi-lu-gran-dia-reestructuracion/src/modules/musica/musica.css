@@ -57,13 +57,12 @@
 .music-reference-main>small a{color:#9b6873;text-decoration:none;font-weight:700}
 .music-reference-moments{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
 .music-reference-moments span{padding:3px 6px;border-radius:6px;background:#f6f2ee;color:#776f69;font-size:7px}
-.music-row-play,.music-row-remove{height:30px;padding:0 10px;border:0;border-radius:50%;background:#f8edf0;color:#a66d78;font-size:9px;font-weight:800;cursor:pointer}
+.music-row-play,.music-row-cover,.music-row-remove{height:30px;padding:0 10px;border:0;border-radius:50%;background:#f8edf0;color:#a66d78;font-size:9px;font-weight:800;cursor:pointer}
+.music-row-cover{width:30px;padding:0;font-size:12px}
 .music-row-remove{background:transparent;font-size:15px}
-.music-empty-selection{padding:28px;text-align:center}
-@media(max-width:620px){.music-board-head{padding:15px}.music-reference-row{grid-template-columns:46px minmax(0,1fr) auto;gap:9px;padding:9px}.music-reference-row>img,.music-reference-row>.music-cover{width:46px;height:46px;min-width:46px}.music-row-remove{display:none}.music-reference-moments{gap:3px}.music-reference-moments span{font-size:6px;padding:3px 5px}}
-
 .music-field-optional{font-size:8px;font-weight:500;color:#a39b94}
-.music-row-cover{width:30px;height:30px;padding:0;border:0;border-radius:50%;background:#f8edf0;color:#a66d78;font-size:12px;font-weight:800;cursor:pointer}
 .music-cover-dialog{width:min(480px,calc(100% - 24px))}
 .music-cover-dialog .music-dialog-hint{margin:10px 0 0}
-@media(max-width:620px){.music-reference-row{grid-template-columns:46px minmax(0,1fr) auto auto}.music-row-cover{display:grid;place-items:center}.music-row-play{display:grid;place-items:center}.music-row-remove{display:none}}
+.music-empty-selection{padding:28px;text-align:center}
+@media(max-width:620px){.music-board-head{padding:15px}.music-reference-row{grid-template-columns:46px minmax(0,1fr) auto auto;gap:9px;padding:9px}.music-reference-row>img,.music-reference-row>.music-cover{width:46px;height:46px;min-width:46px}.music-row-cover{display:grid;place-items:center}.music-row-play{display:grid;place-items:center}.music-row-remove{display:none}.music-reference-moments{gap:3px}.music-reference-moments span{font-size:6px;padding:3px 5px}}
+
