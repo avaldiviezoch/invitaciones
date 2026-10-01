@@ -69,3 +69,30 @@ Antes de declararlo listo:
 - sin duplicaciones;
 - tests de invariantes;
 - persistencia real todavía aislada, salvo autorización expresa.
+
+## 8. Aislamiento obligatorio por boda
+
+Todo dato operativo o personal creado dentro de Migrandia pertenece a una única boda identificada por `weddingId`. La información de una boda nunca puede aparecer, heredarse, reutilizarse ni permanecer activa al cambiar a otra boda o a otro usuario.
+
+Esto aplica tanto a persistencia como a estado de frontend:
+- Firebase/Firestore y cualquier adaptador de persistencia deben resolver los datos mediante la boda activa;
+- listeners y suscripciones deben quedar vinculados a la boda activa;
+- estado JavaScript, cachés y componentes montados no pueden conservar información de una boda anterior;
+- operaciones asíncronas iniciadas para una boda anterior deben invalidarse al cambiar de contexto;
+- al cambiar de `weddingId` o cerrar sesión, los módulos con estado propio deben ejecutar su cleanup y posteriormente cargar el nuevo contexto.
+
+La privacidad es por **boda**, no necesariamente por usuario: varios usuarios con permisos válidos pueden trabajar sobre la misma boda.
+
+Los únicos datos que pueden ser compartidos entre bodas son los catálogos o recursos definidos explícitamente como globales por arquitectura.
+
+### Prueba obligatoria de aislamiento
+
+Todo módulo que persista o mantenga estado específico de una boda debe validar como mínimo:
+1. Boda A → crear dato A.
+2. Boda B → comprobar que A no aparece.
+3. Boda B → crear dato B.
+4. Volver a Boda A → comprobar que solo aparece A.
+5. Usuario A → cerrar sesión.
+6. Usuario B → comprobar que ningún dato de A aparece en su boda.
+
+No se declara un módulo listo para producción si falla cualquiera de estas pruebas.
