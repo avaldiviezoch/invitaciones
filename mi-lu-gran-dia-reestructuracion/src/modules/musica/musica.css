@@ -76,5 +76,5 @@
 .music-cover-dialog{width:min(480px,calc(100% - 24px))}
 .music-cover-dialog .music-dialog-hint{margin:10px 0 0}
 .music-empty-selection{padding:28px;text-align:center}
-@media(max-width:620px){.music-board-head{padding:15px}.music-reference-row{grid-template-columns:46px minmax(0,1fr) auto auto;gap:9px;padding:9px}.music-reference-row>img,.music-reference-row>.music-cover{width:46px;height:46px;min-width:46px}.music-row-cover{display:grid;place-items:center}.music-row-play{display:grid;place-items:center}.music-row-remove{display:none}.music-reference-moments{gap:3px}.music-reference-moments span{font-size:6px;padding:3px 5px}}
+@media(max-width:620px){.music-board-head{padding:15px}.music-reference-row{grid-template-columns:46px minmax(0,1fr) 30px 30px 30px;gap:8px;padding:9px}.music-reference-row>img,.music-reference-row>.music-cover{width:46px;height:46px;min-width:46px}.music-row-cover{display:grid;place-items:center;width:30px}.music-row-play{display:grid;place-items:center;width:30px}.music-row-remove{display:grid;place-items:center;width:30px}.music-reference-moments{gap:3px}.music-reference-moments span{font-size:6px;padding:3px 5px}}
 
