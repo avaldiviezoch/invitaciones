@@ -129,6 +129,18 @@ export async function mountMusica(context){
       render(plan,requests,search); await save('Playlist vinculada.');
       return;
     }
+    const previewPlaylist=event.target.closest('[data-preview-playlist]');
+    const previewSong=event.target.closest('[data-preview-song]');
+    if(previewPlaylist||previewSong){
+      const moment=plan.moments.find(m=>m.id==(previewPlaylist||previewSong).dataset[previewPlaylist?'previewPlaylist':'previewSong']);
+      if(!moment)return;
+      let mediaUrl='',title=moment.name;
+      if(previewPlaylist){mediaUrl=moment.playlist?.embedUrl||embedUrl(parseMediaUrl(moment.playlist?.url));}
+      else{const song=moment.songs.find(s=>s.id===previewSong.dataset.songId);mediaUrl=embedUrl(parseMediaUrl(song?.url));title=song?.title||title;}
+      const preview=root.querySelector('[data-music-preview]'),body=root.querySelector('[data-preview-body]');
+      if(preview&&body&&mediaUrl){root.querySelector('[data-preview-title]').textContent=title;body.innerHTML='<iframe src="'+esc(mediaUrl)+'" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" allowfullscreen title="'+esc(title)+'"></iframe>';preview.showModal();}
+      return;
+    }
     const unlink=event.target.closest('[data-unlink-playlist]');
     if(unlink){
       const moment=plan.moments.find(m=>m.id===unlink.dataset.unlinkPlaylist); if(!moment)return;
@@ -140,6 +152,7 @@ export async function mountMusica(context){
     if(event.target.matches('[data-music-form]')){event.preventDefault();const data=new FormData(event.target);if(event.submitter?.value==='save'){plan.moments.push({id:crypto.randomUUID(),name:clean(data.get('name'),80),description:clean(data.get('description'),180),songs:[]});dialog.close();event.target.reset();render(plan,requests,search);await save('Nuevo momento guardado.')}else dialog.close();return}
     const form=event.target.closest('[data-add-song]');if(form){event.preventDefault();const data=new FormData(form);const title=clean(data.get('title'));const artist=clean(data.get('artist'),120);if(!title)return;const moment=plan.moments.find(m=>m.id===form.dataset.addSong);if(!moment)return;const media=await enrichMedia(String(data.get('url')||''));moment.songs.push({id:songId(),title,artist,source:media.platform||'manual',requestKey:'',url:media.url,coverUrl:media.coverUrl,platform:media.platform,album:media.title});form.reset();render(plan,requests,search);await save('Canción guardada.')}
   },{signal});
+  root.addEventListener('click',event=>{if(event.target.closest('[data-close-preview]'))root.querySelector('[data-music-preview]')?.close();},{signal});
   root.addEventListener('input',event=>{if(event.target.matches('[data-music-search]')){search=event.target.value;render(plan,requests,search)}},{signal});
   cleanup=()=>{controller.abort();cleanup=null};
   return true;
