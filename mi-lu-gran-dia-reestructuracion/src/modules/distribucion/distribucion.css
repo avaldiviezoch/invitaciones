@@ -191,3 +191,14 @@
 .distribution-background-button:hover{border-color:rgba(127,137,98,.42);background:#fff}
 .distribution-background-button:focus-visible{outline:2px solid rgba(127,137,98,.32);outline-offset:2px}
 
+
+
+.distribution-background-onboarding{position:absolute;inset:0;z-index:20;display:grid;place-items:center;padding:24px;box-sizing:border-box;pointer-events:none}
+.distribution-background-onboarding[hidden]{display:none}
+.distribution-background-onboarding-card{width:min(430px,calc(100% - 30px));padding:28px 30px;border:1px solid rgba(127,137,98,.2);border-radius:22px;background:rgba(255,255,255,.96);box-shadow:0 18px 55px rgba(65,60,52,.16);text-align:center;pointer-events:auto}
+.distribution-background-onboarding-card h2{margin:8px 0 7px;color:#514e49;font:500 25px/1.08 Georgia,serif}
+.distribution-background-onboarding-card p{margin:0 auto;color:#8c867e;font-size:9px;line-height:1.55;max-width:360px}
+.distribution-background-onboarding-actions{display:flex;justify-content:center;gap:8px;margin:18px 0 10px}
+.distribution-background-onboarding-actions button{height:38px;padding:0 15px;border:1px solid #7f8962;border-radius:10px;background:#7f8962;color:#fff;font-size:9px;font-weight:850;cursor:pointer}
+.distribution-background-onboarding-actions button.is-secondary{border-color:#ded8d1;background:#fff;color:#68635d}
+.distribution-background-onboarding-card small{display:block;color:#a09a92;font-size:7px;line-height:1.5}
