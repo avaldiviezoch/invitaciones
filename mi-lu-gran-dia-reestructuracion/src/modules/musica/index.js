@@ -25,7 +25,7 @@ const normalize=(v)=>clean(v,200).normalize('NFD').replace(/[\u0300-\u036f]/g,''
 const cloneDefault=()=>DEFAULT_MOMENTS.map(x=>({...x,songs:[]}));
 function normalizePlan(value){
   const moments=Array.isArray(value?.moments)&&value.moments.length
-    ? value.moments.map((m)=>({id:clean(m?.id,80)||crypto.randomUUID(),name:clean(m?.name,80)||'Momento musical',description:clean(m?.description,180),songs:Array.isArray(m?.songs)?m.songs.map(s=>({id:clean(s?.id,80)||crypto.randomUUID(),title:clean(s?.title),artist:clean(s?.artist,120),source:clean(s?.source,30)||'manual',requestKey:clean(s?.requestKey,240)})).filter(s=>s.title||s.artist):[]}))
+    ? value.moments.map((m)=>({id:clean(m?.id,80)||crypto.randomUUID(),name:clean(m?.name,80)||'Momento musical',description:clean(m?.description,180),songs:Array.isArray(m?.songs)?m.songs.map(s=>({id:clean(s?.id,80)||crypto.randomUUID(),title:clean(s?.title),artist:clean(s?.artist,120),source:clean(s?.source,30)||'manual',requestKey:clean(s?.requestKey,240),url:clean(s?.url,500),coverUrl:clean(s?.coverUrl,1000),platform:clean(s?.platform,30),album:clean(s?.album,160)})).filter(s=>s.title||s.artist):[]}))
     : cloneDefault();
   return {version:2,moments:moments.map(m=>({...m,playlist:m.playlist&&m.playlist.url?{platform:m.playlist.platform||playlistPlatform(m.playlist.url),url:m.playlist.url,name:m.playlist.name||''}:null}))};
 }
