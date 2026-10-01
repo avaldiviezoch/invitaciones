@@ -110,6 +110,23 @@ La carpeta `src/modules/distribucion/` mantiene pocos archivos. No se divide por
 
 No se crearán archivos `helpers`, `utils`, `fix`, `patch`, `v2` o equivalentes para repartir código sin dueño. Una futura extracción solo procede si toda una responsabilidad puede trasladarse a un único propietario sin duplicarla ni repartir su lógica entre varios archivos.
 
+## Biblioteca personal de Invitaciones
+
+La biblioteca de enlaces del módulo `invitaciones` es una excepción de alcance: pertenece a la cuenta autenticada y no a una boda concreta.
+
+```text
+users/
+  {uid}/
+    invitations/
+      {invitationId}
+```
+
+`src/services/personal-invitations.js` es el único propietario de esta persistencia. El módulo no mantiene un catálogo hardcodeado de invitaciones ni usa una colección global. La suscripción se crea para el `uid` autenticado y debe limpiarse al desmontar el módulo o cambiar de cuenta.
+
+Los archivos publicados de las invitaciones existentes permanecen fuera de esta colección; Firestore solo conserva la referencia personal (nombre, URL y metadatos).
+
+La futura funcionalidad de creación de invitaciones deberá mantener esta separación y definir su alcance antes de implementar persistencia.
+
 ## Migración
 
 La migración será por módulo. No se copiará `app_integral` completo ni se moverán 140+ archivos a esta estructura.
