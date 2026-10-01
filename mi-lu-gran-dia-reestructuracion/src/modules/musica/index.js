@@ -39,12 +39,12 @@ function embedUrl(media){
 async function enrichMedia(url){
   const media=parseMediaUrl(url);if(!media)return null;
   if(media.platform==='spotify'){
-    try{const r=await fetch('https://open.spotify.com/oembed?url='+encodeURIComponent(media.url),{headers:{Accept:'application/json'}});if(r.ok){const d=await r.json();return{...media,coverUrl:d.thumbnail_url||'',title:d.title||''};}}catch{}
+    try{const r=await fetch('https://open.spotify.com/oembed?url='+encodeURIComponent(media.url));if(r.ok){const d=await r.json();return{...media,coverUrl:d.thumbnail_url||'',title:d.title||''};}}catch{}
   }
   if(media.platform==='youtube'){
     try{
       const youtubeUrl='https://www.youtube.com/'+(media.type==='playlist'?'playlist?list='+encodeURIComponent(media.id):'watch?v='+encodeURIComponent(media.id));
-      const r=await fetch('https://www.youtube.com/oembed?url='+encodeURIComponent(youtubeUrl)+'&format=json',{headers:{Accept:'application/json'}});
+      const r=await fetch('https://www.youtube.com/oembed?url='+encodeURIComponent(youtubeUrl)+'&format=json');
       if(r.ok){const d=await r.json();return{...media,coverUrl:d.thumbnail_url||'',title:d.title||''};}
     }catch{}
     if(media.type==='track')return{...media,coverUrl:'https://i.ytimg.com/vi/'+media.id+'/hqdefault.jpg',title:''};
