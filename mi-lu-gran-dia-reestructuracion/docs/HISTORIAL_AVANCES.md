@@ -1,3 +1,14 @@
+## Fase 4 — Distribución: aislamiento de fondos y primer estado vacío
+
+- Se eliminó el comportamiento de Casa Acapulco como fondo predeterminado universal.
+- La primera entrada a una boda sin `backgroundId` queda sin fondo y muestra una guía para elegirlo.
+- Casa Acapulco permanece disponible como ambiente del catálogo global.
+- Los fondos personalizados de IndexedDB ahora llevan `ownerUid` y una clave compuesta por `uid + id`; no se muestran a otra cuenta en el mismo navegador.
+- La selección y configuración del fondo (`backgroundId`, `visible`, `scale`, `offsetX`, `offsetY`) continúa persistida por `weddingId`.
+- Los registros personalizados del almacén IndexedDB anterior, que no tenían propietario verificable, no se reutilizan en el nuevo catálogo para evitar contaminación entre cuentas.
+- No se modificaron Firebase Auth, Firebase Storage, Firestore Rules ni los datos de Invitados/Mesas.
+- Pendiente: prueba real con dos usuarios y dos bodas antes de cerrar la fase.
+
 ## Regla arquitectónica — aislamiento obligatorio por boda
 
 Se incorporó como no negociable que toda información operativa/personal pertenece a una única boda mediante `weddingId`. La regla cubre persistencia y estado de frontend: listeners, cachés, DOM, estado JavaScript y operaciones asíncronas no pueden conservar información de una boda anterior. Se estableció además la prueba obligatoria Boda A ↔ Boda B y Usuario A ↔ Usuario B antes de producción.
