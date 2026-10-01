@@ -1,60 +1,87 @@
 <div class="invitations-shell">
   <section class="invitations-hero">
     <div>
-      <p class="invitations-eyebrow">Módulo · Espacio de la boda</p>
+      <p class="invitations-eyebrow">Módulo · Biblioteca personal</p>
       <div class="invitations-title-row">
         <div class="invitations-title-icon" aria-hidden="true"><img src="https://raw.githubusercontent.com/avaldiviezoch/Wedding/main/invitaciones/invitacion_0/assets/invitacion.png" width="34" height="34" alt=""></div>
         <div>
           <h1>Invitaciones</h1>
-          <p>Revisa todos los modelos publicados y comprueba cómo se ven antes de compartirlos.</p>
+          <p>Tus invitaciones pertenecen a tu cuenta. Aquí puedes guardar enlaces y, próximamente, crear nuevas invitaciones.</p>
         </div>
       </div>
     </div>
     <div class="invitations-hero-total">
-      <span>Modelos disponibles</span>
-      <strong data-invitations-total>8</strong>
+      <span>Mis invitaciones</span>
+      <strong data-invitations-total>0</strong>
     </div>
   </section>
 
   <main class="invitations-content">
-    <section class="invitations-workspace">
-      <aside class="invitations-selector">
-        <header>
-          <span>MODELOS DISPONIBLES</span>
-          <h2>Selecciona una invitación</h2>
-          <p>La Invitación 0 es la principal. Elige cualquier modelo para revisarlo en la vista móvil.</p>
-        </header>
-        <div class="invitations-list" data-invitations-list></div>
-      </aside>
-
-      <section class="invitations-preview">
-        <div class="invitations-toolbar">
-          <div>
-            <span>VISTA PREVIA MÓVIL</span>
-            <strong data-invitations-current>Invitación 0</strong>
-            <small data-invitations-badge>Invitación principal</small>
-          </div>
-          <div class="invitations-actions">
-            <button type="button" data-invitations-reload>↻ <span>Recargar</span></button>
-            <button type="button" data-invitations-copy>⧉ <span>Copiar enlace</span></button>
-            <a data-invitations-open target="_blank" rel="noopener">↗ <span>Abrir aparte</span></a>
-          </div>
+    <section class="invitations-library">
+      <div class="invitations-add-panel">
+        <div>
+          <span class="invitations-panel-label">MI BIBLIOTECA</span>
+          <h2>Agregar una invitación</h2>
+          <p>Guarda una invitación publicada mediante su enlace. Quedará asociada únicamente a tu cuenta.</p>
         </div>
+        <form data-invitations-add-form class="invitations-add-form">
+          <input data-invitations-add-name type="text" maxlength="80" placeholder="Nombre de la invitación" aria-label="Nombre de la invitación">
+          <input data-invitations-add-url type="url" required placeholder="https://..." aria-label="Enlace de la invitación">
+          <button type="submit">＋ Agregar enlace</button>
+          <button type="button" class="is-secondary" data-invitations-create>＋ Crear invitación</button>
+          <small data-invitations-add-status class="invitations-add-status">El creador de invitaciones se desarrollará en su propio módulo.</small>
+        </form>
+      </div>
 
-        <div class="invitations-device-bar">
-          <span>Simular tamaño real</span>
-          <div data-invitations-devices></div>
+      <section class="invitations-empty" data-invitations-empty>
+        <div class="invitations-empty-icon">✦</div>
+        <h2>Aún no tienes invitaciones</h2>
+        <p>Agrega un enlace para comenzar. Las invitaciones guardadas aquí son personales de tu cuenta.</p>
+        <div class="invitations-empty-actions">
+          <button type="button" data-invitations-empty-focus>＋ Agregar enlace</button>
+          <button type="button" class="is-secondary" data-invitations-create-empty>＋ Crear invitación</button>
         </div>
+      </section>
 
-        <div class="invitations-stage">
-          <div class="invitations-phone" data-invitations-phone>
-            <div class="invitations-phone-screen">
-              <div class="invitations-loading" data-invitations-loading>Cargando invitación…</div>
-              <iframe data-invitations-frame title="Vista previa de invitación" allow="autoplay; fullscreen"></iframe>
+      <section class="invitations-workspace">
+        <aside class="invitations-selector">
+          <header>
+            <span>MIS INVITACIONES</span>
+            <h2>Biblioteca</h2>
+            <p>Selecciona una invitación para revisar su vista previa.</p>
+          </header>
+          <div class="invitations-list" data-invitations-list></div>
+        </aside>
+
+        <section class="invitations-preview">
+          <div class="invitations-toolbar">
+            <div>
+              <span>VISTA PREVIA MÓVIL</span>
+              <strong data-invitations-current>Sin invitaciones</strong>
+              <small data-invitations-badge>Agrega una invitación para comenzar</small>
+            </div>
+            <div class="invitations-actions">
+              <button type="button" data-invitations-reload>↻ <span>Recargar</span></button>
+              <button type="button" data-invitations-copy disabled>⧉ <span>Copiar enlace</span></button>
+              <a data-invitations-open target="_blank" rel="noopener">↗ <span>Abrir aparte</span></a>
             </div>
           </div>
-        </div>
-        <p class="invitations-note">Desliza dentro de la pantalla para recorrer la invitación. “Abrir aparte” permite probarla en el viewport real.</p>
+
+          <div class="invitations-device-bar">
+            <span>Simular tamaño real</span>
+            <div data-invitations-devices></div>
+          </div>
+
+          <div class="invitations-stage">
+            <div class="invitations-phone" data-invitations-phone>
+              <div class="invitations-phone-screen">
+                <div class="invitations-loading" data-invitations-loading>Cargando invitación…</div>
+                <iframe data-invitations-frame title="Vista previa de invitación" allow="autoplay; fullscreen"></iframe>
+              </div>
+            </div>
+          </div>
+          <p class="invitations-note">Desliza dentro de la pantalla para recorrer la invitación. “Abrir aparte” permite probarla en el viewport real.</p>
+        </section>
       </section>
     </section>
   </main>
