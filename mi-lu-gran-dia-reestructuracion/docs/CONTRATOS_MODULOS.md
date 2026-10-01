@@ -56,3 +56,26 @@ Los módulos montados deben exponer una destrucción explícita cuando mantengan
 ## Regla transversal
 
 Un indicador, gráfico o tarjeta de dashboard se deriva de los módulos; no guarda una copia maestra.
+
+## Aislamiento por boda
+
+Todo dato operativo o personal del módulo pertenece a una única boda y debe resolverse mediante el `weddingId` del contexto activo. La clave o nombre lógico de un dato puede repetirse entre bodas siempre que su persistencia esté aislada por el `weddingId`.
+
+Un módulo no puede reutilizar entre bodas:
+- estado JavaScript;
+- listeners o subscriptions;
+- cachés;
+- DOM montado;
+- resultados de operaciones asíncronas.
+
+Al cambiar de `weddingId`, cerrar sesión o cambiar de contexto de usuario, el módulo debe ejecutar su cleanup y cargar exclusivamente el estado de la nueva boda.
+
+La privacidad es por boda, no necesariamente por usuario: owner/admin/editor/etc. autorizados pueden compartir los datos de una misma boda.
+
+Los catálogos o recursos globales son la única excepción y deben estar declarados explícitamente como globales.
+
+Cada módulo que persista o mantenga estado específico de boda debe poder demostrar:
+- lectura con el contexto de boda activo;
+- escritura con el contexto de boda activo;
+- cleanup de listeners/estado;
+- aislamiento mediante prueba Boda A ↔ Boda B.
