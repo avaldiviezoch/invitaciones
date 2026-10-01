@@ -124,16 +124,24 @@ export async function mountMusica(context){
       if(!platform){window.alert('Usa una URL válida de Spotify, YouTube Music o Apple Music.');return}
       const media=await enrichMedia(String(url).trim());
       const choices=plan.moments.map((m,i)=>(i+1)+'. '+m.name).join('\n');
-      const selection=window.prompt('¿Para qué momento? Escribe el número. También puedes escribir una categoría nueva.\n\n'+choices+'\n'+(plan.moments.length+1)+'. ＋ Crear mi propia categoría','');
+      const selection=window.prompt('¿Dónde quieres usar esta playlist?\n\n'+choices+'\n'+(plan.moments.length+1)+'. Combinado (varios momentos)\n'+(plan.moments.length+2)+'. ＋ Crear mi propia categoría','');
       if(!selection)return;
-      let moment=plan.moments[Number(selection)-1];
-      if(!moment){
-        const custom=clean(selection,80);
+      const selectedNumber=Number(selection);
+      let targets=[];
+      if(selectedNumber===plan.moments.length+1){
+        const nums=window.prompt('Escribe los números de los momentos separados por coma. Ej.: 1, 4, 7','');
+        targets=String(nums||'').split(',').map(v=>plan.moments[Number(v.trim())-1]).filter(Boolean);
+      }else if(selectedNumber===plan.moments.length+2){
+        const custom=clean(window.prompt('Nombre de tu nueva categoría:',''),80);
         if(!custom)return;
-        moment={id:crypto.randomUUID(),name:custom,description:'Momento musical personalizado.',songs:[],playlist:null};
-        plan.moments.push(moment);
+        const moment={id:crypto.randomUUID(),name:custom,description:'Momento musical personalizado.',songs:[],playlist:null};
+        plan.moments.push(moment); targets=[moment];
+      }else if(plan.moments[selectedNumber-1]){
+        targets=[plan.moments[selectedNumber-1]];
       }
-      moment.playlist={platform,url:String(url).trim(),name:clean(media.title,120)||'Playlist vinculada',coverUrl:media.coverUrl||'',embedUrl:embedUrl(parseMediaUrl(String(url).trim()))};
+      if(!targets.length)return;
+      const playlist={platform,url:String(url).trim(),name:clean(media.title,120)||'Playlist vinculada',coverUrl:media.coverUrl||'',embedUrl:embedUrl(parseMediaUrl(String(url).trim()))};
+      targets.forEach(moment=>{moment.playlist={...playlist}});
       render(plan,requests,search); await save('Playlist vinculada.');
       return;
     }
