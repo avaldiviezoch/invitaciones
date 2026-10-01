@@ -50,6 +50,9 @@ Preferencias de aplicación y boda que no pertenezcan a otro dominio.
 ## Dashboard
 Solo compone indicadores derivados. No debe convertirse en una segunda base de datos.
 
+## Ciclo de vida de módulos
+Los módulos montados deben exponer una destrucción explícita cuando mantengan listeners, estado o DOM propio. Al cambiar de `weddingId`, cerrar sesión o cerrar el espacio de módulos, el shell debe ejecutar ese cleanup antes de permitir el montaje del siguiente contexto. Un módulo nunca puede reutilizar estado de una boda anterior.
+
 ## Regla transversal
 
 Un indicador, gráfico o tarjeta de dashboard se deriva de los módulos; no guarda una copia maestra.
