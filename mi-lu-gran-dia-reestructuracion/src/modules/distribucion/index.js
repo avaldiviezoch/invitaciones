@@ -2881,7 +2881,10 @@ async function mountDistribucion(context) {
         if (!groups.has(groupName)) groups.set(groupName, []);
         groups.get(groupName).push(background);
       });
-      referenceCatalog.replaceChildren(...[...groups.entries()].map(([groupName, items]) => {
+      const chooseOption = document.createElement('option');
+      chooseOption.value = NONE_BACKGROUND_ID;
+      chooseOption.textContent = 'Elegir fondo…';
+      referenceCatalog.replaceChildren(chooseOption, ...[...groups.entries()].map(([groupName, items]) => {
         const optgroup = document.createElement('optgroup');
         optgroup.label = groupName;
         items.forEach((background) => {
@@ -2990,7 +2993,7 @@ async function mountDistribucion(context) {
       void persistReferencePreference({ immediate:true });
     };
     referenceRemove.onclick = async () => {
-      if (activeReferenceId === DEFAULT_BACKGROUND_ID) return;
+      if (!activeReferenceId) return;
       await removeDistributionBackground(activeReferenceId);
       await refreshReferenceCatalog(NONE_BACKGROUND_ID);
       referenceToggle.checked = true;
