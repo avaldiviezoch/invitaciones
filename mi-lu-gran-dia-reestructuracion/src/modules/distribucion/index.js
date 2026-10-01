@@ -25,7 +25,8 @@ import {
 } from './spatial-geometry.js?v=1';
 import { getAreaCatalogItem, getAreaPreset, getCatalogItem, getElementCatalogItem, getVisibleAreaPresets, getVisibleCatalogGroups, resolveCatalogType } from './distribution-catalog.js?v=4';
 import {
-  DEFAULT_BACKGROUND_ID,
+  NONE_BACKGROUND_ID,
+  LEGACY_DEFAULT_BACKGROUND_ID,
   addDistributionBackground,
   listDistributionBackgrounds,
   loadDistributionBackground,
@@ -2827,7 +2828,7 @@ async function mountDistribucion(context) {
     const referenceY = root.querySelector('[data-distribution-reference-y]');
     const referenceReset = root.querySelector('[data-distribution-reference-reset]');
     let referenceObjectUrl = '';
-    let activeReferenceId = DEFAULT_BACKGROUND_ID;
+    let activeReferenceId = NONE_BACKGROUND_ID;
     let referenceTransform = { scale:1, offsetX:0, offsetY:0 };
 
     const renderReferenceTransform = () => {
@@ -2850,7 +2851,18 @@ async function mountDistribucion(context) {
       const background = await loadDistributionBackground(id);
       if (!root.isConnected) return;
       releaseReferenceObjectUrl();
-      activeReferenceId = background.id;
+      activeReferenceId = background?.id || NONE_BACKGROUND_ID;
+      if (!background) {
+        releaseReferenceObjectUrl();
+        referenceImage.removeAttribute('src');
+        referenceImage.dataset.builtin = 'false';
+        world.classList.remove('has-reference-image');
+        world.classList.add('hide-reference-image');
+        referenceCatalog.value = NONE_BACKGROUND_ID;
+        referenceRemove.disabled = true;
+        referenceRemove.textContent = 'Sin plano seleccionado';
+        return;
+      }
       const source = background.blob ? URL.createObjectURL(background.blob) : background.source;
       if (background.blob) referenceObjectUrl = source;
       referenceImage.src = source;
@@ -2880,8 +2892,8 @@ async function mountDistribucion(context) {
         });
         return optgroup;
       }));
-      const available = backgrounds.some((background) => background.id === selectedId);
-      await applyReferenceBackground(available ? selectedId : DEFAULT_BACKGROUND_ID);
+      const available = selectedId && backgrounds.some((background) => background.id === selectedId);
+      await applyReferenceBackground(available ? selectedId : NONE_BACKGROUND_ID);
     };
     let referenceSaveTimer = 0;
     const persistReferencePreference = ({ immediate = false } = {}) => {
@@ -2899,7 +2911,7 @@ async function mountDistribucion(context) {
     const normalizeReferencePreference = (value) => {
       const preference = value && typeof value === 'object' ? value : {};
       return {
-        backgroundId: String(preference.backgroundId || DEFAULT_BACKGROUND_ID),
+        backgroundId: String(preference.backgroundId || NONE_BACKGROUND_ID),
         visible: preference.visible !== false,
         scale: Math.max(0.5, Math.min(2.5, Number(preference.scale) || 1)),
         offsetX: Math.max(-600, Math.min(600, Number(preference.offsetX) || 0)),
@@ -2922,7 +2934,10 @@ async function mountDistribucion(context) {
 
     const storedReferencePreference = await readPlannerStorageKey(context, DISTRIBUTION_VIEW_STORAGE_KEY).catch(() => null);
     if (epoch !== mountEpoch || !root.isConnected) return;
-    await applyReferencePreference(storedReferencePreference);
+    const normalizedStoredReference = storedReferencePreference && storedReferencePreference.backgroundId === LEGACY_DEFAULT_BACKGROUND_ID
+      ? { ...storedReferencePreference, backgroundId: NONE_BACKGROUND_ID, visible: false }
+      : storedReferencePreference;
+    await applyReferencePreference(normalizedStoredReference);
     if (epoch !== mountEpoch || !root.isConnected) return;
 
     const updateReferenceTransform = () => {
@@ -2945,12 +2960,12 @@ async function mountDistribucion(context) {
     });
 
     referenceCatalog.onchange = async () => {
-      await applyReferenceBackground(referenceCatalog.value);
+      await applyReferenceBackground(referenceCatalog.value || NONE_BACKGROUND_ID);
       referenceToggle.checked = true;
       world.classList.remove('hide-reference-image');
       await persistReferencePreference({ immediate:true });
       camera.fit();
-      status.textContent = activeReferenceId === DEFAULT_BACKGROUND_ID ? 'Casa Acapulco seleccionado como plano base' : 'Plano local seleccionado';
+      status.textContent = activeReferenceId ? 'Fondo seleccionado y guardado para esta boda' : 'Sin fondo seleccionado';
     };
     referenceFile.onchange = async () => {
       const file = referenceFile.files?.[0];
@@ -2977,12 +2992,12 @@ async function mountDistribucion(context) {
     referenceRemove.onclick = async () => {
       if (activeReferenceId === DEFAULT_BACKGROUND_ID) return;
       await removeDistributionBackground(activeReferenceId);
-      await refreshReferenceCatalog(DEFAULT_BACKGROUND_ID);
+      await refreshReferenceCatalog(NONE_BACKGROUND_ID);
       referenceToggle.checked = true;
       world.classList.remove('hide-reference-image');
       await persistReferencePreference({ immediate:true });
       camera.fit();
-      status.textContent = 'Plano personalizado eliminado. Casa Acapulco vuelve a ser el plano base';
+      status.textContent = 'Plano personalizado eliminado';
     };
     root.querySelector('[data-distribution-rotate-left]').onclick = () => rotateSelected(-ROTATION_STEP);
     root.querySelector('[data-distribution-rotate-right]').onclick = () => rotateSelected(ROTATION_STEP);
