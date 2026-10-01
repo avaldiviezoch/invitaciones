@@ -79,3 +79,9 @@ Cada módulo que persista o mantenga estado específico de boda debe poder demos
 - escritura con el contexto de boda activo;
 - cleanup de listeners/estado;
 - aislamiento mediante prueba Boda A ↔ Boda B.
+
+## Biblioteca personal de invitaciones
+
+Las invitaciones guardadas por una cuenta pertenecen a su `uid`, no al catálogo global ni directamente a una boda. La ruta conceptual es `users/{uid}/invitations/{invitationId}`. Un usuario nuevo debe comenzar con su biblioteca vacía. Una boda podrá posteriormente referenciar/usar una invitación de la biblioteca, pero la biblioteca personal permanece aislada por cuenta.
+
+Las invitaciones de desarrollo que anteriormente estaban hardcodeadas en el módulo no se consideran catálogo global: son datos heredables de la cuenta propietaria y deben migrarse una sola vez a su biblioteca personal antes de retirar definitivamente el fixture del código.
