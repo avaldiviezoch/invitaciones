@@ -199,8 +199,18 @@ export async function mountMusica(context){
     }
     const preview=event.target.closest('[data-preview-url]');
     if(preview){
-      const url=preview.dataset.previewUrl,media=parseMediaUrl(url),embed=embedUrl(media);
-      if(embed){root.querySelector('[data-preview-title]').textContent=preview.dataset.previewTitle||'Música de boda';root.querySelector('[data-preview-body]').innerHTML='<iframe src="'+esc(embed)+'" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';root.querySelector('[data-music-preview]').showModal();}
+      const url=preview.dataset.previewUrl,media=parseMediaUrl(url);
+      const dialog=root.querySelector('[data-music-preview]');
+      const item=plan.moments.flatMap(m=>m.playlist?[{playlist:m.playlist}]:[]).find(x=>x.playlist?.url===url)?.playlist;
+      if(dialog&&url){
+        const cover=dialog.querySelector('[data-preview-cover]');
+        cover.innerHTML=item?.coverUrl?'<img src="'+esc(item.coverUrl)+'" alt="" loading="lazy">':visualFallback(media?.platform||'generic');
+        dialog.querySelector('[data-preview-title]').textContent=item?.name||preview.dataset.previewTitle||'Música';
+        dialog.querySelector('[data-preview-name]').textContent=item?.name||preview.dataset.previewTitle||'Música de boda';
+        dialog.querySelector('[data-preview-platform]').textContent=platformLabel(media?.platform)||'Música';
+        dialog.querySelector('[data-preview-open]').href=url;
+        dialog.showModal();
+      }
       return
     }
     if(event.target.closest('[data-close-preview]'))root.querySelector('[data-music-preview]').close();
