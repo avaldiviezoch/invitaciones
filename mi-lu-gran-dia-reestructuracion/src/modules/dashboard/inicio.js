@@ -1006,6 +1006,7 @@ const moduleLoader = $('moduleLoader');
 let moduleLoadEpoch = 0;
 let moduleCacheWeddingId = '';
 const mountedModules = new Set();
+const mountedModuleExports = new Map();
 const pendingModuleMounts = new Map();
 
 const MODULES = Object.freeze({
@@ -1043,7 +1044,8 @@ const MODULES = Object.freeze({
   },
   ideas: {
     load: () => import('../ideas/index.js?v=13'),
-    mount: 'mountIdeas'
+    mount: 'mountIdeas',
+    destroy: 'destroyIdeas'
   }
 });
 
@@ -1051,6 +1053,15 @@ const ACTIVE_MODULES = new Set(Object.keys(MODULES));
 
 function resetModuleCache(weddingId = '') {
   moduleLoadEpoch += 1;
+  for (const [moduleId, module] of mountedModuleExports) {
+    try {
+      const destroy = MODULES[moduleId]?.destroy;
+      if (destroy && typeof module[destroy] === 'function') module[destroy]();
+    } catch (error) {
+      console.error(`No se pudo desmontar ${moduleId}:`, error);
+    }
+  }
+  mountedModuleExports.clear();
   mountedModules.clear();
   pendingModuleMounts.clear();
   moduleCacheWeddingId = weddingId;
@@ -1088,7 +1099,13 @@ async function mountModuleOnce(moduleId, context) {
     if (typeof mount !== 'function') throw new Error(`El módulo ${moduleId} no expone ${definition.mount}.`);
     const mounted = await mount(context);
     if (mounted === false) return false;
-    if (moduleCacheWeddingId === weddingId) mountedModules.add(moduleId);
+    if (moduleCacheWeddingId !== weddingId) {
+      const destroy = definition.destroy;
+      if (destroy && typeof module[destroy] === 'function') module[destroy]();
+      return false;
+    }
+    mountedModules.add(moduleId);
+    mountedModuleExports.set(moduleId, module);
     return true;
   })();
 
