@@ -188,10 +188,17 @@ export async function mountInvitaciones() {
     }
   }, { signal });
 
-  createButton.addEventListener('click', () => {
+  const showCreatorMessage = () => {
     addStatus.textContent = 'El creador de invitaciones se habilitará en su módulo correspondiente.';
     addStatus.className = 'invitations-add-status';
     addUrl.focus();
+  };
+
+  createButton.addEventListener('click', showCreatorMessage, { signal });
+  root.querySelector('[data-invitations-create-empty]')?.addEventListener('click', showCreatorMessage, { signal });
+  root.querySelector('[data-invitations-empty-focus]')?.addEventListener('click', () => {
+    addUrl.focus();
+    addUrl.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }, { signal });
 
   applyDevice(selectedDevice);
