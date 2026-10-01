@@ -26,3 +26,29 @@
 @media(max-width:760px){.invitations-hero{grid-template-columns:1fr;padding:18px 16px 14px;gap:12px}.invitations-eyebrow{margin-bottom:10px;font-size:8px}.invitations-title-row{grid-template-columns:40px minmax(0,1fr);gap:11px}.invitations-title-icon{width:38px;height:38px;border-radius:12px;font-size:18px}.invitations-title-row h1{font-size:30px}.invitations-title-row p{margin-top:7px;font-size:10.5px;line-height:1.4}.invitations-hero-total{display:none}.invitations-content{width:calc(100% - 24px);padding:12px 0 30px}.invitations-workspace{height:auto;min-height:0;display:block}.invitations-selector{margin-bottom:10px;border-radius:16px}.invitations-selector header{padding:14px}.invitations-selector h2{font-size:20px}.invitations-list{display:flex;gap:7px;padding:9px;overflow-x:auto}.invitations-option{min-width:142px;min-height:52px;grid-template-columns:32px minmax(0,1fr);padding:7px}.invitations-number{width:31px;height:31px;border-radius:9px;font-size:12px}.invitations-preview{height:calc(100dvh - 235px);min-height:520px;padding:9px;border-radius:16px}.invitations-toolbar{align-items:flex-start;min-height:0;padding:8px;gap:8px}.invitations-actions{flex-wrap:wrap;justify-content:flex-end}.invitations-actions button,.invitations-actions a{min-height:30px;padding:0 8px;font-size:8px}.invitations-actions span{display:none}.invitations-device-bar{display:grid;gap:6px}.invitations-device-bar>div{overflow-x:auto}.invitations-device-bar button{white-space:nowrap}.invitations-stage{padding:9px}.invitations-phone{border-radius:24px;padding:6px}.invitations-phone-screen{border-radius:18px}}
 @media(max-width:430px){.invitations-title-row h1{font-size:28px}.invitations-preview{height:calc(100dvh - 220px)}.invitations-toolbar strong{font-size:11px}.invitations-device-bar button{font-size:7.5px;padding:0 7px}}
 @media(prefers-reduced-motion:reduce){.invitations-shell *{scroll-behavior:auto}}
+
+
+.invitations-library{display:grid;gap:14px}
+.invitations-add-panel{display:grid;grid-template-columns:minmax(240px,.8fr) minmax(420px,1.2fr);gap:20px;align-items:center;padding:18px 20px;border:1px solid var(--invitations-line);border-radius:20px;background:#fff;box-shadow:var(--invitations-shadow)}
+.invitations-panel-label{color:#7d8866;font-size:8px;font-weight:800;letter-spacing:.14em}
+.invitations-add-panel h2{margin:6px 0 5px;font:500 23px/1.05 Georgia,serif}
+.invitations-add-panel p{margin:0;color:#8b8784;font-size:9px;line-height:1.5;max-width:520px}
+.invitations-add-form{display:grid;grid-template-columns:1fr 1.45fr auto auto;gap:7px;align-items:center}
+.invitations-add-form input{width:100%;min-width:0;height:36px;padding:0 10px;border:1px solid #e3ddd8;border-radius:10px;background:#fff;color:#3a3836;font:9px Arial,sans-serif}
+.invitations-add-form button,.invitations-empty-actions button{height:36px;padding:0 12px;border:1px solid #849168;border-radius:10px;background:#849168;color:#fff;font:700 9px Arial,sans-serif;cursor:pointer;white-space:nowrap}
+.invitations-add-form button.is-secondary,.invitations-empty-actions button.is-secondary{border-color:#e3ddd8;background:#fff;color:#55514e}
+.invitations-add-status{grid-column:1/-1;min-height:12px;color:#8a8884;font-size:8px}
+.invitations-add-status.is-success{color:#6d7d55;font-weight:700}
+.invitations-add-status.is-error{color:#a45f68;font-weight:700}
+.invitations-add-status.is-loading{color:#7d8866}
+.invitations-empty{display:grid;place-items:center;padding:54px 20px;border:1px dashed #d9d0ca;border-radius:20px;background:rgba(255,255,255,.72);text-align:center}
+.invitations-empty[hidden]{display:none}
+.invitations-empty-icon{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:#f7ecee;color:#ae7480;font:22px Georgia,serif}
+.invitations-empty h2{margin:13px 0 5px;font:500 24px/1.1 Georgia,serif}
+.invitations-empty p{max-width:480px;margin:0;color:#8b8784;font-size:9px;line-height:1.5}
+.invitations-empty-actions{display:flex;gap:7px;margin-top:15px}
+.invitations-empty-actions button{min-width:130px}
+.invitations-workspace{display:grid}
+.invitations-actions button:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:1050px){.invitations-add-panel{grid-template-columns:1fr}.invitations-add-form{grid-template-columns:1fr 1.5fr auto auto}}
+@media(max-width:760px){.invitations-add-panel{padding:15px;gap:13px}.invitations-add-form{grid-template-columns:1fr 1fr}.invitations-add-form button{width:100%}.invitations-add-status{grid-column:1/-1}.invitations-empty{padding:40px 16px}.invitations-workspace{display:block}}
