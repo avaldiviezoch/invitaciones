@@ -32,7 +32,7 @@ function parseMediaUrl(url){
 function embedUrl(media){
   if(!media)return'';
   if(media.platform==='spotify')return'https://open.spotify.com/embed/'+media.type+'/'+media.id+'?utm_source=generator';
-  if(media.platform==='youtube')return media.type==='playlist'?'https://www.youtube.com/embed?listType=playlist&list='+encodeURIComponent(media.id)+'&playsinline=1':'https://www.youtube.com/embed/'+encodeURIComponent(media.id)+'?playsinline=1';
+  if(media.platform==='youtube')return media.type==='playlist'?'https://www.youtube.com/embed/videoseries?list='+encodeURIComponent(media.id)+'&playsinline=1':'https://www.youtube.com/embed/'+encodeURIComponent(media.id)+'?playsinline=1';
   if(media.platform==='apple')return media.url.replace('https://music.apple.com/','https://embed.music.apple.com/');
   return'';
 }
@@ -200,7 +200,7 @@ export async function mountMusica(context){
     const preview=event.target.closest('[data-preview-url]');
     if(preview){
       const url=preview.dataset.previewUrl,media=parseMediaUrl(url),embed=embedUrl(media);
-      if(embed){root.querySelector('[data-preview-title]').textContent=preview.dataset.previewTitle||'Música de boda';root.querySelector('[data-preview-body]').innerHTML='<iframe src="'+esc(embed)+'" loading="lazy" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';root.querySelector('[data-music-preview]').showModal();}
+      if(embed){root.querySelector('[data-preview-title]').textContent=preview.dataset.previewTitle||'Música de boda';root.querySelector('[data-preview-body]').innerHTML='<iframe src="'+esc(embed)+'" loading="lazy" referrerpolicy="strict-origin-when-cross-origin" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture" allowfullscreen></iframe>';root.querySelector('[data-music-preview]').showModal();}
       return
     }
     if(event.target.closest('[data-close-preview]'))root.querySelector('[data-music-preview]').close();
