@@ -2942,10 +2942,7 @@ async function mountDistribucion(context) {
 
     const storedReferencePreference = await readPlannerStorageKey(context, DISTRIBUTION_VIEW_STORAGE_KEY).catch(() => null);
     if (epoch !== mountEpoch || !root.isConnected) return;
-    const normalizedStoredReference = storedReferencePreference && storedReferencePreference.backgroundId === LEGACY_DEFAULT_BACKGROUND_ID
-      ? { ...storedReferencePreference, backgroundId: NONE_BACKGROUND_ID, visible: false }
-      : storedReferencePreference;
-    await applyReferencePreference(normalizedStoredReference);
+    await applyReferencePreference(storedReferencePreference);
     if (epoch !== mountEpoch || !root.isConnected) return;
 
     const updateReferenceTransform = () => {
