@@ -52,3 +52,207 @@
 .invitations-actions button:disabled{opacity:.45;cursor:not-allowed}
 @media(max-width:1050px){.invitations-add-panel{grid-template-columns:1fr}.invitations-add-form{grid-template-columns:1fr 1.5fr auto auto}}
 @media(max-width:760px){.invitations-add-panel{padding:15px;gap:13px}.invitations-add-form{grid-template-columns:1fr 1fr}.invitations-add-form button{width:100%}.invitations-add-status{grid-column:1/-1}.invitations-empty{padding:40px 16px}.invitations-workspace{display:block}}
+
+
+.invitations-guest-music{
+  margin-bottom:16px;
+  padding:18px 20px 20px;
+  border:1px solid var(--invitations-line);
+  border-radius:20px;
+  background:#fff;
+  box-shadow:var(--invitations-shadow)
+}
+.invitations-guest-music-head{
+  display:flex;
+  align-items:end;
+  justify-content:space-between;
+  gap:18px;
+  margin-bottom:14px
+}
+.invitations-guest-music-head h2{
+  margin:6px 0 5px;
+  font:500 23px/1.06 Georgia,serif
+}
+.invitations-guest-music-head p{
+  margin:0;
+  color:#8b8784;
+  font-size:9px;
+  line-height:1.5
+}
+.invitations-guest-music-total{
+  flex:none;
+  text-align:right
+}
+.invitations-guest-music-total strong{
+  display:block;
+  color:#ae7480;
+  font:500 28px/1 Georgia,serif
+}
+.invitations-guest-music-total span{
+  display:block;
+  margin-top:4px;
+  color:#938c87;
+  font-size:8px
+}
+.invitations-guest-music-list{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px
+}
+.invitations-music-card{
+  min-width:0;
+  display:grid;
+  grid-template-columns:82px minmax(0,1fr);
+  gap:11px;
+  padding:10px;
+  border:1px solid #e8e1dc;
+  border-radius:14px;
+  background:#fff
+}
+.invitations-music-cover{
+  width:82px;
+  height:82px;
+  overflow:hidden;
+  border-radius:11px;
+  background:#eee7e1
+}
+.invitations-music-cover img{
+  width:100%;
+  height:100%;
+  display:block;
+  object-fit:cover
+}
+.invitations-music-cover-fallback{
+  position:relative;
+  display:flex;
+  flex-direction:column;
+  justify-content:flex-end;
+  gap:2px;
+  padding:9px;
+  overflow:hidden;
+  color:#fff;
+  background:
+    radial-gradient(circle at 78% 20%,rgba(255,255,255,.25),transparent 30%),
+    linear-gradient(145deg,#b77d89,#86936f)
+}
+.invitations-music-cover-fallback:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:linear-gradient(180deg,transparent 24%,rgba(45,39,35,.34))
+}
+.invitations-music-cover-fallback>*{
+  position:relative;
+  z-index:1
+}
+.invitations-music-cover-fallback>span{
+  position:absolute;
+  top:8px;
+  right:9px;
+  font:20px Georgia,serif
+}
+.invitations-music-cover-fallback strong{
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  font:600 10px/1.1 Georgia,serif
+}
+.invitations-music-cover-fallback small{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:6px;
+  opacity:.9
+}
+.invitations-music-card-body{
+  min-width:0;
+  align-self:center
+}
+.invitations-music-kicker{
+  display:block;
+  color:#9b6b75;
+  font-size:6px;
+  font-weight:800;
+  letter-spacing:.12em
+}
+.invitations-music-card h3{
+  margin:5px 0 0;
+  overflow:hidden;
+  display:-webkit-box;
+  -webkit-box-orient:vertical;
+  -webkit-line-clamp:2;
+  font:500 14px/1.12 Georgia,serif
+}
+.invitations-music-artist{
+  margin:4px 0 0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#7f7872;
+  font-size:8px
+}
+.invitations-music-meta{
+  display:grid;
+  gap:4px;
+  margin-top:8px;
+  padding-top:7px;
+  border-top:1px solid #eee8e3
+}
+.invitations-music-meta span{
+  display:grid;
+  grid-template-columns:48px minmax(0,1fr);
+  gap:5px;
+  color:#756f69;
+  font-size:7px;
+  line-height:1.3
+}
+.invitations-music-meta b{
+  color:#99918b;
+  font-weight:700
+}
+.invitations-guest-music-empty{
+  grid-column:1/-1;
+  min-height:128px;
+  display:grid;
+  place-items:center;
+  align-content:center;
+  gap:5px;
+  padding:20px;
+  border:1px dashed #d9d0ca;
+  border-radius:14px;
+  background:#faf8f5;
+  color:#918b85;
+  text-align:center;
+  font-size:9px
+}
+.invitations-guest-music-empty>span{
+  width:34px;
+  height:34px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:#f4e9ec;
+  color:#aa707b;
+  font:17px Georgia,serif
+}
+.invitations-guest-music-empty strong{
+  color:#514b47;
+  font:500 14px Georgia,serif
+}
+.invitations-guest-music-empty p{margin:0}
+
+@media(max-width:1100px){
+  .invitations-guest-music-list{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+  .invitations-guest-music{padding:15px}
+  .invitations-guest-music-head{align-items:flex-start}
+  .invitations-guest-music-head h2{font-size:20px}
+  .invitations-guest-music-list{grid-template-columns:1fr}
+}
+@media(max-width:430px){
+  .invitations-guest-music-head{display:grid;grid-template-columns:1fr auto}
+  .invitations-music-card{grid-template-columns:72px minmax(0,1fr)}
+  .invitations-music-cover{width:72px;height:72px}
+}
