@@ -511,3 +511,19 @@
   .table-physical-foot{align-items:stretch;flex-direction:column}
   .table-physical-foot small{max-width:none}
 }
+
+.music-head-kicker{display:block;margin-bottom:5px;color:#7d8866;font-size:8px;font-weight:800;letter-spacing:.14em}
+.music-request-card{grid-template-columns:70px minmax(0,1fr) minmax(180px,.7fr)}
+.music-request-cover{width:68px;height:68px;overflow:hidden;border-radius:12px;background:#ece7e2}
+.music-request-cover img{width:100%;height:100%;display:block;object-fit:cover}
+.music-request-cover-fallback{position:relative;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;padding:8px;color:#fff;background:radial-gradient(circle at 78% 18%,rgba(255,255,255,.24),transparent 28%),linear-gradient(145deg,#b77d89,#86936f)}
+.music-request-cover-fallback:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 26%,rgba(45,39,35,.36))}
+.music-request-cover-fallback>*{position:relative;z-index:1}
+.music-request-cover-fallback>span{position:absolute;top:7px;right:9px;font:20px Georgia,serif}
+.music-request-cover-fallback strong{overflow:hidden;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;font:600 9px/1.08 Georgia,serif}
+.music-request-cover-fallback small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:6px;opacity:.9}
+@media(max-width:760px){
+  .music-request-card{grid-template-columns:58px minmax(0,1fr)}
+  .music-request-cover{width:56px;height:56px}
+  .music-request-person{grid-column:2}
+}
