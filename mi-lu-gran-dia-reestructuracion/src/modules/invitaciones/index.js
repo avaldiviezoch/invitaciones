@@ -3,6 +3,8 @@ import {
   addPersonalInvitation,
   deletePersonalInvitation
 } from '../../services/personal-invitations.js';
+import { loadRsvpAdminSnapshot } from '../../services/rsvp-admin.js?v=5';
+import { searchMusicCatalog } from '../../services/music-catalog.js';
 
 const DEVICES = Object.freeze([
   { id: 'compact', label: 'Compacto', width: 360, height: 800 },
@@ -44,7 +46,101 @@ function escapeHtml(value = '') {
     .replaceAll("'", '&#39;');
 }
 
-export async function mountInvitaciones() {
+
+function cleanText(value = '', max = 180) {
+  return String(value ?? '').trim().slice(0, max);
+}
+
+function normalizeMusicText(value = '') {
+  return cleanText(value, 260)
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLocaleLowerCase('es')
+    .replace(/\s+/g, ' ');
+}
+
+function invitationMusicRequests(snapshot) {
+  return (snapshot?.musicResponses || []).flatMap((response) => {
+    let value = response?.customData?.mgdMusic;
+    if (typeof value === 'string') {
+      try { value = JSON.parse(value); } catch { value = null; }
+    }
+
+    const songs = Array.isArray(value?.songs) ? value.songs : [];
+    const guest = cleanText(value?.guestName || response?.name, 120) || 'Invitado';
+    const message = cleanText(value?.message, 280);
+
+    return songs.map((song, index) => ({
+      id: [String(response?.id || ''), index, normalizeMusicText(song?.title), normalizeMusicText(song?.artist)].join('|'),
+      title: cleanText(song?.title) || 'Canción sin título',
+      artist: cleanText(song?.artist, 140) || 'Artista no indicado',
+      guest,
+      message,
+      coverUrl: cleanText(
+        song?.coverUrl || song?.image || song?.imageUrl || song?.thumbnail || song?.thumbnailUrl || song?.artwork || song?.artworkUrl,
+        1000
+      )
+    }));
+  });
+}
+
+function invitationMusicCover(item) {
+  if (item.coverUrl) {
+    return `<div class="invitations-music-cover"><img src="${escapeHtml(item.coverUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer"></div>`;
+  }
+  return `<div class="invitations-music-cover invitations-music-cover-fallback" aria-hidden="true"><span>♫</span><strong>${escapeHtml(item.title)}</strong><small>${escapeHtml(item.artist)}</small></div>`;
+}
+
+function renderInvitationMusic(root, requests) {
+  const host = root.querySelector('[data-invitations-guest-music]');
+  const total = root.querySelector('[data-invitations-music-total]');
+  if (!host || !total) return;
+
+  total.textContent = String(requests.length);
+
+  if (!requests.length) {
+    host.innerHTML = '<div class="invitations-guest-music-empty"><span>♫</span><strong>Aún no hay pedidos musicales</strong><p>Cuando tus invitados envíen canciones desde la invitación, aparecerán aquí.</p></div>';
+    return;
+  }
+
+  host.innerHTML = requests.map((item) => `
+    <article class="invitations-music-card" data-music-request-id="${escapeHtml(item.id)}">
+      ${invitationMusicCover(item)}
+      <div class="invitations-music-card-body">
+        <span class="invitations-music-kicker">PEDIDO MUSICAL</span>
+        <h3>${escapeHtml(item.title)}</h3>
+        <p class="invitations-music-artist">${escapeHtml(item.artist)}</p>
+        <div class="invitations-music-meta">
+          <span><b>Invitado</b>${escapeHtml(item.guest)}</span>
+          ${item.message ? `<span><b>Dedicatoria</b>${escapeHtml(item.message)}</span>` : ''}
+        </div>
+      </div>
+    </article>
+  `).join('');
+}
+
+async function hydrateInvitationMusicCovers(root, requests, signal) {
+  const targets = requests.filter((item) => !item.coverUrl).slice(0, 12);
+
+  for (const item of targets) {
+    if (signal.aborted) return;
+    const result = await searchMusicCatalog({ title: item.title, artist: item.artist }, signal);
+    if (signal.aborted) return;
+    if (result?.status !== 'matched' || !result.track?.artwork) continue;
+
+    item.coverUrl = result.track.artwork;
+    const card = [...root.querySelectorAll('[data-music-request-id]')]
+      .find((node) => node.dataset.musicRequestId === item.id);
+    if (!card) continue;
+
+    const cover = card.querySelector('.invitations-music-cover');
+    if (!cover) continue;
+    cover.className = 'invitations-music-cover';
+    cover.innerHTML = `<img src="${escapeHtml(item.coverUrl)}" alt="" loading="lazy" referrerpolicy="no-referrer">`;
+  }
+}
+
+export async function mountInvitaciones(context) {
   const root = document.querySelector('[data-module-view="invitaciones"]');
   if (!root) return false;
 
@@ -72,6 +168,12 @@ export async function mountInvitaciones() {
   const addUrl = root.querySelector('[data-invitations-add-url]');
   const addStatus = root.querySelector('[data-invitations-add-status]');
   const createButton = root.querySelector('[data-invitations-create]');
+
+  const musicRequests = context?.id
+    ? invitationMusicRequests(await loadRsvpAdminSnapshot(context))
+    : [];
+  renderInvitationMusic(root, musicRequests);
+  void hydrateInvitationMusicCovers(root, musicRequests, signal);
 
   let invitations = [];
   let selected = null;
