@@ -132,6 +132,7 @@ function createRsvpController(api) {
 
   const musicCoverCache = new Map();
   let musicCoverEpoch = 0;
+  let musicUi = { search: '', filter: 'all' };
 
   function musicEntries() {
     const source = Array.isArray(state.musicResponses) ? state.musicResponses : [];
@@ -178,14 +179,62 @@ function createRsvpController(api) {
     const people = new Set(entries.map((item) => item.responseId || item.person)).size;
     const unique = new Set(entries.map((item) => `${normalizeName(item.title)}|${normalizeName(item.artist)}`)).size;
     root.querySelector('[data-music-tab-count]')?.replaceChildren(document.createTextNode(String(entries.length)));
-    const total=root.querySelector('[data-music-total]'), peopleEl=root.querySelector('[data-music-people]'), uniqueEl=root.querySelector('[data-music-unique]');
-    if(total) total.textContent=String(entries.length); if(peopleEl) peopleEl.textContent=String(people); if(uniqueEl) uniqueEl.textContent=String(unique);
-    const list=root.querySelector('[data-music-list]'); if(!list) return;
-    if(loading){list.innerHTML='<div class="guests-empty"><strong>Cargando música</strong><span>Consultando las respuestas existentes.</span></div>';return;}
-    if(!state.token){list.innerHTML='<div class="guests-empty"><strong>RSVP aún no está configurado</strong><span>La música utiliza el mismo token de la boda.</span></div>';return;}
-    list.innerHTML=entries.length?entries.map((item)=>`<article class="music-request-card" data-music-request-key="${esc(item.key)}">${musicCoverMarkup(item)}<div class="music-request-song"><strong>${esc(item.title||'Canción sin título')}</strong><span>${esc(item.artist||'Artista no indicado')}</span></div><div class="music-request-person"><strong>${esc(item.person)}</strong>${item.message?`<span>${esc(item.message)}</span>`:'<span>Sin dedicatoria</span>'}</div></article>`).join(''):'<div class="guests-empty"><strong>Aún no hay canciones solicitadas</strong><span>Las solicitudes enviadas desde las invitaciones aparecerán aquí.</span></div>';
+
+    const total = root.querySelector('[data-music-total]');
+    const peopleEl = root.querySelector('[data-music-people]');
+    const uniqueEl = root.querySelector('[data-music-unique]');
+    if (total) total.textContent = String(entries.length);
+    if (peopleEl) peopleEl.textContent = String(people);
+    if (uniqueEl) uniqueEl.textContent = String(unique);
+
+    const list = root.querySelector('[data-music-list]');
+    if (!list) return;
+    if (loading) {
+      list.innerHTML = '<div class="music-empty-state"><span>♫</span><strong>Cargando música</strong><p>Consultando las solicitudes de tus invitados.</p></div>';
+      return;
+    }
+    if (!state.token) {
+      list.innerHTML = '<div class="music-empty-state"><span>♫</span><strong>Aún no hay música disponible</strong><p>Las solicitudes aparecerán aquí cuando lleguen desde las invitaciones.</p></div>';
+      return;
+    }
+
+    const needle = normalizeName(musicUi.search);
+    const visible = entries.filter((item) => {
+      if (musicUi.filter === 'message' && !text(item.message)) return false;
+      if (musicUi.filter === 'no-message' && text(item.message)) return false;
+      if (!needle) return true;
+      return normalizeName([item.title, item.artist, item.person, item.message].filter(Boolean).join(' ')).includes(needle);
+    });
+
+    root.querySelectorAll('[data-music-filter]').forEach((button) => {
+      button.classList.toggle('is-active', button.dataset.musicFilter === musicUi.filter);
+    });
+
+    const search = root.querySelector('[data-music-search]');
+    if (search && search.value !== musicUi.search) search.value = musicUi.search;
+
+    list.innerHTML = visible.length
+      ? visible.map((item) => `
+        <article class="music-request-card" data-music-request-key="${esc(item.key)}">
+          ${musicCoverMarkup(item)}
+          <div class="music-request-content">
+            <span class="music-request-eyebrow">PEDIDO MUSICAL</span>
+            <div class="music-request-song">
+              <strong>${esc(item.title || 'Canción sin título')}</strong>
+              <span>${esc(item.artist || 'Artista no indicado')}</span>
+            </div>
+            <div class="music-request-person">
+              <span class="music-request-person-label">Invitado</span>
+              <strong>${esc(item.person)}</strong>
+            </div>
+            ${item.message ? `<blockquote class="music-request-message">“${esc(item.message)}”</blockquote>` : '<span class="music-request-no-message">Sin dedicatoria</span>'}
+          </div>
+        </article>`
+      ).join('')
+      : '<div class="music-empty-state"><span>⌕</span><strong>No encontramos coincidencias</strong><p>Prueba con otra canción, artista, invitado o filtro.</p></div>';
+
     const epoch = ++musicCoverEpoch;
-    if (entries.length) void hydrateMusicCovers(root, entries, epoch);
+    if (visible.length) void hydrateMusicCovers(root, visible, epoch);
   }
 
   function render() {
@@ -550,6 +599,12 @@ function createRsvpController(api) {
   }
 
   async function handleClick(event) {
+    const musicFilter = event.target.closest('[data-music-filter]');
+    if (musicFilter) {
+      musicUi.filter = musicFilter.dataset.musicFilter || 'all';
+      renderMusic(api.getRoot());
+      return true;
+    }
     if (event.target.closest('[data-rsvp-close]')) {
       closeReview();
       return true;
@@ -573,7 +628,13 @@ function createRsvpController(api) {
     return false;
   }
 
-  function handleInput() {
+  function handleInput(event) {
+    const musicSearch = event.target.closest('[data-music-search]');
+    if (musicSearch) {
+      musicUi.search = musicSearch.value;
+      renderMusic(api.getRoot());
+      return true;
+    }
     return false;
   }
 
