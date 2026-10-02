@@ -982,3 +982,11 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - `diagnostico_rsvp_vs_invitados.html` queda como herramienta exclusiva de desarrollo/QA para investigar diferencias entre RSVP e Invitados.
 - La app mantiene las protecciones preventivas del flujo, pero no expone IDs internos, inconsistencias técnicas ni accesos al diagnóstico al usuario final.
 - Si vuelve a aparecer una diferencia, otro agente o desarrollador debe usar el HTML de diagnóstico fuera del flujo normal de usuario antes de tocar Firebase.
+
+## 2026-10-02 — Ideas: tamaños personales del tablero
+
+- Se añadió un control discreto de densidad visual al módulo Ideas.
+- Existen cuatro tamaños: Actual, Medio, Compacto y Miniatura; `Actual` conserva exactamente el tamaño previo y sigue siendo el valor por defecto.
+- La preferencia es personal por usuario y navegador mediante `src/services/ui-preferences.js`; no modifica datos compartidos de la boda ni cambia la vista de otros usuarios.
+- Si la preferencia no existe, se borra o el almacenamiento local se reinicia, Ideas vuelve automáticamente a `Actual`.
+- El cambio solo modifica presentación; no altera ideas, imágenes, precios, enlaces ni otros datos del módulo.
