@@ -246,11 +246,34 @@ function createRsvpController(api) {
     const confirmedResponseIds = new Set(
       responses.filter((item) => item.attendance === 'confirmed').map((item) => String(item.id))
     );
-    const people = new Set(
-      management
-        .filter((item) => confirmedResponseIds.has(String(item.responseId)))
-        .flatMap((item) => Array.isArray(item.linkedGuestIds) ? item.linkedGuestIds.map(String) : [])
-    ).size;
+    const confirmedManagement = management.filter((item) => confirmedResponseIds.has(String(item.responseId)));
+    const confirmedLinkedGuestIds = [...new Set(
+      confirmedManagement.flatMap((item) => Array.isArray(item.linkedGuestIds) ? item.linkedGuestIds.map(String) : [])
+    )];
+    const people = confirmedLinkedGuestIds.length;
+
+    const canonicalGuests = api.getSnapshot()?.canonical?.guests || [];
+    const canonicalById = new Map(canonicalGuests.map((guest) => [String(guest?.id ?? ''), guest]));
+    const integrityIssues = confirmedLinkedGuestIds.map((guestId) => {
+      const guest = canonicalById.get(guestId) || null;
+      const status = text(guest?.status).toLowerCase() || 'pending';
+      if (guest && status === 'confirmed') return null;
+      return { guestId, guest, status: guest ? status : 'missing' };
+    }).filter(Boolean);
+    const integrityAlert = root.querySelector('[data-rsvp-integrity-alert]');
+    if (integrityAlert) {
+      integrityAlert.hidden = loading || !state.token || !integrityIssues.length;
+      if (integrityIssues.length) {
+        const issueNames = integrityIssues
+          .slice(0, 3)
+          .map((item) => text(item.guest?.name) || `ID ${item.guestId}`);
+        const remainder = Math.max(0, integrityIssues.length - issueNames.length);
+        const title = root.querySelector('[data-rsvp-integrity-title]');
+        const detail = root.querySelector('[data-rsvp-integrity-detail]');
+        if (title) title.textContent = `${integrityIssues.length} inconsistencia${integrityIssues.length === 1 ? '' : 's'} entre RSVP e Invitados`;
+        if (detail) detail.textContent = `Vinculados a una respuesta confirmada pero sin estado confirmado: ${issueNames.join(', ')}${remainder ? ` y ${remainder} más` : ''}. Revisa el diagnóstico antes de modificar datos.`;
+      }
+    }
     const declined = responses.filter((item) => item.attendance === 'declined').length;
     const reviewed = new Set(management.filter((item) => item.reviewed).map((item) => String(item.responseId)));
     const unreviewed = responses.filter((item) => !reviewed.has(String(item.id))).length;
