@@ -154,7 +154,7 @@ function createRsvpController(api) {
   function musicCoverMarkup(item) {
     const cached = item.coverUrl || musicCoverCache.get(item.key) || '';
     if (cached) return `<div class="guest-music-request-cover"><img src="${esc(cached)}" alt="" loading="lazy" referrerpolicy="no-referrer"></div>`;
-    return `<div class="guest-music-request-cover guest-guest-music-request-cover-fallback" aria-hidden="true"><span>♫</span><strong>${esc(item.title || 'Canción')}</strong><small>${esc(item.artist || 'Artista')}</small></div>`;
+    return `<div class="guest-music-request-cover guest-music-request-cover-fallback" aria-hidden="true"><span>♫</span><strong>${esc(item.title || 'Canción')}</strong><small>${esc(item.artist || 'Artista')}</small></div>`;
   }
 
   async function hydrateMusicCovers(root, entries, epoch) {
@@ -224,7 +224,7 @@ function createRsvpController(api) {
               <span>${esc(item.artist || 'Artista no indicado')}</span>
             </div>
             <div class="guest-music-request-person">
-              <span class="guest-guest-music-request-person-label">Invitado</span>
+              <span class="guest-music-request-person-label">Invitado</span>
               <strong>${esc(item.person)}</strong>
             </div>
             ${item.message ? `<blockquote class="guest-music-request-message">“${esc(item.message)}”</blockquote>` : '<span class="guest-music-request-no-message">Sin dedicatoria</span>'}
