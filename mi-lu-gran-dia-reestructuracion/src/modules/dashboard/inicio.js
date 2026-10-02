@@ -1040,7 +1040,7 @@ const MODULES = Object.freeze({
     destroy: 'destroyInvitaciones'
   },
   musica: {
-    load: () => import('../musica/index.js?v=15'),
+    load: () => import('../musica/index.js?v=16'),
     mount: 'mountMusica'
   },
   ideas: {
