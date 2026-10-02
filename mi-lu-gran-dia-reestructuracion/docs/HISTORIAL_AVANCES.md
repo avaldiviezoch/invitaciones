@@ -975,3 +975,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 Otro agente o sesión de ChatGPT debe abrir primero `diagnostico_rsvp_vs_invitados.html` antes de tocar Firebase o cambiar cálculos de KPI. Si aparecen discrepancias, revisar los IDs y el flujo de escritura que pudo modificar `guest.status`. No asumir que el vínculo está roto solo porque los nombres o indicadores difieran.
 
 Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, tratarla como un posible bug nuevo y buscar la escritura que alteró el estado antes de ejecutar cualquier reparación.
+
+## 2026-10-02 — Alerta automática de integridad RSVP
+
+- Se añadió una defensa preventiva dentro de Invitados → Confirmaciones RSVP.
+- Al cargar las respuestas, se comparan los `linkedGuestIds` de RSVP confirmados contra los invitados canónicos.
+- Si un ID vinculado no existe o su `status` no es `confirmed`, aparece una alerta discreta con acceso al diagnóstico completo.
+- La validación es de solo lectura y no modifica Firebase ni repara datos silenciosamente.
+- Cuando no existen discrepancias, la alerta permanece oculta.
+- Se mantiene `diagnostico_rsvp_vs_invitados.html` como herramienta de análisis y reparación controlada.
