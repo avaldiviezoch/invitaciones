@@ -85,3 +85,47 @@ Cada módulo que persista o mantenga estado específico de boda debe poder demos
 Las invitaciones guardadas por una cuenta pertenecen a su `uid`, no al catálogo global ni directamente a una boda. La ruta conceptual es `users/{uid}/invitations/{invitationId}`. Un usuario nuevo debe comenzar con su biblioteca vacía. Una boda podrá posteriormente referenciar/usar una invitación de la biblioteca, pero la biblioteca personal permanece aislada por cuenta.
 
 Las invitaciones de desarrollo que anteriormente estaban hardcodeadas en el módulo no se consideran catálogo global: son datos heredables de la cuenta propietaria y deben migrarse una sola vez a su biblioteca personal antes de retirar definitivamente el fixture del código.
+
+## Diagnóstico de consistencia RSVP ↔ Invitados
+
+Existe una herramienta de diagnóstico en:
+
+`diagnostico_rsvp_vs_invitados.html`
+
+Debe usarse antes de modificar datos cuando aparezca cualquiera de estas señales:
+- el KPI de Confirmados de Invitados no coincide con Personas confirmadas de RSVP;
+- una respuesta RSVP aparece revisada y vinculada, pero la persona figura como pendiente;
+- se sospecha que un vínculo RSVP se perdió o quedó desincronizado;
+- hay dudas sobre qué `guestId` está asociado a cada `responseId`.
+
+La herramienta compara, en solo lectura durante el diagnóstico:
+- `guestId`;
+- nombre canónico del invitado;
+- `status` canónico;
+- `responseId`;
+- respuesta RSVP;
+- `attendance`;
+- `rsvpManagement.linkedGuestIds`.
+
+También identifica:
+- vinculados a una respuesta RSVP confirmada cuyo `guest.status` no es `confirmed`;
+- confirmados canónicos sin vínculo a una respuesta RSVP confirmada;
+- IDs vinculados que ya no existan en Invitados.
+
+### Invariante obligatoria
+
+Si un invitado está incluido en `rsvpManagement.linkedGuestIds` de una respuesta con `attendance = confirmed`, su estado canónico debe ser `guest.status = confirmed`.
+
+La vinculación se mantiene por ID, no por nombre. Editar el nombre de un invitado no debe cambiar `guestId`, `rsvpResponseId`, estado RSVP, mesa ni silla.
+
+Un invitado ya vinculado a RSVP no debe permitir que una edición ordinaria de nombre, relación, lado, restricción u otros datos personales sobrescriba su `status`. Antes de introducir cambios en Invitados o RSVP, validar que esta protección siga vigente.
+
+### Reparación
+
+El HTML de diagnóstico incluye una reparación controlada para discrepancias del tipo “RSVP confirmado + guest vinculado + status distinto de confirmed”. Esa acción debe:
+- modificar únicamente `guest.status` a `confirmed`;
+- preservar nombre, `guestId`, `responseId`, `linkedGuestIds`, mesa, silla y demás metadatos;
+- ejecutarse solo después de revisar las filas discrepantes;
+- volver a ejecutar el diagnóstico después de guardar.
+
+No usar la reparación para ocultar una causa nueva. Si vuelve a aparecer una discrepancia después del 30/09/2026, primero investigar qué flujo escribió el estado antes de corregir los datos.
