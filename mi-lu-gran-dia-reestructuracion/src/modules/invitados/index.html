@@ -65,13 +65,40 @@
   </div>
 
   <div class="music-pane" data-guests-pane="music" hidden>
-    <section class="music-overview">
-      <article><span>Canciones</span><strong data-music-total>0</strong><small>solicitudes recibidas</small></article>
-      <article><span>Personas</span><strong data-music-people>0</strong><small>que enviaron música</small></article>
+    <section class="music-guest-hero">
+      <div class="music-guest-hero-copy">
+        <span class="music-head-kicker">MÚSICA DE INVITADOS</span>
+        <h2>La banda sonora que están construyendo tus invitados</h2>
+        <p>Reúne en un solo lugar las canciones que llegan desde la invitación, sin configuraciones ni pasos técnicos.</p>
+      </div>
+      <div class="music-guest-hero-mark" aria-hidden="true">♫</div>
+    </section>
+
+    <section class="music-overview" aria-label="Resumen de solicitudes musicales">
+      <article><span>Solicitudes</span><strong data-music-total>0</strong><small>canciones recibidas</small></article>
+      <article><span>Invitados</span><strong data-music-people>0</strong><small>con pedidos musicales</small></article>
       <article><span>Únicas</span><strong data-music-unique>0</strong><small>canciones distintas</small></article>
     </section>
-    <section class="music-head"><div><span class="music-head-kicker">MÚSICA DE INVITADOS</span><h2>Solicitudes recibidas</h2><p>Las canciones que tus invitados enviaron desde la invitación aparecen aquí.</p></div></section>
-    <section class="music-request-list" data-music-list></section>
+
+    <section class="music-library">
+      <div class="music-library-toolbar">
+        <div>
+          <span class="music-library-label">SOLICITUDES RECIBIDAS</span>
+          <h3>Selección de tus invitados</h3>
+          <p>Explora por canción, artista, invitado o dedicatoria.</p>
+        </div>
+        <label class="music-search">
+          <span aria-hidden="true">⌕</span>
+          <input type="search" data-music-search placeholder="Buscar canción, artista o invitado" aria-label="Buscar canción, artista o invitado">
+        </label>
+      </div>
+      <div class="music-filters" aria-label="Filtrar solicitudes musicales">
+        <button type="button" class="is-active" data-music-filter="all">Todas</button>
+        <button type="button" data-music-filter="message">Con dedicatoria</button>
+        <button type="button" data-music-filter="no-message">Sin dedicatoria</button>
+      </div>
+      <section class="music-request-list" data-music-list></section>
+    </section>
   </div>
 
   <div class="tables-pane" data-guests-pane="tables" hidden>
