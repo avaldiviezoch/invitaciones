@@ -947,3 +947,12 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Editar dimensiones conserva el placement de Distribución (x, y y rotación).
 - Reducir capacidad reacomoda únicamente invitados cuyas sillas quedarían fuera, siempre que la nueva capacidad alcance; no elimina ni desasigna invitados.
 - Producción PR #506/#507 permanece sin fusionar hasta aprobación en desarrollo.
+
+
+## 2026-10-02 — Música simplificada a solicitudes de invitados
+- Se retiró del módulo Música la administración de música de boda, playlists, momentos, portadas configurables y la guía de uso para Invitaciones.
+- El módulo quedó como vista de solo lectura de las solicitudes musicales recibidas desde RSVP mediante `loadRsvpAdminSnapshot`.
+- Se eliminaron las lecturas/escrituras de `planner-cloud` y la clave `migrandia.music.v1` de este módulo.
+- Cada solicitud se presenta como tarjeta con cover; usa la imagen recibida cuando existe y un cover visual de respaldo cuando el RSVP no trae portada.
+- Se mantienen búsqueda por canción/artista/invitado, conteo de solicitudes e invitados y cleanup del listener de búsqueda.
+- Sin cambios en Firebase Rules, Auth, Storage, usuarios, RSVP, Confirmaciones, Invitados ni producción.
