@@ -956,3 +956,22 @@ Construir las acciones funcionales de los botones de la carátula y luego recons
 - Cada solicitud se presenta como tarjeta con cover; usa la imagen recibida cuando existe y un cover visual de respaldo cuando el RSVP no trae portada.
 - Se mantienen búsqueda por canción/artista/invitado, conteo de solicitudes e invitados y cleanup del listener de búsqueda.
 - Sin cambios en Firebase Rules, Auth, Storage, usuarios, RSVP, Confirmaciones, Invitados ni producción.
+
+## 2026-10-02 — Incidente RSVP 40 vs 38 y herramienta de diagnóstico
+
+- Se detectó una diferencia entre `Personas confirmadas = 40` en RSVP y `Confirmados = 38` en la lista canónica de Invitados.
+- Se creó `diagnostico_rsvp_vs_invitados.html` para comparar los vínculos reales por ID entre RSVP e Invitados.
+- El diagnóstico encontró exactamente dos discrepancias históricas: **jordan** y **leila**.
+- Ambos `guestId` seguían incluidos correctamente en `rsvpManagement.linkedGuestIds` de la respuesta confirmada de **Johrdan Gabriel Abanto Regalado**, pero sus registros canónicos tenían `status = pending`.
+- Esto confirmó que la vinculación administrativa no se había perdido; el problema estaba únicamente en el estado canónico.
+- El historial del código mostró que el 30/09/2026 se incorporó la corrección “Corrige consistencia entre RSVP e Invitados”, que impide editar el `status` de un invitado con `rsvpResponseId` y preserva dicho estado durante ediciones ordinarias.
+- Antes de esa protección, un invitado ya vinculado podía volver a guardar un estado diferente desde el editor de Invitados. Jordan y Leila fueron vinculados antes de esa corrección, por lo que quedaron como inconsistencia histórica.
+- Se ejecutó una reparación controlada que modificó únicamente `status: pending -> confirmed` para esos dos invitados.
+- Tras la reparación, los indicadores quedaron consistentes: **40 vinculados a RSVP confirmado = 40 confirmados canónicos = 0 discrepancias**.
+- No se modificaron nombres, `guestId`, `responseId`, `linkedGuestIds`, mesas ni sillas.
+
+### Procedimiento si vuelve a ocurrir
+
+Otro agente o sesión de ChatGPT debe abrir primero `diagnostico_rsvp_vs_invitados.html` antes de tocar Firebase o cambiar cálculos de KPI. Si aparecen discrepancias, revisar los IDs y el flujo de escritura que pudo modificar `guest.status`. No asumir que el vínculo está roto solo porque los nombres o indicadores difieran.
+
+Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, tratarla como un posible bug nuevo y buscar la escritura que alteró el estado antes de ejecutar cualquier reparación.
