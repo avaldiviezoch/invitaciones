@@ -665,16 +665,16 @@
 }
 .music-request-list{
   display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:12px
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:18px
 }
 .music-request-card{
   min-width:0;
   overflow:hidden;
-  border:1px solid #e8e1dc;
-  border-radius:17px;
+  border:1px solid #e5dcd7;
+  border-radius:22px;
   background:#fff;
-  box-shadow:0 8px 18px rgba(72,63,56,.035);
+  box-shadow:0 14px 30px rgba(72,63,56,.055);
   transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease
 }
 .music-request-card:hover{
@@ -684,7 +684,7 @@
 }
 .music-request-cover{
   width:100%;
-  aspect-ratio:16/9;
+  height:280px;
   overflow:hidden;
   background:#ece7e2
 }
@@ -720,24 +720,24 @@
   font:26px Georgia,serif
 }
 .music-request-cover-fallback strong{
-  max-width:82%;
+  max-width:78%;
   overflow:hidden;
   display:-webkit-box;
   -webkit-box-orient:vertical;
   -webkit-line-clamp:2;
-  font:600 14px/1.08 Georgia,serif
+  font:600 22px/1.08 Georgia,serif
 }
 .music-request-cover-fallback small{
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
-  font-size:8px;
-  opacity:.88
+  font-size:10px;
+  opacity:.9
 }
 .music-request-content{
   display:grid;
-  gap:7px;
-  padding:13px 14px 14px
+  gap:10px;
+  padding:18px 19px 20px
 }
 .music-request-eyebrow{
   color:#a06a75;
@@ -752,16 +752,16 @@
   -webkit-box-orient:vertical;
   -webkit-line-clamp:2;
   color:#433f3b;
-  font:500 16px/1.12 Georgia,serif
+  font:500 22px/1.12 Georgia,serif
 }
 .music-request-song span{
   display:block;
-  margin-top:4px;
+  margin-top:5px;
   overflow:hidden;
   text-overflow:ellipsis;
   white-space:nowrap;
   color:#8a837e;
-  font-size:8px
+  font-size:10px
 }
 .music-request-person{
   display:flex;
@@ -774,7 +774,7 @@
 .music-request-person-label{
   flex:none;
   color:#a39b95;
-  font-size:7px;
+  font-size:8px;
   font-weight:700
 }
 .music-request-person strong{
@@ -783,16 +783,16 @@
   text-overflow:ellipsis;
   white-space:nowrap;
   color:#69625d;
-  font-size:8px
+  font-size:10px
 }
 .music-request-message{
   margin:0;
-  padding:8px 10px;
+  padding:11px 13px;
   border-left:2px solid #d5bdc2;
-  border-radius:0 9px 9px 0;
+  border-radius:0 10px 10px 0;
   background:#fbf6f7;
   color:#77706b;
-  font:italic 8px/1.45 Georgia,serif
+  font:italic 10px/1.5 Georgia,serif
 }
 .music-request-no-message{
   color:#aaa29c;
@@ -832,6 +832,7 @@
 }
 @media(max-width:1120px){
   .music-request-list{grid-template-columns:1fr}
+  .music-request-cover{height:250px}
 }
 @media(max-width:760px){
   .music-guest-hero,
@@ -848,12 +849,12 @@
   .music-filters{overflow-x:auto;padding-bottom:2px}
   .music-filters button{flex:none;white-space:nowrap}
   .music-request-list{grid-template-columns:1fr}
-  .music-request-card{display:grid;grid-template-columns:118px minmax(0,1fr)}
-  .music-request-cover{width:118px;height:100%;min-height:138px;aspect-ratio:auto}
-  .music-request-content{padding:12px 13px}
+  .music-request-card{display:grid;grid-template-columns:150px minmax(0,1fr)}
+  .music-request-cover{width:150px;height:100%;min-height:170px}
+  .music-request-content{padding:14px 15px}
 }
 @media(max-width:430px){
-  .music-request-card{grid-template-columns:104px minmax(0,1fr)}
-  .music-request-cover{width:104px;min-height:126px}
-  .music-request-song strong{font-size:15px}
+  .music-request-card{grid-template-columns:128px minmax(0,1fr)}
+  .music-request-cover{width:128px;min-height:150px}
+  .music-request-song strong{font-size:16px}
 }
