@@ -46,3 +46,11 @@ Reconstruir la aplicación de forma modular, mantenible y segura, evitando la ac
 - `tests/`: pruebas de contratos e invariantes.
 
 Leer primero `AGENTS.md` y `docs/REGLAS_NO_NEGOCIABLES.md`.
+
+## Diagnóstico RSVP ↔ Invitados
+
+Si los indicadores de Confirmados y RSVP no coinciden, usar primero `diagnostico_rsvp_vs_invitados.html`.
+
+La herramienta compara `guestId`, `responseId`, vínculos RSVP y estado canónico, y permite detectar inconsistencias como la ocurrida el 02/10/2026 con Jordan y Leila. El detalle del incidente, la causa histórica y la regla para evitar regresiones están documentados en `docs/HISTORIAL_AVANCES.md` y `docs/CONTRATOS_MODULOS.md`.
+
+No corregir diferencias de conteo cambiando KPIs ni editando Firebase manualmente antes de ejecutar este diagnóstico.
