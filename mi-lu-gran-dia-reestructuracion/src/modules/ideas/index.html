@@ -17,7 +17,20 @@
       <button type="button" data-ideas-filter="inspiration">Inspiración</button>
       <button type="button" data-ideas-filter="purchase">Por comprar</button>
     </div>
-    <input type="search" data-ideas-search placeholder="Buscar en mis ideas…" aria-label="Buscar ideas">
+    <div class="ideas-toolbar-actions">
+      <input type="search" data-ideas-search placeholder="Buscar en mis ideas…" aria-label="Buscar ideas">
+      <details class="ideas-size-control" data-ideas-size-control>
+        <summary aria-label="Cambiar tamaño de las tarjetas" title="Tamaño de tarjetas">
+          <span class="ideas-size-icon" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+        </summary>
+        <div class="ideas-size-menu" role="group" aria-label="Tamaño de tarjetas">
+          <button type="button" data-ideas-size="large"><span class="ideas-size-preview is-large" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>Actual</b></button>
+          <button type="button" data-ideas-size="medium"><span class="ideas-size-preview is-medium" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></span><b>Medio</b></button>
+          <button type="button" data-ideas-size="compact"><span class="ideas-size-preview is-compact" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></span><b>Compacto</b></button>
+          <button type="button" data-ideas-size="mini"><span class="ideas-size-preview is-mini" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span><b>Miniatura</b></button>
+        </div>
+      </details>
+    </div>
   </section>
   <section class="ideas-board" data-ideas-board aria-live="polite"></section>
   <div class="ideas-empty" data-ideas-empty>
