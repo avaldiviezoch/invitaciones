@@ -28,12 +28,18 @@ function normalizeUrl(value = '') {
   }
 }
 
-async function resolvePinterestPreview(value = '') {
+function previewProvider(value = '') {
+  try {
+    const host = new URL(value).hostname.toLowerCase();
+    if (host === 'pin.it' || host === 'pinterest.com' || host.endsWith('.pinterest.com')) return 'pinterest';
+    if (host === 'temu.com' || host.endsWith('.temu.com')) return 'temu';
+  } catch {}
+  return '';
+}
+
+async function resolveRemotePreview(value = '') {
   const source = normalizeUrl(value);
-  if (!source) return null;
-  let host = '';
-  try { host = new URL(source).hostname.toLowerCase(); } catch { return null; }
-  if (!['pin.it', 'www.pinterest.com', 'pinterest.com'].includes(host) && !host.endsWith('.pinterest.com')) return null;
+  if (!source || !previewProvider(source)) return null;
   try {
     const endpoint = `https://migrandia-dev.avaldiviezoch.workers.dev/api/link-preview?url=${encodeURIComponent(source)}`;
     const response = await fetch(endpoint, { mode: 'cors', credentials: 'omit' });
@@ -55,9 +61,16 @@ async function resolvePinterestPreview(value = '') {
 async function resolveLinkPreview(value = '') {
   const source = normalizeUrl(value);
   if (!source) return null;
+
+  const provider = previewProvider(source);
+  if (provider) {
+    const remote = await resolveRemotePreview(source);
+    if (remote?.image || remote?.title) return remote;
+  }
+
   const directImage = imageFromProductUrl(source);
   if (directImage) return { image: directImage, title: '' };
-  return resolvePinterestPreview(source);
+  return null;
 }
 
 function imageFromProductUrl(value = '') {
