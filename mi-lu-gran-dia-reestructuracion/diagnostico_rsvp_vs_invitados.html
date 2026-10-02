@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diagnóstico RSVP vs Invitados</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f6f3ef;color:#3f3a36;font-family:Arial,sans-serif}main{width:min(96%,1500px);margin:32px auto 60px}
+header,section,.state,.summary article{background:#fff;border:1px solid #e4dcd6}header{padding:24px 26px;border-radius:20px}.eyebrow{color:#7d8866;font-size:10px;font-weight:800;letter-spacing:.14em}
+h1{margin:7px 0 0;font:500 30px Georgia,serif}header p,section p{color:#8b8580;font-size:11px}.state{margin:14px 0;padding:12px 14px;border-radius:12px;font-size:12px}
+.summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:16px 0}.summary article{padding:15px 16px;border-radius:15px}.summary span,.summary small{display:block;color:#948d87;font-size:9px}.summary strong{display:block;margin:7px 0 3px;font:600 25px Georgia,serif}.warn{background:#fff7f9!important}.warn strong{color:#a45868}
+section{margin-top:16px;padding:18px;border-radius:18px}section h2{margin:0;font:500 20px Georgia,serif}.table-wrap{overflow:auto;border:1px solid #ece5df;border-radius:13px}
+table{width:100%;border-collapse:collapse;min-width:1100px}th,td{padding:10px 11px;border-bottom:1px solid #eee7e2;text-align:left;vertical-align:top;font-size:10px}th{background:#faf8f5;color:#716a64;font-size:8px;text-transform:uppercase;letter-spacing:.08em}
+.badrow{background:#fff0f3}.okrow{background:#fbfcf8}.missing{background:#fff7e8}.code{font-family:Consolas,monospace;font-size:9px;word-break:break-all}.badge{display:inline-block;padding:4px 7px;border-radius:999px;font-size:8px;font-weight:700}.badge.ok{background:#edf3e8;color:#63734c}.badge.bad{background:#f8e3e7;color:#a15161}
+.empty{padding:22px;text-align:center;color:#958e88}.actions{margin-top:12px}.actions button{padding:9px 12px;border:1px solid #dcd3cd;border-radius:10px;background:#fff;cursor:pointer}
+@media(max-width:800px){.summary{grid-template-columns:1fr 1fr}.summary article:last-child{grid-column:1/-1}}
+</style></head>
+<body><main>
+<header><span class="eyebrow">DIAGNÓSTICO · SOLO LECTURA</span><h1>RSVP vs Invitados</h1><p>Compara cada persona vinculada a un RSVP confirmado contra la lista canónica de Invitados.</p><div class="actions"><button id="reload">Actualizar diagnóstico</button></div></header>
+<div class="state" id="state">Esperando sesión activa…</div>
+<div class="summary">
+<article><span>Respuestas confirmadas</span><strong id="sResponses">—</strong><small>formularios RSVP</small></article>
+<article><span>Vinculados a RSVP confirmado</span><strong id="sLinked">—</strong><small>guestId únicos</small></article>
+<article><span>Confirmados canónicos</span><strong id="sCanonical">—</strong><small>status = confirmed</small></article>
+<article class="warn"><span>Vinculados pero no confirmados</span><strong id="sMismatch">—</strong><small>posible causa del 40 vs 38</small></article>
+<article><span>Confirmados sin RSVP confirmado</span><strong id="sExtra">—</strong><small>manuales u otra fuente</small></article>
+</div>
+<section><h2>Versus persona por persona</h2><p>Las filas rosadas son las discrepancias.</p><div class="table-wrap"><table><thead><tr><th>#</th><th>guestId</th><th>Invitado</th><th>Estado canónico</th><th>responseId</th><th>Respuesta RSVP</th><th>Cantidad RSVP</th><th>Asistencia</th><th>Resultado</th></tr></thead><tbody id="versusBody"><tr><td colspan="9" class="empty">Cargando…</td></tr></tbody></table></div></section>
+<section><h2>Confirmados canónicos sin RSVP confirmado</h2><p>Para detectar confirmaciones manuales o datos que compensen la diferencia.</p><div class="table-wrap"><table><thead><tr><th>#</th><th>guestId</th><th>Nombre</th><th>Estado</th><th>rsvpResponseId guardado</th></tr></thead><tbody id="extraBody"><tr><td colspan="5" class="empty">Cargando…</td></tr></tbody></table></div></section>
+</main>
+<script type="module">
+import {auth,authPersistenceReady} from './src/services/firebase-client.js';
+import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
+import {loadActiveWeddingContext} from './src/services/wedding-context.js';
+import {loadInvitadosSnapshot,guestStatus} from './src/modules/invitados/invitados-data.js?v=10';
+import {loadRsvpAdminSnapshot} from './src/services/rsvp-admin.js?v=5';
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
+let currentUser=null;
+async function run(){
+ if(!currentUser){$('state').textContent='No hay sesión iniciada. Abre primero Mi Gran Día e inicia sesión.';return}
+ $('state').textContent='Leyendo datos reales…';
+ try{
+  const context=await loadActiveWeddingContext(currentUser); if(!context) throw new Error('No se encontró una boda activa.');
+  const [guestSnap,rsvpSnap]=await Promise.all([loadInvitadosSnapshot(context),loadRsvpAdminSnapshot(context)]);
+  const guests=guestSnap?.canonical?.guests||[], byId=new Map(guests.map(g=>[String(g.id),g]));
+  const responses=rsvpSnap.responses||[], management=rsvpSnap.management||[], responseById=new Map(responses.map(r=>[String(r.id),r]));
+  const confirmedResponses=responses.filter(r=>r.attendance==='confirmed'), confirmedIds=new Set(confirmedResponses.map(r=>String(r.id)));
+  const rows=[];
+  for(const m of management){
+   if(!confirmedIds.has(String(m.responseId))) continue;
+   const response=responseById.get(String(m.responseId));
+   for(const guestId of [...new Set(Array.isArray(m.linkedGuestIds)?m.linkedGuestIds.map(String):[])]){
+    const guest=byId.get(guestId)||null;
+    rows.push({guestId,guest,response,status:guest?guestStatus(guest):'missing'});
+   }
+  }
+  const linked=new Set(rows.map(r=>r.guestId));
+  const canonical=guests.filter(g=>guestStatus(g)==='confirmed');
+  const mismatches=rows.filter(r=>r.status!=='confirmed');
+  const extras=canonical.filter(g=>!linked.has(String(g.id)));
+  $('sResponses').textContent=confirmedResponses.length;$('sLinked').textContent=linked.size;$('sCanonical').textContent=canonical.length;$('sMismatch').textContent=mismatches.length;$('sExtra').textContent=extras.length;
+  $('state').innerHTML='Boda activa: <b>'+esc(context.name)+'</b> · ID <span class="code">'+esc(context.id)+'</span> · '+new Date().toLocaleString('es-PE');
+  rows.sort((a,b)=>(a.status==='confirmed')-(b.status==='confirmed')||String(a.guest?.name||'').localeCompare(String(b.guest?.name||''),'es'));
+  $('versusBody').innerHTML=rows.map((r,i)=>{
+   const ok=r.status==='confirmed', missing=!r.guest;
+   return '<tr class="'+(missing?'missing':ok?'okrow':'badrow')+'"><td>'+(i+1)+'</td><td class="code">'+esc(r.guestId)+'</td><td><b>'+esc(r.guest?.name||'NO ENCONTRADO')+'</b></td><td><span class="badge '+(ok?'ok':'bad')+'">'+esc(r.status)+'</span></td><td class="code">'+esc(r.response?.id||'')+'</td><td><b>'+esc(r.response?.name||'')+'</b></td><td>'+esc(r.response?.quantity||1)+'</td><td>'+esc(r.response?.attendance||'')+'</td><td>'+(ok?'<span class="badge ok">Coincide</span>':'<span class="badge bad">DISCREPANCIA</span>')+'</td></tr>';
+  }).join('')||'<tr><td colspan="9" class="empty">Sin vínculos confirmados.</td></tr>';
+  $('extraBody').innerHTML=extras.map((g,i)=>'<tr><td>'+(i+1)+'</td><td class="code">'+esc(g.id)+'</td><td><b>'+esc(g.name||'')+'</b></td><td><span class="badge ok">confirmed</span></td><td class="code">'+esc(g.rsvpResponseId||'—')+'</td></tr>').join('')||'<tr><td colspan="5" class="empty">Ninguno.</td></tr>';
+ }catch(e){$('state').textContent=e?.message||'No se pudo cargar el diagnóstico.'}
+}
+$('reload').addEventListener('click',run);
+await authPersistenceReady; onAuthStateChanged(auth,user=>{currentUser=user;void run()});
+</script></body></html>
