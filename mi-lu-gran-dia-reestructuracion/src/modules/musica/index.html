@@ -3,126 +3,47 @@
     <span class="music-admin-eyebrow">MÓDULO · ESPACIO DE LA BODA</span>
     <div class="music-admin-title-row">
       <div class="music-admin-title-icon" aria-hidden="true">♫</div>
-      <div><h1>Música</h1><p>Organiza la música de tu boda y administra las solicitudes de tus invitados.</p></div>
-      <div class="music-admin-hero-total"><strong data-music-total>0</strong><span>selecciones</span></div>
+      <div>
+        <h1>Música</h1>
+        <p>Las canciones que tus invitados quieren escuchar en tu boda.</p>
+      </div>
+      <div class="music-admin-hero-total">
+        <strong data-music-total>0</strong>
+        <span>solicitudes</span>
+      </div>
     </div>
   </header>
 
   <main class="music-admin-content">
     <section class="music-admin-kpis">
-      <article><span>Selecciones</span><strong data-music-kpi-playlists>0</strong><small>de música de boda</small></article>
-      <article><span>Canciones</span><strong data-music-kpi-songs>0</strong><small>organizadas</small></article>
-      <article><span>Invitados</span><strong data-music-kpi-guests>0</strong><small>con solicitudes</small></article>
-      <article><span>Solicitudes</span><strong data-music-kpi-requests>0</strong><small>recibidas</small></article>
-    </section>
-
-    <section class="music-admin-intro">
-      <div><span class="music-admin-section-label">MÚSICA DE BODA</span>
-        <h2>Una sola entrada para organizar toda tu música</h2>
-        <p>Agrega una playlist o canción, elige el momento de la boda y listo. No necesitas administrar cada momento por separado.</p>
-      </div>
-      <div class="music-admin-flow">
-        <span><b>01</b> Agrega música</span><i>→</i><span><b>02</b> Elige el momento</span><i>→</i><span><b>03</b> Vincula la playlist</span>
-      </div>
-    </section>
-
-    <section class="music-playlists-section">
-      <div class="music-admin-toolbar">
-        <div><span class="music-admin-section-label">MÚSICA DE BODA</span><h2>Mis selecciones</h2><p>Las playlists aparecen aquí con su portada y momento asignado.</p></div>
-        <button type="button" class="music-primary" data-add-wedding-music>＋ Agregar música de boda</button>
-      </div>
-      <div class="music-playlist-list" data-music-playlists></div>
+      <article>
+        <span>Solicitudes</span>
+        <strong data-music-kpi-requests>0</strong>
+        <small>canciones recibidas</small>
+      </article>
+      <article>
+        <span>Invitados</span>
+        <strong data-music-kpi-guests>0</strong>
+        <small>con pedidos musicales</small>
+      </article>
     </section>
 
     <section class="music-guests-section">
-      <div class="music-admin-toolbar compact">
-        <div><span class="music-admin-section-label">MÚSICA DE INVITADOS</span><h2>Solicitudes recibidas</h2><p>Aquí solo aparecen las canciones que enviaron tus invitados mediante RSVP.</p></div>
-        <label class="music-search"><span>⌕</span><input type="search" data-music-search placeholder="Buscar canción o invitado"></label>
+      <div class="music-admin-toolbar">
+        <div>
+          <span class="music-admin-section-label">MÚSICA DE INVITADOS</span>
+          <h2>Solicitudes recibidas</h2>
+          <p>Aquí aparecen únicamente las canciones enviadas por tus invitados desde la invitación.</p>
+        </div>
+        <label class="music-search">
+          <span aria-hidden="true">⌕</span>
+          <input type="search" data-music-search placeholder="Buscar canción, artista o invitado" aria-label="Buscar canción, artista o invitado">
+        </label>
       </div>
-      <section class="music-request-list" data-music-list></section>
-    </section>
 
-    <section class="music-invitation-guide">
-      <div><span class="music-admin-section-label">MÚSICA PARA TU INVITACIÓN</span>
-        <h2>¿Cómo llegará a tu invitación?</h2>
-        <p>Primero organizas la música aquí. Cuando usemos el constructor de invitaciones, podrás seleccionar una de estas músicas sin volver a crearla.</p>
-      </div>
-      <ol>
-        <li><b>1</b><span><strong>Agrega música</strong> Selecciona una playlist o canción.</span></li>
-        <li><b>2</b><span><strong>Elige el momento</strong> Recepción, baile, ceremonia, etc.</span></li>
-        <li><b>3</b><span><strong>Marca para invitación</strong> La selección quedará disponible para el editor.</span></li>
-        <li><b>4</b><span><strong>Publica</strong> La invitación utilizará la selección preparada.</span></li>
-      </ol>
+      <section class="music-request-grid" data-music-list></section>
     </section>
 
     <p class="music-admin-state" data-music-state></p>
   </main>
-
-  <dialog class="music-dialog music-add-dialog" data-add-music-dialog>
-    <form data-add-music-form>
-      <div class="music-dialog-head"><div><span>AGREGAR MÚSICA DE BODA</span><h2>¿Qué música quieres agregar?</h2></div><button type="button" data-close-add-music aria-label="Cerrar">×</button></div>
-
-      <label>Tipo de música
-        <select name="kind" data-music-kind>
-          <option value="playlist">Playlist / álbum</option>
-          <option value="song">Canción individual</option>
-        </select>
-      </label>
-
-      <label>Momento de la boda
-        <select name="momentMode" data-moment-mode>
-          <option value="single">Un momento</option>
-          <option value="combined">Combinado · varios momentos</option>
-          <option value="custom">＋ Crear mi propia categoría</option>
-        </select>
-      </label>
-
-      <div data-single-category>
-        <label>Categoría
-          <select name="momentId" data-moment-id></select>
-        </label>
-      </div>
-
-      <div class="music-combined-box" data-combined-box hidden>
-        <span>Selecciona uno o varios momentos</span>
-        <div class="music-category-checks" data-category-checks></div>
-      </div>
-
-      <div data-custom-category hidden>
-        <label>Nombre de tu categoría
-          <input name="customCategory" maxlength="80" placeholder="Ej. Fiesta después de la boda">
-        </label>
-      </div>
-
-      <label>Plataforma
-        <select name="platform">
-          <option value="spotify">Spotify</option>
-          <option value="youtube">YouTube Music / YouTube</option>
-          <option value="apple">Apple Music</option>
-        </select>
-      </label>
-
-      <label>Enlace
-        <input name="url" type="url" required maxlength="700" placeholder="Pega aquí el enlace de tu playlist o canción">
-      </label>
-
-      <label>Portada personalizada <span class="music-field-optional">opcional</span>
-        <input name="coverUrl" type="url" maxlength="1000" placeholder="URL de una imagen · si la dejas vacía usaremos la automática">
-      </label>
-
-      <div class="music-dialog-actions"><button type="button" data-close-add-music>Cancelar</button><button class="music-primary" type="submit">Agregar a mi música</button></div>
-    </form>
-  </dialog>
-
-  <dialog class="music-dialog music-cover-dialog" data-edit-cover-dialog>
-    <form data-edit-cover-form>
-      <div class="music-dialog-head"><div><span>PORTADA DE LA REFERENCIA</span><h2 data-edit-cover-title>Música</h2></div><button type="button" data-close-edit-cover aria-label="Cerrar">×</button></div>
-      <label>URL de la portada
-        <input name="coverUrl" type="url" data-edit-cover-url-input maxlength="1000" placeholder="https://...">
-      </label>
-      <p class="music-dialog-hint">Puedes dejar el campo vacío para quitar la portada personalizada y volver a usar la portada automática.</p>
-      <div class="music-dialog-actions"><button type="button" data-close-edit-cover>Cancelar</button><button class="music-primary" type="submit">Guardar portada</button></div>
-    </form>
-  </dialog>
-
-/div>
+</div>
