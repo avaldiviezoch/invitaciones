@@ -153,8 +153,8 @@ function createRsvpController(api) {
 
   function musicCoverMarkup(item) {
     const cached = item.coverUrl || musicCoverCache.get(item.key) || '';
-    if (cached) return `<div class="music-request-cover"><img src="${esc(cached)}" alt="" loading="lazy" referrerpolicy="no-referrer"></div>`;
-    return `<div class="music-request-cover music-request-cover-fallback" aria-hidden="true"><span>♫</span><strong>${esc(item.title || 'Canción')}</strong><small>${esc(item.artist || 'Artista')}</small></div>`;
+    if (cached) return `<div class="guest-music-request-cover"><img src="${esc(cached)}" alt="" loading="lazy" referrerpolicy="no-referrer"></div>`;
+    return `<div class="guest-music-request-cover guest-guest-music-request-cover-fallback" aria-hidden="true"><span>♫</span><strong>${esc(item.title || 'Canción')}</strong><small>${esc(item.artist || 'Artista')}</small></div>`;
   }
 
   async function hydrateMusicCovers(root, entries, epoch) {
@@ -167,9 +167,9 @@ function createRsvpController(api) {
       if (!artwork) continue;
       musicCoverCache.set(item.key, artwork);
       const card = [...root.querySelectorAll('[data-music-request-key]')].find((node) => node.dataset.musicRequestKey === item.key);
-      const cover = card?.querySelector('.music-request-cover');
+      const cover = card?.querySelector('.guest-music-request-cover');
       if (!cover) continue;
-      cover.className = 'music-request-cover';
+      cover.className = 'guest-music-request-cover';
       cover.innerHTML = `<img src="${esc(artwork)}" alt="" loading="lazy" referrerpolicy="no-referrer">`;
     }
   }
@@ -190,11 +190,11 @@ function createRsvpController(api) {
     const list = root.querySelector('[data-music-list]');
     if (!list) return;
     if (loading) {
-      list.innerHTML = '<div class="music-empty-state"><span>♫</span><strong>Cargando música</strong><p>Consultando las solicitudes de tus invitados.</p></div>';
+      list.innerHTML = '<div class="guest-music-empty-state"><span>♫</span><strong>Cargando música</strong><p>Consultando las solicitudes de tus invitados.</p></div>';
       return;
     }
     if (!state.token) {
-      list.innerHTML = '<div class="music-empty-state"><span>♫</span><strong>Aún no hay música disponible</strong><p>Las solicitudes aparecerán aquí cuando lleguen desde las invitaciones.</p></div>';
+      list.innerHTML = '<div class="guest-music-empty-state"><span>♫</span><strong>Aún no hay música disponible</strong><p>Las solicitudes aparecerán aquí cuando lleguen desde las invitaciones.</p></div>';
       return;
     }
 
@@ -210,28 +210,28 @@ function createRsvpController(api) {
       button.classList.toggle('is-active', button.dataset.musicFilter === musicUi.filter);
     });
 
-    const search = root.querySelector('[data-music-search]');
+    const search = root.querySelector('[data-guest-music-search]');
     if (search && search.value !== musicUi.search) search.value = musicUi.search;
 
     list.innerHTML = visible.length
       ? visible.map((item) => `
-        <article class="music-request-card" data-music-request-key="${esc(item.key)}">
+        <article class="guest-music-request-card" data-music-request-key="${esc(item.key)}">
           ${musicCoverMarkup(item)}
-          <div class="music-request-content">
-            <span class="music-request-eyebrow">PEDIDO MUSICAL</span>
-            <div class="music-request-song">
+          <div class="guest-music-request-content">
+            <span class="guest-music-request-eyebrow">PEDIDO MUSICAL</span>
+            <div class="guest-music-request-song">
               <strong>${esc(item.title || 'Canción sin título')}</strong>
               <span>${esc(item.artist || 'Artista no indicado')}</span>
             </div>
-            <div class="music-request-person">
-              <span class="music-request-person-label">Invitado</span>
+            <div class="guest-music-request-person">
+              <span class="guest-guest-music-request-person-label">Invitado</span>
               <strong>${esc(item.person)}</strong>
             </div>
-            ${item.message ? `<blockquote class="music-request-message">“${esc(item.message)}”</blockquote>` : '<span class="music-request-no-message">Sin dedicatoria</span>'}
+            ${item.message ? `<blockquote class="guest-music-request-message">“${esc(item.message)}”</blockquote>` : '<span class="guest-music-request-no-message">Sin dedicatoria</span>'}
           </div>
         </article>`
       ).join('')
-      : '<div class="music-empty-state"><span>⌕</span><strong>No encontramos coincidencias</strong><p>Prueba con otra canción, artista, invitado o filtro.</p></div>';
+      : '<div class="guest-music-empty-state"><span>⌕</span><strong>No encontramos coincidencias</strong><p>Prueba con otra canción, artista, invitado o filtro.</p></div>';
 
     const epoch = ++musicCoverEpoch;
     if (visible.length) void hydrateMusicCovers(root, visible, epoch);
@@ -629,7 +629,7 @@ function createRsvpController(api) {
   }
 
   function handleInput(event) {
-    const musicSearch = event.target.closest('[data-music-search]');
+    const musicSearch = event.target.closest('[data-guest-music-search]');
     if (musicSearch) {
       musicUi.search = musicSearch.value;
       renderMusic(api.getRoot());
