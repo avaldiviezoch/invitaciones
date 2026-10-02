@@ -976,11 +976,9 @@ Otro agente o sesión de ChatGPT debe abrir primero `diagnostico_rsvp_vs_invitad
 
 Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, tratarla como un posible bug nuevo y buscar la escritura que alteró el estado antes de ejecutar cualquier reparación.
 
-## 2026-10-02 — Alerta automática de integridad RSVP
+## 2026-10-02 — Diagnóstico RSVP reservado a desarrollo/QA
 
-- Se añadió una defensa preventiva dentro de Invitados → Confirmaciones RSVP.
-- Al cargar las respuestas, se comparan los `linkedGuestIds` de RSVP confirmados contra los invitados canónicos.
-- Si un ID vinculado no existe o su `status` no es `confirmed`, aparece una alerta discreta con acceso al diagnóstico completo.
-- La validación es de solo lectura y no modifica Firebase ni repara datos silenciosamente.
-- Cuando no existen discrepancias, la alerta permanece oculta.
-- Se mantiene `diagnostico_rsvp_vs_invitados.html` como herramienta de análisis y reparación controlada.
+- Se decidió no mostrar alertas técnicas de integridad dentro de la interfaz de Invitados, porque la aplicación está orientada a usuarios finales.
+- `diagnostico_rsvp_vs_invitados.html` queda como herramienta exclusiva de desarrollo/QA para investigar diferencias entre RSVP e Invitados.
+- La app mantiene las protecciones preventivas del flujo, pero no expone IDs internos, inconsistencias técnicas ni accesos al diagnóstico al usuario final.
+- Si vuelve a aparecer una diferencia, otro agente o desarrollador debe usar el HTML de diagnóstico fuera del flujo normal de usuario antes de tocar Firebase.
