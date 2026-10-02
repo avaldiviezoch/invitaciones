@@ -990,3 +990,10 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - La preferencia es personal por usuario y navegador mediante `src/services/ui-preferences.js`; no modifica datos compartidos de la boda ni cambia la vista de otros usuarios.
 - Si la preferencia no existe, se borra o el almacenamiento local se reinicia, Ideas vuelve automáticamente a `Actual`.
 - El cambio solo modifica presentación; no altera ideas, imágenes, precios, enlaces ni otros datos del módulo.
+
+## 2026-10-02 — Ideas: soporte Temu móvil
+
+- Ideas reconoce enlaces largos de Temu y enlaces cortos compartidos desde la app mediante `share.temu.com`.
+- Los enlaces compatibles se resuelven con `/api/link-preview`; la portada se sirve mediante `/api/image-proxy`.
+- Se conserva fallback directo para URLs que ya traen `top_gallery_url`, `thumb_url` o `_web_cover`.
+- Pinterest mantiene el mismo flujo y no se modificaron datos guardados del módulo.
