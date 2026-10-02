@@ -684,7 +684,7 @@
 }
 .guest-music-request-cover{
   width:100%;
-  height:210px;
+  height:170px;
   overflow:hidden;
   background:#ece7e2
 }
@@ -832,7 +832,7 @@
 }
 @media(max-width:1120px){
   .guest-music-request-list{grid-template-columns:1fr}
-  .guest-music-request-cover{height:190px}
+  .guest-music-request-cover{height:165px}
 }
 @media(max-width:760px){
   .guest-music-guest-hero,
@@ -849,12 +849,12 @@
   .guest-music-filters{overflow-x:auto;padding-bottom:2px}
   .guest-music-filters button{flex:none;white-space:nowrap}
   .guest-music-request-list{grid-template-columns:1fr}
-  .guest-music-request-card{display:grid;grid-template-columns:132px minmax(0,1fr)}
-  .guest-music-request-cover{width:132px;height:100%;min-height:150px}
+  .guest-music-request-card{display:grid;grid-template-columns:120px minmax(0,1fr)}
+  .guest-music-request-cover{width:120px;height:100%;min-height:138px}
   .guest-music-request-content{padding:14px 15px}
 }
 @media(max-width:430px){
-  .guest-music-request-card{grid-template-columns:114px minmax(0,1fr)}
-  .guest-music-request-cover{width:114px;min-height:132px}
+  .guest-music-request-card{grid-template-columns:106px minmax(0,1fr)}
+  .guest-music-request-cover{width:106px;min-height:124px}
   .guest-music-request-song strong{font-size:16px}
 }
