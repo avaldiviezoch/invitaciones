@@ -129,3 +129,13 @@ El HTML de diagnóstico incluye una reparación controlada para discrepancias de
 - volver a ejecutar el diagnóstico después de guardar.
 
 No usar la reparación para ocultar una causa nueva. Si vuelve a aparecer una discrepancia después del 30/09/2026, primero investigar qué flujo escribió el estado antes de corregir los datos.
+
+### Alerta automática integrada
+
+Invitados → Confirmaciones RSVP ejecuta en cada render/carga una validación de integridad sin escritura. Si detecta un `guestId` incluido en `linkedGuestIds` de una respuesta `confirmed` cuyo invitado canónico no existe o no tiene `status = confirmed`, muestra una alerta con el número de inconsistencias y acceso a `diagnostico_rsvp_vs_invitados.html`.
+
+La alerta:
+- no repara ni cambia Firebase automáticamente;
+- no altera KPI para ocultar la discrepancia;
+- desaparece cuando la relación vuelve a ser consistente;
+- sirve como señal temprana para investigar la escritura responsable antes de reparar.
