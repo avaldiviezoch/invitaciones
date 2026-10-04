@@ -997,3 +997,14 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Los enlaces compatibles se resuelven con `/api/link-preview`; la portada se sirve mediante `/api/image-proxy`.
 - Se conserva fallback directo para URLs que ya traen `top_gallery_url`, `thumb_url` o `_web_cover`.
 - Pinterest mantiene el mismo flujo y no se modificaron datos guardados del módulo.
+
+
+## 2026-10-04 — Diagnóstico RSVP ampliado a consola QA extraordinaria
+
+- `diagnostico_rsvp_vs_invitados.html` ahora muestra todas las respuestas de confirmación recibidas, no solo los vínculos confirmados o discrepancias.
+- La tabla incluye responseId, nombre, asistencia, cantidad, fecha, invitados vinculados y estado de revisión.
+- Se añadió una acción extraordinaria por fila para eliminar una respuesta RSVP desde la herramienta QA.
+- La operación elimina atómicamente la respuesta pública y su registro `rsvpManagement` asociado.
+- La acción requiere permiso de edición y doble confirmación, incluyendo escribir `ELIMINAR`.
+- No elimina cuentas de Firebase Auth, invitados canónicos, mesas, sillas ni asignaciones.
+- La acción permanece fuera de la interfaz normal y es exclusiva de desarrollo/QA.
