@@ -116,10 +116,13 @@
 .provider-toolbar-filters{display:grid;grid-template-columns:1fr;gap:7px}
 .provider-search,.provider-filter{width:100%;min-width:0;height:42px;border-radius:12px}
 .provider-filter select{width:100%}
-.provider-overview{grid-template-columns:repeat(4,120px);margin:12px 0;border-radius:16px;overflow-x:auto}
-.provider-overview article{min-height:72px;padding:12px 14px}
-.provider-overview span{font-size:8px}
-.provider-overview strong{font-size:20px}
+.provider-overview{grid-template-columns:repeat(2,minmax(0,1fr));margin:12px 0;border-radius:16px;overflow:hidden}
+.provider-overview article{min-height:61px;padding:11px 12px;border-right:1px solid #e6dfda;border-bottom:1px solid #e6dfda}
+.provider-overview article:nth-child(2n){border-right:0}
+.provider-overview article:nth-last-child(-n+2){border-bottom:0}
+.provider-overview span{margin-bottom:7px;font-size:8px}
+.provider-overview strong{font-family:Arial,sans-serif;font-size:21px;font-weight:600}
+.provider-overview small{margin-top:5px;font-size:7.5px}
 .provider-list-head{align-items:flex-start}
 .provider-list-head h2{font-size:18px}
 .provider-list-head p{font-size:9px;line-height:1.4}
