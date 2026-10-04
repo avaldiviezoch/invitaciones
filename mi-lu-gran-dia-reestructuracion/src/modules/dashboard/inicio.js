@@ -2,7 +2,7 @@ import { weddingCapabilities } from '../../core/app/permissions.js';
 import { auth } from '../../services/firebase-client.js';
 import { readPlannerStorageKeys, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
 import { GUEST_STORAGE_KEY, summarizeInvitadosValue } from '../invitados/invitados-data.js?v=10';
-import { CHECKLIST_STORAGE_KEY, summarizeChecklistValue } from '../checklist/index.js?v=19';
+import { CHECKLIST_STORAGE_KEY, summarizeChecklistValue } from '../checklist/index.js?v=20';
 import { BUDGET_STORAGE_KEY, summarizeBudgetValue } from '../presupuesto/index.js?v=16';
 import {
   listWeddingContexts,
@@ -1011,7 +1011,7 @@ const pendingModuleMounts = new Map();
 
 const MODULES = Object.freeze({
   checklist: {
-    load: () => import('../checklist/index.js?v=19'),
+    load: () => import('../checklist/index.js?v=20'),
     mount: 'mountChecklist'
   },
   presupuesto: {
