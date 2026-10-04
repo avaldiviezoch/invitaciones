@@ -152,3 +152,16 @@ La eliminación disponible en esta herramienta es excepcional y exclusiva de des
 - NO cambia automáticamente `guest.status` ni otros datos de Invitados.
 
 Si una respuesta eliminada tenía invitados vinculados, cualquier efecto posterior sobre esos invitados debe revisarse explícitamente mediante el diagnóstico. No convertir esta acción en una eliminación masiva ni exponerla en la aplicación normal.
+
+
+## Disponibilidad de invitados al vincular RSVP
+
+En el selector de una respuesta RSVP solo deben mostrarse invitados disponibles para esa respuesta.
+
+Un invitado se considera no disponible cuando:
+- su `guestId` aparece en `rsvpManagement.linkedGuestIds` de otra respuesta; o
+- su `guest.rsvpResponseId` apunta a otra respuesta.
+
+Excepción: al revisar una respuesta ya vinculada, sus propios invitados deben seguir visibles y seleccionados para permitir correcciones o desvinculación.
+
+Este filtro es exclusivamente de interfaz y validación. No elimina invitados, no modifica vínculos existentes y no debe resolver conflictos por nombre.

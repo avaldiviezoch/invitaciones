@@ -1008,3 +1008,13 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - La acción requiere permiso de edición y doble confirmación, incluyendo escribir `ELIMINAR`.
 - No elimina cuentas de Firebase Auth, invitados canónicos, mesas, sillas ni asignaciones.
 - La acción permanece fuera de la interfaz normal y es exclusiva de desarrollo/QA.
+
+
+## 2026-10-04 — RSVP: ocultar invitados ya vinculados al revisar confirmaciones
+
+- El selector de invitados dentro de la revisión RSVP deja de mostrar personas ya vinculadas a otras respuestas.
+- El filtrado se realiza por `guestId` y por vínculo canónico `rsvpResponseId`, no por nombre.
+- Al editar una respuesta ya aplicada, sus propios invitados vinculados permanecen visibles y seleccionados para permitir revisión o desvinculación.
+- Las coincidencias automáticas se calculan únicamente sobre invitados disponibles.
+- La interfaz informa cuántos invitados ya vinculados fueron ocultados.
+- No se modifica persistencia, IDs, Firebase, Firestore, mesas, sillas ni estados RSVP.

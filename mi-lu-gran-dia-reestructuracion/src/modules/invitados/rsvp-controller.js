@@ -340,10 +340,24 @@ function createRsvpController(api) {
     if (!dialog || !form || !response || !snapshot) return;
 
     const management = managementFor(response.id);
-    const suggestions = suggestedGuestIds(response);
+    const currentResponseId = String(response.id);
+    const linkedToOtherResponse = new Set(
+      (state.management || [])
+        .filter((item) => String(item?.responseId || '') !== currentResponseId)
+        .flatMap((item) => Array.isArray(item?.linkedGuestIds) ? item.linkedGuestIds.map(String) : [])
+    );
+    const availableGuests = snapshot.canonical.guests.filter((guest) => {
+      const guestId = String(guest?.id ?? '');
+      const canonicalResponseId = text(guest?.rsvpResponseId);
+      if (canonicalResponseId && canonicalResponseId !== currentResponseId) return false;
+      if (linkedToOtherResponse.has(guestId)) return false;
+      return true;
+    });
+    const availableGuestIds = new Set(availableGuests.map((guest) => String(guest?.id ?? '')));
+    const suggestions = suggestedGuestIds(response).filter((guestId) => availableGuestIds.has(String(guestId)));
     const selected = new Set(
       Array.isArray(management?.linkedGuestIds) && management.linkedGuestIds.length
-        ? management.linkedGuestIds.map(String)
+        ? management.linkedGuestIds.map(String).filter((guestId) => availableGuestIds.has(guestId))
         : suggestions
     );
 
@@ -364,8 +378,8 @@ function createRsvpController(api) {
     `;
 
     const picker = root.querySelector('[data-rsvp-guest-picker]');
-    picker.innerHTML = snapshot.canonical.guests.length
-      ? snapshot.canonical.guests.map((guest) => {
+    picker.innerHTML = availableGuests.length
+      ? availableGuests.map((guest) => {
         const id = String(guest.id ?? '');
         const suggested = suggestions.includes(id);
         return `<label class="rsvp-guest-option${suggested ? ' is-suggested' : ''}">
@@ -374,11 +388,14 @@ function createRsvpController(api) {
           <span><strong>${esc(text(guest.name) || 'Sin nombre')}</strong><small>${suggested ? 'Coincidencia sugerida' : esc(text(guest.relation) || 'Invitado existente')}</small></span>
         </label>`;
       }).join('')
-      : '<div class="guests-empty"><strong>No hay invitados disponibles</strong><span>Primero agrega las personas a la lista de invitados.</span></div>';
+      : '<div class="guests-empty"><strong>No hay invitados disponibles</strong><span>Todos los invitados existentes ya están vinculados a otras respuestas RSVP.</span></div>';
 
+    const hiddenLinkedCount = Math.max(0, snapshot.canonical.guests.length - availableGuests.length);
     root.querySelector('[data-rsvp-suggestion-label]').textContent = suggestions.length
-      ? `${suggestions.length} coincidencia${suggestions.length === 1 ? '' : 's'} sugerida${suggestions.length === 1 ? '' : 's'}`
-      : 'Sin coincidencias automáticas';
+      ? `${suggestions.length} coincidencia${suggestions.length === 1 ? '' : 's'} sugerida${suggestions.length === 1 ? '' : 's'} · ${hiddenLinkedCount} ya vinculado${hiddenLinkedCount === 1 ? '' : 's'} oculto${hiddenLinkedCount === 1 ? '' : 's'}`
+      : hiddenLinkedCount
+        ? `${hiddenLinkedCount} invitado${hiddenLinkedCount === 1 ? '' : 's'} ya vinculado${hiddenLinkedCount === 1 ? '' : 's'} oculto${hiddenLinkedCount === 1 ? '' : 's'}`
+        : 'Sin coincidencias automáticas';
 
     const declaredNames = [response?.name, ...(Array.isArray(response?.companions) ? response.companions : [])]
       .map(text)
