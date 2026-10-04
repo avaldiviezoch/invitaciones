@@ -2824,6 +2824,7 @@ async function mountDistribucion(context) {
     const onboardingCatalog = root.querySelector('[data-distribution-onboarding-catalog]');
     const onboardingUpload = root.querySelector('[data-distribution-onboarding-upload]');
     const referenceRemove = root.querySelector('[data-distribution-reference-remove]');
+    const referenceState = root.querySelector('[data-distribution-reference-state]');
     const referenceImage = root.querySelector('[data-distribution-reference-image]');
     const referenceScale = root.querySelector('[data-distribution-reference-scale]');
     const referenceScaleOutput = root.querySelector('[data-distribution-reference-scale-output]');
@@ -2863,7 +2864,8 @@ async function mountDistribucion(context) {
         world.classList.add('hide-reference-image');
         referenceCatalog.value = NONE_BACKGROUND_ID;
         referenceRemove.disabled = true;
-        referenceRemove.textContent = 'Sin plano seleccionado';
+        referenceRemove.textContent = 'Eliminar imagen personalizada';
+        if (referenceState) referenceState.textContent = 'Sin ambiente seleccionado';
         if (backgroundOnboarding) backgroundOnboarding.hidden = false;
         return;
       }
@@ -2875,7 +2877,12 @@ async function mountDistribucion(context) {
       world.classList.add('has-reference-image');
       referenceCatalog.value = activeReferenceId;
       referenceRemove.disabled = background.builtin;
-      referenceRemove.textContent = background.builtin ? `${background.name} · incluido` : 'Eliminar plano personalizado';
+      referenceRemove.textContent = 'Eliminar imagen personalizada';
+      if (referenceState) {
+        referenceState.textContent = background.builtin
+          ? `${background.name} · incluido en Migrandia`
+          : `${background.name} · imagen personal`;
+      }
     };
     const refreshReferenceCatalog = async (selectedId = activeReferenceId) => {
       const backgrounds = await listDistributionBackgrounds();
