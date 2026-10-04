@@ -202,3 +202,59 @@
 .distribution-background-onboarding-actions button{height:38px;padding:0 15px;border:1px solid #7f8962;border-radius:10px;background:#7f8962;color:#fff;font-size:9px;font-weight:850;cursor:pointer}
 .distribution-background-onboarding-actions button.is-secondary{border-color:#ded8d1;background:#fff;color:#68635d}
 .distribution-background-onboarding-card small{display:block;color:#a09a92;font-size:7px;line-height:1.5}
+
+/* Ambiente: composición estable en escritorio */
+@media(min-width:1101px){
+  .distribution-toolbar-environment{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  .distribution-environment-heading{
+    display:flex;
+    align-items:baseline;
+    gap:8px;
+    padding:0 2px;
+  }
+  .distribution-environment-heading>small{
+    max-width:none;
+  }
+  .distribution-toolbar-environment .distribution-reference-controls{
+    grid-template-columns:minmax(240px,1fr) minmax(360px,1.35fr) minmax(260px,1fr);
+    align-items:stretch;
+  }
+  .distribution-environment-card{
+    min-height:138px;
+  }
+}
+@media(min-width:701px) and (max-width:1100px){
+  .distribution-toolbar-environment{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+  .distribution-toolbar-environment .distribution-reference-controls{
+    grid-template-columns:1fr 1fr;
+  }
+  .distribution-environment-upload{
+    grid-column:1 / -1;
+  }
+}
+.distribution-environment-file-state{
+  min-height:30px;
+  display:flex;
+  align-items:center;
+  margin-top:8px;
+  padding:0 9px;
+  border:1px solid rgba(91,91,75,.09);
+  border-radius:9px;
+  background:#fff;
+  color:#817b73;
+  font-size:7.5px;
+  line-height:1.3;
+}
+.distribution-environment-remove:disabled{
+  opacity:.46;
+  cursor:default;
+}
+
