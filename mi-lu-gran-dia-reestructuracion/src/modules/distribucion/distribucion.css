@@ -57,13 +57,19 @@
   .distribution-toolbar-environment .distribution-reference-controls{box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr);gap:8px;width:100%;min-width:0}
   .distribution-toolbar-environment .distribution-reference-controls>label,.distribution-toolbar-environment .distribution-reference-controls>label:first-child,.distribution-toolbar-environment .distribution-reference-controls>label:has(input[type=file]){width:100%;min-width:0;max-width:100%;font-size:10px}
   .distribution-toolbar-environment .distribution-reference-controls select{width:100%;min-width:0;font-size:10px}
-  .distribution-toolbar-environment .distribution-reference-calibration{box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr);gap:7px;width:100%;min-width:0}
-  .distribution-toolbar-environment .distribution-reference-calibration>strong,.distribution-toolbar-environment .distribution-reference-calibration>label,.distribution-toolbar-environment .distribution-reference-position label,.distribution-toolbar-environment .distribution-reference-controls button{font-size:10px}
-  .distribution-toolbar-environment .distribution-reference-calibration>label{display:grid;grid-template-columns:auto auto 1fr;min-width:0;width:100%}
-  .distribution-toolbar-environment .distribution-reference-calibration>label input[type=range]{width:100%;min-width:0}
-  .distribution-toolbar-environment .distribution-reference-position{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;width:100%;min-width:0}
-  .distribution-toolbar-environment .distribution-reference-position label{display:grid;grid-template-columns:auto 1fr;min-width:0}
-  .distribution-toolbar-environment .distribution-reference-position input[type=range]{width:100%;min-width:0}
+  .distribution-toolbar-environment .distribution-reference-calibration{box-sizing:border-box;display:grid;grid-template-columns:minmax(0,1fr);gap:10px;width:100%;min-width:0;padding:12px;border:1px solid rgba(91,91,75,.11);border-radius:16px;background:#f8f6f2}
+  .distribution-toolbar-environment .distribution-reference-calibration>strong{display:flex;align-items:center;min-height:22px;color:#5f6454;font-size:11px;font-weight:850;letter-spacing:.01em}
+  .distribution-toolbar-environment .distribution-reference-calibration>label,.distribution-toolbar-environment .distribution-reference-position label{box-sizing:border-box;display:grid;grid-template-columns:minmax(76px,auto) auto minmax(0,1fr);align-items:center;gap:8px;width:100%;min-width:0;min-height:48px;padding:8px 10px;border:1px solid rgba(91,91,75,.09);border-radius:12px;background:#fff;color:#68645d;font-size:10px;font-weight:800}
+  .distribution-toolbar-environment .distribution-reference-calibration>label output{justify-self:start;min-width:42px;padding:4px 7px;border-radius:999px;background:#eef1e8;color:#667151;text-align:center;font-size:9px;font-weight:850}
+  .distribution-toolbar-environment .distribution-reference-position{display:grid;grid-template-columns:minmax(0,1fr);gap:8px;width:100%;min-width:0}
+  .distribution-toolbar-environment .distribution-reference-position label{grid-template-columns:minmax(76px,auto) minmax(0,1fr)}
+  .distribution-toolbar-environment .distribution-reference-calibration input[type=range]{width:100%;min-width:0;height:28px;margin:0;accent-color:#7f8962;touch-action:pan-y}
+  .distribution-toolbar-environment .distribution-reference-calibration input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:999px;background:#dddcd4}
+  .distribution-toolbar-environment .distribution-reference-calibration input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border:3px solid #fff;border-radius:50%;background:#7f8962;box-shadow:0 2px 7px rgba(67,70,56,.22)}
+  .distribution-toolbar-environment .distribution-reference-calibration input[type=range]::-moz-range-track{height:4px;border:0;border-radius:999px;background:#dddcd4}
+  .distribution-toolbar-environment .distribution-reference-calibration input[type=range]::-moz-range-thumb{width:18px;height:18px;border:3px solid #fff;border-radius:50%;background:#7f8962;box-shadow:0 2px 7px rgba(67,70,56,.22)}
+  .distribution-toolbar-environment .distribution-reference-calibration>button{width:100%;min-height:42px;padding:0 12px;border:1px solid rgba(127,137,98,.2);border-radius:12px;background:#fff;color:#667151;font-size:10px;font-weight:850}
+  .distribution-toolbar-environment .distribution-reference-calibration>small{display:block;margin:0 2px;color:#938d84;font-size:8px;line-height:1.45}
   .distribution-toolbar-environment .distribution-reference-controls input[type=file]{width:100%;min-width:0;font-size:10px}
 
   .distribution-workspace{display:block;min-height:0}
