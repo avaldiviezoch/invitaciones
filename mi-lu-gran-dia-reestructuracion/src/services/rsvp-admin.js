@@ -164,4 +164,16 @@ async function restoreRsvpManagement(context, token, responseId, previous) {
   await deleteDoc(ref);
 }
 
-export { loadRsvpAdminSnapshot, saveRsvpMusicConfig, saveRsvpManagement, deleteRsvpManagement, restoreRsvpManagement };
+async function deleteRsvpResponseExceptional(context, token, responseId) {
+  requireEditor(context);
+  const safeToken = cleanText(token, 160);
+  const safeResponseId = cleanText(responseId, 180);
+  if (!safeToken || !safeResponseId) throw new Error('No se pudo identificar la respuesta RSVP a eliminar.');
+
+  const batch = writeBatch(db);
+  batch.delete(doc(db, 'publicRsvp', safeToken, 'responses', safeResponseId));
+  batch.delete(doc(db, 'weddings', context.id, 'rsvpManagement', managementDocId(safeToken, safeResponseId)));
+  await batch.commit();
+}
+
+export { loadRsvpAdminSnapshot, saveRsvpMusicConfig, saveRsvpManagement, deleteRsvpManagement, restoreRsvpManagement, deleteRsvpResponseExceptional };
