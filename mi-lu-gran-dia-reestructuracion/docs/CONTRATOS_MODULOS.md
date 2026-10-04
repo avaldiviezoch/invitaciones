@@ -135,3 +135,20 @@ No usar la reparación para ocultar una causa nueva. Si vuelve a aparecer una di
 La detección de inconsistencias RSVP ↔ Invitados no debe mostrarse en la interfaz normal de usuarios. La herramienta `diagnostico_rsvp_vs_invitados.html` es de uso exclusivo para desarrollo/QA y debe consultarse cuando exista una diferencia de indicadores o se sospeche una desincronización por IDs.
 
 La aplicación de usuario debe limitarse a prevenir la inconsistencia mediante las protecciones del flujo. No debe exponer alertas técnicas, IDs internos ni enlaces al diagnóstico.
+
+
+## Consola QA extraordinaria de RSVP
+
+`diagnostico_rsvp_vs_invitados.html` puede listar todas las respuestas RSVP recibidas para la boda activa, además del diagnóstico de consistencia.
+
+La eliminación disponible en esta herramienta es excepcional y exclusiva de desarrollo/QA:
+- elimina la respuesta en `publicRsvp/{token}/responses/{responseId}`;
+- elimina el registro administrativo correspondiente en `weddings/{weddingId}/rsvpManagement`;
+- exige permisos de edición de la boda;
+- exige confirmación reforzada en la interfaz;
+- NO elimina usuarios de Firebase Auth;
+- NO elimina invitados canónicos;
+- NO elimina mesas, sillas ni asignaciones;
+- NO cambia automáticamente `guest.status` ni otros datos de Invitados.
+
+Si una respuesta eliminada tenía invitados vinculados, cualquier efecto posterior sobre esos invitados debe revisarse explícitamente mediante el diagnóstico. No convertir esta acción en una eliminación masiva ni exponerla en la aplicación normal.
