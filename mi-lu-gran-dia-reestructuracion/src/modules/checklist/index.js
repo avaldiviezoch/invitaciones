@@ -225,7 +225,7 @@ function render() {
         return `<article class="ck-group${collapsed ? ' is-collapsed' : ''}" data-group-name="${esc(name)}"><header><div class="ck-group-ring" style="--p:${pct}"><span>${pct}%</span></div><div><h2>${esc(name)}</h2><div class="ck-group-line"><i style="width:${pct}%"></i></div><small>${done} / ${items.length}</small></div><div class="ck-group-controls">${editable ? `<button type="button" class="ck-group-add" data-group-add aria-label="Agregar tarea a ${esc(name)}">＋</button>` : ''}<button type="button" class="ck-collapse" data-group-toggle aria-expanded="${collapsed ? 'false' : 'true'}" aria-label="${collapsed ? 'Abrir' : 'Cerrar'} ${esc(name)}">⌄</button></div></header><div class="ck-group-tasks">${items.length ? items.map(({task,index})=>taskMarkup(task,index,editable)).join('') : '<p class="ck-group-empty">Aún no hay tareas en este grupo.</p>'}</div></article>`;
       }).join('') : '<div class="ck-empty">No hay tareas para mostrar con este filtro.</div>'}
     </section>
-    <p class="ck-save-state" data-checklist-status>${saving ? 'Guardando en Firebase…' : 'Datos de la boda activa'}</p>
+    ${saving ? '<p class="ck-save-state" data-checklist-status>Guardando…</p>' : ''}
     <dialog class="ck-dialog" data-checklist-dialog>
       <form method="dialog" data-checklist-form>
         <input type="hidden" name="index" value="">
