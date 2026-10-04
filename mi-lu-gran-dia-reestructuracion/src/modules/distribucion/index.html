@@ -80,26 +80,51 @@
       </div>
     </div>
     <div class="distribution-toolbar-environment">
-      <span class="distribution-environment-title">AMBIENTE</span>
+      <div class="distribution-environment-heading">
+        <span class="distribution-environment-title">AMBIENTE</span>
+        <strong>Configura el espacio de tu boda</strong>
+        <small>Elige un fondo, encuádralo y usa una imagen propia si lo prefieres.</small>
+      </div>
+
       <div class="distribution-reference-controls">
-        <label>Plano
-          <select data-distribution-reference-catalog aria-label="Plano del recinto"></select>
-        </label>
-        <div class="distribution-reference-calibration">
-          <strong>Ajustar ambiente a tus mesas</strong>
-          <label>Escala <output data-distribution-reference-scale-output>100%</output>
+        <section class="distribution-environment-card distribution-environment-select">
+          <div class="distribution-environment-step">
+            <b>1</b>
+            <div><strong>Selecciona un ambiente</strong><small>Usa uno del catálogo de Migrandia.</small></div>
+          </div>
+          <label class="distribution-environment-field">
+            <span>Ambiente</span>
+            <select data-distribution-reference-catalog aria-label="Plano del recinto"></select>
+          </label>
+        </section>
+
+        <section class="distribution-environment-card distribution-reference-calibration">
+          <div class="distribution-environment-step">
+            <b>2</b>
+            <div><strong>Ajusta el encuadre</strong><small>Adapta el fondo a la escala visual de tus mesas.</small></div>
+          </div>
+          <label class="distribution-range-control">
+            <span>Escala <output data-distribution-reference-scale-output>100%</output></span>
             <input type="range" min="50" max="250" step="1" value="100" data-distribution-reference-scale>
           </label>
           <div class="distribution-reference-position">
-            <label>Horizontal <input type="range" min="-600" max="600" step="5" value="0" data-distribution-reference-x></label>
-            <label>Vertical <input type="range" min="-450" max="450" step="5" value="0" data-distribution-reference-y></label>
+            <label class="distribution-range-control"><span>Horizontal</span><input type="range" min="-600" max="600" step="5" value="0" data-distribution-reference-x></label>
+            <label class="distribution-range-control"><span>Vertical</span><input type="range" min="-450" max="450" step="5" value="0" data-distribution-reference-y></label>
           </div>
-          <button type="button" data-distribution-reference-reset>Restablecer encuadre</button>
-          <small>Las mesas mantienen sus medidas reales. Ajusta el fondo hasta que su tamaño visual coincida con la escala que percibes en el lugar.</small>
-        </div>
-        <label>Agregar tu propia imagen<input type="file" accept="image/png,image/jpeg,image/webp" data-distribution-reference-file></label>
-        <button type="button" data-distribution-reference-remove>Eliminar plano personalizado</button>
-        <small>Los ambientes incluidos vienen del catálogo de Migrandia. Tus imágenes personales se guardan solo en este navegador.</small>
+          <button class="distribution-environment-reset" type="button" data-distribution-reference-reset>↺ Restablecer encuadre</button>
+        </section>
+
+        <section class="distribution-environment-card distribution-environment-upload">
+          <div class="distribution-environment-step">
+            <b>3</b>
+            <div><strong>Usa tu propia imagen</strong><small>PNG, JPG o WebP · se guarda solo en este navegador.</small></div>
+          </div>
+          <label class="distribution-upload-button">
+            <span>Seleccionar archivo</span>
+            <input type="file" accept="image/png,image/jpeg,image/webp" data-distribution-reference-file>
+          </label>
+          <button class="distribution-environment-remove" type="button" data-distribution-reference-remove>Eliminar imagen personalizada</button>
+        </section>
       </div>
     </div>
   </section>
