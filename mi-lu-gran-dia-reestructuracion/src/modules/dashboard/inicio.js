@@ -1027,7 +1027,7 @@ const MODULES = Object.freeze({
     mount: 'mountInvitados'
   },
   distribucion: {
-    load: () => import('../distribucion/index.js?v=140'),
+    load: () => import('../distribucion/index.js?v=141'),
     mount: 'mountDistribucion'
   },
   cronograma: {
