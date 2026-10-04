@@ -82,35 +82,24 @@
     <div class="distribution-toolbar-environment">
       <span class="distribution-environment-title">AMBIENTE</span>
       <div class="distribution-reference-controls">
-        <label class="distribution-environment-inline-field">
-          <span>Ambiente</span>
+        <label>Plano
           <select data-distribution-reference-catalog aria-label="Plano del recinto"></select>
         </label>
-
-        <label class="distribution-environment-inline-range">
-          <span>Escala <output data-distribution-reference-scale-output>100%</output></span>
-          <input type="range" min="50" max="250" step="1" value="100" data-distribution-reference-scale>
-        </label>
-
-        <label class="distribution-environment-inline-range">
-          <span>Horizontal</span>
-          <input type="range" min="-600" max="600" step="5" value="0" data-distribution-reference-x>
-        </label>
-
-        <label class="distribution-environment-inline-range">
-          <span>Vertical</span>
-          <input type="range" min="-450" max="450" step="5" value="0" data-distribution-reference-y>
-        </label>
-
-        <button class="distribution-environment-reset" type="button" data-distribution-reference-reset>↺ Restablecer</button>
-
-        <label class="distribution-upload-button">
-          <span>Seleccionar archivo</span>
-          <input type="file" accept="image/png,image/jpeg,image/webp" data-distribution-reference-file>
-        </label>
-
-        <div class="distribution-environment-file-state" data-distribution-reference-state>Sin imagen personalizada</div>
-        <button class="distribution-environment-remove" type="button" data-distribution-reference-remove aria-label="Eliminar imagen personalizada">×</button>
+        <div class="distribution-reference-calibration">
+          <strong>Ajustar ambiente a tus mesas</strong>
+          <label>Escala <output data-distribution-reference-scale-output>100%</output>
+            <input type="range" min="50" max="250" step="1" value="100" data-distribution-reference-scale>
+          </label>
+          <div class="distribution-reference-position">
+            <label>Horizontal <input type="range" min="-600" max="600" step="5" value="0" data-distribution-reference-x></label>
+            <label>Vertical <input type="range" min="-450" max="450" step="5" value="0" data-distribution-reference-y></label>
+          </div>
+          <button type="button" data-distribution-reference-reset>Restablecer encuadre</button>
+          <small>Las mesas mantienen sus medidas reales. Ajusta el fondo hasta que su tamaño visual coincida con la escala que percibes en el lugar.</small>
+        </div>
+        <label>Agregar tu propia imagen<input type="file" accept="image/png,image/jpeg,image/webp" data-distribution-reference-file></label>
+        <button type="button" data-distribution-reference-remove>Eliminar plano personalizado</button>
+        <small>Los ambientes incluidos vienen del catálogo de Migrandia. Tus imágenes personales se guardan solo en este navegador.</small>
       </div>
     </div>
   </section>
