@@ -1917,3 +1917,11 @@ reducir dependencia de soporte manual por WhatsApp o mensajes directos.
 - Métrica observada en Firebase App Check tras integrar PROD: Cloud Firestore 58% solicitudes verificadas / 42% no verificadas; Authentication 71% verificadas / 29% no verificadas.
 - Tendencia mejora respecto al punto anterior (Firestore 48% / 52%; Authentication 64% / 36%), confirmando que nuevos clientes están enviando App Check.
 - Enforcement permanece desactivado: todavía existe tráfico no verificado significativo y primero debe identificarse/agotarse el tráfico legado y validar RSVP público productivo.
+
+
+### QA RSVP producción — 2026-10-05
+- Invitación 0 productiva validada manualmente.
+- El formulario RSVP abrió correctamente con App Check integrado.
+- Se envió una confirmación de prueba y fue registrada correctamente.
+- La prueba se eliminará después del QA para no contaminar datos reales.
+- Resultado: flujo RSVP productivo operativo con App Check.
