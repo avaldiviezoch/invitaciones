@@ -97,10 +97,26 @@ function resetRsvpSecurity(form){
   }
 }
 
-async function waitForRsvpSecurityToken(form,timeoutMs=3500){
+async function waitForRsvpSecurityToken(form,timeoutMs=8000){
+  const widgetId=turnstileWidgets.get(form);
+  const readToken=()=>clean(
+    form.dataset.mgdTurnstileToken||
+    (widgetId!==undefined&&globalThis.turnstile?.getResponse
+      ? globalThis.turnstile.getResponse(widgetId)
+      : ''),
+    4096
+  );
+
+  let token=readToken();
+  if(token)return token;
+
+  if(widgetId!==undefined&&globalThis.turnstile?.reset){
+    try{globalThis.turnstile.reset(widgetId);}catch(_){}
+  }
+
   const started=Date.now();
   while(Date.now()-started<timeoutMs){
-    const token=clean(form.dataset.mgdTurnstileToken||'',4096);
+    token=readToken();
     if(token)return token;
     await new Promise(resolve=>setTimeout(resolve,100));
   }
