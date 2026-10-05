@@ -2254,3 +2254,11 @@ Siguiente paso:
 - Todas devolvieron HTTP 200; no se observó 429 en este primer intento.
 - El resultado es inconcluso, no se clasifica como fallo del binding: las respuestas de éxito usan `Cache-Control: public, max-age=3600` y el navegador puede reutilizar la respuesta cacheada sin volver a ejecutar el Worker.
 - Siguiente prueba: repetir con `cache: "no-store"` y un parámetro anti-cache único por solicitud para forzar ejecución real del Worker y validar `API_RATE_LIMIT`.
+
+
+### QA seguridad MGD-004 — API_RATE_LIMIT confirmado — 2026-10-05
+- Se repitió la prueba de 70 solicitudes con `cache: "no-store"` y parámetro anti-cache único.
+- Resultado: `API_RATE_LIMIT` respondió correctamente con HTTP 429 y el mensaje público `Demasiadas solicitudes. Inténtalo nuevamente en un momento.`.
+- También se observaron respuestas 200 antes/durante la ráfaga por ejecución concurrente fuera de orden; esto es esperable en una prueba paralela.
+- Durante la ráfaga aparecieron algunos 502/503 sin CORS visibles en el navegador, atribuibles al estrés/subrequests concurrentes del entorno; no se reproducen en el flujo funcional normal ya validado.
+- Conclusión: el binding DEV `API_RATE_LIMIT` (namespace 1003, limit 60/60s) está activo y bloquea abuso.
