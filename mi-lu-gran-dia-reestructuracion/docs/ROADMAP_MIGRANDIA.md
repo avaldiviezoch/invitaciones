@@ -1086,6 +1086,252 @@ Riesgos:
 
 ---
 
+# BLOQUE L — CONFIANZA, GOBERNANZA Y PRODUCTO
+
+## MGD-042 — Legal, privacidad y confianza
+Estado: ⬜ PENDIENTE
+Prioridad: CRÍTICA ANTES DE BETA PÚBLICA
+
+Objetivo:
+definir una base legal y de confianza coherente con una plataforma que maneja cuentas, eventos, invitados, RSVP, imágenes y contenido generado por usuarios.
+
+Incluir:
+- Términos y Condiciones;
+- Política de Privacidad;
+- Política de cookies / tecnologías equivalentes cuando aplique;
+- tratamiento de datos personales;
+- finalidad y minimización de datos;
+- conservación y eliminación;
+- derechos del usuario;
+- datos de invitados que pueden no ser usuarios de Migrandia;
+- imágenes y archivos subidos;
+- proveedores externos;
+- Firebase / Google;
+- Cloudflare;
+- servicios de música, enlaces e imágenes;
+- canales de contacto y soporte.
+
+Reglas:
+- solicitar solo los datos necesarios;
+- no reutilizar datos personales para finalidades no informadas;
+- diferenciar datos del organizador de datos de invitados;
+- contemplar eliminación de cuenta y evento;
+- revisar requisitos legales aplicables antes de beta pública;
+- la implementación técnica debe permitir cumplir las políticas declaradas.
+
+---
+
+## MGD-043 — Analytics de producto con privacidad
+Estado: ⬜ PENDIENTE
+Prioridad: ALTA
+
+Objetivo:
+medir uso real de Migrandia sin convertir la analítica en recolección invasiva.
+
+Medir:
+- creación de eventos por eventType;
+- inicio y finalización del onboarding;
+- abandono por paso;
+- activación de módulos;
+- uso de Checklist, Presupuesto, Invitados, Distribución, Ideas, Música e Invitaciones;
+- origen de entrada: home general o landing específica;
+- conversión Landing → Onboarding → Evento creado;
+- uso por dispositivo y tamaño de pantalla;
+- errores de experiencia relacionados con flujo.
+
+No registrar en analytics:
+- contraseñas;
+- nombres completos de invitados;
+- teléfonos;
+- correos;
+- respuestas RSVP completas;
+- contenido privado de notas;
+- datos personales que no sean necesarios para la métrica.
+
+Separar:
+- observabilidad técnica = MGD-006;
+- analytics de producto = MGD-043.
+
+---
+
+## MGD-044 — Roles y permisos por evento
+Estado: ⬜ PENDIENTE
+Prioridad: CRÍTICA
+
+Objetivo:
+definir quién puede ver o modificar cada parte de un evento compartido.
+
+Roles base iniciales:
+- Owner;
+- Admin;
+- Editor;
+- Provider;
+- Viewer.
+
+Evaluar perfiles contextuales:
+- pareja;
+- familiar;
+- wedding/event planner;
+- colaborador de empresa;
+- proveedor invitado;
+- ayudante temporal.
+
+La autorización real debe resolverse por capacidades, no solo por etiquetas visuales.
+
+Ejemplos de capacidades:
+- ver evento;
+- editar configuración;
+- gestionar invitados;
+- ver datos sensibles;
+- editar presupuesto;
+- editar checklist;
+- modificar distribución;
+- gestionar invitaciones;
+- revisar RSVP;
+- administrar colaboradores;
+- eliminar evento;
+- transferir ownership.
+
+Reglas:
+- mínimo privilegio;
+- un Provider no debe recibir acceso global por defecto;
+- Viewer nunca modifica;
+- acciones destructivas restringidas;
+- permisos deben validarse también en backend / Rules, no solo ocultarse en UI;
+- los permisos se aplican por eventId y no contaminan otros eventos del mismo usuario.
+
+---
+
+## MGD-045 — Ciclo de vida y estados del evento
+Estado: ⬜ PENDIENTE
+Prioridad: ALTA
+
+Definir un estado explícito del evento para evitar que todos los eventos se comporten igual durante toda su vida.
+
+Estados conceptuales iniciales:
+- draft;
+- planning;
+- invitations_open;
+- active;
+- completed;
+- archived;
+- cancelled cuando corresponda.
+
+El estado podrá influir en:
+- CTA principal;
+- recordatorios;
+- checklist;
+- RSVP;
+- edición de invitaciones;
+- indicadores;
+- notificaciones;
+- visibilidad de tareas posteriores;
+- archivado.
+
+Reglas:
+- no borrar automáticamente un evento al terminar;
+- permitir consulta histórica;
+- separar evento completado de evento eliminado;
+- transiciones críticas deben quedar registradas;
+- no inferir estados únicamente por fecha sin permitir corrección del owner.
+
+---
+
+## MGD-046 — Configuración regional e internacionalización base
+Estado: ⬜ PENDIENTE
+Prioridad: ALTA
+
+Preparar Migrandia para no quedar amarrada a Perú aunque la primera operación se concentre allí.
+
+Configurable por usuario/evento cuando corresponda:
+- país;
+- zona horaria;
+- idioma;
+- moneda;
+- símbolo y formato monetario;
+- formato de fecha;
+- formato de hora;
+- separadores numéricos;
+- unidades cuando apliquen.
+
+Regla:
+- almacenar fechas internamente de manera consistente;
+- renderizar según locale / timezone;
+- Presupuesto no debe hardcodear PEN;
+- textos visibles deben poder migrar progresivamente a un sistema de traducciones;
+- no duplicar módulos por idioma o país.
+
+Primera prioridad:
+- español;
+- Perú;
+- PEN;
+- zona horaria del evento.
+
+Arquitectura preparada para ampliar después.
+
+---
+
+## MGD-047 — Capacidades activables por tipo de evento
+Estado: ⬜ PENDIENTE
+Prioridad: CRÍTICA
+
+Objetivo:
+permitir que distintos eventos tengan funciones diferentes sin crear ocho aplicaciones ni llenar el código de condicionales dispersos.
+
+Agregar a eventProfile una capa de capabilities, por ejemplo:
+
+```js
+capabilities = {
+  rsvp: true,
+  seating: true,
+  padrinos: false,
+  accreditation: false,
+  giftRegistry: false,
+  ceremony: false
+}
+```
+
+Ejemplos:
+- boda puede activar ceremonia, padrinos, mesas e RSVP;
+- evento corporativo puede activar acreditación y agenda;
+- cumpleaños puede ocultar funciones matrimoniales;
+- graduación puede activar promoción, ceremonia o diplomas cuando se implemente.
+
+Reglas:
+- una capability define disponibilidad funcional;
+- el tema visual no decide capacidades;
+- eventType propone defaults;
+- el evento puede guardar configuración compatible cuando corresponda;
+- ningún módulo debe asumir que siempre está habilitado;
+- capabilities centralizadas en eventProfile.
+
+---
+
+## MGD-048 — Revisión transversal antes de marcha blanca
+Estado: ⬜ PENDIENTE
+Prioridad: CRÍTICA
+
+Antes de incorporar usuarios externos, realizar una revisión transversal que confirme:
+
+- privacidad y textos legales mínimos definidos;
+- roles y permisos probados;
+- separación real entre observabilidad y analytics;
+- datos personales minimizados;
+- ciclo de vida del evento consistente;
+- configuración regional sin hardcodes críticos;
+- capabilities centralizadas;
+- login y branding MGD-033 verificados;
+- DEV/PROD separados;
+- backup y restore probados;
+- E2E principales ejecutados;
+- comportamiento móvil validado.
+
+Esta tarea no reemplaza las anteriores: funciona como gate de salida hacia marcha blanca.
+
+
+
+---
+
 # BLOQUE M — ENTRADAS GENERALES Y ESPECÍFICAS POR EVENTO
 
 ## Regla de entrada a Migrandia
