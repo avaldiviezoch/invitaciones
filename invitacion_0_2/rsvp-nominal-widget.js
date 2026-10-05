@@ -1,10 +1,26 @@
 import { initializeApp, getApp, getApps } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
 import { doc, getDoc, getFirestore, serverTimestamp, setDoc, updateDoc } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
 import { getAuth, signInAnonymously } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
+import { initializeAppCheck, ReCaptchaEnterpriseProvider } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-app-check.js';
 
 const VERSION='20260819-2520-inv5-music-fields1';
 const firebaseConfig={apiKey:'AIzaSyDCRuQgMjnm7KcAN_qo8AHPD3ueyis4-LY',authDomain:'migrandia.firebaseapp.com',projectId:'migrandia',storageBucket:'migrandia.firebasestorage.app',messagingSenderId:'7432985765',appId:'1:7432985765:web:b3a4844f41ac2a1376c14c'};
 const app=getApps().length?getApp():initializeApp(firebaseConfig);
+const APP_CHECK_SITE_KEY='6LeukOAtAAAAAJODsmEu9XyMLnyb6JH9TNYizFHk';
+const APP_CHECK_HOSTS=new Set(['migrandiapp.com','www.migrandiapp.com','avaldiviezoch.github.io']);
+const currentHost=String(globalThis.location?.hostname||'').trim().toLowerCase();
+function enableAppCheck(targetApp){
+  if(!APP_CHECK_HOSTS.has(currentHost))return null;
+  try{
+    return initializeAppCheck(targetApp,{provider:new ReCaptchaEnterpriseProvider(APP_CHECK_SITE_KEY),isTokenAutoRefreshEnabled:true});
+  }catch(error){
+    if(String(error?.code||'').includes('already-initialized'))return null;
+    throw error;
+  }
+}
+enableAppCheck(app);
+const rsvpApp=getApps().find(candidate=>candidate.name==='mgd-rsvp-anonymous')||initializeApp(app.options,'mgd-rsvp-anonymous');
+enableAppCheck(rsvpApp);
 const db=getFirestore(app);
 const installed=new WeakSet();
 const turnstileWidgets=new WeakMap();
@@ -127,7 +143,7 @@ async function verifyRsvpSecurity(form,host,rsvpToken,responseId){
 }
 
 
-async function saveNominalRsvp(token,responseId,payload){const rsvpApp=getApps().find(candidate=>candidate.name==='mgd-rsvp-anonymous')||initializeApp(app.options,'mgd-rsvp-anonymous');const auth=getAuth(rsvpApp);const user=auth.currentUser||(await signInAnonymously(auth)).user;const rsvpDb=getFirestore(rsvpApp);const ref=doc(rsvpDb,'publicRsvp',token,'responses',responseId);const {customData={},submittedAt:_submittedAt,updatedAt:_updatedAt,ownerUid:_ownerUid,...fields}=payload;const customUpdates=Object.fromEntries(Object.entries(customData).map(([key,value])=>['customData.'+key,value]));try{await updateDoc(ref,{...fields,...customUpdates,updatedAt:serverTimestamp()});}catch(error){if(!String(error?.code||'').includes('not-found')&&!String(error?.code||'').includes('permission-denied'))throw error;await setDoc(ref,{...fields,customData,ownerUid:user.uid,submittedAt:serverTimestamp(),updatedAt:serverTimestamp()});}}
+async function saveNominalRsvp(token,responseId,payload){const auth=getAuth(rsvpApp);const user=auth.currentUser||(await signInAnonymously(auth)).user;const rsvpDb=getFirestore(rsvpApp);const ref=doc(rsvpDb,'publicRsvp',token,'responses',responseId);const {customData={},submittedAt:_submittedAt,updatedAt:_updatedAt,ownerUid:_ownerUid,...fields}=payload;const customUpdates=Object.fromEntries(Object.entries(customData).map(([key,value])=>['customData.'+key,value]));try{await updateDoc(ref,{...fields,...customUpdates,updatedAt:serverTimestamp()});}catch(error){if(!String(error?.code||'').includes('not-found')&&!String(error?.code||'').includes('permission-denied'))throw error;await setDoc(ref,{...fields,customData,ownerUid:user.uid,submittedAt:serverTimestamp(),updatedAt:serverTimestamp()});}}
 function esc(v=''){return String(v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');}
 function clean(v='',max=180){return String(v??'').trim().slice(0,max);}
 function makeId(){return crypto?.randomUUID?.()||`mgd_${Date.now()}_${Math.random().toString(36).slice(2)}`;}

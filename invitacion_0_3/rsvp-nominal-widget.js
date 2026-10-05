@@ -5,6 +5,21 @@ import { LEGACY_RSVP_MESSAGE, saveOwnedRsvp, saveOwnedRsvpMusic } from 'https://
 const VERSION='20260819-2520-inv5-music-fields1';
 const firebaseConfig={apiKey:'AIzaSyDCRuQgMjnm7KcAN_qo8AHPD3ueyis4-LY',authDomain:'migrandia.firebaseapp.com',projectId:'migrandia',storageBucket:'migrandia.firebasestorage.app',messagingSenderId:'7432985765',appId:'1:7432985765:web:b3a4844f41ac2a1376c14c'};
 const app=getApps().length?getApp():initializeApp(firebaseConfig);
+const APP_CHECK_SITE_KEY='6LeukOAtAAAAAJODsmEu9XyMLnyb6JH9TNYizFHk';
+const APP_CHECK_HOSTS=new Set(['migrandiapp.com','www.migrandiapp.com','avaldiviezoch.github.io']);
+const currentHost=String(globalThis.location?.hostname||'').trim().toLowerCase();
+function enableAppCheck(targetApp){
+  if(!APP_CHECK_HOSTS.has(currentHost))return null;
+  try{
+    return initializeAppCheck(targetApp,{provider:new ReCaptchaEnterpriseProvider(APP_CHECK_SITE_KEY),isTokenAutoRefreshEnabled:true});
+  }catch(error){
+    if(String(error?.code||'').includes('already-initialized'))return null;
+    throw error;
+  }
+}
+enableAppCheck(app);
+const rsvpApp=getApps().find(candidate=>candidate.name==='mgd-rsvp-anonymous')||initializeApp(app.options,'mgd-rsvp-anonymous');
+enableAppCheck(rsvpApp);
 const db=getFirestore(app);
 const installed=new WeakSet();
 
