@@ -2247,3 +2247,10 @@ Siguiente paso:
 - Respuesta obtenida: `{"ok":false,"error":"No se pudieron obtener los datos de la música.","provider":"youtube","type":"unknown"}`.
 - Interpretación: la solicitud sí pasó la validación de longitud y llegó a la lógica de `music-preview`; por tanto esta prueba no valida todavía el límite de 2048 caracteres.
 - Siguiente prueba: generar programáticamente una URL >2048 caracteres y verificar respuesta `La URL excede el tamaño permitido.`.
+
+
+### QA seguridad MGD-004 — rate limit (primer intento) — 2026-10-05
+- Se ejecutaron 70 solicitudes consecutivas contra `/api/music-preview`.
+- Todas devolvieron HTTP 200; no se observó 429 en este primer intento.
+- El resultado es inconcluso, no se clasifica como fallo del binding: las respuestas de éxito usan `Cache-Control: public, max-age=3600` y el navegador puede reutilizar la respuesta cacheada sin volver a ejecutar el Worker.
+- Siguiente prueba: repetir con `cache: "no-store"` y un parámetro anti-cache único por solicitud para forzar ejecución real del Worker y validar `API_RATE_LIMIT`.
