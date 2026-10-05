@@ -2294,3 +2294,9 @@ Pendiente para cierre definitivo:
 - Configuración acordada/versionada: namespace `1004`, limit `60`, period `60`.
 - `RSVP_RATE_LIMIT` existente debe permanecer en namespace `1002`, limit `5`, period `60`.
 - Pendiente: desplegar en `migrandia-api` el mismo `migrandia-worker.js` endurecido validado en DEV y ejecutar smoke test productivo.
+
+
+### PROD MGD-004 — deploy confirmado por usuario — 2026-10-05
+- Confirmación del usuario: el Worker `migrandia-api` fue desplegado en Cloudflare con el código endurecido validado previamente en DEV.
+- Binding `API_RATE_LIMIT` PROD ya creado (namespace `1004`, limit `60`, period `60`).
+- Pendiente únicamente smoke test productivo final antes de marcar MGD-004 como 🟢 PRODUCCIÓN.
