@@ -239,6 +239,34 @@ Riesgos pendientes:
 - no hay límite server-side por intervalo de tiempo;
 - no hay señal central de abuso o picos de envío.
 
+### Implementación de código — fase no Firebase — 2026-10-05
+
+Se versionó por primera vez el Worker actual de Migrandia dentro de:
+`cloudflare/migrandia-worker.js`
+
+Este archivo conserva los servicios existentes:
+- `/api/link-preview`
+- `/api/image-proxy`
+- `/api/music-preview`
+
+y agrega:
+- `POST /api/rsvp/verify`
+
+Protecciones implementadas en el nuevo endpoint:
+- solo acepta `POST`;
+- CORS específico para `migrandiapp.com`, `www.migrandiapp.com` y GitHub Pages de desarrollo;
+- respuesta `no-store`;
+- valida presencia y tamaño de `turnstileToken`, `rsvpToken` y `responseId`;
+- honeypot `website`;
+- tiempo mínimo de interacción antes del envío;
+- validación server-side contra Cloudflare Turnstile Siteverify;
+- valida `action = rsvp_submit` cuando Turnstile la devuelve;
+- preparado para binding `RSVP_RATE_LIMIT` de Cloudflare Workers;
+- el secret Turnstile solo se lee desde `env.TURNSTILE_SECRET_KEY`, nunca se hardcodea.
+
+Importante:
+esta fase **NO toca Firebase**, pero por sí sola todavía no impide que un atacante intente escribir directamente contra Firestore saltándose el frontend. El cierre completo de MGD-003 requerirá después revisar quirúrgicamente App Check / Rules / ruta de escritura, con autorización explícita.
+
 ### Arquitectura objetivo
 
 Mantener:
@@ -266,7 +294,7 @@ La primera fase será no destructiva:
 
 DEV branch: `mgd/003-rsvp-abuse-protection-20261005`
 DEV PR: pendiente
-DEV commit: pendiente
+DEV commit: `187084474576120c80ade0fe699dff707def83ff` (Worker versionado + guard RSVP)
 
 QA pendiente:
 - usuario legítimo puede enviar RSVP;
@@ -282,6 +310,9 @@ Pendiente de autorización antes de tocar infraestructura protegida:
 - cualquier cambio de Firestore Rules;
 - habilitación/configuración de App Check;
 - cambios en Auth;
+- despliegue/configuración del Worker DEV en Cloudflare;
+- creación del secret `TURNSTILE_SECRET_KEY`;
+- creación del binding `RSVP_RATE_LIMIT`;
 - configuración productiva de Cloudflare Turnstile/rate limiting.
 
 ---
