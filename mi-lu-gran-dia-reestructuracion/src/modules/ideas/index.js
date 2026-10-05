@@ -42,6 +42,18 @@ function previewProvider(value = '') {
   return '';
 }
 
+function ideaSourceLabel(value = '') {
+  try {
+    const host = new URL(value).hostname.toLowerCase().replace(/^www\./, '');
+    if (host === 'pin.it' || host === 'pinterest.com' || host.endsWith('.pinterest.com')) return 'Pinterest';
+    if (host === 'temu.com' || host.endsWith('.temu.com')) return 'Temu';
+    if (host.includes('aliexpress.')) return 'AliExpress';
+    return host ? host.split('.').slice(-2).join('.') : '';
+  } catch {
+    return '';
+  }
+}
+
 async function resolveRemotePreview(value = '') {
   const source = normalizeUrl(value);
   if (!source || !previewProvider(source)) return null;
@@ -133,12 +145,16 @@ function render(root) {
 
   const editable = canManageIdeas();
   board.innerHTML = items.map((item) => {
+    const purchase = item.type === 'purchase';
+    const source = ideaSourceLabel(item.url);
     const image = item.image ? `<img class="ideas-card-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '<div class="ideas-card-placeholder" aria-hidden="true"></div>';
-    const link = item.url ? `<a class="ideas-card-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">Ver enlace</a>` : '';
+    const typeBadge = `<span class="ideas-card-type">${purchase ? 'Por comprar' : 'Inspiración'}</span>`;
+    const sourceBadge = source ? `<span class="ideas-card-source">${escapeHtml(source)}</span>` : '';
+    const link = item.url ? `<a class="ideas-card-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">${purchase ? 'Ver producto' : 'Ver referencia'}</a>` : '';
     const use = editable ? `<button class="ideas-card-use" type="button" data-idea-use="${escapeHtml(item.id)}">Usar esta idea</button>` : '';
     const edit = editable ? `<button class="ideas-card-edit" type="button" data-idea-edit="${escapeHtml(item.id)}" aria-label="Editar ${escapeHtml(item.title)}">Editar</button>` : '';
     const remove = editable ? `<button class="ideas-card-delete" type="button" data-idea-delete="${escapeHtml(item.id)}" aria-label="Eliminar ${escapeHtml(item.title)}">×</button>` : '';
-    return `<article class="ideas-card" data-idea-id="${escapeHtml(item.id)}">${edit}${remove}${image}<div class="ideas-card-body"><div class="ideas-card-meta"><span>${escapeHtml(item.category)}</span><span>${item.type === 'purchase' ? 'Compra' : 'Inspiración'}</span></div><h3>${escapeHtml(item.title)}</h3>${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ''}${item.price ? `<strong class="ideas-card-price">S/ ${item.price.toFixed(2)}</strong>` : ''}${link}${use}</div></article>`;
+    return `<article class="ideas-card is-${purchase ? 'purchase' : 'inspiration'}" data-idea-id="${escapeHtml(item.id)}">${edit}${remove}<div class="ideas-card-media">${image}<div class="ideas-card-badges">${typeBadge}${sourceBadge}</div></div><div class="ideas-card-body"><div class="ideas-card-meta"><span>${escapeHtml(item.category)}</span></div><h3>${escapeHtml(item.title)}</h3>${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ''}${purchase && item.price ? `<strong class="ideas-card-price">S/ ${item.price.toFixed(2)}</strong>` : ''}${link}${use}</div></article>`;
   }).join('');
   empty.hidden = items.length > 0;
   board.querySelectorAll('[data-idea-use]').forEach((button) => {

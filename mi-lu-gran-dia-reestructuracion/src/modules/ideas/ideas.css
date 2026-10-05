@@ -224,3 +224,28 @@
   .ideas-board[data-card-size="compact"]{grid-template-columns:repeat(2,minmax(0,1fr))}
   .ideas-board[data-card-size="mini"]{grid-template-columns:repeat(3,minmax(0,1fr))}
 }
+
+
+/* Diferenciación visual de tipo — conserva miniaturas y densidades existentes */
+.ideas-card-media{position:relative;overflow:hidden}
+.ideas-card-badges{position:absolute;left:8px;right:8px;bottom:8px;z-index:1;display:flex;align-items:flex-end;justify-content:space-between;gap:6px;pointer-events:none}
+.ideas-card-type,.ideas-card-source{display:inline-flex;min-height:22px;align-items:center;padding:0 8px;border:1px solid rgba(255,255,255,.72);border-radius:999px;box-shadow:0 3px 10px rgba(35,32,28,.12);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font-size:7px;font-weight:850;letter-spacing:.055em;text-transform:uppercase}
+.ideas-card-source{max-width:48%;overflow:hidden;background:rgba(255,255,255,.9);color:#66615b;text-overflow:ellipsis;white-space:nowrap}
+.ideas-card.is-inspiration{border-color:rgba(176,116,128,.18)}
+.ideas-card.is-inspiration .ideas-card-media{border-bottom:3px solid rgba(176,116,128,.62)}
+.ideas-card.is-inspiration .ideas-card-type{background:rgba(251,240,243,.94);color:#8f626c}
+.ideas-card.is-inspiration .ideas-card-use{border-color:#ead9dd;background:#fbf4f6;color:#8a6570}
+.ideas-card.is-purchase{border-color:rgba(127,137,98,.2)}
+.ideas-card.is-purchase .ideas-card-media{border-bottom:3px solid rgba(127,137,98,.78)}
+.ideas-card.is-purchase .ideas-card-type{background:rgba(239,243,231,.95);color:#61704a}
+.ideas-card.is-purchase .ideas-card-price{font:850 13px/1 Arial,sans-serif;color:#5f6c49}
+.ideas-card.is-purchase .ideas-card-link{color:#5f6c49}
+.ideas-card.is-inspiration .ideas-card-link{color:#8a6570}
+.ideas-card-link{font-weight:850}
+.ideas-board[data-card-size="compact"] .ideas-card-type,.ideas-board[data-card-size="compact"] .ideas-card-source{min-height:19px;padding:0 6px;font-size:6px}
+.ideas-board[data-card-size="mini"] .ideas-card-badges{left:5px;right:5px;bottom:5px}
+.ideas-board[data-card-size="mini"] .ideas-card-type,.ideas-board[data-card-size="mini"] .ideas-card-source{min-height:17px;padding:0 5px;font-size:5.5px;letter-spacing:.035em}
+@media(max-width:700px){
+  .ideas-card-badges{left:7px;right:7px;bottom:7px}
+  .ideas-card-type,.ideas-card-source{min-height:20px;padding:0 7px;font-size:6.5px}
+}
