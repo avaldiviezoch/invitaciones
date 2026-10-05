@@ -2208,3 +2208,15 @@ Siguiente paso:
   - `RSVP_RATE_LIMIT`: namespace `1001`, limit `5`, period `60`.
 - Los secretos `TURNSTILE_SECRET_KEY` y `YOUTUBE_API_KEY` NO se versionan; permanecen únicamente en Cloudflare.
 - No se modificó Firebase, Firestore Rules, Auth, Storage ni BD.
+
+
+### Deploy DEV MGD-004 — 2026-10-05
+- El usuario confirmó que reemplazó el código de `migrandia-dev` por la versión endurecida de `cloudflare/migrandia-worker.js` y ejecutó Deploy en Cloudflare.
+- Bindings DEV ya confirmados previamente:
+  - `API_RATE_LIMIT`: namespace `1003`, limit `60`, period `60`.
+  - `RSVP_RATE_LIMIT`: namespace `1001`, limit `5`, period `60`.
+  - `TURNSTILE_SECRET_KEY`: presente.
+  - `YOUTUBE_API_KEY`: presente.
+- Wrangler DEV quedó versionado en GitHub con los dos rate-limit bindings.
+- Estado: desplegado según confirmación del usuario; pendiente QA funcional y de seguridad sobre el Worker DEV.
+- No se modificó Firebase, Firestore Rules, Auth, Storage ni BD.
