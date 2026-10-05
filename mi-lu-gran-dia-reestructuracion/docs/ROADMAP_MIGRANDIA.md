@@ -297,6 +297,8 @@ DEV PR: pendiente
 DEV commit: `187084474576120c80ade0fe699dff707def83ff` (Worker versionado + guard RSVP)
 
 QA pendiente:
+- Turnstile DEV usa la sitekey oficial de prueba `1x00000000000000000000AA`;
+- Worker DEV debe usar temporalmente la secret oficial de prueba `1x0000000000000000000000000000000AA` solo para QA;
 - usuario legítimo puede enviar RSVP;
 - usuario puede editar su propia respuesta;
 - otra sesión anónima no puede editarla;
@@ -305,6 +307,28 @@ QA pendiente:
 - móvil y desktop;
 - no se rompe Música;
 - no se rompe RSVP histórico.
+
+### Integración frontend DEV preparada
+
+La invitación de desarrollo `invitacion_0_2` ya incluye el guard antes de guardar RSVP:
+- carga Turnstile explícitamente;
+- usa `action = rsvp_submit`;
+- honeypot oculto;
+- mide tiempo mínimo de interacción;
+- llama a `https://migrandia-dev.avaldiviezoch.workers.dev/api/rsvp/verify`;
+- en DEV usa únicamente la sitekey oficial de prueba de Cloudflare;
+- si el guard falla o rate-limit responde 429, no continúa con el guardado RSVP.
+
+No se ha aplicado ninguna clave real ni ningún cambio de Firebase.
+
+### PUNTO DE INTERVENCIÓN CLOUDFLARE
+
+Para continuar el QA real de MGD-003 se necesita ahora configuración en la cuenta Cloudflare:
+1. desplegar/actualizar el Worker `migrandia-dev` con `cloudflare/migrandia-worker.js`;
+2. configurar `TURNSTILE_SECRET_KEY` con la clave de prueba durante QA;
+3. configurar el binding `RSVP_RATE_LIMIT` o equivalente disponible en la cuenta;
+4. verificar `/api/rsvp/verify` desde GitHub Pages DEV;
+5. después crear el widget Turnstile real para los dominios definitivos y sustituir las claves de prueba.
 
 Pendiente de autorización antes de tocar infraestructura protegida:
 - cualquier cambio de Firestore Rules;
