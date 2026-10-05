@@ -1,11 +1,11 @@
 # ROADMAP MIGRANDIA
 
 Última actualización: 2026-10-05
-Último commit DEV: pendiente de registrar en cada avance
-Último commit PROD: pendiente de registrar en cada avance
+Último commit DEV: 0322bdde6f72887de55edce799d3e08b09f8c995
+Último commit PROD: 9a1d5b6f088c610486a2aa02cf69c4687d623fd8
 Versión producción: pendiente de versionado formal
-Trabajo actual: preparación para marcha blanca + arquitectura multi-evento
-Próximo trabajo: MGD-001 a MGD-007 y definición MGD-012 a MGD-014
+Trabajo actual: MGD-001 — baseline y versión estable
+Próximo trabajo: MGD-002 — separación total DEV / PROD
 Bloqueadores: separación DEV/PROD de servicios, protección anti-abuso RSVP, observabilidad y E2E
 
 ## Regla maestra de mantenimiento
@@ -99,20 +99,55 @@ Lo que cambia según el evento:
 # BLOQUE A — PREPARAR MIGRANDIA PARA MÁS USUARIOS
 
 ## MGD-001 — Baseline y versión estable
-Estado: ⬜ PENDIENTE
+Estado: 🟠 QA
 Prioridad: CRÍTICA
 
 Crear una referencia de estabilidad antes de cambios estructurales.
 
-Debe registrar:
-- commit actual de desarrollo;
-- commit actual de producción;
-- versión Worker DEV;
-- versión Worker PROD;
-- Rules Firebase vigentes;
-- fecha de auditoría;
-- versión visible del app;
-- punto de restauración.
+### Baseline capturado — 2026-10-05
+
+- DEV repo: `avaldiviezoch/invitaciones`
+- DEV rama estable: `main`
+- DEV commit base: `0322bdde6f72887de55edce799d3e08b09f8c995`
+- DEV carpeta: `mi-lu-gran-dia-reestructuracion/`
+- PROD repo: `avaldiviezoch/Wedding`
+- PROD rama estable: `main`
+- PROD commit base: `9a1d5b6f088c610486a2aa02cf69c4687d623fd8`
+- PROD carpeta: `app_integral/`
+- Worker PROD configurado en repo: `wedding`
+- Worker PROD compatibility date: `2026-09-26`
+- Worker DEV conocido para previews/servicios: `migrandia-dev.avaldiviezoch.workers.dev`
+- Firestore Rules blob SHA en producción: `8cdfd32625f6fe636aac7d15dc27075fd9fa354d`
+- Versión visible formal del app: pendiente de MGD-007.
+- Punto de restauración DEV: commit DEV base indicado arriba.
+- Punto de restauración PROD: commit PROD base indicado arriba.
+
+### Validaciones realizadas
+- Se releen `AGENTS.md`, `ARQUITECTURA.md`, `CONTRATOS_MODULOS.md`, `REGLAS_NO_NEGOCIABLES.md`, `HISTORIAL_AVANCES.md` y este roadmap antes de iniciar cambios.
+- No se modificó Firebase, Firestore, Auth, Storage, datos reales ni contratos de persistencia.
+- No se modificó producción.
+- Se confirmó que producción usa Worker `wedding` en `app_integral/wrangler.jsonc`.
+- Se deja MGD-001 en QA documental hasta fusionar este registro a desarrollo main.
+
+DEV branch: `mgd/001-baseline-20261005`
+DEV PR: pendiente
+DEV commit: pendiente
+QA:
+- Documentación baseline: OK
+- Persistencia/Firebase: sin cambios
+- Producción: sin cambios
+
+PROD branch: no aplica
+PROD PR: no aplica
+PROD commit: no aplica
+
+Decisiones:
+- Este baseline será la referencia previa a MGD-002 y al resto de cambios de seguridad/arquitectura.
+- No se tocará producción para completar MGD-001.
+
+Pendiente:
+- Fusionar documentación del baseline a DEV main.
+- MGD-007 definirá el versionado visible formal.
 
 ---
 
