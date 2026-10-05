@@ -2055,3 +2055,131 @@ Pendiente QA DEV:
 3. validar Ideas Pinterest/Temu, image proxy y Música;
 4. probar origen no permitido, URL no permitida, payload grande, timeout y 429;
 5. solo después migrar a `migrandia-api` PROD.
+
+
+## Registro consolidado de cambios, Workers y bindings — 2026-10-05
+
+Este bloque consolida los cambios realizados y las configuraciones de Cloudflare/Firebase trabajadas durante la sesión para evitar pérdida de contexto.
+
+### Workers y separación DEV / PROD
+- Frontend PROD: Worker `wedding` continúa como Worker de assets estáticos para `migrandiapp.com`; no se convierte en API.
+- API DEV: `migrandia-dev`.
+- API PROD: `migrandia-api`.
+- Endpoint PROD utilizado por RSVP: `https://migrandia-api.avaldiviezoch.workers.dev/api/rsvp/verify`.
+- Objetivo futuro: mover la API productiva a `api.migrandiapp.com`.
+- Regla arquitectónica: frontend estático y API permanecen separados.
+
+### Bindings y secretos Cloudflare
+**DEV — `migrandia-dev`**
+- `TURNSTILE_SECRET_KEY`: configurado como secret. No registrar ni exponer su valor.
+- `RSVP_RATE_LIMIT`:
+  - Namespace: `1001`
+  - Limit: `5`
+  - Period: `60 seconds`
+  - Uso: protección del endpoint RSVP DEV.
+- `API_RATE_LIMIT`:
+  - Namespace reservado/definido: `1003`
+  - Limit: `60`
+  - Period: `60 seconds`
+  - Uso: `/api/link-preview`, `/api/image-proxy`, `/api/music-preview`.
+  - Estado al registrar este bloque: parámetros definidos; pendiente confirmar en Cloudflare que el binding fue guardado.
+
+**PROD — `migrandia-api`**
+- `TURNSTILE_SECRET_KEY`: configurado como secret rotado. No registrar ni exponer su valor.
+- `RSVP_RATE_LIMIT`:
+  - Namespace: `1002`
+  - Limit: `5`
+  - Period: `60 seconds`
+  - Uso: protección del endpoint RSVP productivo.
+- `API_RATE_LIMIT`: todavía no desplegado/configurado en PROD; solo se hará después del QA completo de MGD-004 en DEV.
+- `YOUTUBE_API_KEY`: no asumir configurado; sigue pendiente si se requiere la ruta de playlist vía API oficial.
+
+### Turnstile RSVP
+- Widget PROD creado como `Migrandia RSVP PROD`.
+- Hostnames autorizados:
+  - `migrandiapp.com`
+  - `www.migrandiapp.com`
+  - `avaldiviezoch.github.io`
+- Site key público PROD: `0x4AAAAAAF0hdpk8eH91dghw`.
+- El secret original expuesto accidentalmente fue rotado y reemplazado; nunca almacenar el valor del secret en repositorio/documentación.
+- DEV usa el flujo de prueba/validación con Turnstile Managed.
+- Modo UX aprobado: silencioso en flujo normal, sin mensaje técnico ni CAPTCHA visual cuando no hay desafío.
+- Rate-limit muestra solo mensaje amigable al usuario.
+
+### Firebase App Check
+- Proveedor: reCAPTCHA Enterprise / Fraud Defense.
+- App web: `migrandiaweb`.
+- Clave pública App Check: `6LeukOAtAAAAAJODsmEu9XyMLnyb6JH9TNYizFHk`.
+- TTL: 1 hora.
+- Dominios:
+  - `migrandiapp.com`
+  - `www.migrandiapp.com`
+  - `avaldiviezoch.github.io`
+- Auto refresh habilitado.
+- App Check se inicializa tanto en la app Firebase por defecto como en la app anónima `mgd-rsvp-anonymous` para los clientes RSVP correspondientes.
+- Enforcement permanece desactivado hasta observar tráfico suficientemente limpio y reducir solicitudes no verificadas.
+- No se modificaron Firestore Rules, Auth, Storage ni esquema de BD como parte de estos cambios.
+
+### Cambios RSVP DEV
+- PR #70: corrección del botón “Agregar al tablero” de Ideas al esperar el preview asíncrono antes de validar título/imagen.
+- PR #71: cache bust de Ideas/dashboard; DEV quedó funcionando.
+- PR #72: App Check para clientes RSVP directos `invitacion_0_2` y `invitacion_0_3`.
+- PR #73: primera versión silenciosa del guard Turnstile en DEV.
+- PR #74: corrección del caso en que Turnstile se renderizaba dentro del panel RSVP inicialmente oculto.
+  - lee token también mediante `turnstile.getResponse()`;
+  - si el token no está listo al enviar, reinicia el widget ya con el panel visible;
+  - espera silenciosa hasta 8 s;
+  - no muestra mensajes técnicos al invitado;
+  - cache bust en `invitacion_0_2` y `invitacion_0_3`.
+- Commit merge DEV PR #74: `efd995e1ce0de8d471c2339ee3450486adc10355`.
+- QA manual DEV:
+  - envío legítimo correcto;
+  - sin mensaje técnico;
+  - sin Turnstile visible en flujo normal;
+  - confirmación final correcta;
+  - rate-limit probado y mensaje amigable correcto.
+
+### Cambios RSVP PROD
+- PR #531: integración App Check en producción.
+  - Commit: `8095ab1b39b28718a97897e5fecd8713a6af2bf3`.
+- PR #532: primer intento de Turnstile productivo.
+  - Se detectó mala UX por mensaje visible de verificación.
+- PR #533: hotfix para restaurar estabilidad productiva mientras se corregía el flujo silencioso.
+  - Commit: `ad642b317ae4612a48a475c27ef232ef65f9ead7`.
+- PR #534: reintroducción controlada del guard silencioso ya validado en DEV.
+  - Commit PROD: `a2be5675a22199e244ae3f981e1196250911516e`.
+  - Resultado QA PROD: RSVP correcto, sin mensaje técnico, sin CAPTCHA visible, Turnstile + rate-limit activos.
+- MGD-003 queda funcionalmente desplegado; Enforcement de App Check sigue pendiente por decisión controlada.
+
+### MGD-004 — Hardening Worker DEV
+- Auditoría inicial detectó CORS abierto, ausencia de rate-limit general, validaciones de host permisivas, falta de timeout/límites y redirects sin revalidación.
+- PR #75: hardening del Worker en DEV.
+- Commit merge DEV PR #75: `e18b281628a590cd625e618b1fedbb8c012797ce`.
+- Cambios:
+  - CORS de previews/música/imágenes pasa de `*` a allowlist.
+  - soporte de `API_RATE_LIMIT` separado de `RSVP_RATE_LIMIT`;
+  - allowlist estricta de hosts musicales;
+  - timeout upstream de 8 s;
+  - HTML limitado a 1.5 MB;
+  - JSON limitado a 1 MB;
+  - imágenes proxied limitadas a 6 MB;
+  - URL objetivo limitada a 2048 caracteres;
+  - revalidación de redirect final para Pinterest image proxy;
+  - revalidación de redirects de YouTube y Apple Music;
+  - errores públicos normalizados;
+  - errores con `Cache-Control: no-store`;
+  - rutas desconocidas devuelven 404 real;
+  - health check disponible en `/` y `/health`.
+- No se tocó Firebase, Firestore Rules, Auth, Storage ni estructura de BD.
+
+### Próximo QA MGD-004
+1. Confirmar en Cloudflare DEV que `API_RATE_LIMIT` quedó guardado con namespace `1003`, limit `60`, period `60 seconds`.
+2. Desplegar/confirmar el Worker DEV con el código de `main`.
+3. Probar Pinterest, Temu, image proxy y Música desde la app DEV.
+4. Probar origen no permitido.
+5. Probar dominio musical falso.
+6. Probar URL demasiado larga.
+7. Probar timeout/upstream lento.
+8. Probar límite de tamaño.
+9. Probar 429 del `API_RATE_LIMIT`.
+10. Solo después preparar el pase a `migrandia-api` PROD.
