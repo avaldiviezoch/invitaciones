@@ -2300,3 +2300,9 @@ Pendiente para cierre definitivo:
 - Confirmación del usuario: el Worker `migrandia-api` fue desplegado en Cloudflare con el código endurecido validado previamente en DEV.
 - Binding `API_RATE_LIMIT` PROD ya creado (namespace `1004`, limit `60`, period `60`).
 - Pendiente únicamente smoke test productivo final antes de marcar MGD-004 como 🟢 PRODUCCIÓN.
+
+
+### Smoke test PROD MGD-004 — health — 2026-10-05
+- Usuario confirmó `/health` en `migrandia-api` con `ok: true`.
+- Resultado: Worker productivo responde correctamente después del despliegue endurecido.
+- Pendiente: validar una función real (Ideas o Música) y confirmar rate limit 429 en PROD.
