@@ -182,8 +182,8 @@ Módulos migrados:
 Los módulos ya no contienen `migrandia-dev.avaldiviezoch.workers.dev` hardcodeado.
 
 DEV branch: `mgd/002-env-separation-20261005`
-DEV PR: pendiente
-DEV commit: pendiente
+DEV PR: #68
+DEV commit: `303aa8d27c3fa16c6190c10e43f4ae1303b1b0d0`
 
 QA requerido antes de aprobar DEV:
 - Ideas Pinterest preview
