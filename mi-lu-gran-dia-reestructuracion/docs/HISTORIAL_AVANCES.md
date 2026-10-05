@@ -1063,3 +1063,12 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Se reemplazaron los glifos del catálogo de Distribución por los SVG personalizados Nivel 1 en desktop y móvil.
 - Los SVG se renderizan como máscaras monocromáticas para respetar el color visual del sistema sin alterar los archivos fuente.
 - Alcance limitado a botones del catálogo y áreas dibujables; no se modificó la representación de objetos dentro del plano, persistencia, Firebase ni geometría.
+
+
+## 2026-10-05 — MGD-002: configuración central de servicios por ambiente
+- Se creó `src/services/runtime-environment.js` como único propietario de los orígenes DEV/PROD de servicios HTTP.
+- Ideas dejó de hardcodear el Worker DEV para `/api/link-preview` y `/api/image-proxy`.
+- Música dejó de hardcodear el Worker DEV para `/api/music-preview`.
+- GitHub Pages/localhost continúan resolviendo al Worker DEV; dominios productivos resuelven al origen PROD configurado.
+- No se modificaron Firebase, Firestore Rules, Auth, Storage, datos reales ni persistencia.
+- Antes de migrar esta fase a Wedding debe validarse que el Worker PROD expone los tres endpoints usados por Ideas y Música.

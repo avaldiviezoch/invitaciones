@@ -1,6 +1,7 @@
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js';
 import { readUiPreference, writeUiPreference } from '../../services/ui-preferences.js?v=1';
 import { normalizeWeddingRole } from '../../core/app/permissions.js';
+import { serviceUrl } from '../../services/runtime-environment.js';
 
 const TEMPLATE_URL = new URL('./index.html?v=4', import.meta.url);
 const STORAGE_KEY = 'planificador_bodas_ideas_v1';
@@ -58,7 +59,7 @@ async function resolveRemotePreview(value = '') {
   const source = normalizeUrl(value);
   if (!source || !previewProvider(source)) return null;
   try {
-    const endpoint = `https://migrandia-dev.avaldiviezoch.workers.dev/api/link-preview?url=${encodeURIComponent(source)}`;
+    const endpoint = serviceUrl('/api/link-preview', { url: source });
     const response = await fetch(endpoint, { mode: 'cors', credentials: 'omit' });
     if (!response.ok) return null;
     const data = await response.json();
@@ -66,7 +67,7 @@ async function resolveRemotePreview(value = '') {
     const originalImage = normalizeUrl(data.image);
     return {
       image: originalImage
-        ? `https://migrandia-dev.avaldiviezoch.workers.dev/api/image-proxy?url=${encodeURIComponent(originalImage)}`
+        ? serviceUrl('/api/image-proxy', { url: originalImage })
         : '',
       title: String(data.title || '').trim()
     };
