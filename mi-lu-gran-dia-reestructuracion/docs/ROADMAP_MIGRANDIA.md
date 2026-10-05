@@ -1976,3 +1976,11 @@ reducir dependencia de soporte manual por WhatsApp o mensajes directos.
 - No apareció desafío Turnstile visible en el flujo normal.
 - Se mostró correctamente el estado final de éxito con los 2 pases nominales registrados.
 - Resultado: UX normal aprobada para el flujo legítimo; falta QA de rate-limit/abuso antes de volver a preparar producción.
+
+
+### QA DEV rate-limit — 2026-10-05
+- Flujo de abuso controlado validado manualmente en DEV.
+- Tras varios envíos seguidos, el rate limiter bloquea correctamente.
+- La UX muestra un mensaje amigable sin exponer códigos 429 ni detalles técnicos de Cloudflare.
+- Resultado: flujo legítimo + flujo de abuso aprobados en DEV.
+- Siguiente paso: preparar migración controlada del guard silencioso a producción.
