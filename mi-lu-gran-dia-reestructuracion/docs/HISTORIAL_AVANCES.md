@@ -1028,3 +1028,14 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Roles `editor`, `provider` y `viewer` conservan acceso de lectura al tablero, filtros, búsqueda, tamaño visual y enlaces externos.
 - Los controles de escritura se ocultan en modo solo lectura y las funciones de mutación quedan además protegidas en JavaScript.
 - No se modifican Firebase Rules, Auth, Storage, colecciones, claves, payloads ni persistencia.
+
+
+## 2026-10-04 — Ideas: diferenciación visual entre inspiración y compra
+
+- Se mantiene intacto el grid existente, las miniaturas 4:3 y las cuatro densidades visuales del tablero.
+- Cada tarjeta muestra ahora un badge visible sobre la miniatura: `Inspiración` o `Por comprar`.
+- Se añade una segunda señal de origen derivada únicamente de la URL: Pinterest, Temu, AliExpress o dominio equivalente; no se persiste un campo nuevo.
+- Inspiración usa un acento rosado sobrio y Compra un acento oliva, manteniendo la paleta actual del módulo.
+- Los enlaces cambian de microcopy según intención: `Ver referencia` para inspiración y `Ver producto` para compra.
+- El precio gana jerarquía únicamente en tarjetas de compra.
+- No se modifican imágenes guardadas, URLs, IDs, datos, Firebase, Firestore, Storage ni el contrato `planificador_bodas_ideas_v1`.
