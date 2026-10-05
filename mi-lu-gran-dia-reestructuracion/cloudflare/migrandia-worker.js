@@ -1,14 +1,133 @@
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
-
-const RSVP_ALLOWED_ORIGINS = new Set([
+const APP_ALLOWED_ORIGINS = new Set([
   "https://migrandiapp.com",
   "https://www.migrandiapp.com",
   "https://avaldiviezoch.github.io",
 ]);
+
+const RSVP_ALLOWED_ORIGINS = APP_ALLOWED_ORIGINS;
+
+const API_PATHS = new Set([
+  "/api/link-preview",
+  "/api/image-proxy",
+  "/api/music-preview",
+]);
+
+const MAX_TARGET_URL_LENGTH = 2048;
+const MAX_HTML_BYTES = 1_500_000;
+const MAX_IMAGE_BYTES = 6_000_000;
+const MAX_JSON_BYTES = 1_000_000;
+const UPSTREAM_TIMEOUT_MS = 8_000;
+
+function appCorsHeaders(origin = "") {
+  const headers = {
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Vary": "Origin",
+  };
+  if (APP_ALLOWED_ORIGINS.has(origin)) {
+    headers["Access-Control-Allow-Origin"] = origin;
+  }
+  return headers;
+}
+
+function withAppCors(response, origin = "") {
+  const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(appCorsHeaders(origin))) {
+    headers.set(key, value);
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
+function hostMatches(host, domain) {
+  const normalized = String(host || "").toLowerCase();
+  const target = String(domain || "").toLowerCase();
+  return normalized === target || normalized.endsWith("." + target);
+}
+
+function clientIp(request) {
+  return cleanSecurityValue(request.headers.get("CF-Connecting-IP"), 80) || "unknown";
+}
+
+async function applyApiGuards(request, env, pathname) {
+  const origin = requestOrigin(request);
+  if (origin && !APP_ALLOWED_ORIGINS.has(origin)) {
+    return withAppCors(
+      json({ ok: false, error: "Origen no permitido." }, 403),
+      origin
+    );
+  }
+
+  if (env.API_RATE_LIMIT?.limit) {
+    const key = `api:${pathname}:${clientIp(request)}`;
+    const { success } = await env.API_RATE_LIMIT.limit({ key });
+    if (!success) {
+      return withAppCors(
+        json({ ok: false, error: "Demasiadas solicitudes. Inténtalo nuevamente en un momento." }, 429),
+        origin
+      );
+    }
+  }
+
+  return null;
+}
+
+async function fetchWithTimeout(resource, options = {}, timeoutMs = UPSTREAM_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort("timeout"), timeoutMs);
+  try {
+    return await fetch(resource, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function readBytesLimited(response, maxBytes) {
+  const declared = Number(response.headers.get("Content-Length") || 0);
+  if (Number.isFinite(declared) && declared > maxBytes) {
+    throw new Error("upstream-too-large");
+  }
+  if (!response.body) return new Uint8Array();
+
+  const reader = response.body.getReader();
+  const chunks = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > maxBytes) {
+        await reader.cancel("size-limit");
+        throw new Error("upstream-too-large");
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const output = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    output.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return output;
+}
+
+async function readTextLimited(response, maxBytes = MAX_HTML_BYTES) {
+  const bytes = await readBytesLimited(response, maxBytes);
+  return new TextDecoder("utf-8").decode(bytes);
+}
+
+async function readJsonLimited(response, maxBytes = MAX_JSON_BYTES) {
+  const text = await readTextLimited(response, maxBytes);
+  return JSON.parse(text);
+}
 
 function securityJson(data, status = 200, origin = "") {
   const headers = {
@@ -49,7 +168,7 @@ async function verifyTurnstile(turnstileToken, request, env) {
   body.set("response", turnstileToken);
   if (remoteip) body.set("remoteip", remoteip);
 
-  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+  const response = await fetchWithTimeout("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
     method: "POST",
     body,
   });
@@ -58,7 +177,7 @@ async function verifyTurnstile(turnstileToken, request, env) {
     return { ok: false, status: 502, reason: "turnstile-upstream" };
   }
 
-  const result = await response.json();
+  const result = await readJsonLimited(response);
   if (!result?.success) {
     return {
       ok: false,
@@ -131,9 +250,10 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data, null, 2), {
     status,
     headers: {
-      ...CORS,
       "Content-Type": "application/json; charset=UTF-8",
-      "Cache-Control": "public, max-age=3600",
+      "Cache-Control": status >= 200 && status < 300
+        ? "public, max-age=3600"
+        : "no-store",
     },
   });
 }
@@ -238,7 +358,7 @@ async function pinterestPreview(target) {
   }
 
   try {
-    const response = await fetch(target, {
+    const response = await fetchWithTimeout(target, {
       redirect: "follow",
       headers: {
         "User-Agent":
@@ -270,7 +390,7 @@ async function pinterestPreview(target) {
       );
     }
 
-    const html = await response.text();
+    const html = await readTextLimited(response);
 
     const image =
       meta(html, "og:image") ||
@@ -308,9 +428,7 @@ async function pinterestPreview(target) {
     return json(
       {
         ok: false,
-        error:
-          error?.message ||
-          "No se pudo resolver Pinterest.",
+        error: "No se pudo resolver Pinterest.",
       },
       500
     );
@@ -329,7 +447,7 @@ async function pinterestImageProxy(target) {
   }
 
   try {
-    const response = await fetch(target, {
+    const response = await fetchWithTimeout(target, {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (compatible; MigrandiaPreview/1.0)",
@@ -349,6 +467,17 @@ async function pinterestImageProxy(target) {
       );
     }
 
+    const finalImageUrl = response.url;
+    if (!isPinterestImage(finalImageUrl)) {
+      return json(
+        {
+          ok: false,
+          error: "La imagen de Pinterest redirigió a un dominio no permitido.",
+        },
+        400
+      );
+    }
+
     const contentType =
       response.headers.get("Content-Type") || "";
 
@@ -362,10 +491,10 @@ async function pinterestImageProxy(target) {
       );
     }
 
-    return new Response(response.body, {
+    const imageBytes = await readBytesLimited(response, MAX_IMAGE_BYTES);
+    return new Response(imageBytes, {
       status: 200,
       headers: {
-        ...CORS,
         "Content-Type": contentType,
         "Cache-Control": "public, max-age=86400",
       },
@@ -374,9 +503,7 @@ async function pinterestImageProxy(target) {
     return json(
       {
         ok: false,
-        error:
-          error?.message ||
-          "No se pudo cargar la imagen.",
+        error: "No se pudo cargar la imagen.",
       },
       500
     );
@@ -561,7 +688,7 @@ async function temuPreview(target) {
   }
 
   try {
-    const response = await fetch(target, {
+    const response = await fetchWithTimeout(target, {
       redirect: "follow",
       headers: {
         "User-Agent":
@@ -596,7 +723,7 @@ async function temuPreview(target) {
       );
     }
 
-    const html = await response.text();
+    const html = await readTextLimited(response);
 
     const directImage =
       temuImageFromUrl(finalUrl) ||
@@ -662,9 +789,7 @@ async function temuPreview(target) {
       {
         ok: false,
         provider: "temu",
-        error:
-          error?.message ||
-          "No se pudo resolver el enlace de Temu.",
+        error: "No se pudo resolver el enlace de Temu.",
       },
       500
     );
@@ -683,7 +808,7 @@ async function temuImageProxy(target) {
   }
 
   try {
-    const response = await fetch(target, {
+    const response = await fetchWithTimeout(target, {
       redirect: "follow",
       headers: {
         "User-Agent":
@@ -730,10 +855,10 @@ async function temuImageProxy(target) {
       );
     }
 
-    return new Response(response.body, {
+    const imageBytes = await readBytesLimited(response, MAX_IMAGE_BYTES);
+    return new Response(imageBytes, {
       status: 200,
       headers: {
-        ...CORS,
         "Content-Type": contentType,
         "Cache-Control": "public, max-age=86400",
       },
@@ -742,9 +867,7 @@ async function temuImageProxy(target) {
     return json(
       {
         ok: false,
-        error:
-          error?.message ||
-          "No se pudo cargar la imagen de Temu.",
+        error: "No se pudo cargar la imagen de Temu.",
       },
       500
     );
@@ -797,23 +920,24 @@ async function imageProxy(target) {
    MÚSICA
    ========================================================= */
 
+function isYouTubeHost(host) {
+  return hostMatches(host, "youtube.com") || String(host || "").toLowerCase() === "youtu.be";
+}
+
+function isSpotifyHost(host) {
+  return hostMatches(host, "spotify.com");
+}
+
+function isAppleMusicHost(host) {
+  return hostMatches(host, "music.apple.com");
+}
+
 function isMusicUrl(value) {
   try {
     const url = new URL(value);
-
-    if (!["http:", "https:"].includes(url.protocol)) {
-      return false;
-    }
-
+    if (!["http:", "https:"].includes(url.protocol)) return false;
     const host = url.hostname.toLowerCase();
-
-    return (
-      host.includes("youtube.com") ||
-      host === "youtu.be" ||
-      host.includes("music.youtube.com") ||
-      host.includes("spotify.com") ||
-      host.includes("music.apple.com")
-    );
+    return isYouTubeHost(host) || isSpotifyHost(host) || isAppleMusicHost(host);
   } catch {
     return false;
   }
@@ -821,26 +945,11 @@ function isMusicUrl(value) {
 
 function musicPlatform(value) {
   try {
-    const url = new URL(value);
-    const host = url.hostname.toLowerCase();
-
-    if (
-      host.includes("youtube.com") ||
-      host === "youtu.be" ||
-      host.includes("music.youtube.com")
-    ) {
-      return "youtube";
-    }
-
-    if (host.includes("spotify.com")) {
-      return "spotify";
-    }
-
-    if (host.includes("music.apple.com")) {
-      return "apple";
-    }
+    const host = new URL(value).hostname.toLowerCase();
+    if (isYouTubeHost(host)) return "youtube";
+    if (isSpotifyHost(host)) return "spotify";
+    if (isAppleMusicHost(host)) return "apple";
   } catch {}
-
   return "";
 }
 
@@ -849,57 +958,22 @@ function musicType(value) {
     const url = new URL(value);
     const host = url.hostname.toLowerCase();
 
-    // YouTube / YouTube Music
-    if (
-      host.includes("youtube.com") ||
-      host === "youtu.be" ||
-      host.includes("music.youtube.com")
-    ) {
-      if (url.searchParams.get("list")) {
-        return "playlist";
-      }
-
-      if (url.searchParams.get("v")) {
-        return "track";
-      }
-
-      if (host === "youtu.be") {
-        return "track";
-      }
+    if (isYouTubeHost(host)) {
+      if (url.searchParams.get("list")) return "playlist";
+      if (url.searchParams.get("v") || host === "youtu.be") return "track";
     }
 
-    // Spotify
-    if (host.includes("spotify.com")) {
-      const parts = url.pathname
-        .split("/")
-        .filter(Boolean);
-
-      if (parts[0] === "playlist") {
-        return "playlist";
-      }
-
-      if (parts[0] === "album") {
-        return "album";
-      }
-
-      if (parts[0] === "track") {
-        return "track";
-      }
+    if (isSpotifyHost(host)) {
+      const parts = url.pathname.split("/").filter(Boolean);
+      if (parts[0] === "playlist") return "playlist";
+      if (parts[0] === "album") return "album";
+      if (parts[0] === "track") return "track";
     }
 
-    // Apple Music
-    if (host.includes("music.apple.com")) {
-      if (url.pathname.includes("/playlist/")) {
-        return "playlist";
-      }
-
-      if (url.pathname.includes("/album/")) {
-        return "album";
-      }
-
-      if (url.pathname.includes("/song/")) {
-        return "track";
-      }
+    if (isAppleMusicHost(host)) {
+      if (url.pathname.includes("/playlist/")) return "playlist";
+      if (url.pathname.includes("/album/")) return "album";
+      if (url.pathname.includes("/song/")) return "track";
     }
   } catch {}
 
@@ -930,7 +1004,7 @@ async function youtubePlaylistPreview(target, apiKey) {
     return {
       ok: false,
       error:
-        "Falta configurar el Secret YOUTUBE_API_KEY en Cloudflare.",
+        "No se pudo consultar YouTube en este momento.",
       provider: "youtube",
       type: "playlist",
     };
@@ -944,33 +1018,22 @@ async function youtubePlaylistPreview(target, apiKey) {
     "&key=" +
     encodeURIComponent(apiKey);
 
-  const response = await fetch(apiUrl, {
+  const response = await fetchWithTimeout(apiUrl, {
     headers: {
       Accept: "application/json",
     },
   });
 
   if (!response.ok) {
-    let detail = "";
-
-    try {
-      const data = await response.json();
-      detail =
-        data?.error?.message ||
-        "";
-    } catch {}
-
     return {
       ok: false,
-      error:
-        detail ||
-        `YouTube API respondió ${response.status}.`,
+      error: "No se pudo consultar YouTube en este momento.",
       provider: "youtube",
       type: "playlist",
     };
   }
 
-  const data = await response.json();
+  const data = await readJsonLimited(response);
   const playlist = data?.items?.[0];
 
   if (!playlist) {
@@ -1042,7 +1105,7 @@ async function musicPreview(target, env) {
       }
 
       try {
-        const response = await fetch(target, {
+        const response = await fetchWithTimeout(target, {
           redirect: "follow",
           headers: {
             "User-Agent":
@@ -1055,7 +1118,10 @@ async function musicPreview(target, env) {
         });
 
         if (response.ok) {
-          const html = await response.text();
+          if (!isMusicUrl(response.url) || musicPlatform(response.url) !== "youtube") {
+            return json({ ok: false, error: "YouTube redirigió a un dominio no permitido." }, 400);
+          }
+          const html = await readTextLimited(response);
 
           const image =
             meta(html, "og:image") ||
@@ -1098,7 +1164,7 @@ async function musicPreview(target, env) {
       type === "track"
     ) {
       try {
-        const response = await fetch(target, {
+        const response = await fetchWithTimeout(target, {
           redirect: "follow",
           headers: {
             "User-Agent":
@@ -1111,7 +1177,10 @@ async function musicPreview(target, env) {
         });
 
         if (response.ok) {
-          const html = await response.text();
+          if (!isMusicUrl(response.url) || musicPlatform(response.url) !== "youtube") {
+            return json({ ok: false, error: "YouTube redirigió a un dominio no permitido." }, 400);
+          }
+          const html = await readTextLimited(response);
 
           const image =
             meta(html, "og:image") ||
@@ -1170,13 +1239,13 @@ async function musicPreview(target, env) {
 
     // Spotify
     if (provider === "spotify") {
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         "https://open.spotify.com/oembed?url=" +
           encodeURIComponent(target)
       );
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await readJsonLimited(response);
 
         return json({
           ok: true,
@@ -1192,7 +1261,7 @@ async function musicPreview(target, env) {
 
     // Apple Music
     if (provider === "apple") {
-      const response = await fetch(target, {
+      const response = await fetchWithTimeout(target, {
         redirect: "follow",
         headers: {
           "User-Agent":
@@ -1205,7 +1274,10 @@ async function musicPreview(target, env) {
       });
 
       if (response.ok) {
-        const html = await response.text();
+        if (!isMusicUrl(response.url) || musicPlatform(response.url) !== "apple") {
+          return json({ ok: false, error: "Apple Music redirigió a un dominio no permitido." }, 400);
+        }
+        const html = await readTextLimited(response);
 
         const image =
           meta(html, "og:image") ||
@@ -1243,9 +1315,7 @@ async function musicPreview(target, env) {
     return json(
       {
         ok: false,
-        error:
-          error?.message ||
-          "No se pudo resolver la referencia musical.",
+        error: "No se pudo resolver la referencia musical.",
         provider,
         type,
       },
@@ -1261,10 +1331,11 @@ async function musicPreview(target, env) {
 export default {
   async fetch(request, env) {
     const requestUrl = new URL(request.url);
+    const pathname = requestUrl.pathname;
+    const origin = requestOrigin(request);
 
     if (request.method === "OPTIONS") {
-      const origin = requestOrigin(request);
-      if (requestUrl.pathname === "/api/rsvp/verify") {
+      if (pathname === "/api/rsvp/verify") {
         if (!RSVP_ALLOWED_ORIGINS.has(origin)) {
           return new Response(null, { status: 403 });
         }
@@ -1279,104 +1350,81 @@ export default {
         });
       }
 
-      return new Response(null, { headers: CORS });
+      if (API_PATHS.has(pathname)) {
+        if (!APP_ALLOWED_ORIGINS.has(origin)) {
+          return new Response(null, { status: 403 });
+        }
+        return new Response(null, { headers: appCorsHeaders(origin) });
+      }
+
+      return new Response(null, { status: 404 });
     }
 
-    if (requestUrl.pathname === "/api/rsvp/verify") {
+    if (pathname === "/api/rsvp/verify") {
       if (request.method !== "POST") {
-        return securityJson({ ok: false, error: "Método no permitido." }, 405, requestOrigin(request));
+        return securityJson({ ok: false, error: "Método no permitido." }, 405, origin);
       }
       return rsvpVerify(request, env);
     }
 
-    if (request.method !== "GET") {
-      return json(
-        {
-          ok: false,
-          error: "Método no permitido.",
-        },
-        405
+    if (pathname === "/" || pathname === "/health") {
+      if (request.method !== "GET") {
+        return json({ ok: false, error: "Método no permitido." }, 405);
+      }
+      return withAppCors(
+        json({
+          ok: true,
+          service: "Migrandia API",
+          providers: {
+            linkPreview: ["pinterest", "temu"],
+            music: ["youtube", "spotify", "apple"],
+          },
+        }),
+        origin
       );
     }
 
-    // Pinterest + Temu — link preview
-    if (
-      requestUrl.pathname ===
-      "/api/link-preview"
-    ) {
-      const target =
-        requestUrl.searchParams.get("url");
-
-      if (!target) {
-        return json(
-          {
-            ok: false,
-            error: "Falta el parámetro url.",
-          },
-          400
-        );
-      }
-
-      return linkPreview(target);
+    if (!API_PATHS.has(pathname)) {
+      return withAppCors(
+        json({ ok: false, error: "Ruta no encontrada." }, 404),
+        origin
+      );
     }
 
-    // Pinterest + Temu — image proxy
-    if (
-      requestUrl.pathname ===
-      "/api/image-proxy"
-    ) {
-      const target =
-        requestUrl.searchParams.get("url");
-
-      if (!target) {
-        return json(
-          {
-            ok: false,
-            error: "Falta el parámetro url.",
-          },
-          400
-        );
-      }
-
-      return imageProxy(target);
+    if (request.method !== "GET") {
+      return withAppCors(
+        json({ ok: false, error: "Método no permitido." }, 405),
+        origin
+      );
     }
 
-    // Música — preview
-    if (
-      requestUrl.pathname ===
-      "/api/music-preview"
-    ) {
-      const target =
-        requestUrl.searchParams.get("url");
+    const guardResponse = await applyApiGuards(request, env, pathname);
+    if (guardResponse) return guardResponse;
 
-      if (!target) {
-        return json(
-          {
-            ok: false,
-            error: "Falta el parámetro url.",
-          },
-          400
-        );
-      }
-
-      return musicPreview(target, env);
+    const target = requestUrl.searchParams.get("url") || "";
+    if (!target) {
+      return withAppCors(
+        json({ ok: false, error: "Falta el parámetro url." }, 400),
+        origin
+      );
     }
 
-    // Health check
-    return json({
-      ok: true,
-      service: "Migrandia Link Preview",
-      providers: {
-        linkPreview: [
-          "pinterest",
-          "temu",
-        ],
-        music: [
-          "youtube",
-          "spotify",
-          "apple",
-        ],
-      },
-    });
+    if (target.length > MAX_TARGET_URL_LENGTH) {
+      return withAppCors(
+        json({ ok: false, error: "La URL excede el tamaño permitido." }, 400),
+        origin
+      );
+    }
+
+    let response;
+    if (pathname === "/api/link-preview") {
+      response = await linkPreview(target);
+    } else if (pathname === "/api/image-proxy") {
+      response = await imageProxy(target);
+    } else {
+      response = await musicPreview(target, env);
+    }
+
+    return withAppCors(response, origin);
   },
 };

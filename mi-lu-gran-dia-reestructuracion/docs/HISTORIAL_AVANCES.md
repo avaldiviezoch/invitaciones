@@ -1107,3 +1107,14 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Se mantuvo Anonymous Auth y la persistencia actual sin cambios de esquema.
 - Se actualizaron las versiones de carga de ambos widgets para forzar el JS nuevo.
 - Producción todavía no fue modificada; enforcement global permanece desactivado.
+
+
+## 2026-10-05 — MGD-004: hardening inicial del Worker en DEV
+- CORS cerrado por allowlist para endpoints de preview/música/imágenes.
+- Rate limiting general preparado vía `API_RATE_LIMIT`.
+- Allowlist estricta de hosts para música.
+- Timeouts y límites de tamaño para HTML, JSON e imágenes.
+- Revalidación de redirects en proveedores.
+- Errores públicos normalizados y errores sin caché.
+- 404 real para rutas inexistentes.
+- Sin cambios en Firebase Rules, Auth, Storage ni estructura de BD.

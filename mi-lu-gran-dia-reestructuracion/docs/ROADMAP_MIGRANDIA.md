@@ -2028,3 +2028,30 @@ reducir dependencia de soporte manual por WhatsApp o mensajes directos.
 - Rate limit y Turnstile quedan activos mediante `migrandia-api`.
 - App Check continúa activo; Enforcement aún no se habilita hasta observar una ventana limpia de tráfico.
 - MGD-003 queda funcionalmente desplegado en producción; el cierre definitivo depende únicamente de la decisión posterior sobre Enforcement de App Check.
+
+
+### Implementación DEV MGD-004 — 2026-10-05
+Se endureció `cloudflare/migrandia-worker.js` sin tocar Firebase ni datos.
+
+Cambios:
+- CORS de previews/música/imágenes pasa de `*` a allowlist de Migrandia + GitHub Pages DEV.
+- Se agrega soporte de rate limit general mediante binding `API_RATE_LIMIT`, separado de `RSVP_RATE_LIMIT`.
+- Validación de dominios musicales pasa a host exacto/subdominio válido; se eliminan comparaciones permisivas con `includes()`.
+- Todos los fetch externos usan timeout de 8 s.
+- HTML externo limitado a 1.5 MB.
+- JSON externo limitado a 1 MB.
+- Imágenes proxied limitadas a 6 MB.
+- Pinterest image proxy revalida dominio final después de redirect.
+- YouTube y Apple Music revalidan dominio final después de redirect.
+- Se normalizan errores públicos para no exponer mensajes internos/upstream.
+- Respuestas de error usan `Cache-Control: no-store`.
+- URLs objetivo limitadas a 2048 caracteres.
+- Rutas desconocidas devuelven 404 real.
+- Health check queda en `/` y `/health`.
+
+Pendiente QA DEV:
+1. desplegar la rama/versión endurecida al Worker `migrandia-dev`;
+2. crear binding `API_RATE_LIMIT` en DEV;
+3. validar Ideas Pinterest/Temu, image proxy y Música;
+4. probar origen no permitido, URL no permitida, payload grande, timeout y 429;
+5. solo después migrar a `migrandia-api` PROD.
