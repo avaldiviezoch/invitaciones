@@ -165,3 +165,17 @@ Un invitado se considera no disponible cuando:
 Excepción: al revisar una respuesta ya vinculada, sus propios invitados deben seguir visibles y seleccionados para permitir correcciones o desvinculación.
 
 Este filtro es exclusivamente de interfaz y validación. No elimina invitados, no modifica vínculos existentes y no debe resolver conflictos por nombre.
+
+
+## Ideas — alcance y permisos
+
+El tablero de Ideas pertenece a la boda activa y se comparte entre los miembros autorizados de esa boda mediante la clave existente `planificador_bodas_ideas_v1`.
+
+Permisos funcionales del módulo:
+- `owner`: lectura y gestión completa de Ideas;
+- `admin`: lectura y gestión completa de Ideas;
+- `editor`, `provider` y `viewer`: solo lectura dentro de Ideas.
+
+“Gestión” incluye agregar, editar, eliminar y usar una idea para iniciar un flujo hacia Checklist, Presupuesto o Proveedores.
+
+Esta restricción es específica de Ideas y no modifica las capacidades globales de otros módulos ni cambia el esquema persistente.
