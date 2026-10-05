@@ -2306,3 +2306,9 @@ Pendiente para cierre definitivo:
 - Usuario confirmó `/health` en `migrandia-api` con `ok: true`.
 - Resultado: Worker productivo responde correctamente después del despliegue endurecido.
 - Pendiente: validar una función real (Ideas o Música) y confirmar rate limit 429 en PROD.
+
+
+### Smoke test PROD MGD-004 — funcional — 2026-10-05
+- Usuario confirmó que en `https://www.migrandiapp.com` el funcionamiento productivo está correcto después del despliegue endurecido.
+- Resultado: sin regresiones funcionales visibles en el frontend productivo.
+- Pendiente únicamente: confirmar `API_RATE_LIMIT` productivo con respuesta HTTP 429 controlada y cerrar MGD-004 como 🟢 PRODUCCIÓN.
