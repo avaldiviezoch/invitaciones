@@ -428,9 +428,7 @@ async function pinterestPreview(target) {
     return json(
       {
         ok: false,
-        error:
-          error?.message ||
-          "No se pudo resolver Pinterest.",
+        error: "No se pudo resolver Pinterest.",
       },
       500
     );
@@ -505,9 +503,7 @@ async function pinterestImageProxy(target) {
     return json(
       {
         ok: false,
-        error:
-          error?.message ||
-          "No se pudo cargar la imagen.",
+        error: "No se pudo cargar la imagen.",
       },
       500
     );
@@ -793,9 +789,7 @@ async function temuPreview(target) {
       {
         ok: false,
         provider: "temu",
-        error:
-          error?.message ||
-          "No se pudo resolver el enlace de Temu.",
+        error: "No se pudo resolver el enlace de Temu.",
       },
       500
     );
@@ -873,9 +867,7 @@ async function temuImageProxy(target) {
     return json(
       {
         ok: false,
-        error:
-          error?.message ||
-          "No se pudo cargar la imagen de Temu.",
+        error: "No se pudo cargar la imagen de Temu.",
       },
       500
     );
@@ -1323,9 +1315,7 @@ async function musicPreview(target, env) {
     return json(
       {
         ok: false,
-        error:
-          error?.message ||
-          "No se pudo resolver la referencia musical.",
+        error: "No se pudo resolver la referencia musical.",
         provider,
         type,
       },
