@@ -917,23 +917,24 @@ async function imageProxy(target) {
    MÚSICA
    ========================================================= */
 
+function isYouTubeHost(host) {
+  return hostMatches(host, "youtube.com") || String(host || "").toLowerCase() === "youtu.be";
+}
+
+function isSpotifyHost(host) {
+  return hostMatches(host, "spotify.com");
+}
+
+function isAppleMusicHost(host) {
+  return hostMatches(host, "music.apple.com");
+}
+
 function isMusicUrl(value) {
   try {
     const url = new URL(value);
-
-    if (!["http:", "https:"].includes(url.protocol)) {
-      return false;
-    }
-
+    if (!["http:", "https:"].includes(url.protocol)) return false;
     const host = url.hostname.toLowerCase();
-
-    return (
-      host.includes("youtube.com") ||
-      host === "youtu.be" ||
-      host.includes("music.youtube.com") ||
-      host.includes("spotify.com") ||
-      host.includes("music.apple.com")
-    );
+    return isYouTubeHost(host) || isSpotifyHost(host) || isAppleMusicHost(host);
   } catch {
     return false;
   }
@@ -941,26 +942,11 @@ function isMusicUrl(value) {
 
 function musicPlatform(value) {
   try {
-    const url = new URL(value);
-    const host = url.hostname.toLowerCase();
-
-    if (
-      host.includes("youtube.com") ||
-      host === "youtu.be" ||
-      host.includes("music.youtube.com")
-    ) {
-      return "youtube";
-    }
-
-    if (host.includes("spotify.com")) {
-      return "spotify";
-    }
-
-    if (host.includes("music.apple.com")) {
-      return "apple";
-    }
+    const host = new URL(value).hostname.toLowerCase();
+    if (isYouTubeHost(host)) return "youtube";
+    if (isSpotifyHost(host)) return "spotify";
+    if (isAppleMusicHost(host)) return "apple";
   } catch {}
-
   return "";
 }
 
@@ -969,57 +955,22 @@ function musicType(value) {
     const url = new URL(value);
     const host = url.hostname.toLowerCase();
 
-    // YouTube / YouTube Music
-    if (
-      host.includes("youtube.com") ||
-      host === "youtu.be" ||
-      host.includes("music.youtube.com")
-    ) {
-      if (url.searchParams.get("list")) {
-        return "playlist";
-      }
-
-      if (url.searchParams.get("v")) {
-        return "track";
-      }
-
-      if (host === "youtu.be") {
-        return "track";
-      }
+    if (isYouTubeHost(host)) {
+      if (url.searchParams.get("list")) return "playlist";
+      if (url.searchParams.get("v") || host === "youtu.be") return "track";
     }
 
-    // Spotify
-    if (host.includes("spotify.com")) {
-      const parts = url.pathname
-        .split("/")
-        .filter(Boolean);
-
-      if (parts[0] === "playlist") {
-        return "playlist";
-      }
-
-      if (parts[0] === "album") {
-        return "album";
-      }
-
-      if (parts[0] === "track") {
-        return "track";
-      }
+    if (isSpotifyHost(host)) {
+      const parts = url.pathname.split("/").filter(Boolean);
+      if (parts[0] === "playlist") return "playlist";
+      if (parts[0] === "album") return "album";
+      if (parts[0] === "track") return "track";
     }
 
-    // Apple Music
-    if (host.includes("music.apple.com")) {
-      if (url.pathname.includes("/playlist/")) {
-        return "playlist";
-      }
-
-      if (url.pathname.includes("/album/")) {
-        return "album";
-      }
-
-      if (url.pathname.includes("/song/")) {
-        return "track";
-      }
+    if (isAppleMusicHost(host)) {
+      if (url.pathname.includes("/playlist/")) return "playlist";
+      if (url.pathname.includes("/album/")) return "album";
+      if (url.pathname.includes("/song/")) return "track";
     }
   } catch {}
 
