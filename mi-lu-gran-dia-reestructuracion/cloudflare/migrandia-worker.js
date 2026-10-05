@@ -1343,10 +1343,11 @@ async function musicPreview(target, env) {
 export default {
   async fetch(request, env) {
     const requestUrl = new URL(request.url);
+    const pathname = requestUrl.pathname;
+    const origin = requestOrigin(request);
 
     if (request.method === "OPTIONS") {
-      const origin = requestOrigin(request);
-      if (requestUrl.pathname === "/api/rsvp/verify") {
+      if (pathname === "/api/rsvp/verify") {
         if (!RSVP_ALLOWED_ORIGINS.has(origin)) {
           return new Response(null, { status: 403 });
         }
@@ -1361,104 +1362,81 @@ export default {
         });
       }
 
-      return new Response(null, { headers: CORS });
+      if (API_PATHS.has(pathname)) {
+        if (!APP_ALLOWED_ORIGINS.has(origin)) {
+          return new Response(null, { status: 403 });
+        }
+        return new Response(null, { headers: appCorsHeaders(origin) });
+      }
+
+      return new Response(null, { status: 404 });
     }
 
-    if (requestUrl.pathname === "/api/rsvp/verify") {
+    if (pathname === "/api/rsvp/verify") {
       if (request.method !== "POST") {
-        return securityJson({ ok: false, error: "Método no permitido." }, 405, requestOrigin(request));
+        return securityJson({ ok: false, error: "Método no permitido." }, 405, origin);
       }
       return rsvpVerify(request, env);
     }
 
-    if (request.method !== "GET") {
-      return json(
-        {
-          ok: false,
-          error: "Método no permitido.",
-        },
-        405
+    if (pathname === "/" || pathname === "/health") {
+      if (request.method !== "GET") {
+        return json({ ok: false, error: "Método no permitido." }, 405);
+      }
+      return withAppCors(
+        json({
+          ok: true,
+          service: "Migrandia API",
+          providers: {
+            linkPreview: ["pinterest", "temu"],
+            music: ["youtube", "spotify", "apple"],
+          },
+        }),
+        origin
       );
     }
 
-    // Pinterest + Temu — link preview
-    if (
-      requestUrl.pathname ===
-      "/api/link-preview"
-    ) {
-      const target =
-        requestUrl.searchParams.get("url");
-
-      if (!target) {
-        return json(
-          {
-            ok: false,
-            error: "Falta el parámetro url.",
-          },
-          400
-        );
-      }
-
-      return linkPreview(target);
+    if (!API_PATHS.has(pathname)) {
+      return withAppCors(
+        json({ ok: false, error: "Ruta no encontrada." }, 404),
+        origin
+      );
     }
 
-    // Pinterest + Temu — image proxy
-    if (
-      requestUrl.pathname ===
-      "/api/image-proxy"
-    ) {
-      const target =
-        requestUrl.searchParams.get("url");
-
-      if (!target) {
-        return json(
-          {
-            ok: false,
-            error: "Falta el parámetro url.",
-          },
-          400
-        );
-      }
-
-      return imageProxy(target);
+    if (request.method !== "GET") {
+      return withAppCors(
+        json({ ok: false, error: "Método no permitido." }, 405),
+        origin
+      );
     }
 
-    // Música — preview
-    if (
-      requestUrl.pathname ===
-      "/api/music-preview"
-    ) {
-      const target =
-        requestUrl.searchParams.get("url");
+    const guardResponse = await applyApiGuards(request, env, pathname);
+    if (guardResponse) return guardResponse;
 
-      if (!target) {
-        return json(
-          {
-            ok: false,
-            error: "Falta el parámetro url.",
-          },
-          400
-        );
-      }
-
-      return musicPreview(target, env);
+    const target = requestUrl.searchParams.get("url") || "";
+    if (!target) {
+      return withAppCors(
+        json({ ok: false, error: "Falta el parámetro url." }, 400),
+        origin
+      );
     }
 
-    // Health check
-    return json({
-      ok: true,
-      service: "Migrandia Link Preview",
-      providers: {
-        linkPreview: [
-          "pinterest",
-          "temu",
-        ],
-        music: [
-          "youtube",
-          "spotify",
-          "apple",
-        ],
-      },
-    });
+    if (target.length > MAX_TARGET_URL_LENGTH) {
+      return withAppCors(
+        json({ ok: false, error: "La URL excede el tamaño permitido." }, 400),
+        origin
+      );
+    }
+
+    let response;
+    if (pathname === "/api/link-preview") {
+      response = await linkPreview(target);
+    } else if (pathname === "/api/image-proxy") {
+      response = await imageProxy(target);
+    } else {
+      response = await musicPreview(target, env);
+    }
+
+    return withAppCors(response, origin);
   },
 };
