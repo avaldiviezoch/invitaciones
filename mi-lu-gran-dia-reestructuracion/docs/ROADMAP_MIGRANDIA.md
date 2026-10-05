@@ -4,8 +4,8 @@
 Último commit DEV: 0322bdde6f72887de55edce799d3e08b09f8c995
 Último commit PROD: 9a1d5b6f088c610486a2aa02cf69c4687d623fd8
 Versión producción: pendiente de versionado formal
-Trabajo actual: MGD-002 — separación total DEV / PROD
-Próximo trabajo: cerrar QA MGD-002 y continuar MGD-003
+Trabajo actual: MGD-003 — protección contra abuso de RSVP
+Próximo trabajo: definir e implementar la capa anti-abuso RSVP en desarrollo sin tocar Firebase Rules/Auth
 Bloqueadores: separación DEV/PROD de servicios, protección anti-abuso RSVP, observabilidad y E2E
 
 ## Regla maestra de mantenimiento
@@ -212,21 +212,77 @@ Pendiente:
 ---
 
 ## MGD-003 — Protección contra abuso de RSVP
-Estado: ⬜ PENDIENTE
+Estado: 🟡 EN DESARROLLO
 Prioridad: CRÍTICA
 
-Mantener Anonymous Auth + Firestore Rules.
+Objetivo:
+blindar el RSVP público para que pueda escalar a usuarios externos sin permitir spam, automatización abusiva ni costos innecesarios.
 
-Agregar / evaluar:
-- Firebase App Check;
-- Cloudflare Turnstile;
-- rate limiting;
-- límites por token;
-- límites por IP / fingerprint cuando sea viable y compatible con privacidad;
-- protección contra spam;
-- límites de payload;
-- límites de frecuencia;
-- detección de abuso.
+### Auditoría actual — 2026-10-05
+
+Fortalezas existentes:
+- las respuestas públicas usan Firebase Anonymous Auth;
+- cada respuesta nueva queda vinculada a `ownerUid == request.auth.uid`;
+- un invitado anónimo solo puede actualizar su propia respuesta;
+- las respuestas no son legibles públicamente;
+- el formulario valida `maxGuests`;
+- existen límites de longitud para nombre, correo, teléfono, restricciones, notas y música;
+- el token RSVP debe existir y estar activo;
+- Firestore Rules validan estructura y campos permitidos.
+
+Riesgos pendientes:
+- no existe rate limiting real;
+- no existe Cloudflare Turnstile;
+- no existe App Check visible en el flujo actual;
+- Anonymous Auth por sí solo no impide automatización masiva;
+- el cliente escribe directamente a Firestore, por lo que un atacante puede saltarse controles visuales del formulario;
+- no hay límite server-side por intervalo de tiempo;
+- no hay señal central de abuso o picos de envío.
+
+### Arquitectura objetivo
+
+Mantener:
+- Firebase Anonymous Auth;
+- token RSVP no enumerado;
+- ownership por `ownerUid`;
+- reglas de validación existentes.
+
+Agregar por fases:
+1. protección anti-bot visible/invisible cuando corresponda;
+2. rate limiting real fuera del cliente;
+3. validación server-side adicional para envíos públicos;
+4. observabilidad de intentos rechazados;
+5. límites conservadores que no afecten invitados legítimos.
+
+### Regla de implementación
+
+No modificar Firestore Rules, Auth, Storage ni la estructura canónica sin autorización explícita.
+
+La primera fase será no destructiva:
+- diseñar el punto de control;
+- definir Turnstile / App Check / Worker;
+- preparar integración en desarrollo;
+- probar sin tocar datos reales.
+
+DEV branch: `mgd/003-rsvp-abuse-protection-20261005`
+DEV PR: pendiente
+DEV commit: pendiente
+
+QA pendiente:
+- usuario legítimo puede enviar RSVP;
+- usuario puede editar su propia respuesta;
+- otra sesión anónima no puede editarla;
+- spam repetido es rechazado;
+- respuesta pública sigue sin ser legible;
+- móvil y desktop;
+- no se rompe Música;
+- no se rompe RSVP histórico.
+
+Pendiente de autorización antes de tocar infraestructura protegida:
+- cualquier cambio de Firestore Rules;
+- habilitación/configuración de App Check;
+- cambios en Auth;
+- configuración productiva de Cloudflare Turnstile/rate limiting.
 
 ---
 
