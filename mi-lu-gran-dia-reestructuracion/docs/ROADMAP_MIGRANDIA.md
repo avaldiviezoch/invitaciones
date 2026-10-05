@@ -1967,3 +1967,12 @@ reducir dependencia de soporte manual por WhatsApp o mensajes directos.
 - Se separará la API productiva en un Worker dedicado, recomendado: `migrandia-api`.
 - Objetivo final de dominio: `api.migrandiapp.com`.
 - Esta separación reduce riesgo de romper el frontend productivo y mejora escalabilidad/observabilidad.
+
+
+### QA DEV Turnstile silencioso — 2026-10-05
+- Invitación DEV validada manualmente en `invitacion_0_2`.
+- Envío RSVP correcto.
+- No se mostró mensaje técnico de seguridad durante el envío.
+- No apareció desafío Turnstile visible en el flujo normal.
+- Se mostró correctamente el estado final de éxito con los 2 pases nominales registrados.
+- Resultado: UX normal aprobada para el flujo legítimo; falta QA de rate-limit/abuso antes de volver a preparar producción.
