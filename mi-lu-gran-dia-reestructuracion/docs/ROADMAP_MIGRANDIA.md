@@ -2233,3 +2233,10 @@ Siguiente paso:
 - El usuario confirmó que el módulo Música en DEV continúa funcionando igual que antes del hardening del Worker.
 - Se mantiene el comportamiento esperado de los previews musicales sin regresiones funcionales visibles.
 - Resultado: `/api/music-preview` continúa operativo después del hardening.
+
+
+### QA seguridad MGD-004 — dominio musical falso — 2026-10-05
+- Prueba ejecutada contra `/api/music-preview` usando `https://youtube.com.ejemplo.com/watch?v=123`.
+- Resultado: bloqueado correctamente.
+- Respuesta: `{"ok":false,"error":"La URL no corresponde a Spotify, YouTube Music o Apple Music."}`
+- Conclusión: la validación estricta de hostname funciona y ya no acepta dominios que solo contienen el texto `youtube.com`.
