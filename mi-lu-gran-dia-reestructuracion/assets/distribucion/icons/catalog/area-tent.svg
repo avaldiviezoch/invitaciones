@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Toldo / área cubierta -->
+    <path d="M14 29h36"/>
+    <path d="M18 29l6-10h16l6 10"/>
+    <path d="M24 19l8-6 8 6"/>
+
+    <!-- Postes -->
+    <path d="M18 29v20"/>
+    <path d="M46 29v20"/>
+
+    <!-- Base del área -->
+    <path d="M21 49h22"/>
+    <path d="M24 45h16"/>
+
+    <!-- Indicador de superficie -->
+    <path d="M25 36h14"/>
+    <path d="M28 40h8"/>
+  </g>
+</svg>

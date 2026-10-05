@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Cubierta -->
+    <path d="M14 25h36"/>
+    <path d="M18 25l5-8h18l5 8"/>
+    <path d="M23 17l9-6 9 6"/>
+
+    <!-- Postes -->
+    <path d="M18 25v24"/>
+    <path d="M46 25v24"/>
+
+    <!-- Estructura interior -->
+    <path d="M23 25v20"/>
+    <path d="M41 25v20"/>
+    <path d="M23 45h18"/>
+
+    <!-- Bases -->
+    <path d="M15 49h6"/>
+    <path d="M43 49h6"/>
+  </g>
+</svg>

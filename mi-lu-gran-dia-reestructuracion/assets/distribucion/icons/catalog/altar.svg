@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Base -->
+    <path d="M18 48h28"/>
+    <path d="M22 48v5"/>
+    <path d="M42 48v5"/>
+
+    <!-- Estructura principal -->
+    <path d="M21 48V26"/>
+    <path d="M43 48V26"/>
+    <path d="M21 26c0-8 5-14 11-14s11 6 11 14"/>
+
+    <!-- Mesa ceremonial -->
+    <path d="M25 39h14v9H25z"/>
+    <path d="M25 42h14"/>
+
+    <!-- Detalle floral mínimo -->
+    <path d="M24 24c-3-1-5-3-6-6 3 0 5 1 7 3"/>
+    <path d="M40 24c3-1 5-3 6-6-3 0-5 1-7 3"/>
+  </g>
+</svg>

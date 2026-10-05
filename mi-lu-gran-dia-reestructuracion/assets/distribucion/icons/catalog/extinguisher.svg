@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Cuerpo -->
+    <path d="M24 24h16v25c0 2.2-1.8 4-4 4h-8c-2.2 0-4-1.8-4-4V24Z"/>
+
+    <!-- Hombros -->
+    <path d="M27 24v-4h10v4"/>
+
+    <!-- Manija -->
+    <path d="M29 20v-5h9"/>
+    <path d="M38 15l4 3"/>
+
+    <!-- Manguera -->
+    <path d="M40 27c6 1 8 5 8 10"/>
+    <path d="M48 37v5"/>
+    <path d="M46 42h4"/>
+
+    <!-- Etiqueta -->
+    <path d="M28 33h8"/>
+    <path d="M28 38h8"/>
+  </g>
+</svg>

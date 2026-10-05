@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Contorno del área lounge -->
+    <rect x="14" y="17" width="36" height="32" rx="4"/>
+
+    <!-- Sofás -->
+    <path d="M19 31h10v8H19z"/>
+    <path d="M35 31h10v8H35z"/>
+    <path d="M19 29h10"/>
+    <path d="M35 29h10"/>
+
+    <!-- Mesa central -->
+    <ellipse cx="32" cy="37" rx="4.5" ry="2.5"/>
+    <path d="M32 39.5v4"/>
+
+    <!-- Indicador de zona -->
+    <path d="M23 22h18"/>
+  </g>
+</svg>

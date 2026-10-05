@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Maceta pequeña -->
+    <path d="M25 42h14l-2 9H27l-2-9Z"/>
+    <path d="M23.5 39h17"/>
+
+    <!-- Tallo -->
+    <path d="M32 39V24"/>
+
+    <!-- Hojas -->
+    <path d="M32 29c-4.2 0-7-2-8-5.2 4.7 0 7.4 1.7 8 5.2Z"/>
+    <path d="M32 33c4.2 0 7-2 8-5.2-4.7 0-7.4 1.7-8 5.2Z"/>
+    <path d="M32 25c2.8-1.2 4.5-3.2 4.8-5.8-3.3.4-5 2.2-4.8 5.8Z"/>
+  </g>
+</svg>

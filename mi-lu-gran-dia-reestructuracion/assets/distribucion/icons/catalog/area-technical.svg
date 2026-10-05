@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Contorno del área técnica -->
+    <rect x="14" y="16" width="36" height="34" rx="4"/>
+
+    <!-- Rack -->
+    <path d="M20 24h12v18H20z"/>
+    <path d="M23 28h6"/>
+    <path d="M23 33h6"/>
+    <path d="M23 38h6"/>
+
+    <!-- Cableado / energía -->
+    <path d="M37 25h6v8h-6z"/>
+    <path d="M40 33v6"/>
+    <path d="M37 39h6"/>
+
+    <!-- Señal técnica -->
+    <path d="M38 21l3-4 3 4"/>
+  </g>
+</svg>

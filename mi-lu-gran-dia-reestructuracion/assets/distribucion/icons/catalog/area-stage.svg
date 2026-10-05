@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Área de escenario -->
+    <path d="M14 43h36"/>
+    <path d="M18 37h28v10H18z"/>
+    <path d="M22 31h20v6H22z"/>
+
+    <!-- Fondo escénico -->
+    <path d="M20 18h24v13H20z"/>
+    <path d="M24 22h16"/>
+
+    <!-- Escalón -->
+    <path d="M25 47v4h14v-4"/>
+
+    <!-- Indicador de superficie -->
+    <path d="M27 40h10"/>
+  </g>
+</svg>

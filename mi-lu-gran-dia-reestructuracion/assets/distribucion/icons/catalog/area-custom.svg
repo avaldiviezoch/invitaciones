@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Contorno del área personalizada -->
+    <rect x="14" y="16" width="36" height="34" rx="4"/>
+
+    <!-- Forma libre / edición -->
+    <path d="M22 38l7-10 7 6 6-8"/>
+    <circle cx="22" cy="38" r="1.6"/>
+    <circle cx="29" cy="28" r="1.6"/>
+    <circle cx="36" cy="34" r="1.6"/>
+    <circle cx="42" cy="26" r="1.6"/>
+
+    <!-- Lápiz -->
+    <path d="M37 43l8-8"/>
+    <path d="M43 34l3 3"/>
+    <path d="M36 44l3-1"/>
+  </g>
+</svg>

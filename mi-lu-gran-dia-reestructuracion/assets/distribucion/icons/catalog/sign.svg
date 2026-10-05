@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Tótem / letrero -->
+    <path d="M23 15h18v27H23z"/>
+    <path d="M27 21h10"/>
+    <path d="M27 26h7"/>
+    <path d="M27 31h10"/>
+
+    <!-- Soporte -->
+    <path d="M32 42v8"/>
+    <path d="M25 52h14"/>
+
+    <!-- Detalle direccional -->
+    <path d="M26 36h11"/>
+    <path d="M34 33l3 3-3 3"/>
+  </g>
+</svg>

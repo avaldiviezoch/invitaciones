@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Rack / módulo técnico -->
+    <path d="M18 16h28v33H18z"/>
+    <path d="M22 21h20v7H22z"/>
+    <path d="M22 31h20v7H22z"/>
+    <path d="M22 41h20v4H22z"/>
+
+    <!-- Indicadores -->
+    <circle cx="26" cy="24.5" r="1"/>
+    <circle cx="26" cy="34.5" r="1"/>
+    <path d="M31 24.5h7"/>
+    <path d="M31 34.5h7"/>
+
+    <!-- Cableado lateral -->
+    <path d="M46 24c4 0 4 5 0 5"/>
+    <path d="M46 34c4 0 4 5 0 5"/>
+
+    <!-- Base -->
+    <path d="M22 49v4"/>
+    <path d="M42 49v4"/>
+  </g>
+</svg>

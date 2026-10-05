@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Contorno del área infantil -->
+    <rect x="14" y="16" width="36" height="34" rx="4"/>
+
+    <!-- Bloques -->
+    <path d="M19 34h8v8h-8z"/>
+    <path d="M29 30h8v12h-8z"/>
+    <path d="M39 35h6v7h-6z"/>
+
+    <!-- Pelota -->
+    <circle cx="24" cy="25" r="4"/>
+    <path d="M21 23l6 4"/>
+    <path d="M27 23l-6 4"/>
+
+    <!-- Indicador de zona -->
+    <path d="M33 22h10"/>
+  </g>
+</svg>

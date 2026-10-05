@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Jardinera -->
+    <path d="M14 40h36l-3 12H17l-3-12Z"/>
+    <path d="M16 40h32"/>
+
+    <!-- Tallos -->
+    <path d="M23 40V27"/>
+    <path d="M32 40V23"/>
+    <path d="M41 40V28"/>
+
+    <!-- Hojas -->
+    <path d="M23 31c-4 0-6.5-2-7.5-5 4.4 0 6.9 1.6 7.5 5Z"/>
+    <path d="M23 34c4 0 6.5-2 7.5-5-4.4 0-6.9 1.6-7.5 5Z"/>
+
+    <path d="M32 27c-4.4 0-7.2-2.2-8.3-5.5 4.8 0 7.6 1.7 8.3 5.5Z"/>
+    <path d="M32 30c4.4 0 7.2-2.2 8.3-5.5-4.8 0-7.6 1.7-8.3 5.5Z"/>
+
+    <path d="M41 32c-3.8 0-6.2-1.8-7.2-4.8 4.1 0 6.5 1.5 7.2 4.8Z"/>
+    <path d="M41 35c3.8 0 6.2-1.8 7.2-4.8-4.1 0-6.5 1.5-7.2 4.8Z"/>
+  </g>
+</svg>

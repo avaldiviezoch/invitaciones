@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Carrito -->
+    <path d="M16 31h32v14H16z"/>
+    <path d="M20 45v6"/>
+    <path d="M44 45v6"/>
+    <circle cx="22" cy="52" r="2.5"/>
+    <circle cx="42" cy="52" r="2.5"/>
+
+    <!-- Toldo -->
+    <path d="M18 25h28l3 6H15l3-6Z"/>
+    <path d="M21 25v-5"/>
+    <path d="M43 25v-5"/>
+    <path d="M21 20h22"/>
+
+    <!-- Snacks -->
+    <path d="M23 35h7l-1 7h-5l-1-7Z"/>
+    <path d="M25 35c0-2 1-3.5 2-3.5s2 1.5 2 3.5"/>
+    <path d="M35 34h7"/>
+    <path d="M36 34v8"/>
+    <path d="M41 34v8"/>
+    <path d="M36 38h5"/>
+  </g>
+</svg>

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Mesa -->
+    <path d="M18 41h28"/>
+    <path d="M21 41v10"/>
+    <path d="M43 41v10"/>
+    <path d="M16 51h32"/>
+
+    <!-- Base del pastel -->
+    <path d="M21 33h22v8H21z"/>
+    <path d="M24 26h16v7H24z"/>
+
+    <!-- Glaseado ondulado -->
+    <path d="M21 33c1.5 0 1.5 2 3 2s1.5-2 3-2 1.5 2 3 2 1.5-2 3-2 1.5 2 3 2 1.5-2 3-2 1.5 2 3 2 1.5-2 3-2"/>
+
+    <!-- Vela -->
+    <path d="M32 20v6"/>
+    <path d="M32 16c1.3 1 1.8 2 0 4-1.8-2-1.3-3 0-4Z"/>
+
+    <!-- Detalles laterales -->
+    <path d="M26 37h12"/>
+    <path d="M27 29h10"/>
+  </g>
+</svg>

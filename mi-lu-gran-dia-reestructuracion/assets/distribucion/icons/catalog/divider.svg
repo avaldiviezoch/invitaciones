@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Biombo de tres paneles -->
+    <path d="M16 18h10v28H16z"/>
+    <path d="M27 16h10v30H27z"/>
+    <path d="M38 18h10v28H38z"/>
+
+    <!-- Uniones -->
+    <path d="M26 22h1"/>
+    <path d="M37 22h1"/>
+    <path d="M26 40h1"/>
+    <path d="M37 40h1"/>
+
+    <!-- Patas -->
+    <path d="M18 46v5"/>
+    <path d="M24 46v5"/>
+    <path d="M29 46v5"/>
+    <path d="M35 46v5"/>
+    <path d="M40 46v5"/>
+    <path d="M46 46v5"/>
+
+    <!-- Detalle vertical mínimo -->
+    <path d="M21 23v18"/>
+    <path d="M32 21v20"/>
+    <path d="M43 23v18"/>
+  </g>
+</svg>

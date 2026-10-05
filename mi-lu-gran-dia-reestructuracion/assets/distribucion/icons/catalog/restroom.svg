@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Marco -->
+    <path d="M16 14h32v38H16z"/>
+
+    <!-- Persona izquierda -->
+    <circle cx="25" cy="24" r="3"/>
+    <path d="M25 27v10"/>
+    <path d="M21.5 31h7"/>
+    <path d="M23 37l-1 8"/>
+    <path d="M27 37l1 8"/>
+
+    <!-- Persona derecha -->
+    <circle cx="39" cy="24" r="3"/>
+    <path d="M39 27v10"/>
+    <path d="M35.5 31h7"/>
+    <path d="M37 37l-2 8"/>
+    <path d="M41 37l2 8"/>
+
+    <!-- Separación -->
+    <path d="M32 20v27"/>
+  </g>
+</svg>

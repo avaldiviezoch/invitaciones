@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Panel principal -->
+    <path d="M18 17h28v29H18z"/>
+    <path d="M22 17v29"/>
+    <path d="M42 17v29"/>
+
+    <!-- Base / soportes -->
+    <path d="M18 46l-4 5"/>
+    <path d="M46 46l4 5"/>
+    <path d="M14 51h8"/>
+    <path d="M42 51h8"/>
+
+    <!-- Composición floral mínima -->
+    <path d="M22 24c4-5 8-6 12-4"/>
+    <path d="M34 20c3 1 5 3 7 6"/>
+    <path d="M24 22c-1.5-3.5-5-4-6.5-1 2.5 2 4.5 2.5 6.5 1Z"/>
+    <path d="M39 23c2-3 5-3.5 6.5-.5-2.2 1.8-4.2 2.2-6.5.5Z"/>
+
+    <!-- Línea decorativa inferior -->
+    <path d="M25 39h14"/>
+  </g>
+</svg>

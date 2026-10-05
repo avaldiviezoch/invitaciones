@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Mesa -->
+    <path d="M16 40h32"/>
+    <path d="M20 40v11"/>
+    <path d="M44 40v11"/>
+    <path d="M18 51h28"/>
+
+    <!-- Recuerdos / cajitas -->
+    <path d="M21 28h9v12h-9z"/>
+    <path d="M34 26h9v14h-9z"/>
+
+    <!-- Lazos -->
+    <path d="M25.5 28c-1.8-3.2-5.5-2.8-5.5 0 0 1.5 2.2 2.5 5.5 0Z"/>
+    <path d="M25.5 28c1.8-3.2 5.5-2.8 5.5 0 0 1.5-2.2 2.5-5.5 0Z"/>
+    <path d="M38.5 26c-1.8-3.2-5.5-2.8-5.5 0 0 1.5 2.2 2.5 5.5 0Z"/>
+    <path d="M38.5 26c1.8-3.2 5.5-2.8 5.5 0 0 1.5-2.2 2.5-5.5 0Z"/>
+  </g>
+</svg>

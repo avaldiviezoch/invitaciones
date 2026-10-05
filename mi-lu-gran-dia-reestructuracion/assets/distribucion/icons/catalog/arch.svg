@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Base lateral -->
+    <path d="M18 49h28"/>
+    <path d="M21 49v4"/>
+    <path d="M43 49v4"/>
+
+    <!-- Arco principal -->
+    <path d="M20 49V28"/>
+    <path d="M44 49V28"/>
+    <path d="M20 28c0-6.5 5.5-12 12-12s12 5.5 12 12"/>
+
+    <!-- Guirnalda / floral -->
+    <path d="M23 28c2.5 2.3 5.7 3.5 9 3.5s6.5-1.2 9-3.5"/>
+    <path d="M24 24c2.2 2 5 3 8 3s5.8-1 8-3"/>
+
+    <!-- Soportes decorativos -->
+    <path d="M20 36h4"/>
+    <path d="M40 36h4"/>
+  </g>
+</svg>

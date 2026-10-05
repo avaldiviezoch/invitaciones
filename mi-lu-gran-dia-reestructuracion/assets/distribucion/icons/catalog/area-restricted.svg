@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Contorno del área restringida -->
+    <rect x="14" y="16" width="36" height="34" rx="4"/>
+
+    <!-- Barrera -->
+    <path d="M19 29h26"/>
+    <path d="M22 29v13"/>
+    <path d="M42 29v13"/>
+    <path d="M24 35l5-6"/>
+    <path d="M31 35l5-6"/>
+    <path d="M38 35l5-6"/>
+
+    <!-- Símbolo de restricción -->
+    <circle cx="32" cy="22" r="4"/>
+    <path d="M29.5 24.5l5-5"/>
+  </g>
+</svg>

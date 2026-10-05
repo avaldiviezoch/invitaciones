@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Contorno del área de buffet -->
+    <rect x="14" y="17" width="36" height="32" rx="4"/>
+
+    <!-- Línea de servicio -->
+    <path d="M19 34h26"/>
+    <path d="M21 34v8"/>
+    <path d="M43 34v8"/>
+
+    <!-- Bandejas -->
+    <path d="M20 28h9"/>
+    <path d="M35 28h9"/>
+
+    <!-- Cloche central -->
+    <path d="M28 31h8"/>
+    <path d="M29 31c0-3 1.5-5 3-5s3 2 3 5"/>
+    <path d="M32 24v2"/>
+
+    <!-- Indicador de zona -->
+    <path d="M23 22h18"/>
+  </g>
+</svg>

@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Marco de acceso -->
+    <path d="M26 52V18h20v34"/>
+    <path d="M26 18h20"/>
+
+    <!-- Hoja de puerta -->
+    <path d="M26 24h14v28H26"/>
+    <circle cx="29.5" cy="38" r="1.2"/>
+
+    <!-- Flecha de salida -->
+    <path d="M18 26v20"/>
+    <path d="M12 32l6-6 6 6"/>
+  </g>
+</svg>

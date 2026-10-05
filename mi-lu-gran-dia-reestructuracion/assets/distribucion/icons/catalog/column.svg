@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Capitel -->
+    <path d="M22 15h20"/>
+    <path d="M24 19h16"/>
+    <path d="M26 22h12"/>
+
+    <!-- Fuste -->
+    <path d="M27 22v24"/>
+    <path d="M37 22v24"/>
+    <path d="M30 22v24"/>
+    <path d="M34 22v24"/>
+
+    <!-- Base -->
+    <path d="M25 46h14"/>
+    <path d="M23 50h18"/>
+    <path d="M21 53h22"/>
+  </g>
+</svg>

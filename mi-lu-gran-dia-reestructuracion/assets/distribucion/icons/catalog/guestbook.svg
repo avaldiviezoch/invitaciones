@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Mesa -->
+    <path d="M16 40h32"/>
+    <path d="M20 40v11"/>
+    <path d="M44 40v11"/>
+    <path d="M18 51h28"/>
+
+    <!-- Libro -->
+    <path d="M22 25c4-2 8-2 10 0v12c-2-2-6-2-10 0V25Z"/>
+    <path d="M42 25c-4-2-8-2-10 0v12c2-2 6-2 10 0V25Z"/>
+    <path d="M32 25v12"/>
+
+    <!-- Pluma -->
+    <path d="M39 18l7 7"/>
+    <path d="M38 19l-5 12"/>
+    <path d="M35 29l-2 2"/>
+  </g>
+</svg>

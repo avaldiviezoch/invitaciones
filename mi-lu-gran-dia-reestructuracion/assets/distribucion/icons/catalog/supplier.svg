@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Mesa -->
+    <path d="M16 40h32"/>
+    <path d="M20 40v11"/>
+    <path d="M44 40v11"/>
+    <path d="M18 51h28"/>
+
+    <!-- Carpeta / documentos -->
+    <path d="M23 25h18v12H23z"/>
+    <path d="M26 22h7l2 3h6"/>
+    <path d="M27 30h10"/>
+    <path d="M27 34h7"/>
+
+    <!-- Credencial / proveedor -->
+    <path d="M43 21h6v9h-6z"/>
+    <path d="M46 18v3"/>
+    <circle cx="46" cy="24" r="1.2"/>
+  </g>
+</svg>

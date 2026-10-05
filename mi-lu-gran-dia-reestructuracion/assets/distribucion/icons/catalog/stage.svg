@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Plataforma -->
+    <path d="M14 39h36v10H14z"/>
+    <path d="M18 49v4"/>
+    <path d="M46 49v4"/>
+    <path d="M17 53h30"/>
+
+    <!-- Fondo / estructura -->
+    <path d="M19 21h26v18H19z"/>
+    <path d="M23 21v18"/>
+    <path d="M41 21v18"/>
+
+    <!-- Escalón central -->
+    <path d="M25 49v-5h14v5"/>
+
+    <!-- Focos superiores -->
+    <circle cx="25" cy="18" r="1.5"/>
+    <circle cx="32" cy="18" r="1.5"/>
+    <circle cx="39" cy="18" r="1.5"/>
+  </g>
+</svg>

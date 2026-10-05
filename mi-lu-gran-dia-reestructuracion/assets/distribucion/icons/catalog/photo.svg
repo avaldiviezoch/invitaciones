@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Cabina / marco principal -->
+    <path d="M17 18h30v31H17z"/>
+    <path d="M21 22h22v18H21z"/>
+
+    <!-- Cámara -->
+    <path d="M27 27h10"/>
+    <circle cx="32" cy="31" r="4.5"/>
+
+    <!-- Cortina inferior -->
+    <path d="M21 40c2.2 2 4.5 3 7 3s4.8-1 7-3c2.2 2 4.5 3 8 3"/>
+    <path d="M22 43v6"/>
+    <path d="M42 43v6"/>
+
+    <!-- Destello -->
+    <path d="M46 14v5"/>
+    <path d="M43.5 16.5h5"/>
+  </g>
+</svg>

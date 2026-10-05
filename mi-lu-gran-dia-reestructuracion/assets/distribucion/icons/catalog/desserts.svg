@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 64 64"
+     width="64" height="64"
+     fill="none"
+     color="currentColor"
+     aria-hidden="true">
+  <g stroke="currentColor"
+     stroke-width="2.25"
+     stroke-linecap="round"
+     stroke-linejoin="round">
+    <!-- Mesa de postres -->
+    <path d="M15 40h34"/>
+    <path d="M19 40v11"/>
+    <path d="M45 40v11"/>
+    <path d="M17 51h30"/>
+
+    <!-- Pedestal central -->
+    <path d="M27 25h10"/>
+    <path d="M29 25v10"/>
+    <path d="M35 25v10"/>
+    <path d="M26 35h12"/>
+
+    <!-- Cupcakes -->
+    <path d="M20 30h8l-1 7h-6l-1-7Z"/>
+    <path d="M21 29c1-3 5-3 6 0"/>
+    <path d="M36 30h8l-1 7h-6l-1-7Z"/>
+    <path d="M37 29c1-3 5-3 6 0"/>
+
+    <!-- Dulce superior -->
+    <path d="M30 20h4"/>
+    <path d="M30 20c0-2 1-3.5 2-3.5s2 1.5 2 3.5"/>
+  </g>
+</svg>
