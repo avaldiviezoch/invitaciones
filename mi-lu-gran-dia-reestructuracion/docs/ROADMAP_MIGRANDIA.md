@@ -130,8 +130,8 @@ Crear una referencia de estabilidad antes de cambios estructurales.
 - Se deja MGD-001 en QA documental hasta fusionar este registro a desarrollo main.
 
 DEV branch: `mgd/001-baseline-20261005`
-DEV PR: pendiente
-DEV commit: pendiente
+DEV PR: #67
+DEV commit: `4bf63cf464af602525ab5ba73ae330c62df62ae4`
 QA:
 - Documentación baseline: OK
 - Persistencia/Firebase: sin cambios
@@ -146,7 +146,6 @@ Decisiones:
 - No se tocará producción para completar MGD-001.
 
 Pendiente:
-- Fusionar documentación del baseline a DEV main.
 - MGD-007 definirá el versionado visible formal.
 
 ---
