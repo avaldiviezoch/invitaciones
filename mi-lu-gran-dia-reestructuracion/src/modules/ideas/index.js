@@ -1,5 +1,6 @@
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js';
 import { readUiPreference, writeUiPreference } from '../../services/ui-preferences.js?v=1';
+import { normalizeWeddingRole } from '../../core/app/permissions.js';
 
 const TEMPLATE_URL = new URL('./index.html?v=4', import.meta.url);
 const STORAGE_KEY = 'planificador_bodas_ideas_v1';
@@ -10,6 +11,10 @@ let cleanup = () => {};
 let lifecycleToken = 0;
 
 const state = { items: [], filter: 'all', search: '', cardSize: 'large', context: null, editingId: '', usingId: '' };
+
+function canManageIdeas() {
+  return ['owner', 'admin'].includes(normalizeWeddingRole(state.context?.role));
+}
 
 function escapeHtml(value = '') {
   return String(value).replace(/[&<>"']/g, (character) => ({
@@ -126,11 +131,14 @@ function render(root) {
     && (!query || [item.title, item.category, item.notes].join(' ').toLowerCase().includes(query))
   );
 
+  const editable = canManageIdeas();
   board.innerHTML = items.map((item) => {
     const image = item.image ? `<img class="ideas-card-image" src="${escapeHtml(item.image)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : '<div class="ideas-card-placeholder" aria-hidden="true"></div>';
     const link = item.url ? `<a class="ideas-card-link" href="${escapeHtml(item.url)}" target="_blank" rel="noopener noreferrer">Ver enlace</a>` : '';
-    const use = `<button class="ideas-card-use" type="button" data-idea-use="${escapeHtml(item.id)}">Usar esta idea</button>`;
-    return `<article class="ideas-card" data-idea-id="${escapeHtml(item.id)}"><button class="ideas-card-edit" type="button" data-idea-edit="${escapeHtml(item.id)}" aria-label="Editar ${escapeHtml(item.title)}">Editar</button><button class="ideas-card-delete" type="button" data-idea-delete="${escapeHtml(item.id)}" aria-label="Eliminar ${escapeHtml(item.title)}">×</button>${image}<div class="ideas-card-body"><div class="ideas-card-meta"><span>${escapeHtml(item.category)}</span><span>${item.type === 'purchase' ? 'Compra' : 'Inspiración'}</span></div><h3>${escapeHtml(item.title)}</h3>${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ''}${item.price ? `<strong class="ideas-card-price">S/ ${item.price.toFixed(2)}</strong>` : ''}${link}${use}</div></article>`;
+    const use = editable ? `<button class="ideas-card-use" type="button" data-idea-use="${escapeHtml(item.id)}">Usar esta idea</button>` : '';
+    const edit = editable ? `<button class="ideas-card-edit" type="button" data-idea-edit="${escapeHtml(item.id)}" aria-label="Editar ${escapeHtml(item.title)}">Editar</button>` : '';
+    const remove = editable ? `<button class="ideas-card-delete" type="button" data-idea-delete="${escapeHtml(item.id)}" aria-label="Eliminar ${escapeHtml(item.title)}">×</button>` : '';
+    return `<article class="ideas-card" data-idea-id="${escapeHtml(item.id)}">${edit}${remove}${image}<div class="ideas-card-body"><div class="ideas-card-meta"><span>${escapeHtml(item.category)}</span><span>${item.type === 'purchase' ? 'Compra' : 'Inspiración'}</span></div><h3>${escapeHtml(item.title)}</h3>${item.notes ? `<p>${escapeHtml(item.notes)}</p>` : ''}${item.price ? `<strong class="ideas-card-price">S/ ${item.price.toFixed(2)}</strong>` : ''}${link}${use}</div></article>`;
   }).join('');
   empty.hidden = items.length > 0;
   board.querySelectorAll('[data-idea-use]').forEach((button) => {
@@ -141,6 +149,7 @@ function render(root) {
   });
   board.querySelectorAll('[data-idea-delete]').forEach((button) => {
     button.onclick = async () => {
+      if (!canManageIdeas()) return;
       const id = button.dataset.ideaDelete;
       const previous = state.items;
       state.items = state.items.filter((item) => item.id !== id);
@@ -156,6 +165,7 @@ function render(root) {
 }
 
 function openUseDialog(root, id) {
+  if (!canManageIdeas()) return;
   const item = state.items.find((current) => current.id === id);
   const dialog = root.querySelector('[data-ideas-use-dialog]');
   if (!item || !dialog) return;
@@ -170,6 +180,7 @@ function closeUseDialog(root) {
 }
 
 function useIdea(root, target) {
+  if (!canManageIdeas()) return;
   const item = state.items.find((current) => current.id === state.usingId);
   if (!item || !['checklist', 'presupuesto', 'proveedores'].includes(target)) return;
   sessionStorage.setItem('migrandia:idea-draft', JSON.stringify({ target, title: item.title, category: item.category, price: item.price, url: item.url, notes: item.notes }));
@@ -178,6 +189,7 @@ function useIdea(root, target) {
 }
 
 function openEditor(root, id) {
+  if (!canManageIdeas()) return;
   const item = state.items.find((current) => current.id === id);
   if (!item) return;
   const form = root.querySelector('[data-ideas-form]');
@@ -204,6 +216,7 @@ function resetEditor(root) {
 }
 
 async function persist(root) {
+  if (!canManageIdeas()) throw new Error('Solo el propietario o un administrador pueden modificar Ideas.');
   const status = root.querySelector('[data-ideas-status]');
   try {
     if (status) status.textContent = 'Guardando…';
@@ -259,13 +272,21 @@ export async function mountIdeas(context) {
 
   const dialog = root.querySelector('[data-ideas-dialog]');
   const form = root.querySelector('[data-ideas-form]');
+  const editable = canManageIdeas();
+  root.querySelectorAll('[data-ideas-open-form]').forEach((button) => { button.hidden = !editable; });
+  const statusNode = root.querySelector('[data-ideas-status]');
+  if (statusNode && !editable) statusNode.textContent = 'Solo lectura · únicamente propietario y administradores pueden modificar este tablero.';
   const urlInput = form.querySelector('[data-ideas-url]');
   const imageInput = form.querySelector('[data-ideas-image]');
   root.querySelector('[data-ideas-use-close]').onclick = () => closeUseDialog(root);
   root.querySelectorAll('[data-ideas-use]').forEach((button) => { button.onclick = () => useIdea(root, button.dataset.ideasUse); });
 
   root.querySelectorAll('[data-ideas-open-form]').forEach((button) => {
-    button.onclick = () => { resetEditor(root); dialog.showModal(); };
+    button.onclick = () => {
+      if (!canManageIdeas()) return;
+      resetEditor(root);
+      dialog.showModal();
+    };
   });
   root.querySelectorAll('[data-ideas-close]').forEach((button) => {
     button.onclick = () => { dialog.close(); resetEditor(root); };
@@ -294,7 +315,7 @@ export async function mountIdeas(context) {
   });
 
   urlInput.onchange = async () => {
-    if (imageInput.value.trim()) return;
+    if (!canManageIdeas() || imageInput.value.trim()) return;
     const preview = await resolveLinkPreview(urlInput.value);
     if (preview?.image) imageInput.value = preview.image;
     const titleInput = form.querySelector('[data-ideas-title]');
@@ -303,6 +324,7 @@ export async function mountIdeas(context) {
 
   form.onsubmit = async (event) => {
     event.preventDefault();
+    if (!canManageIdeas()) return;
     const titleInput = form.querySelector('[data-ideas-title]');
     const title = titleInput.value.trim();
     if (!title) {
