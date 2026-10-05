@@ -1099,3 +1099,11 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Ahora el submit espera el preview cuando falta título o imagen, muestra “Preparando idea…”, completa título/imagen si están disponibles y recién después valida y guarda.
 - Si el proveedor no entrega título, se muestra una validación explícita para escribir el nombre en vez de fallar silenciosamente.
 - No se modificó Firebase, Firestore Rules, Storage, Auth ni persistencia.
+
+
+## 2026-10-05 — MGD-003: App Check extendido a clientes RSVP DEV
+- Se detectó que `invitacion_0_2` y `invitacion_0_3` inicializaban Firebase directamente fuera del cliente central, generando solicitudes no verificadas.
+- Ambos widgets ahora inicializan App Check en la app Firebase principal y en la app anónima `mgd-rsvp-anonymous` usada por RSVP.
+- Se mantuvo Anonymous Auth y la persistencia actual sin cambios de esquema.
+- Se actualizaron las versiones de carga de ambos widgets para forzar el JS nuevo.
+- Producción todavía no fue modificada; enforcement global permanece desactivado.
