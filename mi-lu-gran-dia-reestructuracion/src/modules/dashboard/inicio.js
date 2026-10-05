@@ -1044,7 +1044,7 @@ const MODULES = Object.freeze({
     mount: 'mountMusica'
   },
   ideas: {
-    load: () => import('../ideas/index.js?v=20'),
+    load: () => import('../ideas/index.js?v=21'),
     mount: 'mountIdeas',
     destroy: 'destroyIdeas'
   }
