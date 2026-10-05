@@ -160,11 +160,15 @@ ninguna función productiva debe depender de URLs DEV hardcodeadas dentro de mó
 DEV:
 `migrandia-dev.avaldiviezoch.workers.dev`
 
-PROD objetivo:
-`wedding.avaldiviezoch.workers.dev`
+PROD API objetivo:
+`migrandia-api.avaldiviezoch.workers.dev`
 
 Objetivo posterior:
 `api.migrandiapp.com`
+
+Nota arquitectónica confirmada 2026-10-05:
+- el Worker `wedding` es el host estático de `migrandiapp.com` (assets-only) y no debe reutilizarse como API;
+- los servicios API productivos deben vivir en un Worker separado para no mezclar hosting estático con endpoints, bindings y secretos.
 
 ### Implementación DEV — 2026-10-05
 
@@ -1943,3 +1947,12 @@ reducir dependencia de soporte manual por WhatsApp o mensajes directos.
 - Se envió una confirmación de prueba y fue registrada correctamente.
 - La prueba se eliminará después del QA para no contaminar datos reales.
 - Resultado: flujo RSVP productivo operativo con App Check.
+
+
+### Hallazgo Cloudflare PROD — 2026-10-05
+- El Worker `wedding` está desplegado como Worker de assets estáticos para `migrandiapp.com`.
+- Cloudflare muestra “Metrics is unavailable for Workers with only static assets” y actualmente tiene 0 bindings.
+- Decisión: NO convertir `wedding` en Worker API ni pegar allí el código de `migrandia-dev`.
+- Se separará la API productiva en un Worker dedicado, recomendado: `migrandia-api`.
+- Objetivo final de dominio: `api.migrandiapp.com`.
+- Esta separación reduce riesgo de romper el frontend productivo y mejora escalabilidad/observabilidad.
