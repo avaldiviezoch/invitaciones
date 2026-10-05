@@ -310,3 +310,49 @@
 @media(max-width:700px){
   .ideas-card::before{inset:-5px;filter:blur(11px);opacity:.64}
 }
+
+
+/* Ajuste UX: halo como sombra de color sutil alrededor de toda la tarjeta */
+.ideas-card::before{
+  inset:-3px;
+  opacity:.34;
+  filter:blur(9px);
+}
+.ideas-card.is-inspiration{
+  border-color:rgba(176,116,128,.20);
+  box-shadow:
+    0 8px 22px rgba(57,58,48,.045),
+    0 0 12px rgba(176,116,128,.10);
+}
+.ideas-card.is-inspiration::before{
+  background:rgba(176,116,128,.16);
+}
+.ideas-card.is-purchase{
+  border-color:rgba(127,137,98,.22);
+  box-shadow:
+    0 8px 22px rgba(57,58,48,.045),
+    0 0 12px rgba(127,137,98,.11);
+}
+.ideas-card.is-purchase::before{
+  background:rgba(127,137,98,.17);
+}
+@media(hover:hover){
+  .ideas-card:hover{transform:translateY(-1px)}
+  .ideas-card.is-inspiration:hover{
+    border-color:rgba(176,116,128,.24);
+    box-shadow:
+      0 10px 24px rgba(57,58,48,.055),
+      0 0 15px rgba(176,116,128,.13);
+  }
+  .ideas-card.is-inspiration:hover::before{opacity:.42;filter:blur(10px);transform:none}
+  .ideas-card.is-purchase:hover{
+    border-color:rgba(127,137,98,.26);
+    box-shadow:
+      0 10px 24px rgba(57,58,48,.055),
+      0 0 15px rgba(127,137,98,.14);
+  }
+  .ideas-card.is-purchase:hover::before{opacity:.42;filter:blur(10px);transform:none}
+}
+@media(max-width:700px){
+  .ideas-card::before{inset:-2px;opacity:.30;filter:blur(8px)}
+}
