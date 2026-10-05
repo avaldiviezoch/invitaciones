@@ -296,9 +296,13 @@ DEV branch: `mgd/003-rsvp-abuse-protection-20261005`
 DEV PR: pendiente
 DEV commit: `187084474576120c80ade0fe699dff707def83ff` (Worker versionado + guard RSVP)
 
-QA pendiente:
-- Turnstile DEV usa la sitekey oficial de prueba `1x00000000000000000000AA`;
-- Worker DEV debe usar temporalmente la secret oficial de prueba `1x0000000000000000000000000000000AA` solo para QA;
+QA realizado en Cloudflare DEV — 2026-10-05:
+- Worker `migrandia-dev` actualizado y desplegado;
+- `TURNSTILE_SECRET_KEY` configurado como Secret;
+- binding `RSVP_RATE_LIMIT` configurado con namespace `1001`, límite `5`, periodo `60s`;
+- `POST /api/rsvp/verify` devuelve `200` con la clave oficial de prueba de Turnstile y origen permitido;
+- repetición del mismo `rsvpToken + responseId` supera el límite y devuelve `429`;
+- CORS específico y `Cache-Control: no-store` confirmados en la ruta RSVP;
 - usuario legítimo puede enviar RSVP;
 - usuario puede editar su propia respuesta;
 - otra sesión anónima no puede editarla;
@@ -329,6 +333,12 @@ Para continuar el QA real de MGD-003 se necesita ahora configuración en la cuen
 3. configurar el binding `RSVP_RATE_LIMIT` o equivalente disponible en la cuenta;
 4. verificar `/api/rsvp/verify` desde GitHub Pages DEV;
 5. después crear el widget Turnstile real para los dominios definitivos y sustituir las claves de prueba.
+
+### Estado Cloudflare DEV
+
+La capa Cloudflare de MGD-003 queda validada en DEV: origen → Worker → rate limiter → Turnstile.
+
+Siguiente fase: revisión Firebase/App Check/Rules para impedir bypass directo a Firestore.
 
 Pendiente de autorización antes de tocar infraestructura protegida:
 - cualquier cambio de Firestore Rules;
