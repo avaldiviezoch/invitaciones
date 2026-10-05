@@ -1,14 +1,133 @@
-const CORS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-  "Access-Control-Allow-Headers": "Content-Type",
-};
-
-const RSVP_ALLOWED_ORIGINS = new Set([
+const APP_ALLOWED_ORIGINS = new Set([
   "https://migrandiapp.com",
   "https://www.migrandiapp.com",
   "https://avaldiviezoch.github.io",
 ]);
+
+const RSVP_ALLOWED_ORIGINS = APP_ALLOWED_ORIGINS;
+
+const API_PATHS = new Set([
+  "/api/link-preview",
+  "/api/image-proxy",
+  "/api/music-preview",
+]);
+
+const MAX_TARGET_URL_LENGTH = 2048;
+const MAX_HTML_BYTES = 1_500_000;
+const MAX_IMAGE_BYTES = 6_000_000;
+const MAX_JSON_BYTES = 1_000_000;
+const UPSTREAM_TIMEOUT_MS = 8_000;
+
+function appCorsHeaders(origin = "") {
+  const headers = {
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
+    "Vary": "Origin",
+  };
+  if (APP_ALLOWED_ORIGINS.has(origin)) {
+    headers["Access-Control-Allow-Origin"] = origin;
+  }
+  return headers;
+}
+
+function withAppCors(response, origin = "") {
+  const headers = new Headers(response.headers);
+  for (const [key, value] of Object.entries(appCorsHeaders(origin))) {
+    headers.set(key, value);
+  }
+  return new Response(response.body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers,
+  });
+}
+
+function hostMatches(host, domain) {
+  const normalized = String(host || "").toLowerCase();
+  const target = String(domain || "").toLowerCase();
+  return normalized === target || normalized.endsWith("." + target);
+}
+
+function clientIp(request) {
+  return cleanSecurityValue(request.headers.get("CF-Connecting-IP"), 80) || "unknown";
+}
+
+async function applyApiGuards(request, env, pathname) {
+  const origin = requestOrigin(request);
+  if (origin && !APP_ALLOWED_ORIGINS.has(origin)) {
+    return withAppCors(
+      json({ ok: false, error: "Origen no permitido." }, 403),
+      origin
+    );
+  }
+
+  if (env.API_RATE_LIMIT?.limit) {
+    const key = `api:${pathname}:${clientIp(request)}`;
+    const { success } = await env.API_RATE_LIMIT.limit({ key });
+    if (!success) {
+      return withAppCors(
+        json({ ok: false, error: "Demasiadas solicitudes. Inténtalo nuevamente en un momento." }, 429),
+        origin
+      );
+    }
+  }
+
+  return null;
+}
+
+async function fetchWithTimeout(resource, options = {}, timeoutMs = UPSTREAM_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort("timeout"), timeoutMs);
+  try {
+    return await fetch(resource, { ...options, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function readBytesLimited(response, maxBytes) {
+  const declared = Number(response.headers.get("Content-Length") || 0);
+  if (Number.isFinite(declared) && declared > maxBytes) {
+    throw new Error("upstream-too-large");
+  }
+  if (!response.body) return new Uint8Array();
+
+  const reader = response.body.getReader();
+  const chunks = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > maxBytes) {
+        await reader.cancel("size-limit");
+        throw new Error("upstream-too-large");
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+
+  const output = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    output.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return output;
+}
+
+async function readTextLimited(response, maxBytes = MAX_HTML_BYTES) {
+  const bytes = await readBytesLimited(response, maxBytes);
+  return new TextDecoder("utf-8").decode(bytes);
+}
+
+async function readJsonLimited(response, maxBytes = MAX_JSON_BYTES) {
+  const text = await readTextLimited(response, maxBytes);
+  return JSON.parse(text);
+}
 
 function securityJson(data, status = 200, origin = "") {
   const headers = {
@@ -131,9 +250,10 @@ function json(data, status = 200) {
   return new Response(JSON.stringify(data, null, 2), {
     status,
     headers: {
-      ...CORS,
       "Content-Type": "application/json; charset=UTF-8",
-      "Cache-Control": "public, max-age=3600",
+      "Cache-Control": status >= 200 && status < 300
+        ? "public, max-age=3600"
+        : "no-store",
     },
   });
 }
