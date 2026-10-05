@@ -2227,3 +2227,9 @@ Siguiente paso:
 - Pinterest: preview correcto, imagen/título y agregado al tablero funcionando.
 - Temu: preview correcto, imagen/título y agregado al tablero funcionando.
 - Resultado: `/api/link-preview` e integración asociada continúan operativas después del hardening.
+
+
+### QA funcional MGD-004 — Música — 2026-10-05
+- El usuario confirmó que el módulo Música en DEV continúa funcionando igual que antes del hardening del Worker.
+- Se mantiene el comportamiento esperado de los previews musicales sin regresiones funcionales visibles.
+- Resultado: `/api/music-preview` continúa operativo después del hardening.
