@@ -1091,3 +1091,11 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - La inicialización solo ocurre en hosts registrados; localhost queda excluido por ahora.
 - No se activó enforcement aún para evitar bloquear tráfico legítimo antes del QA.
 - No se modificaron Firestore Rules, Auth, Storage ni estructura de BD.
+
+
+## 2026-10-05 — Ideas: corrección de carrera al agregar enlaces Temu/Pinterest
+- Se corrigió el submit de Ideas cuando el usuario pega un enlace y pulsa “Agregar al tablero” inmediatamente.
+- Antes, el evento `change` del enlace iniciaba el preview remoto de forma asíncrona, pero el submit validaba el nombre antes de que terminara el preview; si el título aún estaba vacío, el botón parecía no responder.
+- Ahora el submit espera el preview cuando falta título o imagen, muestra “Preparando idea…”, completa título/imagen si están disponibles y recién después valida y guarda.
+- Si el proveedor no entrega título, se muestra una validación explícita para escribir el nombre en vez de fallar silenciosamente.
+- No se modificó Firebase, Firestore Rules, Storage, Auth ni persistencia.
