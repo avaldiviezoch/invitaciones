@@ -338,23 +338,52 @@ export async function mountIdeas(context) {
     const titleInput = form.querySelector('[data-ideas-title]');
     if (!titleInput.value.trim() && preview?.title) titleInput.value = preview.title;
   };
+  form.querySelector('[data-ideas-title]').oninput = (event) => {
+    event.currentTarget.setCustomValidity('');
+  };
 
   form.onsubmit = async (event) => {
     event.preventDefault();
     if (!canManageIdeas()) return;
+
     const titleInput = form.querySelector('[data-ideas-title]');
+    const submitButton = form.querySelector('[data-ideas-submit]');
+    const url = normalizeUrl(urlInput.value);
+    let image = normalizeUrl(imageInput.value) || imageFromProductUrl(url);
+
+    const needsPreview = Boolean(url) && (!titleInput.value.trim() || !image);
+    if (needsPreview) {
+      const originalText = submitButton?.textContent || 'Agregar al tablero';
+      if (submitButton) {
+        submitButton.disabled = true;
+        submitButton.textContent = 'Preparando idea…';
+      }
+      try {
+        const preview = await resolveLinkPreview(url);
+        if (!image && preview?.image) {
+          image = preview.image;
+          imageInput.value = preview.image;
+        }
+        if (!titleInput.value.trim() && preview?.title) {
+          titleInput.value = preview.title;
+        }
+      } finally {
+        if (submitButton) {
+          submitButton.disabled = false;
+          submitButton.textContent = originalText;
+        }
+      }
+    }
+
     const title = titleInput.value.trim();
     if (!title) {
+      titleInput.setCustomValidity('Escribe un nombre para la idea.');
+      titleInput.reportValidity();
       titleInput.focus();
       return;
     }
-    const url = normalizeUrl(urlInput.value);
-    let image = normalizeUrl(imageInput.value) || imageFromProductUrl(url);
-    if (!image && url) {
-      const preview = await resolveLinkPreview(url);
-      image = preview?.image || '';
-      if (!titleInput.value.trim() && preview?.title) titleInput.value = preview.title;
-    }
+    titleInput.setCustomValidity('');
+
     const item = {
       id: crypto.randomUUID(),
       title,
