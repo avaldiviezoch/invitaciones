@@ -2,7 +2,7 @@
 
 Última actualización: 2026-10-05
 Último commit DEV: 6365dbcfc921af0e8a9028b91e999284301f94d2
-Último commit PROD: ad642b317ae4612a48a475c27ef232ef65f9ead7
+Último commit PROD: a2be5675a22199e244ae3f981e1196250911516e
 Versión producción: pendiente de versionado formal
 Trabajo actual: MGD-003 — protección contra abuso de RSVP
 Próximo trabajo: completar capa Cloudflare PROD de MGD-003 y luego evaluar Enforcement de App Check
@@ -1984,3 +1984,16 @@ reducir dependencia de soporte manual por WhatsApp o mensajes directos.
 - La UX muestra un mensaje amigable sin exponer códigos 429 ni detalles técnicos de Cloudflare.
 - Resultado: flujo legítimo + flujo de abuso aprobados en DEV.
 - Siguiente paso: preparar migración controlada del guard silencioso a producción.
+
+
+### QA final PROD RSVP silencioso — 2026-10-05
+- PR PROD #534 fusionado.
+- Commit PROD: `a2be5675a22199e244ae3f981e1196250911516e`.
+- Invitación productiva validada manualmente.
+- Envío RSVP correcto.
+- Sin mensajes técnicos de seguridad.
+- Sin CAPTCHA visible en flujo normal.
+- Estado final “¡Gracias por confirmar!” correcto.
+- Rate limit y Turnstile quedan activos mediante `migrandia-api`.
+- App Check continúa activo; Enforcement aún no se habilita hasta observar una ventana limpia de tráfico.
+- MGD-003 queda funcionalmente desplegado en producción; el cierre definitivo depende únicamente de la decisión posterior sobre Enforcement de App Check.
