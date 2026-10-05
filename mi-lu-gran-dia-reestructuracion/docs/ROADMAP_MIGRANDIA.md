@@ -340,6 +340,17 @@ La capa Cloudflare de MGD-003 queda validada en DEV: origen → Worker → rate 
 
 Siguiente fase: revisión Firebase/App Check/Rules para impedir bypass directo a Firestore.
 
+### Firebase App Check — DEV integrado 2026-10-05
+- App web registrada en Firebase App Check: `migrandiaweb`.
+- Proveedor: Fraud Defense / reCAPTCHA Enterprise.
+- Site key web registrada para `migrandiapp.com`, `www.migrandiapp.com` y `avaldiviezoch.github.io`.
+- App Check integrado en `src/services/firebase-client.js`.
+- Inicialización centralizada con `ReCaptchaEnterpriseProvider`.
+- Renovación automática de token activada.
+- App Check solo se inicializa en hosts registrados; localhost queda fuera para no romper desarrollo local antes de definir debug tokens.
+- No se activó enforcement todavía.
+- No se modificaron Firestore Rules, Auth, Storage ni estructura de datos.
+
 Pendiente de autorización antes de tocar infraestructura protegida:
 - cualquier cambio de Firestore Rules;
 - habilitación/configuración de App Check;
