@@ -2240,3 +2240,10 @@ Siguiente paso:
 - Resultado: bloqueado correctamente.
 - Respuesta: `{"ok":false,"error":"La URL no corresponde a Spotify, YouTube Music o Apple Music."}`
 - Conclusión: la validación estricta de hostname funciona y ya no acepta dominios que solo contienen el texto `youtube.com`.
+
+
+### QA seguridad MGD-004 — URL larga (primer intento) — 2026-10-05
+- Primer intento no alcanzó el límite de longitud definido por el Worker.
+- Respuesta obtenida: `{"ok":false,"error":"No se pudieron obtener los datos de la música.","provider":"youtube","type":"unknown"}`.
+- Interpretación: la solicitud sí pasó la validación de longitud y llegó a la lógica de `music-preview`; por tanto esta prueba no valida todavía el límite de 2048 caracteres.
+- Siguiente prueba: generar programáticamente una URL >2048 caracteres y verificar respuesta `La URL excede el tamaño permitido.`.
