@@ -2,7 +2,7 @@
 
 Última actualización: 2026-10-05
 Último commit DEV: 6365dbcfc921af0e8a9028b91e999284301f94d2
-Último commit PROD: 8095ab1b39b28718a97897e5fecd8713a6af2bf3
+Último commit PROD: ad642b317ae4612a48a475c27ef232ef65f9ead7
 Versión producción: pendiente de versionado formal
 Trabajo actual: MGD-003 — protección contra abuso de RSVP
 Próximo trabajo: completar capa Cloudflare PROD de MGD-003 y luego evaluar Enforcement de App Check
@@ -352,13 +352,24 @@ La capa Cloudflare de MGD-003 queda validada en DEV: origen → Worker → rate 
 - No se modificaron Firestore Rules, Auth, Storage ni estructura de datos.
 - Enforcement permanece desactivado.
 
+### Estado actual MGD-003 — 2026-10-05
+- Worker PROD dedicado creado: `migrandia-api.avaldiviezoch.workers.dev`.
+- `TURNSTILE_SECRET_KEY` configurado como Secret en PROD.
+- `RSVP_RATE_LIMIT` configurado con namespace `1002`, límite 5 / 60 s.
+- QA HTTP PROD validado: CORS permitido, 429 por abuso y 403 ante token Turnstile falso.
+- La primera integración Turnstile en la invitación productiva se retiró mediante hotfix porque el token podía no estar listo al pulsar enviar y mostraba un mensaje técnico al invitado.
+- Hotfix productivo PR #533 fusionado; commit PROD `ad642b317ae4612a48a475c27ef232ef65f9ead7`.
+- App Check productivo se mantiene activo.
+- DEV incluye corrección de UX silenciosa para Turnstile; PR #73 fusionado; commit DEV `cfcd89cca480250412b6be38d555c0524defdac3`.
+- Producción queda estable mientras se valida la nueva UX exclusivamente en DEV.
+
 ### Pendiente para cerrar MGD-003
-1. Configurar/validar la misma protección `/api/rsvp/verify` en el Worker PROD `wedding`.
-2. Configurar secret Turnstile real y binding de rate limit en PROD.
-3. Conectar la invitación productiva al guard Worker PROD antes del guardado Firestore.
-4. Ejecutar QA productivo: envío legítimo, 429 por abuso, origen inválido, móvil/desktop.
-5. Observar la métrica de App Check después de una ventana limpia de tráfico; no exigir 100% histórico inmediato.
-6. Solo después decidir Enforcement de Cloud Firestore/Authentication.
+1. QA manual DEV de `invitacion_0_2` con Turnstile silencioso.
+2. Confirmar envío normal sin mensajes técnicos visibles.
+3. Confirmar móvil y desktop.
+4. Confirmar 429 con mensaje de UX controlado.
+5. Solo después preparar una nueva migración a PROD.
+6. Tras una ventana limpia de tráfico, evaluar Enforcement de App Check; no activarlo antes.
 
 Siguiente fase: revisión Firebase/App Check/Rules para impedir bypass directo a Firestore.
 
