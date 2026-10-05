@@ -396,7 +396,7 @@ Pendiente de autorización antes de tocar infraestructura protegida:
 ---
 
 ## MGD-004 — Seguridad de Workers
-Estado: 🔵 PR PRODUCCIÓN
+Estado: 🟢 PRODUCCIÓN
 Prioridad: CRÍTICA
 
 Auditar:
@@ -2312,3 +2312,17 @@ Pendiente para cierre definitivo:
 - Usuario confirmó que en `https://www.migrandiapp.com` el funcionamiento productivo está correcto después del despliegue endurecido.
 - Resultado: sin regresiones funcionales visibles en el frontend productivo.
 - Pendiente únicamente: confirmar `API_RATE_LIMIT` productivo con respuesta HTTP 429 controlada y cerrar MGD-004 como 🟢 PRODUCCIÓN.
+
+
+### Cierre MGD-004 — PRODUCCIÓN — 2026-10-05
+- Smoke test productivo completado.
+- `/health`: OK.
+- Funcionalidad real en `https://www.migrandiapp.com`: OK, sin regresiones visibles.
+- Prueba controlada de `API_RATE_LIMIT` en `migrandia-api`:
+  - 70 solicitudes totales.
+  - 29 respuestas HTTP 400 por URL inválida esperada.
+  - 41 respuestas HTTP 429 `Too Many Requests`.
+  - 0 respuestas HTTP 200.
+- Conclusión: `API_RATE_LIMIT` PROD está activo y bloquea ráfagas correctamente.
+- MGD-004 queda cerrado como 🟢 PRODUCCIÓN.
+- No se modificó Firebase, Firestore Rules, Auth, Storage ni BD.
