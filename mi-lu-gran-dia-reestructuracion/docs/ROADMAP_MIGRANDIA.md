@@ -4,8 +4,8 @@
 Último commit DEV: 0322bdde6f72887de55edce799d3e08b09f8c995
 Último commit PROD: 9a1d5b6f088c610486a2aa02cf69c4687d623fd8
 Versión producción: pendiente de versionado formal
-Trabajo actual: MGD-001 — baseline y versión estable
-Próximo trabajo: MGD-002 — separación total DEV / PROD
+Trabajo actual: MGD-002 — separación total DEV / PROD
+Próximo trabajo: cerrar QA MGD-002 y continuar MGD-003
 Bloqueadores: separación DEV/PROD de servicios, protección anti-abuso RSVP, observabilidad y E2E
 
 ## Regla maestra de mantenimiento
@@ -151,29 +151,63 @@ Pendiente:
 ---
 
 ## MGD-002 — Separación total DEV / PROD
-Estado: ⬜ PENDIENTE
+Estado: 🟠 QA
 Prioridad: CRÍTICA
 
 Objetivo:
-ninguna función productiva debe depender de `migrandia-dev`.
+ninguna función productiva debe depender de URLs DEV hardcodeadas dentro de módulos.
 
 DEV:
 `migrandia-dev.avaldiviezoch.workers.dev`
 
-PROD:
+PROD objetivo:
 `wedding.avaldiviezoch.workers.dev`
 
 Objetivo posterior:
 `api.migrandiapp.com`
 
-Centralizar endpoints en una sola configuración por ambiente.
+### Implementación DEV — 2026-10-05
 
-Incluye:
-- Ideas
-- Música
-- Link Preview
+Se creó `src/services/runtime-environment.js` como único propietario de los endpoints por ambiente.
+
+Resolución actual:
+- `migrandiapp.com`, `www.migrandiapp.com` y `wedding.avaldiviezoch.workers.dev` → producción.
+- cualquier otro host (GitHub Pages DEV / localhost) → desarrollo.
+
+Módulos migrados:
+- Ideas → `/api/link-preview`
+- Ideas → `/api/image-proxy`
+- Música → `/api/music-preview`
+
+Los módulos ya no contienen `migrandia-dev.avaldiviezoch.workers.dev` hardcodeado.
+
+DEV branch: `mgd/002-env-separation-20261005`
+DEV PR: pendiente
+DEV commit: pendiente
+
+QA requerido antes de aprobar DEV:
+- Ideas Pinterest preview
+- Ideas Temu preview
 - Image Proxy
-- futuros servicios
+- Música YouTube
+- Música Spotify
+- Música Apple Music
+- GitHub Pages DEV mantiene Worker DEV
+- confirmar que el Worker PROD realmente expone los tres endpoints antes de migrar a Wedding
+
+PROD branch: pendiente
+PROD PR: pendiente
+PROD commit: pendiente
+
+Decisiones:
+- no tocar Firebase, Firestore, Auth, Storage ni persistencia;
+- no migrar a producción hasta comprobar funcionalmente los endpoints del Worker PROD;
+- una sola configuración central para servicios actuales y futuros.
+
+Pendiente:
+- QA funcional en desarrollo.
+- Validación del backend PROD.
+- Migración controlada a `Wedding` tras aprobación.
 
 ---
 
