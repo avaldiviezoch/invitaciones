@@ -1056,3 +1056,10 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - El efecto ya no busca parecer un borde ni una mancha acuarelada: funciona como una sombra cromática sutil y uniforme.
 - Hover aumenta solo ligeramente la presencia de la sombra.
 - Sin cambios en miniaturas, grid, densidades, datos ni persistencia.
+
+
+## 2026-10-05 — Distribución: iconografía Nivel 1 del catálogo
+- Se validaron 46 SVG del catálogo en `assets/distribucion/icons/catalog/` sin faltantes ni extras.
+- Se reemplazaron los glifos del catálogo de Distribución por los SVG personalizados Nivel 1 en desktop y móvil.
+- Los SVG se renderizan como máscaras monocromáticas para respetar el color visual del sistema sin alterar los archivos fuente.
+- Alcance limitado a botones del catálogo y áreas dibujables; no se modificó la representación de objetos dentro del plano, persistencia, Firebase ni geometría.

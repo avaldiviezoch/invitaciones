@@ -104,6 +104,19 @@ function escapeText(value) {
   return String(value ?? '').trim();
 }
 
+const CATALOG_ICON_BASE_URL = new URL('../../../assets/distribucion/icons/catalog/', import.meta.url);
+
+function createCatalogIcon(iconName) {
+  const frame = document.createElement('strong');
+  frame.className = 'distribution-catalog-icon-frame';
+  frame.setAttribute('aria-hidden', 'true');
+  const glyph = document.createElement('span');
+  glyph.className = 'distribution-catalog-icon';
+  glyph.style.setProperty('--distribution-catalog-icon', `url("${new URL(`${iconName}.svg`, CATALOG_ICON_BASE_URL).href}")`);
+  frame.append(glyph);
+  return frame;
+}
+
 function compactGuestName(value, maxLength = 18) {
   const text = escapeText(value);
   if (text.length <= maxLength) return text;
@@ -831,9 +844,7 @@ async function mountDistribucion(context) {
     button.dataset.distributionAddElement = definition.type;
     button.setAttribute('aria-label', definition.label);
     button.title = definition.label;
-    const icon = document.createElement('strong');
-    icon.textContent = definition.icon;
-    icon.setAttribute('aria-hidden', 'true');
+    const icon = createCatalogIcon(definition.type);
     const label = document.createElement('span');
     label.textContent = definition.label;
     button.append(icon, label);
@@ -871,9 +882,7 @@ async function mountDistribucion(context) {
     button.dataset.defaultLabel = preset.label;
     button.setAttribute('aria-label', preset.label);
     button.title = preset.label;
-    const icon = document.createElement('strong');
-    icon.textContent = preset.icon;
-    icon.setAttribute('aria-hidden', 'true');
+    const icon = createCatalogIcon(`area-${preset.areaKind}`);
     const label = document.createElement('span');
     label.textContent = preset.label;
     button.append(icon, label);
@@ -1025,9 +1034,7 @@ async function mountDistribucion(context) {
             const button = document.createElement('button');
             button.type = 'button';
             button.setAttribute('aria-label', definition.label);
-            const icon = document.createElement('strong');
-            icon.textContent = definition.icon;
-            icon.setAttribute('aria-hidden', 'true');
+            const icon = createCatalogIcon(definition.type);
             const label = document.createElement('span');
             label.textContent = definition.label;
             button.append(icon, label);
@@ -1051,9 +1058,7 @@ async function mountDistribucion(context) {
           const button = document.createElement('button');
           button.type = 'button';
           button.setAttribute('aria-label', preset.label);
-          const icon = document.createElement('strong');
-          icon.textContent = preset.icon;
-          icon.setAttribute('aria-hidden', 'true');
+          const icon = createCatalogIcon(`area-${preset.areaKind}`);
           const label = document.createElement('span');
           label.textContent = preset.label;
           button.append(icon, label);
