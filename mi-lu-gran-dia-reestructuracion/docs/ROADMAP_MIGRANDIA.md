@@ -2287,3 +2287,10 @@ Pendiente para cierre definitivo:
 3. desplegar en `migrandia-api` el mismo `migrandia-worker.js` endurecido ya probado en DEV;
 4. ejecutar smoke test productivo: `/health`, Pinterest/Temu/Música y un 429 controlado;
 5. marcar MGD-004 como 🟢 PRODUCCIÓN.
+
+
+### PROD MGD-004 — binding API_RATE_LIMIT creado — 2026-10-05
+- Confirmación del usuario: se creó en Cloudflare Worker `migrandia-api` el binding `API_RATE_LIMIT`.
+- Configuración acordada/versionada: namespace `1004`, limit `60`, period `60`.
+- `RSVP_RATE_LIMIT` existente debe permanecer en namespace `1002`, limit `5`, period `60`.
+- Pendiente: desplegar en `migrandia-api` el mismo `migrandia-worker.js` endurecido validado en DEV y ejecutar smoke test productivo.
