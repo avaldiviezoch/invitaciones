@@ -1,3 +1,11 @@
+## 2026-10-06 — Uso extraordinario del diagnóstico RSVP ↔ Invitados
+
+- Se mantiene registrado el utilitario `mi-lu-gran-dia-reestructuracion/diagnostico_rsvp_vs_invitados.html`.
+- URL operativa: `https://avaldiviezoch.github.io/invitaciones/mi-lu-gran-dia-reestructuracion/diagnostico_rsvp_vs_invitados.html`.
+- Es una herramienta **extraordinaria y excepcional**, reservada a desarrollo/QA y administración controlada cuando sea necesario auditar el inventario RSVP ↔ Invitados, revisar IDs, localizar inconsistencias o limpiar registros de prueba de forma individual.
+- No forma parte del flujo ordinario de Invitados y no sustituye el módulo canónico. Antes de cualquier eliminación debe verificarse el `responseId`/`guestId` exacto para no afectar confirmaciones reales.
+- Esta referencia debe conservarse en la documentación de desarrollo y producción para que el utilitario no vuelva a perderse.
+
 ## Fase 5 — Invitaciones: biblioteca personal por cuenta
 
 - Se eliminó el catálogo hardcodeado de invitaciones del módulo; una cuenta nueva inicia sin invitaciones.
