@@ -1911,3 +1911,9 @@ reducir dependencia de soporte manual por WhatsApp o mensajes directos.
 - Se mantienen los mismos datos y colecciones; no se alteró la BD.
 - Se incrementaron versiones de carga para evitar caché del widget anterior.
 - Producción (`Wedding`) aún conserva clientes RSVP sin App Check y por eso no debe activarse enforcement global todavía.
+
+
+### QA App Check posterior a integración producción — 2026-10-05
+- Métrica observada en Firebase App Check tras integrar PROD: Cloud Firestore 58% solicitudes verificadas / 42% no verificadas; Authentication 71% verificadas / 29% no verificadas.
+- Tendencia mejora respecto al punto anterior (Firestore 48% / 52%; Authentication 64% / 36%), confirmando que nuevos clientes están enviando App Check.
+- Enforcement permanece desactivado: todavía existe tráfico no verificado significativo y primero debe identificarse/agotarse el tráfico legado y validar RSVP público productivo.
