@@ -2220,3 +2220,10 @@ Siguiente paso:
 - Wrangler DEV quedó versionado en GitHub con los dos rate-limit bindings.
 - Estado: desplegado según confirmación del usuario; pendiente QA funcional y de seguridad sobre el Worker DEV.
 - No se modificó Firebase, Firestore Rules, Auth, Storage ni BD.
+
+
+### QA funcional MGD-004 — Ideas — 2026-10-05
+- Worker DEV endurecido validado desde la app DEV.
+- Pinterest: preview correcto, imagen/título y agregado al tablero funcionando.
+- Temu: preview correcto, imagen/título y agregado al tablero funcionando.
+- Resultado: `/api/link-preview` e integración asociada continúan operativas después del hardening.
