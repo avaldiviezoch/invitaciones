@@ -1018,3 +1018,13 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Las coincidencias automáticas se calculan únicamente sobre invitados disponibles.
 - La interfaz informa cuántos invitados ya vinculados fueron ocultados.
 - No se modifica persistencia, IDs, Firebase, Firestore, mesas, sillas ni estados RSVP.
+
+
+## 2026-10-04 — Ideas: tablero compartido por boda y edición restringida
+
+- Se ratifica que Ideas es un tablero compartido por boda, no una biblioteca personal por usuario.
+- Se conserva la clave `planificador_bodas_ideas_v1` y el aislamiento existente por `weddingId`.
+- Solo roles `owner` y `admin` pueden agregar, editar, eliminar o usar ideas.
+- Roles `editor`, `provider` y `viewer` conservan acceso de lectura al tablero, filtros, búsqueda, tamaño visual y enlaces externos.
+- Los controles de escritura se ocultan en modo solo lectura y las funciones de mutación quedan además protegidas en JavaScript.
+- No se modifican Firebase Rules, Auth, Storage, colecciones, claves, payloads ni persistencia.
