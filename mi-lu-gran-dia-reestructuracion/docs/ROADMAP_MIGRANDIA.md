@@ -1,11 +1,11 @@
 # ROADMAP MIGRANDIA
 
 Última actualización: 2026-10-05
-Último commit DEV: 0322bdde6f72887de55edce799d3e08b09f8c995
-Último commit PROD: 9a1d5b6f088c610486a2aa02cf69c4687d623fd8
+Último commit DEV: 6365dbcfc921af0e8a9028b91e999284301f94d2
+Último commit PROD: 8095ab1b39b28718a97897e5fecd8713a6af2bf3
 Versión producción: pendiente de versionado formal
 Trabajo actual: MGD-003 — protección contra abuso de RSVP
-Próximo trabajo: definir e implementar la capa anti-abuso RSVP en desarrollo sin tocar Firebase Rules/Auth
+Próximo trabajo: completar capa Cloudflare PROD de MGD-003 y luego evaluar Enforcement de App Check
 Bloqueadores: separación DEV/PROD de servicios, protección anti-abuso RSVP, observabilidad y E2E
 
 ## Regla maestra de mantenimiento
@@ -212,7 +212,7 @@ Pendiente:
 ---
 
 ## MGD-003 — Protección contra abuso de RSVP
-Estado: 🟡 EN DESARROLLO
+Estado: 🟠 QA
 Prioridad: CRÍTICA
 
 Objetivo:
@@ -231,9 +231,8 @@ Fortalezas existentes:
 - Firestore Rules validan estructura y campos permitidos.
 
 Riesgos pendientes:
-- no existe rate limiting real;
-- no existe Cloudflare Turnstile;
-- no existe App Check visible en el flujo actual;
+- rate limiting y Turnstile ya están validados en Worker DEV, pero falta replicar/configurar la capa equivalente en Worker PROD;
+- App Check ya está integrado en DEV y PROD y validado con tráfico real; Enforcement aún está desactivado;
 - Anonymous Auth por sí solo no impide automatización masiva;
 - el cliente escribe directamente a Firestore, por lo que un atacante puede saltarse controles visuales del formulario;
 - no hay límite server-side por intervalo de tiempo;
@@ -293,8 +292,8 @@ La primera fase será no destructiva:
 - probar sin tocar datos reales.
 
 DEV branch: `mgd/003-rsvp-abuse-protection-20261005`
-DEV PR: pendiente
-DEV commit: `187084474576120c80ade0fe699dff707def83ff` (Worker versionado + guard RSVP)
+DEV PR: #69, #72
+DEV commits principales: `1392d6578f839101546c4149a0c009ba39806d21`, `6365dbcfc921af0e8a9028b91e999284301f94d2`
 
 QA realizado en Cloudflare DEV — 2026-10-05:
 - Worker `migrandia-dev` actualizado y desplegado;
@@ -337,6 +336,25 @@ Para continuar el QA real de MGD-003 se necesita ahora configuración en la cuen
 ### Estado Cloudflare DEV
 
 La capa Cloudflare de MGD-003 queda validada en DEV: origen → Worker → rate limiter → Turnstile.
+
+### Integración PROD — 2026-10-05
+- PR producción: #531.
+- Commit producción: `8095ab1b39b28718a97897e5fecd8713a6af2bf3`.
+- App Check integrado en `Wedding/app_integral/src/services/firebase-client.js`.
+- App Check integrado en la invitación pública `Wedding/invitaciones/invitacion_0`.
+- App Check integrado también en la identidad anónima `mgd-rsvp-anonymous`.
+- QA manual productivo: login/app operativa y RSVP real de prueba registrado correctamente.
+- Métricas App Check posteriores: Firestore 58% verificadas / 42% no verificadas; Authentication 71% / 29%.
+- No se modificaron Firestore Rules, Auth, Storage ni estructura de datos.
+- Enforcement permanece desactivado.
+
+### Pendiente para cerrar MGD-003
+1. Configurar/validar la misma protección `/api/rsvp/verify` en el Worker PROD `wedding`.
+2. Configurar secret Turnstile real y binding de rate limit en PROD.
+3. Conectar la invitación productiva al guard Worker PROD antes del guardado Firestore.
+4. Ejecutar QA productivo: envío legítimo, 429 por abuso, origen inválido, móvil/desktop.
+5. Observar la métrica de App Check después de una ventana limpia de tráfico; no exigir 100% histórico inmediato.
+6. Solo después decidir Enforcement de Cloud Firestore/Authentication.
 
 Siguiente fase: revisión Firebase/App Check/Rules para impedir bypass directo a Firestore.
 
