@@ -168,7 +168,7 @@ async function verifyTurnstile(turnstileToken, request, env) {
   body.set("response", turnstileToken);
   if (remoteip) body.set("remoteip", remoteip);
 
-  const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+  const response = await fetchWithTimeout("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
     method: "POST",
     body,
   });
@@ -177,7 +177,7 @@ async function verifyTurnstile(turnstileToken, request, env) {
     return { ok: false, status: 502, reason: "turnstile-upstream" };
   }
 
-  const result = await response.json();
+  const result = await readJsonLimited(response);
   if (!result?.success) {
     return {
       ok: false,
@@ -358,7 +358,7 @@ async function pinterestPreview(target) {
   }
 
   try {
-    const response = await fetch(target, {
+    const response = await fetchWithTimeout(target, {
       redirect: "follow",
       headers: {
         "User-Agent":
@@ -390,7 +390,7 @@ async function pinterestPreview(target) {
       );
     }
 
-    const html = await response.text();
+    const html = await readTextLimited(response);
 
     const image =
       meta(html, "og:image") ||
@@ -449,7 +449,7 @@ async function pinterestImageProxy(target) {
   }
 
   try {
-    const response = await fetch(target, {
+    const response = await fetchWithTimeout(target, {
       headers: {
         "User-Agent":
           "Mozilla/5.0 (compatible; MigrandiaPreview/1.0)",
@@ -469,6 +469,17 @@ async function pinterestImageProxy(target) {
       );
     }
 
+    const finalImageUrl = response.url;
+    if (!isPinterestImage(finalImageUrl)) {
+      return json(
+        {
+          ok: false,
+          error: "La imagen de Pinterest redirigió a un dominio no permitido.",
+        },
+        400
+      );
+    }
+
     const contentType =
       response.headers.get("Content-Type") || "";
 
@@ -482,10 +493,10 @@ async function pinterestImageProxy(target) {
       );
     }
 
-    return new Response(response.body, {
+    const imageBytes = await readBytesLimited(response, MAX_IMAGE_BYTES);
+    return new Response(imageBytes, {
       status: 200,
       headers: {
-        ...CORS,
         "Content-Type": contentType,
         "Cache-Control": "public, max-age=86400",
       },
@@ -681,7 +692,7 @@ async function temuPreview(target) {
   }
 
   try {
-    const response = await fetch(target, {
+    const response = await fetchWithTimeout(target, {
       redirect: "follow",
       headers: {
         "User-Agent":
@@ -716,7 +727,7 @@ async function temuPreview(target) {
       );
     }
 
-    const html = await response.text();
+    const html = await readTextLimited(response);
 
     const directImage =
       temuImageFromUrl(finalUrl) ||
@@ -803,7 +814,7 @@ async function temuImageProxy(target) {
   }
 
   try {
-    const response = await fetch(target, {
+    const response = await fetchWithTimeout(target, {
       redirect: "follow",
       headers: {
         "User-Agent":
@@ -850,10 +861,10 @@ async function temuImageProxy(target) {
       );
     }
 
-    return new Response(response.body, {
+    const imageBytes = await readBytesLimited(response, MAX_IMAGE_BYTES);
+    return new Response(imageBytes, {
       status: 200,
       headers: {
-        ...CORS,
         "Content-Type": contentType,
         "Cache-Control": "public, max-age=86400",
       },
@@ -1015,7 +1026,7 @@ async function youtubePlaylistPreview(target, apiKey) {
     "&key=" +
     encodeURIComponent(apiKey);
 
-  const response = await fetch(apiUrl, {
+  const response = await fetchWithTimeout(apiUrl, {
     headers: {
       Accept: "application/json",
     },
@@ -1025,7 +1036,7 @@ async function youtubePlaylistPreview(target, apiKey) {
     let detail = "";
 
     try {
-      const data = await response.json();
+      const data = await readJsonLimited(response);
       detail =
         data?.error?.message ||
         "";
@@ -1041,7 +1052,7 @@ async function youtubePlaylistPreview(target, apiKey) {
     };
   }
 
-  const data = await response.json();
+  const data = await readJsonLimited(response);
   const playlist = data?.items?.[0];
 
   if (!playlist) {
@@ -1113,7 +1124,7 @@ async function musicPreview(target, env) {
       }
 
       try {
-        const response = await fetch(target, {
+        const response = await fetchWithTimeout(target, {
           redirect: "follow",
           headers: {
             "User-Agent":
@@ -1126,7 +1137,7 @@ async function musicPreview(target, env) {
         });
 
         if (response.ok) {
-          const html = await response.text();
+          const html = await readTextLimited(response);
 
           const image =
             meta(html, "og:image") ||
@@ -1169,7 +1180,7 @@ async function musicPreview(target, env) {
       type === "track"
     ) {
       try {
-        const response = await fetch(target, {
+        const response = await fetchWithTimeout(target, {
           redirect: "follow",
           headers: {
             "User-Agent":
@@ -1182,7 +1193,7 @@ async function musicPreview(target, env) {
         });
 
         if (response.ok) {
-          const html = await response.text();
+          const html = await readTextLimited(response);
 
           const image =
             meta(html, "og:image") ||
@@ -1241,13 +1252,13 @@ async function musicPreview(target, env) {
 
     // Spotify
     if (provider === "spotify") {
-      const response = await fetch(
+      const response = await fetchWithTimeout(
         "https://open.spotify.com/oembed?url=" +
           encodeURIComponent(target)
       );
 
       if (response.ok) {
-        const data = await response.json();
+        const data = await readJsonLimited(response);
 
         return json({
           ok: true,
@@ -1263,7 +1274,7 @@ async function musicPreview(target, env) {
 
     // Apple Music
     if (provider === "apple") {
-      const response = await fetch(target, {
+      const response = await fetchWithTimeout(target, {
         redirect: "follow",
         headers: {
           "User-Agent":
@@ -1276,7 +1287,7 @@ async function musicPreview(target, env) {
       });
 
       if (response.ok) {
-        const html = await response.text();
+        const html = await readTextLimited(response);
 
         const image =
           meta(html, "og:image") ||
