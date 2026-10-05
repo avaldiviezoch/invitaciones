@@ -1047,3 +1047,12 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Inspiración usa un halo rosado empolvado; Por comprar usa un halo oliva.
 - En reposo el efecto es tenue; en hover aumenta ligeramente la presencia sin convertirse en neón ni alterar el layout.
 - Se conserva el grid, las miniaturas 4:3, tamaños de tarjeta, persistencia, IDs, imágenes y Firebase.
+
+
+## 2026-10-04 — Ideas: halo refinado como sombra de color
+
+- Se reduce el halo anterior y se convierte en una sombra de color suave alrededor de toda la tarjeta.
+- Inspiración mantiene rosa empolvado; Por comprar mantiene oliva.
+- El efecto ya no busca parecer un borde ni una mancha acuarelada: funciona como una sombra cromática sutil y uniforme.
+- Hover aumenta solo ligeramente la presencia de la sombra.
+- Sin cambios en miniaturas, grid, densidades, datos ni persistencia.
