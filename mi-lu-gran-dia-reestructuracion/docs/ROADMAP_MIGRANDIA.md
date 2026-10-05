@@ -2078,11 +2078,11 @@ Este bloque consolida los cambios realizados y las configuraciones de Cloudflare
   - Period: `60 seconds`
   - Uso: protección del endpoint RSVP DEV.
 - `API_RATE_LIMIT`:
-  - Namespace reservado/definido: `1003`
+  - Namespace: `1003`
   - Limit: `60`
   - Period: `60 seconds`
   - Uso: `/api/link-preview`, `/api/image-proxy`, `/api/music-preview`.
-  - Estado al registrar este bloque: parámetros definidos; pendiente confirmar en Cloudflare que el binding fue guardado.
+  - Estado: confirmado guardado en Cloudflare DEV.
 
 **PROD — `migrandia-api`**
 - `TURNSTILE_SECRET_KEY`: configurado como secret rotado. No registrar ni exponer su valor.
@@ -2092,7 +2092,7 @@ Este bloque consolida los cambios realizados y las configuraciones de Cloudflare
   - Period: `60 seconds`
   - Uso: protección del endpoint RSVP productivo.
 - `API_RATE_LIMIT`: todavía no desplegado/configurado en PROD; solo se hará después del QA completo de MGD-004 en DEV.
-- `YOUTUBE_API_KEY`: no asumir configurado; sigue pendiente si se requiere la ruta de playlist vía API oficial.
+- `YOUTUBE_API_KEY`: confirmado configurado como secret en `migrandia-dev`; el valor permanece cifrado/no documentado. En PROD aún no asumir configurado salvo verificación específica.
 
 ### Turnstile RSVP
 - Widget PROD creado como `Migrandia RSVP PROD`.
@@ -2183,3 +2183,18 @@ Este bloque consolida los cambios realizados y las configuraciones de Cloudflare
 8. Probar límite de tamaño.
 9. Probar 429 del `API_RATE_LIMIT`.
 10. Solo después preparar el pase a `migrandia-api` PROD.
+
+
+### Confirmación Cloudflare DEV bindings — 2026-10-05
+Captura revisada en `migrandia-dev > Settings > Production`.
+
+Confirmado:
+- Secret `TURNSTILE_SECRET_KEY`: presente.
+- Secret `YOUTUBE_API_KEY`: presente.
+- Binding `API_RATE_LIMIT`: namespace `1003`, limit `60`, period `60`.
+- Binding `RSVP_RATE_LIMIT`: namespace `1001`, limit `5`, period `60`.
+- Cloudflare muestra aviso para mantener Wrangler sincronizado con los cambios de bindings.
+
+Siguiente paso:
+- desplegar/confirmar el código endurecido de MGD-004 en `migrandia-dev`;
+- luego ejecutar QA funcional de Ideas/Música/Image Proxy y pruebas de seguridad/rate-limit.
