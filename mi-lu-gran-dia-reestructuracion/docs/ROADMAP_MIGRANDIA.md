@@ -396,7 +396,7 @@ Pendiente de autorización antes de tocar infraestructura protegida:
 ---
 
 ## MGD-004 — Seguridad de Workers
-Estado: 🟡 EN DESARROLLO
+Estado: 🔵 PR PRODUCCIÓN
 Prioridad: CRÍTICA
 
 Auditar:
@@ -2262,3 +2262,28 @@ Siguiente paso:
 - También se observaron respuestas 200 antes/durante la ráfaga por ejecución concurrente fuera de orden; esto es esperable en una prueba paralela.
 - Durante la ráfaga aparecieron algunos 502/503 sin CORS visibles en el navegador, atribuibles al estrés/subrequests concurrentes del entorno; no se reproducen en el flujo funcional normal ya validado.
 - Conclusión: el binding DEV `API_RATE_LIMIT` (namespace 1003, limit 60/60s) está activo y bloquea abuso.
+
+
+### Preparación PROD MGD-004 — 2026-10-05
+DEV quedó aprobado funcionalmente y en seguridad básica:
+- Health check OK.
+- Pinterest OK.
+- Temu OK.
+- Música OK.
+- Dominio musical falso bloqueado.
+- `API_RATE_LIMIT` confirmado con HTTP 429 bajo ráfaga.
+- Sin regresiones funcionales visibles en Ideas/Música.
+- No se modificó Firebase, Firestore Rules, Auth, Storage ni BD.
+
+Se agregó configuración productiva versionada:
+- `cloudflare/wrangler.prod.jsonc`
+- Worker: `migrandia-api`
+- `RSVP_RATE_LIMIT`: namespace `1002`, limit `5`, period `60`.
+- `API_RATE_LIMIT`: namespace `1004`, limit `60`, period `60`.
+
+Pendiente para cierre definitivo:
+1. crear/confirmar en Cloudflare PROD binding `API_RATE_LIMIT` con namespace `1004`, limit `60`, period `60`;
+2. mantener `RSVP_RATE_LIMIT` existente en namespace `1002`;
+3. desplegar en `migrandia-api` el mismo `migrandia-worker.js` endurecido ya probado en DEV;
+4. ejecutar smoke test productivo: `/health`, Pinterest/Temu/Música y un 429 controlado;
+5. marcar MGD-004 como 🟢 PRODUCCIÓN.
