@@ -396,7 +396,7 @@ Pendiente de autorización antes de tocar infraestructura protegida:
 ---
 
 ## MGD-004 — Seguridad de Workers
-Estado: ⬜ PENDIENTE
+Estado: 🟡 EN DESARROLLO
 Prioridad: CRÍTICA
 
 Auditar:
@@ -416,6 +416,37 @@ Endpoints:
 - `/api/link-preview`
 - `/api/image-proxy`
 - `/api/music-preview`
+
+### Auditoría inicial MGD-004 — 2026-10-05
+Archivo auditado: `cloudflare/migrandia-worker.js`.
+
+Fortalezas:
+- RSVP usa CORS por allowlist, Turnstile, rate limit, honeypot, tiempo mínimo y `no-store`.
+- Pinterest y Temu validan protocolo y host antes de fetch.
+- Pinterest/Temu preview revalidan el host final tras redirects.
+- Temu image proxy revalida la URL final.
+- Secretos se leen desde `env`; no están hardcodeados.
+
+Hallazgos prioritarios:
+1. ALTO — `/api/link-preview`, `/api/image-proxy` y `/api/music-preview` usan CORS global `*`; cualquier sitio externo puede consumir la API y generar costo/tráfico.
+2. ALTO — no existe rate limiting para link preview, image proxy ni music preview.
+3. ALTO — `isMusicUrl()` valida YouTube/Spotify mediante `hostname.includes(...)`, lo que permite dominios con esos textos embebidos en el hostname; debe cambiarse a allowlist exacta/subdominio.
+4. ALTO — varios fetch externos no tienen timeout/AbortSignal.
+5. ALTO — previews HTML usan `response.text()` sin límite explícito de bytes; una respuesta grande puede consumir CPU/memoria.
+6. ALTO — image proxy transmite imágenes sin límite explícito de tamaño; riesgo de abuso de ancho de banda.
+7. MEDIO — YouTube/Apple siguen redirects sin revalidar el hostname final.
+8. MEDIO — Pinterest image proxy no revalida explícitamente la URL final después de redirect.
+9. MEDIO — errores generales pueden devolver `error.message` del upstream/runtime y estados específicos; conviene normalizar mensajes públicos.
+10. MEDIO — `json()` aplica `Cache-Control: public, max-age=3600` también a varias respuestas de error; conviene separar cache de éxito/error.
+11. BAJO — rutas GET desconocidas responden health check 200 en vez de 404; dificulta observabilidad y detección de rutas incorrectas.
+
+Decisión:
+- no tocar Firebase, Firestore Rules, Auth, Storage ni BD;
+- endurecer primero DEV;
+- mantener contratos de endpoints actuales;
+- no modificar RSVP productivo salvo regresión crítica;
+- después de QA DEV, migrar el mismo Worker endurecido a `migrandia-api`.
+
 
 ---
 
