@@ -249,3 +249,64 @@
   .ideas-card-badges{left:7px;right:7px;bottom:7px}
   .ideas-card-type,.ideas-card-source{min-height:20px;padding:0 7px;font-size:6.5px}
 }
+
+
+/* Halo acuarelado por tipo — propuesta visual */
+.ideas-card{
+  isolation:isolate;
+  overflow:visible;
+  transition:transform .18s ease,box-shadow .22s ease,border-color .22s ease;
+}
+.ideas-card::before{
+  content:"";
+  position:absolute;
+  inset:-7px;
+  z-index:-1;
+  border-radius:24px;
+  opacity:.72;
+  filter:blur(13px);
+  pointer-events:none;
+  transition:opacity .22s ease,filter .22s ease,transform .22s ease;
+}
+.ideas-card.is-inspiration{
+  border-color:rgba(176,116,128,.28);
+  box-shadow:
+    0 8px 24px rgba(57,58,48,.05),
+    0 0 0 2px rgba(176,116,128,.055);
+}
+.ideas-card.is-inspiration::before{
+  background:
+    radial-gradient(70% 52% at 18% 16%,rgba(176,116,128,.18),transparent 72%),
+    radial-gradient(58% 64% at 88% 76%,rgba(194,137,148,.12),transparent 72%);
+}
+.ideas-card.is-purchase{
+  border-color:rgba(127,137,98,.3);
+  box-shadow:
+    0 8px 24px rgba(57,58,48,.05),
+    0 0 0 2px rgba(127,137,98,.06);
+}
+.ideas-card.is-purchase::before{
+  background:
+    radial-gradient(68% 50% at 20% 14%,rgba(127,137,98,.19),transparent 72%),
+    radial-gradient(60% 66% at 88% 78%,rgba(151,160,120,.13),transparent 74%);
+}
+@media(hover:hover){
+  .ideas-card:hover{transform:translateY(-2px)}
+  .ideas-card.is-inspiration:hover{
+    border-color:rgba(176,116,128,.38);
+    box-shadow:
+      0 12px 30px rgba(57,58,48,.08),
+      0 0 0 3px rgba(176,116,128,.075);
+  }
+  .ideas-card.is-inspiration:hover::before{opacity:.96;filter:blur(15px);transform:scale(1.012)}
+  .ideas-card.is-purchase:hover{
+    border-color:rgba(127,137,98,.4);
+    box-shadow:
+      0 12px 30px rgba(57,58,48,.08),
+      0 0 0 3px rgba(127,137,98,.08);
+  }
+  .ideas-card.is-purchase:hover::before{opacity:.96;filter:blur(15px);transform:scale(1.012)}
+}
+@media(max-width:700px){
+  .ideas-card::before{inset:-5px;filter:blur(11px);opacity:.64}
+}
