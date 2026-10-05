@@ -7,6 +7,125 @@ const firebaseConfig={apiKey:'AIzaSyDCRuQgMjnm7KcAN_qo8AHPD3ueyis4-LY',authDomai
 const app=getApps().length?getApp():initializeApp(firebaseConfig);
 const db=getFirestore(app);
 const installed=new WeakSet();
+const turnstileWidgets=new WeakMap();
+let turnstileLoader=null;
+
+function loadTurnstile(){
+  if(globalThis.turnstile)return Promise.resolve(globalThis.turnstile);
+  if(turnstileLoader)return turnstileLoader;
+  turnstileLoader=new Promise((resolve,reject)=>{
+    const existing=document.querySelector('script[data-mgd-turnstile]');
+    if(existing){
+      existing.addEventListener('load',()=>resolve(globalThis.turnstile),{once:true});
+      existing.addEventListener('error',()=>reject(new Error('No se pudo cargar la verificación de seguridad.')),{once:true});
+      return;
+    }
+    const script=document.createElement('script');
+    script.src='https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    script.async=true;
+    script.defer=true;
+    script.dataset.mgdTurnstile='';
+    script.onload=()=>resolve(globalThis.turnstile);
+    script.onerror=()=>reject(new Error('No se pudo cargar la verificación de seguridad.'));
+    document.head.appendChild(script);
+  });
+  return turnstileLoader;
+}
+
+async function prepareRsvpSecurity(form,host){
+  const sitekey=clean(host?.dataset?.mgdTurnstileSitekey||'',120);
+  const endpoint=clean(host?.dataset?.mgdSecurityEndpoint||'',500);
+  if(!sitekey||!endpoint)return;
+
+  form.dataset.mgdSecurityStartedAt=String(Date.now());
+
+  const honeypot=document.createElement('input');
+  honeypot.type='text';
+  honeypot.name='website';
+  honeypot.tabIndex=-1;
+  honeypot.autocomplete='off';
+  honeypot.setAttribute('aria-hidden','true');
+  honeypot.style.position='absolute';
+  honeypot.style.left='-10000px';
+  honeypot.style.width='1px';
+  honeypot.style.height='1px';
+  honeypot.style.opacity='0';
+  form.appendChild(honeypot);
+
+  const holder=document.createElement('div');
+  holder.dataset.mgdTurnstile='';
+  holder.style.minHeight='1px';
+  const submit=form.querySelector('button[type="submit"]');
+  form.insertBefore(holder,submit||null);
+
+  const api=await loadTurnstile();
+  if(!api?.render)throw new Error('No se pudo iniciar la verificación de seguridad.');
+
+  const widgetId=api.render(holder,{
+    sitekey,
+    action:'rsvp_submit',
+    appearance:'interaction-only',
+    size:'flexible',
+    callback(token){form.dataset.mgdTurnstileToken=String(token||'');},
+    'expired-callback'(){delete form.dataset.mgdTurnstileToken;},
+    'error-callback'(){delete form.dataset.mgdTurnstileToken;}
+  });
+  turnstileWidgets.set(form,widgetId);
+}
+
+function resetRsvpSecurity(form){
+  delete form.dataset.mgdTurnstileToken;
+  const widgetId=turnstileWidgets.get(form);
+  if(widgetId!==undefined&&globalThis.turnstile?.reset){
+    try{globalThis.turnstile.reset(widgetId);}catch(_){}
+  }
+}
+
+async function verifyRsvpSecurity(form,host,rsvpToken,responseId){
+  const endpoint=clean(host?.dataset?.mgdSecurityEndpoint||'',500);
+  const sitekey=clean(host?.dataset?.mgdTurnstileSitekey||'',120);
+  if(!endpoint||!sitekey)return true;
+
+  const turnstileToken=clean(form.dataset.mgdTurnstileToken||'',4096);
+  if(!turnstileToken){
+    throw new Error('Espera un momento mientras verificamos la seguridad e inténtalo nuevamente.');
+  }
+
+  const elapsedMs=Math.max(0,Date.now()-Number(form.dataset.mgdSecurityStartedAt||Date.now()));
+  const website=clean(form.elements?.website?.value||'',200);
+
+  let response;
+  try{
+    response=await fetch(endpoint,{
+      method:'POST',
+      mode:'cors',
+      credentials:'omit',
+      headers:{'Content-Type':'application/json','Accept':'application/json'},
+      body:JSON.stringify({turnstileToken,rsvpToken,responseId,elapsedMs,website})
+    });
+  }catch(_){
+    resetRsvpSecurity(form);
+    throw new Error('No pudimos completar la verificación de seguridad. Revisa tu conexión e inténtalo nuevamente.');
+  }
+
+  let data={};
+  try{data=await response.json();}catch(_){}
+
+  resetRsvpSecurity(form);
+
+  if(!response.ok||data?.ok!==true){
+    const error=new Error(
+      response.status===429
+        ? 'Se detectaron demasiados intentos. Espera un momento y vuelve a intentar.'
+        : 'No pudimos verificar que seas una persona. Inténtalo nuevamente.'
+    );
+    error.code=response.status===429?'rsvp-rate-limited':'rsvp-security-rejected';
+    throw error;
+  }
+
+  return true;
+}
+
 
 async function saveNominalRsvp(token,responseId,payload){const rsvpApp=getApps().find(candidate=>candidate.name==='mgd-rsvp-anonymous')||initializeApp(app.options,'mgd-rsvp-anonymous');const auth=getAuth(rsvpApp);const user=auth.currentUser||(await signInAnonymously(auth)).user;const rsvpDb=getFirestore(rsvpApp);const ref=doc(rsvpDb,'publicRsvp',token,'responses',responseId);const {customData={},submittedAt:_submittedAt,updatedAt:_updatedAt,ownerUid:_ownerUid,...fields}=payload;const customUpdates=Object.fromEntries(Object.entries(customData).map(([key,value])=>['customData.'+key,value]));try{await updateDoc(ref,{...fields,...customUpdates,updatedAt:serverTimestamp()});}catch(error){if(!String(error?.code||'').includes('not-found')&&!String(error?.code||'').includes('permission-denied'))throw error;await setDoc(ref,{...fields,customData,ownerUid:user.uid,submittedAt:serverTimestamp(),updatedAt:serverTimestamp()});}}
 function esc(v=''){return String(v).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'",'&#039;');}
@@ -39,9 +158,9 @@ function customField(field){const key=esc(field?.key||makeId());const label=esc(
 
 function optionalMarkup(c){const out=[];const add=(key,id,type='input')=>{const f=fieldCfg(c,key);if(!f.enabled)return;const req=f.required?'required':'';const label=esc(f.label||key);if(key==='menu'&&Array.isArray(c.menuOptions)&&c.menuOptions.length)out.push(`<label class="mgd-native-field"><span class="mgd-native-label">${label}</span><select class="mgd-native-select" id="${id}" ${req}><option value="">Selecciona</option>${c.menuOptions.map(o=>`<option>${esc(o)}</option>`).join('')}</select></label>`);else if(type==='textarea')out.push(`<label class="mgd-native-field"><span class="mgd-native-label">${label}</span><textarea class="mgd-native-textarea" id="${id}" ${req}></textarea></label>`);else out.push(`<label class="mgd-native-field"><span class="mgd-native-label">${label}</span><input class="mgd-native-input" id="${id}" ${req}></label>`);};add('email','mgdRsvpEmail');add('phone','mgdRsvpPhone');add('menu','mgdRsvpMenu');add('restriction','mgdRsvpRestriction');add('notes','mgdRsvpNotes','textarea');return out.join('');}
 
-async function installRsvp(host,token){const nominalInvitees=clean(host.dataset.mgdInvitees||'',1000).split('|').map(x=>clean(x,120)).filter(Boolean);if(nominalInvitees.length){host.innerHTML=`<div class="mgd-native-status">Cargando confirmación…</div>`;}const c=await config(token);const s=session(token);if(nominalInvitees.length){host.innerHTML=`<form class="mgd-native-form" data-mgd-rsvp-form><div class="mgd-native-field"><span class="mgd-native-label">Invitación con ${nominalInvitees.length} pases</span><div class="mgd-native-companions">${nominalInvitees.map(name=>`<label class="rsvp-pass-person"><input type="checkbox" data-nominal-invitee value="${esc(name)}"><span style="display:flex;justify-content:flex-start;gap:10px;text-align:left"><b aria-hidden="true">✓</b>${esc(name)}</span></label>`).join('')}</div></div><button class="mgd-native-button" type="submit">Enviar confirmación</button><div class="mgd-native-status" data-status></div></form>`;const form=host.querySelector('form');form.addEventListener('submit',async e=>{e.preventDefault();const button=form.querySelector('button[type="submit"]');const status=form.querySelector('[data-status]');const selected=[...host.querySelectorAll('[data-nominal-invitee]:checked')].map(x=>clean(x.value,120));const attendance=selected.length?'confirmed':'declined';button.disabled=true;button.textContent='Enviando…';try{const localMusic=readMusic(token,s.id);const customData={mgdNominalPasses:JSON.stringify({authorized:nominalInvitees,attending:selected})};if(localMusic)customData.mgdMusic=JSON.stringify(localMusic);const payload={version:1,name:selected[0]||nominalInvitees.join(' + '),attendance,quantity:selected.length,companions:selected.slice(1),email:'',phone:'',menu:'',restriction:'',notes:'',customData,clientDate:new Date().toISOString(),source:'public-rsvp',submittedAt:serverTimestamp(),updatedAt:serverTimestamp()};await saveNominalRsvp(token,s.id,payload);publishAttendance(token,attendance);const text=selected.length?`Hemos registrado ${selected.length} de ${nominalInvitees.length} pase(s): ${selected.join(', ')}.`:'Hemos registrado que ninguno de los pases asistirá.';host.innerHTML=`<div class="mgd-native-success"><div class="mgd-native-success-icon">${selected.length?'✓':'♡'}</div><h3>${selected.length?'¡Gracias por confirmar! ✨':'Gracias por avisarnos'}</h3><p>${esc(text)}</p>${c.allowEditResponse!==false?'<button class="mgd-native-button secondary" type="button" data-edit>Modificar respuesta</button>':''}</div>`;host.querySelector('[data-edit]')?.addEventListener('click',()=>{installed.delete(host);install(host);});}catch(err){console.error(err);status.textContent=err?.code==='rsvp-owner-mismatch'?LEGACY_RSVP_MESSAGE:'No se pudo enviar tu confirmación. Intenta nuevamente.';button.disabled=false;button.textContent='Enviar confirmación';}});return;}const max=Math.max(1,Math.min(20,Number(c.maxGuests||1)));const attendanceStyle=['buttons','cards','compact'].includes(host.dataset.mgdAttendanceStyle)?host.dataset.mgdAttendanceStyle:c.attendanceControlStyle;const quantityStyle=['counter','select'].includes(host.dataset.mgdQuantityStyle)?host.dataset.mgdQuantityStyle:c.quantityControlStyle;host.innerHTML=`<form class="mgd-native-form" data-mgd-rsvp-form><label class="mgd-native-field"><span class="mgd-native-label">Nombre completo</span><input class="mgd-native-input" id="mgdRsvpName" maxlength="120" autocomplete="name" required></label><div class="mgd-native-field"><span class="mgd-native-label">Asistencia</span><div class="mgd-native-choices is-${['buttons','cards','compact'].includes(attendanceStyle)?attendanceStyle:'buttons'}${c.allowTentative!==false?' has-tentative':''}"><label class="mgd-native-choice"><input type="radio" name="mgdAttendance" value="confirmed" required><span>Sí, asistiré</span></label><label class="mgd-native-choice"><input type="radio" name="mgdAttendance" value="declined"><span>No asistiré</span></label>${c.allowTentative!==false?'<label class="mgd-native-choice"><input type="radio" name="mgdAttendance" value="tentative"><span>Por confirmar</span></label>':''}</div></div>${quantityStyle==='select'?`<label class="mgd-native-field" data-qty style="display:none"><span class="mgd-native-label">Cantidad total de asistentes</span><select class="mgd-native-select" id="mgdRsvpQty">${Array.from({length:max},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}</select></label>`:`<div class="mgd-native-field" data-qty style="display:none"><span class="mgd-native-label">Cantidad total de asistentes</span><div class="mgd-native-counter"><button type="button" data-qty-step="-1" aria-label="Restar asistente">−</button><output data-qty-output>1</output><button type="button" data-qty-step="1" aria-label="Agregar asistente">+</button><input id="mgdRsvpQty" type="hidden" value="1"></div></div>`}<div class="mgd-native-companions" data-companions></div><div class="mgd-native-grid">${optionalMarkup(c)}</div><div class="mgd-native-grid">${(c.customFields||[]).map(customField).join('')}</div><button class="mgd-native-button" type="submit">Enviar confirmación</button><div class="mgd-native-status" data-status></div></form>`;
-const form=host.querySelector('form');const qty=host.querySelector('#mgdRsvpQty');const companions=host.querySelector('[data-companions]');function renderCompanions(){const att=host.querySelector('input[name="mgdAttendance"]:checked')?.value||'';host.querySelector('[data-qty]').style.display=att==='confirmed'?'':'none';const f=fieldCfg(c,'companions');const n=att==='confirmed'&&f.enabled?Math.max(0,Number(qty.value||1)-1):0;companions.innerHTML=Array.from({length:n},(_,i)=>`<label class="mgd-native-field"><span class="mgd-native-label">Acompañante ${i+1}</span><input class="mgd-native-input" data-companion maxlength="120" ${f.required?'required':''}></label>`).join('');}host.querySelectorAll('input[name="mgdAttendance"]').forEach(r=>r.addEventListener('change',renderCompanions));qty.addEventListener('change',renderCompanions);host.querySelectorAll('[data-qty-step]').forEach(button=>button.addEventListener('click',()=>{const next=Math.max(1,Math.min(max,Number(qty.value||1)+Number(button.dataset.qtyStep)));qty.value=String(next);const output=host.querySelector('[data-qty-output]');if(output)output.textContent=String(next);host.querySelectorAll('[data-qty-step]').forEach(step=>{step.disabled=(Number(step.dataset.qtyStep)<0&&next<=1)||(Number(step.dataset.qtyStep)>0&&next>=max);});renderCompanions();}));renderCompanions();
-form.addEventListener('submit',async e=>{e.preventDefault();if(!form.reportValidity())return;const button=form.querySelector('button[type="submit"]');const status=form.querySelector('[data-status]');const attendance=host.querySelector('input[name="mgdAttendance"]:checked')?.value;if(!attendance)return;button.disabled=true;button.textContent='Enviando…';try{const customData={};host.querySelectorAll('[data-custom-key]').forEach(el=>customData[el.dataset.customKey]=clean(el.value,500));const localMusic=readMusic(token,s.id);if(localMusic)customData.mgdMusic=JSON.stringify(localMusic);const quantity=attendance==='confirmed'?Number(qty.value||1):(attendance==='tentative'?1:0);const payload={version:1,name:clean(host.querySelector('#mgdRsvpName').value,120),attendance,quantity,companions:attendance==='confirmed'?[...host.querySelectorAll('[data-companion]')].map(x=>clean(x.value,120)).filter(Boolean):[],email:clean(host.querySelector('#mgdRsvpEmail')?.value,120),phone:clean(host.querySelector('#mgdRsvpPhone')?.value,60),menu:clean(host.querySelector('#mgdRsvpMenu')?.value,120),restriction:clean(host.querySelector('#mgdRsvpRestriction')?.value,160),notes:clean(host.querySelector('#mgdRsvpNotes')?.value,700),customData,clientDate:new Date().toISOString(),source:'public-rsvp',submittedAt:serverTimestamp(),updatedAt:serverTimestamp()};await saveOwnedRsvp({app,token,responseId:s.id,payload});publishAttendance(token,attendance);const success=attendance==='confirmed'?{icon:'✓',title:'¡Gracias por confirmar! ✨',text:clean(c.confirmedMessage||'¡Qué alegría! Hemos recibido tu confirmación y nos encantará compartir este día contigo.',500)}:attendance==='declined'?{icon:'♡',title:'Gracias por avisarnos',text:clean(c.declinedMessage||'Nos hubiera encantado compartir este día contigo. Gracias por hacérnoslo saber; te tendremos presente con mucho cariño.',500)}:{icon:'…',title:'Gracias por avisarnos',text:'Hemos registrado que aún estás por confirmar. Cuando lo sepas, podrás volver aquí y actualizar tu respuesta.'};const editButton=c.allowEditResponse!==false?'<button class="mgd-native-button secondary" type="button" data-edit>Modificar respuesta</button>':'';host.innerHTML=`<div class="mgd-native-success"><div class="mgd-native-success-icon">${success.icon}</div><h3>${success.title}</h3><p>${success.text}</p>${editButton}</div>`;host.querySelector('[data-edit]')?.addEventListener('click',()=>{installed.delete(host);install(host);});}catch(err){console.error(err);status.textContent=err?.code==='rsvp-owner-mismatch'?LEGACY_RSVP_MESSAGE:'No se pudo enviar tu confirmación. Intenta nuevamente.';button.disabled=false;button.textContent='Enviar confirmación';}});}
+async function installRsvp(host,token){const nominalInvitees=clean(host.dataset.mgdInvitees||'',1000).split('|').map(x=>clean(x,120)).filter(Boolean);if(nominalInvitees.length){host.innerHTML=`<div class="mgd-native-status">Cargando confirmación…</div>`;}const c=await config(token);const s=session(token);if(nominalInvitees.length){host.innerHTML=`<form class="mgd-native-form" data-mgd-rsvp-form><div class="mgd-native-field"><span class="mgd-native-label">Invitación con ${nominalInvitees.length} pases</span><div class="mgd-native-companions">${nominalInvitees.map(name=>`<label class="rsvp-pass-person"><input type="checkbox" data-nominal-invitee value="${esc(name)}"><span style="display:flex;justify-content:flex-start;gap:10px;text-align:left"><b aria-hidden="true">✓</b>${esc(name)}</span></label>`).join('')}</div></div><button class="mgd-native-button" type="submit">Enviar confirmación</button><div class="mgd-native-status" data-status></div></form>`;const form=host.querySelector('form');prepareRsvpSecurity(form,host).catch(error=>console.error('[Mi Gran Día] Seguridad RSVP',error));form.addEventListener('submit',async e=>{e.preventDefault();const button=form.querySelector('button[type="submit"]');const status=form.querySelector('[data-status]');const selected=[...host.querySelectorAll('[data-nominal-invitee]:checked')].map(x=>clean(x.value,120));const attendance=selected.length?'confirmed':'declined';button.disabled=true;button.textContent='Enviando…';try{const localMusic=readMusic(token,s.id);const customData={mgdNominalPasses:JSON.stringify({authorized:nominalInvitees,attending:selected})};if(localMusic)customData.mgdMusic=JSON.stringify(localMusic);const payload={version:1,name:selected[0]||nominalInvitees.join(' + '),attendance,quantity:selected.length,companions:selected.slice(1),email:'',phone:'',menu:'',restriction:'',notes:'',customData,clientDate:new Date().toISOString(),source:'public-rsvp',submittedAt:serverTimestamp(),updatedAt:serverTimestamp()};await verifyRsvpSecurity(form,host,token,s.id);await saveNominalRsvp(token,s.id,payload);publishAttendance(token,attendance);const text=selected.length?`Hemos registrado ${selected.length} de ${nominalInvitees.length} pase(s): ${selected.join(', ')}.`:'Hemos registrado que ninguno de los pases asistirá.';host.innerHTML=`<div class="mgd-native-success"><div class="mgd-native-success-icon">${selected.length?'✓':'♡'}</div><h3>${selected.length?'¡Gracias por confirmar! ✨':'Gracias por avisarnos'}</h3><p>${esc(text)}</p>${c.allowEditResponse!==false?'<button class="mgd-native-button secondary" type="button" data-edit>Modificar respuesta</button>':''}</div>`;host.querySelector('[data-edit]')?.addEventListener('click',()=>{installed.delete(host);install(host);});}catch(err){console.error(err);status.textContent=err?.code==='rsvp-owner-mismatch'?LEGACY_RSVP_MESSAGE:'No se pudo enviar tu confirmación. Intenta nuevamente.';button.disabled=false;button.textContent='Enviar confirmación';}});return;}const max=Math.max(1,Math.min(20,Number(c.maxGuests||1)));const attendanceStyle=['buttons','cards','compact'].includes(host.dataset.mgdAttendanceStyle)?host.dataset.mgdAttendanceStyle:c.attendanceControlStyle;const quantityStyle=['counter','select'].includes(host.dataset.mgdQuantityStyle)?host.dataset.mgdQuantityStyle:c.quantityControlStyle;host.innerHTML=`<form class="mgd-native-form" data-mgd-rsvp-form><label class="mgd-native-field"><span class="mgd-native-label">Nombre completo</span><input class="mgd-native-input" id="mgdRsvpName" maxlength="120" autocomplete="name" required></label><div class="mgd-native-field"><span class="mgd-native-label">Asistencia</span><div class="mgd-native-choices is-${['buttons','cards','compact'].includes(attendanceStyle)?attendanceStyle:'buttons'}${c.allowTentative!==false?' has-tentative':''}"><label class="mgd-native-choice"><input type="radio" name="mgdAttendance" value="confirmed" required><span>Sí, asistiré</span></label><label class="mgd-native-choice"><input type="radio" name="mgdAttendance" value="declined"><span>No asistiré</span></label>${c.allowTentative!==false?'<label class="mgd-native-choice"><input type="radio" name="mgdAttendance" value="tentative"><span>Por confirmar</span></label>':''}</div></div>${quantityStyle==='select'?`<label class="mgd-native-field" data-qty style="display:none"><span class="mgd-native-label">Cantidad total de asistentes</span><select class="mgd-native-select" id="mgdRsvpQty">${Array.from({length:max},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join('')}</select></label>`:`<div class="mgd-native-field" data-qty style="display:none"><span class="mgd-native-label">Cantidad total de asistentes</span><div class="mgd-native-counter"><button type="button" data-qty-step="-1" aria-label="Restar asistente">−</button><output data-qty-output>1</output><button type="button" data-qty-step="1" aria-label="Agregar asistente">+</button><input id="mgdRsvpQty" type="hidden" value="1"></div></div>`}<div class="mgd-native-companions" data-companions></div><div class="mgd-native-grid">${optionalMarkup(c)}</div><div class="mgd-native-grid">${(c.customFields||[]).map(customField).join('')}</div><button class="mgd-native-button" type="submit">Enviar confirmación</button><div class="mgd-native-status" data-status></div></form>`;
+const form=host.querySelector('form');prepareRsvpSecurity(form,host).catch(error=>console.error('[Mi Gran Día] Seguridad RSVP',error));const qty=host.querySelector('#mgdRsvpQty');const companions=host.querySelector('[data-companions]');function renderCompanions(){const att=host.querySelector('input[name="mgdAttendance"]:checked')?.value||'';host.querySelector('[data-qty]').style.display=att==='confirmed'?'':'none';const f=fieldCfg(c,'companions');const n=att==='confirmed'&&f.enabled?Math.max(0,Number(qty.value||1)-1):0;companions.innerHTML=Array.from({length:n},(_,i)=>`<label class="mgd-native-field"><span class="mgd-native-label">Acompañante ${i+1}</span><input class="mgd-native-input" data-companion maxlength="120" ${f.required?'required':''}></label>`).join('');}host.querySelectorAll('input[name="mgdAttendance"]').forEach(r=>r.addEventListener('change',renderCompanions));qty.addEventListener('change',renderCompanions);host.querySelectorAll('[data-qty-step]').forEach(button=>button.addEventListener('click',()=>{const next=Math.max(1,Math.min(max,Number(qty.value||1)+Number(button.dataset.qtyStep)));qty.value=String(next);const output=host.querySelector('[data-qty-output]');if(output)output.textContent=String(next);host.querySelectorAll('[data-qty-step]').forEach(step=>{step.disabled=(Number(step.dataset.qtyStep)<0&&next<=1)||(Number(step.dataset.qtyStep)>0&&next>=max);});renderCompanions();}));renderCompanions();
+form.addEventListener('submit',async e=>{e.preventDefault();if(!form.reportValidity())return;const button=form.querySelector('button[type="submit"]');const status=form.querySelector('[data-status]');const attendance=host.querySelector('input[name="mgdAttendance"]:checked')?.value;if(!attendance)return;button.disabled=true;button.textContent='Enviando…';try{const customData={};host.querySelectorAll('[data-custom-key]').forEach(el=>customData[el.dataset.customKey]=clean(el.value,500));const localMusic=readMusic(token,s.id);if(localMusic)customData.mgdMusic=JSON.stringify(localMusic);const quantity=attendance==='confirmed'?Number(qty.value||1):(attendance==='tentative'?1:0);const payload={version:1,name:clean(host.querySelector('#mgdRsvpName').value,120),attendance,quantity,companions:attendance==='confirmed'?[...host.querySelectorAll('[data-companion]')].map(x=>clean(x.value,120)).filter(Boolean):[],email:clean(host.querySelector('#mgdRsvpEmail')?.value,120),phone:clean(host.querySelector('#mgdRsvpPhone')?.value,60),menu:clean(host.querySelector('#mgdRsvpMenu')?.value,120),restriction:clean(host.querySelector('#mgdRsvpRestriction')?.value,160),notes:clean(host.querySelector('#mgdRsvpNotes')?.value,700),customData,clientDate:new Date().toISOString(),source:'public-rsvp',submittedAt:serverTimestamp(),updatedAt:serverTimestamp()};await verifyRsvpSecurity(form,host,token,s.id);await saveOwnedRsvp({app,token,responseId:s.id,payload});publishAttendance(token,attendance);const success=attendance==='confirmed'?{icon:'✓',title:'¡Gracias por confirmar! ✨',text:clean(c.confirmedMessage||'¡Qué alegría! Hemos recibido tu confirmación y nos encantará compartir este día contigo.',500)}:attendance==='declined'?{icon:'♡',title:'Gracias por avisarnos',text:clean(c.declinedMessage||'Nos hubiera encantado compartir este día contigo. Gracias por hacérnoslo saber; te tendremos presente con mucho cariño.',500)}:{icon:'…',title:'Gracias por avisarnos',text:'Hemos registrado que aún estás por confirmar. Cuando lo sepas, podrás volver aquí y actualizar tu respuesta.'};const editButton=c.allowEditResponse!==false?'<button class="mgd-native-button secondary" type="button" data-edit>Modificar respuesta</button>':'';host.innerHTML=`<div class="mgd-native-success"><div class="mgd-native-success-icon">${success.icon}</div><h3>${success.title}</h3><p>${success.text}</p>${editButton}</div>`;host.querySelector('[data-edit]')?.addEventListener('click',()=>{installed.delete(host);install(host);});}catch(err){console.error(err);status.textContent=err?.code==='rsvp-owner-mismatch'?LEGACY_RSVP_MESSAGE:'No se pudo enviar tu confirmación. Intenta nuevamente.';button.disabled=false;button.textContent='Enviar confirmación';}});}
 
 function musicConfig(c){const m=c?.musicConfig||{};return{enabled:m.enabled!==false,maxSongs:Math.max(1,Math.min(10,Number(m.maxSongs||5))),askArtist:m.askArtist!==false,askMessage:m.askMessage!==false,messageLabel:clean(m.messageLabel||'Mensaje o dedicatoria (opcional)',90)};}
 function musicRow(m,i,item={}){return `<div class="mgd-native-music-row" data-row><label class="mgd-native-field"><span class="mgd-native-label">Canción</span><input class="mgd-native-input" data-title maxlength="140" value="${esc(item.title||'')}"></label>${m.askArtist?`<label class="mgd-native-field"><span class="mgd-native-label">Artista</span><input class="mgd-native-input" data-artist maxlength="140" value="${esc(item.artist||'')}"></label>`:''}<button class="mgd-native-remove" type="button" data-remove aria-label="Quitar canción ${i+1}">×</button></div>`;}
