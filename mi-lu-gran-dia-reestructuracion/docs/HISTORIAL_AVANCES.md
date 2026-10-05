@@ -1039,3 +1039,11 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Los enlaces cambian de microcopy según intención: `Ver referencia` para inspiración y `Ver producto` para compra.
 - El precio gana jerarquía únicamente en tarjetas de compra.
 - No se modifican imágenes guardadas, URLs, IDs, datos, Firebase, Firestore, Storage ni el contrato `planificador_bodas_ideas_v1`.
+
+
+## 2026-10-04 — Ideas: halo acuarelado por tipo
+
+- Se añade un halo exterior difuso y muy suave para reforzar la diferencia visual sin tocar miniaturas ni densidades.
+- Inspiración usa un halo rosado empolvado; Por comprar usa un halo oliva.
+- En reposo el efecto es tenue; en hover aumenta ligeramente la presencia sin convertirse en neón ni alterar el layout.
+- Se conserva el grid, las miniaturas 4:3, tamaños de tarjeta, persistencia, IDs, imágenes y Firebase.
