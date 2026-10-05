@@ -1012,7 +1012,7 @@ async function youtubePlaylistPreview(target, apiKey) {
     return {
       ok: false,
       error:
-        "Falta configurar el Secret YOUTUBE_API_KEY en Cloudflare.",
+        "No se pudo consultar YouTube en este momento.",
       provider: "youtube",
       type: "playlist",
     };
@@ -1033,20 +1033,9 @@ async function youtubePlaylistPreview(target, apiKey) {
   });
 
   if (!response.ok) {
-    let detail = "";
-
-    try {
-      const data = await readJsonLimited(response);
-      detail =
-        data?.error?.message ||
-        "";
-    } catch {}
-
     return {
       ok: false,
-      error:
-        detail ||
-        `YouTube API respondió ${response.status}.`,
+      error: "No se pudo consultar YouTube en este momento.",
       provider: "youtube",
       type: "playlist",
     };
@@ -1137,6 +1126,9 @@ async function musicPreview(target, env) {
         });
 
         if (response.ok) {
+          if (!isMusicUrl(response.url) || musicPlatform(response.url) !== "youtube") {
+            return json({ ok: false, error: "YouTube redirigió a un dominio no permitido." }, 400);
+          }
           const html = await readTextLimited(response);
 
           const image =
@@ -1193,6 +1185,9 @@ async function musicPreview(target, env) {
         });
 
         if (response.ok) {
+          if (!isMusicUrl(response.url) || musicPlatform(response.url) !== "youtube") {
+            return json({ ok: false, error: "YouTube redirigió a un dominio no permitido." }, 400);
+          }
           const html = await readTextLimited(response);
 
           const image =
@@ -1287,6 +1282,9 @@ async function musicPreview(target, env) {
       });
 
       if (response.ok) {
+        if (!isMusicUrl(response.url) || musicPlatform(response.url) !== "apple") {
+          return json({ ok: false, error: "Apple Music redirigió a un dominio no permitido." }, 400);
+        }
         const html = await readTextLimited(response);
 
         const image =
