@@ -1072,3 +1072,22 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - GitHub Pages/localhost continúan resolviendo al Worker DEV; dominios productivos resuelven al origen PROD configurado.
 - No se modificaron Firebase, Firestore Rules, Auth, Storage, datos reales ni persistencia.
 - Antes de migrar esta fase a Wedding debe validarse que el Worker PROD expone los tres endpoints usados por Ideas y Música.
+
+
+## 2026-10-05 — MGD-003: primera capa anti-abuso RSVP sin tocar Firebase
+- Se recuperó y versionó en GitHub el código actual del Worker de Migrandia, que antes estaba mantenido fuera del repositorio.
+- Se agregó `POST /api/rsvp/verify` para validación server-side de Cloudflare Turnstile.
+- El endpoint restringe origen, método y caché; valida payload, honeypot y tiempo mínimo de interacción.
+- El Worker quedó preparado para un binding `RSVP_RATE_LIMIT` y lee `TURNSTILE_SECRET_KEY` únicamente desde secrets/env.
+- Se conservaron sin cambios funcionales las rutas Link Preview, Image Proxy y Music Preview.
+- No se modificaron Firebase, Firestore Rules, Auth, Storage ni datos reales.
+- Pendiente para cerrar MGD-003: desplegar/configurar el guard en DEV, probarlo y luego revisar la parte Firebase/App Check de forma explícitamente autorizada.
+
+
+## 2026-10-05 — MGD-003: integración Firebase App Check en DEV
+- Se registró la app web `migrandiaweb` en Firebase App Check con Fraud Defense / reCAPTCHA Enterprise.
+- Se creó la clave web score-based sin desafío visual para `migrandiapp.com`, `www.migrandiapp.com` y `avaldiviezoch.github.io`.
+- Se integró App Check en `src/services/firebase-client.js` con `ReCaptchaEnterpriseProvider` y auto refresh de tokens.
+- La inicialización solo ocurre en hosts registrados; localhost queda excluido por ahora.
+- No se activó enforcement aún para evitar bloquear tráfico legítimo antes del QA.
+- No se modificaron Firestore Rules, Auth, Storage ni estructura de BD.

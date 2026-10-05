@@ -4,8 +4,8 @@
 Último commit DEV: 0322bdde6f72887de55edce799d3e08b09f8c995
 Último commit PROD: 9a1d5b6f088c610486a2aa02cf69c4687d623fd8
 Versión producción: pendiente de versionado formal
-Trabajo actual: MGD-002 — separación total DEV / PROD
-Próximo trabajo: cerrar QA MGD-002 y continuar MGD-003
+Trabajo actual: MGD-003 — protección contra abuso de RSVP
+Próximo trabajo: definir e implementar la capa anti-abuso RSVP en desarrollo sin tocar Firebase Rules/Auth
 Bloqueadores: separación DEV/PROD de servicios, protección anti-abuso RSVP, observabilidad y E2E
 
 ## Regla maestra de mantenimiento
@@ -212,21 +212,153 @@ Pendiente:
 ---
 
 ## MGD-003 — Protección contra abuso de RSVP
-Estado: ⬜ PENDIENTE
+Estado: 🟡 EN DESARROLLO
 Prioridad: CRÍTICA
 
-Mantener Anonymous Auth + Firestore Rules.
+Objetivo:
+blindar el RSVP público para que pueda escalar a usuarios externos sin permitir spam, automatización abusiva ni costos innecesarios.
 
-Agregar / evaluar:
-- Firebase App Check;
-- Cloudflare Turnstile;
-- rate limiting;
-- límites por token;
-- límites por IP / fingerprint cuando sea viable y compatible con privacidad;
-- protección contra spam;
-- límites de payload;
-- límites de frecuencia;
-- detección de abuso.
+### Auditoría actual — 2026-10-05
+
+Fortalezas existentes:
+- las respuestas públicas usan Firebase Anonymous Auth;
+- cada respuesta nueva queda vinculada a `ownerUid == request.auth.uid`;
+- un invitado anónimo solo puede actualizar su propia respuesta;
+- las respuestas no son legibles públicamente;
+- el formulario valida `maxGuests`;
+- existen límites de longitud para nombre, correo, teléfono, restricciones, notas y música;
+- el token RSVP debe existir y estar activo;
+- Firestore Rules validan estructura y campos permitidos.
+
+Riesgos pendientes:
+- no existe rate limiting real;
+- no existe Cloudflare Turnstile;
+- no existe App Check visible en el flujo actual;
+- Anonymous Auth por sí solo no impide automatización masiva;
+- el cliente escribe directamente a Firestore, por lo que un atacante puede saltarse controles visuales del formulario;
+- no hay límite server-side por intervalo de tiempo;
+- no hay señal central de abuso o picos de envío.
+
+### Implementación de código — fase no Firebase — 2026-10-05
+
+Se versionó por primera vez el Worker actual de Migrandia dentro de:
+`cloudflare/migrandia-worker.js`
+
+Este archivo conserva los servicios existentes:
+- `/api/link-preview`
+- `/api/image-proxy`
+- `/api/music-preview`
+
+y agrega:
+- `POST /api/rsvp/verify`
+
+Protecciones implementadas en el nuevo endpoint:
+- solo acepta `POST`;
+- CORS específico para `migrandiapp.com`, `www.migrandiapp.com` y GitHub Pages de desarrollo;
+- respuesta `no-store`;
+- valida presencia y tamaño de `turnstileToken`, `rsvpToken` y `responseId`;
+- honeypot `website`;
+- tiempo mínimo de interacción antes del envío;
+- validación server-side contra Cloudflare Turnstile Siteverify;
+- valida `action = rsvp_submit` cuando Turnstile la devuelve;
+- preparado para binding `RSVP_RATE_LIMIT` de Cloudflare Workers;
+- el secret Turnstile solo se lee desde `env.TURNSTILE_SECRET_KEY`, nunca se hardcodea.
+
+Importante:
+esta fase **NO toca Firebase**, pero por sí sola todavía no impide que un atacante intente escribir directamente contra Firestore saltándose el frontend. El cierre completo de MGD-003 requerirá después revisar quirúrgicamente App Check / Rules / ruta de escritura, con autorización explícita.
+
+### Arquitectura objetivo
+
+Mantener:
+- Firebase Anonymous Auth;
+- token RSVP no enumerado;
+- ownership por `ownerUid`;
+- reglas de validación existentes.
+
+Agregar por fases:
+1. protección anti-bot visible/invisible cuando corresponda;
+2. rate limiting real fuera del cliente;
+3. validación server-side adicional para envíos públicos;
+4. observabilidad de intentos rechazados;
+5. límites conservadores que no afecten invitados legítimos.
+
+### Regla de implementación
+
+No modificar Firestore Rules, Auth, Storage ni la estructura canónica sin autorización explícita.
+
+La primera fase será no destructiva:
+- diseñar el punto de control;
+- definir Turnstile / App Check / Worker;
+- preparar integración en desarrollo;
+- probar sin tocar datos reales.
+
+DEV branch: `mgd/003-rsvp-abuse-protection-20261005`
+DEV PR: pendiente
+DEV commit: `187084474576120c80ade0fe699dff707def83ff` (Worker versionado + guard RSVP)
+
+QA realizado en Cloudflare DEV — 2026-10-05:
+- Worker `migrandia-dev` actualizado y desplegado;
+- `TURNSTILE_SECRET_KEY` configurado como Secret;
+- binding `RSVP_RATE_LIMIT` configurado con namespace `1001`, límite `5`, periodo `60s`;
+- `POST /api/rsvp/verify` devuelve `200` con la clave oficial de prueba de Turnstile y origen permitido;
+- repetición del mismo `rsvpToken + responseId` supera el límite y devuelve `429`;
+- CORS específico y `Cache-Control: no-store` confirmados en la ruta RSVP;
+- usuario legítimo puede enviar RSVP;
+- usuario puede editar su propia respuesta;
+- otra sesión anónima no puede editarla;
+- spam repetido es rechazado;
+- respuesta pública sigue sin ser legible;
+- móvil y desktop;
+- no se rompe Música;
+- no se rompe RSVP histórico.
+
+### Integración frontend DEV preparada
+
+La invitación de desarrollo `invitacion_0_2` ya incluye el guard antes de guardar RSVP:
+- carga Turnstile explícitamente;
+- usa `action = rsvp_submit`;
+- honeypot oculto;
+- mide tiempo mínimo de interacción;
+- llama a `https://migrandia-dev.avaldiviezoch.workers.dev/api/rsvp/verify`;
+- en DEV usa únicamente la sitekey oficial de prueba de Cloudflare;
+- si el guard falla o rate-limit responde 429, no continúa con el guardado RSVP.
+
+No se ha aplicado ninguna clave real ni ningún cambio de Firebase.
+
+### PUNTO DE INTERVENCIÓN CLOUDFLARE
+
+Para continuar el QA real de MGD-003 se necesita ahora configuración en la cuenta Cloudflare:
+1. desplegar/actualizar el Worker `migrandia-dev` con `cloudflare/migrandia-worker.js`;
+2. configurar `TURNSTILE_SECRET_KEY` con la clave de prueba durante QA;
+3. configurar el binding `RSVP_RATE_LIMIT` o equivalente disponible en la cuenta;
+4. verificar `/api/rsvp/verify` desde GitHub Pages DEV;
+5. después crear el widget Turnstile real para los dominios definitivos y sustituir las claves de prueba.
+
+### Estado Cloudflare DEV
+
+La capa Cloudflare de MGD-003 queda validada en DEV: origen → Worker → rate limiter → Turnstile.
+
+Siguiente fase: revisión Firebase/App Check/Rules para impedir bypass directo a Firestore.
+
+### Firebase App Check — DEV integrado 2026-10-05
+- App web registrada en Firebase App Check: `migrandiaweb`.
+- Proveedor: Fraud Defense / reCAPTCHA Enterprise.
+- Site key web registrada para `migrandiapp.com`, `www.migrandiapp.com` y `avaldiviezoch.github.io`.
+- App Check integrado en `src/services/firebase-client.js`.
+- Inicialización centralizada con `ReCaptchaEnterpriseProvider`.
+- Renovación automática de token activada.
+- App Check solo se inicializa en hosts registrados; localhost queda fuera para no romper desarrollo local antes de definir debug tokens.
+- No se activó enforcement todavía.
+- No se modificaron Firestore Rules, Auth, Storage ni estructura de datos.
+
+Pendiente de autorización antes de tocar infraestructura protegida:
+- cualquier cambio de Firestore Rules;
+- habilitación/configuración de App Check;
+- cambios en Auth;
+- despliegue/configuración del Worker DEV en Cloudflare;
+- creación del secret `TURNSTILE_SECRET_KEY`;
+- creación del binding `RSVP_RATE_LIMIT`;
+- configuración productiva de Cloudflare Turnstile/rate limiting.
 
 ---
 

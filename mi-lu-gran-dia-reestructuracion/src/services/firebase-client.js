@@ -5,6 +5,10 @@ import {
   setPersistence
 } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
 import { getFirestore } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
+import {
+  initializeAppCheck,
+  ReCaptchaEnterpriseProvider
+} from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-app-check.js';
 
 const firebaseConfig = {
   apiKey: 'AIzaSyDCRuQgMjnm7KcAN_qo8AHPD3ueyis4-LY',
@@ -16,10 +20,26 @@ const firebaseConfig = {
 };
 
 const app = getApps()[0] || initializeApp(firebaseConfig);
+
+const APP_CHECK_SITE_KEY = '6LeukOAtAAAAAJODsmEu9XyMLnyb6JH9TNYizFHk';
+const APP_CHECK_HOSTS = new Set([
+  'migrandiapp.com',
+  'www.migrandiapp.com',
+  'avaldiviezoch.github.io'
+]);
+
+const currentHost = String(globalThis.location?.hostname || '').trim().toLowerCase();
+const appCheck = APP_CHECK_HOSTS.has(currentHost)
+  ? initializeAppCheck(app, {
+      provider: new ReCaptchaEnterpriseProvider(APP_CHECK_SITE_KEY),
+      isTokenAutoRefreshEnabled: true
+    })
+  : null;
+
 const auth = getAuth(app);
 const db = getFirestore(app);
 const authPersistenceReady = setPersistence(auth, browserLocalPersistence).catch((error) => {
   console.warn('No se pudo fijar la persistencia de autenticación:', error);
 });
 
-export { auth, authPersistenceReady, db };
+export { appCheck, auth, authPersistenceReady, db };
