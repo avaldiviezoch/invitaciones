@@ -1081,3 +1081,183 @@ Riesgos:
 - Máximo inicial: 8 familias de evento; nuevas familias requieren justificación antes de añadirse.
 - Cada avance debe actualizar este roadmap antes de empezar el siguiente.
 - Ninguna tarea se marca como producción sin verificar `Wedding/main`.
+
+
+---
+
+# BLOQUE M — ENTRADAS GENERALES Y ESPECÍFICAS POR EVENTO
+
+## Regla de entrada a Migrandia
+
+Migrandia tendrá **dos formas distintas de entrada**, ambas conectadas al mismo motor multi-evento:
+
+1. **Entrada general**: para usuarios que llegan a Mi Gran Día sin tener todavía definido o declarado el tipo de evento. La experiencia debe presentar la plataforma de forma general y permitir elegir entre los tipos de evento disponibles.
+2. **Entrada específica por evento**: para usuarios que llegan buscando una necesidad concreta, por ejemplo “organizador de bodas”, “organizador de cumpleaños”, “organizador de quinceañero”, etc. En este caso la página debe mostrar información, ejemplos, beneficios, módulos y CTA enfocados solamente en ese tipo de evento.
+
+Estas dos entradas no deben convertirse en aplicaciones separadas. Deben compartir el mismo core, autenticación, módulos, eventProfile, sistema de temas y backend.
+
+### MGD-037 — Landing general de Mi Gran Día
+**Estado:** ⬜ PENDIENTE  
+**Prioridad:** ALTA
+
+Objetivo:
+- Mantener una landing principal genérica de Mi Gran Día.
+- Comunicar que la plataforma sirve para organizar distintos tipos de eventos especiales.
+- Mostrar los tipos base de evento disponibles.
+- El CTA principal debe llevar al onboarding general.
+- En el onboarding general, la primera decisión será el tipo de evento.
+- No asumir boda por defecto cuando el usuario entra por la portada general.
+
+Ejemplo conceptual:
+```text
+migrandiapp.com
+        ↓
+Mi Gran Día — plataforma general
+        ↓
+¿Qué gran día estás organizando?
+        ↓
+Boda / Cumpleaños / 15 años / Baby Shower /
+Bautizo-Comunión / Graduación / Corporativo / Otro
+```
+
+### MGD-038 — Landings específicas por tipo de evento
+**Estado:** ⬜ PENDIENTE  
+**Prioridad:** ALTA
+
+Crear rutas reales e indexables por cada tipo de evento, evitando depender de fragmentos tipo `#boda`.
+
+Rutas iniciales propuestas:
+```text
+/bodas
+/cumpleanos
+/quinceaneros
+/baby-shower
+/bautizo-comunion
+/graduaciones
+/eventos-corporativos
+```
+
+Cada landing específica debe:
+- tener copy específico del evento;
+- usar imágenes, ejemplos y beneficios relevantes para ese evento;
+- mostrar únicamente funciones que tengan sentido para ese contexto;
+- usar terminología del eventProfile correspondiente;
+- adoptar el tema visual o familia visual definida para ese evento;
+- tener metadata SEO propia;
+- tener título, description, Open Graph y contenido indexable propio;
+- evitar contenido duplicado entre categorías;
+- mantener marca Mi Gran Día como marca principal.
+
+Ejemplo:
+```text
+Google: “organizador de bodas”
+        ↓
+migrandiapp.com/bodas
+        ↓
+Contenido 100 % orientado a bodas
+        ↓
+CTA: “Organiza tu boda”
+        ↓
+Onboarding con eventType = wedding
+```
+
+### MGD-039 — Onboarding preconfigurado desde landing específica
+**Estado:** ⬜ PENDIENTE  
+**Prioridad:** ALTA
+
+Cuando un usuario entra desde una landing específica, el onboarding no debe volver a preguntarle qué tipo de evento está organizando.
+
+La ruta debe transmitir el contexto al onboarding:
+
+```text
+/bodas              → eventType = wedding
+/cumpleanos         → eventType = birthday
+/quinceaneros       → eventType = quince
+/baby-shower        → eventType = baby_shower
+/bautizo-comunion   → eventType = baptism_communion
+/graduaciones       → eventType = graduation
+/eventos-corporativos → eventType = corporate
+```
+
+Luego el onboarding continúa con las preguntas relevantes:
+```text
+quién organiza
+→ edad / etapa de vida cuando corresponda
+→ cantidad estimada de invitados
+→ fecha
+→ presupuesto
+→ temática / estilo
+→ configuración inicial del eventProfile
+```
+
+### MGD-040 — SEO multi-evento
+**Estado:** ⬜ PENDIENTE  
+**Prioridad:** ALTA
+
+Trabajar posicionamiento por intención de búsqueda, sin mezclar todas las intenciones en una única página.
+
+Ejemplos de familias de búsqueda:
+
+**Bodas**
+- organizador de bodas;
+- planificador de bodas online;
+- checklist de boda;
+- presupuesto de boda;
+- invitaciones de boda;
+- distribución de mesas para boda.
+
+**Cumpleaños**
+- organizador de cumpleaños;
+- planificador de cumpleaños;
+- invitaciones de cumpleaños;
+- checklist de cumpleaños;
+- distribución de mesas para cumpleaños.
+
+La misma lógica se extenderá al resto de eventos.
+
+Reglas:
+- una URL canónica por intención principal;
+- sitemap actualizado;
+- metadata específica;
+- schema/structured data cuando corresponda;
+- no duplicar contenido textual entre landings;
+- enlazado interno entre la home general y las páginas específicas;
+- medir tráfico y conversión por tipo de evento.
+
+### MGD-041 — Coherencia entre adquisición y experiencia interna
+**Estado:** ⬜ PENDIENTE  
+**Prioridad:** ALTA
+
+La promesa de la landing específica debe continuar dentro de la aplicación.
+
+Ejemplo:
+si el usuario entra por `/cumpleanos`, no debe llegar a una interfaz que hable de “novios”, “iglesia” o “mesa de novios”.
+
+Debe preservarse el contexto:
+```text
+Landing específica
+→ eventType
+→ onboarding
+→ eventProfile
+→ tema global
+→ terminología
+→ checklist
+→ distribución
+→ invitaciones
+→ módulos habilitados
+```
+
+La landing no tendrá lógica de negocio duplicada. Solamente define la puerta de entrada y el contexto inicial.
+
+## Criterio de aceptación del bloque
+
+Este bloque se considera terminado cuando:
+- la home general permite descubrir y elegir cualquier tipo de evento;
+- existe al menos una landing específica funcional por cada tipo base priorizado;
+- cada landing específica inicia el onboarding con el eventType correcto;
+- no se pregunta dos veces el tipo de evento cuando ya viene definido;
+- la app interna conserva el contexto del evento;
+- las URLs son indexables y tienen metadata propia;
+- no existe dependencia de GitHub Pages visible para el usuario final;
+- todo se sirve bajo el dominio de Mi Gran Día;
+- cada avance queda registrado aquí con DEV → QA → PROD, PR y commit.
