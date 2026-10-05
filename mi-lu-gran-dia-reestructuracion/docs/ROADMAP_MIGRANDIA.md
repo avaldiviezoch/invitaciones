@@ -1903,3 +1903,11 @@ Objetivo:
 reducir dependencia de soporte manual por WhatsApp o mensajes directos.
 
 ---
+
+
+### RSVP DEV direct clients con App Check — 2026-10-05
+- `invitacion_0_2/rsvp-nominal-widget.js` ahora inicializa App Check tanto en la app Firebase por defecto como en la app anónima `mgd-rsvp-anonymous`.
+- `invitacion_0_3/rsvp-nominal-widget.js` hace lo mismo y deja preinicializada la app anónima que reutiliza el cliente RSVP compartido.
+- Se mantienen los mismos datos y colecciones; no se alteró la BD.
+- Se incrementaron versiones de carga para evitar caché del widget anterior.
+- Producción (`Wedding`) aún conserva clientes RSVP sin App Check y por eso no debe activarse enforcement global todavía.
