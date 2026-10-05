@@ -397,23 +397,23 @@ No hacer migración destructiva.
 Estado: ⬜ PENDIENTE
 Prioridad: ALTA
 
-Primera versión:
-- `wedding`
-- `birthday`
-- `baby_shower`
-- `quince`
-- `baptism`
-- `graduation`
-- `custom`
+Primera versión acordada: **máximo 8 tipos base**, evitando fragmentar demasiado el producto.
 
-Interfaz:
-- Boda
-- Cumpleaños
-- Baby Shower
-- 15 años
-- Bautizo
-- Graduación
-- Otro evento
+Tipos:
+- `wedding` — Boda
+- `birthday` — Cumpleaños
+- `quince` — 15 años
+- `baby_shower` — Baby Shower
+- `religious` — Bautizo / Primera Comunión
+- `graduation` — Graduación
+- `corporate` — Evento corporativo
+- `custom` — Otro / personalizado
+
+Regla:
+- No crecer a 15 o 20 tipos desde el inicio.
+- La variedad fina se resuelve con `themeId`, edad/perfil y configuración del evento.
+- Boda seguirá siendo el modo flagship y el más completo.
+- Bautizo y Primera Comunión comparten una misma familia inicial de evento religioso para no duplicar lógica.
 
 ---
 
@@ -439,9 +439,12 @@ eventProfile = {
   distributionCatalog,
   theme,
   onboarding,
-  invitationCapabilities
+  invitationCapabilities,
+  audienceProfile
 }
 ```
+
+`audienceProfile` podrá considerar edad/rango etario, rol del organizador y contexto del evento sin convertir cada combinación en una aplicación distinta.
 
 Este perfil no escala con usuarios y por ello sí puede ser configuración JS/JSON.
 
@@ -468,21 +471,41 @@ No mezclar lógica funcional con tema visual.
 
 ---
 
-## MGD-016 — Tokens visuales
+## MGD-016 — Tema global y tokens visuales
 Estado: ⬜ PENDIENTE
 Prioridad: ALTA
 
-No crear CSS separado por evento.
+El tema será **global para toda la aplicación** y consumido por cada módulo.
 
-Usar tokens:
+No crear CSS separado por evento ni repetir fuentes/colores módulo por módulo.
+
+Usar tokens centrales:
 - `--event-primary`
 - `--event-secondary`
 - `--event-accent`
 - `--event-background`
 - `--event-surface`
 - `--event-heading-font`
+- `--event-body-font`
+- `--event-radius`
+- `--event-decoration-style`
 
-Mantener JS / CSS / HTML por módulo sin duplicaciones.
+Cada módulo conserva su propio HTML/JS/CSS, pero consume estos tokens globales.
+
+La apariencia podrá ajustarse según:
+1. tipo de evento;
+2. tema elegido;
+3. edad o rango etario cuando corresponda;
+4. perfil del homenajeado/organizador.
+
+Ejemplos:
+- cumpleaños infantil de 5 años → visual más lúdico y apropiado a infancia;
+- cumpleaños adulto de 50 años → visual más sobrio/adulto;
+- 15 años → perfil visual específico elegido por el usuario, sin asumir obligatoriamente color rosado;
+- boda → mantiene la línea premium como referencia principal.
+
+Regla:
+la edad orienta presets y recomendaciones, pero nunca debe imponer estereotipos visuales de forma rígida.
 
 ---
 
@@ -556,6 +579,130 @@ Cumpleaños:
 Regla:
 al crear el evento se parte de una plantilla.
 Después de creada, la lista pertenece al evento y no se pisa automáticamente.
+
+---
+
+## MGD-034 — Onboarding dinámico por tipo de evento
+Estado: ⬜ PENDIENTE
+Prioridad: CRÍTICA
+
+El onboarding actual está orientado a boda (Novia / Novio / Ayudo a organizar). Debe convertirse en un flujo adaptativo.
+
+Primera decisión:
+**¿Qué tipo de evento estás organizando?**
+
+Según la respuesta, cambian las siguientes preguntas.
+
+Ejemplos:
+
+Boda:
+- Novia
+- Novio
+- Somos la pareja
+- Ayudo a organizar
+
+Cumpleaños:
+- Es para mí
+- Para mi hijo/a
+- Para un familiar
+- Para otra persona
+- Ayudo a organizar
+
+15 años:
+- Soy la quinceañera
+- Mamá / papá
+- Familiar
+- Organizador/a
+
+Baby Shower:
+- Futura mamá / futuros padres
+- Familiar
+- Amigo/a
+- Organizador/a
+
+Evento religioso:
+- Mamá / papá
+- Familiar
+- Padrino / madrina
+- Organizador/a
+
+Graduación:
+- Soy el/la graduado/a
+- Familiar
+- Institución / promoción
+- Organizador/a
+
+Evento corporativo:
+- Represento a la empresa
+- Colaborador/a
+- Organizador interno
+- Organizador / proveedor externo
+
+Otro:
+- Para mí
+- Para otra persona
+- Para una organización
+- Ayudo a organizar
+
+Regla:
+no crear ocho onboardings independientes. Se mantiene un solo motor de onboarding que lee preguntas y opciones desde `eventProfile.onboarding`.
+
+---
+
+## MGD-035 — Edad / etapa de vida y adaptación de experiencia
+Estado: ⬜ PENDIENTE
+Prioridad: ALTA
+
+Cuando el tipo de evento lo requiera, el onboarding preguntará edad exacta o rango etario del homenajeado.
+
+Aplicaciones:
+- cumpleaños infantil;
+- cumpleaños adolescente;
+- cumpleaños adulto;
+- adulto mayor;
+- 15 años;
+- otros eventos donde la edad sea relevante.
+
+La edad podrá influir en:
+- presets visuales sugeridos;
+- tono de microcopy;
+- checklist inicial;
+- catálogo recomendado;
+- ideas;
+- plantillas de invitación;
+- recomendaciones de actividades.
+
+No debe cambiar permisos, identidad del usuario ni estructura de datos.
+
+La app no debe inferir que una edad obliga a un color o estilo específico; ofrecerá presets y permitirá cambiar tema manualmente.
+
+---
+
+## MGD-036 — Onboarding con previsualización temática progresiva
+Estado: ⬜ PENDIENTE
+Prioridad: ALTA
+
+Mientras el usuario completa el onboarding, la interfaz podrá ir adaptándose en tiempo real.
+
+Flujo conceptual:
+`eventType → organizerRole → ageProfile → themeId → eventProfile final`
+
+Ejemplo:
+1. Selecciona Cumpleaños.
+2. Indica “para mi hijo/a”.
+3. Ingresa edad 5.
+4. La UI muestra presets infantiles apropiados.
+5. El usuario elige una temática.
+6. Mi Gran Día aplica ese tema global al evento.
+
+Otro ejemplo:
+1. Selecciona Evento corporativo.
+2. Indica “represento a la empresa”.
+3. La app cambia a lenguaje corporativo.
+4. Se ofrecen temas sobrios/brand-neutral.
+5. Los módulos y checklist se adaptan.
+
+La adaptación visual durante onboarding es una **previsualización**. Al finalizar, se guarda la configuración elegida como parte del evento.
 
 ---
 
@@ -838,11 +985,14 @@ Requisitos mínimos:
 
 ## SIGUIENTE BLOQUE — Multi-evento visible
 11. MGD-015 — evento vs tema
-12. MGD-016 — tokens
+12. MGD-016 — tema global y tokens
 13. MGD-017 — textos dinámicos
-14. MGD-018 — checklist
-15. MGD-019 — Distribución filtrada
-16. MGD-020 — objetos especializados
+14. MGD-034 — onboarding dinámico
+15. MGD-035 — edad / etapa de vida
+16. MGD-036 — previsualización temática progresiva
+17. MGD-018 — checklist
+18. MGD-019 — Distribución filtrada
+19. MGD-020 — objetos especializados
 
 ## SIGUIENTE BLOQUE — Invitaciones profesionales
 17. MGD-021 — motor de invitaciones
@@ -925,5 +1075,9 @@ Riesgos:
 - No exponer GitHub al usuario final.
 - Boda sigue siendo el modo flagship.
 - Mi Gran Día debe funcionar semánticamente para cualquier evento especial.
+- El onboarding debe adaptarse al tipo de evento sin duplicar motores.
+- El tema visual es global y los módulos consumen tokens compartidos.
+- Edad/rango etario puede orientar presets, nunca imponer estereotipos rígidos.
+- Máximo inicial: 8 familias de evento; nuevas familias requieren justificación antes de añadirse.
 - Cada avance debe actualizar este roadmap antes de empezar el siguiente.
 - Ninguna tarea se marca como producción sin verificar `Wedding/main`.
