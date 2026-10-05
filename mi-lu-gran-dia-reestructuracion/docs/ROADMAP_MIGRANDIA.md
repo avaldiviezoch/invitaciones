@@ -2198,3 +2198,13 @@ Confirmado:
 Siguiente paso:
 - desplegar/confirmar el código endurecido de MGD-004 en `migrandia-dev`;
 - luego ejecutar QA funcional de Ideas/Música/Image Proxy y pruebas de seguridad/rate-limit.
+
+
+### Sincronización Wrangler DEV — 2026-10-05
+- Se agregó `cloudflare/wrangler.jsonc` para evitar que futuros despliegues de `migrandia-dev` pierdan los bindings configurados manualmente en Cloudflare.
+- Configuración versionada:
+  - Worker: `migrandia-dev`
+  - `API_RATE_LIMIT`: namespace `1003`, limit `60`, period `60`.
+  - `RSVP_RATE_LIMIT`: namespace `1001`, limit `5`, period `60`.
+- Los secretos `TURNSTILE_SECRET_KEY` y `YOUTUBE_API_KEY` NO se versionan; permanecen únicamente en Cloudflare.
+- No se modificó Firebase, Firestore Rules, Auth, Storage ni BD.
