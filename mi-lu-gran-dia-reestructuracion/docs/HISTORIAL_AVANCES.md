@@ -1,3 +1,17 @@
+## 2026-10-05 — Incidente productivo Invitación 0: RSVP / Turnstile
+
+- Se atendió un incidente real en `invitaciones/invitacion_0/`: al pulsar **Confirmar asistencia** en móvil y desktop, el envío terminaba con “No se puede enviar. Intenta nuevamente”.
+- Se separaron dos problemas distintos: la lectura inicial de configuración RSVP desde Firestore y el fallo de seguridad ocurrido específicamente al enviar. Firebase no fue la causa del fallo final de submit.
+- La consola permitió identificar Cloudflare Turnstile `400020` (**Invalid sitekey**, error terminal/no reintentable). El widget no podía generar un token válido y el envío se detenía antes de la verificación normal.
+- PR #538 mejoró únicamente el retry de carga de configuración RSVP ante fallos transitorios/App Check/red; no resolvió por sí solo el incidente de submit.
+- PR #539 endureció el manejo de errores Turnstile: captura códigos terminales y evita bucles de reset/retry sobre errores no recuperables.
+- PR #540 actualizó el cache-busting del widget/script para asegurar que clientes móviles y desktop recibieran la corrección vigente.
+- PR #541 sustituyó la Site Key Turnstile inválida por la nueva clave pública `0x4AAAAAAFOxH1jYJoSiZm9V`. El secret correspondiente permanece exclusivamente en Cloudflare como `TURNSTILE_SECRET_KEY` y **nunca debe documentarse ni incluirse en GitHub**.
+- Tras rotar el secret del Worker y desplegar, se verificó envío RSVP correcto tanto en celular como en desktop.
+- El Worker productivo continúa validando origen, payload, honeypot, tiempo mínimo, rate limit y Turnstile antes de permitir el flujo RSVP.
+- Regla operativa: si RSVP productivo está funcionando, no realizar cambios preventivos o “de limpieza” sobre este flujo sin una incidencia reproducible y autorización expresa. No hacer rollback de una corrección validada.
+- Para diagnóstico excepcional RSVP ↔ Invitados se conserva `mi-lu-gran-dia-reestructuracion/diagnostico_rsvp_vs_invitados.html`, publicado en `https://avaldiviezoch.github.io/invitaciones/mi-lu-gran-dia-reestructuracion/diagnostico_rsvp_vs_invitados.html`. Su uso es extraordinario/desarrollo-QA y cualquier eliminación debe validar primero el `responseId`/`guestId` exacto.
+
 ## 2026-10-06 — Uso extraordinario del diagnóstico RSVP ↔ Invitados
 
 - Se mantiene registrado el utilitario `mi-lu-gran-dia-reestructuracion/diagnostico_rsvp_vs_invitados.html`.
