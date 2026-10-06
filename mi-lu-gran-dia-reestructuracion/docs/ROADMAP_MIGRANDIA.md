@@ -480,8 +480,20 @@ Cierre QA (06/10/2026):
 ---
 
 ## MGD-006 — Observabilidad de producción
-Estado: ⬜ PENDIENTE
+Estado: 🟠 DEV / QA APROBADO — PENDIENTE PROD
 Prioridad: CRÍTICA
+
+QA DEV 06/10/2026:
+- captura global de `unhandledrejection` validada;
+- errores de carga de recursos validados;
+- error de persistencia local validado sin guardar datos de prueba;
+- contexto técnico validado: versión, entorno, navegador, dispositivo, viewport y conectividad;
+- endpoint `/api/observability` validado en `migrandia-dev` con CORS/preflight y rate guard;
+- redacción de correo y teléfono validada tanto en cliente como en Worker;
+- errores centrales de Firebase/Firestore instrumentados sin provocar operaciones de prueba contra BD;
+- no se modificaron Firestore, Storage, Rules, Auth, RSVP ni datos reales.
+
+Pendiente para cierre: sincronizar el código aprobado a PROD mediante PR en `Wedding`, esperar checks verdes y realizar QA de producción.
 
 Agregar captura centralizada de:
 - errores JavaScript;
