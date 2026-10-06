@@ -480,7 +480,7 @@ Cierre QA (06/10/2026):
 ---
 
 ## MGD-006 — Observabilidad de producción
-Estado: 🟠 DEV / QA APROBADO — PENDIENTE PROD
+Estado: 🟠 PROD / QA FUNCIONAL APROBADO — AJUSTE MENOR DE VERSIÓN
 Prioridad: CRÍTICA
 
 QA DEV 06/10/2026:
@@ -492,6 +492,13 @@ QA DEV 06/10/2026:
 - redacción de correo y teléfono validada tanto en cliente como en Worker;
 - errores centrales de Firebase/Firestore instrumentados sin provocar operaciones de prueba contra BD;
 - no se modificaron Firestore, Storage, Rules, Auth, RSVP ni datos reales.
+
+QA PROD 06/10/2026:
+- aplicación y módulos cargan normalmente tras el despliegue;
+- Cloudflare Workers Observability habilitado;
+- preflight OPTIONS y POST de `/api/observability` validados;
+- evento `qa-prod` recibido con `environment: production` y mensaje esperado;
+- detectada falsa redacción de la versión `mgd-006-20261006` como teléfono; se corrige el formato de versión antes del cierre definitivo.
 
 Pendiente para cierre: sincronizar el código aprobado a PROD mediante PR en `Wedding`, esperar checks verdes y realizar QA de producción.
 
