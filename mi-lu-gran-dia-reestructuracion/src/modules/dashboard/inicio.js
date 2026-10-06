@@ -1,4 +1,5 @@
 import { installObservability, reportError } from '../../services/observability.js?v=2';
+import { APP_VERSION_LABEL } from '../../core/app/version.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { auth } from '../../services/firebase-client.js';
 import { readPlannerStorageKeys, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
@@ -30,6 +31,8 @@ import {
 } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
 
 installObservability();
+const appVersionNode = document.getElementById('appNavVersion');
+if (appVersionNode) appVersionNode.textContent = APP_VERSION_LABEL;
 
 const $ = (id) => document.getElementById(id);
 const menu = $('menuButton');
