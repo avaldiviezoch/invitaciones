@@ -13,7 +13,8 @@ const MODULES = [
 ];
 
 const KNOWN_BROWSER_NOISE = [
-  'requestStorageAccess: Permission denied.'
+  'requestStorageAccess: Permission denied.',
+  "Framing 'https://www.google.com/' violates the following report-only Content Security Policy directive"
 ];
 
 function collectUnexpectedErrors(page) {
@@ -78,10 +79,12 @@ test('E2E-16: recorrido público no deja errores globales inesperados', async ({
 test('E2E-02-pre: login Google abre el flujo sin completar autenticación', async ({ page }) => {
   const errors = collectUnexpectedErrors(page);
   await page.goto('', { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('#discoverGoogleButton')).toBeVisible();
+  await expect(page.locator('#discoverSkipButton')).toBeVisible();
+  await page.locator('#discoverSkipButton').click();
+  await expect(page.locator('#googleLoginButton')).toBeVisible();
 
   const popupPromise = page.waitForEvent('popup', { timeout: 10000 });
-  await page.locator('#discoverGoogleButton').click();
+  await page.locator('#googleLoginButton').click();
   const popup = await popupPromise;
   await popup.waitForLoadState('domcontentloaded').catch(() => {});
 
