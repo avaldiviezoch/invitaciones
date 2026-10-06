@@ -1,3 +1,14 @@
+## 2026-10-06 — MGD-005A: auditoría XSS, inyección y enlaces externos (DEV)
+
+- Se ejecutó la primera auditoría de superficies dinámicas en DEV respetando las Reglas No Negociables: sin cambios en Firebase, Firestore Rules, Auth, Storage, datos, esquema ni Worker productivo.
+- Ideas ya normaliza URLs a HTTP/HTTPS, escapa valores insertados en tarjetas y abre enlaces externos con `rel="noopener noreferrer"`.
+- Música ya escapaba contenido dinámico y protegía pestañas nuevas, pero su reconocimiento frontend de proveedor usaba coincidencias parciales de hostname (`includes`), que podían aceptar dominios visualmente parecidos. Se reemplazó por coincidencia exacta o subdominio real para Spotify, YouTube y Apple Music.
+- Invitaciones renderizaba `item.id` y `item.name` directamente dentro de HTML y reutilizaba `item.url` en enlace/iframe. Se escaparon ID/nombre y se añadió validación HTTP/HTTPS antes de navegación o preview, sin modificar el dato almacenado ni su contrato.
+- El iframe temporal usado por Cronograma para impresión se genera localmente desde una imagen `data:image/png` producida por canvas; no carga contenido remoto y no se modifica en esta fase.
+- Proveedores, Presupuesto, Cronograma, Invitados y RSVP revisados usan escape de contenido en los sinks dinámicos inspeccionados. Los usos de `innerHTML` de plantillas locales permanecen sin refactorización indiscriminada.
+- No se introducen dependencias, archivos nuevos, `!important`, listeners duplicados ni parches visuales.
+- Pendiente de MGD-005A: QA DEV de Música e Invitaciones y revisión final de URLs de imágenes/avatares antes de cerrar el subbloque.
+
 ## 2026-10-05 — Incidente productivo Invitación 0: RSVP / Turnstile
 
 - Se atendió un incidente real en `invitaciones/invitacion_0/`: al pulsar **Confirmar asistencia** en móvil y desktop, el envío terminaba con “No se puede enviar. Intenta nuevamente”.
