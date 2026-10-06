@@ -1,3 +1,11 @@
+## 2026-10-06 — MGD-008: inicio de QA autenticación sin escritura
+
+- Tras aprobar el baseline público, se auditó el flujo actual de autenticación antes de automatizar una sesión real.
+- El login Google usa `signInWithPopup` y solo después de una autenticación exitosa consulta las bodas del usuario; el onboarding automático solo se ejecuta si la cuenta no tiene bodas y además existe contexto de Descubre en la sesión.
+- Para no tocar Auth ni datos en esta etapa se añadió `E2E-02-pre`: abre el popup real de Google, valida el destino del flujo y lo cierra sin seleccionar cuenta ni completar autenticación.
+- No se incorporaron credenciales, secretos, cuentas de prueba ni estado autenticado al repositorio.
+- Commit de prueba: `79f6de48b2e889fcb63921a5fcc9995db55f9e61`. Pendiente ejecución real del workflow seguro.
+
 ## 2026-10-06 — MGD-008A: baseline público E2E — QA aprobado
 
 - La tercera corrida del workflow `MGD-008 E2E seguro` fue reportada en verde por el usuario después de los ajustes de E2E-14 y E2E-16.
