@@ -682,7 +682,7 @@ No crear usuarios separados por evento.
 
 ---
 
-## MGD-033 — Branding profesional del login Google / Firebase
+## MGD-026 — Branding profesional del login Google / Firebase
 Estado: ⬜ PENDIENTE
 Prioridad: CRÍTICA ANTES DE MARCHA BLANCA
 
@@ -1197,7 +1197,7 @@ Usar transición controlada:
 
 ---
 
-## MGD-026 — Permisos de Ideas
+## MGD-027 — Permisos de Ideas
 Estado: ⬜ PENDIENTE
 Prioridad: MEDIA
 
@@ -1213,7 +1213,7 @@ Resolver cuando Ideas tenga persistencia propia.
 
 ---
 
-## MGD-027 — Límites de plataforma
+## MGD-028 — Límites de plataforma
 Estado: ⬜ PENDIENTE
 Prioridad: ALTA
 
@@ -1235,7 +1235,7 @@ proteger costos y estabilidad.
 
 # BLOQUE J — PRIVACIDAD Y RECUPERACIÓN
 
-## MGD-028 — Eliminar evento
+## MGD-029 — Eliminar evento
 Estado: ⬜ PENDIENTE
 Prioridad: ALTA
 
@@ -1245,7 +1245,7 @@ Confirmación fuerte.
 
 ---
 
-## MGD-029 — Eliminar cuenta
+## MGD-030 — Eliminar cuenta
 Estado: ⬜ PENDIENTE
 Prioridad: ALTA
 
@@ -1259,7 +1259,7 @@ Definir:
 
 ---
 
-## MGD-030 — Backup y restauración
+## MGD-031 — Backup y restauración
 Estado: ⬜ PENDIENTE
 Prioridad: CRÍTICA
 
@@ -1276,7 +1276,7 @@ Nunca restaurar un evento sobre otro por accidente.
 
 # BLOQUE K — MARCHA BLANCA Y BETA
 
-## MGD-031 — Marcha blanca controlada
+## MGD-032 — Marcha blanca controlada
 Estado: ⬜ PENDIENTE
 Prioridad: ALTA
 
@@ -1299,7 +1299,7 @@ Medir:
 
 ---
 
-## MGD-032 — Beta pública
+## MGD-033 — Beta pública
 Estado: ⬜ PENDIENTE
 Prioridad: FUTURA
 
@@ -1310,7 +1310,7 @@ Requisitos mínimos:
 - MGD-006 cerrado;
 - MGD-008 cerrado;
 - MGD-010 cerrado;
-- branding de login MGD-033 cerrado;
+- branding de login MGD-026 cerrado;
 - multi-evento base validado;
 - no contaminación entre eventos;
 - backup probado;
@@ -1327,7 +1327,7 @@ Requisitos mínimos:
 4. MGD-004 — Worker security
 5. MGD-006 — Observabilidad
 6. MGD-007 — Versionado
-7. MGD-033 — Branding Login Google/Firebase
+7. MGD-026 — Branding Login Google/Firebase
 8. MGD-012 — Capa eventType
 9. MGD-013 — Tipos de evento
 10. MGD-014 — eventProfile
@@ -1353,16 +1353,16 @@ Requisitos mínimos:
 21. MGD-008 — E2E
 22. MGD-009 — crear cuenta
 23. MGD-010 — recuperar contraseña
-24. MGD-031 — marcha blanca
+24. MGD-032 — marcha blanca
 
 ## SIGUIENTE BLOQUE — Escalabilidad
 25. MGD-025 — planner-cloud modular
-26. MGD-026 — permisos Ideas
-27. MGD-027 — límites
-28. MGD-028 — eliminación evento
-29. MGD-029 — eliminación cuenta
-30. MGD-030 — backup / restore
-31. MGD-032 — beta pública
+26. MGD-027 — permisos Ideas
+27. MGD-028 — límites
+28. MGD-029 — eliminación evento
+29. MGD-030 — eliminación cuenta
+30. MGD-031 — backup / restore
+31. MGD-033 — beta pública
 
 ---
 
@@ -1669,7 +1669,7 @@ Antes de incorporar usuarios externos, realizar una revisión transversal que co
 - ciclo de vida del evento consistente;
 - configuración regional sin hardcodes críticos;
 - capabilities centralizadas;
-- login y branding MGD-033 verificados;
+- login y branding MGD-026 verificados;
 - DEV/PROD separados;
 - backup y restore probados;
 - E2E principales ejecutados;
