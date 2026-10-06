@@ -561,8 +561,19 @@ Registrar por release:
 - cambios principales.
 
 DEV branch: no aplica; repositorio DEV libre según flujo vigente.
-DEV commit: pendiente.
-QA: pendiente.
+DEV commits:
+- `31b02e51dc5720fe96566b659ed8fbda3e2db138` — fuente única `src/core/app/version.js`.
+- `26ac432097b06540d3dcb7be62ea569268ff2bd1` — MGD-006 consume la versión global.
+
+Versión DEV inicial: `Migrandia 0.7.0`.
+
+Implementación:
+- `src/core/app/version.js` es la única fuente de verdad de la versión formal;
+- expone `APP_VERSION`, `APP_VERSION_LABEL`, `appVersion()` y `appVersionLabel()`;
+- Observabilidad ya no contiene un identificador de versión propio y utiliza `APP_VERSION`;
+- los `?v=` existentes permanecen sin cambios y continúan siendo únicamente cache-busters locales.
+
+QA: pendiente de validar import de versión y evento MGD-006 en DEV.
 PROD branch: pendiente.
 PROD PR: pendiente.
 PROD commit: pendiente.
