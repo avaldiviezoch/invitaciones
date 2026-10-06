@@ -1,3 +1,12 @@
+## 2026-10-06 — MGD-008: segundo ajuste E2E-02-pre
+
+- La nueva corrida ejecutó 42 pruebas: 38 pasaron y 4 fallaron.
+- Tres fallos correspondieron a E2E-02-pre: `#discoverGoogleButton` estaba correctamente presente pero oculto porque pertenece a la diapositiva final de Descubre; la prueba había asumido erróneamente que esa diapositiva estaba activa al cargar.
+- Se corrigió el recorrido de prueba para usar el flujo visible real desde el inicio: `#discoverSkipButton` cierra Descubre y abre el overlay de autenticación; luego se pulsa `#googleLoginButton` para comprobar la apertura del popup, que será cerrado sin seleccionar cuenta.
+- El cuarto fallo apareció solo en móvil dentro de E2E-16 por un mensaje `report-only` de CSP generado por Google: `Framing 'https://www.google.com/' ... frame-ancestors 'self'`. Se añadió únicamente ese texto conocido a la allowlist de ruido de navegador/proveedor; cualquier otro `console.error` o `pageerror` continúa siendo fallo.
+- No se modificó la aplicación funcional ni Firebase, Firestore, Storage, Rules, Auth, RSVP, onboarding o datos reales.
+- Commit de prueba: `4f1caa4b94c1544ec495c4159aa07d8026d1e2b8`. Pendiente nueva corrida del workflow seguro.
+
 ## 2026-10-06 — MGD-008: ajuste E2E-02-pre según entrada real
 
 - La corrida con E2E-02-pre ejecutó 42 pruebas: 39 pasaron y únicamente falló el nuevo caso de login en desktop, tablet y móvil.
