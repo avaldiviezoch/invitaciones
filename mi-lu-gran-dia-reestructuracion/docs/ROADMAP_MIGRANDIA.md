@@ -699,7 +699,10 @@ Implementación inicial segura — 2026-10-06:
 - primera ejecución real completada: desktop pasó; tablet/móvil fallaron únicamente porque la configuración de dispositivos solicitaba WebKit mientras el workflow instalaba Chromium;
 - se corrigió la configuración para que desktop/tablet/móvil reutilicen Chromium con viewports/touch distintos, sin alterar la aplicación;
 - segunda ejecución real reportada en verde por el usuario para los tres proyectos;
-- se amplió la suite segura con E2E-14 (recarga/retorno de ruta) y E2E-16 (recorrido por módulos sin errores globales inesperados); esta ampliación queda pendiente de la siguiente ejecución real antes de declararla aprobada.
+- la siguiente corrida ejecutó 39 pruebas: 33 pasaron y 6 fallaron, concentradas únicamente en E2E-14 y E2E-16 en los tres viewports;
+- E2E-14 reveló que, sin sesión autenticada, la aplicación elimina correctamente el hash de módulo al recargar y vuelve a la superficie pública; la expectativa del test era incorrecta y se ajustó al comportamiento real, sin modificar la aplicación;
+- E2E-16 detectó únicamente `requestStorageAccess: Permission denied.`, ruido del navegador/entorno al solicitar acceso de almacenamiento; se excluyó de la lista de errores inesperados mediante una allowlist cerrada y específica, manteniendo activos todos los demás errores de consola y `pageerror`;
+- commit de ajuste seguro: `9ef78ace73940b94e93b6a086eeea2bee8eba071`; requiere una nueva corrida real antes de declarar esta ampliación aprobada.
 
 Commits implementación inicial:
 - `b44f132e3586c50baae5ad1d39f6446a1872cd47` — runner/dependencia E2E;
