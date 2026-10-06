@@ -689,6 +689,20 @@ Criterio de diseño de automatización:
 - si una prueba necesita estado destructivo, debe usar un entorno/dato de prueba expresamente autorizado y limpieza verificable.
 
 
+
+Implementación inicial segura — 2026-10-06:
+- se incorporó Playwright como dependencia exclusiva de desarrollo porque MGD-008 exige navegador real; no se añade ninguna dependencia al runtime de Migrandia;
+- `playwright.config.js` reutiliza una sola suite en desktop 1440 px, tablet y móvil 390 px;
+- `tests/e2e-safe.spec.js` inicia únicamente con E2E-01, rutas de los nueve módulos y E2E-15 responsive;
+- la suite no ejecuta clicks de edición, altas, bajas, onboarding, RSVP ni llamadas de escritura deliberadas;
+- URL por defecto: GitHub Pages DEV; puede sobreescribirse con `MIGRANDIA_E2E_URL`;
+- aún no se declara QA aprobado: falta instalar el navegador de Playwright y ejecutar la suite contra DEV, revisar cualquier error real y ajustar solo si corresponde.
+
+Commits implementación inicial:
+- `b44f132e3586c50baae5ad1d39f6446a1872cd47` — runner/dependencia E2E;
+- `eba4ffc2b21f808f918de16fe51c4d08d26cbf11` — configuración responsive;
+- `5a7de913675e67731405b9e2eeb10653c1fdf526` — smoke tests seguros.
+
 ---
 
 # BLOQUE B — CUENTA, LOGIN Y BRANDING DE ACCESO
