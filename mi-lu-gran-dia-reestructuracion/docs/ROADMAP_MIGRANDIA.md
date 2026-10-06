@@ -705,6 +705,7 @@ Implementación inicial segura — 2026-10-06:
 - commit de ajuste seguro: `9ef78ace73940b94e93b6a086eeea2bee8eba071`;
 - tercera corrida real reportada en verde por el usuario: E2E-14 y E2E-16 quedan validados junto con el baseline público en desktop, tablet y móvil;
 - **MGD-008A público/solo lectura: QA APROBADO**. Permanecen pendientes los casos autenticados y/o con escritura controlada (E2E-02, E2E-03, E2E-05 a E2E-13 en estado autenticado, E2E-17 a E2E-19), que no se ejecutarán contra datos reales sin autorización.
+- siguiente subbloque iniciado: **E2E-02-pre**, validación no destructiva del arranque de Google Login. La prueba abre el popup real de autenticación, verifica que el destino pertenezca al flujo Google/Firebase y lo cierra sin elegir cuenta, sin completar Auth y sin acceder a datos. Commit: `79f6de48b2e889fcb63921a5fcc9995db55f9e61`. Pendiente corrida real.
 
 Commits implementación inicial:
 - `b44f132e3586c50baae5ad1d39f6446a1872cd47` — runner/dependencia E2E;
