@@ -1,3 +1,11 @@
+## 2026-10-06 — MGD-008: E2E-02-pre Google Login — QA aprobado
+
+- La corrida final del workflow `MGD-008 E2E seguro` fue reportada en verde por el usuario.
+- Queda aprobado E2E-02-pre en desktop, tablet y móvil: desde la entrada visible se abre correctamente el flujo Google y el popup se valida sin seleccionar cuenta ni completar autenticación.
+- El caso conserva vigilancia estricta de errores; el 403 genérico observado en navegador headless queda filtrado únicamente dentro de E2E-02-pre por coincidencia exacta.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth, RSVP, onboarding ni datos reales.
+- Estado: E2E-02-pre 🟢 QA APROBADO. MGD-008 general continúa 🟡 EN DESARROLLO; siguiente subbloque: baseline autenticado de solo lectura.
+
 ## 2026-10-06 — MGD-008: corrección de alcance del filtro 403
 
 - La nueva corrida volvió a mostrar 39/42 pruebas aprobadas y el mismo 403 exacto en E2E-02-pre.
