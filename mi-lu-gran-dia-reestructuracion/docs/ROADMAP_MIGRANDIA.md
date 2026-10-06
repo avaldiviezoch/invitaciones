@@ -2492,3 +2492,5 @@ Pendiente para cierre definitivo:
 - Conclusión: `API_RATE_LIMIT` PROD está activo y bloquea ráfagas correctamente.
 - MGD-004 queda cerrado como 🟢 PRODUCCIÓN.
 - No se modificó Firebase, Firestore Rules, Auth, Storage ni BD.
+
+- nueva corrida: 39/42 pruebas pasaron. E2E-02-pre abrió correctamente el flujo Google en los tres viewports y llegó hasta la validación final; el único motivo de fallo fue un `console.error` genérico `Failed to load resource: the server responded with a status of 403 ()` emitido durante el popup headless. Como el popup y su URL ya fueron validados, no se convirtió este 403 en excepción global: se filtró únicamente dentro de E2E-02-pre y por coincidencia exacta. Commit: `2fc71cdfb2e3fe6eaccc08fbfb18168af5d2c74b`. Pendiente corrida final de este subbloque.
