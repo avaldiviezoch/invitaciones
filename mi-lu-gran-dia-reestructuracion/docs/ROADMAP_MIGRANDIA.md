@@ -2497,3 +2497,26 @@ Pendiente para cierre definitivo:
 - revisión de la corrida posterior mostró que el filtro 403 del commit `2fc71cdf...` no había quedado aplicado en E2E-02-pre; por una sustitución demasiado amplia terminó en E2E-01. Se corrigió explícitamente: E2E-01 vuelve a ser estricto y el filtro exacto del 403 queda únicamente dentro de E2E-02-pre. Commit correcto: `ba8c1a73b134f4c376c2ff316416a19dca1574b3`. Pendiente nueva corrida.
 - corrida final de E2E-02-pre reportada en verde por el usuario. Queda validado el inicio del flujo Google en desktop, tablet y móvil sin seleccionar cuenta ni completar autenticación. **E2E-02-pre: 🟢 QA APROBADO**.
 - siguiente paso de MGD-008: preparar el baseline autenticado de solo lectura (E2E-02/E2E-03 y lectura real de módulos) sin usar datos destructivos ni automatizar onboarding/escrituras sobre la boda real.
+
+### MGD-008A autenticado — preparación local segura
+
+Auditoría previa:
+- Checklist, Presupuesto, Proveedores, Invitados, Cronograma e Ideas cargan sus datos existentes en el montaje y no ejecutan una escritura deliberada por el simple hecho de abrir el módulo;
+- Invitaciones se deja fuera de esta primera tanda por cargar contenido externo/iframe y suscripción propia, aunque el montaje revisado no escribe por sí mismo;
+- Distribución se deja fuera inicialmente porque su módulo contiene autosave y preferencias de vista persistidas; se validará por separado antes de incorporarlo al baseline de solo lectura;
+- Música se deja fuera inicialmente porque `mountMusica()` puede escribir automáticamente si `hydratePlaylistCovers()` detecta cambios de carátula; no cumple el criterio estricto de “solo lectura”.
+
+Implementación:
+- se agregó `tests/e2e-auth-readonly.spec.js` para validar una sesión existente, boda activa y montaje real de Checklist, Presupuesto, Proveedores, Invitados, Cronograma e Ideas sin acciones de edición;
+- la sesión autenticada NO se guarda en el repositorio: se captura localmente en `tests/.auth/storage-state.json`;
+- `mi-lu-gran-dia-reestructuracion/.gitignore` excluye `tests/.auth/`, `test-results/` y `playwright-report/` para impedir subir tokens o artefactos locales;
+- se agregó `playwright.auth.config.js` con un único proyecto desktop autenticado para esta primera validación;
+- scripts: `npm run auth:e2e:capture` y `npm run test:e2e:auth-readonly`.
+
+Commits:
+- `c5e16767bee74b4106bcbe9e0f99be5f80f8e1a1` — scripts locales;
+- `967829114a197756ebc0eb8c8dec86a87fd7a48d` — configuración autenticada;
+- `29894cd2a825d682cc8951bf985c0b330e8b9b92` — pruebas autenticadas de solo lectura;
+- `175c0754fc73743eab2bfbdf8a9ebcddd5cc4f45` — exclusión de sesión/tokens y artefactos.
+
+Estado: preparación completada; pendiente captura manual de sesión existente y primera corrida local autenticada. No usar cuenta nueva ni completar onboarding durante este QA.
