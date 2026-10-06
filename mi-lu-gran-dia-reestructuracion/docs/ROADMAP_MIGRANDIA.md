@@ -652,6 +652,43 @@ Decisión de alcance:
 
 Estado auditoría: infraestructura y alcance identificados; implementación de tests aún no iniciada.
 
+### Matriz MGD-008A — baseline E2E 0.7.0
+
+| ID | Flujo | Tipo | Escritura real | Criterio de aprobación |
+|---|---|---|---|---|
+| E2E-01 | Carga pública inicial | Automático | No | Home carga sin error fatal y muestra `Migrandia 0.7.0`. |
+| E2E-02 | Login existente | Semiautomático | Auth únicamente | Usuario autenticado llega a su boda activa sin error. |
+| E2E-03 | Boda activa / Inicio | Automático tras sesión | No | Identidad y resumen de la boda activa cargan sin alterar datos. |
+| E2E-04 | Navegación por 9 módulos | Automático | No | Cada módulo monta, cambia hash/vista y no deja error fatal. |
+| E2E-05 | Checklist lectura | Automático | No | Vista y resumen existentes cargan. |
+| E2E-06 | Presupuesto lectura | Automático | No | Vista y resumen existentes cargan. |
+| E2E-07 | Proveedores lectura | Automático | No | Vista existente carga sin modificar proveedores. |
+| E2E-08 | Invitados lectura | Automático | No | Lista/canon actual carga sin altas, bajas ni edición. |
+| E2E-09 | Distribución lectura | Automático | No | Plano, mesas y estado guardado cargan; validaciones no escriben. |
+| E2E-10 | Cronograma lectura | Automático | No | Vista existente carga sin edición. |
+| E2E-11 | Invitaciones lectura | Automático | No | Biblioteca existente carga sin crear/eliminar referencias. |
+| E2E-12 | Música lectura | Automático | No | Módulo y contenido existente cargan sin editar playlists. |
+| E2E-13 | Ideas lectura | Automático | No | Tablero existente carga sin agregar/eliminar ideas. |
+| E2E-14 | Recarga y retorno | Automático | No | Tras recargar se conserva sesión/contexto y puede volver al módulo. |
+| E2E-15 | Responsive desktop/tablet/mobile | Automático visual/DOM | No | Shell y navegación siguen utilizables en viewports objetivo. |
+| E2E-16 | Observabilidad durante recorrido | Automático | No | No aparecen errores globales inesperados; los fallos reales quedan asociados a versión 0.7.0. |
+| E2E-17 | Persistencia con cambio controlado | Manual posterior | **Sí** | Cambio de prueba sobre dato autorizado sobrevive recarga y puede revertirse. No ejecutar sin autorización. |
+| E2E-18 | Usuario nuevo + onboarding + crear evento | Manual posterior | **Sí** | Cuenta/evento de prueba se crea y persiste. No ejecutar sobre cuenta/datos reales sin autorización. |
+| E2E-19 | RSVP | Manual posterior | **Sí** | Confirmación de prueba controlada completa el flujo y luego se limpia según procedimiento autorizado. |
+
+Clasificación:
+- **Fase segura inmediata:** E2E-01 y E2E-03 a E2E-16; navegación/lectura solamente. E2E-02 requiere autenticación pero no cambios de negocio.
+- **Fase con escritura controlada:** E2E-17 a E2E-19; queda bloqueada hasta autorización expresa y definición de datos/cuenta de prueba.
+- **MGD-008B diferido:** roles completos, colaboración, cambio multi-evento y aislamiento avanzado.
+
+Criterio de diseño de automatización:
+- una sola infraestructura E2E bajo `tests/`, sin duplicar suites por dispositivo;
+- reutilizar los mismos escenarios con viewports distintos;
+- no introducir mocks que oculten fallos reales del shell/integraciones en el baseline;
+- no automatizar escrituras contra la boda real;
+- si una prueba necesita estado destructivo, debe usar un entorno/dato de prueba expresamente autorizado y limpieza verificable.
+
+
 ---
 
 # BLOQUE B — CUENTA, LOGIN Y BRANDING DE ACCESO
