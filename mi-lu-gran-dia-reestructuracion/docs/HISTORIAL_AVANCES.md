@@ -30,7 +30,8 @@
 - Proveedores, Presupuesto, Cronograma, Invitados y RSVP revisados usan escape de contenido en los sinks dinámicos inspeccionados. Los usos de `innerHTML` de plantillas locales permanecen sin refactorización indiscriminada.
 - No se introducen dependencias, archivos nuevos, `!important`, listeners duplicados ni parches visuales.
 - Revisión complementaria de MGD-005A: Música ahora valida como HTTP/HTTPS las URLs dinámicas usadas como enlaces y valida las portadas antes de insertarlas como `src`; las imágenes `data:image/` se conservan únicamente donde el módulo ya las admite. No se cambia el modelo persistido ni los proveedores.
-- Pendiente de cierre de MGD-005A: QA DEV de Música e Invitaciones y revisión final del avatar autenticado; el QA funcional integral se mantiene para el final.
+- Revisión final del avatar autenticado: `user.photoURL` se valida como HTTP/HTTPS antes de asignarlo a los `<img>` de cuenta/navegación; si no es válido se conserva el fallback existente. No se modifica Firebase Auth ni el perfil del usuario.
+- Pendiente de cierre de MGD-005A/005D: QA DEV de Música, Invitaciones y sesión autenticada; el QA funcional integral se mantiene para el final.
 
 ## 2026-10-05 — Incidente productivo Invitación 0: RSVP / Turnstile
 
