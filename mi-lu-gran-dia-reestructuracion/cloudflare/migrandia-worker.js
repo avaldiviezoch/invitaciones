@@ -1371,12 +1371,7 @@ export default {
     const origin = requestOrigin(request);
 
     if (request.method === "OPTIONS") {
-      if (pathname === OBSERVABILITY_PATH) {
-      if (request.method !== "POST") return observabilityJson({ ok: false }, 405, origin);
-      return recordObservability(request, origin);
-    }
-
-    if (pathname === "/api/rsvp/verify") {
+      if (pathname === "/api/rsvp/verify") {
         if (!RSVP_ALLOWED_ORIGINS.has(origin)) {
           return new Response(null, { status: 403 });
         }
@@ -1399,6 +1394,13 @@ export default {
       }
 
       return new Response(null, { status: 404 });
+    }
+
+    if (pathname === OBSERVABILITY_PATH) {
+      if (request.method !== "POST") {
+        return observabilityJson({ ok: false }, 405, origin);
+      }
+      return recordObservability(request, origin);
     }
 
     if (pathname === "/api/rsvp/verify") {
