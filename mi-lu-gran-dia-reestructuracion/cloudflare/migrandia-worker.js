@@ -271,6 +271,8 @@ async function recordObservability(request, origin) {
       path: cleanSecurityValue(value?.context?.path, 220),
       module: cleanSecurityValue(value?.context?.module, 80),
       source: cleanSecurityValue(value?.context?.source, 220),
+      browser: cleanSecurityValue(value?.context?.browser, 30),
+      device: cleanSecurityValue(value?.context?.device, 20),
       viewport: cleanSecurityValue(value?.context?.viewport, 40),
       online: Boolean(value?.context?.online),
       line: Number(value?.context?.line || 0),
@@ -278,7 +280,7 @@ async function recordObservability(request, origin) {
     },
     at: cleanSecurityValue(value?.at, 40)
   };
-  console.error("MGD_OBSERVABILITY", JSON.stringify(event));
+  console.log("MGD_OBSERVABILITY", JSON.stringify(event));
   return observabilityJson({ ok: true }, 202, origin);
 }
 
@@ -1400,6 +1402,8 @@ export default {
       if (request.method !== "POST") {
         return observabilityJson({ ok: false }, 405, origin);
       }
+      const guardResponse = await applyApiGuards(request, env, pathname);
+      if (guardResponse) return guardResponse;
       return recordObservability(request, origin);
     }
 
