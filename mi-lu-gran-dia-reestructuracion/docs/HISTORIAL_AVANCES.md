@@ -1,3 +1,14 @@
+## 2026-10-06 — MGD-008: pruebas E2E reales — avance DEV seguro
+
+- Se inició MGD-008 con una matriz separada entre pruebas de solo lectura/navegación y pruebas que requieren escritura controlada. Las pruebas con escritura permanecen bloqueadas sin autorización expresa.
+- Se incorporó Playwright únicamente como dependencia de desarrollo y una suite `tests/e2e-safe.spec.js`; no se añadió código de pruebas al runtime de Migrandia.
+- Se habilitó manualmente el workflow `MGD-008 E2E seguro` en GitHub Actions para ejecutar la suite contra GitHub Pages DEV.
+- Primera corrida: los 11 casos desktop pasaron. Tablet y móvil no llegaron a abrir Migrandia porque los perfiles de dispositivo solicitaban WebKit y el workflow había instalado solo Chromium; se identificó como fallo de infraestructura de prueba, no de la aplicación.
+- Se corrigió `playwright.config.js` para reutilizar Chromium en desktop, tablet y móvil con sus respectivos viewports/touch. La segunda corrida fue reportada en verde por el usuario.
+- Se amplió la suite con E2E-14 para recarga/retorno de ruta y E2E-16 para recorrer los nueve módulos detectando errores globales JavaScript/consola. Esta ampliación requiere una nueva corrida antes de marcarse aprobada.
+- No se tocaron Firebase, Firestore, Storage, Rules, Auth, RSVP, datos reales ni la boda. No se ejecutaron altas, bajas, onboarding ni persistencia de negocio.
+- Estado: MGD-008 continúa 🟡 EN DESARROLLO; baseline inicial verde y ampliación segura pendiente de ejecución.
+
 ## 2026-10-06 — MGD-007: versionado formal — cierre DEV/PROD
 
 - Se cerró MGD-007 con una única fuente formal de versión en `src/core/app/version.js`, actualmente `Migrandia 0.7.0`.
