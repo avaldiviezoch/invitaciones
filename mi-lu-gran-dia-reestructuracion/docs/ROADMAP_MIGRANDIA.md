@@ -524,7 +524,7 @@ No almacenar:
 ---
 
 ## MGD-007 — Versionado de Migrandia
-Estado: 🟠 QA DEV APROBADO / PENDIENTE PROD
+Estado: 🟢 PRODUCCIÓN / QA APROBADO
 Prioridad: ALTA
 
 Objetivo:
@@ -578,9 +578,22 @@ QA DEV — APROBADO 2026-10-06:
 - MGD-006 registró en `migrandia-dev` el evento `qa-version-mgd007` con `context.version: "0.7.0"` y `environment: "development"`;
 - versión visible validada en la pantalla inicial debajo de `Antonio Valdiviezo © Derechos reservados`;
 - revisión final confirmó una sola fuente formal de versión y sin cambios en Firebase, Firestore, Storage, Rules, Auth, RSVP ni datos reales.
-PROD branch: pendiente.
-PROD PR: pendiente.
-PROD commit: pendiente.
+PROD branch: `feature/mgd-007-versioning-20261006`.
+PROD PR: #549 — `MGD-007: versionado formal de Migrandia` — Repository validation #777 en `success`.
+PROD commit: `c11075a7d9456e051af3ca737a361226e5eb2ad9`.
+
+QA PROD — APROBADO 2026-10-06:
+- versión visible `Migrandia 0.7.0` en la pantalla inicial;
+- evento `qa-version-mgd007-prod` recibido por el Worker `wedding` con respuesta HTTP 202;
+- `context.version: "0.7.0"` y `context.environment: "production"` confirmados en Real-time logs;
+- flujo DEV → PROD completado sin modificar Firebase, Firestore, Storage, Rules, Auth, RSVP ni datos reales.
+
+Release registrada:
+- versión: `Migrandia 0.7.0`;
+- commit DEV de cierre QA/documentación: `bb6ab4631580d7dca45a2f25d6ae5569f7830b64` (implementación MGD-007 acumulada en DEV);
+- commit PROD: `c11075a7d9456e051af3ca737a361226e5eb2ad9`;
+- fecha: 2026-10-06;
+- cambios principales: fuente única de versión, integración con MGD-006 y etiqueta visible en pantalla inicial.
 
 ---
 
