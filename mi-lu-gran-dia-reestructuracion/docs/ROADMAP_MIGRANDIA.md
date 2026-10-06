@@ -451,7 +451,7 @@ Decisión:
 ---
 
 ## MGD-005 — Seguridad web general
-Estado: 🟡 EN DESARROLLO
+Estado: 🟢 PRODUCCIÓN / QA APROBADO
 Prioridad: ALTA
 
 Revisar / implementar:
@@ -468,6 +468,14 @@ Revisar / implementar:
 - Apple Music;
 - Pinterest;
 - Temu.
+
+Cierre QA (06/10/2026):
+- hardening de URLs y enlaces externos validado;
+- vista previa de invitaciones validada con sandbox y navegación externa segura;
+- Referrer-Policy aplicado;
+- protección anti-frame desplegada en `migrandiapp.com` con `Content-Security-Policy: frame-ancestors 'none'` y `X-Frame-Options: DENY`;
+- prueba externa real en Esri StoryMap: el contenido de Migrandia queda bloqueado dentro del frame;
+- módulos y flujo funcional revisados sin modificar Firebase Rules, Auth, Storage ni el flujo RSVP.
 
 ---
 
