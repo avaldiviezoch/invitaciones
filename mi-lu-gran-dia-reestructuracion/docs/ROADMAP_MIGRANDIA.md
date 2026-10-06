@@ -696,12 +696,17 @@ Implementación inicial segura — 2026-10-06:
 - `tests/e2e-safe.spec.js` inicia únicamente con E2E-01, rutas de los nueve módulos y E2E-15 responsive;
 - la suite no ejecuta clicks de edición, altas, bajas, onboarding, RSVP ni llamadas de escritura deliberadas;
 - URL por defecto: GitHub Pages DEV; puede sobreescribirse con `MIGRANDIA_E2E_URL`;
-- aún no se declara QA aprobado: falta instalar el navegador de Playwright y ejecutar la suite contra DEV, revisar cualquier error real y ajustar solo si corresponde.
+- primera ejecución real completada: desktop pasó; tablet/móvil fallaron únicamente porque la configuración de dispositivos solicitaba WebKit mientras el workflow instalaba Chromium;
+- se corrigió la configuración para que desktop/tablet/móvil reutilicen Chromium con viewports/touch distintos, sin alterar la aplicación;
+- segunda ejecución real reportada en verde por el usuario para los tres proyectos;
+- se amplió la suite segura con E2E-14 (recarga/retorno de ruta) y E2E-16 (recorrido por módulos sin errores globales inesperados); esta ampliación queda pendiente de la siguiente ejecución real antes de declararla aprobada.
 
 Commits implementación inicial:
 - `b44f132e3586c50baae5ad1d39f6446a1872cd47` — runner/dependencia E2E;
 - `eba4ffc2b21f808f918de16fe51c4d08d26cbf11` — configuración responsive;
-- `5a7de913675e67731405b9e2eeb10653c1fdf526` — smoke tests seguros.
+- `5a7de913675e67731405b9e2eeb10653c1fdf526` — smoke tests seguros;
+- `3e4e3282e0e2603e681f3d3d46990674fe13d847` — responsive sobre Chromium;
+- `09cb09db79385a39bd7043d170678efa7420aa4b` — recarga/retorno y barrido de errores globales.
 
 ---
 
