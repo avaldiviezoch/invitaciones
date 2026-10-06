@@ -1,3 +1,17 @@
+## 2026-10-06 — MGD-007: versionado formal — cierre DEV/PROD
+
+- Se cerró MGD-007 con una única fuente formal de versión en `src/core/app/version.js`, actualmente `Migrandia 0.7.0`.
+- La fuente expone únicamente `APP_VERSION` y `APP_VERSION_LABEL`; MGD-006 consume `APP_VERSION` y ya no mantiene un identificador propio de release.
+- La versión visible se ubicó discretamente debajo de `Antonio Valdiviezo © Derechos reservados` en la pantalla inicial, sin duplicarla en el menú de cuenta.
+- Los sufijos `?v=` existentes permanecen como cache-busters locales y no se reutilizan como sistema de versionado global.
+- QA DEV aprobado: import directo `0.7.0` / `Migrandia 0.7.0`, etiqueta visual y evento de Observabilidad con `context.version: "0.7.0"` y `environment: "development"`.
+- La promoción a PROD se realizó desde `Wedding/main` mediante la rama `feature/mgd-007-versioning-20261006` y PR #549. Antes de abrir el PR se redujo el diff para evitar arrastrar diferencias ajenas entre DEV y PROD.
+- El PR #549 pasó `Repository validation #777` en `success` y fue fusionado con commit `c11075a7d9456e051af3ca737a361226e5eb2ad9`.
+- QA PROD aprobado: el Worker `wedding` recibió `qa-version-mgd007-prod` con HTTP 202 y registró `context.version: "0.7.0"`, `context.environment: "production"`, módulo `mgd-007` y operación `version-check`.
+- Release registrada: versión `0.7.0`, fecha 2026-10-06, commit DEV de cierre QA/documentación `bb6ab4631580d7dca45a2f25d6ae5569f7830b64` y commit PROD `c11075a7d9456e051af3ca737a361226e5eb2ad9`.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth, RSVP ni datos reales. No se añadieron dependencias ni `!important`.
+- Estado final: MGD-007 cerrado. Siguiente bloque del roadmap: MGD-008 — pruebas E2E reales.
+
 ## 2026-10-06 — MGD-006: observabilidad técnica — cierre DEV/PROD
 
 - Se completó MGD-006 con observabilidad técnica centralizada para Migrandia, respetando el flujo operativo: implementación y QA primero en DEV (`avaldiviezoch/invitaciones`) y promoción controlada a PROD (`avaldiviezoch/Wedding`) mediante PR, checks verdes y merge.
