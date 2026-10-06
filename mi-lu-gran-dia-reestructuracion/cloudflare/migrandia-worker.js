@@ -1391,7 +1391,7 @@ export default {
         });
       }
 
-      if (API_PATHS.has(pathname)) {
+      if (API_PATHS.has(pathname) || pathname === OBSERVABILITY_PATH) {
         if (!APP_ALLOWED_ORIGINS.has(origin)) {
           return new Response(null, { status: 403 });
         }
