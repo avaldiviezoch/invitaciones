@@ -1,3 +1,14 @@
+## 2026-10-06 — MGD-008: preparación del baseline autenticado de solo lectura
+
+- Se auditó el montaje real de los módulos antes de automatizar una sesión autenticada.
+- Primera tanda segura: Checklist, Presupuesto, Proveedores, Invitados, Cronograma e Ideas. Sus montajes revisados cargan datos existentes y no disparan una escritura deliberada solo por abrir la vista.
+- Se excluyen temporalmente Invitaciones, Distribución y Música de esta tanda. Distribución contiene autosave/preferencias persistidas; Música puede guardar automáticamente cambios de carátula durante `mountMusica()`; Invitaciones incorpora contenido externo y se validará aparte.
+- Se añadió `tests/e2e-auth-readonly.spec.js` para comprobar sesión existente, boda activa y montaje de los seis módulos seguros sin clicks de edición.
+- La autenticación será capturada únicamente en el equipo local mediante Playwright. El estado queda en `tests/.auth/storage-state.json` y está expresamente ignorado por Git; no se guardan credenciales, tokens ni secretos en el repositorio.
+- Se añadieron `playwright.auth.config.js`, scripts de captura/ejecución y un `.gitignore` local para proteger la sesión y excluir artefactos E2E.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth, RSVP, onboarding ni datos reales.
+- Estado: MGD-008 continúa 🟡 EN DESARROLLO; la siguiente acción es una captura manual de la sesión existente y una corrida local de solo lectura.
+
 ## 2026-10-06 — MGD-008: E2E-02-pre Google Login — QA aprobado
 
 - La corrida final del workflow `MGD-008 E2E seguro` fue reportada en verde por el usuario.
