@@ -1,6 +1,6 @@
 import { currentEnvironment, serviceUrl } from './runtime-environment.js';
 
-const APP_VERSION = 'mgd-006-20261006';
+const APP_VERSION = 'mgd-v006-2026-10-06';
 const ENDPOINT = serviceUrl('/api/observability');
 let installed = false;
 
