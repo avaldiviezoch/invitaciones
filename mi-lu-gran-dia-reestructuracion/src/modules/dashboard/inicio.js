@@ -1,3 +1,4 @@
+import { installObservability, reportError } from '../../services/observability.js?v=1';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { auth } from '../../services/firebase-client.js';
 import { readPlannerStorageKeys, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
@@ -27,6 +28,8 @@ import {
   signInWithPopup,
   signOut
 } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
+
+installObservability();
 
 const $ = (id) => document.getElementById(id);
 const menu = $('menuButton');
@@ -1197,6 +1200,7 @@ async function openModule(moduleId, { updateHash = true, focusTarget = '' } = {}
     if (mounted !== false) await applyHomeFocusTarget(moduleId, focusTarget);
   } catch (error) {
     console.error(`No se pudo montar ${moduleId}:`, error);
+    reportError('module-load', error, { module: moduleId });
     const view = document.querySelector(`[data-module-view="${moduleId}"]`);
     if (view) {
       view.innerHTML = '<div class="module-loading" role="alert">No se pudo cargar este módulo. Vuelve a tocarlo para reintentar.</div>';
