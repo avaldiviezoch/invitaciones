@@ -1,4 +1,4 @@
-import { installObservability, reportError } from '../../services/observability.js?v=1';
+import { installObservability, reportError } from '../../services/observability.js?v=2';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { auth } from '../../services/firebase-client.js';
 import { readPlannerStorageKeys, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
