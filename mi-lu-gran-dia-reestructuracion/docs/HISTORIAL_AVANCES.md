@@ -1,3 +1,13 @@
+## 2026-10-06 — MGD-005B: clickjacking e iframes (DEV)
+
+- Se auditó el uso de iframes en DEV. Se identificaron dos usos legítimos: preview de Invitaciones y frame efímero/local de Cronograma para impresión.
+- El preview de Invitaciones ahora incorpora `sandbox` con capacidades mínimas compatibles con una invitación interactiva: scripts, formularios, same-origin y popups; no se habilitan navegación del top, descargas ni permisos adicionales.
+- El enlace “Abrir aparte” quedó con `rel="noopener noreferrer"` y el iframe usa `referrerPolicy = 'strict-origin-when-cross-origin'`.
+- El iframe de Cronograma permanece sin cambios: es efímero, local, no navega a una URL remota y solo imprime una imagen generada por canvas.
+- No se añadió `X-Frame-Options`/CSP global en esta fase porque GitHub Pages no permite controlar headers HTTP de la aplicación como un servidor propio y una política prematura podría romper previews/proveedores. La política global se diseña en MGD-005C para el hosting productivo compatible.
+- Sin cambios en Firebase, Firestore Rules, Auth, Storage, datos, esquema ni Worker productivo; sin archivos nuevos, `!important` ni parches visuales.
+- QA funcional global queda diferido por decisión del responsable hasta completar los subbloques de MGD-005.
+
 ## 2026-10-06 — MGD-005A: auditoría XSS, inyección y enlaces externos (DEV)
 
 - Se ejecutó la primera auditoría de superficies dinámicas en DEV respetando las Reglas No Negociables: sin cambios en Firebase, Firestore Rules, Auth, Storage, datos, esquema ni Worker productivo.
