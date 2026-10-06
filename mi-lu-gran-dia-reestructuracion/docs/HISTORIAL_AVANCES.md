@@ -1,3 +1,36 @@
+## 2026-10-06 — MGD-005C: auditoría previa de políticas globales (DEV)
+
+- Antes de introducir CSP/Permissions-Policy se inventariaron dependencias reales para evitar bloquear funciones existentes.
+- Dependencias observadas: módulos Firebase desde `www.gstatic.com`; Auth/Firestore/App Check del proyecto `migrandia`; Worker DEV/PROD; recursos de GitHub Pages y `raw.githubusercontent.com`; catálogo musical Deezer; YouTube/`i.ytimg.com`; Spotify; Apple Music; y previews Pinterest/Temu a través del Worker. Google Login y App Check agregan además tráfico gestionado por Firebase/Google que no debe restringirse por una allowlist incompleta.
+- Hallazgo importante: una CSP estricta escrita ahora “a ojo” tiene riesgo real de romper Login Google, Firestore, App Check, Música, imágenes y previews. No se incorpora todavía CSP en modo enforcement.
+- `frame-ancestors` no se implementa mediante `<meta>`: requiere una cabecera CSP efectiva. `Permissions-Policy` también se reserva para la capa de headers del hosting/proxy que realmente entregue Migrandia. No se simulan controles que el navegador no vaya a aplicar.
+- Se aplica únicamente `<meta name="referrer" content="strict-origin-when-cross-origin">` en DEV, compatible con los flujos inventariados y sin modificar contratos de red.
+- Protección anti-embedding obligatoria para el cierre de MGD-005: Migrandia no debe poder cargarse dentro de `iframe`, `embed` u `object` de sitios externos. Se implementará en la capa de hosting que entregue cabeceras reales mediante `Content-Security-Policy: frame-ancestors 'none'` y compatibilidad `X-Frame-Options: DENY`; no mediante un parche JavaScript ni un `<meta>` inefectivo. Esta protección no modifica el flujo RSVP ni impide que Migrandia use sus propios previews internos.
+- Durante la auditoría se detectó que una rama de reconocimiento de proveedor de Música todavía conservaba coincidencia parcial de hostname; se completó el hardening iniciado en MGD-005A usando coincidencia exacta/subdominio real.
+- Próximo paso de 005C: definir una política candidata a partir de tráfico real de QA y decidir el punto técnico correcto para headers antes de cualquier enforcement. El QA funcional integral se mantiene para el final por decisión del responsable.
+- Sin cambios en Firebase, Firestore Rules, Auth, Storage, datos, esquema, secretos ni Worker productivo; sin dependencias nuevas, `!important` ni parches.
+
+## 2026-10-06 — MGD-005B: clickjacking e iframes (DEV)
+
+- Se auditó el uso de iframes en DEV. Se identificaron dos usos legítimos: preview de Invitaciones y frame efímero/local de Cronograma para impresión.
+- El preview de Invitaciones ahora incorpora `sandbox` con capacidades mínimas compatibles con una invitación interactiva: scripts, formularios, same-origin y popups; no se habilitan navegación del top, descargas ni permisos adicionales.
+- El enlace “Abrir aparte” quedó con `rel="noopener noreferrer"` y el iframe usa `referrerPolicy = 'strict-origin-when-cross-origin'`.
+- El iframe de Cronograma permanece sin cambios: es efímero, local, no navega a una URL remota y solo imprime una imagen generada por canvas.
+- No se añadió `X-Frame-Options`/CSP global en esta fase porque GitHub Pages no permite controlar headers HTTP de la aplicación como un servidor propio y una política prematura podría romper previews/proveedores. La política global se diseña en MGD-005C para el hosting productivo compatible.
+- Sin cambios en Firebase, Firestore Rules, Auth, Storage, datos, esquema ni Worker productivo; sin archivos nuevos, `!important` ni parches visuales.
+- QA funcional global queda diferido por decisión del responsable hasta completar los subbloques de MGD-005.
+
+## 2026-10-06 — MGD-005A: auditoría XSS, inyección y enlaces externos (DEV)
+
+- Se ejecutó la primera auditoría de superficies dinámicas en DEV respetando las Reglas No Negociables: sin cambios en Firebase, Firestore Rules, Auth, Storage, datos, esquema ni Worker productivo.
+- Ideas ya normaliza URLs a HTTP/HTTPS, escapa valores insertados en tarjetas y abre enlaces externos con `rel="noopener noreferrer"`.
+- Música ya escapaba contenido dinámico y protegía pestañas nuevas, pero su reconocimiento frontend de proveedor usaba coincidencias parciales de hostname (`includes`), que podían aceptar dominios visualmente parecidos. Se reemplazó por coincidencia exacta o subdominio real para Spotify, YouTube y Apple Music.
+- Invitaciones renderizaba `item.id` y `item.name` directamente dentro de HTML y reutilizaba `item.url` en enlace/iframe. Se escaparon ID/nombre y se añadió validación HTTP/HTTPS antes de navegación o preview, sin modificar el dato almacenado ni su contrato.
+- El iframe temporal usado por Cronograma para impresión se genera localmente desde una imagen `data:image/png` producida por canvas; no carga contenido remoto y no se modifica en esta fase.
+- Proveedores, Presupuesto, Cronograma, Invitados y RSVP revisados usan escape de contenido en los sinks dinámicos inspeccionados. Los usos de `innerHTML` de plantillas locales permanecen sin refactorización indiscriminada.
+- No se introducen dependencias, archivos nuevos, `!important`, listeners duplicados ni parches visuales.
+- Pendiente de MGD-005A: QA DEV de Música e Invitaciones y revisión final de URLs de imágenes/avatares antes de cerrar el subbloque.
+
 ## 2026-10-05 — Incidente productivo Invitación 0: RSVP / Turnstile
 
 - Se atendió un incidente real en `invitaciones/invitacion_0/`: al pulsar **Confirmar asistencia** en móvil y desktop, el envío terminaba con “No se puede enviar. Intenta nuevamente”.

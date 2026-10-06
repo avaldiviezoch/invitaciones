@@ -63,7 +63,7 @@
             <div class="invitations-actions">
               <button type="button" data-invitations-reload>↻ <span>Recargar</span></button>
               <button type="button" data-invitations-copy disabled>⧉ <span>Copiar enlace</span></button>
-              <a data-invitations-open target="_blank" rel="noopener">↗ <span>Abrir aparte</span></a>
+              <a data-invitations-open target="_blank" rel="noopener noreferrer">↗ <span>Abrir aparte</span></a>
             </div>
           </div>
 
@@ -76,7 +76,7 @@
             <div class="invitations-phone" data-invitations-phone>
               <div class="invitations-phone-screen">
                 <div class="invitations-loading" data-invitations-loading>Cargando invitación…</div>
-                <iframe data-invitations-frame title="Vista previa de invitación" allow="autoplay; fullscreen"></iframe>
+                <iframe data-invitations-frame title="Vista previa de invitación" allow="autoplay; fullscreen" sandbox="allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox"></iframe>
               </div>
             </div>
           </div>

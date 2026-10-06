@@ -15,18 +15,18 @@ const cloneDefault=()=>DEFAULT_MOMENTS.map(x=>({...x,songs:[],playlist:null}));
 
 function playlistPlatform(url){
   try{const host=new URL(String(url||'').trim()).hostname.toLowerCase().replace(/^www\./,'');
-    if(host.includes('spotify.com'))return'spotify';
-    if(host.includes('music.youtube.com')||host.includes('youtube.com')||host==='youtu.be')return'youtube';
-    if(host.includes('music.apple.com'))return'apple';
+    if(hostMatches(host,'spotify.com'))return'spotify';
+    if(hostMatches(host,'youtube.com')||host==='youtu.be')return'youtube';
+    if(hostMatches(host,'music.apple.com'))return'apple';
   }catch{}
   return'';
 }
 function platformLabel(p){return p==='spotify'?'Spotify':p==='youtube'?'YouTube Music':p==='apple'?'Apple Music':'';}
 function parseMediaUrl(url){
   try{const u=new URL(String(url||'').trim()),host=u.hostname.toLowerCase().replace(/^www\./,'');
-    if(host.includes('spotify.com')){const x=u.pathname.split('/').filter(Boolean);if(x[0]&&x[1]&&['playlist','album','track'].includes(x[0]))return{platform:'spotify',type:x[0],id:x[1],url:u.href};}
-    if(host.includes('youtube.com')||host==='youtu.be'||host.includes('music.youtube.com')){const list=u.searchParams.get('list'),video=u.searchParams.get('v')||(host==='youtu.be'?u.pathname.slice(1):'');if(list)return{platform:'youtube',type:'playlist',id:list,url:u.href};if(video)return{platform:'youtube',type:'track',id:video,url:u.href};}
-    if(host.includes('music.apple.com')){const x=u.pathname.split('/').filter(Boolean),type=x.includes('playlist')?'playlist':x.includes('album')?'album':x.includes('song')?'track':'';if(type)return{platform:'apple',type,id:x[x.indexOf(type)+1]||'',url:u.href};}
+    if(hostMatches(host,'spotify.com')){const x=u.pathname.split('/').filter(Boolean);if(x[0]&&x[1]&&['playlist','album','track'].includes(x[0]))return{platform:'spotify',type:x[0],id:x[1],url:u.href};}
+    if(hostMatches(host,'youtube.com')||host==='youtu.be'){const list=u.searchParams.get('list'),video=u.searchParams.get('v')||(host==='youtu.be'?u.pathname.slice(1):'');if(list)return{platform:'youtube',type:'playlist',id:list,url:u.href};if(video)return{platform:'youtube',type:'track',id:video,url:u.href};}
+    if(hostMatches(host,'music.apple.com')){const x=u.pathname.split('/').filter(Boolean),type=x.includes('playlist')?'playlist':x.includes('album')?'album':x.includes('song')?'track':'';if(type)return{platform:'apple',type,id:x[x.indexOf(type)+1]||'',url:u.href};}
   }catch{}
   return null;
 }
