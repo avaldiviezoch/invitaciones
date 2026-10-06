@@ -4,8 +4,25 @@ const APP_VERSION = 'mgd-006-20261006';
 const ENDPOINT = serviceUrl('/api/observability');
 let installed = false;
 
+function redact(value) {
+  return String(value ?? '')
+    .replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, '[email]')
+    .replace(/(?:\+?\d[\s().-]*){9,15}/g, '[phone]');
+}
+
 function clean(value, max = 500) {
-  return String(value ?? '').replace(/[\r\n\t]+/g, ' ').trim().slice(0, max);
+  return redact(value).replace(/[\r\n\t]+/g, ' ').trim().slice(0, max);
+}
+
+function safeExtra(extra = {}) {
+  const allowed = {};
+  for (const key of ['module', 'operation', 'source', 'line', 'column']) {
+    if (!(key in extra)) continue;
+    allowed[key] = ['line', 'column'].includes(key)
+      ? Number(extra[key] || 0)
+      : clean(extra[key], key === 'source' ? 220 : 80);
+  }
+  return allowed;
 }
 
 function browserFamily() {
@@ -42,7 +59,7 @@ function reportError(type, error, extra = {}) {
       device: deviceClass(),
       viewport: innerWidth + 'x' + innerHeight,
       online: navigator.onLine,
-      ...extra
+      ...safeExtra(extra)
     },
     at: new Date().toISOString()
   };
