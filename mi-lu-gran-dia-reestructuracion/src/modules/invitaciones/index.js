@@ -25,14 +25,23 @@ function stopFrame(frame) {
 }
 
 function invitationButton(item, active) {
-  return `<button class="invitations-option${active ? ' is-active' : ''}" type="button" data-invitation-id="${item.id}">
+  return `<button class="invitations-option${active ? ' is-active' : ''}" type="button" data-invitation-id="${escapeHtml(item.id)}">
     <span class="invitations-number">↗</span>
-    <span><strong>${item.name}</strong><small>Enlace guardado</small>${item.principal ? '<b>Principal</b>' : ''}</span>
+    <span><strong>${escapeHtml(item.name)}</strong><small>Enlace guardado</small>${item.principal ? '<b>Principal</b>' : ''}</span>
   </button>`;
 }
 
 function deviceButton(device, active) {
   return `<button class="${active ? 'is-active' : ''}" type="button" data-invitation-device="${device.id}">${device.label} · ${device.width}×${device.height}</button>`;
+}
+
+function safeHttpUrl(value = '') {
+  try {
+    const url = new URL(String(value || '').trim());
+    return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+  } catch (_) {
+    return '';
+  }
 }
 
 function escapeHtml(value = '') {
@@ -127,7 +136,16 @@ export async function mountInvitaciones() {
     current.textContent = item.name;
     badge.textContent = item.principal ? 'Invitación principal' : 'Invitación personal';
     badge.classList.toggle('is-principal', Boolean(item.principal));
-    open.href = item.url;
+    const safeUrl = safeHttpUrl(item.url);
+    if (!safeUrl) {
+      open.removeAttribute('href');
+      frame.hidden = true;
+      loading.textContent = 'El enlace guardado no es válido.';
+      loading.hidden = false;
+      copy.disabled = true;
+      return;
+    }
+    open.href = safeUrl;
     loading.textContent = `Cargando ${item.name}…`;
     loading.hidden = false;
     frame.hidden = false;
@@ -140,7 +158,7 @@ export async function mountInvitaciones() {
       if (epoch !== loadEpoch) return;
       loading.hidden = true;
     };
-    frame.src = item.url;
+    frame.src = safeUrl;
   }
 
   list.addEventListener('click', (event) => {
