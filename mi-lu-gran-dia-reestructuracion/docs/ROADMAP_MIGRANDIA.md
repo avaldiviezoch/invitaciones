@@ -451,7 +451,7 @@ Decisión:
 ---
 
 ## MGD-005 — Seguridad web general
-Estado: ⬜ PENDIENTE
+Estado: 🟡 EN DESARROLLO
 Prioridad: ALTA
 
 Revisar / implementar:
