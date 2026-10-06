@@ -1,3 +1,12 @@
+## 2026-10-06 — MGD-008: ajuste final de ruido 403 en E2E-02-pre
+
+- La corrida ejecutó 42 pruebas: 39 pasaron y los únicos tres fallos correspondieron a E2E-02-pre en desktop, tablet y móvil.
+- A diferencia de corridas anteriores, el flujo de login sí avanzó correctamente: el popup se abrió, la URL fue validada y el test llegó hasta la comprobación final.
+- El único fallo restante fue un `console.error` genérico `Failed to load resource: the server responded with a status of 403 ()` durante el flujo Google en navegador headless.
+- Para no debilitar la vigilancia global, este 403 no se añadió a la allowlist general. Se excluye únicamente dentro de E2E-02-pre y solo si coincide exactamente con ese mensaje; cualquier otro error continúa fallando.
+- No se modificó la aplicación funcional ni Firebase, Firestore, Storage, Rules, Auth, RSVP, onboarding o datos reales.
+- Commit: `2fc71cdfb2e3fe6eaccc08fbfb18168af5d2c74b`. Pendiente nueva corrida para cerrar E2E-02-pre.
+
 ## 2026-10-06 — MGD-008: segundo ajuste E2E-02-pre
 
 - La nueva corrida ejecutó 42 pruebas: 38 pasaron y 4 fallaron.
