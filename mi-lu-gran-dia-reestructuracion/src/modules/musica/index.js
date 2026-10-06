@@ -15,9 +15,9 @@ const cloneDefault=()=>DEFAULT_MOMENTS.map(x=>({...x,songs:[],playlist:null}));
 
 function playlistPlatform(url){
   try{const host=new URL(String(url||'').trim()).hostname.toLowerCase().replace(/^www\./,'');
-    if(host.includes('spotify.com'))return'spotify';
-    if(host.includes('music.youtube.com')||host.includes('youtube.com')||host==='youtu.be')return'youtube';
-    if(host.includes('music.apple.com'))return'apple';
+    if(hostMatches(host,'spotify.com'))return'spotify';
+    if(hostMatches(host,'youtube.com')||host==='youtu.be')return'youtube';
+    if(hostMatches(host,'music.apple.com'))return'apple';
   }catch{}
   return'';
 }
