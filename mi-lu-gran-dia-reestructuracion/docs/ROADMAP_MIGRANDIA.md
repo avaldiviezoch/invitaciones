@@ -524,11 +524,34 @@ No almacenar:
 ---
 
 ## MGD-007 — Versionado de Migrandia
-Estado: ⬜ PENDIENTE
+Estado: 🟡 EN DESARROLLO
 Prioridad: ALTA
 
-Definir versión visible:
-`Migrandia x.y.z`
+Objetivo:
+disponer de una única versión formal de la aplicación que permita relacionar cada despliegue con el código ejecutado y con los eventos capturados por MGD-006.
+
+### Auditoría inicial — 2026-10-06
+
+Estado encontrado:
+- MGD-006 mantiene actualmente su propio identificador `mgd-v006-2026-10-06`; no existe todavía una fuente global de versión.
+- `index.html` y varios imports dinámicos conservan sufijos `?v=...` independientes por archivo/módulo. Estos valores funcionan como cache-busting local y no representan una release completa.
+- no se detectó Service Worker propio ni un sistema formal de release en la aplicación revisada.
+- el roadmap ya reservaba MGD-007 para definir una versión visible y registrar versión, commits DEV/PROD, fecha y cambios principales.
+- no se eliminarán ni renumerarán masivamente los `?v=` existentes durante este bloque: primero se introduce la fuente única de versión sin alterar el mecanismo de caché actual.
+
+Diseño inicial:
+- crear una única fuente de verdad de versión en código;
+- formato visible: `Migrandia x.y.z`;
+- MGD-006 debe consumir esa fuente en lugar de mantener una versión propia;
+- la versión debe poder consultarse desde la aplicación sin depender de Firebase;
+- registrar cada release en esta misma documentación/bitácora, sin crear roadmaps paralelos;
+- DEV primero; PROD solo después de QA y mediante PR/checks verdes.
+
+Restricciones:
+- no tocar Firestore, Storage, Rules, Auth, RSVP ni datos reales;
+- no introducir dependencias;
+- no reemplazar indiscriminadamente los cache-busters existentes;
+- no crear mecanismos duplicados de versión.
 
 Registrar por release:
 - versión;
@@ -536,6 +559,13 @@ Registrar por release:
 - commit PROD;
 - fecha;
 - cambios principales.
+
+DEV branch: no aplica; repositorio DEV libre según flujo vigente.
+DEV commit: pendiente.
+QA: pendiente.
+PROD branch: pendiente.
+PROD PR: pendiente.
+PROD commit: pendiente.
 
 ---
 
