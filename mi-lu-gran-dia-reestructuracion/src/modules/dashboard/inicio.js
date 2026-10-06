@@ -523,6 +523,15 @@ function escapeHtml(value) {
     .replaceAll("'", '&#039;');
 }
 
+function safeAvatarUrl(value) {
+  try {
+    const url = new URL(String(value || '').trim());
+    return url.protocol === 'https:' || url.protocol === 'http:' ? url.href : '';
+  } catch {
+    return '';
+  }
+}
+
 function setWeddingSwitcher(open) {
   weddingSwitcher.classList.toggle('show', open);
   weddingSwitcher.setAttribute('aria-hidden', String(!open));
@@ -758,10 +767,11 @@ onAuthStateChanged(auth, async (user) => {
   $('appNavInitials').textContent = (user.displayName || 'MGD').trim().split(/\\s+/).slice(0, 2).map((part) => part[0]).join('').toUpperCase();
   $('accountEmail').textContent = user.email || '';
   const avatar = $('accountAvatar');
-  if (user.photoURL) {
-    avatar.src = user.photoURL;
+  const avatarUrl = safeAvatarUrl(user.photoURL);
+  if (avatarUrl) {
+    avatar.src = avatarUrl;
     avatar.style.display = '';
-    $('appNavAvatar').src = user.photoURL;
+    $('appNavAvatar').src = avatarUrl;
     $('appNavAvatar').classList.add('show');
   } else {
     avatar.style.display = 'none';
