@@ -31,7 +31,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
 
 installObservability();
-const appVersionNode = document.getElementById('appNavVersion');
+const appVersionNode = document.getElementById('appVersion');
 if (appVersionNode) appVersionNode.textContent = APP_VERSION_LABEL;
 
 const $ = (id) => document.getElementById(id);
