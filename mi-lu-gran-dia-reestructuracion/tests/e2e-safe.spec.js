@@ -78,10 +78,10 @@ test('E2E-16: recorrido público no deja errores globales inesperados', async ({
 test('E2E-02-pre: login Google abre el flujo sin completar autenticación', async ({ page }) => {
   const errors = collectUnexpectedErrors(page);
   await page.goto('', { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('#googleLoginButton')).toBeAttached();
+  await expect(page.locator('#discoverGoogleButton')).toBeVisible();
 
   const popupPromise = page.waitForEvent('popup', { timeout: 10000 });
-  await page.locator('#googleLoginButton').click();
+  await page.locator('#discoverGoogleButton').click();
   const popup = await popupPromise;
   await popup.waitForLoadState('domcontentloaded').catch(() => {});
 
