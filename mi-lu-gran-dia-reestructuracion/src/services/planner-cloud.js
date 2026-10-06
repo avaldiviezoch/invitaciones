@@ -7,6 +7,7 @@ import {
 } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
 import { auth, db } from './firebase-client.js';
 import { weddingCapabilities } from '../core/app/permissions.js';
+import { reportError } from './observability.js?v=2';
 
 const CHUNK_SIZE = 180000;
 
@@ -19,7 +20,13 @@ function chunkText(text) {
 async function readPlannerBackup(context) {
   if (!auth.currentUser || !context?.id) throw new Error('No hay una boda activa.');
   const metaRef = doc(db, 'weddings', context.id, 'cloudSync', 'main');
-  const metaSnapshot = await getDoc(metaRef);
+  let metaSnapshot;
+  try {
+    metaSnapshot = await getDoc(metaRef);
+  } catch (error) {
+    reportError('firebase', error, { module: 'planner-cloud', operation: 'read-meta' });
+    throw error;
+  }
   if (!metaSnapshot.exists()) return { backup: null, chunkCount: 0 };
 
   const chunkCount = Number(metaSnapshot.data()?.chunkCount || 0);
@@ -71,7 +78,8 @@ async function writePlannerStorageKeys(context, entries) {
   const metaRef = doc(db, 'weddings', context.id, 'cloudSync', 'main');
   const chunkRef = (index) => doc(db, 'weddings', context.id, 'cloudChunks', String(index).padStart(5, '0'));
 
-  await runTransaction(db, async (transaction) => {
+  try {
+    await runTransaction(db, async (transaction) => {
     const metaSnapshot = await transaction.get(metaRef);
     const oldCount = metaSnapshot.exists() ? Number(metaSnapshot.data()?.chunkCount || 0) : 0;
     if (!Number.isInteger(oldCount) || oldCount < 0 || oldCount > 500) {
@@ -118,13 +126,17 @@ async function writePlannerStorageKeys(context, entries) {
     for (let index = chunks.length; index < oldCount; index += 1) {
       transaction.delete(chunkRef(index));
     }
-    transaction.set(metaRef, {
-      chunkCount: chunks.length,
-      bytes: raw.length,
-      updatedAt: serverTimestamp(),
-      version: Number(backup.version || 1)
-    }, { merge: true });
-  });
+      transaction.set(metaRef, {
+        chunkCount: chunks.length,
+        bytes: raw.length,
+        updatedAt: serverTimestamp(),
+        version: Number(backup.version || 1)
+      }, { merge: true });
+    });
+  } catch (error) {
+    reportError('firebase', error, { module: 'planner-cloud', operation: 'write-transaction' });
+    throw error;
+  }
 }
 
 async function writePlannerStorageKey(context, key, value) {
@@ -154,7 +166,10 @@ function subscribePlannerStorageKey(context, key, onValue, onError) {
       lastValueSignature = valueSignature;
       if (notify) onValue?.(value);
     } catch (error) {
-      if (!stopped && generation === readGeneration) onError?.(error);
+      if (!stopped && generation === readGeneration) {
+        reportError('firebase', error, { module: 'planner-cloud', operation: 'subscription-read' });
+        onError?.(error);
+      }
     }
   };
 
@@ -176,7 +191,10 @@ function subscribePlannerStorageKey(context, key, onValue, onError) {
     lastMetaSignature = metaSignature;
     void readCurrentValue({ notify: true });
   }, (error) => {
-    if (!stopped) onError?.(error);
+    if (!stopped) {
+      reportError('firebase', error, { module: 'planner-cloud', operation: 'snapshot' });
+      onError?.(error);
+    }
   });
 
   return () => {
