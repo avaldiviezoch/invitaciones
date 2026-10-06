@@ -524,7 +524,7 @@ No almacenar:
 ---
 
 ## MGD-007 — Versionado de Migrandia
-Estado: 🟡 EN DESARROLLO
+Estado: 🟠 QA DEV APROBADO / PENDIENTE PROD
 Prioridad: ALTA
 
 Objetivo:
@@ -569,11 +569,15 @@ Versión DEV inicial: `Migrandia 0.7.0`.
 
 Implementación:
 - `src/core/app/version.js` es la única fuente de verdad de la versión formal;
-- expone `APP_VERSION`, `APP_VERSION_LABEL`, `appVersion()` y `appVersionLabel()`;
+- expone únicamente `APP_VERSION` y `APP_VERSION_LABEL`;
 - Observabilidad ya no contiene un identificador de versión propio y utiliza `APP_VERSION`;
 - los `?v=` existentes permanecen sin cambios y continúan siendo únicamente cache-busters locales.
 
-QA: pendiente de validar import de versión y evento MGD-006 en DEV.
+QA DEV — APROBADO 2026-10-06:
+- import directo validado: `0.7.0` / `Migrandia 0.7.0`;
+- MGD-006 registró en `migrandia-dev` el evento `qa-version-mgd007` con `context.version: "0.7.0"` y `environment: "development"`;
+- versión visible validada en la pantalla inicial debajo de `Antonio Valdiviezo © Derechos reservados`;
+- revisión final confirmó una sola fuente formal de versión y sin cambios en Firebase, Firestore, Storage, Rules, Auth, RSVP ni datos reales.
 PROD branch: pendiente.
 PROD PR: pendiente.
 PROD commit: pendiente.
