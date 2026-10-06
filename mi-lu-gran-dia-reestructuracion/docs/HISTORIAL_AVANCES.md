@@ -1,3 +1,11 @@
+## 2026-10-06 — MGD-008: corrección de alcance del filtro 403
+
+- La nueva corrida volvió a mostrar 39/42 pruebas aprobadas y el mismo 403 exacto en E2E-02-pre.
+- Al revisar el archivo de prueba se detectó un error en nuestra edición anterior: el filtro acotado del 403 había quedado aplicado por error en E2E-01 y no en E2E-02-pre.
+- Se corrigió el archivo de forma explícita: E2E-01 vuelve a validar todos sus errores sin filtro; E2E-02-pre es el único caso que excluye exactamente `console: Failed to load resource: the server responded with a status of 403 ()`.
+- No se modificó la aplicación funcional ni Firebase, Firestore, Storage, Rules, Auth, RSVP o datos reales.
+- Commit correcto: `ba8c1a73b134f4c376c2ff316416a19dca1574b3`. Pendiente nueva corrida.
+
 ## 2026-10-06 — MGD-008: ajuste final de ruido 403 en E2E-02-pre
 
 - La corrida ejecutó 42 pruebas: 39 pasaron y los únicos tres fallos correspondieron a E2E-02-pre en desktop, tablet y móvil.
