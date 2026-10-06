@@ -1,3 +1,22 @@
+## 2026-10-06 — MGD-006: observabilidad técnica — cierre DEV/PROD
+
+- Se completó MGD-006 con observabilidad técnica centralizada para Migrandia, respetando el flujo operativo: implementación y QA primero en DEV (`avaldiviezoch/invitaciones`) y promoción controlada a PROD (`avaldiviezoch/Wedding`) mediante PR, checks verdes y merge.
+- Se creó `src/services/observability.js` como punto central de captura. Registra errores JavaScript globales, `unhandledrejection`, fallos de carga de recursos, errores de montaje de módulos, fallos naturales de persistencia local y fallos naturales de Firebase/Firestore ya existentes en los flujos instrumentados.
+- El contexto técnico se limita a datos operativos mínimos: versión de app, entorno, ruta, navegador en familia cerrada, clase de dispositivo, viewport, conectividad, módulo, operación, fuente y línea/columna cuando corresponde. No se envían formularios ni payloads completos de negocio.
+- Se incorporó `runtime-environment.js` para resolver de forma explícita el Worker correspondiente al entorno: DEV usa `migrandia-dev.avaldiviezoch.workers.dev` y PROD usa `wedding.avaldiviezoch.workers.dev`.
+- El endpoint `POST /api/observability` quedó implementado en los Workers. En producción se mantuvieron intactas las cabeceras anti-embedding ya existentes: `Content-Security-Policy: frame-ancestors 'none'` y `X-Frame-Options: DENY`.
+- La protección de privacidad se aplica en dos capas. Cliente y Worker redactan correos como `[email]` y teléfonos como `[phone]`; además el cliente solo admite un conjunto cerrado de campos extra y el Worker reconstruye un evento técnico cerrado antes de escribirlo al log.
+- QA DEV validado: endpoint/CORS/preflight, `unhandledrejection`, error de carga de recurso, fallo controlado de persistencia local, contexto técnico, versión/navegador/dispositivo y redacción de PII. La prueba de privacidad confirmó que `qa006@example.com` y `+51 999 888 777` no llegaron al log literal.
+- La instrumentación de Firebase/Firestore se validó por código y queda destinada a capturar únicamente errores naturales. Por instrucción expresa no se provocaron fallos ni se realizaron escrituras de prueba sobre Firestore, Storage, Rules, Auth o datos reales.
+- En PROD, PR #547 (`MGD-006: observabilidad técnica de producción`) pasó `Repository validation` y fue fusionado a `Wedding/main` con merge `692124473d5ef2b3ed70608cf52799fe2c83f8b3`.
+- Se habilitó Cloudflare Workers Observability para el Worker `wedding`, conservando Invocation logs y persistencia de logs en el dashboard. Esto permite visualizar los `MGD_OBSERVABILITY` emitidos por el Worker sin introducir una base de datos adicional.
+- QA PROD validado: Migrandia y sus módulos cargaron normalmente; `observability.js?v=2` y `runtime-environment.js` se sirvieron en producción; el evento controlado `qa-prod` produjo la secuencia `OPTIONS → POST → MGD_OBSERVABILITY`, con `environment: production` y mensaje `MGD006_PROD_QA`.
+- Durante ese QA se detectó que la versión original `mgd-006-20261006` era interpretada por el regex de privacidad como un teléfono y aparecía como `mgd-[phone]`. No se relajó la redacción: se cambió únicamente el identificador de versión a `mgd-v006-2026-10-06`.
+- La corrección de versión se aplicó primero en DEV y luego mediante PR #548 en PROD. `Repository validation` terminó en `success` y el PR fue fusionado a `Wedding/main` con merge `8e3868bb2c85583970f99b111025f01b1bfc5d7f`. Solo modificó `app_integral/src/services/observability.js`.
+- El roadmap quedó actualizado a `MGD-006 — 🟢 PRODUCCIÓN / QA APROBADO`.
+- No se modificaron Firestore Rules, Firebase Storage, esquema de base de datos, colecciones, documentos, usuarios, Auth, RSVP, Turnstile ni datos reales como parte de MGD-006. No se añadieron dependencias, `!important` ni parches visuales.
+- Estado final: MGD-006 cerrado. Siguiente bloque del roadmap: MGD-007 — Versionado.
+
 ## 2026-10-06 — MGD-005E: barrido residual de seguridad web (DEV)
 
 - Se revisaron Checklist, Cronograma, Distribución, Invitados/administración RSVP, Presupuesto, Proveedores y servicios compartidos buscando navegación dinámica, imágenes, HTML dinámico, JSONP y sinks ejecutables.
