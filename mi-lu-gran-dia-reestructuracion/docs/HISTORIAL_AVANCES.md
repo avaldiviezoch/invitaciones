@@ -1,3 +1,13 @@
+## 2026-10-06 — MGD-008A: baseline público E2E — QA aprobado
+
+- La tercera corrida del workflow `MGD-008 E2E seguro` fue reportada en verde por el usuario después de los ajustes de E2E-14 y E2E-16.
+- Queda aprobado el baseline público/solo lectura en desktop, tablet y móvil: carga de Migrandia 0.7.0, rutas públicas de los nueve módulos, responsive, recarga segura y barrido de errores globales inesperados.
+- La corrección de E2E-14 mantuvo intacto el comportamiento real de la aplicación: sin sesión, una recarga vuelve a la superficie pública en lugar de conservar una ruta privada de módulo.
+- E2E-16 mantiene vigilancia estricta de `pageerror` y `console.error`; solo se excluye el texto exacto conocido `requestStorageAccess: Permission denied.`.
+- MGD-008 completo no se cierra todavía. Quedan pendientes los flujos autenticados y los que requieren escritura/persistencia controlada, además de MGD-008B cuando existan roles/colaboración/multi-evento.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth, RSVP ni datos reales.
+- Estado: baseline MGD-008A público 🟢 QA APROBADO; MGD-008 general continúa 🟡 EN DESARROLLO.
+
 ## 2026-10-06 — MGD-008: análisis de corrida ampliada E2E
 
 - La corrida ampliada ejecutó 39 pruebas: 33 pasaron y 6 fallaron. Los fallos se limitaron a E2E-14 y E2E-16 en desktop, tablet y móvil.
