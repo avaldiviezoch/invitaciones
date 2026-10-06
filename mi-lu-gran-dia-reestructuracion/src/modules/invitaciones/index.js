@@ -158,6 +158,7 @@ export async function mountInvitaciones() {
       if (epoch !== loadEpoch) return;
       loading.hidden = true;
     };
+    frame.referrerPolicy = 'strict-origin-when-cross-origin';
     frame.src = safeUrl;
   }
 
