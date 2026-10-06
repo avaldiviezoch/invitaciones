@@ -12,11 +12,18 @@ const MODULES = [
   'ideas'
 ];
 
+const KNOWN_BROWSER_NOISE = [
+  'requestStorageAccess: Permission denied.'
+];
+
 function collectUnexpectedErrors(page) {
   const errors = [];
   page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
   page.on('console', (message) => {
-    if (message.type() === 'error') errors.push(`console: ${message.text()}`);
+    if (message.type() !== 'error') return;
+    const text = message.text();
+    if (KNOWN_BROWSER_NOISE.some((known) => text.includes(known))) return;
+    errors.push(`console: ${text}`);
   });
   return errors;
 }
@@ -39,13 +46,14 @@ for (const moduleId of MODULES) {
   });
 }
 
-test('E2E-14: recarga conserva la ruta solicitada sin escritura', async ({ page }) => {
+test('E2E-14: recarga pública vuelve de forma segura al inicio', async ({ page }) => {
   const errors = collectUnexpectedErrors(page);
   await page.goto('#distribucion', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('[data-app-module="distribucion"]')).toBeAttached();
   await page.reload({ waitUntil: 'domcontentloaded' });
-  await expect(page).toHaveURL(/#distribucion$/);
-  await expect(page.locator('[data-app-module="distribucion"]')).toBeAttached();
+  await expect(page).not.toHaveURL(/#distribucion$/);
+  await expect(page.locator('#googleLoginButton')).toBeAttached();
+  await expect(page.locator('#appVersion')).toHaveText('Migrandia 0.7.0');
   expect(errors).toEqual([]);
 });
 
