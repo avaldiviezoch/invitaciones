@@ -13,6 +13,7 @@ const API_PATHS = new Set([
 ]);
 
 const MAX_TARGET_URL_LENGTH = 2048;
+const OBSERVABILITY_PATH = "/api/observability";
 const MAX_HTML_BYTES = 1_500_000;
 const MAX_IMAGE_BYTES = 6_000_000;
 const MAX_JSON_BYTES = 1_000_000;
@@ -244,6 +245,41 @@ async function rsvpVerify(request, env) {
   }
 
   return securityJson({ ok: true }, 200, origin);
+}
+
+
+function observabilityJson(data, status = 200, origin = "") {
+  const headers = { "Content-Type": "application/json; charset=UTF-8", "Cache-Control": "no-store", "Vary": "Origin" };
+  if (APP_ALLOWED_ORIGINS.has(origin)) headers["Access-Control-Allow-Origin"] = origin;
+  return new Response(JSON.stringify(data), { status, headers });
+}
+
+async function recordObservability(request, origin) {
+  if (!APP_ALLOWED_ORIGINS.has(origin)) return observabilityJson({ ok: false }, 403, origin);
+  let value;
+  try { value = await request.json(); } catch { return observabilityJson({ ok: false }, 400, origin); }
+  const event = {
+    type: cleanSecurityValue(value?.type, 80),
+    error: {
+      name: cleanSecurityValue(value?.error?.name, 80),
+      message: cleanSecurityValue(value?.error?.message, 500),
+      stack: cleanSecurityValue(value?.error?.stack, 1600)
+    },
+    context: {
+      version: cleanSecurityValue(value?.context?.version, 80),
+      environment: cleanSecurityValue(value?.context?.environment, 30),
+      path: cleanSecurityValue(value?.context?.path, 220),
+      module: cleanSecurityValue(value?.context?.module, 80),
+      source: cleanSecurityValue(value?.context?.source, 220),
+      viewport: cleanSecurityValue(value?.context?.viewport, 40),
+      online: Boolean(value?.context?.online),
+      line: Number(value?.context?.line || 0),
+      column: Number(value?.context?.column || 0)
+    },
+    at: cleanSecurityValue(value?.at, 40)
+  };
+  console.error("MGD_OBSERVABILITY", JSON.stringify(event));
+  return observabilityJson({ ok: true }, 202, origin);
 }
 
 function json(data, status = 200) {
@@ -1335,7 +1371,12 @@ export default {
     const origin = requestOrigin(request);
 
     if (request.method === "OPTIONS") {
-      if (pathname === "/api/rsvp/verify") {
+      if (pathname === OBSERVABILITY_PATH) {
+      if (request.method !== "POST") return observabilityJson({ ok: false }, 405, origin);
+      return recordObservability(request, origin);
+    }
+
+    if (pathname === "/api/rsvp/verify") {
         if (!RSVP_ALLOWED_ORIGINS.has(origin)) {
           return new Response(null, { status: 403 });
         }
