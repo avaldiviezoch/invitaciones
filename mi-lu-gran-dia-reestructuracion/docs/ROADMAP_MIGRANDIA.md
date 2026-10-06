@@ -598,7 +598,7 @@ Release registrada:
 ---
 
 ## MGD-008 — Tests E2E reales
-Estado: ⬜ PENDIENTE
+Estado: 🟡 EN DESARROLLO
 Prioridad: CRÍTICA
 
 Incorporar pruebas de navegador.
@@ -634,6 +634,23 @@ Otros flujos:
 - Android;
 - tablet;
 - desktop.
+
+
+### Auditoría inicial — 2026-10-06
+
+Hallazgos:
+- la arquitectura objetivo ya reserva una carpeta `tests/`, pero no se detectó infraestructura E2E existente (Playwright/Cypress/package de pruebas) en la aplicación revisada;
+- la versión base a proteger es `Migrandia 0.7.0`;
+- el shell actual expone nueve módulos navegables: Checklist, Presupuesto, Proveedores, Invitados, Distribución, Cronograma, Invitaciones, Música e Ideas;
+- MGD-008 mezcla flujos disponibles hoy con capacidades todavía pendientes (roles completos, colaboración, multi-evento y aislamiento avanzado).
+
+Decisión de alcance:
+- **MGD-008A — baseline E2E de Migrandia 0.7.0:** acceso/login, boda activa/onboarding existente, navegación por los nueve módulos, recarga y persistencia ya existente, responsive y ausencia de regresiones visibles;
+- **MGD-008B — E2E multi-evento/colaboración:** Owner/Admin/Editor/Provider/Viewer, invitación/aceptación de colaborador, cambio de evento y aislamiento; se ejecutará cuando esas capacidades existan;
+- no se crearán ni modificarán datos reales para montar la infraestructura de pruebas sin autorización expresa;
+- antes de automatizar se definirá una matriz de casos de solo lectura/navegación frente a casos que requieren escritura controlada.
+
+Estado auditoría: infraestructura y alcance identificados; implementación de tests aún no iniciada.
 
 ---
 
