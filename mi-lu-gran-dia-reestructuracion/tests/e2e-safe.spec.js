@@ -34,10 +34,7 @@ test('E2E-01: carga pública y versión formal', async ({ page }) => {
   await page.goto('', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('#appVersion')).toHaveText('Migrandia 0.7.0');
   await expect(page.locator('#googleLoginButton')).toBeAttached();
-  const unexpectedLoginErrors = errors.filter(
-    (error) => error !== 'console: Failed to load resource: the server responded with a status of 403 ()'
-  );
-  expect(unexpectedLoginErrors).toEqual([]);
+  expect(errors).toEqual([]);
 });
 
 for (const moduleId of MODULES) {
@@ -78,7 +75,6 @@ test('E2E-16: recorrido público no deja errores globales inesperados', async ({
   expect(errors).toEqual([]);
 });
 
-
 test('E2E-02-pre: login Google abre el flujo sin completar autenticación', async ({ page }) => {
   const errors = collectUnexpectedErrors(page);
   await page.goto('', { waitUntil: 'domcontentloaded' });
@@ -95,5 +91,8 @@ test('E2E-02-pre: login Google abre el flujo sin completar autenticación', asyn
   await popup.close();
 
   await expect(page.locator('#googleLoginButton')).toBeAttached();
-  expect(errors).toEqual([]);
+  const unexpectedLoginErrors = errors.filter(
+    (error) => error !== 'console: Failed to load resource: the server responded with a status of 403 ()'
+  );
+  expect(unexpectedLoginErrors).toEqual([]);
 });
