@@ -702,7 +702,9 @@ Implementación inicial segura — 2026-10-06:
 - la siguiente corrida ejecutó 39 pruebas: 33 pasaron y 6 fallaron, concentradas únicamente en E2E-14 y E2E-16 en los tres viewports;
 - E2E-14 reveló que, sin sesión autenticada, la aplicación elimina correctamente el hash de módulo al recargar y vuelve a la superficie pública; la expectativa del test era incorrecta y se ajustó al comportamiento real, sin modificar la aplicación;
 - E2E-16 detectó únicamente `requestStorageAccess: Permission denied.`, ruido del navegador/entorno al solicitar acceso de almacenamiento; se excluyó de la lista de errores inesperados mediante una allowlist cerrada y específica, manteniendo activos todos los demás errores de consola y `pageerror`;
-- commit de ajuste seguro: `9ef78ace73940b94e93b6a086eeea2bee8eba071`; requiere una nueva corrida real antes de declarar esta ampliación aprobada.
+- commit de ajuste seguro: `9ef78ace73940b94e93b6a086eeea2bee8eba071`;
+- tercera corrida real reportada en verde por el usuario: E2E-14 y E2E-16 quedan validados junto con el baseline público en desktop, tablet y móvil;
+- **MGD-008A público/solo lectura: QA APROBADO**. Permanecen pendientes los casos autenticados y/o con escritura controlada (E2E-02, E2E-03, E2E-05 a E2E-13 en estado autenticado, E2E-17 a E2E-19), que no se ejecutarán contra datos reales sin autorización.
 
 Commits implementación inicial:
 - `b44f132e3586c50baae5ad1d39f6446a1872cd47` — runner/dependencia E2E;
