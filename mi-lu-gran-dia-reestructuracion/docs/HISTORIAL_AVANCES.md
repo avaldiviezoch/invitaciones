@@ -1,3 +1,13 @@
+## 2026-10-06 — MGD-005E: barrido residual de seguridad web (DEV)
+
+- Se revisaron Checklist, Cronograma, Distribución, Invitados/administración RSVP, Presupuesto, Proveedores y servicios compartidos buscando navegación dinámica, imágenes, HTML dinámico, JSONP y sinks ejecutables.
+- Checklist y Presupuesto solo generan descargas locales mediante `blob:`; Cronograma usa imagen/canvas local; Distribución carga fondos incorporados o blobs del usuario. No se cambian esos flujos.
+- Invitados/RSVP mantiene su lógica y persistencia intactas. Las portadas musicales mostradas allí provienen del catálogo musical compartido.
+- Hallazgo residual: el catálogo Deezer aceptaba literalmente `candidate.link` y las URLs de carátula devueltas por el proveedor. Ahora ambas se normalizan y solo se exponen si son HTTP/HTTPS válidas antes de llegar a la UI.
+- No se modifica Firebase, Firestore Rules, Auth, Storage, RSVP, Turnstile, Workers, datos ni esquema. Sin dependencias nuevas, `!important` ni archivos de parche.
+- El requisito anti-embedding de Migrandia sigue pendiente de la capa real de headers: `Content-Security-Policy: frame-ancestors 'none'` más `X-Frame-Options: DENY`. No se simula con JavaScript o meta CSP.
+- Tras este barrido, no se identificó otro cambio de código de bajo riesgo que justifique modificar los módulos revisados. El siguiente paso es QA funcional integral de MGD-005 antes de cierre.
+
 ## 2026-10-06 — MGD-005C: auditoría previa de políticas globales (DEV)
 
 - Antes de introducir CSP/Permissions-Policy se inventariaron dependencias reales para evitar bloquear funciones existentes.

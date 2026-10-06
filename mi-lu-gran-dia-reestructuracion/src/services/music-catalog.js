@@ -120,6 +120,13 @@ function enqueue(task,signal){
   return result;
 }
 
+function safeHttpUrl(value){
+  try{
+    const url=new URL(text(value));
+    return url.protocol==='https:'||url.protocol==='http:'?url.href:'';
+  }catch{return''}
+}
+
 function toTrack(best){
   const candidate=best.candidate;
   return {
@@ -127,8 +134,8 @@ function toTrack(best){
     title:text(candidate?.title),
     artist:text(candidate?.artist?.name),
     album:text(candidate?.album?.title),
-    artwork:text(candidate?.album?.cover_big||candidate?.album?.cover_medium||candidate?.album?.cover||''),
-    url:text(candidate?.link),
+    artwork:safeHttpUrl(candidate?.album?.cover_big||candidate?.album?.cover_medium||candidate?.album?.cover||''),
+    url:safeHttpUrl(candidate?.link),
     score:best.score
   };
 }
