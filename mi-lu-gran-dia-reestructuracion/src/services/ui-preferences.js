@@ -1,4 +1,5 @@
 import { auth } from './firebase-client.js';
+import { reportError } from './observability.js?v=2';
 
 const STORAGE_PREFIX = 'migrandia_ui_preferences_v1';
 
@@ -15,7 +16,8 @@ function readAll() {
     if (!raw) return {};
     const value = JSON.parse(raw);
     return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
-  } catch {
+  } catch (error) {
+    reportError('persistence', error, { module: 'ui-preferences', operation: 'read' });
     return {};
   }
 }
@@ -26,7 +28,8 @@ function writeAll(value) {
   try {
     localStorage.setItem(key, JSON.stringify(value && typeof value === 'object' ? value : {}));
     return true;
-  } catch {
+  } catch (error) {
+    reportError('persistence', error, { module: 'ui-preferences', operation: 'write' });
     return false;
   }
 }
