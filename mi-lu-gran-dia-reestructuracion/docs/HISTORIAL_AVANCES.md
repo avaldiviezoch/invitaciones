@@ -29,7 +29,8 @@
 - El iframe temporal usado por Cronograma para impresión se genera localmente desde una imagen `data:image/png` producida por canvas; no carga contenido remoto y no se modifica en esta fase.
 - Proveedores, Presupuesto, Cronograma, Invitados y RSVP revisados usan escape de contenido en los sinks dinámicos inspeccionados. Los usos de `innerHTML` de plantillas locales permanecen sin refactorización indiscriminada.
 - No se introducen dependencias, archivos nuevos, `!important`, listeners duplicados ni parches visuales.
-- Pendiente de MGD-005A: QA DEV de Música e Invitaciones y revisión final de URLs de imágenes/avatares antes de cerrar el subbloque.
+- Revisión complementaria de MGD-005A: Música ahora valida como HTTP/HTTPS las URLs dinámicas usadas como enlaces y valida las portadas antes de insertarlas como `src`; las imágenes `data:image/` se conservan únicamente donde el módulo ya las admite. No se cambia el modelo persistido ni los proveedores.
+- Pendiente de cierre de MGD-005A: QA DEV de Música e Invitaciones y revisión final del avatar autenticado; el QA funcional integral se mantiene para el final.
 
 ## 2026-10-05 — Incidente productivo Invitación 0: RSVP / Turnstile
 
