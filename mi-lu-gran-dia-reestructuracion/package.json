@@ -1,0 +1,10 @@
+{
+  "name": "migrandia-e2e",
+  "private": true,
+  "scripts": {
+    "test:e2e:safe": "playwright test tests/e2e-safe.spec.js"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.56.0"
+  }
+}
