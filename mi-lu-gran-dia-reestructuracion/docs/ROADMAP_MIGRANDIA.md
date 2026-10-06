@@ -480,7 +480,7 @@ Cierre QA (06/10/2026):
 ---
 
 ## MGD-006 — Observabilidad de producción
-Estado: 🟠 PROD / QA FUNCIONAL APROBADO — AJUSTE MENOR DE VERSIÓN
+Estado: 🟢 PRODUCCIÓN / QA APROBADO
 Prioridad: CRÍTICA
 
 QA DEV 06/10/2026:
@@ -498,7 +498,7 @@ QA PROD 06/10/2026:
 - Cloudflare Workers Observability habilitado;
 - preflight OPTIONS y POST de `/api/observability` validados;
 - evento `qa-prod` recibido con `environment: production` y mensaje esperado;
-- detectada falsa redacción de la versión `mgd-006-20261006` como teléfono; se corrige el formato de versión antes del cierre definitivo.
+- detectada falsa redacción de la versión `mgd-006-20261006` como teléfono; corregida en DEV y PROD mediante el formato `mgd-v006-2026-10-06` (PR #548, checks verdes y merge completado).
 
 Pendiente para cierre: sincronizar el código aprobado a PROD mediante PR en `Wedding`, esperar checks verdes y realizar QA de producción.
 
