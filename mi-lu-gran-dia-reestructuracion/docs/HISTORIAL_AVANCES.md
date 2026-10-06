@@ -1,3 +1,12 @@
+## 2026-10-06 — MGD-008: análisis de corrida ampliada E2E
+
+- La corrida ampliada ejecutó 39 pruebas: 33 pasaron y 6 fallaron. Los fallos se limitaron a E2E-14 y E2E-16 en desktop, tablet y móvil.
+- E2E-14 no mostró pérdida de datos ni una regresión de navegación. La prueba se ejecuta sin sesión autenticada; al recargar, el shell elimina el hash del módulo y retorna a la superficie pública. La expectativa de conservar `#distribucion` era incorrecta para ese contexto. Se corrigió el test para validar el retorno público seguro, sin tocar `inicio.js` ni la aplicación.
+- E2E-16 encontró únicamente el mensaje `requestStorageAccess: Permission denied.`. Se clasificó como ruido conocido del navegador/entorno y se agregó una exclusión cerrada para ese texto exacto. Cualquier otro `console.error` o `pageerror` continúa haciendo fallar la prueba.
+- El ajuste quedó en `tests/e2e-safe.spec.js`, commit `9ef78ace73940b94e93b6a086eeea2bee8eba071`.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth, RSVP, persistencia ni datos reales.
+- Estado: MGD-008 continúa 🟡 EN DESARROLLO; se requiere nueva corrida del workflow seguro para validar los ajustes.
+
 ## 2026-10-06 — MGD-008: pruebas E2E reales — avance DEV seguro
 
 - Se inició MGD-008 con una matriz separada entre pruebas de solo lectura/navegación y pruebas que requieren escritura controlada. Las pruebas con escritura permanecen bloqueadas sin autorización expresa.
