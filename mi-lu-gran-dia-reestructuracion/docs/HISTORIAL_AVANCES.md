@@ -1,3 +1,14 @@
+## 2026-10-06 — MGD-005C: auditoría previa de políticas globales (DEV)
+
+- Antes de introducir CSP/Permissions-Policy se inventariaron dependencias reales para evitar bloquear funciones existentes.
+- Dependencias observadas: módulos Firebase desde `www.gstatic.com`; Auth/Firestore/App Check del proyecto `migrandia`; Worker DEV/PROD; recursos de GitHub Pages y `raw.githubusercontent.com`; catálogo musical Deezer; YouTube/`i.ytimg.com`; Spotify; Apple Music; y previews Pinterest/Temu a través del Worker. Google Login y App Check agregan además tráfico gestionado por Firebase/Google que no debe restringirse por una allowlist incompleta.
+- Hallazgo importante: una CSP estricta escrita ahora “a ojo” tiene riesgo real de romper Login Google, Firestore, App Check, Música, imágenes y previews. No se incorpora todavía CSP en modo enforcement.
+- `frame-ancestors` no se implementa mediante `<meta>`: requiere una cabecera CSP efectiva. `Permissions-Policy` también se reserva para la capa de headers del hosting/proxy que realmente entregue Migrandia. No se simulan controles que el navegador no vaya a aplicar.
+- Se aplica únicamente `<meta name="referrer" content="strict-origin-when-cross-origin">` en DEV, compatible con los flujos inventariados y sin modificar contratos de red.
+- Durante la auditoría se detectó que una rama de reconocimiento de proveedor de Música todavía conservaba coincidencia parcial de hostname; se completó el hardening iniciado en MGD-005A usando coincidencia exacta/subdominio real.
+- Próximo paso de 005C: definir una política candidata a partir de tráfico real de QA y decidir el punto técnico correcto para headers antes de cualquier enforcement. El QA funcional integral se mantiene para el final por decisión del responsable.
+- Sin cambios en Firebase, Firestore Rules, Auth, Storage, datos, esquema, secretos ni Worker productivo; sin dependencias nuevas, `!important` ni parches.
+
 ## 2026-10-06 — MGD-005B: clickjacking e iframes (DEV)
 
 - Se auditó el uso de iframes en DEV. Se identificaron dos usos legítimos: preview de Invitaciones y frame efímero/local de Cronograma para impresión.
