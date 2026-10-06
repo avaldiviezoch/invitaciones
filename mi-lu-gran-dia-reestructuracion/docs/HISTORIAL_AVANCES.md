@@ -1,3 +1,11 @@
+## 2026-10-06 — MGD-008: ajuste E2E-02-pre según entrada real
+
+- La corrida con E2E-02-pre ejecutó 42 pruebas: 39 pasaron y únicamente falló el nuevo caso de login en desktop, tablet y móvil.
+- El log confirmó que el popup no llegó a abrirse porque `#discoverOverlay` estaba visible e interceptaba el click dirigido al botón interno `#googleLoginButton`. Esto corresponde a una expectativa incorrecta del test, no a un fallo de Google Login.
+- Se auditó el flujo real: `#discoverGoogleButton` es la entrada visible de Google desde Descubre; su manejador cierra el overlay y delega al mismo `#googleLoginButton`.
+- Se corrigió exclusivamente la prueba para pulsar `#discoverGoogleButton`. No se alteró el código funcional de Migrandia, Auth ni onboarding.
+- Commit: `25b613881ffe74b17605f7b5daa2a0e56f4d39ec`. Pendiente nueva corrida del workflow.
+
 ## 2026-10-06 — MGD-008: inicio de QA autenticación sin escritura
 
 - Tras aprobar el baseline público, se auditó el flujo actual de autenticación antes de automatizar una sesión real.
