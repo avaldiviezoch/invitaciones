@@ -248,6 +248,12 @@ async function rsvpVerify(request, env) {
 }
 
 
+function redactObservabilityValue(value = "", max = 500) {
+  return cleanSecurityValue(value, max)
+    .replace(/\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi, "[email]")
+    .replace(/(?:\+?\d[\s().-]*){9,15}/g, "[phone]");
+}
+
 function observabilityJson(data, status = 200, origin = "") {
   const headers = { "Content-Type": "application/json; charset=UTF-8", "Cache-Control": "no-store", "Vary": "Origin" };
   if (APP_ALLOWED_ORIGINS.has(origin)) headers["Access-Control-Allow-Origin"] = origin;
@@ -261,16 +267,16 @@ async function recordObservability(request, origin) {
   const event = {
     type: cleanSecurityValue(value?.type, 80),
     error: {
-      name: cleanSecurityValue(value?.error?.name, 80),
-      message: cleanSecurityValue(value?.error?.message, 500),
-      stack: cleanSecurityValue(value?.error?.stack, 1600)
+      name: redactObservabilityValue(value?.error?.name, 80),
+      message: redactObservabilityValue(value?.error?.message, 500),
+      stack: redactObservabilityValue(value?.error?.stack, 1600)
     },
     context: {
       version: cleanSecurityValue(value?.context?.version, 80),
       environment: cleanSecurityValue(value?.context?.environment, 30),
-      path: cleanSecurityValue(value?.context?.path, 220),
-      module: cleanSecurityValue(value?.context?.module, 80),
-      source: cleanSecurityValue(value?.context?.source, 220),
+      path: redactObservabilityValue(value?.context?.path, 220),
+      module: redactObservabilityValue(value?.context?.module, 80),
+      source: redactObservabilityValue(value?.context?.source, 220),
       browser: cleanSecurityValue(value?.context?.browser, 30),
       device: cleanSecurityValue(value?.context?.device, 20),
       viewport: cleanSecurityValue(value?.context?.viewport, 40),
