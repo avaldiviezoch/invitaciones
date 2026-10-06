@@ -1,0 +1,32 @@
+name: MGD-008 E2E seguro
+
+on:
+  workflow_dispatch:
+
+jobs:
+  e2e-safe:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: mi-lu-gran-dia-reestructuracion
+
+    steps:
+      - name: Obtener repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Instalar dependencias E2E
+        run: npm install
+
+      - name: Instalar Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Ejecutar MGD-008A seguro
+        run: npm run test:e2e:safe
+        env:
+          MIGRANDIA_E2E_URL: https://avaldiviezoch.github.io/invitaciones/mi-lu-gran-dia-reestructuracion/
