@@ -1002,7 +1002,7 @@ No mezclar lógica funcional con tema visual.
 ---
 
 ## MGD-016 — Tema global y tokens visuales
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: ALTA
 
 El tema será **global para toda la aplicación** y consumido por cada módulo.
@@ -1042,7 +1042,7 @@ la edad orienta presets y recomendaciones, pero nunca debe imponer estereotipos 
 # BLOQUE E — TERMINOLOGÍA DINÁMICA
 
 ## MGD-017 — Diccionario de lenguaje por evento
-Estado: ⬜ PENDIENTE
+Estado: 🟡 EN DESARROLLO
 Prioridad: ALTA
 
 Evitar texto matrimonial hardcodeado.
