@@ -1,3 +1,15 @@
+## 2026-10-06 — MGD-017 aprobado / MGD-018 implementado en DEV
+
+- La corrida de GitHub Actions posterior a MGD-017 fue reportada en verde por el usuario.
+- MGD-017 queda 🟢 QA SEGURO DEV APROBADO.
+- Se auditó el Checklist actual antes de implementar MGD-018; el módulo conserva una única fuente operativa y persistencia por evento/boda.
+- Se implementó MGD-018 mediante configuración central de plantillas, sin crear módulos Checklist separados por tipo de evento.
+- Las plantillas se resuelven desde `eventProfile.checklist` y cubren los ocho tipos base.
+- La plantilla de boda conserva compatibilidad con la estructura rica existente; las demás plantillas definen grupos/tareas iniciales acordes al tipo de evento.
+- No se materializan ni escriben automáticamente las plantillas en Firebase en este bloque. La aplicación efectiva se hará al crear el evento, cuando el flujo multi-evento correspondiente esté habilitado.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth, RSVP ni datos reales.
+- Estado: MGD-018 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-06 — MGD-016 aprobado / handoff a nuevo chat
 
 - La corrida posterior a MGD-016 fue reportada en verde por el usuario.
