@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-036 aprobado
+
+- QA seguro reportado en verde por el usuario.
+- MGD-036 queda 🟢 QA SEGURO DEV APROBADO.
+- La preview progresiva queda validada con previewOnly: true y persist: false.
+- No se persiste themeId, eventType ni ageProfile desde la preview.
+- Se revisará el siguiente bloque pendiente real del ROADMAP.
+
 ## 2026-10-07 — MGD-036 preview progresiva base implementada
 
 - Se creó `src/core/app/onboarding-preview.js`.
