@@ -1396,13 +1396,23 @@ Implementación DEV segura:
 ---
 
 ## MGD-024 — URL personalizada
-Estado: ⬜ PENDIENTE
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: MEDIA
 
 Posible:
 `migrandiapp.com/i/antonio-lucero`
 
 Internamente mantener token seguro.
+
+Implementación DEV segura:
+- nuevo `src/core/app/custom-invite-slug.js`;
+- normalización central de alias legibles (`Antonio & Lucero` → `antonio-lucero`);
+- validación de longitud y formato del slug;
+- el alias nunca contiene ni expone `eventId`;
+- internamente resuelve únicamente hacia el `publicInviteId` seguro de MGD-023;
+- revocación soportada en memoria;
+- la URL resultante puede ser `https://migrandiapp.com/i/antonio-lucero`;
+- no se agregó persistencia, reserva de alias, unicidad en base de datos ni routing real de dominio.
 
 ---
 
