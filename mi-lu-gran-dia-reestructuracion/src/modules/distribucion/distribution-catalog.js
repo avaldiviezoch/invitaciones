@@ -14,6 +14,7 @@ function catalogItem(type, label, category, widthM, heightM, options = {}) {
     label,
     category,
     aliases: Object.freeze([...(options.aliases || [])]),
+    eventTypes: options.eventTypes ? Object.freeze([...(options.eventTypes || [])]) : null,
     dimensions: Object.freeze({ widthM, heightM }),
     shape: options.shape || 'rect',
     spatialFamily: options.spatialFamily || 'obstacle',
@@ -30,15 +31,15 @@ function catalogItem(type, label, category, widthM, heightM, options = {}) {
 
 const DISTRIBUTION_OBJECT_CATALOG = Object.freeze({
   dance: catalogItem('dance', 'Pista de baile', 'celebration', 5, 5, { spatialFamily: 'reserved', icon: '◇' }),
-  couple: catalogItem('couple', 'Mesa de novios', 'furniture', 3, 1.2, { icon: '♡' }),
+  couple: catalogItem('couple', 'Mesa de novios', 'furniture', 3, 1.2, { eventTypes: ['wedding'], icon: '♡' }),
   bar: catalogItem('bar', 'Barra', 'food-service', 4, 1.2, { icon: '▰' }),
   dj: catalogItem('dj', 'DJ / sonido', 'celebration', 3, 2, { icon: '♫' }),
   stage: catalogItem('stage', 'Escenario', 'venue', 4, 2.5, { icon: '▔' }),
   screen: catalogItem('screen', 'Pantalla / proyector', 'celebration', 2.5, 0.5, { icon: '▭' }),
-  photo: catalogItem('photo', 'Photobooth / zona de fotos', 'celebration', 3, 2, { spatialFamily: 'reserved', icon: '⌾' }),
+  photo: catalogItem('photo', 'Photobooth / zona de fotos', 'celebration', 3, 2, { eventTypes: ['wedding', 'quince', 'birthday', 'graduation'], spatialFamily: 'reserved', icon: '⌾' }),
   booth360: catalogItem('booth360', 'Cabina 360°', 'celebration', 2.5, 2.5, { shape: 'circle', spatialFamily: 'reserved', icon: '◉' }),
   mirror: catalogItem('mirror', 'Espejo selfie', 'celebration', 1, 0.2, { icon: '│' }),
-  altar: catalogItem('altar', 'Altar', 'decoration', 4, 2, { spatialFamily: 'reserved', icon: '⌂' }),
+  altar: catalogItem('altar', 'Altar', 'decoration', 4, 2, { eventTypes: ['wedding', 'religious'], spatialFamily: 'reserved', icon: '⌂' }),
   arch: catalogItem('arch', 'Arco decorativo', 'decoration', 2.4, 0.8, { icon: '∩' }),
   backdrop: catalogItem('backdrop', 'Panel floral / backdrop', 'decoration', 2.5, 0.6, { icon: '▤' }),
   sign: catalogItem('sign', 'Tótem / letrero', 'decoration', 0.8, 0.5, { icon: '¶' }),
@@ -50,7 +51,7 @@ const DISTRIBUTION_OBJECT_CATALOG = Object.freeze({
   buffet: catalogItem('buffet', 'Buffet', 'food-service', 3, 0.9, { icon: '▤' }),
   drinks: catalogItem('drinks', 'Estación de bebidas', 'food-service', 2, 0.8, { icon: '◫' }),
   desserts: catalogItem('desserts', 'Estación de postres', 'food-service', 2.4, 0.8, { icon: '◇' }),
-  cake: catalogItem('cake', 'Mesa de torta', 'furniture', 1.8, 1.8, { shape: 'circle', icon: '○' }),
+  cake: catalogItem('cake', 'Mesa de torta', 'furniture', 1.8, 1.8, { eventTypes: ['wedding', 'quince', 'birthday', 'baby_shower'], shape: 'circle', icon: '○' }),
   gifts: catalogItem('gifts', 'Mesa de regalos', 'furniture', 1.8, 0.75, { aliases: ['gift'], icon: '□' }),
   guestbook: catalogItem('guestbook', 'Mesa de firmas', 'furniture', 1.2, 0.6, { icon: '✎' }),
   welcome: catalogItem('welcome', 'Mesa de bienvenida', 'furniture', 1.8, 0.75, { icon: '▥' }),
@@ -126,8 +127,21 @@ const CATALOG_OBJECT_ORDER = Object.freeze([
   'extinguisher'
 ]);
 
-function getVisibleCatalogGroups() {
-  const visible = CATALOG_OBJECT_ORDER.map((type) => DISTRIBUTION_OBJECT_CATALOG[type]).filter(Boolean);
+function normalizeCatalogEventType(eventType) {
+  const value = String(eventType || '').trim().toLowerCase();
+  return value || 'wedding';
+}
+
+function catalogItemSupportsEvent(item, eventType) {
+  if (!item) return false;
+  if (!item.eventTypes || !item.eventTypes.length) return true;
+  return item.eventTypes.includes(normalizeCatalogEventType(eventType));
+}
+
+function getVisibleCatalogGroups(eventType = 'wedding') {
+  const visible = CATALOG_OBJECT_ORDER
+    .map((type) => DISTRIBUTION_OBJECT_CATALOG[type])
+    .filter((item) => catalogItemSupportsEvent(item, eventType));
   return CATALOG_CATEGORY_PRESENTATION.map((category) => Object.freeze({
     ...category,
     items: Object.freeze(visible.filter((item) => item.category === category.id))
@@ -173,6 +187,7 @@ export {
   DRAWABLE_AREA_PRESETS,
   DRAWABLE_AREA_ORDER,
   getVisibleCatalogGroups,
+  catalogItemSupportsEvent,
   getVisibleAreaPresets,
   getAreaPreset,
   getAreaCatalogItem,
