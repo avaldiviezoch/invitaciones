@@ -1196,7 +1196,7 @@ Implementación DEV base MGD-034:
 ---
 
 ## MGD-035 — Edad / etapa de vida y adaptación de experiencia
-Estado: ⬜ PENDIENTE
+Estado: 🟡 AGE PROFILE BASE IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: ALTA
 
 Cuando el tipo de evento lo requiera, el onboarding preguntará edad exacta o rango etario del homenajeado.
@@ -1221,6 +1221,16 @@ La edad podrá influir en:
 No debe cambiar permisos, identidad del usuario ni estructura de datos.
 
 La app no debe inferir que una edad obliga a un color o estilo específico; ofrecerá presets y permitirá cambiar tema manualmente.
+
+Implementación DEV base MGD-035:
+- nuevo `src/core/app/age-profile.js`;
+- perfiles: child, teen, young-adult, adult y older-adult;
+- ageProfile aplica inicialmente a birthday, quince y custom;
+- quince se clasifica como teen sin modificar permisos ni identidad;
+- onboarding-profiles expone una pregunta opcional de edad solo para eventos age-aware;
+- las recomendaciones quedan en modo `suggest-only`;
+- el usuario mantiene override manual de tema;
+- no se modifica persistencia ni estructura de datos.
 
 ---
 
