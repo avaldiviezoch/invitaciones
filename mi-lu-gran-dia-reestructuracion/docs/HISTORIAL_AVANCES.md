@@ -1,3 +1,12 @@
+## 2026-10-07 — MGD-008 reclasificado a QA seguro aprobado
+
+- Tras nuevas corridas verdes del workflow E2E, la capa segura de MGD-008 queda 🟢 QA SEGURO DEV APROBADO.
+- La suite cubre navegador real en desktop, tablet y móvil, navegación pública, responsive, recarga, errores globales y múltiples contratos MGD.
+- MGD-008 ya no se considera “en desarrollo”.
+- Permanecen fuera del alcance seguro únicamente los flujos autenticados y con escritura controlada: persistencia real, creación de cuenta/evento y RSVP controlado.
+- Estos casos no se ejecutarán contra datos reales sin autorización.
+- El siguiente objetivo es terminar los bloqueadores restantes y pasar al onboarding visual multi-evento.
+
 ## 2026-10-07 — MGD-003 QA técnico aprobado
 
 - QA seguro reportado en verde por el usuario.
