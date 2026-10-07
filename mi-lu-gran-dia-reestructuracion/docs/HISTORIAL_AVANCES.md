@@ -1,3 +1,13 @@
+## 2026-10-07 — MGD-003 QA técnico preparado
+
+- Se auditó la protección anti-abuso RSVP existente.
+- La infraestructura ya contiene endpoint de verificación, Turnstile, rate limiting, CORS y observabilidad.
+- DEV y PROD usan Workers y namespaces de rate-limit distintos.
+- Se agregó QA automatizado para verificar la capa técnica sin activar nuevamente Turnstile en producción.
+- No se modificó Firestore Rules, Auth, Storage ni la invitación productiva.
+- La activación productiva final sigue pendiente de una prueba real controlada de UX.
+- Estado: MGD-003 🟡 QA TÉCNICO PREPARADO / PENDIENTE CORRIDA.
+
 ## 2026-10-07 — MGD-002 aprobado
 
 - QA seguro reportado en verde por el usuario.
