@@ -1,3 +1,15 @@
+## 2026-10-07 — MGD-025 fase 2 lectura con fallback implementada
+
+- Tras aprobar la Fase 1 se implementó lectura nueva por dominio con fallback legacy.
+- Se detectó y evitó un riesgo de lectura obsoleta entre la transacción legacy y la copia sombra.
+- Cada escritura genera un `syncToken` y lo guarda tanto en metadata legacy como en el documento de dominio.
+- Un dato de dominio solo se usa si su token coincide con el metadata legacy actual.
+- Si falta el documento nuevo, el token no coincide o la lectura nueva falla, se usa `cloudSync/cloudChunks`.
+- Las suscripciones continúan escuchando el metadata legacy; no se duplicaron listeners.
+- No se eliminó ni retiró almacenamiento legacy y no se ejecutó backfill.
+- Se agregó QA seguro para la política de sincronización y fallback.
+- Estado: MGD-025 🟡 FASE 2 IMPLEMENTADA EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-025 fase 1 sombra aprobada
 
 - QA seguro reportado en verde por el usuario.
