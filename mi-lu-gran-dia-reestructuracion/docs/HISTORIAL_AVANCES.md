@@ -1,3 +1,17 @@
+## 2026-10-07 — MGD-025 fase 1 sombra implementada
+
+- El usuario autorizó explícitamente continuar con cambios de persistencia de MGD-025 en DEV.
+- Se identificaron 10 claves legacy usadas por Checklist, Cronograma, Presupuesto, Invitados, Distribución, Ideas, Música y Proveedores.
+- Se creó un mapa central de dominios y una nueva capa `planner-domain-cloud.js`.
+- Nueva ruta preparada: `weddings/{id}/domainData/{domain}/entries/{storageKey}`.
+- `cloudSync/cloudChunks` sigue siendo la fuente autoritativa.
+- Tras cada escritura legacy exitosa se intenta una escritura sombra al dominio correspondiente.
+- El shadow write es best-effort y no rompe la operación legacy si la ruta nueva no tiene permiso.
+- No se cambió todavía la lectura de los módulos, no se ejecutó backfill y no se eliminaron datos legacy.
+- No se tocaron Rules ni producción.
+- Se agregó QA seguro para el mapa de dominios.
+- Estado: MGD-025 🟡 FASE 1 SOMBRA IMPLEMENTADA EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-025 auditado / pendiente de autorización
 
 - MGD-024 fue aprobado en QA seguro.
