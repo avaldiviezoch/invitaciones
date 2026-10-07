@@ -1,3 +1,14 @@
+## 2026-10-07 — MGD-011 aislamiento estructural implementado
+
+- Se retomó MGD-011 después de cerrar MGD-012 y la capa eventType.
+- La base existente ya permite múltiples contextos por un mismo UID.
+- Se creó `event-context-isolation.js`.
+- El contrato deriva rutas independientes por eventId para raíz, membresía, índice de usuario, planner legacy/nuevo y RSVP.
+- Se bloquean eventId duplicados.
+- Se agregó QA seguro para verificar aislamiento estructural sin datos reales.
+- No se crearon cuentas ni eventos de prueba y no hubo escrituras en Firebase.
+- Estado: MGD-011 🟡 AISLAMIENTO ESTRUCTURAL IMPLEMENTADO EN DEV / PENDIENTE QA Y PRUEBA REAL CONTROLADA.
+
 ## 2026-10-07 — MGD-026 fase 1 aprobada
 
 - QA seguro reportado en verde por el usuario.
