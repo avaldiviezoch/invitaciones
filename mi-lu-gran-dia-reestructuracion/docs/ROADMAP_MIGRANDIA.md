@@ -1594,7 +1594,7 @@ Implementación DEV:
 # BLOQUE J — PRIVACIDAD Y RECUPERACIÓN
 
 ## MGD-029 — Eliminar evento
-Estado: 🟡 CONTRATO SEGURO IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: ALTA
 
 Eliminar un evento sin afectar los otros eventos del usuario.
