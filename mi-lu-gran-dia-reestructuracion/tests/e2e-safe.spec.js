@@ -1005,3 +1005,53 @@ test('MGD-027: Ideas restringe escritura a Owner/Admin sin quitar Editor global'
     editorIdeasBlocked: true
   });
 });
+
+
+test('MGD-028: límites técnicos V1 están centralizados sin enforcement destructivo', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/platform-limits.js')).href;
+  const {
+    PLATFORM_LIMITS_VERSION,
+    PLATFORM_LIMITS,
+    isWithinPlatformLimit,
+    assertWithinPlatformLimit,
+    assessSerializedEntry
+  } = await import(moduleUrl);
+
+  let overflowBlocked = false;
+  try {
+    assertWithinPlatformLimit('guestsPerEvent', PLATFORM_LIMITS.guestsPerEvent + 1);
+  } catch {
+    overflowBlocked = true;
+  }
+
+  const payload = assessSerializedEntry({ sample: 'ok' });
+
+  expect({
+    version: PLATFORM_LIMITS_VERSION,
+    limits: PLATFORM_LIMITS,
+    guestsAtLimit: isWithinPlatformLimit('guestsPerEvent', PLATFORM_LIMITS.guestsPerEvent),
+    guestsOverLimit: isWithinPlatformLimit('guestsPerEvent', PLATFORM_LIMITS.guestsPerEvent + 1),
+    overflowBlocked,
+    payloadWithinLimit: payload.withinLimit,
+    payloadLimit: payload.limit
+  }).toEqual({
+    version: 1,
+    limits: {
+      eventsPerUser: 20,
+      guestsPerEvent: 2000,
+      tablesPerEvent: 250,
+      ideasPerEvent: 500,
+      providersPerEvent: 300,
+      rsvpResponsesPerEvent: 5000,
+      imagesPerEvent: 500,
+      distributionObjectsPerEvent: 2000,
+      serializedEntryBytes: 750000,
+      imageBytes: 10485760
+    },
+    guestsAtLimit: true,
+    guestsOverLimit: false,
+    overflowBlocked: true,
+    payloadWithinLimit: true,
+    payloadLimit: 750000
+  });
+});
