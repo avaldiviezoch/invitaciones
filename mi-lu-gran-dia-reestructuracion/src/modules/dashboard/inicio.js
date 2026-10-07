@@ -1,5 +1,5 @@
 import { installObservability, reportError } from '../../services/observability.js?v=2';
-import { AUTH_BRANDING } from '../../core/app/auth-branding.js?v=1';
+import { AUTH_BRANDING } from '../../core/app/auth-branding.js?v=2';
 import { APP_VERSION_LABEL } from '../../core/app/version.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { applyEventTheme } from '../../core/app/theme-tokens.js';
