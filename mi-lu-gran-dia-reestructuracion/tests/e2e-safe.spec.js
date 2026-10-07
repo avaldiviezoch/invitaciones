@@ -1225,3 +1225,61 @@ test('MGD-031: backup formal incluye eventId y restore bloquea eventos distintos
     sameEvent: true
   });
 });
+
+
+test('MGD-032: marcha blanca define cohortes y gate sin enrolar usuarios automáticamente', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/controlled-rollout.js')).href;
+  const {
+    ROLLOUT_PHASES,
+    ROLLOUT_METRICS,
+    rolloutPhaseForUsers,
+    assessRolloutGate,
+    buildControlledRolloutPlan
+  } = await import(moduleUrl);
+
+  const healthyGate = {
+    e2ePassed: true,
+    mobilePassed: true,
+    desktopPassed: true,
+    criticalErrors: 0,
+    permissionViolations: 0,
+    persistenceFailures: 0,
+    rsvpFailures: 0,
+    firebaseHealthy: true,
+    workersHealthy: true,
+    costsWithinExpectedRange: true
+  };
+
+  const blockedGate = assessRolloutGate({
+    ...healthyGate,
+    persistenceFailures: 1
+  });
+  const plan = buildControlledRolloutPlan({
+    currentUsers: 7,
+    gate: healthyGate
+  });
+
+  expect({
+    phases: ROLLOUT_PHASES,
+    metrics: ROLLOUT_METRICS,
+    sevenUsersPhase: rolloutPhaseForUsers(7).id,
+    twentyUsersPhase: rolloutPhaseForUsers(20).id,
+    healthyCanAdvance: plan.assessment.canAdvance,
+    blockedCanAdvance: blockedGate.canAdvance,
+    autoEnroll: plan.autoEnroll,
+    publicBeta: plan.publicBeta
+  }).toEqual({
+    phases: {
+      INTERNAL: { id: 'internal', minUsers: 0, maxUsers: 4 },
+      EXTERNAL_SMALL: { id: 'external-small', minUsers: 5, maxUsers: 10 },
+      EXTERNAL_EXPANDED: { id: 'external-expanded', minUsers: 20, maxUsers: 30 }
+    },
+    metrics: ['errors','firebase','workers','costs','ux','mobile','persistence','permissions','rsvp'],
+    sevenUsersPhase: 'external-small',
+    twentyUsersPhase: 'external-expanded',
+    healthyCanAdvance: true,
+    blockedCanAdvance: false,
+    autoEnroll: false,
+    publicBeta: false
+  });
+});
