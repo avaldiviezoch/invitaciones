@@ -655,6 +655,9 @@ body.menu-open .menu-button svg {
   gap:5px;
   margin:9px 0
 }
+.auth-card [hidden] {
+  display:none
+}
 .auth-card input {
   min-height:46px;
   padding:0 12px;
