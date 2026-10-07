@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-011 aislamiento QA aprobado
+
+- QA seguro reportado en verde por el usuario.
+- El aislamiento estructural multi-evento queda 🟢 QA APROBADO.
+- Se mantiene pendiente una prueba real controlada con cuentas/eventos de prueba autorizados.
+- No se escribieron datos reales ni se modificó Firebase.
+- Siguiente bloqueo de beta: MGD-002 — separación DEV/PROD.
+
 ## 2026-10-07 — MGD-011 aislamiento estructural implementado
 
 - Se retomó MGD-011 después de cerrar MGD-012 y la capa eventType.
