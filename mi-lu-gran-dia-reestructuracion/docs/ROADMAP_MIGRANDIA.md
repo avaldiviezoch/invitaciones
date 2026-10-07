@@ -1344,7 +1344,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-022 — Invitaciones bajo dominio Migrandia
-Estado: ⬜ PENDIENTE
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA
 
 Nunca enviar al usuario final enlaces de GitHub.
@@ -1356,6 +1356,14 @@ Objetivo:
 Posible evolución:
 
 `https://invite.migrandiapp.com/ABC123`
+
+Implementación DEV segura:
+- se creó `src/core/app/public-invitation-url.js` como contrato único para construir URLs públicas;
+- origen canónico actual: `https://migrandiapp.com`;
+- ruta pública reservada: `/i/{publicInviteId}`;
+- el helper rechaza como válidas las URLs públicas de GitHub;
+- no se modificaron DNS, rutas de Cloudflare, Worker productivo ni despliegues;
+- la resolución real de `/i/{publicInviteId}` queda condicionada a MGD-023 y a una activación controlada de infraestructura.
 
 ---
 
