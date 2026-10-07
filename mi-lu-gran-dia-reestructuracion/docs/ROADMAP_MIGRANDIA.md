@@ -1697,7 +1697,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-033 — Beta pública
-Estado: 🟡 GATE IMPLEMENTADO EN DEV / BETA BLOQUEADA POR PREREQUISITOS
+Estado: 🟢 GATE QA APROBADO / BETA BLOQUEADA POR PREREQUISITOS
 Prioridad: FUTURA
 
 Requisitos mínimos:
