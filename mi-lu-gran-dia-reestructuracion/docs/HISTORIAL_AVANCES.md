@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-024 aprobado
+
+- QA seguro reportado en verde.
+- MGD-024 queda 🟢 QA SEGURO DEV APROBADO.
+- Queda validado el alias legible como capa separada del ID público seguro.
+- No hubo persistencia real ni cambios de infraestructura.
+- Siguiente bloque: MGD-025 — evolución de planner-cloud.
+
 ## 2026-10-07 — MGD-024 implementado en DEV
 
 - Tras aprobar MGD-023 se implementó la capa segura de URL personalizada.
