@@ -1327,3 +1327,36 @@ test('MGD-033: beta pública queda bloqueada mientras existan prerequisitos abie
     autoPublish: false
   });
 });
+
+
+test('MGD-034: onboarding usa un solo motor con opciones adaptativas por tipo de evento', async () => {
+  const onboardingUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/onboarding-profiles.js')).href;
+  const eventProfileUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/event-profile.js')).href;
+  const { ONBOARDING_ENGINE_ID, ONBOARDING_PROFILES, getOnboardingProfile } = await import(onboardingUrl);
+  const { getEventProfile } = await import(eventProfileUrl);
+
+  const ids = Object.keys(ONBOARDING_PROFILES);
+  expect({
+    engine: ONBOARDING_ENGINE_ID,
+    ids,
+    sameEngine: ids.every((id) => ONBOARDING_PROFILES[id].engine === ONBOARDING_ENGINE_ID),
+    firstQuestion: ids.every((id) => ONBOARDING_PROFILES[id].firstQuestion === 'eventType'),
+    weddingRoles: getOnboardingProfile('wedding').organizerRoleQuestion.options.map((item) => item.label),
+    birthdayRoles: getOnboardingProfile('birthday').organizerRoleQuestion.options.map((item) => item.label),
+    corporateRoles: getOnboardingProfile('corporate').organizerRoleQuestion.options.map((item) => item.label),
+    fallback: getOnboardingProfile('unknown').profileId,
+    profileConsumesContract: getEventProfile('graduation').onboarding.profileId,
+    noIndependentEngines: new Set(ids.map((id) => ONBOARDING_PROFILES[id].engine)).size
+  }).toEqual({
+    engine: 'adaptive-onboarding-v1',
+    ids: ['wedding','birthday','quince','baby_shower','religious','graduation','corporate','custom'],
+    sameEngine: true,
+    firstQuestion: true,
+    weddingRoles: ['Novia','Novio','Somos la pareja','Ayudo a organizar'],
+    birthdayRoles: ['Es para mí','Para mi hijo/a','Para un familiar','Para otra persona','Ayudo a organizar'],
+    corporateRoles: ['Represento a la empresa','Colaborador/a','Organizador interno','Organizador / proveedor externo'],
+    fallback: 'wedding',
+    profileConsumesContract: 'graduation',
+    noIndependentEngines: 1
+  });
+});
