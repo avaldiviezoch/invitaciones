@@ -21,6 +21,7 @@ function catalogItem(type, label, category, widthM, heightM, options = {}) {
     capabilities: options.capabilities || DEFAULT_PHYSICAL_CAPABILITIES,
     behavior: options.behavior || 'physical',
     icon: options.icon || '□',
+    iconAsset: options.iconAsset || type,
     visual: Object.freeze({
       fit: options.visualFit || 'contain',
       paddingRatio: Math.max(0, Math.min(0.35, Number(options.visualPaddingRatio ?? 0.08))),
@@ -68,6 +69,45 @@ const DISTRIBUTION_OBJECT_CATALOG = Object.freeze({
   extinguisher: catalogItem('extinguisher', 'Extintor / seguridad', 'safety-circulation', 0.5, 0.5, { icon: '!' }),
   chair: catalogItem('chair', 'Silla suelta', 'furniture', 0.5, 0.5, { behavior: 'detached-chair', icon: '▱' }),
   canopy: catalogItem('canopy', 'Cobertura rectangular / toldo modular', 'venue', 6, 6, { spatialFamily: 'container', behavior: 'physical-container', icon: '⌂' })
+});
+
+const SPECIALIZED_DISTRIBUTION_OBJECT_CATALOG = Object.freeze({
+  quince_main_table: catalogItem('quince_main_table', 'Mesa principal de 15 años', 'furniture', 3, 1.2, {
+    eventTypes: ['quince'],
+    spatialFamily: 'obstacle',
+    icon: '☆',
+    iconAsset: 'couple'
+  }),
+  quince_choreography: catalogItem('quince_choreography', 'Zona de coreografía', 'celebration', 5, 5, {
+    eventTypes: ['quince'],
+    spatialFamily: 'reserved',
+    icon: '◇',
+    iconAsset: 'dance'
+  }),
+  baby_gifts: catalogItem('baby_gifts', 'Zona de regalos', 'furniture', 2.2, 1.2, {
+    eventTypes: ['baby_shower'],
+    spatialFamily: 'reserved',
+    icon: '□',
+    iconAsset: 'gifts'
+  }),
+  baby_games: catalogItem('baby_games', 'Zona de juegos', 'celebration', 4, 4, {
+    eventTypes: ['baby_shower'],
+    spatialFamily: 'reserved',
+    icon: '☆',
+    iconAsset: 'dance'
+  }),
+  graduation_diplomas: catalogItem('graduation_diplomas', 'Mesa de diplomas', 'furniture', 2.4, 0.9, {
+    eventTypes: ['graduation'],
+    spatialFamily: 'obstacle',
+    icon: '▤',
+    iconAsset: 'guestbook'
+  }),
+  graduation_stage: catalogItem('graduation_stage', 'Escenario de graduación', 'venue', 5, 3, {
+    eventTypes: ['graduation'],
+    spatialFamily: 'reserved',
+    icon: '▔',
+    iconAsset: 'stage'
+  })
 });
 
 const DRAWABLE_AREA_PRESETS = Object.freeze({
@@ -139,9 +179,10 @@ function catalogItemSupportsEvent(item, eventType) {
 }
 
 function getVisibleCatalogGroups(eventType = 'wedding') {
-  const visible = CATALOG_OBJECT_ORDER
-    .map((type) => DISTRIBUTION_OBJECT_CATALOG[type])
-    .filter((item) => catalogItemSupportsEvent(item, eventType));
+  const visible = [
+    ...CATALOG_OBJECT_ORDER.map((type) => DISTRIBUTION_OBJECT_CATALOG[type]),
+    ...Object.values(SPECIALIZED_DISTRIBUTION_OBJECT_CATALOG)
+  ].filter((item) => catalogItemSupportsEvent(item, eventType));
   return CATALOG_CATEGORY_PRESENTATION.map((category) => Object.freeze({
     ...category,
     items: Object.freeze(visible.filter((item) => item.category === category.id))
@@ -177,11 +218,12 @@ function getElementCatalogItem(element) {
 
 function getCatalogItem(type) {
   const resolved = resolveCatalogType(type);
-  return DISTRIBUTION_OBJECT_CATALOG[resolved] || LEGACY_AREA_CATALOG[resolved] || null;
+  return DISTRIBUTION_OBJECT_CATALOG[resolved] || SPECIALIZED_DISTRIBUTION_OBJECT_CATALOG[resolved] || LEGACY_AREA_CATALOG[resolved] || null;
 }
 
 export {
   DISTRIBUTION_OBJECT_CATALOG,
+  SPECIALIZED_DISTRIBUTION_OBJECT_CATALOG,
   LEGACY_AREA_CATALOG,
   DRAWABLE_AREA_CATALOG,
   DRAWABLE_AREA_PRESETS,
