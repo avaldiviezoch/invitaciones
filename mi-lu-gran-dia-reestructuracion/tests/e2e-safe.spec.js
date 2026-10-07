@@ -680,3 +680,33 @@ test('MGD-025 fase 1: mapa de dominios separa planner-cloud sin romper legacy', 
     unknownMigrated: false
   });
 });
+
+
+test('MGD-025 fase 2: lectura nueva exige token de sincronización antes de desplazar legacy', async () => {
+  const plannerSource = await import('node:fs/promises').then(({ readFile }) =>
+    readFile(path.resolve(process.cwd(), 'src/services/planner-cloud.js'), 'utf8')
+  );
+  const domainSource = await import('node:fs/promises').then(({ readFile }) =>
+    readFile(path.resolve(process.cwd(), 'src/services/planner-domain-cloud.js'), 'utf8')
+  );
+
+  expect({
+    plannerReadsDomain: plannerSource.includes('readPlannerDomainEntries'),
+    requiresMetaToken: plannerSource.includes('Boolean(meta.syncToken)'),
+    checksTokenMatch: plannerSource.includes('candidate.syncToken === meta.syncToken'),
+    keepsLegacyFallback: plannerSource.includes('readPlannerBackup(context, meta)'),
+    writesSyncTokenToLegacy: plannerSource.includes('syncToken,'),
+    passesTokenToShadow: plannerSource.includes('writePlannerDomainShadowEntries(context, entries, syncToken)'),
+    domainStoresToken: domainSource.includes("syncToken: String(syncToken || '')"),
+    domainReturnsToken: domainSource.includes("syncToken: String(snapshot.data()?.syncToken || '')")
+  }).toEqual({
+    plannerReadsDomain: true,
+    requiresMetaToken: true,
+    checksTokenMatch: true,
+    keepsLegacyFallback: true,
+    writesSyncTokenToLegacy: true,
+    passesTokenToShadow: true,
+    domainStoresToken: true,
+    domainReturnsToken: true
+  });
+});
