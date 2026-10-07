@@ -971,3 +971,37 @@ test('MGD-025 fase 8: solicitud domain-only queda verificada pero no aplicada', 
     blockedWithoutReadiness: true
   });
 });
+
+
+test('MGD-027: Ideas restringe escritura a Owner/Admin sin quitar Editor global', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/services/planner-domain-permissions.js')).href;
+  const {
+    IDEAS_STORAGE_KEY,
+    canWritePlannerStorageKey,
+    assertPlannerStorageWriteAllowed
+  } = await import(moduleUrl);
+
+  const checklistKey = 'planificador_bodas_checklist_v1';
+  let editorIdeasBlocked = false;
+  try {
+    assertPlannerStorageWriteAllowed('editor', [IDEAS_STORAGE_KEY]);
+  } catch {
+    editorIdeasBlocked = true;
+  }
+
+  expect({
+    ownerIdeas: canWritePlannerStorageKey('owner', IDEAS_STORAGE_KEY),
+    adminIdeas: canWritePlannerStorageKey('admin', IDEAS_STORAGE_KEY),
+    editorIdeas: canWritePlannerStorageKey('editor', IDEAS_STORAGE_KEY),
+    viewerIdeas: canWritePlannerStorageKey('viewer', IDEAS_STORAGE_KEY),
+    editorChecklistStillAllowed: canWritePlannerStorageKey('editor', checklistKey),
+    editorIdeasBlocked
+  }).toEqual({
+    ownerIdeas: true,
+    adminIdeas: true,
+    editorIdeas: false,
+    viewerIdeas: false,
+    editorChecklistStillAllowed: true,
+    editorIdeasBlocked: true
+  });
+});
