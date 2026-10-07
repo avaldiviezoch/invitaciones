@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-032 aprobado
+
+- QA seguro reportado en verde por el usuario.
+- MGD-032 queda 🟢 QA SEGURO DEV APROBADO.
+- El contrato de cohortes y gate queda validado.
+- autoEnroll y publicBeta continúan en false.
+- Siguiente bloque: MGD-033 — beta pública.
+
 ## 2026-10-07 — MGD-032 contrato de marcha blanca implementado
 
 - Se reutiliza la observabilidad existente; no se creó un segundo sistema de errores.
