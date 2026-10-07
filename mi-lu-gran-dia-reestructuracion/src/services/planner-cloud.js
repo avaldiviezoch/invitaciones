@@ -8,9 +8,16 @@ import {
 import { auth, db } from './firebase-client.js';
 import { weddingCapabilities } from '../core/app/permissions.js';
 import { reportError } from './observability.js?v=2';
-import { writePlannerDomainShadowEntries } from './planner-domain-cloud.js?v=1';
+import { readPlannerDomainEntries, writePlannerDomainShadowEntries } from './planner-domain-cloud.js?v=2';
 
 const CHUNK_SIZE = 180000;
+
+function createSyncToken() {
+  if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID();
+  const bytes = new Uint8Array(16);
+  globalThis.crypto.getRandomValues(bytes);
+  return Array.from(bytes, (value) => value.toString(16).padStart(2, '0')).join('');
+}
 
 function chunkText(text) {
   const chunks = [];
@@ -18,23 +25,34 @@ function chunkText(text) {
   return chunks.length ? chunks : [''];
 }
 
-async function readPlannerBackup(context) {
+async function readPlannerMeta(context) {
   if (!auth.currentUser || !context?.id) throw new Error('No hay una boda activa.');
   const metaRef = doc(db, 'weddings', context.id, 'cloudSync', 'main');
-  let metaSnapshot;
   try {
-    metaSnapshot = await getDoc(metaRef);
+    const snapshot = await getDoc(metaRef);
+    if (!snapshot.exists()) return { exists: false, chunkCount: 0, syncToken: '', snapshot };
+    const data = snapshot.data() || {};
+    return {
+      exists: true,
+      chunkCount: Number(data.chunkCount || 0),
+      syncToken: String(data.syncToken || ''),
+      snapshot
+    };
   } catch (error) {
     reportError('firebase', error, { module: 'planner-cloud', operation: 'read-meta' });
     throw error;
   }
-  if (!metaSnapshot.exists()) return { backup: null, chunkCount: 0 };
+}
 
-  const chunkCount = Number(metaSnapshot.data()?.chunkCount || 0);
+async function readPlannerBackup(context, meta = null) {
+  const plannerMeta = meta || await readPlannerMeta(context);
+  if (!plannerMeta.exists) return { backup: null, chunkCount: 0, syncToken: '' };
+
+  const chunkCount = Number(plannerMeta.chunkCount || 0);
   if (!Number.isInteger(chunkCount) || chunkCount < 0 || chunkCount > 500) {
     throw new Error('La copia de Firebase tiene un formato no válido.');
   }
-  if (!chunkCount) return { backup: null, chunkCount: 0 };
+  if (!chunkCount) return { backup: null, chunkCount: 0, syncToken: plannerMeta.syncToken };
 
   const chunks = await Promise.all(
     Array.from({ length: chunkCount }, (_, index) =>
@@ -42,10 +60,10 @@ async function readPlannerBackup(context) {
     )
   );
   const raw = chunks.map((snapshot) => snapshot.exists() ? String(snapshot.data()?.data || '') : '').join('');
-  if (!raw) return { backup: null, chunkCount };
+  if (!raw) return { backup: null, chunkCount, syncToken: plannerMeta.syncToken };
 
   try {
-    return { backup: JSON.parse(raw), chunkCount };
+    return { backup: JSON.parse(raw), chunkCount, syncToken: plannerMeta.syncToken };
   } catch {
     throw new Error('No se pudo interpretar la copia de Firebase de esta boda.');
   }
@@ -60,8 +78,31 @@ function parseStoredJson(value) {
 async function readPlannerStorageKeys(context, keys) {
   const requested = Array.isArray(keys) ? [...new Set(keys.map(String).filter(Boolean))] : [];
   if (!requested.length) return {};
-  const { backup } = await readPlannerBackup(context);
-  return Object.fromEntries(requested.map((key) => [key, parseStoredJson(backup?.localStorage?.[key])]));
+
+  const meta = await readPlannerMeta(context);
+  const domainValues = await readPlannerDomainEntries(context, requested);
+  const canUseDomain = Boolean(meta.syncToken);
+
+  const resolved = {};
+  const fallbackKeys = [];
+
+  requested.forEach((key) => {
+    const candidate = domainValues[key];
+    if (canUseDomain && candidate?.exists && candidate.syncToken === meta.syncToken) {
+      resolved[key] = candidate.value ?? null;
+    } else {
+      fallbackKeys.push(key);
+    }
+  });
+
+  if (fallbackKeys.length) {
+    const { backup } = await readPlannerBackup(context, meta);
+    fallbackKeys.forEach((key) => {
+      resolved[key] = parseStoredJson(backup?.localStorage?.[key]);
+    });
+  }
+
+  return Object.fromEntries(requested.map((key) => [key, resolved[key] ?? null]));
 }
 
 async function readPlannerStorageKey(context, key) {
@@ -77,6 +118,7 @@ async function writePlannerStorageKeys(context, entries) {
   }
 
   const metaRef = doc(db, 'weddings', context.id, 'cloudSync', 'main');
+  const syncToken = createSyncToken();
   const chunkRef = (index) => doc(db, 'weddings', context.id, 'cloudChunks', String(index).padStart(5, '0'));
 
   try {
@@ -131,6 +173,7 @@ async function writePlannerStorageKeys(context, entries) {
         chunkCount: chunks.length,
         bytes: raw.length,
         updatedAt: serverTimestamp(),
+        syncToken,
         version: Number(backup.version || 1)
       }, { merge: true });
     });
@@ -141,7 +184,7 @@ async function writePlannerStorageKeys(context, entries) {
 
   // MGD-025 fase sombra: el backup legacy sigue siendo autoritativo.
   // La copia por dominio es best-effort y nunca invalida una escritura legacy exitosa.
-  await writePlannerDomainShadowEntries(context, entries).catch(() => ({ attempted: 0, fulfilled: 0 }));
+  await writePlannerDomainShadowEntries(context, entries, syncToken).catch(() => ({ attempted: 0, fulfilled: 0 }));
 }
 
 async function writePlannerStorageKey(context, key, value) {
