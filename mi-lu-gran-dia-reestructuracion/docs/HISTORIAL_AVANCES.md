@@ -1,3 +1,12 @@
+## 2026-10-07 — MGD-025 fase 8 aprobada
+
+- QA seguro reportado en verde por el usuario.
+- La Fase 8 de solicitud controlada de activación queda aprobada.
+- La orden domain-only sigue con apply: false.
+- Checklist continúa en modo hybrid.
+- No se retiró fallback legacy ni se modificó Firestore.
+- Siguiente paso: auditar activación real del piloto Checklist con readiness real de la boda.
+
 ## 2026-10-07 — MGD-025 fase 8 solicitud de activación implementada
 
 - Tras aprobar la Fase 7 se preparó la activación controlada del piloto Checklist.
