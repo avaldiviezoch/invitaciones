@@ -925,7 +925,7 @@ Implementación DEV MGD-011 — aislamiento estructural:
 ---
 
 ## MGD-026 — Branding profesional del login Google / Firebase
-Estado: 🟠 QA — BRANDING EXTERNO AVANZADO / PENDIENTE LEGAL + VERIFICACIÓN DE DOMINIO
+Estado: 🟡 PRODUCCIÓN ACTUALIZADA / PENDIENTE PROPAGACIÓN GOOGLE
 Prioridad: CRÍTICA ANTES DE MARCHA BLANCA
 
 Problema actual:
@@ -1004,11 +1004,22 @@ Implementación DEV — Fase legal/verificación:
 - no se modifican Firebase Rules, Firestore, Storage, datos ni contratos de persistencia.
 
 
+
+Producción — 2026-10-07:
+- PR #551 fusionado en `avaldiviezoch/Wedding`;
+- `Wedding/main` quedó en commit `1c8412c82b03599919f7cc8b92fe595be4288113`;
+- GitHub Pages de producción terminó en verde;
+- home productiva prioriza el nombre público **Mi Gran Día**;
+- Política de Privacidad ampliada publicada en `https://migrandiapp.com/privacy.html`;
+- Google Auth Platform dejó de mostrar las observaciones por nombre de aplicación y contenido insuficiente de privacidad;
+- `migrandiapp.com` fue verificado correctamente en Google Search Console mediante Cloudflare;
+- permanece únicamente el aviso histórico de propiedad del dominio mientras Google propaga la verificación (la consola indica hasta 24 horas);
+- recordatorio creado para revisar el estado el **09/10/2026 por la mañana**.
+
 Seguimiento pendiente — verificación Google OAuth:
 - 2026-10-07: dominio `migrandiapp.com` verificado correctamente en Google Search Console mediante Cloudflare.
 - Google Auth Platform todavía muestra el hallazgo histórico de propiedad del dominio y advierte que la actualización interna puede demorar hasta 24 horas.
-- revisar nuevamente el **08/10/2026**;
-- si el hallazgo continúa, realizar segunda revisión el **09/10/2026**;
+- revisión programada directamente para el **09/10/2026**;
 - cuando desaparezca el aviso, seleccionar **“Corregí los problemas” → Continuar** para reenviar la verificación de marca.
 - no modificar DNS, Search Console ni dominios mientras se espera la propagación, salvo que Google muestre una observación nueva.
 
