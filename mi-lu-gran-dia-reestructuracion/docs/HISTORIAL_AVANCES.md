@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-010 QA seguro aprobado
+
+- Antonio ejecutó el workflow `MGD-008 E2E seguro` sobre la rama de corrección de Auth y reportó resultado VERDE.
+- Queda validada en DEV la separación visual entre Ingresar, Crear cuenta y Recuperar contraseña.
+- MGD-010 vuelve a estado 🟢 QA SEGURO DEV APROBADO.
+- La prueba real de recepción del correo de recuperación con cuenta QA continúa pendiente.
+- No se modificó producción ni se realizaron cambios destructivos en Firebase, Firestore, Auth, Storage o Rules.
+
 ## 2026-10-07 — MGD-010: separación clara de login, registro y recuperación
 
 - Durante la prueba real de cuenta Email/Password se detectó que “Confirmar contraseña” permanecía visible también en modo Ingresar.
