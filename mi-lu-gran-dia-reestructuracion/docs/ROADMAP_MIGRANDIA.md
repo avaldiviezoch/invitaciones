@@ -983,7 +983,7 @@ Este perfil no escala con usuarios y por ello sí puede ser configuración JS/JS
 # BLOQUE D — EVENTO VS TEMÁTICA
 
 ## MGD-015 — Separar tipo de evento de temática
-Estado: 🟡 EN DESARROLLO
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: ALTA
 
 Ejemplos:
@@ -2606,3 +2606,29 @@ Commits:
 Estado:
 - MGD-013: 🟢 QA SEGURO DEV APROBADO, corrida reportada en verde;
 - MGD-014: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
+### MGD-015 — implementación DEV: eventType ≠ themeId
+
+Implementado:
+- nuevo `src/core/app/theme-id.js` con `DEFAULT_THEME_ID`, `normalizeThemeId()` y `resolveEventPresentation()`;
+- `eventType` y `themeId` se modelan como propiedades independientes;
+- el mismo `themeId` puede utilizarse con tipos de evento distintos sin cambiar la lógica funcional;
+- `wedding-context.js` expone `themeId` en memoria junto a `eventType`;
+- documentos históricos sin `themeId` reciben fallback `classic-elegant` en memoria;
+- no se persiste todavía `themeId` en Firestore;
+- no se mezclaron colores/tokens visuales en esta tarea: eso queda para MGD-016.
+
+QA seguro:
+- valida `wedding + one-piece-elegant`;
+- valida `birthday + minimal-black`;
+- valida que un mismo tema pueda coexistir con distintos `eventType`;
+- valida normalización independiente del tema.
+
+Commits:
+- `dc585f703af955f16e1eccc5f06ddd9af855d417` — helper de themeId;
+- `f2fc3ce148db6deed40bd92a3fd3cb0db32b542b` — integración de contexto en memoria;
+- `9da4cf55a473a7b46cef1a63587df35d2f885c8c` — QA seguro.
+
+Estado:
+- MGD-014: 🟢 QA SEGURO DEV APROBADO;
+- MGD-015: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
