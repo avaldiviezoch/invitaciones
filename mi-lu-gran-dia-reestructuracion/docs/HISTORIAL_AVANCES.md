@@ -1,3 +1,15 @@
+## 2026-10-07 — MGD-027 permisos de Ideas implementados
+
+- La UI de Ideas ya limitaba edición a Owner/Admin.
+- Se detectó que planner-cloud permitía escribir a Owner/Admin/Editor por la capacidad global canEdit.
+- Se creó `planner-domain-permissions.js`.
+- La clave de Ideas ahora exige Owner/Admin en la capa de aplicación.
+- Editor conserva permiso de escritura en otros módulos; no se retiró globalmente.
+- planner-cloud valida la lista de claves antes de iniciar la transacción.
+- No se tocaron Firestore Rules ni datos reales.
+- Se agregó QA seguro específico para MGD-027.
+- Estado: MGD-027 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-025 fase 8 aprobada
 
 - QA seguro reportado en verde por el usuario.
