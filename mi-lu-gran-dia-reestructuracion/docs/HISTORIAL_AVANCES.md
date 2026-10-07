@@ -1,3 +1,15 @@
+## 2026-10-07 — MGD-028 guardrails V1 implementados
+
+- Se auditó la app y no existía una fuente global de límites técnicos.
+- Se creó `src/core/app/platform-limits.js`.
+- Se definieron límites V1 para eventos, invitados, mesas, ideas, proveedores, RSVP, imágenes, objetos de Distribución y tamaño de payload.
+- Los límites están centralizados y versionados.
+- Se añadieron helpers puros para consultar, validar y medir payload serializado.
+- En esta fase no se conectó enforcement a módulos ni persistencia real.
+- No se tocaron Firestore Rules, Storage ni datos existentes.
+- Se agregó QA seguro específico para MGD-028.
+- Estado: MGD-028 🟡 GUARDRAILS V1 IMPLEMENTADOS EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-027 aprobado
 
 - QA seguro reportado en verde por el usuario.
