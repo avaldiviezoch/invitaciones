@@ -848,3 +848,56 @@ test('MGD-025 fase 5: diagnóstico readiness es solo lectura y no retira legacy'
     noDelete: true
   });
 });
+
+
+test('MGD-025 fase 6: domain-only queda bloqueado por defecto y exige readiness + aprobación', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/services/planner-domain-retirement.js')).href;
+  const {
+    RETIREMENT_MODE,
+    getPlannerReadMode,
+    canEnableDomainOnly,
+    assertDomainOnlyActivation
+  } = await import(moduleUrl);
+
+  const ready = { safeToRetireLegacy: true };
+  const notReady = { safeToRetireLegacy: false };
+
+  let blockedMessage = '';
+  try {
+    assertDomainOnlyActivation({
+      storageKey: 'planificador_bodas_checklist_v1',
+      readiness: ready,
+      explicitlyApproved: false
+    });
+  } catch (error) {
+    blockedMessage = error.message;
+  }
+
+  expect({
+    defaultMode: getPlannerReadMode('planificador_bodas_checklist_v1'),
+    readyWithoutApproval: canEnableDomainOnly({ readiness: ready, explicitlyApproved: false }),
+    approvedButNotReady: canEnableDomainOnly({ readiness: notReady, explicitlyApproved: true }),
+    readyAndApproved: canEnableDomainOnly({ readiness: ready, explicitlyApproved: true }),
+    activation: assertDomainOnlyActivation({
+      storageKey: 'planificador_bodas_checklist_v1',
+      readiness: ready,
+      explicitlyApproved: true
+    }),
+    blockedMessage,
+    constants: RETIREMENT_MODE
+  }).toEqual({
+    defaultMode: 'hybrid',
+    readyWithoutApproval: false,
+    approvedButNotReady: false,
+    readyAndApproved: true,
+    activation: {
+      storageKey: 'planificador_bodas_checklist_v1',
+      nextMode: 'domain-only'
+    },
+    blockedMessage: 'La clave todavía no está autorizada para retirar fallback legacy.',
+    constants: {
+      HYBRID: 'hybrid',
+      DOMAIN_ONLY: 'domain-only'
+    }
+  });
+});
