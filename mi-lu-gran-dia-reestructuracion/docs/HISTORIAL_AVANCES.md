@@ -1,3 +1,15 @@
+## 2026-10-07 — MGD-025 fase 6 compuerta de retirada implementada
+
+- Tras aprobar la Fase 5 se auditó la retirada gradual del legacy.
+- Se concluyó que todavía no corresponde eliminar cloudChunks físicamente.
+- Se creó `planner-domain-retirement.js`.
+- Todas las claves quedan en modo hybrid por defecto.
+- Domain-only exige dos condiciones: readiness positivo y aprobación explícita.
+- Ninguna clave fue activada en domain-only.
+- No se modificaron lecturas activas, Firestore ni datos reales.
+- Se agregó QA seguro para bloquear retiradas prematuras.
+- Estado: MGD-025 🟡 FASE 6 IMPLEMENTADA EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-025 fase 5 aprobada
 
 - QA seguro reportado en verde por el usuario.
