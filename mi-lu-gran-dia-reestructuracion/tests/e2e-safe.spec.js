@@ -1451,3 +1451,52 @@ test('MGD-035: ageProfile adapta sugerencias sin cambiar permisos, identidad ni 
     weddingHasQuestion: false
   });
 });
+
+
+test('MGD-036: preview progresiva adapta perfil y tema sin persistir automáticamente', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/onboarding-preview.js')).href;
+  const { themeSuggestions, buildOnboardingPreview } = await import(moduleUrl);
+
+  const childBirthday = buildOnboardingPreview({
+    eventType: 'birthday',
+    organizerRole: 'child',
+    age: 5
+  });
+
+  const corporate = buildOnboardingPreview({
+    eventType: 'corporate',
+    organizerRole: 'company',
+    age: 40
+  });
+
+  const manualTheme = buildOnboardingPreview({
+    eventType: 'birthday',
+    organizerRole: 'self',
+    age: 34,
+    themeId: 'minimal-black'
+  });
+
+  expect({
+    childEventType: childBirthday.eventType,
+    childAgeProfile: childBirthday.ageProfile.profileId,
+    childSuggestions: childBirthday.theme.suggestedThemeIds,
+    childPreviewOnly: childBirthday.previewOnly,
+    childPersist: childBirthday.persist,
+    corporateSuggestions: corporate.theme.suggestedThemeIds,
+    corporateAgeApplicable: corporate.ageProfile.applicable,
+    manualTheme: manualTheme.theme.selectedThemeId,
+    manualOverrideAllowed: manualTheme.theme.manualOverrideAllowed,
+    flowIndependent: themeSuggestions({ eventType: 'wedding', ageProfileId: null })
+  }).toEqual({
+    childEventType: 'birthday',
+    childAgeProfile: 'child',
+    childSuggestions: ['classic-elegant', 'one-piece-elegant'],
+    childPreviewOnly: true,
+    childPersist: false,
+    corporateSuggestions: ['minimal-black', 'classic-elegant'],
+    corporateAgeApplicable: false,
+    manualTheme: 'minimal-black',
+    manualOverrideAllowed: true,
+    flowIndependent: ['classic-elegant', 'one-piece-elegant', 'minimal-black']
+  });
+});
