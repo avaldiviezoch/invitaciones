@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-023 aprobado
+
+- QA seguro reportado en verde.
+- MGD-023 queda 🟢 QA SEGURO DEV APROBADO.
+- Queda validado el formato independiente de ID público y su contrato de resolución/revocación en memoria.
+- No hubo persistencia real ni cambios en producción.
+- Siguiente bloque: MGD-024 — URL personalizada.
+
 ## 2026-10-07 — MGD-023 implementado en DEV
 
 - Tras aprobar MGD-022 se implementó la capa segura de ID público de invitación.
