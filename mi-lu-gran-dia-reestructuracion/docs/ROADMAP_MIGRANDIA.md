@@ -721,7 +721,7 @@ Commits implementación inicial:
 # BLOQUE B — CUENTA, LOGIN Y BRANDING DE ACCESO
 
 ## MGD-009 — Registro por correo
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO / PENDIENTE PRUEBA REAL CONTROLADA
 Prioridad: ALTA
 
 Agregar:
@@ -765,14 +765,17 @@ Commits:
 - `bbb30270d79780fbf9b37a02348abd038b4478c4` — estilos;
 - `43af4370b2f566d7b4b47f70ef342e86b4e76f1f` — QA seguro.
 
+QA seguro DEV — 2026-10-06:
+- workflow `MGD-008 E2E seguro` reportado en verde por el usuario;
+- validado cambio de modo Ingresar/Crear cuenta, confirmación de contraseña y rechazo local sin crear usuarios reales.
+
 Pendiente:
-- ejecutar GitHub Actions;
 - prueba real de creación de cuenta solo con una cuenta de prueba autorizada, no con datos reales.
 
 ---
 
 ## MGD-010 — Recuperación de contraseña
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO / PENDIENTE PRUEBA REAL CONTROLADA
 Prioridad: ALTA
 
 Agregar:
@@ -791,8 +794,11 @@ Implementación DEV — 2026-10-06:
 - el botón se oculta durante el modo “Crear cuenta” para mantener el flujo claro;
 - QA seguro añadido con correo inválido, sin enviar ninguna solicitud real a Firebase.
 
+QA seguro DEV — 2026-10-06:
+- workflow `MGD-008 E2E seguro` reportado en verde por el usuario;
+- validado botón de recuperación, validación local de correo y mensaje de error sin enviar solicitudes reales.
+
 Pendiente:
-- ejecutar GitHub Actions;
 - prueba real del correo de recuperación solo con una cuenta de prueba autorizada.
 
 ---
