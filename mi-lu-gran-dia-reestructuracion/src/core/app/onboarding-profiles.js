@@ -5,6 +5,7 @@ function option(value, label) {
 }
 
 function onboardingProfile(eventType, roleOptions) {
+  const ageAware = ['birthday', 'quince', 'custom'].includes(eventType);
   return Object.freeze({
     profileId: eventType,
     engine: ONBOARDING_ENGINE_ID,
@@ -13,7 +14,16 @@ function onboardingProfile(eventType, roleOptions) {
       id: 'role',
       label: '¿Cuál es tu papel en este evento?',
       options: Object.freeze(roleOptions)
-    })
+    }),
+    ageQuestion: ageAware
+      ? Object.freeze({
+          id: 'age',
+          label: eventType === 'quince' ? '¿Qué edad cumplirá?' : '¿Qué edad tiene el/la homenajeado/a?',
+          mode: 'optional-exact-age',
+          min: 0,
+          max: 120
+        })
+      : null
   });
 }
 
