@@ -983,7 +983,7 @@ Este perfil no escala con usuarios y por ello sí puede ser configuración JS/JS
 # BLOQUE D — EVENTO VS TEMÁTICA
 
 ## MGD-015 — Separar tipo de evento de temática
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: ALTA
 
 Ejemplos:
@@ -1002,7 +1002,7 @@ No mezclar lógica funcional con tema visual.
 ---
 
 ## MGD-016 — Tema global y tokens visuales
-Estado: ⬜ PENDIENTE
+Estado: 🟡 EN DESARROLLO
 Prioridad: ALTA
 
 El tema será **global para toda la aplicación** y consumido por cada módulo.
