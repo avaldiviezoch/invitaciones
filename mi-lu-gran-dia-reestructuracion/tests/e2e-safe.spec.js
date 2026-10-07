@@ -936,3 +936,38 @@ test('MGD-025 fase 7: Checklist queda como piloto domain-only pero desactivado',
     blockedWithoutExplicitApproval: true
   });
 });
+
+
+test('MGD-025 fase 8: solicitud domain-only queda verificada pero no aplicada', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/services/planner-domain-activation.js')).href;
+  const { buildDomainOnlyActivationRequest } = await import(moduleUrl);
+
+  const request = buildDomainOnlyActivationRequest({
+    readiness: { safeToRetireLegacy: true },
+    explicitlyApproved: true
+  });
+
+  let blockedWithoutReadiness = false;
+  try {
+    buildDomainOnlyActivationRequest({
+      readiness: { safeToRetireLegacy: false },
+      explicitlyApproved: true
+    });
+  } catch {
+    blockedWithoutReadiness = true;
+  }
+
+  expect({
+    request,
+    blockedWithoutReadiness
+  }).toEqual({
+    request: {
+      storageKey: 'planificador_bodas_checklist_v1',
+      requestedMode: 'domain-only',
+      verifiedReady: true,
+      explicitlyApproved: true,
+      apply: false
+    },
+    blockedWithoutReadiness: true
+  });
+});
