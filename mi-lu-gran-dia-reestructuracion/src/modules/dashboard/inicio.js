@@ -1,6 +1,7 @@
 import { installObservability, reportError } from '../../services/observability.js?v=2';
 import { APP_VERSION_LABEL } from '../../core/app/version.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
+import { applyEventTheme } from '../../core/app/theme-tokens.js';
 import { auth } from '../../services/firebase-client.js';
 import { readPlannerStorageKeys, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
 import { GUEST_STORAGE_KEY, summarizeInvitadosValue } from '../invitados/invitados-data.js?v=10';
@@ -492,6 +493,7 @@ homeDashboard?.querySelector('[data-home-focus-action]')?.addEventListener('clic
 
 function applyWeddingContext(context) {
   weddingContext = context;
+  applyEventTheme(context?.themeId);
   const name = context?.name || 'Mi boda';
   const capabilities = weddingCapabilities(context?.role);
 
