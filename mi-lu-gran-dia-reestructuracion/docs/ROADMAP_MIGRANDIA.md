@@ -1419,7 +1419,7 @@ Implementación DEV segura:
 # BLOQUE I — DATOS Y ESCALABILIDAD
 
 ## MGD-025 — Evolución de `planner-cloud`
-Estado: 🟢 FASE 1-5 QA APROBADAS / RETIRADA LEGACY EN AUDITORÍA
+Estado: 🟡 FASE 1-5 QA APROBADAS / FASE 6 COMPUERTA DE RETIRADA IMPLEMENTADA EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA A MEDIANO PLAZO
 
 Problema:
@@ -1500,6 +1500,15 @@ Implementación autorizada — Fase 5 diagnóstico readiness:
 - devuelve detalle por clave y resumen agregado;
 - no escribe Firestore, no ejecuta migraciones y no elimina datos;
 - esta función permitirá validar una boda real antes de plantear retirada gradual de cualquier clave.
+
+Implementación autorizada — Fase 6 compuerta de retirada:
+- se creó `planner-domain-retirement.js`;
+- todas las claves permanecen en modo `hybrid` por defecto;
+- no existe ninguna clave activada en `domain-only`;
+- pasar una clave a `domain-only` exige simultáneamente readiness positivo y aprobación explícita;
+- readiness positivo sin aprobación no habilita retirada;
+- aprobación sin readiness positivo tampoco habilita retirada;
+- esta fase no modifica lecturas activas, no borra datos y no cambia Firestore.
 
 ---
 
