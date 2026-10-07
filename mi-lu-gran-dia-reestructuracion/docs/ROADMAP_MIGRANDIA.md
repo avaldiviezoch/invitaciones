@@ -1074,7 +1074,7 @@ La interfaz debe consultar el perfil del evento.
 # BLOQUE F — CHECKLIST POR EVENTO
 
 ## MGD-018 — Plantillas iniciales de Checklist
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: ALTA
 
 Boda:
