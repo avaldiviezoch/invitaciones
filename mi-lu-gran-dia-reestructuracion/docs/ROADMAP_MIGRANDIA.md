@@ -1,12 +1,28 @@
 # ROADMAP MIGRANDIA
 
-Última actualización: 2026-10-05
-Último commit DEV: 6365dbcfc921af0e8a9028b91e999284301f94d2
+Última actualización: 2026-10-07
+Último commit DEV registrado: 557de4dcb02010110520a189e76492aacb667e37
 Último commit PROD: a2be5675a22199e244ae3f981e1196250911516e
 Versión producción: pendiente de versionado formal
-Trabajo actual: MGD-003 — protección contra abuso de RSVP
-Próximo trabajo: completar capa Cloudflare PROD de MGD-003 y luego evaluar Enforcement de App Check
-Bloqueadores: separación DEV/PROD de servicios, protección anti-abuso RSVP, observabilidad y E2E
+Trabajo actual: MGD-011 — aislamiento estructural multi-evento, pendiente QA seguro y prueba real controlada
+Próximo trabajo: cerrar QA de MGD-011 y luego atacar bloqueadores de beta: MGD-002, MGD-003, MGD-008, MGD-010 y configuración externa restante de MGD-026
+Bloqueadores: MGD-002 y MGD-003 aún en QA; MGD-008 en desarrollo; MGD-010 pendiente prueba real controlada; MGD-026 pendiente configuración externa Google/Firebase; MGD-033 mantiene beta pública bloqueada por diseño
+
+## Estado operativo actual — 2026-10-07
+
+- MGD-004, MGD-005, MGD-006 y MGD-007: producción / QA aprobado según cada bloque.
+- MGD-009 y MGD-010: QA seguro DEV aprobado; falta prueba real controlada.
+- MGD-011: aislamiento estructural multi-evento implementado; pendiente QA seguro y prueba real controlada.
+- MGD-012 a MGD-024: capas multi-evento e invitaciones aprobadas en QA seguro DEV.
+- MGD-025: fases 1–8 aprobadas; activación real domain-only continúa bloqueada.
+- MGD-026: Fase 1 de branding cliente aprobada; falta configuración externa Google/Firebase.
+- MGD-027 a MGD-032: QA seguro DEV aprobado.
+- MGD-033: gate aprobado; beta pública sigue bloqueada hasta cerrar prerequisitos.
+- MGD-034, MGD-035 y MGD-036: QA seguro DEV aprobado.
+- No se habilitó beta pública.
+- No se realizaron cambios destructivos en Firebase, Firestore, Storage o Auth en esta ronda.
+
+---
 
 ## Regla maestra de mantenimiento
 
