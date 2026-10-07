@@ -1,3 +1,13 @@
+## 2026-10-07 — MGD-022 ajuste de QA por desfase de GitHub Pages
+
+- La primera corrida de QA de MGD-022 terminó roja: 78 pruebas pasaron y fallaron únicamente las tres variantes de MGD-022 (desktop, tablet y mobile).
+- El fallo fue `Failed to fetch dynamically imported module` para `public-invitation-url.js` desde GitHub Pages; el archivo sí estaba presente en `main`.
+- No falló ninguna aserción del contrato de URL y no se detectó regresión en MGD-009 a MGD-021.
+- Se corrigió únicamente el test MGD-022 para importar el módulo desde el checkout actual del workflow mediante `import.meta.url`, evitando depender de la latencia de despliegue de GitHub Pages.
+- El resto de E2E sigue ejecutándose contra la URL pública de DEV.
+- No se modificó lógica productiva, DNS, Cloudflare, Firebase, Firestore, Storage, Rules, Auth ni RSVP.
+- MGD-022 continúa 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA hasta una nueva corrida verde.
+
 ## 2026-10-06 — MGD-022 implementado en DEV
 
 - Tras aprobar MGD-021 se auditó el Worker de Cloudflare y la configuración Wrangler de DEV/PROD.
