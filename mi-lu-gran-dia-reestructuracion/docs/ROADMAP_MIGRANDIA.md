@@ -167,7 +167,7 @@ Pendiente:
 ---
 
 ## MGD-002 — Separación total DEV / PROD
-Estado: 🟡 CORRECCIÓN FINAL DE ENDPOINT PROD IMPLEMENTADA / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: CRÍTICA
 
 Objetivo:
