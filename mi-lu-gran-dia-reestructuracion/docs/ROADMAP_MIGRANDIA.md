@@ -1553,7 +1553,7 @@ Implementación DEV:
 ---
 
 ## MGD-028 — Límites de plataforma
-Estado: 🟡 GUARDRAILS V1 IMPLEMENTADOS EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: ALTA
 
 Definir límites técnicos:
