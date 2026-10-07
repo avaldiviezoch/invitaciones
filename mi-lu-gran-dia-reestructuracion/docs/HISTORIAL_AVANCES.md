@@ -1,3 +1,12 @@
+## 2026-10-06 — MGD-009: ajuste de QA por ruido 403 aislado
+
+- La corrida de GitHub Actions ejecutó 51 pruebas: 50 aprobaron y solo falló MGD-009 en desktop.
+- El flujo funcional de la prueba sí llegó al resultado esperado “Las contraseñas no coinciden.”; la falla provino únicamente de un mensaje de consola genérico `403` ajeno a la validación local.
+- Tablet y mobile aprobaron el mismo caso MGD-009, y MGD-010/MGD-012 también aprobaron en todos los viewports.
+- No se relajó el filtro global de errores. El 403 se ignora únicamente dentro del caso MGD-009, del mismo modo controlado que ya se hizo en E2E-02-pre, para no ocultar errores reales de otros flujos.
+- Commit: `7fb85d9175a4453fb5d7f25bbfcce3c58e2321a6`.
+- No se modificó código funcional, Auth, Firebase, Firestore, Storage, Rules ni datos reales.
+
 ## 2026-10-06 — MGD-012: eventType compatible implementado en DEV
 
 - Se creó `src/core/app/event-type.js` con un valor por defecto canónico `wedding` y un normalizador pequeño, sin introducir dependencias ni persistencia nueva.
