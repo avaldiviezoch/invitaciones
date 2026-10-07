@@ -1368,7 +1368,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-023 — ID público de invitación
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: CRÍTICA
 
 No exponer directamente `weddingId` / `eventId`.
