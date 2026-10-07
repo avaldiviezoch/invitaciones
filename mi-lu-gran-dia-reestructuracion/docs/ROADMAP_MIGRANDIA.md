@@ -1613,7 +1613,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-030 — Eliminar cuenta
-Estado: 🟡 CONTRATO SEGURO IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: ALTA
 
 Definir:
