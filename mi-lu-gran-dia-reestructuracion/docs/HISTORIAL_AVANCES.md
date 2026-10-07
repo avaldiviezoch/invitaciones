@@ -1,3 +1,12 @@
+## 2026-10-06 — Roadmap consolidado antes de continuar multi-evento
+
+- Se limpiaron duplicados de numeración que podían generar confusión en el seguimiento.
+- El ejemplo de formato que repetía MGD-019 se renombró como `MGD-XXX — Ejemplo de tarea`; el MGD-019 real permanece como “Catálogo universal + filtros por evento”.
+- Las segundas definiciones duplicadas de MGD-042 a MGD-048 se eliminaron del bloque repetido. La definición canónica queda en “BLOQUE L — CONFIANZA, GOBERNANZA Y PRODUCTO”.
+- El contenido único “Centro de ayuda y soporte”, que antes aparecía como un segundo MGD-048, se conserva como **MGD-049**.
+- No se modificó código funcional, Firebase, Firestore, Storage, Rules, Auth ni datos reales.
+- Próximo paso: auditoría MGD-012 y definición explícita del gate de pruebas controladas para MGD-009/010 y MGD-008.
+
 ## 2026-10-06 — MGD-011: auditoría de usuario único multi-evento
 
 - Se auditó la arquitectura actual sin modificar Firestore ni datos.
