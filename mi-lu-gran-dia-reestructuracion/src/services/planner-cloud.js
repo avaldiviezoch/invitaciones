@@ -8,6 +8,7 @@ import {
 import { auth, db } from './firebase-client.js';
 import { weddingCapabilities } from '../core/app/permissions.js';
 import { reportError } from './observability.js?v=2';
+import { writePlannerDomainShadowEntries } from './planner-domain-cloud.js?v=1';
 
 const CHUNK_SIZE = 180000;
 
@@ -137,6 +138,10 @@ async function writePlannerStorageKeys(context, entries) {
     reportError('firebase', error, { module: 'planner-cloud', operation: 'write-transaction' });
     throw error;
   }
+
+  // MGD-025 fase sombra: el backup legacy sigue siendo autoritativo.
+  // La copia por dominio es best-effort y nunca invalida una escritura legacy exitosa.
+  await writePlannerDomainShadowEntries(context, entries).catch(() => ({ attempted: 0, fulfilled: 0 }));
 }
 
 async function writePlannerStorageKey(context, key, value) {
