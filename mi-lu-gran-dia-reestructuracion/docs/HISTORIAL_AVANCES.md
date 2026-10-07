@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-003 QA técnico aprobado
+
+- QA seguro reportado en verde por el usuario.
+- MGD-003 queda 🟢 QA TÉCNICO DEV APROBADO.
+- Queda pendiente únicamente la validación productiva controlada antes de reactivar Turnstile en la invitación real.
+- No se modificó Firestore Rules, Auth, Storage ni datos reales.
+- Siguiente bloqueo: MGD-008.
+
 ## 2026-10-07 — MGD-003 QA técnico preparado
 
 - Se auditó la protección anti-abuso RSVP existente.
