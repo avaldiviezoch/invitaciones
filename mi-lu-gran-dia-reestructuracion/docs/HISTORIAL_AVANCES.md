@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-029 aprobado
+
+- QA seguro reportado en verde por el usuario.
+- MGD-029 queda 🟢 QA SEGURO DEV APROBADO.
+- El contrato de eliminación fuerte queda validado con execute: false.
+- No se borró ningún evento ni dato real.
+- Siguiente bloque: MGD-030 — eliminar cuenta.
+
 ## 2026-10-07 — MGD-029 contrato seguro implementado
 
 - Se auditó la estructura relacionada a un evento antes de cualquier borrado.
