@@ -1,3 +1,12 @@
+## 2026-10-06 — MGD-008: auditoría autenticada de Invitaciones, Distribución y Música
+
+- Se revisaron por separado los tres módulos que habían quedado fuera de la primera tanda autenticada.
+- Invitaciones queda aprobado técnicamente para el baseline de solo lectura: su montaje carga la vista, suscribe invitaciones y puede renderizar una URL segura en iframe; la escritura está asociada al submit de agregar invitación y no ocurre solo por abrir el módulo.
+- Distribución se mantiene fuera del baseline estricto. Además del autosave, el montaje incluye una reparación dirigida de `DISTRIBUTION_VIEW_STORAGE_KEY` que puede escribir automáticamente si detecta el estado legado Casa Acapulco con escala 1, X=0, Y=+450.
+- Música se mantiene fuera del baseline estricto porque `mountMusica()` puede persistir automáticamente el plan cuando `hydratePlaylistCovers()` detecta cambios de carátula.
+- No se modificó código funcional para “hacer pasar” las pruebas. La decisión es adaptar el alcance del QA a la conducta real del producto, no alterar persistencia ni datos.
+- No se tocaron Firebase, Firestore, Storage, Rules, Auth, RSVP ni datos reales.
+
 ## 2026-10-06 — MGD-008: preparación del baseline autenticado de solo lectura
 
 - Se auditó el montaje real de los módulos antes de automatizar una sesión autenticada.
