@@ -1,3 +1,16 @@
+## 2026-10-07 — MGD-030 contrato seguro implementado
+
+- Se auditó la relación entre cuenta, eventos propios, eventos compartidos y membresías.
+- Se creó `account-deletion-contract.js`.
+- Una cuenta con eventos propios queda bloqueada para eliminación hasta transferir o eliminar esos eventos.
+- En eventos compartidos solo se planifica retirar membresía e índice del usuario; el evento y su RSVP se preservan.
+- Se añadió confirmación fuerte exacta con email + uid.
+- Los archivos requieren inventario previo y Auth queda como último paso.
+- El plan queda con `execute: false`.
+- No se eliminó ninguna cuenta, evento, archivo ni usuario de Auth.
+- Se agregó QA seguro específico para MGD-030.
+- Estado: MGD-030 🟡 CONTRATO SEGURO IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-029 aprobado
 
 - QA seguro reportado en verde por el usuario.
