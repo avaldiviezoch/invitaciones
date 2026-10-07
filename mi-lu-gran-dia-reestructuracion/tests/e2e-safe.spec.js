@@ -131,3 +131,30 @@ test('MGD-010: recuperación exige correo válido sin enviar solicitud', async (
 
   expect(errors).toEqual([]);
 });
+
+
+test('MGD-012: eventType legado cae a wedding sin persistencia', async ({ page }) => {
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+
+  const result = await page.evaluate(async () => {
+    const moduleUrl = new URL('src/core/app/event-type.js', window.location.href).href;
+    const { DEFAULT_EVENT_TYPE, normalizeEventType } = await import(moduleUrl);
+    return {
+      defaultType: DEFAULT_EVENT_TYPE,
+      empty: normalizeEventType(),
+      blank: normalizeEventType('   '),
+      explicitWedding: normalizeEventType('WEDDING'),
+      futureType: normalizeEventType('birthday')
+    };
+  });
+
+  expect(result).toEqual({
+    defaultType: 'wedding',
+    empty: 'wedding',
+    blank: 'wedding',
+    explicitWedding: 'wedding',
+    futureType: 'birthday'
+  });
+  expect(errors).toEqual([]);
+});
