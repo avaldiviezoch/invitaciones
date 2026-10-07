@@ -1042,7 +1042,7 @@ la edad orienta presets y recomendaciones, pero nunca debe imponer estereotipos 
 # BLOQUE E — TERMINOLOGÍA DINÁMICA
 
 ## MGD-017 — Diccionario de lenguaje por evento
-Estado: 🟡 EN DESARROLLO
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: ALTA
 
 Evitar texto matrimonial hardcodeado.
@@ -2659,3 +2659,30 @@ Commits principales:
 Estado:
 - MGD-015: 🟢 QA SEGURO DEV APROBADO;
 - MGD-016: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
+### MGD-017 — implementación DEV del diccionario de lenguaje
+
+Implementado:
+- nuevo `src/core/app/event-terminology.js` como fuente única de terminología por tipo de evento;
+- cubre los 8 tipos base;
+- centraliza términos de evento, organizador/homenajeado, invitados/asistentes, mesa principal, lugar de ceremonia, nombre por defecto y textos de foco;
+- `eventProfile` consume ahora este diccionario en vez de mantener terminología duplicada;
+- el dashboard activo consulta el diccionario para textos sensibles al contexto: invitados/asistentes, pendientes del Checklist, mensaje de inicio y nombre por defecto;
+- se eliminó en móvil la construcción fija “La boda de …”; ahora se muestra el nombre real del evento;
+- no se cambia todavía el onboarding de creación, que continúa siendo boda hasta los MGD específicos de onboarding multi-evento;
+- no se modificó persistencia.
+
+QA seguro:
+- valida términos de boda, cumpleaños, 15 años, baby shower, graduación y corporativo;
+- valida fallback legacy a boda;
+- valida que `eventProfile` reutilice el mismo diccionario.
+
+Commits:
+- `8542192b4805646e63785e63b4cdb12772c06a6b` — diccionario;
+- `276e97d867d55ee3ffe8eb491f6d7d041db33040` — eventProfile consume diccionario;
+- `1d718222c3c03c6d0b00fa2412872db3dcce12b3` — dashboard dinámico;
+- `889aff58b380254c23e8e9326c3ce08998495fce` — QA seguro.
+
+Estado:
+- MGD-016: 🟢 QA SEGURO DEV APROBADO;
+- MGD-017: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
