@@ -564,3 +564,42 @@ test('MGD-022: contrato de URL pública usa dominio Migrandia y no GitHub', asyn
     customOrigin: 'https://invite.migrandiapp.com/i/ABC123'
   });
 });
+
+
+test('MGD-023: ID público independiente se valida y puede revocarse sin persistencia', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/public-invite-id.js')).href;
+  const {
+    createPublicInviteId,
+    isValidPublicInviteId,
+    createPublicInviteResolution,
+    revokePublicInviteResolution,
+    resolveActivePublicInvite
+  } = await import(moduleUrl);
+
+  const id = createPublicInviteId(Uint8Array.from([0, 1, 2, 3, 4, 5]));
+  const resolution = createPublicInviteResolution({
+    publicInviteId: id,
+    eventId: 'internal-event-123',
+    templateId: 'classic-elegant',
+    rsvpConfig: { enabled: true }
+  });
+  const revoked = revokePublicInviteResolution(resolution, '2026-10-07T04:00:00Z');
+
+  expect({
+    id,
+    valid: isValidPublicInviteId(id),
+    rejectsEventIdAsPublicId: isValidPublicInviteId('internal-event-123'),
+    activeEventId: resolveActivePublicInvite(resolution)?.eventId,
+    revokedResolvesNull: resolveActivePublicInvite(revoked) === null,
+    originalStillActive: resolution.revoked === false,
+    revokedFlag: revoked.revoked === true
+  }).toEqual({
+    id: 'MGD-ABCDEF',
+    valid: true,
+    rejectsEventIdAsPublicId: false,
+    activeEventId: 'internal-event-123',
+    revokedResolvesNull: true,
+    originalStillActive: true,
+    revokedFlag: true
+  });
+});
