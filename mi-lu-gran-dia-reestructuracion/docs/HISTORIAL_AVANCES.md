@@ -1,3 +1,13 @@
+## 2026-10-07 — MGD-025 fase 8 solicitud de activación implementada
+
+- Tras aprobar la Fase 7 se preparó la activación controlada del piloto Checklist.
+- Se creó `planner-domain-activation.js`.
+- La solicitud exige readiness positivo y aprobación explícita.
+- La salida es una orden verificable con `requestedMode: domain-only`, pero `apply: false`.
+- No se cambió la lectura de Checklist, no se modificó Firestore y no se retiró legacy.
+- Se agregó QA seguro para verificar que una solicitud válida siga sin aplicarse automáticamente.
+- Estado: MGD-025 🟡 FASE 8 IMPLEMENTADA EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-025 fase 7 aprobada
 
 - QA seguro reportado en verde por el usuario.
