@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-025 fase 1 sombra aprobada
+
+- QA seguro reportado en verde por el usuario.
+- La Fase 1 sombra de MGD-025 queda aprobada.
+- La escritura legacy continúa siendo autoritativa y la copia por dominio permanece best-effort.
+- No se retiraron datos legacy.
+- Se inicia Fase 2: lectura nueva por dominio con fallback automático a cloudSync/cloudChunks.
+
 ## 2026-10-07 — MGD-025 fase 1 sombra implementada
 
 - El usuario autorizó explícitamente continuar con cambios de persistencia de MGD-025 en DEV.
