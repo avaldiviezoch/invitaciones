@@ -1313,7 +1313,7 @@ Implementación DEV:
 # BLOQUE H — INVITACIONES
 
 ## MGD-021 — Separar motor de invitación de plantilla de boda
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: CRÍTICA
 
 Arquitectura:
