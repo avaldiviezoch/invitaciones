@@ -1246,7 +1246,7 @@ La adaptación visual durante onboarding es una **previsualización**. Al finali
 # BLOQUE G — DISTRIBUCIÓN MULTI-EVENTO
 
 ## MGD-019 — Catálogo universal + filtros por evento
-Estado: ⬜ PENDIENTE
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: ALTA
 
 Los 46 iconos actuales se mantienen.
@@ -1265,6 +1265,18 @@ Ejemplos:
 
 No eliminar objetos.
 Filtrar visibilidad según `eventProfile`.
+
+Implementación DEV:
+- se conserva el catálogo físico único de 38 objetos y las áreas dibujables existentes;
+- cada objeto puede declarar `eventTypes`; ausencia de esa propiedad significa objeto universal;
+- `bar` permanece universal;
+- `couple` se muestra solo en wedding;
+- `altar` se muestra en wedding/religious;
+- `photo` se muestra en wedding/quince/birthday/graduation;
+- `cake` se muestra en wedding/quince/birthday/baby_shower;
+- desktop y móvil consumen el mismo filtro;
+- el tipo se resuelve desde `eventProfile.distributionCatalog`;
+- el filtro solo afecta el catálogo de alta: no borra ni altera elementos ya guardados.
 
 ---
 
