@@ -1165,3 +1165,63 @@ test('MGD-030: eliminar cuenta bloquea owners y preserva eventos compartidos', a
     authPolicy: 'delete-only-after-data-plan-is-clear'
   });
 });
+
+
+test('MGD-031: backup formal incluye eventId y restore bloquea eventos distintos', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/services/event-backup-contract.js')).href;
+  const {
+    EVENT_BACKUP_SCHEMA_VERSION,
+    createEventBackupEnvelope,
+    validateEventBackupEnvelope,
+    buildEventRestorePlan
+  } = await import(moduleUrl);
+
+  const context = {
+    id: 'event-123',
+    name: 'Antonio & Lucero',
+    eventType: 'wedding',
+    themeId: 'one-piece-elegant'
+  };
+
+  const backup = createEventBackupEnvelope({
+    context,
+    payload: { localStorage: { sample: 'ok' } },
+    createdAt: '2026-10-07T05:00:00.000Z',
+    sourceVersion: 1
+  });
+
+  let wrongEventBlocked = false;
+  try {
+    buildEventRestorePlan({
+      backup,
+      targetContext: { id: 'event-999' }
+    });
+  } catch {
+    wrongEventBlocked = true;
+  }
+
+  const plan = buildEventRestorePlan({
+    backup,
+    targetContext: { id: 'event-123' }
+  });
+
+  expect({
+    schemaVersion: EVENT_BACKUP_SCHEMA_VERSION,
+    valid: validateEventBackupEnvelope(backup),
+    eventId: backup.eventId,
+    createdAt: backup.createdAt,
+    wrongEventBlocked,
+    restore: plan.restore,
+    overwriteAllowed: plan.overwriteAllowed,
+    sameEvent: plan.sourceEventId === plan.targetEventId
+  }).toEqual({
+    schemaVersion: 1,
+    valid: true,
+    eventId: 'event-123',
+    createdAt: '2026-10-07T05:00:00.000Z',
+    wrongEventBlocked: true,
+    restore: false,
+    overwriteAllowed: false,
+    sameEvent: true
+  });
+});
