@@ -846,7 +846,7 @@ async function mountDistribucion(context) {
     button.dataset.distributionAddElement = definition.type;
     button.setAttribute('aria-label', definition.label);
     button.title = definition.label;
-    const icon = createCatalogIcon(definition.type);
+    const icon = createCatalogIcon(definition.iconAsset || definition.type);
     const label = document.createElement('span');
     label.textContent = definition.label;
     button.append(icon, label);
@@ -1036,7 +1036,7 @@ async function mountDistribucion(context) {
             const button = document.createElement('button');
             button.type = 'button';
             button.setAttribute('aria-label', definition.label);
-            const icon = createCatalogIcon(definition.type);
+            const icon = createCatalogIcon(definition.iconAsset || definition.type);
             const label = document.createElement('span');
             label.textContent = definition.label;
             button.append(icon, label);
