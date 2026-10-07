@@ -1,3 +1,12 @@
+## 2026-10-07 — MGD-026 fase 1 aprobada
+
+- QA seguro reportado en verde por el usuario.
+- La Fase 1 de branding cliente queda 🟢 QA APROBADA.
+- El login propio usa identidad multi-evento y fuente central AUTH_BRANDING.
+- No quedan fallos del test MGD-026 en DEV.
+- MGD-026 completo sigue pendiente de configuración/validación externa en Google/Firebase Console: nombre público, logo, consentimiento, dominios verificados, soporte, políticas y flujo final.
+- No se modificó Auth ni OAuth desde código.
+
 ## 2026-10-07 — MGD-026 segunda corrección QA rojo
 
 - Segundo rerun: 141/144 pruebas en verde.
