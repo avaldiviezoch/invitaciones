@@ -10,6 +10,7 @@ import { weddingCapabilities } from '../core/app/permissions.js';
 import { reportError } from './observability.js?v=2';
 import { readPlannerDomainEntries, writePlannerDomainShadowEntries } from './planner-domain-cloud.js?v=2';
 import { assessPlannerDomainEntry, summarizePlannerDomainReadiness } from './planner-domain-readiness.js?v=1';
+import { assertPlannerStorageWriteAllowed } from './planner-domain-permissions.js?v=1';
 
 const CHUNK_SIZE = 180000;
 
@@ -170,6 +171,7 @@ async function writePlannerStorageKeys(context, entries) {
   if (!entries || typeof entries !== 'object' || Array.isArray(entries) || !Object.keys(entries).length) {
     throw new Error('No hay datos para guardar.');
   }
+  assertPlannerStorageWriteAllowed(context.role, Object.keys(entries));
 
   const metaRef = doc(db, 'weddings', context.id, 'cloudSync', 'main');
   const syncToken = createSyncToken();
