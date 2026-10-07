@@ -1042,7 +1042,7 @@ la edad orienta presets y recomendaciones, pero nunca debe imponer estereotipos 
 # BLOQUE E — TERMINOLOGÍA DINÁMICA
 
 ## MGD-017 — Diccionario de lenguaje por evento
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: ALTA
 
 Evitar texto matrimonial hardcodeado.
@@ -1074,7 +1074,7 @@ La interfaz debe consultar el perfil del evento.
 # BLOQUE F — CHECKLIST POR EVENTO
 
 ## MGD-018 — Plantillas iniciales de Checklist
-Estado: ⬜ PENDIENTE
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: ALTA
 
 Boda:
@@ -1109,6 +1109,13 @@ Cumpleaños:
 Regla:
 al crear el evento se parte de una plantilla.
 Después de creada, la lista pertenece al evento y no se pisa automáticamente.
+
+Implementación DEV:
+- plantillas centralizadas en `src/core/app/checklist-templates.js`;
+- los 8 tipos base resuelven una plantilla mediante `eventProfile.checklist`;
+- no se duplica el módulo Checklist;
+- no se aplican ni persisten automáticamente todavía: la creación efectiva queda para el flujo multi-evento/onboarding correspondiente;
+- una vez materializada para un evento, la lista será propiedad de ese evento y no se sobrescribirá por cambios futuros de plantilla.
 
 ---
 
