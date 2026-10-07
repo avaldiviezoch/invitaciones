@@ -27,7 +27,7 @@ function profile(type, overrides = {}) {
     terminology: overrides.terminology || getEventTerminology(type),
     modules: overrides.modules || CURRENT_MODULES,
     checklist: overrides.checklist || getChecklistTemplate(type),
-    distributionCatalog: overrides.distributionCatalog || { profileId: type },
+    distributionCatalog: overrides.distributionCatalog || { profileId: type, eventType: type },
     theme: overrides.theme || { defaultThemeId: null },
     onboarding: overrides.onboarding || { profileId: type },
     invitationCapabilities: overrides.invitationCapabilities || { enabled: true },
