@@ -1,3 +1,14 @@
+## 2026-10-07 — MGD-025 fase 7 piloto Checklist preparado
+
+- Tras aprobar la Fase 6 se auditó la primera candidata a domain-only.
+- Checklist fue seleccionada por usar una sola clave, lectura/escritura directa y no tener suscripción propia a planner-cloud.
+- Se creó `planner-domain-pilot.js`.
+- El piloto permanece desactivado (`enabled: false`).
+- Incluso con readiness positivo, la activación sigue bloqueada sin aprobación explícita.
+- No se cambió ninguna lectura ni se retiró fallback legacy.
+- Se agregó QA seguro para verificar que el piloto siga apagado.
+- Estado: MGD-025 🟡 FASE 7 PILOTO CHECKLIST PREPARADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-025 fase 6 aprobada
 
 - QA seguro reportado en verde por el usuario.
