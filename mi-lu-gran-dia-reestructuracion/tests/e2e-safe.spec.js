@@ -735,3 +735,82 @@ test('MGD-025 fase 3: fallback legacy autorrepara solo claves faltantes sin back
     nonBlocking: true
   });
 });
+
+
+test('MGD-025 fase 4: readiness impide retirar legacy si el dominio no está validado', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/services/planner-domain-readiness.js')).href;
+  const {
+    READINESS_STATUS,
+    assessPlannerDomainEntry,
+    summarizePlannerDomainReadiness
+  } = await import(moduleUrl);
+
+  const ready = assessPlannerDomainEntry({
+    legacyHasValue: true,
+    legacySyncToken: 'token-1',
+    domainEntry: { exists: true, syncToken: 'token-1' }
+  });
+  const missing = assessPlannerDomainEntry({
+    legacyHasValue: true,
+    legacySyncToken: 'token-1',
+    domainEntry: { exists: false, syncToken: '' }
+  });
+  const stale = assessPlannerDomainEntry({
+    legacyHasValue: true,
+    legacySyncToken: 'token-1',
+    domainEntry: { exists: true, syncToken: 'token-0' }
+  });
+  const legacyOnly = assessPlannerDomainEntry({
+    legacyHasValue: true,
+    legacySyncToken: '',
+    domainEntry: { exists: false, syncToken: '' }
+  });
+  const inaccessible = assessPlannerDomainEntry({
+    legacyHasValue: true,
+    legacySyncToken: 'token-1',
+    domainEntry: null,
+    domainError: true
+  });
+
+  const summary = summarizePlannerDomainReadiness({
+    ready,
+    missing,
+    stale,
+    legacyOnly,
+    inaccessible
+  });
+
+  expect({
+    statuses: [
+      ready.status,
+      missing.status,
+      stale.status,
+      legacyOnly.status,
+      inaccessible.status
+    ],
+    readyCanRetire: ready.safeToRetireLegacy,
+    missingCanRetire: missing.safeToRetireLegacy,
+    staleCanRetire: stale.safeToRetireLegacy,
+    legacyOnlyCanRetire: legacyOnly.safeToRetireLegacy,
+    inaccessibleCanRetire: inaccessible.safeToRetireLegacy,
+    summaryCanRetire: summary.safeToRetireLegacy,
+    readyCount: summary.ready,
+    constants: READINESS_STATUS
+  }).toEqual({
+    statuses: ['ready', 'missing', 'stale', 'legacy-only', 'inaccessible'],
+    readyCanRetire: true,
+    missingCanRetire: false,
+    staleCanRetire: false,
+    legacyOnlyCanRetire: false,
+    inaccessibleCanRetire: false,
+    summaryCanRetire: false,
+    readyCount: 1,
+    constants: {
+      READY: 'ready',
+      MISSING: 'missing',
+      STALE: 'stale',
+      LEGACY_ONLY: 'legacy-only',
+      INACCESSIBLE: 'inaccessible'
+    }
+  });
+});
