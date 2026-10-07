@@ -1,5 +1,6 @@
 import { EVENT_TYPE_BY_ID } from './event-types.js';
 import { getEventTerminology } from './event-terminology.js';
+import { getChecklistTemplate } from './checklist-templates.js';
 
 const CURRENT_MODULES = Object.freeze([
   'checklist',
@@ -25,7 +26,7 @@ function profile(type, overrides = {}) {
     type,
     terminology: overrides.terminology || getEventTerminology(type),
     modules: overrides.modules || CURRENT_MODULES,
-    checklist: overrides.checklist || { templateId: type },
+    checklist: overrides.checklist || getChecklistTemplate(type),
     distributionCatalog: overrides.distributionCatalog || { profileId: type },
     theme: overrides.theme || { defaultThemeId: null },
     onboarding: overrides.onboarding || { profileId: type },
