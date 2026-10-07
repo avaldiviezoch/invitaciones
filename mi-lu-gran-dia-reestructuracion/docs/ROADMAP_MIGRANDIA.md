@@ -924,7 +924,7 @@ Gate de datos:
 ---
 
 ## MGD-013 — Tipos iniciales
-Estado: 🟡 EN DESARROLLO
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: ALTA
 
 Primera versión acordada: **máximo 8 tipos base**, evitando fragmentar demasiado el producto.
@@ -2554,3 +2554,29 @@ Pendiente:
 - ejecutar GitHub Actions;
 - MGD-013 definirá el catálogo oficial de tipos;
 - persistir `eventType` en documentos nuevos queda para una fase autorizada posterior.
+
+### MGD-013 — implementación DEV del catálogo inicial
+
+Implementado:
+- catálogo canónico centralizado en `src/core/app/event-types.js`;
+- exactamente 8 tipos base: `wedding`, `birthday`, `quince`, `baby_shower`, `religious`, `graduation`, `corporate`, `custom`;
+- etiquetas visibles centralizadas;
+- helper `isKnownEventType()` para distinguir tipos admitidos;
+- helper `eventTypeLabel()` para resolver terminología base sin condicionales dispersos;
+- catálogo congelado con `Object.freeze` para evitar mutaciones accidentales en runtime;
+- no se modifica Firestore ni se persiste todavía `eventType`.
+
+QA seguro agregado:
+- verifica que existan exactamente 8 IDs;
+- comprueba unicidad;
+- valida reconocimiento case-insensitive;
+- rechaza tipos no definidos como `festival`;
+- valida la etiqueta compartida de `religious`.
+
+Commits:
+- `489f8ad55018faf1bdae426b63b675390a3c60d6` — catálogo canónico;
+- `6bc983bfb805bb973439a500d991cdcc470967b7` — QA seguro.
+
+Estado:
+- MGD-012: 🟢 QA SEGURO DEV APROBADO tras corrida de 51/51 reportada en verde;
+- MGD-013: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
