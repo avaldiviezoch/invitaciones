@@ -819,7 +819,7 @@ Pendiente:
 ---
 
 ## MGD-010 — Recuperación de contraseña
-Estado: 🟢 QA SEGURO DEV APROBADO / PENDIENTE PRUEBA REAL CONTROLADA
+Estado: 🟣 APROBADO DEV — PRUEBA REAL COMPLETADA
 Prioridad: ALTA
 
 Agregar:
@@ -859,8 +859,19 @@ QA seguro DEV — 2026-10-07:
 - validada la separación visual de login, registro y recuperación;
 - sin regresiones reportadas en la suite segura.
 
-Pendiente:
-- prueba real del correo de recuperación solo con una cuenta de prueba autorizada.
+Prueba real controlada — 2026-10-07:
+- solicitud de recuperación enviada desde DEV con cuenta QA autorizada;
+- Firebase devolvió el mensaje neutro esperado: “Si existe una cuenta con ese correo…”;
+- el correo de recuperación llegó correctamente;
+- el enlace permitió establecer una nueva contraseña;
+- el inicio de sesión posterior con la nueva contraseña fue exitoso;
+- no se tocaron Firestore, datos de boda, invitados, Storage ni Rules.
+
+Resultado:
+- **MGD-010 funcionalmente aprobado en DEV**.
+
+Pendiente no bloqueante de MGD-010:
+- ninguno. El branding visual del correo pertenece a MGD-026.
 
 ---
 
@@ -922,6 +933,13 @@ el flujo de Google puede mostrar referencias técnicas a Firebase / dominio poco
 
 Objetivo:
 el usuario debe percibir que está entrando a **Mi Gran Día / Migrandia**, no a “Firebase”.
+
+Hallazgo de prueba real — 2026-10-07:
+- el correo de recuperación funciona, pero llega con asunto/identidad técnica “migrandiaweb”;
+- contenido en inglés;
+- remitente técnico `noreply@migrandia.firebaseapp.com`;
+- Outlook lo clasificó inicialmente como correo no deseado;
+- este hallazgo no bloquea MGD-010, pero sí debe resolverse dentro de MGD-026 antes de marcha blanca.
 
 Revisar:
 - nombre público de la aplicación en Firebase / Google Cloud;
