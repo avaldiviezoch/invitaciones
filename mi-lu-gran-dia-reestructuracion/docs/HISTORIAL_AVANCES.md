@@ -1,3 +1,15 @@
+## 2026-10-07 — MGD-023 implementado en DEV
+
+- Tras aprobar MGD-022 se implementó la capa segura de ID público de invitación.
+- Se creó `src/core/app/public-invite-id.js` con formato independiente `MGD-XXXXXX`.
+- El identificador público no reutiliza ni acepta un `eventId` como ID público válido.
+- Se definió un contrato interno puro para resolver `publicInviteId → eventId → templateId → rsvpConfig`.
+- Se añadió revocación inmutable: un registro revocado ya no resuelve.
+- No se creó persistencia, colección, índice ni migración en Firestore.
+- No se modificaron Firebase, Storage, Rules, Auth, RSVP, DNS ni Cloudflare.
+- Se agregó QA seguro MGD-023.
+- Estado: MGD-023 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-022 aprobado
 
 - QA seguro reportado en verde.
