@@ -1,3 +1,16 @@
+## 2026-10-07 — MGD-035 ageProfile base implementado
+
+- Se creó `src/core/app/age-profile.js`.
+- Se definieron cinco etapas: child, teen, young-adult, adult y older-adult.
+- Birthday, quince y custom pueden usar ageProfile; corporate/wedding y otros no lo requieren por defecto.
+- Quince se clasifica como teen.
+- onboarding-profiles ahora expone pregunta de edad opcional solo cuando aplica.
+- ageProfile no altera permisos, identidad del usuario ni estructura de datos.
+- Las sugerencias de tema/checklist/invitación/actividades quedan en modo suggest-only con override manual.
+- No se modificó persistencia.
+- Se agregó QA seguro específico para MGD-035.
+- Estado: MGD-035 🟡 AGE PROFILE BASE IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-034 aprobado
 
 - QA seguro reportado en verde por el usuario.
