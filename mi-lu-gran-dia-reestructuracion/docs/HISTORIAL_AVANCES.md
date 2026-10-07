@@ -1,3 +1,15 @@
+## 2026-10-07 — MGD-025 fase 3 migración lazy implementada
+
+- Tras aprobar la Fase 2 se implementó migración progresiva por acceso.
+- Si una clave solicitada no puede leerse del dominio nuevo y debe venir del legacy, se prepara una copia de autorreparación.
+- Solo se autorreparan claves presentes en el backup, con syncToken válido y para usuarios con capacidad de edición.
+- La copia es asíncrona y best-effort; la lectura legacy responde sin esperar la migración.
+- No se recorre ninguna colección de bodas y no existe backfill masivo.
+- Los datos legacy sin syncToken permanecen en fallback hasta una escritura posterior o una fase controlada futura.
+- cloudSync/cloudChunks no se modificó ni retiró.
+- Se agregó QA seguro específico para la migración lazy.
+- Estado: MGD-025 🟡 FASE 3 IMPLEMENTADA EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-025 fase 2 aprobada
 
 - QA seguro reportado en verde por el usuario.
