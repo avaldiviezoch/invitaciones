@@ -877,6 +877,12 @@ Implementación DEV — Fase 1 branding cliente:
 - esta fase no modifica OAuth, Firebase Auth, dominios autorizados ni pantalla de consentimiento externa;
 - la parte Google/Firebase Console sigue requiriendo validación/configuración externa antes de cerrar MGD-026.
 
+Corrección QA rojo MGD-026:
+- el primer rerun dejó 141/144 pruebas en verde;
+- los 3 fallos fueron únicamente MGD-026 en desktop/tablet/mobile;
+- causa: `inicio.js` mantenía un segundo copy hardcodeado “Tu boda, siempre contigo” y sobrescribía el HTML;
+- se eliminó esa segunda fuente y el login ahora consume `AUTH_BRANDING` directamente.
+
 Criterio de diseño:
 - “Mi Gran Día” debe presentarse como organizador de eventos especiales;
 - no usar mensajes que hagan pensar que la plataforma es exclusivamente de bodas;
