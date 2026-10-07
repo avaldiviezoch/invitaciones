@@ -804,7 +804,7 @@ Pendiente:
 ---
 
 ## MGD-011 — Usuario único multi-evento
-Estado: 🟡 AUDITORÍA / BASE EXISTENTE PARCIAL
+Estado: 🟡 AISLAMIENTO ESTRUCTURAL IMPLEMENTADO EN DEV / PENDIENTE QA Y PRUEBA REAL CONTROLADA
 Prioridad: CRÍTICA
 
 Se mantiene:
@@ -840,6 +840,15 @@ Decisión:
 - no reescribir ni migrar colecciones actuales;
 - reutilizar esta base para MGD-012 agregando la capa conceptual `eventType`;
 - mantener un único UID por persona y múltiples contextos/eventos asociados a ese UID.
+
+Implementación DEV MGD-011 — aislamiento estructural:
+- nuevo `src/core/app/event-context-isolation.js`;
+- un mismo UID puede resolver múltiples contextos con `eventId` distintos;
+- rutas de raíz, membresía, índice por usuario, planner legacy/nuevo y RSVP quedan derivadas por `eventId`;
+- eventId duplicados se consideran inválidos;
+- el contrato verifica que dos eventos nunca compartan eventRoot, userIndex ni plannerMeta;
+- no se escriben datos ni se crean cuentas/eventos de prueba;
+- el cierre total seguirá requiriendo una prueba real controlada con cuentas/eventos de prueba autorizados.
 
 ---
 
