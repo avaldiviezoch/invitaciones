@@ -1055,3 +1055,59 @@ test('MGD-028: límites técnicos V1 están centralizados sin enforcement destru
     payloadLimit: 750000
   });
 });
+
+
+test('MGD-029: eliminación de evento exige owner + confirmación fuerte y no ejecuta borrado', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/services/event-deletion-contract.js')).href;
+  const {
+    buildEventDeletionPhrase,
+    assertStrongEventDeletionConfirmation,
+    buildEventDeletionPlan
+  } = await import(moduleUrl);
+
+  const context = {
+    id: 'event-123',
+    name: 'Antonio & Lucero',
+    role: 'owner'
+  };
+  const phrase = buildEventDeletionPhrase(context);
+
+  let wrongPhraseBlocked = false;
+  let nonOwnerBlocked = false;
+  try {
+    assertStrongEventDeletionConfirmation(context, 'Antonio & Lucero');
+  } catch {
+    wrongPhraseBlocked = true;
+  }
+  try {
+    assertStrongEventDeletionConfirmation({ ...context, role: 'admin' }, phrase);
+  } catch {
+    nonOwnerBlocked = true;
+  }
+
+  const plan = buildEventDeletionPlan(context, phrase);
+
+  expect({
+    phrase,
+    wrongPhraseBlocked,
+    nonOwnerBlocked,
+    execute: plan.execute,
+    destructive: plan.destructive,
+    hasWeddingRoot: plan.resources.includes('weddings/event-123'),
+    hasMembers: plan.resources.includes('weddings/event-123/members/*'),
+    hasLegacy: plan.resources.includes('weddings/event-123/cloudChunks/*'),
+    hasDomainData: plan.resources.includes('weddings/event-123/domainData/*'),
+    hasRsvp: plan.resources.includes('publicRsvp/{token} + responses/*')
+  }).toEqual({
+    phrase: 'Antonio & Lucero :: event-123',
+    wrongPhraseBlocked: true,
+    nonOwnerBlocked: true,
+    execute: false,
+    destructive: true,
+    hasWeddingRoot: true,
+    hasMembers: true,
+    hasLegacy: true,
+    hasDomainData: true,
+    hasRsvp: true
+  });
+});
