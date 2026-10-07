@@ -302,3 +302,41 @@ test('MGD-016: tema global aplica tokens visuales sin persistencia', async ({ pa
   });
   expect(errors).toEqual([]);
 });
+
+
+test('MGD-017: diccionario de lenguaje cambia términos sin cambiar lógica', async ({ page }) => {
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+
+  const result = await page.evaluate(async () => {
+    const terminologyUrl = new URL('src/core/app/event-terminology.js', window.location.href).href;
+    const profileUrl = new URL('src/core/app/event-profile.js', window.location.href).href;
+    const { EVENT_TERMINOLOGY, getEventTerminology } = await import(terminologyUrl);
+    const { getEventProfile } = await import(profileUrl);
+
+    return {
+      count: Object.keys(EVENT_TERMINOLOGY).length,
+      weddingTable: getEventTerminology('wedding').primaryTable,
+      quinceHost: getEventTerminology('quince').host,
+      birthdayTable: getEventTerminology('birthday').primaryTable,
+      babyHost: getEventTerminology('baby_shower').host,
+      graduationHost: getEventTerminology('graduation').host,
+      corporateGuest: getEventTerminology('corporate').guest,
+      fallbackEvent: getEventTerminology('unknown').event,
+      profileUsesDictionary: getEventProfile('birthday').terminology.primaryTable
+    };
+  });
+
+  expect(result).toEqual({
+    count: 8,
+    weddingTable: 'Mesa de novios',
+    quinceHost: 'quinceañera/o',
+    birthdayTable: 'Mesa del homenajeado',
+    babyHost: 'futuros padres',
+    graduationHost: 'graduado/a',
+    corporateGuest: 'asistente',
+    fallbackEvent: 'boda',
+    profileUsesDictionary: 'Mesa del homenajeado'
+  });
+  expect(errors).toEqual([]);
+});
