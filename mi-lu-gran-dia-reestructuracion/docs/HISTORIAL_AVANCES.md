@@ -4,7 +4,8 @@
 - MGD-016 queda 🟢 QA SEGURO DEV APROBADO.
 - La implementación aprobada incluye tokens visuales globales, presets classic-elegant / one-piece-elegant / minimal-black, aplicación del tema desde el contexto activo y conexión progresiva de los 9 módulos actuales sin duplicar CSS por evento.
 - No se persistió themeId en Firestore y no se modificaron Firebase, Firestore, Storage, Rules, Auth ni datos reales.
-- Próximo bloque: MGD-017 — Diccionario de lenguaje por evento.
+- MGD-017 — Diccionario de lenguaje por evento ya está implementado en DEV y queda pendiente de QA seguro.
+- Próximo paso real: revisar el test de MGD-017 y ejecutar GitHub Actions; si sale verde, marcar MGD-017 como QA seguro aprobado y continuar con MGD-018.
 - Antes de continuar en un nuevo chat, revisar obligatoriamente:
   1. `docs/REGLAS_NO_NEGOCIABLES.md`;
   2. `docs/ROADMAP_MIGRANDIA.md`;
