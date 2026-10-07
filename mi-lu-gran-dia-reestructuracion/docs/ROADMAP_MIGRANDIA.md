@@ -1396,7 +1396,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-024 — URL personalizada
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: MEDIA
 
 Posible:
