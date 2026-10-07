@@ -2546,3 +2546,35 @@ Limitación operativa actual:
 - como el trabajo del usuario se realiza directamente en GitHub y no existe un entorno local con sesión iniciada, la suite autenticada no puede ejecutarse todavía sin entregar una sesión/credencial a GitHub Actions;
 - no se almacenará contraseña, token de Google ni estado autenticado en el repositorio ni en Actions sin autorización expresa;
 - por ello se continúa avanzando en auditoría y cobertura segura mientras E2E autenticado real queda preparado pero pendiente de mecanismo de sesión aprobado.
+
+
+### MGD-008B — mapa de dependencias y bloqueos reales
+
+Para no crear pruebas ficticias sobre funciones todavía inexistentes, los flujos avanzados quedan vinculados a sus tareas funcionales:
+
+| Flujo E2E futuro | Dependencia funcional | Estado actual |
+|---|---|---|
+| Usuario nuevo por correo | MGD-009 — Registro por correo | Bloqueado hasta implementación |
+| Recuperación de contraseña | MGD-010 | Bloqueado hasta implementación |
+| Usuario con varios eventos | MGD-011 | Bloqueado hasta implementación |
+| eventType / tipos de evento | MGD-012 a MGD-014 | Bloqueado hasta implementación |
+| Cambio entre eventos | MGD-011 + MGD-012 | Bloqueado hasta implementación |
+| Aislamiento entre eventos | MGD-011 + MGD-012 + persistencia por eventId | Bloqueado hasta implementación |
+| Roles Owner/Admin/Editor/Provider/Viewer completos | arquitectura de permisos + flujos de colaboración existentes/futuros | Parcial; no cerrar como E2E completo aún |
+| Invitación / aceptación de colaborador | flujo de colaboración real y cuenta de prueba separada | Requiere datos/cuentas de prueba autorizadas |
+| Persistencia con escritura controlada | E2E-17 | Bloqueado hasta autorizar dato/entorno de prueba |
+| Usuario nuevo + onboarding + crear evento | E2E-18 | Bloqueado hasta autorizar cuenta/entorno de prueba |
+| RSVP controlado | E2E-19 | Bloqueado hasta autorizar confirmación de prueba y limpieza |
+
+Decisión de QA:
+- no inventar mocks para declarar estos flujos aprobados;
+- no reutilizar la boda real como entorno destructivo;
+- no almacenar credenciales o sesiones reales en el repositorio;
+- cada flujo se activará en MGD-008 en cuanto su dependencia funcional esté disponible y exista una forma segura de probarla.
+
+Checkpoint actual:
+- baseline público E2E: 🟢 aprobado;
+- arranque Google Login sin completar Auth: 🟢 aprobado;
+- baseline autenticado de lectura: preparado, pendiente de mecanismo de sesión seguro;
+- módulos con riesgo de escritura automática (Distribución/Música): separados;
+- MGD-008 general permanece 🟡 EN DESARROLLO.
