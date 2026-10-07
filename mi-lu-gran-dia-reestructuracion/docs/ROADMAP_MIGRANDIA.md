@@ -1246,7 +1246,7 @@ La adaptación visual durante onboarding es una **previsualización**. Al finali
 # BLOQUE G — DISTRIBUCIÓN MULTI-EVENTO
 
 ## MGD-019 — Catálogo universal + filtros por evento
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: ALTA
 
 Los 46 iconos actuales se mantienen.
