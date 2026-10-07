@@ -1697,7 +1697,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-033 — Beta pública
-Estado: ⬜ PENDIENTE
+Estado: 🟡 GATE IMPLEMENTADO EN DEV / BETA BLOQUEADA POR PREREQUISITOS
 Prioridad: FUTURA
 
 Requisitos mínimos:
@@ -1712,6 +1712,14 @@ Requisitos mínimos:
 - no contaminación entre eventos;
 - backup probado;
 - QA móvil / desktop.
+
+Gate DEV de beta pública:
+- nuevo `src/core/app/public-beta-readiness.js`;
+- todos los requisitos deben estar cerrados simultáneamente;
+- con el estado actual la beta queda bloqueada por MGD-002, MGD-003, MGD-008, MGD-010 y MGD-026;
+- `publicBeta: false` mientras falte cualquiera;
+- incluso con todos cerrados, `autoPublish: false`;
+- no se habilita beta ni producción automáticamente.
 
 ---
 
