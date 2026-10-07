@@ -887,7 +887,7 @@ Validar en:
 # BLOQUE C — ARQUITECTURA MULTI-EVENTO
 
 ## MGD-012 — Concepto EVENTO sin romper `weddings`
-Estado: 🟡 AUDITORÍA / DISEÑO COMPATIBLE
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA
 
 No renombrar todavía `weddings` a `events`.
@@ -2528,3 +2528,29 @@ Momento de ejecución:
 7. solo entonces marcar MGD-009 y MGD-010 como cerrados funcionalmente.
 
 Hasta ese gate, ambos permanecen con QA seguro DEV aprobado pero no “cerrados” al 100 %.
+
+### MGD-012 — implementación DEV de compatibilidad eventType
+
+Implementado sin persistencia:
+- nuevo `src/core/app/event-type.js` con `DEFAULT_EVENT_TYPE = 'wedding'` y `normalizeEventType()`;
+- `wedding-context.js` ahora expone `eventType` en memoria para contextos existentes;
+- si Firestore no tiene `eventType`, el contexto devuelve `wedding`;
+- `createWedding()` y `acceptWeddingInvitation()` devuelven también `eventType` en el objeto de contexto, sin agregar todavía el campo al documento persistido;
+- no se renombraron colecciones, rutas, claves ni funciones legacy;
+- no se escribió ningún `eventType` nuevo en Firestore.
+
+QA seguro agregado:
+- prueba automática verifica fallback vacío → `wedding`;
+- normalización `WEDDING` → `wedding`;
+- preservación de un tipo futuro como `birthday`;
+- la prueba solo importa el módulo puro y no toca datos.
+
+Commits:
+- `99873d0e06cde8658787fc507585ea3eeee3fd52` — normalizador eventType;
+- `9d9ca38bc856cca16dd6349dd9d324e64efa97f7` — integración de contexto en memoria;
+- `1bfaac952654bcd3ad3be7bf57cd316affbac31c` — QA seguro MGD-012.
+
+Pendiente:
+- ejecutar GitHub Actions;
+- MGD-013 definirá el catálogo oficial de tipos;
+- persistir `eventType` en documentos nuevos queda para una fase autorizada posterior.
