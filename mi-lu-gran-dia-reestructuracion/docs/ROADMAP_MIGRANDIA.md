@@ -844,7 +844,7 @@ Decisión:
 ---
 
 ## MGD-026 — Branding profesional del login Google / Firebase
-Estado: ⬜ PENDIENTE
+Estado: 🟡 FASE 1 BRANDING CLIENTE IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA ANTES DE MARCHA BLANCA
 
 Problema actual:
@@ -866,6 +866,16 @@ Revisar:
 - correo de soporte;
 - favicon / identidad;
 - flujo de retorno a `migrandiapp.com`.
+
+Implementación DEV — Fase 1 branding cliente:
+- nuevo `src/core/app/auth-branding.js` como fuente única de identidad pública;
+- login propio usa lenguaje multi-evento;
+- título actualizado a “Tu evento, siempre contigo”;
+- descripción pública actualizada para “eventos especiales”;
+- botón Google conserva texto neutral “Continuar con Google”;
+- la UI propia no muestra referencias a Firebase;
+- esta fase no modifica OAuth, Firebase Auth, dominios autorizados ni pantalla de consentimiento externa;
+- la parte Google/Firebase Console sigue requiriendo validación/configuración externa antes de cerrar MGD-026.
 
 Criterio de diseño:
 - “Mi Gran Día” debe presentarse como organizador de eventos especiales;
