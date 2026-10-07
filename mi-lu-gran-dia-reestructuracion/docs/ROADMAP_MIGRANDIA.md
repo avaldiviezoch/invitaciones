@@ -1120,7 +1120,7 @@ Implementación DEV:
 ---
 
 ## MGD-034 — Onboarding dinámico por tipo de evento
-Estado: ⬜ PENDIENTE
+Estado: 🟡 MOTOR ADAPTATIVO BASE IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA
 
 El onboarding actual está orientado a boda (Novia / Novio / Ayudo a organizar). Debe convertirse en un flujo adaptativo.
@@ -1183,6 +1183,15 @@ Otro:
 
 Regla:
 no crear ocho onboardings independientes. Se mantiene un solo motor de onboarding que lee preguntas y opciones desde `eventProfile.onboarding`.
+
+Implementación DEV base MGD-034:
+- nuevo `src/core/app/onboarding-profiles.js`;
+- un único engine: `adaptive-onboarding-v1`;
+- 8 perfiles de opciones de rol, uno por tipo de evento;
+- la primera decisión canónica es `eventType`;
+- `eventProfile.onboarding` ahora consume este contrato central;
+- todavía no se cambió la UI ni la persistencia del onboarding actual;
+- no se duplicó ningún flujo por evento.
 
 ---
 
