@@ -1,3 +1,12 @@
+## 2026-10-06 — MGD-021 aprobado / revisión de MGD-022
+
+- La corrida de GitHub Actions posterior a MGD-021 fue reportada en verde por el usuario.
+- MGD-021 queda 🟢 QA SEGURO DEV APROBADO.
+- Queda validada la separación arquitectónica entre motor funcional y plantillas visuales de invitación.
+- La biblioteca personal de invitaciones y RSVP productivo permanecen intactos.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth ni datos reales.
+- Siguiente bloque: MGD-022 — invitaciones bajo dominio Migrandia. Antes de implementar, se audita el enrutamiento actual y se separa preparación de código de cualquier cambio real de DNS/Cloudflare/publicación.
+
 ## 2026-10-06 — MGD-021 implementado en DEV
 
 - Tras aprobar MGD-020 se auditó el módulo Invitaciones y su servicio de biblioteca personal.
