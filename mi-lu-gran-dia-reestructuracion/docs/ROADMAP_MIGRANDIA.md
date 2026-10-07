@@ -1235,7 +1235,7 @@ Implementación DEV base MGD-035:
 ---
 
 ## MGD-036 — Onboarding con previsualización temática progresiva
-Estado: 🟡 PREVIEW PROGRESIVA BASE IMPLEMENTADA EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: ALTA
 
 Mientras el usuario completa el onboarding, la interfaz podrá ir adaptándose en tiempo real.
