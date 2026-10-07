@@ -1534,3 +1534,57 @@ test('MGD-026: branding de acceso es multi-evento y no expone Firebase en la UI 
 
   expect(errors).toEqual([]);
 });
+
+
+test('MGD-011: un UID admite múltiples eventos con rutas aisladas por eventId', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/event-context-isolation.js')).href;
+  const {
+    eventScopedPaths,
+    assessMultiEventIsolation,
+    assertMultiEventIsolation
+  } = await import(moduleUrl);
+
+  const uid = 'user-1';
+  const contexts = [
+    { id: 'event-a', role: 'owner', ownerUid: uid, eventType: 'wedding' },
+    { id: 'event-b', role: 'owner', ownerUid: uid, eventType: 'birthday' },
+    { id: 'event-c', role: 'editor', ownerUid: 'user-2', eventType: 'baby_shower' }
+  ];
+
+  const assessment = assessMultiEventIsolation({ uid, contexts });
+  const eventA = eventScopedPaths(uid, 'event-a');
+  const eventB = eventScopedPaths(uid, 'event-b');
+
+  let duplicateBlocked = false;
+  try {
+    assertMultiEventIsolation({
+      uid,
+      contexts: [
+        { id: 'event-a', role: 'owner' },
+        { id: 'event-a', role: 'editor' }
+      ]
+    });
+  } catch {
+    duplicateBlocked = true;
+  }
+
+  expect({
+    eventCount: assessment.eventCount,
+    uniqueEventIds: assessment.uniqueEventIds,
+    isolatedEventRoots: assessment.isolatedEventRoots,
+    isolatedUserIndexes: assessment.isolatedUserIndexes,
+    distinctRoots: eventA.eventRoot !== eventB.eventRoot,
+    distinctIndexes: eventA.userIndex !== eventB.userIndex,
+    distinctPlanner: eventA.plannerMeta !== eventB.plannerMeta,
+    duplicateBlocked
+  }).toEqual({
+    eventCount: 3,
+    uniqueEventIds: true,
+    isolatedEventRoots: true,
+    isolatedUserIndexes: true,
+    distinctRoots: true,
+    distinctIndexes: true,
+    distinctPlanner: true,
+    duplicateBlocked: true
+  });
+});
