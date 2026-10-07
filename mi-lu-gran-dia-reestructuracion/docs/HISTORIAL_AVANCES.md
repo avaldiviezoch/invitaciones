@@ -1,3 +1,11 @@
+## 2026-10-06 — MGD-008B: mapa de dependencias y bloqueos reales
+
+- Se revisó el alcance restante de MGD-008 para separar pruebas ejecutables hoy de pruebas que dependen de funciones todavía no implementadas.
+- Usuario nuevo por correo depende de MGD-009; recuperación de contraseña de MGD-010; multi-evento/cambio de evento/aislamiento dependen de MGD-011 y MGD-012; eventType/tipos de evento dependen de MGD-012 a MGD-014.
+- Colaboración, roles completos, persistencia controlada, onboarding de cuenta nueva y RSVP requieren además cuentas/datos de prueba autorizados; no se ejecutarán sobre la boda real.
+- Se decidió no usar mocks para fingir aprobación de capacidades que aún no existen y no almacenar sesiones o credenciales reales en el repositorio.
+- Estado consolidado: baseline público 🟢; Google Login pre-auth 🟢; baseline autenticado de lectura preparado; Distribución/Música separados por riesgo de escritura; MGD-008 general 🟡.
+
 ## 2026-10-06 — MGD-008: baseline autenticado ampliado a Invitaciones
 
 - Tras la auditoría individual, Invitaciones se añadió a la suite autenticada de solo lectura.
