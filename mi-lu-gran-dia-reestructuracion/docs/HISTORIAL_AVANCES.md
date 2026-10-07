@@ -1,3 +1,14 @@
+## 2026-10-06 — MGD-022 implementado en DEV
+
+- Tras aprobar MGD-021 se auditó el Worker de Cloudflare y la configuración Wrangler de DEV/PROD.
+- MGD-022 se implementó únicamente como contrato de URL pública en código, sin tocar infraestructura real.
+- Se creó `src/core/app/public-invitation-url.js` con origen canónico `https://migrandiapp.com` y ruta `/i/{publicInviteId}`.
+- El helper permite una futura evolución a `invite.migrandiapp.com` sin acoplar la lógica de negocio.
+- Las URLs públicas de GitHub no se consideran válidas.
+- No se modificaron DNS, Cloudflare routes, Worker productivo, Firebase, Firestore, Storage, Rules, Auth ni RSVP.
+- La resolución real del identificador público queda para MGD-023.
+- Estado: MGD-022 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-06 — MGD-021 aprobado / revisión de MGD-022
 
 - La corrida de GitHub Actions posterior a MGD-021 fue reportada en verde por el usuario.
