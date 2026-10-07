@@ -1,3 +1,15 @@
+## 2026-10-07 — MGD-024 implementado en DEV
+
+- Tras aprobar MGD-023 se implementó la capa segura de URL personalizada.
+- Se creó `src/core/app/custom-invite-slug.js`.
+- El alias legible se normaliza y valida de forma central.
+- El alias no conoce ni expone `eventId`; resuelve únicamente al `publicInviteId` seguro.
+- Se añadió revocación en memoria.
+- No se implementó persistencia, reserva de alias, unicidad en Firestore ni routing real del dominio.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth, RSVP, DNS ni Cloudflare.
+- Se agregó QA seguro MGD-024.
+- Estado: MGD-024 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-023 aprobado
 
 - QA seguro reportado en verde.
