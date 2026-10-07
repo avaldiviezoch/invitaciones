@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-025 fase 5 aprobada
+
+- QA seguro reportado en verde por el usuario.
+- La Fase 5 de diagnóstico readiness queda aprobada.
+- Ya existe una función de inspección por boda/clave antes de retirar fallback legacy.
+- cloudSync/cloudChunks continúa intacto.
+- Siguiente paso: auditar condiciones mínimas para retirada gradual por clave sin riesgo de pérdida de datos.
+
 ## 2026-10-07 — MGD-025 fase 5 diagnóstico readiness implementada
 
 - Tras aprobar la Fase 4 se añadió un diagnóstico real por boda y clave.
