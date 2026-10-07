@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-025 fase 6 aprobada
+
+- QA seguro reportado en verde por el usuario.
+- La Fase 6 de compuerta de retirada queda aprobada.
+- Todas las claves permanecen en modo hybrid por defecto.
+- Ninguna clave fue activada en domain-only.
+- El siguiente paso requiere auditar qué clave podría ser la primera candidata sin riesgo.
+
 ## 2026-10-07 — MGD-025 fase 6 compuerta de retirada implementada
 
 - Tras aprobar la Fase 5 se auditó la retirada gradual del legacy.
