@@ -1,3 +1,15 @@
+## 2026-10-07 — MGD-036 preview progresiva base implementada
+
+- Se creó `src/core/app/onboarding-preview.js`.
+- La capa resuelve el flujo eventType → organizerRole → ageProfile → themeId → eventProfile.
+- Genera sugerencias de tema y tokens visuales en memoria.
+- Birthday infantil/adolescente y corporate reciben presets sugeridos distintos sin imponer estilos.
+- El usuario conserva override manual de tema.
+- La salida queda con previewOnly: true y persist: false.
+- No se escribe themeId, eventType ni ageProfile durante la previsualización.
+- Se agregó QA seguro específico para MGD-036.
+- Estado: MGD-036 🟡 PREVIEW PROGRESIVA BASE IMPLEMENTADA EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-035 aprobado
 
 - QA seguro reportado en verde por el usuario sobre un main que ya incluía el test MGD-035.
