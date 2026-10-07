@@ -1,3 +1,15 @@
+## 2026-10-07 — MGD-026 fase 1 branding cliente implementado
+
+- Se auditó el login actual.
+- La UI propia ya usaba Migrandia/Mi Gran Día, pero el título de acceso seguía orientado solo a boda.
+- Se creó `auth-branding.js` como fuente central de identidad pública.
+- El login propio ahora usa lenguaje multi-evento: “Tu evento, siempre contigo”.
+- La descripción pública habla de eventos especiales.
+- La UI propia no muestra referencias a Firebase.
+- No se modificó Firebase Auth, OAuth, dominios autorizados ni pantalla de consentimiento externa.
+- Se agregó QA seguro específico para la Fase 1 de MGD-026.
+- Estado: MGD-026 🟡 FASE 1 BRANDING CLIENTE IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-036 aprobado
 
 - QA seguro reportado en verde por el usuario.
