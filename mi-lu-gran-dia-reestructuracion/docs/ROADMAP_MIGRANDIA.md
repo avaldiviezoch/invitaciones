@@ -4,9 +4,9 @@
 Último commit DEV registrado: 557de4dcb02010110520a189e76492aacb667e37
 Último commit PROD: a2be5675a22199e244ae3f981e1196250911516e
 Versión producción: pendiente de versionado formal
-Trabajo actual: MGD-011 — aislamiento estructural multi-evento, pendiente QA seguro y prueba real controlada
-Próximo trabajo: cerrar QA de MGD-011 y luego atacar bloqueadores de beta: MGD-002, MGD-003, MGD-008, MGD-010 y configuración externa restante de MGD-026
-Bloqueadores: MGD-002 y MGD-003 aún en QA; MGD-008 en desarrollo; MGD-010 pendiente prueba real controlada; MGD-026 pendiente configuración externa Google/Firebase; MGD-033 mantiene beta pública bloqueada por diseño
+Trabajo actual: cerrar bloqueadores restantes de beta y preparar inicio del desarrollo visual multi-evento
+Próximo trabajo: revisar MGD-010 y MGD-026 externo; después iniciar implementación visual del onboarding multi-evento
+Bloqueadores: MGD-010 pendiente prueba real controlada; MGD-026 pendiente configuración externa Google/Firebase; MGD-003 pendiente validación productiva controlada; MGD-008 pendiente únicamente flujos autenticados/escritura controlada; MGD-033 mantiene beta pública bloqueada por diseño
 
 ## Estado operativo actual — 2026-10-07
 
@@ -632,7 +632,7 @@ Release registrada:
 ---
 
 ## MGD-008 — Tests E2E reales
-Estado: 🟡 EN DESARROLLO
+Estado: 🟢 QA SEGURO DEV APROBADO / PENDIENTE FLUJOS AUTENTICADOS Y ESCRITURA CONTROLADA
 Prioridad: CRÍTICA
 
 Incorporar pruebas de navegador.
