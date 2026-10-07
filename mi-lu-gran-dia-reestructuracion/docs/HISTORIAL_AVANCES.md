@@ -1,3 +1,16 @@
+## 2026-10-07 — MGD-034 motor adaptativo base implementado
+
+- Se auditó el onboarding actual: el motor visual era único, pero las opciones de rol seguían hardcodeadas para boda.
+- eventProfile.onboarding solo contenía profileId.
+- Se creó `onboarding-profiles.js` con un único engine `adaptive-onboarding-v1`.
+- Se definieron opciones de organizador para los 8 tipos canónicos.
+- La primera decisión canónica queda definida como eventType.
+- eventProfile.onboarding ahora consume el contrato central.
+- No se modificó todavía la UI ni la persistencia del onboarding.
+- No se crearon ocho flujos independientes.
+- Se agregó QA seguro específico para MGD-034.
+- Estado: MGD-034 🟡 MOTOR ADAPTATIVO BASE IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-033 aprobado
 
 - QA seguro reportado en verde por el usuario.
