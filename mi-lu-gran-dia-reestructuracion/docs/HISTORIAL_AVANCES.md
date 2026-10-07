@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-025 fase 2 aprobada
+
+- QA seguro reportado en verde por el usuario.
+- La Fase 2 de lectura nueva con fallback legacy queda aprobada.
+- Se mantiene la validación por syncToken antes de aceptar datos del dominio nuevo.
+- cloudSync/cloudChunks continúa disponible como fallback.
+- Se inicia Fase 3: migración progresiva lazy por clave, sin backfill masivo ni eliminación legacy.
+
 ## 2026-10-07 — MGD-025 fase 2 lectura con fallback implementada
 
 - Tras aprobar la Fase 1 se implementó lectura nueva por dominio con fallback legacy.
