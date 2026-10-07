@@ -948,7 +948,7 @@ Regla:
 ---
 
 ## MGD-014 — Motor central `eventProfile`
-Estado: 🟡 EN DESARROLLO
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA
 
 No llenar el código de:
@@ -2580,3 +2580,29 @@ Commits:
 Estado:
 - MGD-012: 🟢 QA SEGURO DEV APROBADO tras corrida de 51/51 reportada en verde;
 - MGD-013: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
+### MGD-014 — implementación DEV del motor central eventProfile
+
+Implementado:
+- nuevo `src/core/app/event-profile.js`;
+- una única fuente de verdad para los 8 perfiles de evento;
+- forma estable por perfil: `type`, `terminology`, `modules`, `checklist`, `distributionCatalog`, `theme`, `onboarding`, `invitationCapabilities`, `audienceProfile`;
+- los 9 módulos actuales se declaran una sola vez en `CURRENT_MODULES`, sin duplicar listas por evento;
+- `getEventProfile()` resuelve perfiles conocidos y usa `wedding` como fallback compatible ante valores desconocidos;
+- se incluyen únicamente diferencias semánticas mínimas por evento; la personalización visual queda separada para MGD-015/016;
+- no se conectó todavía el perfil a persistencia ni se modificó Firestore.
+
+QA seguro:
+- valida los 8 perfiles;
+- valida la forma obligatoria;
+- valida que la lista de módulos actual se comparte;
+- valida terminología básica;
+- valida fallback compatible.
+
+Commits:
+- `ac315b7ab32b336431675b1adef2801017b7b6e7` — motor central;
+- `22b6cc79335141d8b08e34d1c5aa91c44e656fd3` — QA seguro.
+
+Estado:
+- MGD-013: 🟢 QA SEGURO DEV APROBADO, corrida reportada en verde;
+- MGD-014: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
