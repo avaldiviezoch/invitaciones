@@ -255,3 +255,50 @@ test('MGD-015: eventType y themeId permanecen independientes', async ({ page }) 
   });
   expect(errors).toEqual([]);
 });
+
+
+test('MGD-016: tema global aplica tokens visuales sin persistencia', async ({ page }) => {
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+
+  const result = await page.evaluate(async () => {
+    const moduleUrl = new URL('src/core/app/theme-tokens.js', window.location.href).href;
+    const { THEME_TOKENS, applyEventTheme, getThemeTokens } = await import(moduleUrl);
+    const probe = document.createElement('div');
+    document.body.appendChild(probe);
+
+    const applied = applyEventTheme('one-piece-elegant', probe);
+    const onePiece = {
+      primary: probe.style.getPropertyValue('--event-primary'),
+      background: probe.style.getPropertyValue('--event-background'),
+      theme: probe.dataset.eventTheme
+    };
+
+    const fallback = applyEventTheme('tema-inexistente', probe);
+    const classic = getThemeTokens('classic-elegant');
+    probe.remove();
+
+    return {
+      presetCount: Object.keys(THEME_TOKENS).length,
+      applied,
+      onePiece,
+      fallback,
+      classicPrimary: classic.primary,
+      classicBackground: classic.background
+    };
+  });
+
+  expect(result).toEqual({
+    presetCount: 3,
+    applied: 'one-piece-elegant',
+    onePiece: {
+      primary: '#7f8962',
+      background: '#f1e5da',
+      theme: 'one-piece-elegant'
+    },
+    fallback: 'classic-elegant',
+    classicPrimary: '#849168',
+    classicBackground: '#f6f3ef'
+  });
+  expect(errors).toEqual([]);
+});
