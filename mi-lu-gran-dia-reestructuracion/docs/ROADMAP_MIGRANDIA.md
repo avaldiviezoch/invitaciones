@@ -819,7 +819,7 @@ Pendiente:
 ---
 
 ## MGD-010 — Recuperación de contraseña
-Estado: 🟠 QA — CORRECCIÓN UX AUTH IMPLEMENTADA / PENDIENTE NUEVA CORRIDA + PRUEBA REAL CONTROLADA
+Estado: 🟢 QA SEGURO DEV APROBADO / PENDIENTE PRUEBA REAL CONTROLADA
 Prioridad: ALTA
 
 Agregar:
@@ -853,6 +853,11 @@ Corrección UX DEV — 2026-10-07:
 QA seguro DEV — 2026-10-06:
 - workflow `MGD-008 E2E seguro` reportado en verde por el usuario;
 - validado botón de recuperación, validación local de correo y mensaje de error sin enviar solicitudes reales.
+
+QA seguro DEV — 2026-10-07:
+- workflow `MGD-008 E2E seguro` reportado en verde por Antonio tras la corrección UX de Auth;
+- validada la separación visual de login, registro y recuperación;
+- sin regresiones reportadas en la suite segura.
 
 Pendiente:
 - prueba real del correo de recuperación solo con una cuenta de prueba autorizada.
