@@ -1419,7 +1419,7 @@ Implementación DEV segura:
 # BLOQUE I — DATOS Y ESCALABILIDAD
 
 ## MGD-025 — Evolución de `planner-cloud`
-Estado: 🟢 FASE 1-2 QA APROBADAS / FASE 3 EN PREPARACIÓN
+Estado: 🟡 FASE 1-2 QA APROBADAS / FASE 3 MIGRACIÓN LAZY IMPLEMENTADA EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA A MEDIANO PLAZO
 
 Problema:
@@ -1468,6 +1468,16 @@ Implementación autorizada — Fase 2 lectura nueva + fallback:
 - esto evita lecturas obsoletas durante la pequeña ventana entre la transacción legacy y el shadow write;
 - las suscripciones siguen observando metadata legacy, por lo que no se introduce un segundo sistema de listeners;
 - no se retiraron lecturas legacy ni datos existentes.
+
+Implementación autorizada — Fase 3 migración lazy:
+- cuando una lectura nueva no puede usarse y cae al legacy, solo las claves efectivamente solicitadas pueden autorrepararse;
+- la autorreparación requiere que exista un `syncToken` legacy válido;
+- solo se ejecuta para roles con capacidad de edición;
+- solo migra claves realmente presentes en el backup legacy;
+- la escritura al dominio nuevo es asíncrona y best-effort, por lo que no bloquea la lectura del usuario;
+- no existe barrido global, backfill masivo ni enumeración de bodas;
+- datos legacy previos a la existencia de `syncToken` continúan usando fallback hasta una escritura posterior o una futura migración controlada;
+- `cloudSync/cloudChunks` sigue intacto.
 
 ---
 
