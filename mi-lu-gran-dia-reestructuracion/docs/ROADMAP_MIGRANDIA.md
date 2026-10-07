@@ -924,7 +924,7 @@ Gate de datos:
 ---
 
 ## MGD-013 — Tipos iniciales
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: ALTA
 
 Primera versión acordada: **máximo 8 tipos base**, evitando fragmentar demasiado el producto.
@@ -948,7 +948,7 @@ Regla:
 ---
 
 ## MGD-014 — Motor central `eventProfile`
-Estado: ⬜ PENDIENTE
+Estado: 🟡 EN DESARROLLO
 Prioridad: CRÍTICA
 
 No llenar el código de:
