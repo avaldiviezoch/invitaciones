@@ -1529,7 +1529,7 @@ Implementación autorizada — Fase 8 solicitud de activación:
 ---
 
 ## MGD-027 — Permisos de Ideas
-Estado: ⬜ PENDIENTE
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: MEDIA
 
 UI:
@@ -1541,6 +1541,14 @@ Owner/Admin/Editor.
 No retirar Editor globalmente.
 
 Resolver cuando Ideas tenga persistencia propia.
+
+Implementación DEV:
+- la UI ya restringía edición a Owner/Admin;
+- se creó `planner-domain-permissions.js` para llevar esa misma política a la capa de aplicación;
+- la clave `planificador_bodas_ideas_v1` solo admite escritura para Owner/Admin;
+- Editor continúa habilitado globalmente para otros módulos;
+- `planner-cloud` valida permisos por clave antes de escribir;
+- no se modificaron Firestore Rules ni roles globales.
 
 ---
 
