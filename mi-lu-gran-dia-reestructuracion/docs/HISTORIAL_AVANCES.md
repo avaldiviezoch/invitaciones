@@ -1,3 +1,13 @@
+## 2026-10-06 — MGD-012: eventType compatible implementado en DEV
+
+- Se creó `src/core/app/event-type.js` con un valor por defecto canónico `wedding` y un normalizador pequeño, sin introducir dependencias ni persistencia nueva.
+- `wedding-context.js` expone ahora `eventType` en memoria para cada contexto. Los documentos históricos que no contienen el campo se interpretan como `wedding`.
+- `createWedding()` y `acceptWeddingInvitation()` devuelven `eventType` en el objeto de contexto, pero **no** lo escriben todavía en Firestore.
+- No se renombraron colecciones `weddings`, rutas, documentos ni APIs legacy.
+- Se añadió un test E2E seguro para comprobar fallback y normalización sin tocar Auth ni datos.
+- Commits: `99873d0e06cde8658787fc507585ea3eeee3fd52`, `9d9ca38bc856cca16dd6349dd9d324e64efa97f7`, `1bfaac952654bcd3ad3be7bf57cd316affbac31c`.
+- Estado: MGD-012 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-06 — MGD-012: auditoría eventType + gate de pruebas controladas
 
 - Se auditó MGD-012 sin modificar persistencia. La introducción de `eventType` puede comenzar en el adaptador de contexto: documentos históricos sin campo se interpretarán en memoria como `wedding`.
