@@ -1,3 +1,12 @@
+## 2026-10-07 — MGD-026 corrección QA rojo
+
+- QA reportó 141/144 en verde y 3 fallos únicamente en MGD-026.
+- Desktop, tablet y mobile fallaron por el mismo motivo: `inicio.js` reescribía el título del login con el copy legado “Tu boda, siempre contigo”.
+- El HTML ya tenía el copy nuevo; el problema era una segunda fuente hardcodeada.
+- Se eliminó esa duplicidad: `inicio.js` ahora consume `AUTH_BRANDING.loginTitle/registerTitle/loginIntro/registerIntro`.
+- No se tocó Firebase Auth, OAuth, credenciales ni lógica de autenticación.
+- Pendiente rerun de MGD-008 E2E seguro.
+
 ## 2026-10-07 — MGD-026 fase 1 branding cliente implementado
 
 - Se auditó el login actual.
