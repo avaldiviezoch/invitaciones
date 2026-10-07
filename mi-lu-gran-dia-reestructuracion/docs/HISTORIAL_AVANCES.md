@@ -1,3 +1,13 @@
+## 2026-10-07 — MGD-026 segunda corrección QA rojo
+
+- Segundo rerun: 141/144 pruebas en verde.
+- Los 3 fallos volvieron a ser únicamente MGD-026 en desktop/tablet/mobile.
+- El branding funcional ya estaba correcto; el fallo provenía del propio test.
+- Causa: el test intentaba usar `window.location.href` fuera de `page.evaluate`, en contexto Node de Playwright.
+- Se movió la construcción de la URL del módulo dentro del contexto navegador.
+- No se modificó el código de login, Firebase Auth ni OAuth.
+- Pendiente nuevo rerun de MGD-008 E2E seguro.
+
 ## 2026-10-07 — MGD-026 corrección QA rojo
 
 - QA reportó 141/144 en verde y 3 fallos únicamente en MGD-026.
