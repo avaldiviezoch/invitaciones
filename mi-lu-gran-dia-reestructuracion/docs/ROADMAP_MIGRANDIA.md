@@ -1419,7 +1419,7 @@ Implementación DEV segura:
 # BLOQUE I — DATOS Y ESCALABILIDAD
 
 ## MGD-025 — Evolución de `planner-cloud`
-Estado: 🟡 FASE 1 SOMBRA IMPLEMENTADA EN DEV / PENDIENTE QA
+Estado: 🟢 FASE 1 SOMBRA QA APROBADA / FASE 2 EN PREPARACIÓN
 Prioridad: CRÍTICA A MEDIANO PLAZO
 
 Problema:
