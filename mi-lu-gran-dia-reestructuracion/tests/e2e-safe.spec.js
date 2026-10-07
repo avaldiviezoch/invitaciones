@@ -1514,11 +1514,11 @@ test('MGD-026: branding de acceso es multi-evento y no expone Firebase en la UI 
   const bodyText = await page.locator('body').innerText();
   expect(bodyText.includes('Firebase')).toBe(false);
 
-  const moduleUrl = new URL('src/core/app/auth-branding.js', window.location.href).href;
-  const branding = await page.evaluate(async (url) => {
-    const { AUTH_BRANDING } = await import(url);
+  const branding = await page.evaluate(async () => {
+    const moduleUrl = new URL('src/core/app/auth-branding.js', window.location.href).href;
+    const { AUTH_BRANDING } = await import(moduleUrl);
     return AUTH_BRANDING;
-  }, moduleUrl);
+  });
 
   expect({
     productName: branding.productName,
