@@ -1,3 +1,12 @@
+## 2026-10-06 — MGD-018 aprobado / inicio de auditoría MGD-019
+
+- La corrida de GitHub Actions posterior a MGD-018 fue reportada en verde por el usuario.
+- MGD-018 queda 🟢 QA SEGURO DEV APROBADO.
+- Se mantiene un único módulo Checklist; las plantillas por tipo de evento siguen siendo configuración central y no se materializan automáticamente en Firebase.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth, RSVP ni datos reales.
+- Siguiente bloque: MGD-019 — catálogo universal de Distribución con filtros por evento.
+- Antes de implementar MGD-019 se auditará el módulo Distribución actual para reutilizar su motor, evitar duplicaciones y preservar compatibilidad con la boda existente.
+
 ## 2026-10-06 — MGD-017 aprobado / MGD-018 implementado en DEV
 
 - La corrida de GitHub Actions posterior a MGD-017 fue reportada en verde por el usuario.
