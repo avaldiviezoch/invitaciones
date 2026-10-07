@@ -478,3 +478,53 @@ test('MGD-020: objetos especializados reutilizan el mismo motor espacial por eve
   });
   expect(errors).toEqual([]);
 });
+
+
+test('MGD-021: motor de invitación y plantilla visual quedan separados', async ({ page }) => {
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+
+  const result = await page.evaluate(async () => {
+    const engineUrl = new URL('src/core/app/invitation-engine.js', window.location.href).href;
+    const templatesUrl = new URL('src/core/app/invitation-templates.js', window.location.href).href;
+    const profileUrl = new URL('src/core/app/event-profile.js', window.location.href).href;
+    const { INVITATION_ENGINE_FIELDS, invitationEngineModel, hasStableInvitationEngineShape } = await import(engineUrl);
+    const { INVITATION_TEMPLATES, getInvitationTemplate } = await import(templatesUrl);
+    const { getEventProfile } = await import(profileUrl);
+
+    const model = invitationEngineModel({
+      event: { type: 'birthday', name: 'Cumpleaños' },
+      date: '2027-01-01',
+      location: { name: 'Local' },
+      guest: { name: 'Invitado' },
+      companions: [{ name: 'Acompañante' }],
+      rsvp: { enabled: true },
+      questions: [{ id: 'meal' }],
+      music: { enabled: true },
+      status: 'draft'
+    });
+
+    return {
+      fieldCount: INVITATION_ENGINE_FIELDS.length,
+      stableShape: hasStableInvitationEngineShape(model),
+      modelFrozen: Object.isFrozen(model) && Object.isFrozen(model.companions),
+      templateCount: Object.keys(INVITATION_TEMPLATES).length,
+      templatePresentationOnly: Object.values(INVITATION_TEMPLATES).every((item) => item.presentationOnly === true),
+      fallbackTemplate: getInvitationTemplate('unknown').id,
+      profileEngine: getEventProfile('wedding').invitationCapabilities.engine,
+      birthdayEngine: getEventProfile('birthday').invitationCapabilities.engine
+    };
+  });
+
+  expect(result).toEqual({
+    fieldCount: 9,
+    stableShape: true,
+    modelFrozen: true,
+    templateCount: 3,
+    templatePresentationOnly: true,
+    fallbackTemplate: 'classic-elegant',
+    profileEngine: 'generic-v1',
+    birthdayEngine: 'generic-v1'
+  });
+  expect(errors).toEqual([]);
+});
