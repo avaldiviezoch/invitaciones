@@ -1,3 +1,13 @@
+## 2026-10-06 — MGD-008: baseline autenticado ampliado a Invitaciones
+
+- Tras la auditoría individual, Invitaciones se añadió a la suite autenticada de solo lectura.
+- La tanda preparada queda formada por siete módulos: Checklist, Presupuesto, Proveedores, Invitados, Cronograma, Ideas e Invitaciones.
+- Distribución y Música siguen fuera porque pueden escribir durante el montaje en determinadas condiciones.
+- Commit de suite: `1e1287f4ce59f5a391dc43bdb8307c25a96a2a88`.
+- Se deja documentada la limitación del flujo actual: el usuario trabaja directamente en GitHub y no dispone del repo local, por lo que no existe una sesión local reutilizable para Playwright.
+- No se subirán credenciales, cookies, tokens ni `storageState` a GitHub o GitHub Actions sin autorización expresa.
+- MGD-008 sigue 🟡 EN DESARROLLO; cobertura pública aprobada y cobertura autenticada preparada, pendiente de un mecanismo seguro de sesión.
+
 ## 2026-10-06 — MGD-008: auditoría autenticada de Invitaciones, Distribución y Música
 
 - Se revisaron por separado los tres módulos que habían quedado fuera de la primera tanda autenticada.
