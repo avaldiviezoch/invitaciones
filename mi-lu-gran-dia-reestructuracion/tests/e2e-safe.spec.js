@@ -192,3 +192,36 @@ test('MGD-013: catálogo inicial contiene exactamente 8 tipos canónicos', async
   });
   expect(errors).toEqual([]);
 });
+
+
+test('MGD-014: eventProfile central cubre 8 tipos con una forma estable', async ({ page }) => {
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+
+  const result = await page.evaluate(async () => {
+    const moduleUrl = new URL('src/core/app/event-profile.js', window.location.href).href;
+    const { CURRENT_MODULES, EVENT_PROFILES, getEventProfile } = await import(moduleUrl);
+    const ids = Object.keys(EVENT_PROFILES);
+    const requiredKeys = ['type', 'terminology', 'modules', 'checklist', 'distributionCatalog', 'theme', 'onboarding', 'invitationCapabilities', 'audienceProfile'];
+    return {
+      ids,
+      moduleCount: CURRENT_MODULES.length,
+      allHaveShape: ids.every((id) => requiredKeys.every((key) => Object.hasOwn(EVENT_PROFILES[id], key))),
+      weddingType: getEventProfile('wedding').type,
+      birthdayTerm: getEventProfile('birthday').terminology.event,
+      unknownFallback: getEventProfile('festival').type,
+      sameWeddingModules: getEventProfile('wedding').modules === CURRENT_MODULES
+    };
+  });
+
+  expect(result).toEqual({
+    ids: ['wedding', 'birthday', 'quince', 'baby_shower', 'religious', 'graduation', 'corporate', 'custom'],
+    moduleCount: 9,
+    allHaveShape: true,
+    weddingType: 'wedding',
+    birthdayTerm: 'cumpleaños',
+    unknownFallback: 'wedding',
+    sameWeddingModules: true
+  });
+  expect(errors).toEqual([]);
+});
