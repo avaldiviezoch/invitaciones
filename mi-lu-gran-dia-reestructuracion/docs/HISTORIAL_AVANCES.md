@@ -1,3 +1,20 @@
+## 2026-10-07 — MGD-008 prueba autenticada: hallazgos DEV/PROD y login
+
+- Se inició la preparación de la fase autenticada de MGD-008 usando Playwright.
+- En la PC local se instaló correctamente la dependencia del proyecto mediante `npm install` sin vulnerabilidades reportadas.
+- Se intentó capturar una sesión autenticada con `npm run auth:e2e:capture`.
+- Google rechazó el inicio de sesión desde el navegador automatizado con el mensaje de navegador/aplicación no segura.
+- Se intentó también el flujo con canal Chrome; Google continuó bloqueando el acceso por detección del entorno automatizado.
+- Se decidió no insistir con login Google automatizado para evitar bloqueos innecesarios.
+- Se revisó el formulario de correo/contraseña y se confirmó que en DEV existe lógica de registro por correo mediante `createUserWithEmailAndPassword` y cambio de modo de login/registro.
+- La interfaz DEV incluye el control `Crear cuenta`, aunque su presentación es discreta y puede pasar desapercibida.
+- Durante la revisión visual se detectó que una captura mostraba “Tu boda, siempre contigo” y no exhibía la opción de crear cuenta.
+- Se aclaró que esa pantalla correspondía a PRODUCCIÓN, no a DEV.
+- La versión DEV actual usa “Tu evento, siempre contigo” y contiene los cambios recientes de autenticación/branding.
+- Decisión de prueba: las validaciones autenticadas de MGD-008 se harán únicamente sobre DEV, no sobre producción.
+- Producción no debe usarse como entorno de prueba para capturar sesiones ni para validar cambios todavía no migrados.
+- Próximo paso: continuar MGD-008 autenticado en DEV con una estrategia que no dependa de login Google automatizado y sin realizar escrituras reales no autorizadas.
+
 ## 2026-10-07 — MGD-008 reclasificado a QA seguro aprobado
 
 - Tras nuevas corridas verdes del workflow E2E, la capa segura de MGD-008 queda 🟢 QA SEGURO DEV APROBADO.
