@@ -1,3 +1,16 @@
+## 2026-10-06 — MGD-013 aprobado / MGD-014 eventProfile implementado en DEV
+
+- La corrida posterior a MGD-013 fue reportada en verde por el usuario; MGD-013 queda 🟢 QA SEGURO DEV APROBADO.
+- Se implementó `src/core/app/event-profile.js` como motor central pequeño y estático para los ocho tipos de evento.
+- Cada perfil expone la misma forma: type, terminology, modules, checklist, distributionCatalog, theme, onboarding, invitationCapabilities y audienceProfile.
+- Los nueve módulos actuales se declaran una sola vez en `CURRENT_MODULES`; no se duplicó código por evento.
+- `getEventProfile()` centraliza la resolución del perfil y mantiene fallback a wedding para compatibilidad.
+- La capa visual/temática no se mezcló aquí: queda para MGD-015/016.
+- Se agregó QA seguro sin tocar persistencia.
+- Commits: motor `ac315b7ab32b336431675b1adef2801017b7b6e7`; test `22b6cc79335141d8b08e34d1c5aa91c44e656fd3`.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth ni datos reales.
+- Estado: MGD-014 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-06 — MGD-012 aprobado / MGD-013 implementado en DEV
 
 - La nueva corrida de GitHub Actions fue reportada completamente en verde por el usuario. MGD-012 queda 🟢 QA SEGURO DEV APROBADO.
