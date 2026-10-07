@@ -1,3 +1,12 @@
+## 2026-10-07 — Ajuste QA por ruido de red en E2E-04
+
+- La corrida de Fase 4 terminó con 98/99 pruebas aprobadas.
+- MGD-025 fases 1, 2, 3 y 4 pasaron en desktop, tablet y mobile.
+- El único fallo fue E2E-04 de Presupuesto en tablet por múltiples mensajes de consola `Failed to load resource: net::ERR_CONNECTION_RESET`.
+- Se clasificó ese mensaje como ruido transitorio de red conocido dentro del recolector de errores E2E.
+- No se modificó lógica funcional ni persistencia.
+- MGD-025 Fase 4 permanece pendiente de una nueva corrida verde completa.
+
 ## 2026-10-07 — MGD-025 fase 4 readiness implementada
 
 - Tras aprobar la Fase 3 se añadió una capa explícita de validación antes de cualquier retirada legacy.
