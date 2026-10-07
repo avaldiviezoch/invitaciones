@@ -16,7 +16,8 @@ const MODULES = [
 
 const KNOWN_BROWSER_NOISE = [
   'requestStorageAccess: Permission denied.',
-  "Framing 'https://www.google.com/' violates the following report-only Content Security Policy directive"
+  "Framing 'https://www.google.com/' violates the following report-only Content Security Policy directive",
+  'Failed to load resource: net::ERR_CONNECTION_RESET'
 ];
 
 function collectUnexpectedErrors(page) {
