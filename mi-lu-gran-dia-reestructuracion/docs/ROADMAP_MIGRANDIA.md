@@ -1442,6 +1442,13 @@ Usar transición controlada:
 - validación;
 - retirada gradual.
 
+Auditoría previa MGD-025:
+- `src/services/planner-cloud.js` usa Firestore directamente;
+- lectura actual: `weddings/{id}/cloudSync/main` + `cloudChunks/*`;
+- escritura actual: transacción que recompone el backup agregado y actualiza chunks/meta;
+- la evolución a dominios separados implicará nuevas rutas de datos y una migración progresiva;
+- no se iniciará ninguna nueva escritura, backfill ni cambio de esquema sin autorización explícita del usuario.
+
 ---
 
 ## MGD-027 — Permisos de Ideas
