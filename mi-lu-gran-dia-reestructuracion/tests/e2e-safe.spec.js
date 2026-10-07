@@ -1632,3 +1632,40 @@ test('MGD-002: runtime separa Worker DEV y API PROD sin mezclar hosting estátic
     else Object.defineProperty(globalThis, 'location', { configurable: true, value: originalLocation });
   }
 });
+
+
+test('MGD-003: infraestructura RSVP anti-abuso está configurada en DEV y PROD sin activar UX productiva', async () => {
+  const fs = await import('node:fs/promises');
+  const worker = await fs.readFile(path.resolve(process.cwd(), 'cloudflare/migrandia-worker.js'), 'utf8');
+  const dev = JSON.parse((await fs.readFile(path.resolve(process.cwd(), 'cloudflare/wrangler.jsonc'), 'utf8')).replace(/^\s*\/\/.*$/gm, ''));
+  const prod = JSON.parse((await fs.readFile(path.resolve(process.cwd(), 'cloudflare/wrangler.prod.jsonc'), 'utf8')).replace(/^\s*\/\/.*$/gm, ''));
+
+  const devRsvp = dev.ratelimits.find((item) => item.name === 'RSVP_RATE_LIMIT');
+  const prodRsvp = prod.ratelimits.find((item) => item.name === 'RSVP_RATE_LIMIT');
+
+  expect({
+    hasVerifyEndpoint: worker.includes('/api/rsvp/verify'),
+    hasTurnstileSecret: worker.includes('TURNSTILE_SECRET_KEY'),
+    hasSiteverify: worker.includes('https://challenges.cloudflare.com/turnstile/v0/siteverify'),
+    hasRsvpRateLimit: worker.includes('RSVP_RATE_LIMIT'),
+    hasNoStore: worker.includes('Cache-Control') && worker.includes('no-store'),
+    allowsMigrandia: worker.includes('https://migrandiapp.com') && worker.includes('https://www.migrandiapp.com'),
+    devWorker: dev.name,
+    prodWorker: prod.name,
+    devLimit: devRsvp?.simple,
+    prodLimit: prodRsvp?.simple,
+    separateNamespaces: devRsvp?.namespace_id !== prodRsvp?.namespace_id
+  }).toEqual({
+    hasVerifyEndpoint: true,
+    hasTurnstileSecret: true,
+    hasSiteverify: true,
+    hasRsvpRateLimit: true,
+    hasNoStore: true,
+    allowsMigrandia: true,
+    devWorker: 'migrandia-dev',
+    prodWorker: 'migrandia-api',
+    devLimit: { limit: 5, period: 60 },
+    prodLimit: { limit: 5, period: 60 },
+    separateNamespaces: true
+  });
+});
