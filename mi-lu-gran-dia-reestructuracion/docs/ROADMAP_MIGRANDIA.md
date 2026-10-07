@@ -1638,7 +1638,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-031 — Backup y restauración
-Estado: ⬜ PENDIENTE
+Estado: 🟡 CONTRATO FORMAL IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA
 
 Sistema formal de:
@@ -1649,6 +1649,15 @@ Sistema formal de:
 - restore.
 
 Nunca restaurar un evento sobre otro por accidente.
+
+Implementación DEV segura:
+- nuevo `src/services/event-backup-contract.js`;
+- formato formal `migrandia_event_backup`;
+- incluye `eventId`, versión de esquema, fecha, nombre, tipo de evento, tema y payload;
+- el restore valida que `backup.eventId === targetContext.id`;
+- si el backup pertenece a otro evento, la restauración se bloquea;
+- el plan de restore devuelve `restore: false` y `overwriteAllowed: false`;
+- todavía no se escribe ningún dato ni se ejecuta restauración real.
 
 ---
 
