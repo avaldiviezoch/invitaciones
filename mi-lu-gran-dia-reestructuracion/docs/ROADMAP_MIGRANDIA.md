@@ -1532,7 +1532,7 @@ Requisitos mínimos:
 Ejemplo:
 
 ```md
-## MGD-019 — Catálogo Distribución multi-evento
+## MGD-XXX — Ejemplo de tarea
 
 Estado: 🟡 EN DESARROLLO
 Prioridad: Alta
@@ -2020,182 +2020,13 @@ Este bloque se considera terminado cuando:
 - cada avance queda registrado aquí con DEV → QA → PROD, PR y commit.
 
 
-# BLOQUE L — CONFIANZA, ANALÍTICA Y CONFIGURACIÓN GLOBAL
+# NOTA DE CONSOLIDACIÓN DEL ROADMAP
 
-## MGD-042 — Legal y confianza del producto
-Estado: ⬜ PENDIENTE
-Prioridad: CRÍTICA ANTES DE BETA PÚBLICA
+Los MGD-042 a MGD-048 tienen una única definición canónica en el **BLOQUE L — CONFIANZA, GOBERNANZA Y PRODUCTO** ubicado anteriormente en este documento. Se eliminó la segunda definición duplicada para evitar estados contradictorios.
 
-Objetivo:
-Mi Gran Día debe transmitir confianza profesional desde el primer acceso y cumplir con el manejo responsable de datos personales.
+El contenido único de soporte que figuraba como un segundo MGD-048 se conserva con numeración propia:
 
-Incluir:
-- Términos y condiciones;
-- Política de privacidad;
-- Política de cookies cuando corresponda;
-- Información de contacto / soporte;
-- consentimiento cuando se recojan datos personales;
-- tratamiento de fotos, nombres, teléfonos, correos y restricciones alimentarias;
-- derechos de eliminación y actualización;
-- política de retención;
-- tratamiento de datos de invitados que no tienen cuenta;
-- revisión específica para formularios RSVP públicos.
-
-Regla:
-estos documentos deben ser consistentes con lo que realmente hace la plataforma. No publicar textos legales genéricos que no correspondan al comportamiento real del sistema.
-
----
-
-## MGD-043 — Analytics y métricas respetando privacidad
-Estado: ⬜ PENDIENTE
-Prioridad: ALTA
-
-Objetivo:
-entender cómo usan Migrandia los usuarios reales sin recopilar información personal innecesaria.
-
-Medir:
-- creación de eventos;
-- tipo de evento;
-- finalización de onboarding;
-- módulos abiertos;
-- abandono de flujo;
-- creación de invitaciones;
-- uso de RSVP;
-- uso de Distribución;
-- errores por módulo;
-- conversión de landing específica → onboarding → evento creado;
-- rendimiento y tiempos de carga.
-
-No registrar:
-- contraseñas;
-- textos privados completos;
-- contenido de RSVP;
-- nombres de invitados;
-- teléfonos;
-- correos;
-- notas personales.
-
-Diferenciar:
-- analytics de producto;
-- observabilidad técnica;
-- métricas de negocio.
-
----
-
-## MGD-044 — Matriz central de capacidades por rol y tipo de evento
-Estado: ⬜ PENDIENTE
-Prioridad: ALTA
-
-Objetivo:
-evitar permisos dispersos o inconsistentes conforme crezcan los eventos y módulos.
-
-Mantener roles base:
-- Owner;
-- Admin;
-- Editor;
-- Provider;
-- Viewer.
-
-Definir en una matriz central:
-- qué puede ver cada rol;
-- qué puede editar;
-- qué puede invitar;
-- qué puede eliminar;
-- qué puede exportar;
-- qué módulos puede utilizar;
-- qué acciones son exclusivas del propietario.
-
-El tipo de evento puede cambiar módulos disponibles, pero no debe crear modelos de permisos completamente distintos sin justificación.
-
----
-
-## MGD-045 — Estados del evento
-Estado: ⬜ PENDIENTE
-Prioridad: MEDIA
-
-Definir estados estándar del ciclo de vida:
-
-- draft;
-- active;
-- completed;
-- archived;
-- cancelled.
-
-Aplicaciones:
-- eventos futuros;
-- eventos ya realizados;
-- eventos cancelados;
-- eventos archivados;
-- recuperación y limpieza;
-- filtros en “Mis eventos”.
-
-Regla:
-archivar no equivale a eliminar.
-
----
-
-## MGD-046 — Configuración regional e internacionalización
-Estado: ⬜ PENDIENTE
-Prioridad: MEDIA
-
-Preparar la arquitectura para no quedar amarrados a Perú.
-
-Configuración por evento/usuario:
-- moneda;
-- zona horaria;
-- idioma;
-- formato de fecha;
-- formato de hora;
-- formato numérico;
-- país / región;
-- unidades cuando corresponda.
-
-Primera implementación:
-Perú / español / PEN.
-
-Arquitectura:
-debe permitir posteriormente otros países sin reescribir módulos.
-
----
-
-## MGD-047 — Motor de capacidades por tipo de evento
-Estado: ⬜ PENDIENTE
-Prioridad: CRÍTICA PARA MULTI-EVENTO
-
-No crear aplicaciones distintas por evento.
-
-Cada `eventProfile` debe declarar capacidades disponibles.
-
-Conceptualmente:
-
-```js
-capabilities: {
-  checklist: true,
-  budget: true,
-  guests: true,
-  tables: true,
-  distribution: true,
-  invitations: true,
-  music: true,
-  ideas: true,
-  timeline: true
-}
-```
-
-Cada evento podrá activar, ocultar o simplificar módulos.
-
-Ejemplos:
-- Boda: experiencia completa.
-- Cumpleaños: experiencia simplificada.
-- Evento corporativo: módulos y lenguaje adaptados.
-- Otro: configuración flexible.
-
-Regla:
-una capacidad desactivada no debe significar código duplicado; simplemente el motor no expone ese módulo para ese perfil.
-
----
-
-## MGD-048 — Centro de ayuda y soporte
+## MGD-049 — Centro de ayuda y soporte
 Estado: ⬜ PENDIENTE
 Prioridad: MEDIA
 
@@ -2213,7 +2044,6 @@ Objetivo:
 reducir dependencia de soporte manual por WhatsApp o mensajes directos.
 
 ---
-
 
 ### RSVP DEV direct clients con App Check — 2026-10-05
 - `invitacion_0_2/rsvp-nominal-widget.js` ahora inicializa App Check tanto en la app Firebase por defecto como en la app anónima `mgd-rsvp-anonymous`.
