@@ -1235,7 +1235,7 @@ Implementación DEV base MGD-035:
 ---
 
 ## MGD-036 — Onboarding con previsualización temática progresiva
-Estado: ⬜ PENDIENTE
+Estado: 🟡 PREVIEW PROGRESIVA BASE IMPLEMENTADA EN DEV / PENDIENTE QA
 Prioridad: ALTA
 
 Mientras el usuario completa el onboarding, la interfaz podrá ir adaptándose en tiempo real.
@@ -1259,6 +1259,16 @@ Otro ejemplo:
 5. Los módulos y checklist se adaptan.
 
 La adaptación visual durante onboarding es una **previsualización**. Al finalizar, se guarda la configuración elegida como parte del evento.
+
+Implementación DEV base MGD-036:
+- nuevo `src/core/app/onboarding-preview.js`;
+- flujo puro: `eventType → organizerRole → ageProfile → themeId → eventProfile`;
+- la preview resuelve eventProfile, ageProfile, sugerencias de tema y tokens;
+- cumpleaños infantil/adolescente recibe sugerencias adaptadas sin imponer estilo;
+- corporate prioriza temas sobrios/brand-neutral;
+- el usuario puede elegir manualmente otro tema;
+- `previewOnly: true` y `persist: false`;
+- todavía no se escribe `themeId`, `eventType` ni ageProfile durante la previsualización.
 
 ---
 
