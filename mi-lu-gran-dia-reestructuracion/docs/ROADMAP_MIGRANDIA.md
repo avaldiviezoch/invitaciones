@@ -1344,7 +1344,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-022 — Invitaciones bajo dominio Migrandia
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: CRÍTICA
 
 Nunca enviar al usuario final enlaces de GitHub.
