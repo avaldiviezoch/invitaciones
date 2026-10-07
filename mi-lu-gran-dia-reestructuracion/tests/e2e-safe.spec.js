@@ -528,3 +528,43 @@ test('MGD-021: motor de invitación y plantilla visual quedan separados', async 
   });
   expect(errors).toEqual([]);
 });
+
+
+test('MGD-022: contrato de URL pública usa dominio Migrandia y no GitHub', async ({ page }) => {
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+
+  const result = await page.evaluate(async () => {
+    const moduleUrl = new URL('src/core/app/public-invitation-url.js', window.location.href).href;
+    const {
+      PUBLIC_INVITATION_ORIGIN,
+      PUBLIC_INVITATION_PATH,
+      normalizePublicInviteId,
+      buildPublicInvitationUrl,
+      isMigrandiaPublicInvitationUrl
+    } = await import(moduleUrl);
+
+    const url = buildPublicInvitationUrl('MGD-X7K92P');
+
+    return {
+      origin: PUBLIC_INVITATION_ORIGIN,
+      path: PUBLIC_INVITATION_PATH,
+      normalized: normalizePublicInviteId('/MGD-X7K92P/'),
+      url,
+      valid: isMigrandiaPublicInvitationUrl(url),
+      githubRejected: isMigrandiaPublicInvitationUrl('https://avaldiviezoch.github.io/invitaciones/x'),
+      customOrigin: buildPublicInvitationUrl('ABC123', { origin: 'https://invite.migrandiapp.com/' })
+    };
+  });
+
+  expect(result).toEqual({
+    origin: 'https://migrandiapp.com',
+    path: '/i/',
+    normalized: 'MGD-X7K92P',
+    url: 'https://migrandiapp.com/i/MGD-X7K92P',
+    valid: true,
+    githubRejected: false,
+    customOrigin: 'https://invite.migrandiapp.com/i/ABC123'
+  });
+  expect(errors).toEqual([]);
+});
