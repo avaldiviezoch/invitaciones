@@ -1,3 +1,14 @@
+## 2026-10-06 — MGD-016 aprobado / MGD-017 implementado en DEV
+
+- La corrida posterior a MGD-016 fue reportada en verde por el usuario; MGD-016 queda 🟢 QA SEGURO DEV APROBADO.
+- Se creó `event-terminology.js` como diccionario central para los ocho tipos de evento.
+- `eventProfile` consume el diccionario, evitando una segunda fuente de términos.
+- El dashboard activo ya adapta términos de invitados/asistentes, mensajes de Checklist, mensaje inicial y nombre por defecto según `eventType`.
+- La etiqueta móvil dejó de forzar “La boda de …” y usa el nombre real del evento.
+- El onboarding/creación sigue siendo boda por compatibilidad hasta el bloque de onboarding multi-evento; no se adelantó esa migración.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth ni datos reales.
+- Estado: MGD-017 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-06 — MGD-015 aprobado / MGD-016 implementado en DEV
 
 - La corrida posterior a MGD-015 fue reportada en verde por el usuario; MGD-015 queda 🟢 QA SEGURO DEV APROBADO.
