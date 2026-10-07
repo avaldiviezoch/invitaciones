@@ -1,3 +1,13 @@
+## 2026-10-07 — MGD-026: dominio verificado y seguimiento de propagación Google
+
+- `migrandiapp.com` quedó verificado como propiedad en Google Search Console mediante el flujo automático con Cloudflare.
+- Google Auth Platform dejó de mostrar las observaciones de nombre de app y contenido insuficiente de privacidad; permanece únicamente el hallazgo histórico de propiedad del dominio.
+- La propia consola indica esperar hasta 24 horas para que sus sistemas actualicen la verificación.
+- **Revisión programada:** 08/10/2026.
+- **Segunda revisión si aún no actualiza:** 09/10/2026.
+- Próxima acción cuando Google reconozca el dominio: **“Corregí los problemas” → Continuar**.
+- No modificar DNS ni repetir la verificación mientras se espera la propagación, salvo nueva indicación de Google.
+
 ## 2026-10-07 — MGD-026: páginas legales y preparación de verificación Google
 
 - Firebase quedó con nombre del proyecto y nombre público “Mi Gran Día”; se preservaron IDs y alias internos.
