@@ -1313,7 +1313,7 @@ Implementación DEV:
 # BLOQUE H — INVITACIONES
 
 ## MGD-021 — Separar motor de invitación de plantilla de boda
-Estado: ⬜ PENDIENTE
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA
 
 Arquitectura:
@@ -1331,6 +1331,15 @@ El motor gestiona:
 - estado.
 
 Las plantillas definen apariencia.
+
+Implementación DEV segura:
+- nuevo `src/core/app/invitation-engine.js` con un modelo genérico de 9 campos funcionales;
+- nuevo `src/core/app/invitation-templates.js` con plantillas declarativas de presentación;
+- `eventProfile.invitationCapabilities` referencia un motor genérico común;
+- el motor no contiene CSS, HTML ni reglas visuales;
+- las plantillas no contienen lógica RSVP ni persistencia;
+- no se conectó todavía este motor con invitaciones reales, Firestore ni RSVP productivo;
+- la biblioteca personal de enlaces existente permanece intacta.
 
 ---
 
