@@ -1,3 +1,15 @@
+## 2026-10-07 — MGD-025 fase 4 readiness implementada
+
+- Tras aprobar la Fase 3 se añadió una capa explícita de validación antes de cualquier retirada legacy.
+- Se creó `planner-domain-readiness.js`.
+- Estados soportados: ready, missing, stale, legacy-only e inaccessible.
+- Solo ready permite marcar una clave como candidata a futura retirada del fallback legacy.
+- Cualquier token desfasado, documento faltante, legacy sin token o error de lectura bloquea la retirada.
+- Se añadió resumen agregado para evitar retirar legacy con validación parcial.
+- Esta fase no modifica datos, no ejecuta migraciones y no elimina cloudSync/cloudChunks.
+- Se agregó QA seguro para readiness.
+- Estado: MGD-025 🟡 FASE 4 IMPLEMENTADA EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-025 fase 3 aprobada
 
 - QA seguro reportado en verde por el usuario.
