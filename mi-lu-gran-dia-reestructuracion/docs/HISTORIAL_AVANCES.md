@@ -1,3 +1,13 @@
+## 2026-10-07 — MGD-002 aprobado
+
+- QA seguro reportado en verde por el usuario.
+- MGD-002 queda 🟢 QA SEGURO DEV APROBADO.
+- DEV resuelve servicios hacia migrandia-dev.
+- PROD resuelve servicios hacia migrandia-api.
+- El Worker estático wedding deja de ser usado como API desde runtime-environment.
+- No se modificó Firebase, Firestore, Auth ni datos reales.
+- Siguiente bloqueo: MGD-003 — protección contra abuso de RSVP.
+
 ## 2026-10-07 — MGD-002 corrección final de endpoint PROD
 
 - Se auditó la separación DEV/PROD antes de cerrar el bloqueo de beta.
