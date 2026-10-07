@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-025 fase 3 aprobada
+
+- QA seguro reportado en verde por el usuario.
+- La Fase 3 de migración lazy queda aprobada.
+- La autorreparación por clave permanece no bloqueante y limitada a accesos reales.
+- cloudSync/cloudChunks sigue disponible como fallback y no se retiraron datos legacy.
+- Se auditará la siguiente fase antes de reducir dependencia del almacenamiento antiguo.
+
 ## 2026-10-07 — MGD-025 fase 3 migración lazy implementada
 
 - Tras aprobar la Fase 2 se implementó migración progresiva por acceso.
