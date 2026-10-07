@@ -1479,6 +1479,11 @@ Implementación autorizada — Fase 3 migración lazy:
 - datos legacy previos a la existencia de `syncToken` continúan usando fallback hasta una escritura posterior o una futura migración controlada;
 - `cloudSync/cloudChunks` sigue intacto.
 
+Nota QA Fase 4:
+- primera corrida: 98/99; MGD-025 fase 4 pasó en todos los dispositivos;
+- único fallo ajeno al bloque: E2E-04 Presupuesto tablet por `net::ERR_CONNECTION_RESET` transitorio;
+- se ajustó únicamente el filtro de ruido de red del test.
+
 Implementación autorizada — Fase 4 readiness:
 - se creó `planner-domain-readiness.js`;
 - cada clave puede clasificarse como `ready`, `missing`, `stale`, `legacy-only` o `inaccessible`;
