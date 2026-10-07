@@ -426,3 +426,55 @@ test('MGD-019: catálogo universal filtra visibilidad por eventProfile sin elimi
   });
   expect(errors).toEqual([]);
 });
+
+
+test('MGD-020: objetos especializados reutilizan el mismo motor espacial por evento', async ({ page }) => {
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+
+  const result = await page.evaluate(async () => {
+    const catalogUrl = new URL('src/modules/distribucion/distribution-catalog.js', window.location.href).href;
+    const {
+      DISTRIBUTION_OBJECT_CATALOG,
+      SPECIALIZED_DISTRIBUTION_OBJECT_CATALOG,
+      getVisibleCatalogGroups,
+      getCatalogItem
+    } = await import(catalogUrl);
+
+    const visibleTypes = (eventType) => getVisibleCatalogGroups(eventType)
+      .flatMap((group) => group.items.map((item) => item.type));
+
+    return {
+      baseCount: Object.keys(DISTRIBUTION_OBJECT_CATALOG).length,
+      specializedCount: Object.keys(SPECIALIZED_DISTRIBUTION_OBJECT_CATALOG).length,
+      quinceMain: visibleTypes('quince').includes('quince_main_table'),
+      quinceChoreo: visibleTypes('quince').includes('quince_choreography'),
+      babyGifts: visibleTypes('baby_shower').includes('baby_gifts'),
+      babyGames: visibleTypes('baby_shower').includes('baby_games'),
+      graduationDiplomas: visibleTypes('graduation').includes('graduation_diplomas'),
+      graduationStage: visibleTypes('graduation').includes('graduation_stage'),
+      birthdayNoQuinceMain: !visibleTypes('birthday').includes('quince_main_table'),
+      weddingNoBabyGames: !visibleTypes('wedding').includes('baby_games'),
+      sameCatalogContract: ['quince_main_table','quince_choreography','baby_gifts','baby_games','graduation_diplomas','graduation_stage']
+        .every((type) => {
+          const item = getCatalogItem(type);
+          return Boolean(item?.dimensions?.widthM && item?.dimensions?.heightM && item?.capabilities && item?.spatialFamily);
+        })
+    };
+  });
+
+  expect(result).toEqual({
+    baseCount: 38,
+    specializedCount: 6,
+    quinceMain: true,
+    quinceChoreo: true,
+    babyGifts: true,
+    babyGames: true,
+    graduationDiplomas: true,
+    graduationStage: true,
+    birthdayNoQuinceMain: true,
+    weddingNoBabyGames: true,
+    sameCatalogContract: true
+  });
+  expect(errors).toEqual([]);
+});
