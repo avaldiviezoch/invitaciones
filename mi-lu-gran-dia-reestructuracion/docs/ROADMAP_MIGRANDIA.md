@@ -1419,7 +1419,7 @@ Implementación DEV segura:
 # BLOQUE I — DATOS Y ESCALABILIDAD
 
 ## MGD-025 — Evolución de `planner-cloud`
-Estado: ⬜ PENDIENTE
+Estado: 🟡 FASE 1 SOMBRA IMPLEMENTADA EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA A MEDIANO PLAZO
 
 Problema:
@@ -1448,6 +1448,16 @@ Auditoría previa MGD-025:
 - escritura actual: transacción que recompone el backup agregado y actualiza chunks/meta;
 - la evolución a dominios separados implicará nuevas rutas de datos y una migración progresiva;
 - no se iniciará ninguna nueva escritura, backfill ni cambio de esquema sin autorización explícita del usuario.
+
+Implementación autorizada — Fase 1 sombra:
+- se creó `planner-domain-map.js` con un mapa explícito de 10 claves legacy hacia dominios separados;
+- se creó `planner-domain-cloud.js` con ruta nueva `weddings/{id}/domainData/{domain}/entries/{storageKey}`;
+- el backup legacy `cloudSync/cloudChunks` continúa siendo la fuente autoritativa;
+- después de una escritura legacy exitosa, DEV intenta una copia sombra al dominio nuevo;
+- la copia sombra es best-effort: si la ruta nueva aún no está habilitada por Rules, la operación legacy no falla;
+- todavía no se cambió ninguna lectura del usuario al dominio nuevo;
+- no se ejecutó backfill masivo ni retirada de datos legacy;
+- esta fase permite validar permisos, forma y estabilidad antes de activar lectura nueva/fallback.
 
 ---
 
