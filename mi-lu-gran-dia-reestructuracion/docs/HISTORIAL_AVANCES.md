@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-028 aprobado
+
+- QA seguro reportado en verde por el usuario.
+- MGD-028 queda 🟢 QA SEGURO DEV APROBADO.
+- Los guardrails V1 quedan centralizados y validados sin enforcement destructivo.
+- No se tocaron Firestore Rules, Storage ni datos reales.
+- Siguiente bloque: MGD-029 — eliminar evento.
+
 ## 2026-10-07 — MGD-028 guardrails V1 implementados
 
 - Se auditó la app y no existía una fuente global de límites técnicos.
