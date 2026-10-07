@@ -6,7 +6,7 @@
 Versión producción: pendiente de versionado formal
 Trabajo actual: cerrar bloqueadores restantes de beta y preparar inicio del desarrollo visual multi-evento
 Próximo trabajo: revisar MGD-010 y MGD-026 externo; después iniciar implementación visual del onboarding multi-evento
-Bloqueadores: MGD-010 pendiente prueba real controlada; MGD-026 pendiente configuración externa Google/Firebase; MGD-003 pendiente validación productiva controlada; MGD-008 pendiente únicamente flujos autenticados/escritura controlada; MGD-033 mantiene beta pública bloqueada por diseño
+Bloqueadores: MGD-010 pendiente prueba real controlada; MGD-026 pendiente configuración externa Google/Firebase; MGD-003 pendiente validación productiva controlada; MGD-008 pendiente únicamente escritura controlada E2E-17 a E2E-19; MGD-033 mantiene beta pública bloqueada por diseño
 
 ## Estado operativo actual — 2026-10-07
 
@@ -632,7 +632,7 @@ Release registrada:
 ---
 
 ## MGD-008 — Tests E2E reales
-Estado: 🟢 QA SEGURO DEV APROBADO / PENDIENTE FLUJOS AUTENTICADOS Y ESCRITURA CONTROLADA
+Estado: 🟣 AUTH READONLY APROBADO DEV / PENDIENTE ESCRITURA CONTROLADA E2E-17 A E2E-19
 Prioridad: CRÍTICA
 
 Incorporar pruebas de navegador.

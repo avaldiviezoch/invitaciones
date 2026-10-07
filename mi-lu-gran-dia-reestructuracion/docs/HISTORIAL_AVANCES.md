@@ -1,3 +1,14 @@
+## 2026-10-07 — MGD-008 autenticado readonly: 8/8 verde
+
+- Se ejecutó la suite `test:e2e:auth-readonly` con una sesión QA real capturada localmente.
+- La suite validó sesión existente y contexto activo, más Checklist, Presupuesto, Proveedores, Invitados, Cronograma, Ideas e Invitaciones.
+- La primera versión del test fallaba por expectativas de visibilidad incorrectas; se corrigió el test para seguir el drawer y las rutas hash reales sin alterar la aplicación.
+- Se excluyeron únicamente dos mensajes ambientales conocidos de Chromium/GitHub Pages; cualquier otro error de consola o `pageerror` continúa siendo bloqueante.
+- Resultado final reportado por Antonio: **8 passed (36.6s)**.
+- PR DEV: #86.
+- Sin escrituras de negocio, sin cambios en Firebase, Firestore, Rules, Storage ni producción.
+- Quedan pendientes solo los casos con escritura controlada E2E-17, E2E-18 y E2E-19.
+
 ## 2026-10-07 — MGD-010 QA seguro aprobado
 
 - Antonio ejecutó el workflow `MGD-008 E2E seguro` sobre la rama de corrección de Auth y reportó resultado VERDE.

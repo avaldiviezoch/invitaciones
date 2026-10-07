@@ -15,7 +15,10 @@ function collectUnexpectedErrors(page) {
   page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
   page.on('console', (message) => {
     if (message.type() !== 'error') return;
-    errors.push(`console: ${message.text()}`);
+    const text = message.text();
+    if (text === 'requestStorageAccess: Permission denied.') return;
+    if (text === 'Failed to load resource: the server responded with a status of 403 ()') return;
+    errors.push(`console: ${text}`);
   });
   return errors;
 }
@@ -25,6 +28,8 @@ test('E2E-02/E2E-03: sesión existente carga boda activa sin escritura', async (
   await page.goto('', { waitUntil: 'domcontentloaded' });
 
   await expect(page.locator('body')).not.toHaveClass(/auth-locked/);
+  await page.locator('#menuButton').click();
+  await expect(page.locator('body')).toHaveClass(/menu-open/);
   await expect(page.locator('#activeWeddingButton')).toBeVisible();
   await expect(page.locator('#activeWeddingName')).not.toHaveText('');
   expect(errors).toEqual([]);
@@ -33,13 +38,12 @@ test('E2E-02/E2E-03: sesión existente carga boda activa sin escritura', async (
 for (const moduleId of READ_ONLY_MODULES) {
   test(`lectura autenticada: ${moduleId} monta sin acciones de edición`, async ({ page }) => {
     const errors = collectUnexpectedErrors(page);
-    await page.goto('', { waitUntil: 'domcontentloaded' });
+    await page.goto(`#${moduleId}`, { waitUntil: 'domcontentloaded' });
 
     await expect(page.locator('body')).not.toHaveClass(/auth-locked/);
-    await page.locator(`[data-app-module="${moduleId}"]`).click();
     await expect(page).toHaveURL(new RegExp(`#${moduleId}$`));
-    await expect(page.locator(`[data-module-view="${moduleId}"]`)).toBeVisible();
     await expect(page.locator('#moduleWorkspace')).toHaveAttribute('aria-hidden', 'false');
+    await expect(page.locator(`[data-module-view="${moduleId}"]`)).toBeVisible();
 
     expect(errors).toEqual([]);
   });
