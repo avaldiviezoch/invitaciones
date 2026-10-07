@@ -1,3 +1,12 @@
+## 2026-10-07 — MGD-035 aprobado
+
+- QA seguro reportado en verde por el usuario sobre un main que ya incluía el test MGD-035.
+- MGD-035 queda 🟢 QA SEGURO DEV APROBADO.
+- ageProfile mantiene adaptación en modo suggest-only.
+- No altera permisos, identidad ni estructura de datos.
+- No se modificó persistencia.
+- Siguiente bloque: MGD-036 — previsualización temática progresiva.
+
 ## 2026-10-07 — MGD-034 aprobado
 
 - QA seguro reportado en verde por el usuario.
