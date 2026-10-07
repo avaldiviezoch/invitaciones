@@ -804,7 +804,7 @@ Pendiente:
 ---
 
 ## MGD-011 — Usuario único multi-evento
-Estado: ⬜ PENDIENTE
+Estado: 🟡 AUDITORÍA / BASE EXISTENTE PARCIAL
 Prioridad: CRÍTICA
 
 Se mantiene:
@@ -819,6 +819,27 @@ Ejemplo:
 - Graduación
 
 No crear usuarios separados por evento.
+
+### Auditoría inicial — 2026-10-06
+
+Hallazgos:
+- la arquitectura actual ya soporta más de una boda por el mismo UID mediante `users/{uid}/weddings/{weddingId}`;
+- `listWeddingContexts()` lista todos los contextos disponibles para el usuario;
+- `loadActiveWeddingContext()` resuelve `activeWeddingId` y cae al primer contexto válido si no existe;
+- `selectActiveWedding()` cambia el contexto activo actualizando `users/{uid}.activeWeddingId`;
+- la UI ya incluye selector de bodas, creación de una nueva boda y cambio entre bodas;
+- al cambiar de boda, el dashboard invalida el cache de módulos mediante `moduleCacheWeddingId` y vuelve a montar el módulo activo;
+- colaboradores usan el mismo UID y obtienen contexto mediante membresía; no se crean usuarios separados por boda.
+
+Límite actual:
+- todo el modelo sigue nombrado y tipado como `wedding`; todavía no existe `eventType`, por lo que esto es multi-boda, no multi-evento completo;
+- MGD-011 funcionalmente ya tiene una base sólida, pero no debe declararse cerrado hasta incorporar MGD-012 y validar aislamiento real entre eventos;
+- las pruebas obligatorias de aislamiento requieren cuentas/eventos de prueba y no se ejecutarán sobre datos reales sin autorización.
+
+Decisión:
+- no reescribir ni migrar colecciones actuales;
+- reutilizar esta base para MGD-012 agregando la capa conceptual `eventType`;
+- mantener un único UID por persona y múltiples contextos/eventos asociados a ese UID.
 
 ---
 
