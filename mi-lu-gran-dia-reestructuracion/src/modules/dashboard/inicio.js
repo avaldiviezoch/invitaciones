@@ -1,4 +1,5 @@
 import { installObservability, reportError } from '../../services/observability.js?v=2';
+import { AUTH_BRANDING } from '../../core/app/auth-branding.js?v=1';
 import { APP_VERSION_LABEL } from '../../core/app/version.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { applyEventTheme } from '../../core/app/theme-tokens.js';
@@ -726,10 +727,10 @@ let authMode = 'login';
 function setAuthMode(mode = 'login') {
   authMode = mode === 'register' ? 'register' : 'login';
   const registering = authMode === 'register';
-  authTitle.textContent = registering ? 'Crea tu cuenta' : 'Tu boda, siempre contigo';
+  authTitle.textContent = registering ? AUTH_BRANDING.registerTitle : AUTH_BRANDING.loginTitle;
   authIntro.textContent = registering
-    ? 'Regístrate con tu correo para comenzar a organizar tu gran día.'
-    : 'Inicia sesión para acceder a Mi Gran Día.';
+    ? AUTH_BRANDING.registerIntro
+    : AUTH_BRANDING.loginIntro;
   authConfirmLabel.hidden = !registering;
   password.autocomplete = registering ? 'new-password' : 'current-password';
   passwordConfirm.value = '';
