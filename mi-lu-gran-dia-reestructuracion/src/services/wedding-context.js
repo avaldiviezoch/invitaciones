@@ -14,6 +14,7 @@ import {
 import { auth, db } from './firebase-client.js';
 import { normalizeWeddingRole, weddingCapabilities } from '../core/app/permissions.js';
 import { DEFAULT_EVENT_TYPE, normalizeEventType } from '../core/app/event-type.js';
+import { DEFAULT_THEME_ID, normalizeThemeId } from '../core/app/theme-id.js';
 
 async function readMembership(weddingId, uid) {
   if (!weddingId || !uid) return null;
@@ -36,7 +37,8 @@ async function readWeddingContextById(weddingId, uid, indexData = {}) {
     date: String(wedding.date || indexData.date || ''),
     role: normalizeWeddingRole(membership.role || indexData.role),
     ownerUid: String(wedding.ownerUid || indexData.ownerUid || ''),
-    eventType: normalizeEventType(wedding.eventType || indexData.eventType)
+    eventType: normalizeEventType(wedding.eventType || indexData.eventType),
+    themeId: normalizeThemeId(wedding.themeId || indexData.themeId)
   };
 }
 
@@ -127,7 +129,7 @@ async function createWedding({ name, date = '' } = {}) {
   batch.set(doc(db, 'users', user.uid, 'weddings', weddingId), { weddingId, name: cleanName, date: cleanDate, role: 'owner', ownerUid: user.uid, addedAt: serverTimestamp() });
   batch.set(doc(db, 'users', user.uid), { activeWeddingId: weddingId, lastSeenAt: serverTimestamp() }, { merge: true });
   await batch.commit();
-  return { id: weddingId, name: cleanName, date: cleanDate, role: 'owner', eventType: DEFAULT_EVENT_TYPE };
+  return { id: weddingId, name: cleanName, date: cleanDate, role: 'owner', eventType: DEFAULT_EVENT_TYPE, themeId: DEFAULT_THEME_ID };
 }
 
 async function listPendingInvitations() {
@@ -155,7 +157,7 @@ async function acceptWeddingInvitation(inviteId) {
   batch.set(inviteRef, { status: 'accepted', acceptedBy: user.uid, acceptedAt: serverTimestamp(), updatedAt: serverTimestamp() }, { merge: true });
   batch.set(doc(db, 'users', user.uid), { activeWeddingId: weddingId, lastSeenAt: serverTimestamp() }, { merge: true });
   await batch.commit();
-  return { id: weddingId, name: weddingName, role, eventType: normalizeEventType(invite.eventType) };
+  return { id: weddingId, name: weddingName, role, eventType: normalizeEventType(invite.eventType), themeId: normalizeThemeId(invite.themeId) };
 }
 
 function invitationId(weddingId, email) {
