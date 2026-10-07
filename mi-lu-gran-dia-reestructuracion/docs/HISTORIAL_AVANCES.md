@@ -1,3 +1,12 @@
+## 2026-10-06 — MGD-009 / MGD-010: QA seguro DEV aprobado
+
+- La corrida de GitHub Actions posterior a la implementación de registro por correo y recuperación de contraseña fue reportada en verde por el usuario.
+- MGD-009 queda aprobado en QA seguro de DEV para cambio de modo Ingresar/Crear cuenta, campos de confirmación y validaciones locales, sin crear usuarios reales durante la automatización.
+- MGD-010 queda aprobado en QA seguro de DEV para acceso a “Olvidé mi contraseña”, validación local de correo y mensajes neutros, sin enviar correos reales durante la automatización.
+- La prueba funcional real de ambos flujos sigue pendiente y deberá usar una cuenta de prueba autorizada: crear cuenta, cerrar sesión, iniciar sesión, solicitar recuperación y comprobar recepción del correo.
+- No se modificaron Firebase Rules, Firestore, Storage, RSVP ni datos reales.
+- Estado: MGD-009 y MGD-010 🟢 QA SEGURO DEV APROBADO / PENDIENTE PRUEBA REAL CONTROLADA.
+
 ## 2026-10-06 — MGD-009 / MGD-010: registro y recuperación por correo — implementación DEV
 
 - Con autorización expresa se implementaron los cambios funcionales de Firebase Authentication para registro por correo y recuperación de contraseña.
