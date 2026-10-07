@@ -1196,7 +1196,7 @@ Implementación DEV base MGD-034:
 ---
 
 ## MGD-035 — Edad / etapa de vida y adaptación de experiencia
-Estado: 🟡 AGE PROFILE BASE IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: ALTA
 
 Cuando el tipo de evento lo requiera, el onboarding preguntará edad exacta o rango etario del homenajeado.
