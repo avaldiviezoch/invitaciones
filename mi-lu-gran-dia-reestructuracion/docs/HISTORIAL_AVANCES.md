@@ -1,3 +1,11 @@
+## 2026-10-06 — MGD-019 aprobado / inicio de MGD-020
+
+- La corrida de GitHub Actions posterior a MGD-019 fue reportada en verde por el usuario.
+- MGD-019 queda 🟢 QA SEGURO DEV APROBADO.
+- Se mantiene un único catálogo y un único motor de Distribución; los filtros por evento solo afectan visibilidad de alta y no alteran elementos existentes.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth, RSVP ni datos reales.
+- Siguiente bloque: MGD-020 — objetos especializados por tipo de evento, reutilizando el mismo motor espacial.
+
 ## 2026-10-06 — MGD-019 implementado en DEV
 
 - Tras aprobar MGD-018 se auditó el motor actual de Distribución y se confirmó que ya existe un catálogo central único.
