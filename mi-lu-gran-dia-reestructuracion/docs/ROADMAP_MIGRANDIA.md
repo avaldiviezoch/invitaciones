@@ -1970,23 +1970,74 @@ Reglas:
 
 ---
 
-## MGD-043 — Analytics de producto con privacidad
+## MGD-043 — Analytics de producto, tráfico y KPIs con privacidad
 Estado: ⬜ PENDIENTE
 Prioridad: ALTA
 
 Objetivo:
-medir uso real de Migrandia sin convertir la analítica en recolección invasiva.
+medir adquisición, uso real, conversión, retención y monetización de Migrandia sin convertir la analítica en recolección invasiva ni introducir scripts duplicados o parches de medición.
 
-Medir:
+Principio de arquitectura:
+- una sola capa central de eventos de analytics para toda la aplicación;
+- Firebase/Google Analytics para eventos y embudos de producto cuando corresponda;
+- Cloudflare para tráfico, rendimiento y señales agregadas de infraestructura;
+- parámetros UTM para atribución de campañas y publicaciones;
+- evitar múltiples handlers o SDKs midiendo el mismo evento;
+- la instrumentación debe ser reutilizable por todos los eventType y futuros productos.
+
+KPIs de tráfico y adquisición:
+- usuarios únicos;
+- visitas/sesiones totales;
+- usuarios nuevos vs. recurrentes;
+- páginas/landing de entrada;
+- fuente y medio de adquisición: directo, orgánico, Google Ads, Facebook, Instagram y otras campañas identificables;
+- campaña mediante UTM cuando exista;
+- país/ciudad aproximados solo cuando la plataforma de analytics los entregue de forma agregada;
+- dispositivo, navegador y tamaño de pantalla;
+- duración/engagement de sesión y páginas o módulos consultados.
+
+Embudo principal:
+- Landing visitada;
+- registro iniciado/completado;
+- onboarding iniciado/completado;
+- evento creado;
+- invitados agregados;
+- invitación creada;
+- invitación compartida;
+- primeras confirmaciones/RSVP recibidas;
+- uso de módulos avanzados;
+- inicio de Premium;
+- conversión a Premium/pago completado cuando exista monetización.
+
+KPIs de producto:
 - creación de eventos por eventType;
-- inicio y finalización del onboarding;
-- abandono por paso;
-- activación de módulos;
+- abandono del onboarding por paso;
+- activación y frecuencia de uso de módulos;
 - uso de Checklist, Presupuesto, Invitados, Distribución, Ideas, Música e Invitaciones;
 - origen de entrada: home general o landing específica;
-- conversión Landing → Onboarding → Evento creado;
-- uso por dispositivo y tamaño de pantalla;
+- conversión Landing → Registro → Onboarding → Evento creado;
+- tasa de activación;
+- retención y recurrencia;
+- funcionalidades con alto/bajo uso;
 - errores de experiencia relacionados con flujo.
+
+KPIs comerciales cuando exista monetización:
+- conversión Free → Premium;
+- usuarios Premium activos;
+- ingresos recurrentes mensuales (MRR), cuando aplique;
+- ingreso medio por usuario/cliente, cuando aplique;
+- cancelaciones/churn, cuando aplique;
+- costo de adquisición (CAC) únicamente cuando existan campañas pagadas y datos suficientes;
+- conversión e ingreso atribuible por campaña/UTM cuando sea técnicamente posible.
+
+Panel interno:
+- dashboard de KPIs con filtros por rango de fechas, eventType, dispositivo y fuente de adquisición;
+- embudo visual de conversión;
+- evolución temporal de usuarios, eventos creados, activación y Premium;
+- ranking de módulos por uso;
+- indicadores de abandono;
+- comparación de campañas cuando existan UTMs;
+- nunca exponer información privada de invitados en el panel analítico.
 
 No registrar en analytics:
 - contraseñas;
@@ -1995,11 +2046,21 @@ No registrar en analytics:
 - correos;
 - respuestas RSVP completas;
 - contenido privado de notas;
+- texto privado introducido por usuarios;
 - datos personales que no sean necesarios para la métrica.
+
+Criterios de implementación:
+- definir primero el catálogo canónico de eventos y propiedades;
+- nombres de eventos estables y documentados;
+- no introducir medición ad hoc directamente en cada módulo;
+- QA debe verificar que un evento de usuario produzca una sola señal analítica esperada;
+- distinguir tráfico humano de pruebas/QA cuando sea viable;
+- respetar consentimiento, privacidad y normativa aplicable antes de activar medición que lo requiera;
+- ningún cambio de analytics debe alterar Firestore canónico, Auth, Storage ni lógica funcional existente salvo autorización expresa.
 
 Separar:
 - observabilidad técnica = MGD-006;
-- analytics de producto = MGD-043.
+- analytics de producto, adquisición y negocio = MGD-043.
 
 ---
 
