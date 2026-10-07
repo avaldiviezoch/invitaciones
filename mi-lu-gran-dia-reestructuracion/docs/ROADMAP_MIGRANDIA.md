@@ -887,7 +887,7 @@ Validar en:
 # BLOQUE C — ARQUITECTURA MULTI-EVENTO
 
 ## MGD-012 — Concepto EVENTO sin romper `weddings`
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: CRÍTICA
 
 No renombrar todavía `weddings` a `events`.
@@ -924,7 +924,7 @@ Gate de datos:
 ---
 
 ## MGD-013 — Tipos iniciales
-Estado: ⬜ PENDIENTE
+Estado: 🟡 EN DESARROLLO
 Prioridad: ALTA
 
 Primera versión acordada: **máximo 8 tipos base**, evitando fragmentar demasiado el producto.
