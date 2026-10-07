@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-031 aprobado
+
+- QA seguro reportado en verde por el usuario.
+- MGD-031 queda 🟢 QA SEGURO DEV APROBADO.
+- El contrato formal de backup/restore queda validado.
+- Restore real continúa bloqueado.
+- Siguiente bloque: MGD-032 — marcha blanca controlada.
+
 ## 2026-10-07 — MGD-031 contrato formal implementado
 
 - Se auditó el backup legacy de planner-cloud.
