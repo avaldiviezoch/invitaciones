@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-025 fase 4 aprobada
+
+- QA seguro reportado en verde por el usuario.
+- La Fase 4 de readiness queda aprobada.
+- La retirada de legacy continúa bloqueada salvo validación explícita por clave.
+- cloudSync/cloudChunks permanece intacto.
+- Se inicia Fase 5: diagnóstico real de readiness por boda y clave, sin escrituras ni borrados.
+
 ## 2026-10-07 — Ajuste QA por ruido de red en E2E-04
 
 - La corrida de Fase 4 terminó con 98/99 pruebas aprobadas.
