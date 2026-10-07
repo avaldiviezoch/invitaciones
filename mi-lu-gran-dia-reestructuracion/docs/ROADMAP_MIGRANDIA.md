@@ -1120,7 +1120,7 @@ Implementación DEV:
 ---
 
 ## MGD-034 — Onboarding dinámico por tipo de evento
-Estado: 🟡 MOTOR ADAPTATIVO BASE IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: CRÍTICA
 
 El onboarding actual está orientado a boda (Novia / Novio / Ayudo a organizar). Debe convertirse en un flujo adaptativo.
