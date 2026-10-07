@@ -1588,3 +1588,47 @@ test('MGD-011: un UID admite múltiples eventos con rutas aisladas por eventId',
     duplicateBlocked: true
   });
 });
+
+
+test('MGD-002: runtime separa Worker DEV y API PROD sin mezclar hosting estático', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/services/runtime-environment.js')).href;
+  const source = await import(moduleUrl);
+
+  const originalLocation = globalThis.location;
+  try {
+    Object.defineProperty(globalThis, 'location', {
+      configurable: true,
+      value: { hostname: 'avaldiviezoch.github.io' }
+    });
+    const dev = source.currentEnvironment();
+    const devUrl = source.serviceUrl('/api/music-preview');
+
+    Object.defineProperty(globalThis, 'location', {
+      configurable: true,
+      value: { hostname: 'migrandiapp.com' }
+    });
+    const prod = source.currentEnvironment();
+    const prodUrl = source.serviceUrl('/api/music-preview');
+
+    expect({
+      devName: dev.name,
+      devBase: dev.serviceBaseUrl,
+      devUrl,
+      prodName: prod.name,
+      prodBase: prod.serviceBaseUrl,
+      prodUrl,
+      prodUsesStaticWorker: prodUrl.includes('wedding.avaldiviezoch.workers.dev')
+    }).toEqual({
+      devName: 'development',
+      devBase: 'https://migrandia-dev.avaldiviezoch.workers.dev',
+      devUrl: 'https://migrandia-dev.avaldiviezoch.workers.dev/api/music-preview',
+      prodName: 'production',
+      prodBase: 'https://migrandia-api.avaldiviezoch.workers.dev',
+      prodUrl: 'https://migrandia-api.avaldiviezoch.workers.dev/api/music-preview',
+      prodUsesStaticWorker: false
+    });
+  } finally {
+    if (originalLocation === undefined) delete globalThis.location;
+    else Object.defineProperty(globalThis, 'location', { configurable: true, value: originalLocation });
+  }
+});
