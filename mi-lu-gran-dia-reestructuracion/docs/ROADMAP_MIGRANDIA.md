@@ -1419,7 +1419,7 @@ Implementación DEV segura:
 # BLOQUE I — DATOS Y ESCALABILIDAD
 
 ## MGD-025 — Evolución de `planner-cloud`
-Estado: 🟢 FASE 1-6 QA APROBADAS / ACTIVACIÓN DOMAIN-ONLY EN AUDITORÍA
+Estado: 🟡 FASE 1-6 QA APROBADAS / FASE 7 PILOTO CHECKLIST PREPARADO EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA A MEDIANO PLAZO
 
 Problema:
@@ -1509,6 +1509,14 @@ Implementación autorizada — Fase 6 compuerta de retirada:
 - readiness positivo sin aprobación no habilita retirada;
 - aprobación sin readiness positivo tampoco habilita retirada;
 - esta fase no modifica lecturas activas, no borra datos y no cambia Firestore.
+
+Implementación autorizada — Fase 7 piloto Checklist:
+- se seleccionó Checklist como primera candidata a `domain-only`;
+- razones: una sola clave de storage, lectura/escritura directa y ausencia de `subscribePlannerStorageKey`;
+- se creó `planner-domain-pilot.js`;
+- el piloto está explícitamente `enabled: false`;
+- activar el piloto sigue requiriendo readiness positivo y aprobación explícita;
+- esta fase no cambia el modo de lectura de Checklist ni retira fallback legacy.
 
 ---
 
