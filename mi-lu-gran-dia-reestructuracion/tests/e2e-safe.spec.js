@@ -639,3 +639,44 @@ test('MGD-024: URL personalizada actúa como alias del ID público seguro', asyn
     exposesEventId: false
   });
 });
+
+
+test('MGD-025 fase 1: mapa de dominios separa planner-cloud sin romper legacy', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/services/planner-domain-map.js')).href;
+  const {
+    DOMAIN_SCHEMA_VERSION,
+    PLANNER_DOMAIN_BY_STORAGE_KEY,
+    getPlannerDomain,
+    isPlannerDomainMigrated
+  } = await import(moduleUrl);
+
+  expect({
+    schemaVersion: DOMAIN_SCHEMA_VERSION,
+    mappedKeys: Object.keys(PLANNER_DOMAIN_BY_STORAGE_KEY).length,
+    checklist: getPlannerDomain('planificador_bodas_checklist_v1'),
+    budget: getPlannerDomain('planificador_bodas_presupuesto_v5_etiquetas'),
+    guests: getPlannerDomain('planificador_bodas_invitados_v1'),
+    sharedGuests: getPlannerDomain('planificador_bodas_datos_compartidos_v1'),
+    distribution: getPlannerDomain('planificador_bodas_distribucion_v1'),
+    ideas: getPlannerDomain('planificador_bodas_ideas_v1'),
+    music: getPlannerDomain('migrandia.music.v1'),
+    vendors: getPlannerDomain('planificador_bodas_proveedores_v1'),
+    timeline: getPlannerDomain('planificador_bodas_cronograma_v1'),
+    unknownFallback: getPlannerDomain('legacy-unknown'),
+    unknownMigrated: isPlannerDomainMigrated('legacy-unknown')
+  }).toEqual({
+    schemaVersion: 1,
+    mappedKeys: 10,
+    checklist: 'checklist',
+    budget: 'budget',
+    guests: 'guests',
+    sharedGuests: 'guests',
+    distribution: 'distribution',
+    ideas: 'ideas',
+    music: 'music',
+    vendors: 'vendors',
+    timeline: 'timeline',
+    unknownFallback: 'other',
+    unknownMigrated: false
+  });
+});
