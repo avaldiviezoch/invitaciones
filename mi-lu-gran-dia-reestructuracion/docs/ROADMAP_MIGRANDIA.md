@@ -1553,7 +1553,7 @@ Implementación DEV:
 ---
 
 ## MGD-028 — Límites de plataforma
-Estado: ⬜ PENDIENTE
+Estado: 🟡 GUARDRAILS V1 IMPLEMENTADOS EN DEV / PENDIENTE QA
 Prioridad: ALTA
 
 Definir límites técnicos:
@@ -1569,6 +1569,25 @@ Definir límites técnicos:
 
 Objetivo:
 proteger costos y estabilidad.
+
+Guardrails V1 definidos:
+- eventos por usuario: 20;
+- invitados por evento: 2,000;
+- mesas por evento: 250;
+- ideas por evento: 500;
+- proveedores por evento: 300;
+- respuestas RSVP por evento: 5,000;
+- imágenes por evento: 500;
+- objetos de Distribución por evento: 2,000;
+- payload serializado por entrada de dominio: 750,000 bytes;
+- imagen individual: 10 MiB.
+
+Implementación DEV:
+- nuevo `src/core/app/platform-limits.js`;
+- límites centralizados y versionados;
+- helpers puros para consulta, validación y cálculo de tamaño serializado;
+- todavía no se aplica enforcement a módulos ni escrituras reales;
+- no se modificaron Firestore Rules, Storage, datos existentes ni UX.
 
 ---
 
