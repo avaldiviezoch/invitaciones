@@ -1281,7 +1281,7 @@ Implementación DEV:
 ---
 
 ## MGD-020 — Objetos especializados
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: MEDIA
 
 15 años:
