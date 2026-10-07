@@ -1,3 +1,16 @@
+## 2026-10-06 — MGD-009 / MGD-010: registro y recuperación por correo — implementación DEV
+
+- Con autorización expresa se implementaron los cambios funcionales de Firebase Authentication para registro por correo y recuperación de contraseña.
+- MGD-009 reutiliza el mismo `authOverlay`: el usuario puede alternar entre “Ingresar” y “Crear cuenta” sin un modal duplicado. El registro usa `createUserWithEmailAndPassword`.
+- Se agregó confirmación de contraseña únicamente en modo registro, validación de correo, mínimo de 6 caracteres y mensajes específicos para errores comunes.
+- Tras autenticación exitosa por correo se reutiliza el mismo flujo de bodas/onboarding existente; no se creó una segunda ruta de sesión ni una persistencia paralela.
+- MGD-010 agrega “Olvidé mi contraseña” mediante `sendPasswordResetEmail`. La confirmación usa un mensaje neutro (“Si existe una cuenta…”) para no revelar si un correo está registrado.
+- Los errores `auth/user-not-found` y `auth/invalid-credential` en recuperación producen el mismo mensaje neutro; red y rate limit mantienen mensajes operativos.
+- Se añadieron pruebas E2E seguras que validan UI y validación local sin crear cuentas ni enviar correos reales.
+- Commits: UI `0f05e6a4858dc8210d0a189fce383edf8c0eb4f1`, Auth `a4da41407d471eae3cdcb76837d329471659a10b`, CSS `bbb30270d79780fbf9b37a02348abd038b4478c4`, tests `43af4370b2f566d7b4b47f70ef342e86b4e76f1f`.
+- No se modificaron Firebase Rules, Firestore, Storage, RSVP ni datos reales.
+- Estado: MGD-009 y MGD-010 🟡 IMPLEMENTADOS EN DEV / PENDIENTES DE QA.
+
 ## 2026-10-06 — MGD-009: auditoría de registro por correo
 
 - Se inició MGD-009 únicamente como auditoría, sin modificar Auth.
