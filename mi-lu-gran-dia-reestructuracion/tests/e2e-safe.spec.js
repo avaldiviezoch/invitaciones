@@ -1500,3 +1500,37 @@ test('MGD-036: preview progresiva adapta perfil y tema sin persistir automática
     flowIndependent: ['classic-elegant', 'one-piece-elegant', 'minimal-black']
   });
 });
+
+
+test('MGD-026: branding de acceso es multi-evento y no expone Firebase en la UI propia', async ({ page }) => {
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  await page.locator('#discoverSkipButton').click();
+
+  await expect(page.locator('#authTitle')).toHaveText('Tu evento, siempre contigo');
+  await expect(page.locator('#authIntro')).toHaveText('Inicia sesión para acceder a Mi Gran Día.');
+  await expect(page.locator('#googleLoginButton')).toHaveText('Continuar con Google');
+
+  const bodyText = await page.locator('body').innerText();
+  expect(bodyText.includes('Firebase')).toBe(false);
+
+  const moduleUrl = new URL('src/core/app/auth-branding.js', window.location.href).href;
+  const branding = await page.evaluate(async (url) => {
+    const { AUTH_BRANDING } = await import(url);
+    return AUTH_BRANDING;
+  }, moduleUrl);
+
+  expect({
+    productName: branding.productName,
+    platformName: branding.platformName,
+    loginTitle: branding.loginTitle,
+    googleButtonLabel: branding.googleButtonLabel
+  }).toEqual({
+    productName: 'Mi Gran Día',
+    platformName: 'Migrandia',
+    loginTitle: 'Tu evento, siempre contigo',
+    googleButtonLabel: 'Continuar con Google'
+  });
+
+  expect(errors).toEqual([]);
+});
