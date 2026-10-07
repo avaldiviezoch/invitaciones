@@ -1360,3 +1360,94 @@ test('MGD-034: onboarding usa un solo motor con opciones adaptativas por tipo de
     noIndependentEngines: 1
   });
 });
+
+
+test('MGD-035: ageProfile adapta sugerencias sin cambiar permisos, identidad ni estructura', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/age-profile.js')).href;
+  const onboardingUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/onboarding-profiles.js')).href;
+  const {
+    AGE_PROFILE_IDS,
+    ageProfileFromAge,
+    eventUsesAgeProfile,
+    buildAgeProfile,
+    suggestionHints
+  } = await import(moduleUrl);
+  const { getOnboardingProfile } = await import(onboardingUrl);
+
+  const birthdayChild = buildAgeProfile({ eventType: 'birthday', age: 5 });
+  const birthdayAdult = buildAgeProfile({ eventType: 'birthday', age: 34 });
+  const quince = buildAgeProfile({ eventType: 'quince', age: 15 });
+  const corporate = buildAgeProfile({ eventType: 'corporate', age: 40 });
+  const hints = suggestionHints('child');
+
+  expect({
+    ids: AGE_PROFILE_IDS,
+    child: ageProfileFromAge(5),
+    teen: ageProfileFromAge(15),
+    adult: ageProfileFromAge(34),
+    older: ageProfileFromAge(70),
+    birthdayUsesAge: eventUsesAgeProfile('birthday'),
+    corporateUsesAge: eventUsesAgeProfile('corporate'),
+    birthdayChild,
+    birthdayAdult,
+    quince,
+    corporate,
+    hints,
+    birthdayHasQuestion: Boolean(getOnboardingProfile('birthday').ageQuestion),
+    weddingHasQuestion: Boolean(getOnboardingProfile('wedding').ageQuestion)
+  }).toEqual({
+    ids: ['child','teen','young-adult','adult','older-adult'],
+    child: 'child',
+    teen: 'teen',
+    adult: 'adult',
+    older: 'older-adult',
+    birthdayUsesAge: true,
+    corporateUsesAge: false,
+    birthdayChild: {
+      eventType: 'birthday',
+      applicable: true,
+      age: 5,
+      profileId: 'child',
+      affectsPermissions: false,
+      affectsIdentity: false,
+      affectsDataShape: false
+    },
+    birthdayAdult: {
+      eventType: 'birthday',
+      applicable: true,
+      age: 34,
+      profileId: 'adult',
+      affectsPermissions: false,
+      affectsIdentity: false,
+      affectsDataShape: false
+    },
+    quince: {
+      eventType: 'quince',
+      applicable: true,
+      age: 15,
+      profileId: 'teen',
+      affectsPermissions: false,
+      affectsIdentity: false,
+      affectsDataShape: false
+    },
+    corporate: {
+      eventType: 'corporate',
+      applicable: false,
+      age: null,
+      profileId: null,
+      affectsPermissions: false,
+      affectsIdentity: false,
+      affectsDataShape: false
+    },
+    hints: {
+      audiencePreset: 'child',
+      themeMode: 'suggest-only',
+      checklistMode: 'suggest-only',
+      invitationMode: 'suggest-only',
+      activityMode: 'suggest-only',
+      manualThemeOverride: true
+    },
+    birthdayHasQuestion: true,
+    weddingHasQuestion: false
+  });
+});
