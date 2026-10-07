@@ -97,9 +97,26 @@ async function readPlannerStorageKeys(context, keys) {
 
   if (fallbackKeys.length) {
     const { backup } = await readPlannerBackup(context, meta);
+    const migrationEntries = {};
+
     fallbackKeys.forEach((key) => {
-      resolved[key] = parseStoredJson(backup?.localStorage?.[key]);
+      const rawValue = backup?.localStorage?.[key];
+      const parsedValue = parseStoredJson(rawValue);
+      resolved[key] = parsedValue;
+
+      if (
+        canUseDomain
+        && weddingCapabilities(context.role).canEdit
+        && Object.prototype.hasOwnProperty.call(backup?.localStorage || {}, key)
+      ) {
+        migrationEntries[key] = parsedValue;
+      }
     });
+
+    if (Object.keys(migrationEntries).length) {
+      void writePlannerDomainShadowEntries(context, migrationEntries, meta.syncToken)
+        .catch(() => ({ attempted: 0, fulfilled: 0 }));
+    }
   }
 
   return Object.fromEntries(requested.map((key) => [key, resolved[key] ?? null]));
