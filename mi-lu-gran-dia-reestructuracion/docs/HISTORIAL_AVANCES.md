@@ -1,3 +1,14 @@
+## 2026-10-07 — MGD-002 corrección final de endpoint PROD
+
+- Se auditó la separación DEV/PROD antes de cerrar el bloqueo de beta.
+- Se detectó que runtime-environment.js aún apuntaba producción al Worker estático `wedding`.
+- Se corrigió el endpoint productivo a `migrandia-api.avaldiviezoch.workers.dev`.
+- DEV permanece en `migrandia-dev.avaldiviezoch.workers.dev`.
+- Ideas y Música continúan usando la configuración central `serviceUrl()`.
+- Se añadió QA seguro para verificar separación de ambos ambientes y evitar que PROD use el Worker estático.
+- No se tocaron Firebase, Auth, Firestore ni datos reales.
+- Estado: MGD-002 🟡 CORRECCIÓN IMPLEMENTADA / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-011 aislamiento QA aprobado
 
 - QA seguro reportado en verde por el usuario.
