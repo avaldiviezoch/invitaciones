@@ -161,3 +161,34 @@ test('MGD-012: eventType legado cae a wedding sin persistencia', async ({ page }
   });
   expect(errors).toEqual([]);
 });
+
+
+test('MGD-013: catálogo inicial contiene exactamente 8 tipos canónicos', async ({ page }) => {
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+
+  const result = await page.evaluate(async () => {
+    const moduleUrl = new URL('src/core/app/event-types.js', window.location.href).href;
+    const { EVENT_TYPES, EVENT_TYPE_IDS, isKnownEventType, eventTypeLabel } = await import(moduleUrl);
+    return {
+      count: EVENT_TYPES.length,
+      ids: EVENT_TYPE_IDS,
+      uniqueCount: new Set(EVENT_TYPE_IDS).size,
+      weddingKnown: isKnownEventType('wedding'),
+      birthdayKnown: isKnownEventType('BIRTHDAY'),
+      unknownKnown: isKnownEventType('festival'),
+      religiousLabel: eventTypeLabel('religious')
+    };
+  });
+
+  expect(result).toEqual({
+    count: 8,
+    ids: ['wedding', 'birthday', 'quince', 'baby_shower', 'religious', 'graduation', 'corporate', 'custom'],
+    uniqueCount: 8,
+    weddingKnown: true,
+    birthdayKnown: true,
+    unknownKnown: false,
+    religiousLabel: 'Bautizo / Primera Comunión'
+  });
+  expect(errors).toEqual([]);
+});
