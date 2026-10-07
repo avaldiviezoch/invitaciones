@@ -1,3 +1,15 @@
+## 2026-10-06 — MGD-021 implementado en DEV
+
+- Tras aprobar MGD-020 se auditó el módulo Invitaciones y su servicio de biblioteca personal.
+- Se confirmó que la biblioteca actual guarda enlaces por cuenta y que RSVP productivo está fuera del alcance autorizado.
+- MGD-021 se implementó únicamente como separación arquitectónica segura entre motor funcional y plantilla visual.
+- Se creó `src/core/app/invitation-engine.js` con los campos evento, fecha, lugar, invitado, acompañantes, RSVP, preguntas, música y estado.
+- Se creó `src/core/app/invitation-templates.js` con presets visuales declarativos.
+- `eventProfile.invitationCapabilities` apunta al mismo motor genérico para todos los tipos de evento.
+- No se modificó el módulo de biblioteca personal, Firebase, Firestore, Storage, Rules, Auth ni RSVP productivo.
+- Se agregó QA seguro MGD-021.
+- Estado: MGD-021 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-06 — MGD-020 aprobado / revisión de siguiente bloque
 
 - La corrida de GitHub Actions posterior a MGD-020 fue reportada en verde por el usuario.
