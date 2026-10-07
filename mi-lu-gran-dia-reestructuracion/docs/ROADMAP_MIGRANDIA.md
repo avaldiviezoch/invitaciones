@@ -1002,7 +1002,7 @@ No mezclar lógica funcional con tema visual.
 ---
 
 ## MGD-016 — Tema global y tokens visuales
-Estado: 🟡 EN DESARROLLO
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: ALTA
 
 El tema será **global para toda la aplicación** y consumido por cada módulo.
@@ -2632,3 +2632,30 @@ Commits:
 Estado:
 - MGD-014: 🟢 QA SEGURO DEV APROBADO;
 - MGD-015: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
+### MGD-016 — implementación DEV de tema global y tokens visuales
+
+Implementado:
+- nuevo `src/core/app/theme-tokens.js` con presets `classic-elegant`, `one-piece-elegant` y `minimal-black`;
+- tokens globales: `--event-primary`, `--event-secondary`, `--event-accent`, `--event-background`, `--event-surface`, `--event-heading-font`, `--event-body-font`, `--event-radius`, `--event-decoration-style`;
+- `applyEventTheme()` aplica el tema al elemento raíz y registra `data-event-theme`;
+- el dashboard aplica el tema del contexto activo mediante `context.themeId`;
+- fallback seguro a `classic-elegant` para contextos históricos o temas desconocidos;
+- los nueve módulos actuales consumen al menos los tokens globales de fondo/tipografía o aliases de color existentes, sin duplicar CSS por tipo de evento;
+- la apariencia actual se conserva con los valores de `classic-elegant`;
+- no se persiste `themeId` todavía y no se toca Firestore.
+
+QA seguro:
+- valida aplicación de `one-piece-elegant`;
+- valida fallback a `classic-elegant`;
+- valida valores principales de tokens sin escribir datos.
+
+Commits principales:
+- `20fb535ad84775c24fe6622d9a89554d36da9f1c` — motor de tokens;
+- `dc27da007e43b55f21689eddbdfabdabb352caad` — tokens raíz;
+- `ae05059e7d0496e3e3caf2410bc094a4aedfc1c8` — aplicación desde contexto;
+- `08d65ff84af8e0d07c43d2c5c64f03d3137f221f` — QA seguro.
+
+Estado:
+- MGD-015: 🟢 QA SEGURO DEV APROBADO;
+- MGD-016: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
