@@ -1,3 +1,13 @@
+## 2026-10-06 — MGD-012 aprobado / MGD-013 implementado en DEV
+
+- La nueva corrida de GitHub Actions fue reportada completamente en verde por el usuario. MGD-012 queda 🟢 QA SEGURO DEV APROBADO.
+- Se inició e implementó MGD-013 con un catálogo central de exactamente ocho tipos base: wedding, birthday, quince, baby_shower, religious, graduation, corporate y custom.
+- El catálogo vive en `src/core/app/event-types.js`, expone IDs, etiquetas y helpers de consulta, y está congelado para evitar mutaciones accidentales.
+- Se mantuvo separado de persistencia: no se escribió `eventType` en Firestore ni se modificaron documentos existentes.
+- Se agregó QA seguro para cantidad, unicidad, reconocimiento de IDs y etiqueta de la familia religiosa.
+- Commits: catálogo `489f8ad55018faf1bdae426b63b675390a3c60d6`; test `6bc983bfb805bb973439a500d991cdcc470967b7`.
+- Estado: MGD-013 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-06 — MGD-009: ajuste de QA por ruido 403 aislado
 
 - La corrida de GitHub Actions ejecutó 51 pruebas: 50 aprobaron y solo falló MGD-009 en desktop.
