@@ -887,7 +887,7 @@ Validar en:
 # BLOQUE C — ARQUITECTURA MULTI-EVENTO
 
 ## MGD-012 — Concepto EVENTO sin romper `weddings`
-Estado: ⬜ PENDIENTE
+Estado: 🟡 AUDITORÍA / DISEÑO COMPATIBLE
 Prioridad: CRÍTICA
 
 No renombrar todavía `weddings` a `events`.
@@ -900,6 +900,26 @@ todo documento histórico sin `eventType` se interpreta como:
 `wedding`
 
 No hacer migración destructiva.
+
+### Auditoría inicial — 2026-10-06
+
+Hallazgos:
+- el acceso actual está concentrado en `wedding-context.js`; los contextos se leen desde `weddings/{weddingId}` y `users/{uid}/weddings/{weddingId}`;
+- la UI y servicios consumen un objeto de contexto pequeño con `id`, `name`, `date`, `role` y `ownerUid`;
+- no existe todavía ningún `eventType` en el código revisado;
+- por compatibilidad, los documentos históricos pueden interpretarse como `eventType: 'wedding'` **en memoria**, sin escribir ni migrar documentos existentes;
+- la introducción inicial puede hacerse en el adaptador/contexto antes de modificar módulos individuales.
+
+Diseño propuesto sin migración:
+- `readWeddingContextById()` expondrá `eventType` normalizado;
+- si el documento no contiene `eventType`, el contexto devolverá `wedding`;
+- `createWedding()` seguirá siendo compatible y, cuando se autorice la persistencia del nuevo campo, podrá crear eventos con `eventType` explícito;
+- mantener nombres de colecciones/rutas `weddings` por ahora para evitar una migración destructiva;
+- los módulos consumirán posteriormente `eventProfile` (MGD-014), no condicionales dispersos.
+
+Gate de datos:
+- **todavía no se escribe `eventType` en Firestore**;
+- cualquier cambio que agregue el campo a documentos nuevos o existentes requerirá autorización específica de persistencia y QA de aislamiento.
 
 ---
 
@@ -2488,3 +2508,23 @@ Checkpoint actual:
 - baseline autenticado de lectura: preparado, pendiente de mecanismo de sesión seguro;
 - módulos con riesgo de escritura automática (Distribución/Música): separados;
 - MGD-008 general permanece 🟡 EN DESARROLLO.
+
+
+### Gate de pruebas controladas MGD-009 / MGD-010
+
+Las pruebas reales de registro y recuperación **no se ejecutarán todavía sobre la cuenta/boda real**.
+
+Motivo:
+- el flujo actual de una cuenta nueva puede continuar hacia `finishOnboardingForNewUser()` y crear una boda real en Firestore;
+- MGD-029 (eliminación de evento) aún no existe, por lo que una cuenta de QA podría dejar datos de prueba sin un mecanismo funcional de limpieza desde la aplicación.
+
+Momento de ejecución:
+1. cuando exista un entorno/cuenta de prueba con limpieza segura, o después de implementar MGD-029;
+2. crear una cuenta de prueba controlada;
+3. validar cierre de sesión y reingreso;
+4. solicitar recuperación;
+5. verificar recepción del correo;
+6. limpiar cuenta/evento de prueba;
+7. solo entonces marcar MGD-009 y MGD-010 como cerrados funcionalmente.
+
+Hasta ese gate, ambos permanecen con QA seguro DEV aprobado pero no “cerrados” al 100 %.
