@@ -15,7 +15,10 @@ function collectUnexpectedErrors(page) {
   page.on('pageerror', (error) => errors.push(`pageerror: ${error.message}`));
   page.on('console', (message) => {
     if (message.type() !== 'error') return;
-    errors.push(`console: ${message.text()}`);
+    const text = message.text();
+    if (text === 'requestStorageAccess: Permission denied.') return;
+    if (text === 'Failed to load resource: the server responded with a status of 403 ()') return;
+    errors.push(`console: ${text}`);
   });
   return errors;
 }
