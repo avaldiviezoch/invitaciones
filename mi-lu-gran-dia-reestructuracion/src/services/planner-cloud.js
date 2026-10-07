@@ -9,6 +9,7 @@ import { auth, db } from './firebase-client.js';
 import { weddingCapabilities } from '../core/app/permissions.js';
 import { reportError } from './observability.js?v=2';
 import { readPlannerDomainEntries, writePlannerDomainShadowEntries } from './planner-domain-cloud.js?v=2';
+import { assessPlannerDomainEntry, summarizePlannerDomainReadiness } from './planner-domain-readiness.js?v=1';
 
 const CHUNK_SIZE = 180000;
 
@@ -120,6 +121,42 @@ async function readPlannerStorageKeys(context, keys) {
   }
 
   return Object.fromEntries(requested.map((key) => [key, resolved[key] ?? null]));
+}
+
+async function inspectPlannerDomainReadiness(context, keys) {
+  const requested = Array.isArray(keys) ? [...new Set(keys.map(String).filter(Boolean))] : [];
+  if (!requested.length) {
+    return Object.freeze({
+      entries: Object.freeze({}),
+      summary: summarizePlannerDomainReadiness({})
+    });
+  }
+
+  const meta = await readPlannerMeta(context);
+  const [{ backup }, domainValues] = await Promise.all([
+    readPlannerBackup(context, meta),
+    readPlannerDomainEntries(context, requested)
+  ]);
+
+  const entries = Object.fromEntries(requested.map((key) => {
+    const legacyStorage = backup?.localStorage || {};
+    const legacyHasValue = Object.prototype.hasOwnProperty.call(legacyStorage, key);
+    const domainEntry = domainValues[key] || { exists: false, value: null, syncToken: '' };
+    return [
+      key,
+      assessPlannerDomainEntry({
+        legacyHasValue,
+        legacySyncToken: meta.syncToken,
+        domainEntry,
+        domainError: false
+      })
+    ];
+  }));
+
+  return Object.freeze({
+    entries: Object.freeze(entries),
+    summary: summarizePlannerDomainReadiness(entries)
+  });
 }
 
 async function readPlannerStorageKey(context, key) {
@@ -270,6 +307,7 @@ function subscribePlannerStorageKey(context, key, onValue, onError) {
 }
 
 export {
+  inspectPlannerDomainReadiness,
   readPlannerStorageKey,
   readPlannerStorageKeys,
   subscribePlannerStorageKey,
