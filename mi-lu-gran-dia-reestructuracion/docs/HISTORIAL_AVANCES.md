@@ -1,3 +1,10 @@
+## 2026-10-07 — MGD-022 aprobado
+
+- QA seguro reportado en verde.
+- MGD-022 aprobado en DEV.
+- No hubo cambios en produccion ni en datos reales.
+- Siguiente bloque: MGD-023 — ID publico de invitacion.
+
 ## 2026-10-07 — MGD-022 segundo ajuste de QA
 
 - La segunda corrida roja ocurrió antes de ejecutar pruebas: Playwright cargó `e2e-safe.spec.js` en un contexto donde `import.meta` no está disponible.
