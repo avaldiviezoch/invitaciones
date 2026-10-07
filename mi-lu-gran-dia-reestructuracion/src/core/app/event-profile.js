@@ -1,6 +1,7 @@
 import { EVENT_TYPE_BY_ID } from './event-types.js';
 import { getEventTerminology } from './event-terminology.js';
 import { getChecklistTemplate } from './checklist-templates.js';
+import { getOnboardingProfile } from './onboarding-profiles.js';
 
 const CURRENT_MODULES = Object.freeze([
   'checklist',
@@ -29,7 +30,7 @@ function profile(type, overrides = {}) {
     checklist: overrides.checklist || getChecklistTemplate(type),
     distributionCatalog: overrides.distributionCatalog || { profileId: type, eventType: type },
     theme: overrides.theme || { defaultThemeId: null },
-    onboarding: overrides.onboarding || { profileId: type },
+    onboarding: overrides.onboarding || getOnboardingProfile(type),
     invitationCapabilities: overrides.invitationCapabilities || { enabled: true, engine: 'generic-v1', defaultTemplateId: null },
     audienceProfile: overrides.audienceProfile || { mode: 'general' }
   });
