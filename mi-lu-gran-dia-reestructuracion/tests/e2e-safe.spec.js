@@ -1111,3 +1111,57 @@ test('MGD-029: eliminación de evento exige owner + confirmación fuerte y no ej
     hasRsvp: true
   });
 });
+
+
+test('MGD-030: eliminar cuenta bloquea owners y preserva eventos compartidos', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/services/account-deletion-contract.js')).href;
+  const {
+    buildAccountDeletionPhrase,
+    classifyAccountEvents,
+    assertStrongAccountDeletionConfirmation,
+    buildAccountDeletionPlan
+  } = await import(moduleUrl);
+
+  const user = { uid: 'user-1', email: 'antonio@example.com' };
+  const contexts = [
+    { id: 'owned-1', name: 'Evento propio', role: 'owner', ownerUid: 'user-1' },
+    { id: 'shared-1', name: 'Evento compartido', role: 'editor', ownerUid: 'user-2' }
+  ];
+  const phrase = buildAccountDeletionPhrase(user);
+  const classified = classifyAccountEvents(contexts, user.uid);
+
+  let wrongPhraseBlocked = false;
+  try {
+    assertStrongAccountDeletionConfirmation(user, 'antonio@example.com');
+  } catch {
+    wrongPhraseBlocked = true;
+  }
+
+  const plan = buildAccountDeletionPlan({
+    user,
+    contexts,
+    confirmation: phrase
+  });
+
+  expect({
+    phrase,
+    owned: classified.owned.map((item) => item.id),
+    shared: classified.shared.map((item) => item.id),
+    wrongPhraseBlocked,
+    execute: plan.execute,
+    blockedByOwnedEvents: plan.blockedByOwnedEvents,
+    sharedPolicy: plan.responsibilities.sharedEvents,
+    rsvpPolicy: plan.responsibilities.rsvp,
+    authPolicy: plan.responsibilities.auth
+  }).toEqual({
+    phrase: 'antonio@example.com :: user-1',
+    owned: ['owned-1'],
+    shared: ['shared-1'],
+    wrongPhraseBlocked: true,
+    execute: false,
+    blockedByOwnedEvents: true,
+    sharedPolicy: 'remove-membership-and-user-index-only',
+    rsvpPolicy: 'preserve-event-rsvp-unless-event-is-deleted',
+    authPolicy: 'delete-only-after-data-plan-is-clear'
+  });
+});
