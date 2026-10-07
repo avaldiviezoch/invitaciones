@@ -883,6 +883,13 @@ Corrección QA rojo MGD-026:
 - causa: `inicio.js` mantenía un segundo copy hardcodeado “Tu boda, siempre contigo” y sobrescribía el HTML;
 - se eliminó esa segunda fuente y el login ahora consume `AUTH_BRANDING` directamente.
 
+Segunda corrección QA rojo MGD-026:
+- el segundo rerun volvió a quedar 141/144;
+- los 3 fallos fueron del propio test, no del login;
+- causa: `window.location.href` se evaluaba en Node/Playwright en lugar del navegador;
+- la importación de `auth-branding.js` ahora se resuelve dentro de `page.evaluate`;
+- sin cambios adicionales sobre Auth, OAuth o UI funcional.
+
 Criterio de diseño:
 - “Mi Gran Día” debe presentarse como organizador de eventos especiales;
 - no usar mensajes que hagan pensar que la plataforma es exclusivamente de bodas;
