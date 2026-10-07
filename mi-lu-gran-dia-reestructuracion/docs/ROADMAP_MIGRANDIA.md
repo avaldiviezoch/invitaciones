@@ -1529,7 +1529,7 @@ Implementación autorizada — Fase 8 solicitud de activación:
 ---
 
 ## MGD-027 — Permisos de Ideas
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: MEDIA
 
 UI:
