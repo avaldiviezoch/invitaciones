@@ -1664,7 +1664,7 @@ Implementación DEV segura:
 # BLOQUE K — MARCHA BLANCA Y BETA
 
 ## MGD-032 — Marcha blanca controlada
-Estado: 🟡 CONTRATO DE COHORTES Y GATE IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: ALTA
 
 Primero:
