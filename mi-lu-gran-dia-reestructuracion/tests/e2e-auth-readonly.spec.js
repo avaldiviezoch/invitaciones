@@ -6,7 +6,8 @@ const READ_ONLY_MODULES = [
   'proveedores',
   'invitados',
   'cronograma',
-  'ideas'
+  'ideas',
+  'invitaciones'
 ];
 
 function collectUnexpectedErrors(page) {
