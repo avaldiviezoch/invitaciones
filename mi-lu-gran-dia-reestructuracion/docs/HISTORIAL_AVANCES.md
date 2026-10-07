@@ -1,3 +1,13 @@
+## 2026-10-07 — MGD-025 fase 5 diagnóstico readiness implementada
+
+- Tras aprobar la Fase 4 se añadió un diagnóstico real por boda y clave.
+- `inspectPlannerDomainReadiness(context, keys)` compara metadata legacy, backup legacy y dominio nuevo.
+- Cada clave se clasifica con el motor de readiness y se devuelve además un resumen agregado.
+- La función es estrictamente de lectura: no escribe legacy, no escribe dominios y no elimina datos.
+- No se retiró cloudSync/cloudChunks.
+- Se agregó QA seguro que verifica explícitamente que el diagnóstico no contiene operaciones de escritura o borrado.
+- Estado: MGD-025 🟡 FASE 5 IMPLEMENTADA EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-025 fase 4 aprobada
 
 - QA seguro reportado en verde por el usuario.
