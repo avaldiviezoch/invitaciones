@@ -1,4 +1,13 @@
 :root {
+  --event-primary:#849168;
+  --event-secondary:#ae7480;
+  --event-accent:#c89aa3;
+  --event-background:#f6f3ef;
+  --event-surface:#ffffff;
+  --event-heading-font:Georgia,"Times New Roman",serif;
+  --event-body-font:Arial,sans-serif;
+  --event-radius:18px;
+  --event-decoration-style:refined;
   --line:rgba(255,255,255,.14);
   --muted:rgba(255,255,255,.62);
   --olive-light:#c2cba6;
@@ -19,11 +28,11 @@ html {
 body {
   background:#0b0b0b;
   color:#fff;
-  font-family:Inter,Segoe UI,Arial,sans-serif
+  font-family:Inter,Segoe UI,var(--event-body-font)
 }
 html.module-route,
 .module-route body {
-  background:#f7f5f1
+  background:var(--event-background)
 }
 .module-route .app{display:none}
 .module-route .module-workspace{display:block}
