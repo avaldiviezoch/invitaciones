@@ -721,7 +721,7 @@ Commits implementación inicial:
 # BLOQUE B — CUENTA, LOGIN Y BRANDING DE ACCESO
 
 ## MGD-009 — Registro por correo
-Estado: 🟡 AUDITORÍA / PENDIENTE DE AUTORIZACIÓN AUTH
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: ALTA
 
 Agregar:
@@ -748,13 +748,31 @@ Diseño propuesto:
 - no crear documentos, bodas ni onboarding automáticamente fuera del flujo actual ya definido;
 - no modificar Firebase Rules, Firestore, Storage ni configuración de proyecto.
 
-Bloqueo:
-- implementar MGD-009 modifica el flujo Firebase Auth, por lo que requiere autorización expresa antes de tocar código funcional de autenticación.
+Implementación DEV — 2026-10-06:
+- autorización expresa recibida para modificar Firebase Auth en MGD-009/010;
+- se añadió modo “Crear cuenta” dentro del mismo `authOverlay`, sin duplicar modal;
+- se reutilizan `authEmail` y `authPassword` y se agrega confirmación de contraseña solo en registro;
+- registro mediante `createUserWithEmailAndPassword`;
+- validación local de correo, mínimo 6 caracteres y coincidencia de contraseñas;
+- mensajes diferenciados para correo inválido, contraseña débil, correo ya registrado, demasiados intentos y red;
+- tras autenticación exitosa se reutiliza el flujo existente de carga de bodas/onboarding mediante `completeEmailAccess()`;
+- no se modificaron Firebase Rules, Firestore, Storage ni configuración de proyecto;
+- QA seguro añadido: valida cambio de modo y rechazo por contraseñas distintas sin crear una cuenta real.
+
+Commits:
+- `0f05e6a4858dc8210d0a189fce383edf8c0eb4f1` — UI de acceso;
+- `a4da41407d471eae3cdcb76837d329471659a10b` — lógica Auth;
+- `bbb30270d79780fbf9b37a02348abd038b4478c4` — estilos;
+- `43af4370b2f566d7b4b47f70ef342e86b4e76f1f` — QA seguro.
+
+Pendiente:
+- ejecutar GitHub Actions;
+- prueba real de creación de cuenta solo con una cuenta de prueba autorizada, no con datos reales.
 
 ---
 
 ## MGD-010 — Recuperación de contraseña
-Estado: ⬜ PENDIENTE
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: ALTA
 
 Agregar:
@@ -762,6 +780,20 @@ Agregar:
 - Firebase Auth;
 - confirmación visual;
 - protección contra enumeración de correos cuando corresponda.
+
+Implementación DEV — 2026-10-06:
+- botón `Olvidé mi contraseña` integrado al mismo `authOverlay`;
+- envío mediante `sendPasswordResetEmail`;
+- validación local de correo antes de enviar;
+- mensaje neutro de confirmación: “Si existe una cuenta con ese correo…” para evitar confirmar si una dirección está registrada;
+- `auth/user-not-found` y `auth/invalid-credential` reciben el mismo mensaje neutro;
+- errores de red/rate limit mantienen mensajes operativos sin revelar existencia de cuenta;
+- el botón se oculta durante el modo “Crear cuenta” para mantener el flujo claro;
+- QA seguro añadido con correo inválido, sin enviar ninguna solicitud real a Firebase.
+
+Pendiente:
+- ejecutar GitHub Actions;
+- prueba real del correo de recuperación solo con una cuenta de prueba autorizada.
 
 ---
 
