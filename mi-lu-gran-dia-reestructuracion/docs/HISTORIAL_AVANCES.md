@@ -1,3 +1,15 @@
+## 2026-10-07 — MGD-026: producción actualizada y dominio verificado
+
+- PR #551 de producción fusionado; `Wedding/main` quedó en `1c8412c82b03599919f7cc8b92fe595be4288113` y el despliegue GitHub Pages terminó correctamente.
+- La home productiva prioriza **Mi Gran Día** como nombre público y conserva Migrandia como plataforma.
+- La Política de Privacidad productiva fue ampliada con detalle específico sobre Google Sign-In, tipos de datos, finalidad, terceros, conservación y eliminación.
+- Google Auth Platform dejó de mostrar los hallazgos por nombre de aplicación y contenido insuficiente de privacidad.
+- `migrandiapp.com` quedó verificado como propiedad en Google Search Console mediante Cloudflare.
+- Permanece únicamente el aviso histórico de propiedad del dominio mientras se propaga la verificación interna de Google; la propia consola indica esperar hasta 24 horas.
+- La revisión se realizará el **09/10/2026 por la mañana**; se creó recordatorio automático para ese día.
+- Próxima acción: si el aviso desapareció, seleccionar **“Corregí los problemas” → “Continuar”** en Google Auth Platform.
+- No modificar DNS, Search Console ni dominios mientras se espera la propagación, salvo una nueva observación de Google.
+
 ## 2026-10-07 — MGD-026: dominio verificado y seguimiento de propagación Google
 
 - `migrandiapp.com` quedó verificado como propiedad en Google Search Console mediante el flujo automático con Cloudflare.
