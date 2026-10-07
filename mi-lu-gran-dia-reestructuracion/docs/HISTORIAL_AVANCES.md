@@ -1,3 +1,19 @@
+## 2026-10-06 — MGD-016 aprobado / handoff a nuevo chat
+
+- La corrida posterior a MGD-016 fue reportada en verde por el usuario.
+- MGD-016 queda 🟢 QA SEGURO DEV APROBADO.
+- La implementación aprobada incluye tokens visuales globales, presets classic-elegant / one-piece-elegant / minimal-black, aplicación del tema desde el contexto activo y conexión progresiva de los 9 módulos actuales sin duplicar CSS por evento.
+- No se persistió themeId en Firestore y no se modificaron Firebase, Firestore, Storage, Rules, Auth ni datos reales.
+- Próximo bloque: MGD-017 — Diccionario de lenguaje por evento.
+- Antes de continuar en un nuevo chat, revisar obligatoriamente:
+  1. `docs/REGLAS_NO_NEGOCIABLES.md`;
+  2. `docs/ROADMAP_MIGRANDIA.md`;
+  3. `docs/HISTORIAL_AVANCES.md`;
+  4. estado actual de `src/core/app/event-type.js`, `event-types.js`, `event-profile.js`, `theme-id.js` y `theme-tokens.js`;
+  5. confirmar que el trabajo sigue en DEV (`avaldiviezoch/invitaciones`) y que PRODUCCIÓN (`avaldiviezoch/Wedding`) no debe tocarse hasta QA completo y PR controlado.
+- Mantener pendiente el gate de pruebas reales controladas de MGD-009/MGD-010: registro real, logout, login, recuperación de contraseña, recepción del correo y limpieza segura de datos de prueba.
+- No continuar directamente con persistencia de eventType/themeId sin autorización específica.
+
 ## 2026-10-06 — MGD-016 aprobado / MGD-017 implementado en DEV
 
 - La corrida posterior a MGD-016 fue reportada en verde por el usuario; MGD-016 queda 🟢 QA SEGURO DEV APROBADO.
