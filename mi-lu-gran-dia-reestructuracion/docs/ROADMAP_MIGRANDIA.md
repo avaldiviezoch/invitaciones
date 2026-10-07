@@ -241,7 +241,7 @@ Pendiente:
 ---
 
 ## MGD-003 — Protección contra abuso de RSVP
-Estado: 🟠 QA
+Estado: 🟡 QA TÉCNICO PREPARADO / PENDIENTE CORRIDA Y VALIDACIÓN PRODUCTIVA CONTROLADA
 Prioridad: CRÍTICA
 
 Objetivo:
@@ -376,6 +376,15 @@ La capa Cloudflare de MGD-003 queda validada en DEV: origen → Worker → rate 
 - Métricas App Check posteriores: Firestore 58% verificadas / 42% no verificadas; Authentication 71% / 29%.
 - No se modificaron Firestore Rules, Auth, Storage ni estructura de datos.
 - Enforcement permanece desactivado.
+
+### Cierre técnico seguro — 2026-10-07
+
+- se agregó QA automatizado para validar que DEV y PROD mantienen Workers separados;
+- se valida existencia de `/api/rsvp/verify`, Turnstile Siteverify, secret por entorno y `RSVP_RATE_LIMIT`;
+- DEV usa namespace `1001` y PROD `1002`, ambos con 5 intentos / 60 s;
+- se valida CORS para dominios oficiales y respuestas no-store;
+- este QA no reactiva Turnstile en la invitación productiva;
+- la activación final en producción sigue condicionada a prueba real controlada de UX.
 
 ### Estado actual MGD-003 — 2026-10-05
 - Worker PROD dedicado creado: `migrandia-api.avaldiviezoch.workers.dev`.
