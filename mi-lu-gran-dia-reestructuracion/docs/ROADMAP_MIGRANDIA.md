@@ -1664,7 +1664,7 @@ Implementación DEV segura:
 # BLOQUE K — MARCHA BLANCA Y BETA
 
 ## MGD-032 — Marcha blanca controlada
-Estado: ⬜ PENDIENTE
+Estado: 🟡 CONTRATO DE COHORTES Y GATE IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: ALTA
 
 Primero:
@@ -1683,6 +1683,16 @@ Medir:
 - persistencia;
 - permisos;
 - RSVP.
+
+Implementación DEV segura:
+- nuevo `src/core/app/controlled-rollout.js`;
+- cohortes: interna (0–4), externa pequeña (5–10) y externa ampliada (20–30);
+- métricas obligatorias centralizadas;
+- gate de avance exige E2E, móvil y desktop en verde, cero errores críticos, cero fallos de persistencia/permisos/RSVP, Firebase y Workers saludables y costos dentro de rango;
+- un solo fallo bloquea el avance;
+- `autoEnroll: false`;
+- `publicBeta: false`;
+- todavía no se habilitan usuarios externos ni se cambia producción.
 
 ---
 
