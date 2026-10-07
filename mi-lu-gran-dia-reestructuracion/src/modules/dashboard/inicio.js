@@ -2,6 +2,7 @@ import { installObservability, reportError } from '../../services/observability.
 import { APP_VERSION_LABEL } from '../../core/app/version.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { applyEventTheme } from '../../core/app/theme-tokens.js';
+import { getEventTerminology } from '../../core/app/event-terminology.js';
 import { auth } from '../../services/firebase-client.js';
 import { readPlannerStorageKeys, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
 import { GUEST_STORAGE_KEY, summarizeInvitadosValue } from '../invitados/invitados-data.js?v=10';
@@ -365,7 +366,8 @@ function setHomeRing(selector, percent) {
   if (ring) ring.style.setProperty('--p', String(Math.max(0, Math.min(100, Number(percent) || 0))));
 }
 
-function homePriority(summary) {
+function homePriority(summary, context) {
+  const terminology = getEventTerminology(context?.eventType);
   const guests = summary?.guests || {};
   const checklist = summary?.checklist || {};
   const budget = summary?.budget || {};
@@ -377,12 +379,12 @@ function homePriority(summary) {
   const progressTasks = Number(checklist.progress) || 0;
   const overdueTasks = Number(checklist.overdue) || 0;
   if (overdueTasks > 0) return { module:'checklist', target:'overdue', title: overdueTasks + (overdueTasks === 1 ? ' tarea está atrasada' : ' tareas están atrasadas'), detail:'Empieza por los pendientes que ya superaron su fecha prevista.' };
-  if (unseatedGuests > 0) return { module:'invitados', target:'unseated', title: unseatedGuests + (unseatedGuests === 1 ? ' invitado aún no tiene mesa' : ' invitados aún no tienen mesa'), detail:'Revisa las personas que todavía faltan por ubicar en una mesa.' };
-  if (pendingGuests > 0) return { module:'invitados', target:'pending-rsvp', title: pendingGuests + (pendingGuests === 1 ? ' invitado está pendiente de confirmar' : ' invitados están pendientes de confirmar'), detail:'Revisa las confirmaciones pendientes antes de cerrar la distribución.' };
+  if (unseatedGuests > 0) return { module:'invitados', target:'unseated', title: `${unseatedGuests} ${unseatedGuests === 1 ? terminology.guest : terminology.guestPlural} aún no ${unseatedGuests === 1 ? 'tiene' : 'tienen'} mesa`, detail:'Revisa las personas que todavía faltan por ubicar en una mesa.' };
+  if (pendingGuests > 0) return { module:'invitados', target:'pending-rsvp', title: `${pendingGuests} ${pendingGuests === 1 ? terminology.guest : terminology.guestPlural} ${pendingGuests === 1 ? 'está' : 'están'} pendiente${pendingGuests === 1 ? '' : 's'} de confirmar`, detail:'Revisa las confirmaciones pendientes antes de cerrar la distribución.' };
   if (progressTasks > 0) return { module:'checklist', target:'progress', title: progressTasks + (progressTasks === 1 ? ' tarea sigue en proceso' : ' tareas siguen en proceso'), detail:'Continúa lo que ya empezaste antes de abrir nuevos pendientes.' };
-  if (pendingTasks > 0) return { module:'checklist', target:'pending', title: pendingTasks + (pendingTasks === 1 ? ' tarea queda pendiente' : ' tareas quedan pendientes'), detail:'Revisa el Checklist y elige el siguiente pendiente de la boda.' };
+  if (pendingTasks > 0) return { module:'checklist', target:'pending', title: pendingTasks + (pendingTasks === 1 ? ' tarea queda pendiente' : ' tareas quedan pendientes'), detail:terminology.checklistPendingDetail };
   if ((Number(budget.budget) || 0) > 0 && (Number(budget.balance) || 0) > 0) return { module:'presupuesto', target:'overview', title: formatHomeMoney(budget.balance, budget.currency) + ' disponibles en presupuesto', detail:'Consulta lo presupuestado y los pagos registrados antes de la siguiente decisión.' };
-  if (!total && !Number(checklist.total) && !(Number(budget.budget) || 0)) return { module:'', title:'Empieza a darle forma a tu boda', detail:'Agrega tus primeros invitados, tareas o presupuesto para ver aquí qué sigue.' };
+  if (!total && !Number(checklist.total) && !(Number(budget.budget) || 0)) return { module:'', title:terminology.startPrompt, detail:`Agrega tus primeros ${terminology.guestPlural}, tareas o presupuesto para ver aquí qué sigue.` };
   return { module:'', title:'Tus principales pendientes están al día', detail:'Puedes continuar desde el módulo que quieras organizar ahora.' };
 }
 
@@ -403,7 +405,7 @@ function renderHomeSummary(summary, context) {
   const guests = summary?.guests || {};
   const checklist = summary?.checklist || {};
   const budget = summary?.budget || {};
-  const focus = homePriority(summary);
+  const focus = homePriority(summary, context);
   homeDashboard.querySelector('[data-home-focus-title]').textContent = focus.title;
   homeDashboard.querySelector('[data-home-focus-detail]').textContent = focus.detail;
   const focusAction = homeDashboard.querySelector('[data-home-focus-action]');
@@ -494,14 +496,15 @@ homeDashboard?.querySelector('[data-home-focus-action]')?.addEventListener('clic
 function applyWeddingContext(context) {
   weddingContext = context;
   applyEventTheme(context?.themeId);
-  const name = context?.name || 'Mi boda';
+  const terminology = getEventTerminology(context?.eventType);
+  const name = context?.name || terminology.defaultName;
   const capabilities = weddingCapabilities(context?.role);
 
   $('activeWeddingName').textContent = name;
   $('mainWeddingTitle').textContent = name;
   $('appNavWeddingName').textContent = name;
   const mobileWeddingName = $('appMobileWeddingName');
-  if (mobileWeddingName) mobileWeddingName.textContent = context?.name ? `La boda de ${name}` : 'Mi boda';
+  if (mobileWeddingName) mobileWeddingName.textContent = name;
   $('appNavRole').textContent = capabilities.label || 'Mi acceso';
   $('appNavPopoverWedding').textContent = name;
   $('shareWeddingButton').hidden = !capabilities.canManageTeam;
