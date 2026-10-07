@@ -1283,3 +1283,47 @@ test('MGD-032: marcha blanca define cohortes y gate sin enrolar usuarios automá
     publicBeta: false
   });
 });
+
+
+test('MGD-033: beta pública queda bloqueada mientras existan prerequisitos abiertos', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/public-beta-readiness.js')).href;
+  const {
+    PUBLIC_BETA_REQUIREMENTS,
+    assessPublicBetaReadiness,
+    buildPublicBetaPlan
+  } = await import(moduleUrl);
+
+  const current = assessPublicBetaReadiness({
+    'MGD-002': false,
+    'MGD-003': false,
+    'MGD-004': true,
+    'MGD-006': true,
+    'MGD-008': false,
+    'MGD-010': false,
+    'MGD-026': false,
+    multiEventBase: true,
+    eventIsolation: true,
+    backupTested: true,
+    mobileDesktopQa: true
+  });
+
+  const allClosed = Object.fromEntries(PUBLIC_BETA_REQUIREMENTS.map((key) => [key, true]));
+  const readyPlan = buildPublicBetaPlan(allClosed);
+
+  expect({
+    requirements: PUBLIC_BETA_REQUIREMENTS,
+    currentPublicBeta: current.publicBeta,
+    currentMissing: current.missing,
+    readyPublicBeta: readyPlan.publicBeta,
+    autoPublish: readyPlan.autoPublish
+  }).toEqual({
+    requirements: [
+      'MGD-002','MGD-003','MGD-004','MGD-006','MGD-008','MGD-010','MGD-026',
+      'multiEventBase','eventIsolation','backupTested','mobileDesktopQa'
+    ],
+    currentPublicBeta: false,
+    currentMissing: ['MGD-002','MGD-003','MGD-008','MGD-010','MGD-026'],
+    readyPublicBeta: true,
+    autoPublish: false
+  });
+});
