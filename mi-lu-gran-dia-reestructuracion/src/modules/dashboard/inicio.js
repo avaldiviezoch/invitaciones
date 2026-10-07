@@ -1,5 +1,5 @@
 import { installObservability, reportError } from '../../services/observability.js?v=2';
-import { AUTH_BRANDING } from '../../core/app/auth-branding.js?v=1';
+import { AUTH_BRANDING } from '../../core/app/auth-branding.js?v=2';
 import { APP_VERSION_LABEL } from '../../core/app/version.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { applyEventTheme } from '../../core/app/theme-tokens.js';
@@ -46,6 +46,7 @@ const overlay = $('authOverlay');
 const status = $('authStatus');
 const email = $('authEmail');
 const password = $('authPassword');
+const authPasswordLabel = $('authPasswordLabel');
 const passwordConfirm = $('authPasswordConfirm');
 const authConfirmLabel = $('authConfirmLabel');
 const authTitle = $('authTitle');
@@ -725,18 +726,38 @@ function tick() {
 let authMode = 'login';
 
 function setAuthMode(mode = 'login') {
-  authMode = mode === 'register' ? 'register' : 'login';
+  authMode = ['login', 'register', 'recovery'].includes(mode) ? mode : 'login';
   const registering = authMode === 'register';
-  authTitle.textContent = registering ? AUTH_BRANDING.registerTitle : AUTH_BRANDING.loginTitle;
+  const recovering = authMode === 'recovery';
+
+  authTitle.textContent = registering
+    ? AUTH_BRANDING.registerTitle
+    : recovering
+      ? AUTH_BRANDING.recoveryTitle
+      : AUTH_BRANDING.loginTitle;
   authIntro.textContent = registering
     ? AUTH_BRANDING.registerIntro
-    : AUTH_BRANDING.loginIntro;
+    : recovering
+      ? AUTH_BRANDING.recoveryIntro
+      : AUTH_BRANDING.loginIntro;
+
+  authPasswordLabel.hidden = recovering;
   authConfirmLabel.hidden = !registering;
   password.autocomplete = registering ? 'new-password' : 'current-password';
+  if (recovering) password.value = '';
   passwordConfirm.value = '';
-  $('emailLoginButton').textContent = registering ? 'Crear cuenta' : 'Ingresar';
-  authModeToggle.textContent = registering ? 'Ya tengo una cuenta' : 'Crear cuenta';
-  authForgotPassword.hidden = registering;
+
+  $('emailLoginButton').textContent = registering
+    ? 'Crear cuenta'
+    : recovering
+      ? 'Enviar enlace'
+      : 'Ingresar';
+  authModeToggle.textContent = registering
+    ? 'Ya tengo una cuenta'
+    : recovering
+      ? 'Volver a iniciar sesión'
+      : 'Crear cuenta';
+  authForgotPassword.hidden = registering || recovering;
   status.textContent = '';
 }
 
@@ -755,33 +776,37 @@ backdrop.onclick = () => setMenu(false);
 $('authCloseButton').onclick = () => setAuth(false);
 authModeToggle.onclick = () => setAuthMode(authMode === 'login' ? 'register' : 'login');
 
-authForgotPassword.onclick = async () => {
-  const targetEmail = email.value.trim();
-  if (!targetEmail || !email.checkValidity()) {
-    status.textContent = 'Escribe un correo válido para enviarte el enlace de recuperación.';
-    email.focus();
-    return;
-  }
-  status.textContent = 'Enviando enlace de recuperación…';
-  try {
-    await sendPasswordResetEmail(auth, targetEmail);
-    status.textContent = 'Si existe una cuenta con ese correo, recibirás un enlace para restablecer tu contraseña.';
-  } catch (error) {
-    const code = String(error?.code || '');
-    status.textContent = ['auth/user-not-found', 'auth/invalid-credential'].includes(code)
-      ? 'Si existe una cuenta con ese correo, recibirás un enlace para restablecer tu contraseña.'
-      : errorText(error);
-  }
+authForgotPassword.onclick = () => {
+  setAuthMode('recovery');
+  email.focus();
 };
 
 $('emailLoginButton').onclick = async () => {
   const targetEmail = email.value.trim();
   const secret = password.value;
+
   if (!targetEmail || !email.checkValidity()) {
-    status.textContent = 'Revisa el correo ingresado.';
+    status.textContent = authMode === 'recovery'
+      ? 'Escribe un correo válido para enviarte el enlace de recuperación.'
+      : 'Revisa el correo ingresado.';
     email.focus();
     return;
   }
+
+  if (authMode === 'recovery') {
+    status.textContent = 'Enviando enlace de recuperación…';
+    try {
+      await sendPasswordResetEmail(auth, targetEmail);
+      status.textContent = 'Si existe una cuenta con ese correo, recibirás un enlace para restablecer tu contraseña.';
+    } catch (error) {
+      const code = String(error?.code || '');
+      status.textContent = ['auth/user-not-found', 'auth/invalid-credential'].includes(code)
+        ? 'Si existe una cuenta con ese correo, recibirás un enlace para restablecer tu contraseña.'
+        : errorText(error);
+    }
+    return;
+  }
+
   if (secret.length < 6) {
     status.textContent = 'Usa una contraseña de al menos 6 caracteres.';
     password.focus();

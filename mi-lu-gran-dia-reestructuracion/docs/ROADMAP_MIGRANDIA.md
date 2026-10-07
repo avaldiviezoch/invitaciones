@@ -838,9 +838,26 @@ Implementación DEV — 2026-10-06:
 - el botón se oculta durante el modo “Crear cuenta” para mantener el flujo claro;
 - QA seguro añadido con correo inválido, sin enviar ninguna solicitud real a Firebase.
 
+Corrección UX DEV — 2026-10-07:
+- se detectó que `hidden` era visualmente anulado por `.auth-card label { display:grid; }`, haciendo visible “Confirmar contraseña” incluso en modo Ingresar;
+- se añadió una regla específica `.auth-card [hidden]` para respetar el estado real sin `!important`;
+- Auth queda con tres modos dentro del mismo formulario y un solo JS: `login`, `register` y `recovery`;
+- login muestra correo + contraseña;
+- register muestra correo + contraseña + confirmar contraseña;
+- recovery muestra únicamente correo y botón “Enviar enlace”;
+- “Olvidé mi contraseña” entra al modo recovery en lugar de mezclar recuperación con el formulario de login;
+- el copy de recuperación se centralizó en `auth-branding.js`;
+- E2E seguro ampliado para validar transiciones visuales y volver a login;
+- no se modificó Firebase, Firestore, Auth, Storage, Rules ni datos reales.
+
 QA seguro DEV — 2026-10-06:
 - workflow `MGD-008 E2E seguro` reportado en verde por el usuario;
 - validado botón de recuperación, validación local de correo y mensaje de error sin enviar solicitudes reales.
+
+QA seguro DEV — 2026-10-07:
+- workflow `MGD-008 E2E seguro` reportado en verde por Antonio tras la corrección UX de Auth;
+- validada la separación visual de login, registro y recuperación;
+- sin regresiones reportadas en la suite segura.
 
 Pendiente:
 - prueba real del correo de recuperación solo con una cuenta de prueba autorizada.

@@ -31,7 +31,7 @@
   if(moduleId==='checklist'||moduleId==='presupuesto'||moduleId==='proveedores'||moduleId==='invitados'||moduleId==='distribucion'||moduleId==='cronograma'||moduleId==='invitaciones'||moduleId==='musica'||moduleId==='ideas') document.documentElement.classList.add('module-route');
 })();
 </script>
-<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=59">
+<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=60">
 <link rel="stylesheet" href="src/modules/checklist/checklist.css?v=19">
 <link rel="stylesheet" href="src/modules/presupuesto/presupuesto.css?v=27">
 <link rel="stylesheet" href="src/modules/proveedores/proveedores.css?v=5">
@@ -524,7 +524,7 @@ o usa tu correo
 <label>
 Correo<input id="authEmail" type="email" autocomplete="email" inputmode="email">
 </label>
-<label>
+<label id="authPasswordLabel">
 Contraseña<input id="authPassword" type="password" autocomplete="current-password" minlength="6">
 </label>
 <label id="authConfirmLabel" hidden>
@@ -604,7 +604,7 @@ Cancelar
 <form class="create-wedding-card" id="createWeddingForm" hidden><h3>Crear una nueva boda</h3><label><span>Nombre de la boda</span><input id="newWeddingName" type="text" maxlength="90" placeholder="Ej. Antonio & Lucero" required></label><label><span>Fecha</span><input id="newWeddingDate" type="date"></label><div><button type="button" id="cancelCreateWedding">Cancelar</button><button type="submit">Crear y abrir</button></div><p id="createWeddingStatus" aria-live="polite"></p></form>
 </div>
 </section>
-<script type="module" src="src/modules/dashboard/inicio.js?v=267-20261005">
+<script type="module" src="src/modules/dashboard/inicio.js?v=268-20261007">
 </script>
 </body>
 </html>

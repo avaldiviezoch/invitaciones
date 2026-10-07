@@ -1,3 +1,26 @@
+## 2026-10-07 — MGD-010 QA seguro aprobado
+
+- Antonio ejecutó el workflow `MGD-008 E2E seguro` sobre la rama de corrección de Auth y reportó resultado VERDE.
+- Queda validada en DEV la separación visual entre Ingresar, Crear cuenta y Recuperar contraseña.
+- MGD-010 vuelve a estado 🟢 QA SEGURO DEV APROBADO.
+- La prueba real de recepción del correo de recuperación con cuenta QA continúa pendiente.
+- No se modificó producción ni se realizaron cambios destructivos en Firebase, Firestore, Auth, Storage o Rules.
+
+## 2026-10-07 — MGD-010: separación clara de login, registro y recuperación
+
+- Durante la prueba real de cuenta Email/Password se detectó que “Confirmar contraseña” permanecía visible también en modo Ingresar.
+- Causa real: la regla CSS `.auth-card label { display:grid; }` anulaba visualmente el atributo HTML `hidden`.
+- Se corrigió en la misma implementación existente con `.auth-card [hidden] { display:none; }`, sin `!important` y sin duplicar formularios.
+- Se formalizaron tres estados del mismo authOverlay: login, register y recovery.
+- Login muestra correo + contraseña.
+- Registro muestra correo + contraseña + confirmar contraseña.
+- Recuperación muestra solo correo, título “Recupera tu acceso” y acción “Enviar enlace”.
+- “Olvidé mi contraseña” ya no mezcla recuperación con los campos de contraseña.
+- Se centralizó el copy de recuperación en `auth-branding.js`.
+- Se amplió MGD-010 E2E seguro para validar estados y retorno a login sin enviar correo real.
+- No se modificó Firebase, Firestore, Storage, Auth, Rules ni datos reales.
+- Pendiente: corrida GitHub Actions y posteriormente prueba real controlada de recuperación con la cuenta QA.
+
 ## 2026-10-07 — MGD-008 prueba autenticada: hallazgos DEV/PROD y login
 
 - Se inició la preparación de la fase autenticada de MGD-008 usando Playwright.
