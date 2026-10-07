@@ -1,3 +1,17 @@
+## 2026-10-06 — MGD-019 implementado en DEV
+
+- Tras aprobar MGD-018 se auditó el motor actual de Distribución y se confirmó que ya existe un catálogo central único.
+- MGD-019 se implementó sin duplicar el módulo ni crear catálogos paralelos.
+- El catálogo conserva sus 38 objetos ordinarios; se agregó metadata opcional `eventTypes` para controlar únicamente qué objetos se ofrecen al crear nuevos elementos.
+- Objetos sin `eventTypes` siguen siendo universales; `bar` es un caso validado.
+- Se configuraron filtros iniciales para `couple`, `altar`, `photo` y `cake`.
+- Desktop y móvil usan la misma función `getVisibleCatalogGroups(eventType)`.
+- El tipo de evento se toma de `eventProfile.distributionCatalog`.
+- El filtro no elimina ni modifica elementos existentes en una distribución guardada y no realiza escrituras automáticas.
+- Se agregó QA seguro MGD-019 para comprobar conteo del catálogo, perfiles y visibilidad por evento.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth, RSVP ni datos reales.
+- Estado: MGD-019 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-06 — MGD-018 aprobado / inicio de auditoría MGD-019
 
 - La corrida de GitHub Actions posterior a MGD-018 fue reportada en verde por el usuario.
