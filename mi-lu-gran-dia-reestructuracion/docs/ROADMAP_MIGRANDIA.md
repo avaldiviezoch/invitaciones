@@ -167,7 +167,7 @@ Pendiente:
 ---
 
 ## MGD-002 — Separación total DEV / PROD
-Estado: 🟠 QA
+Estado: 🟡 CORRECCIÓN FINAL DE ENDPOINT PROD IMPLEMENTADA / PENDIENTE QA
 Prioridad: CRÍTICA
 
 Objetivo:
@@ -223,6 +223,15 @@ Decisiones:
 - no tocar Firebase, Firestore, Auth, Storage ni persistencia;
 - no migrar a producción hasta comprobar funcionalmente los endpoints del Worker PROD;
 - una sola configuración central para servicios actuales y futuros.
+
+### Corrección final detectada — 2026-10-07
+
+- `runtime-environment.js` seguía resolviendo producción hacia `wedding.avaldiviezoch.workers.dev`;
+- ese Worker corresponde al hosting estático y no debe actuar como API;
+- se corrigió `serviceBaseUrl` de producción a `https://migrandia-api.avaldiviezoch.workers.dev`;
+- DEV se mantiene en `https://migrandia-dev.avaldiviezoch.workers.dev`;
+- Ideas y Música siguen consumiendo exclusivamente `serviceUrl()`;
+- se agregó QA específico para impedir regresión hacia el Worker estático.
 
 Pendiente:
 - QA funcional en desarrollo.
