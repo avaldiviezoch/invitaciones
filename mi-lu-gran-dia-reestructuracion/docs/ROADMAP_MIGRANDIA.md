@@ -2520,3 +2520,16 @@ Commits:
 - `175c0754fc73743eab2bfbdf8a9ebcddd5cc4f45` — exclusión de sesión/tokens y artefactos.
 
 Estado: preparación completada; pendiente captura manual de sesión existente y primera corrida local autenticada. No usar cuenta nueva ni completar onboarding durante este QA.
+
+
+### MGD-008A autenticado — auditoría de Invitaciones, Distribución y Música
+
+Resultado por módulo:
+- **Invitaciones:** el montaje carga la vista, suscribe la biblioteca personal y puede cargar una URL segura en el iframe. La escritura solo aparece en el submit de `addPersonalInvitation(...)`; abrir el módulo por sí solo no ejecuta esa alta. Se clasifica como **apto para baseline autenticado de solo lectura**, con la precaución de no enviar formularios ni accionar creación.
+- **Distribución:** no entra al baseline estricto de solo lectura. Aunque el montaje inicia leyendo invitados/distribución, contiene autosave y además una reparación dirigida que puede ejecutar `writePlannerStorageKey(...DISTRIBUTION_VIEW_STORAGE_KEY...)` al detectar el estado legado Casa Acapulco con Y=+450. Por tanto, abrir el módulo puede escribir en una condición real específica.
+- **Música:** no entra al baseline estricto de solo lectura. `mountMusica()` ejecuta `hydratePlaylistCovers(plan)` y, si detecta cambios de portada, persiste automáticamente el plan mediante `writePlannerStorageKey` sin interacción adicional.
+
+Decisión:
+- sumar **Invitaciones** a la próxima tanda autenticada de solo lectura;
+- mantener **Distribución** y **Música** fuera del QA autenticado automático hasta definir una estrategia segura que garantice cero escritura;
+- no modificar el código funcional de ambos módulos solo para facilitar pruebas.
