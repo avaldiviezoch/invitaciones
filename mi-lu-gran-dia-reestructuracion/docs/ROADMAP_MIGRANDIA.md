@@ -948,7 +948,7 @@ Regla:
 ---
 
 ## MGD-014 — Motor central `eventProfile`
-Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: CRÍTICA
 
 No llenar el código de:
@@ -983,7 +983,7 @@ Este perfil no escala con usuarios y por ello sí puede ser configuración JS/JS
 # BLOQUE D — EVENTO VS TEMÁTICA
 
 ## MGD-015 — Separar tipo de evento de temática
-Estado: ⬜ PENDIENTE
+Estado: 🟡 EN DESARROLLO
 Prioridad: ALTA
 
 Ejemplos:
