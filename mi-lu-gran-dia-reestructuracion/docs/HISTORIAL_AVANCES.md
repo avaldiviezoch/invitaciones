@@ -1,3 +1,15 @@
+## 2026-10-07 — MGD-031 contrato formal implementado
+
+- Se auditó el backup legacy de planner-cloud.
+- El formato legacy tenía type/version/localStorage, pero no incluía eventId.
+- Se creó `event-backup-contract.js`.
+- El nuevo sobre formal incluye eventId, schemaVersion, createdAt, metadatos del evento y payload.
+- Un restore queda bloqueado si el eventId del backup no coincide exactamente con el evento destino.
+- Incluso cuando coincide, el plan devuelve restore: false y overwriteAllowed: false.
+- No se restauró ni sobrescribió ningún evento real.
+- Se agregó QA seguro específico para MGD-031.
+- Estado: MGD-031 🟡 CONTRATO FORMAL IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-030 aprobado
 
 - QA seguro reportado en verde por el usuario.
