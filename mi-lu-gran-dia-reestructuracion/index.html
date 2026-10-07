@@ -509,30 +509,37 @@ Antonio Valdiviezo © Derechos reservados
 </section>
 <section id="authOverlay" class="auth-overlay">
 <div class="auth-card">
-<h2>
+<h2 id="authTitle">
 Tu boda, siempre contigo
 </h2>
-<p>
+<p id="authIntro">
 Inicia sesión para acceder a Mi Gran Día.
 </p>
-<button id="googleLoginButton" class="google">
+<button id="googleLoginButton" class="google" type="button">
 Continuar con Google
 </button>
 <div class="divider">
 o usa tu correo
 </div>
 <label>
-Correo<input id="authEmail" type="email">
+Correo<input id="authEmail" type="email" autocomplete="email" inputmode="email">
 </label>
 <label>
-Contraseña<input id="authPassword" type="password">
+Contraseña<input id="authPassword" type="password" autocomplete="current-password" minlength="6">
 </label>
-<button id="emailLoginButton" class="primary">
+<label id="authConfirmLabel" hidden>
+Confirmar contraseña<input id="authPasswordConfirm" type="password" autocomplete="new-password" minlength="6">
+</label>
+<button id="emailLoginButton" class="primary" type="button">
 Ingresar
 </button>
-<p id="authStatus" class="status">
+<div class="auth-actions">
+<button id="authModeToggle" class="auth-link" type="button">Crear cuenta</button>
+<button id="authForgotPassword" class="auth-link" type="button">Olvidé mi contraseña</button>
+</div>
+<p id="authStatus" class="status" aria-live="polite">
 </p>
-<button id="authCloseButton" class="close">
+<button id="authCloseButton" class="close" type="button">
 Cancelar
 </button>
 </div>
