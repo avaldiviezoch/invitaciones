@@ -710,3 +710,28 @@ test('MGD-025 fase 2: lectura nueva exige token de sincronización antes de desp
     domainReturnsToken: true
   });
 });
+
+
+test('MGD-025 fase 3: fallback legacy autorrepara solo claves faltantes sin backfill masivo', async () => {
+  const plannerSource = await import('node:fs/promises').then(({ readFile }) =>
+    readFile(path.resolve(process.cwd(), 'src/services/planner-cloud.js'), 'utf8')
+  );
+
+  expect({
+    hasMigrationEntries: plannerSource.includes('const migrationEntries = {}'),
+    onlyFallbackKeys: plannerSource.includes('fallbackKeys.forEach((key) =>'),
+    requiresDomainToken: plannerSource.includes('canUseDomain'),
+    requiresEditCapability: plannerSource.includes('weddingCapabilities(context.role).canEdit'),
+    checksLegacyPresence: plannerSource.includes('Object.prototype.hasOwnProperty.call(backup?.localStorage || {}, key)'),
+    writesOnlyCollectedEntries: plannerSource.includes('writePlannerDomainShadowEntries(context, migrationEntries, meta.syncToken)'),
+    nonBlocking: plannerSource.includes("void writePlannerDomainShadowEntries(context, migrationEntries, meta.syncToken)")
+  }).toEqual({
+    hasMigrationEntries: true,
+    onlyFallbackKeys: true,
+    requiresDomainToken: true,
+    requiresEditCapability: true,
+    checksLegacyPresence: true,
+    writesOnlyCollectedEntries: true,
+    nonBlocking: true
+  });
+});
