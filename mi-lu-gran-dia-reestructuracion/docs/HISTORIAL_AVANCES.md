@@ -1,3 +1,12 @@
+## 2026-10-07 — Documentación de reglas Firebase/Firestore
+
+- Se creó `docs/FIREBASE_RULES.md` como referencia operativa para desarrollo y QA.
+- Se documentó el modelo de autenticación, roles, membresías, users, weddings, planner, invitaciones y RSVP público.
+- Se dejó explícito que Firebase Auth y Firestore Rules son capas distintas: las Rules no controlan `createUserWithEmailAndPassword()`.
+- Se detectó que el snapshot de reglas proporcionado por Antonio contiene lógica adicional que no coincide completamente con `Wedding/main/firebase/firestore.rules`.
+- No se modificaron ni desplegaron reglas de Firebase/Firestore.
+- Hallazgo MGD-008 pendiente: capturar el `error.code` real del fallo de creación de cuenta antes de cambiar configuración.
+
 ## 2026-10-07 — MGD-008 prueba autenticada: hallazgos DEV/PROD y login
 
 - Se inició la preparación de la fase autenticada de MGD-008 usando Playwright.
