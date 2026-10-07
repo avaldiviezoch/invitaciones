@@ -109,3 +109,10 @@ Todo módulo que persista o mantenga estado específico de una boda debe validar
 6. Usuario B → comprobar que ningún dato de A aparece en su boda.
 
 No se declara un módulo listo para producción si falla cualquiera de estas pruebas.
+
+## 9. Referencia de Firebase / Firestore
+
+La arquitectura y reglas observadas de Firebase/Firestore están documentadas en `docs/FIREBASE_RULES.md`.
+
+Ese documento es de referencia para desarrollo y QA y **no sustituye** el archivo realmente desplegado. No modificar ni desplegar Firebase, Firestore, Auth, Storage o Rules sin autorización explícita y sin comparar previamente la versión documentada, la versionada y la realmente desplegada.
+

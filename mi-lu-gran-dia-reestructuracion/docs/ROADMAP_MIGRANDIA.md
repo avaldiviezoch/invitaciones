@@ -21,6 +21,7 @@ Bloqueadores: MGD-010 pendiente prueba real controlada; MGD-026 pendiente config
 - MGD-034, MGD-035 y MGD-036: QA seguro DEV aprobado.
 - No se habilitó beta pública.
 - No se realizaron cambios destructivos en Firebase, Firestore, Storage o Auth en esta ronda.
+- Referencia operativa añadida: `docs/FIREBASE_RULES.md`; documenta reglas observadas y diferencias con producción sin modificar Rules.
 
 ---
 
