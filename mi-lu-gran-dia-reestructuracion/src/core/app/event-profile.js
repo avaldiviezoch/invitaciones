@@ -1,4 +1,5 @@
 import { EVENT_TYPE_BY_ID } from './event-types.js';
+import { getEventTerminology } from './event-terminology.js';
 
 const CURRENT_MODULES = Object.freeze([
   'checklist',
@@ -12,14 +13,6 @@ const CURRENT_MODULES = Object.freeze([
   'ideas'
 ]);
 
-const DEFAULT_TERMINOLOGY = Object.freeze({
-  event: 'evento',
-  eventPlural: 'eventos',
-  host: 'organizador',
-  guest: 'invitado',
-  guestPlural: 'invitados'
-});
-
 function freezeProfile(profile) {
   Object.values(profile).forEach((value) => {
     if (value && typeof value === 'object' && !Object.isFrozen(value)) Object.freeze(value);
@@ -30,7 +23,7 @@ function freezeProfile(profile) {
 function profile(type, overrides = {}) {
   return freezeProfile({
     type,
-    terminology: { ...DEFAULT_TERMINOLOGY, ...(overrides.terminology || {}) },
+    terminology: overrides.terminology || getEventTerminology(type),
     modules: overrides.modules || CURRENT_MODULES,
     checklist: overrides.checklist || { templateId: type },
     distributionCatalog: overrides.distributionCatalog || { profileId: type },
@@ -43,31 +36,24 @@ function profile(type, overrides = {}) {
 
 const EVENT_PROFILES = Object.freeze({
   wedding: profile('wedding', {
-    terminology: { event: 'boda', eventPlural: 'bodas', host: 'pareja' },
     audienceProfile: { mode: 'couple' }
   }),
   birthday: profile('birthday', {
-    terminology: { event: 'cumpleaños', eventPlural: 'cumpleaños', host: 'festejado' },
     audienceProfile: { mode: 'age-aware' }
   }),
   quince: profile('quince', {
-    terminology: { event: '15 años', eventPlural: 'fiestas de 15 años', host: 'quinceañera/o' },
     audienceProfile: { mode: 'teen' }
   }),
   baby_shower: profile('baby_shower', {
-    terminology: { event: 'baby shower', eventPlural: 'baby showers', host: 'familia' },
     audienceProfile: { mode: 'family' }
   }),
   religious: profile('religious', {
-    terminology: { event: 'celebración religiosa', eventPlural: 'celebraciones religiosas', host: 'familia' },
     audienceProfile: { mode: 'family' }
   }),
   graduation: profile('graduation', {
-    terminology: { event: 'graduación', eventPlural: 'graduaciones', host: 'graduado' },
     audienceProfile: { mode: 'graduate' }
   }),
   corporate: profile('corporate', {
-    terminology: { event: 'evento corporativo', eventPlural: 'eventos corporativos', host: 'organización' },
     audienceProfile: { mode: 'organization' }
   }),
   custom: profile('custom')
