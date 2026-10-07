@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-022 segundo ajuste de QA
+
+- La segunda corrida roja ocurrió antes de ejecutar pruebas: Playwright cargó `e2e-safe.spec.js` en un contexto donde `import.meta` no está disponible.
+- Error observado: `SyntaxError: Cannot use 'import.meta' outside a module`; por eso el runner terminó con `No tests found`.
+- Se reemplazó `import.meta.url` por una ruta de archivo construida con `path.resolve(process.cwd(), ...)` y `pathToFileURL`.
+- El cambio afecta únicamente al test MGD-022; no modifica lógica funcional, MGD-022, DNS, Cloudflare, Firebase, Firestore, Storage, Rules, Auth ni RSVP.
+- MGD-022 permanece 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-022 ajuste de QA por desfase de GitHub Pages
 
 - La primera corrida de QA de MGD-022 terminó roja: 78 pruebas pasaron y fallaron únicamente las tres variantes de MGD-022 (desktop, tablet y mobile).
