@@ -125,15 +125,30 @@ test('MGD-009: registro por correo valida UI sin crear cuenta', async ({ page })
   expect(unexpectedRegistrationErrors).toEqual([]);
 });
 
-test('MGD-010: recuperación exige correo válido sin enviar solicitud', async ({ page }) => {
+test('MGD-010: recuperación usa un modo propio y valida correo sin enviar solicitud', async ({ page }) => {
   const errors = collectUnexpectedErrors(page);
   await page.goto('', { waitUntil: 'domcontentloaded' });
   await page.locator('#discoverSkipButton').click();
   await expect(page.locator('#authForgotPassword')).toBeVisible();
+  await expect(page.locator('#authPasswordLabel')).toBeVisible();
+  await expect(page.locator('#authConfirmLabel')).toBeHidden();
+
+  await page.locator('#authForgotPassword').click();
+  await expect(page.locator('#authTitle')).toHaveText('Recupera tu acceso');
+  await expect(page.locator('#authPasswordLabel')).toBeHidden();
+  await expect(page.locator('#authConfirmLabel')).toBeHidden();
+  await expect(page.locator('#emailLoginButton')).toHaveText('Enviar enlace');
+  await expect(page.locator('#authModeToggle')).toHaveText('Volver a iniciar sesión');
+  await expect(page.locator('#authForgotPassword')).toBeHidden();
 
   await page.locator('#authEmail').fill('correo-invalido');
-  await page.locator('#authForgotPassword').click();
+  await page.locator('#emailLoginButton').click();
   await expect(page.locator('#authStatus')).toHaveText('Escribe un correo válido para enviarte el enlace de recuperación.');
+
+  await page.locator('#authModeToggle').click();
+  await expect(page.locator('#authTitle')).toHaveText('Tu evento, siempre contigo');
+  await expect(page.locator('#authPasswordLabel')).toBeVisible();
+  await expect(page.locator('#authConfirmLabel')).toBeHidden();
 
   expect(errors).toEqual([]);
 });
