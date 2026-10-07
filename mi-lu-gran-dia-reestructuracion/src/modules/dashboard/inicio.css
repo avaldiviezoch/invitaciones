@@ -685,6 +685,25 @@ body.menu-open .menu-button svg {
   color:#d7ddb9;
   font-size:11px
 }
+.auth-actions {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin-top:8px
+}
+.auth-card .auth-link {
+  min-height:36px;
+  padding:0 8px;
+  background:transparent;
+  color:var(--muted);
+  font-size:10px;
+  font-weight:700
+}
+.auth-card .auth-link:hover,
+.auth-card .auth-link:focus-visible {
+  color:#fff;
+  background:rgba(255,255,255,.05)
+}
 @media(max-width:700px) {
   .account-card {
     grid-template-columns:minmax(0,1fr) auto;
