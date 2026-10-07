@@ -1,3 +1,12 @@
+## 2026-10-07 — MGD-027 aprobado
+
+- QA seguro reportado en verde por el usuario.
+- MGD-027 queda 🟢 QA SEGURO DEV APROBADO.
+- Ideas mantiene edición Owner/Admin.
+- Editor continúa habilitado para otros módulos.
+- No se tocaron Firestore Rules ni datos reales.
+- Siguiente bloque: MGD-028 — límites de plataforma.
+
 ## 2026-10-07 — MGD-027 permisos de Ideas implementados
 
 - La UI de Ideas ya limitaba edición a Owner/Admin.
