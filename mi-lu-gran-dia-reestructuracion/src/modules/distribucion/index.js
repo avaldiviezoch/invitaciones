@@ -10,6 +10,7 @@ import {
 } from '../invitados/table-geometry.js?v=6';
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=6';
 import { weddingCapabilities } from '../../core/app/permissions.js';
+import { getEventProfile } from '../../core/app/event-profile.js';
 import { setupDistributionCamera } from './camera.js?v=9';
 import {
   normalizePolygonElementGeometry,
@@ -835,7 +836,8 @@ async function mountDistribucion(context) {
   const catalogHost = root.querySelector('[data-distribution-tool-catalog]');
   const areaCatalogHost = root.querySelector('[data-distribution-area-catalog]');
   const catalogSearch = root.querySelector('[data-distribution-catalog-search]');
-  const catalogGroups = getVisibleCatalogGroups();
+  const distributionProfile = getEventProfile(context?.eventType).distributionCatalog;
+  const catalogGroups = getVisibleCatalogGroups(distributionProfile.eventType);
   const areaPresets = getVisibleAreaPresets();
   const catalogButtons = [];
   const createCatalogButton = (definition) => {
@@ -1022,7 +1024,7 @@ async function mountDistribucion(context) {
       if (action === 'add') {
         const mobileCatalog = document.createElement('div');
         mobileCatalog.className = 'distribution-mobile-catalog';
-        getVisibleCatalogGroups().forEach((group, groupIndex) => {
+        getVisibleCatalogGroups(distributionProfile.eventType).forEach((group, groupIndex) => {
           const details = document.createElement('details');
           details.className = 'distribution-mobile-catalog-group';
           details.open = groupIndex === 0;
