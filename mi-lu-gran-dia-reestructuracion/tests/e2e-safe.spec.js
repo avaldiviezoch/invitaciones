@@ -815,3 +815,36 @@ test('MGD-025 fase 4: readiness impide retirar legacy si el dominio no está val
     }
   });
 });
+
+
+test('MGD-025 fase 5: diagnóstico readiness es solo lectura y no retira legacy', async () => {
+  const plannerSource = await import('node:fs/promises').then(({ readFile }) =>
+    readFile(path.resolve(process.cwd(), 'src/services/planner-cloud.js'), 'utf8')
+  );
+
+  const start = plannerSource.indexOf('async function inspectPlannerDomainReadiness');
+  const end = plannerSource.indexOf('async function readPlannerStorageKey', start);
+  const diagnosticSource = plannerSource.slice(start, end);
+
+  expect({
+    exported: plannerSource.includes('inspectPlannerDomainReadiness,'),
+    readsMeta: diagnosticSource.includes('readPlannerMeta(context)'),
+    readsLegacy: diagnosticSource.includes('readPlannerBackup(context, meta)'),
+    readsDomain: diagnosticSource.includes('readPlannerDomainEntries(context, requested)'),
+    assessesEachKey: diagnosticSource.includes('assessPlannerDomainEntry({'),
+    summarizes: diagnosticSource.includes('summarizePlannerDomainReadiness(entries)'),
+    noWriteLegacy: !diagnosticSource.includes('writePlannerStorage'),
+    noWriteDomain: !diagnosticSource.includes('writePlannerDomain'),
+    noDelete: !diagnosticSource.includes('delete')
+  }).toEqual({
+    exported: true,
+    readsMeta: true,
+    readsLegacy: true,
+    readsDomain: true,
+    assessesEachKey: true,
+    summarizes: true,
+    noWriteLegacy: true,
+    noWriteDomain: true,
+    noDelete: true
+  });
+});
