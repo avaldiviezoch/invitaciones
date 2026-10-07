@@ -1,3 +1,15 @@
+## 2026-10-06 — MGD-015 aprobado / MGD-016 implementado en DEV
+
+- La corrida posterior a MGD-015 fue reportada en verde por el usuario; MGD-015 queda 🟢 QA SEGURO DEV APROBADO.
+- Se creó `theme-tokens.js` como fuente central de tokens visuales globales.
+- Se definieron tres presets iniciales: classic-elegant, one-piece-elegant y minimal-black.
+- El dashboard aplica el tema del contexto activo mediante `themeId`, con fallback a classic-elegant.
+- Los nueve módulos actuales fueron conectados de forma progresiva a los tokens globales de fondo, tipografía y/o aliases de color, preservando el aspecto actual del tema clásico.
+- No se creó CSS separado por evento ni se duplicaron módulos.
+- No se persistió themeId ni se modificaron Firebase, Firestore, Storage, Rules, Auth o datos reales.
+- Se añadió QA seguro de aplicación/fallback de tokens.
+- Estado: MGD-016 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-06 — MGD-014 aprobado / MGD-015 implementado en DEV
 
 - La corrida posterior a MGD-014 fue reportada en verde por el usuario; MGD-014 queda 🟢 QA SEGURO DEV APROBADO.
