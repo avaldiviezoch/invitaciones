@@ -1,3 +1,14 @@
+## 2026-10-06 — MGD-009: auditoría de registro por correo
+
+- Se inició MGD-009 únicamente como auditoría, sin modificar Auth.
+- La pantalla actual permite Google Login y login por correo/contraseña, pero no existe un flujo de creación de cuenta por correo.
+- El código usa `signInWithEmailAndPassword`; no importa ni llama `createUserWithEmailAndPassword`.
+- La función de mensajes de error actual solo distingue credenciales inválidas, por lo que MGD-009 necesitará mensajes separados para correo inválido, contraseña débil y correo ya registrado.
+- La persistencia de sesión ya está centralizada mediante `browserLocalPersistence`, y el estado autenticado converge en `onAuthStateChanged`. El registro nuevo debe reutilizar esa arquitectura y no duplicar el manejo de sesión.
+- Diseño propuesto: un único overlay de autenticación con cambio de modo “Ingresar / Crear cuenta”, reutilizando los mismos campos y el flujo de boda/onboarding existente después de autenticarse.
+- No se tocaron Firebase, Firestore, Storage, Rules, Auth ni datos reales.
+- Estado: MGD-009 🟡 AUDITORÍA / PENDIENTE DE AUTORIZACIÓN AUTH.
+
 ## 2026-10-06 — MGD-008B: mapa de dependencias y bloqueos reales
 
 - Se revisó el alcance restante de MGD-008 para separar pruebas ejecutables hoy de pruebas que dependen de funciones todavía no implementadas.
