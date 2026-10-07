@@ -1,3 +1,15 @@
+## 2026-10-07 — MGD-029 contrato seguro implementado
+
+- Se auditó la estructura relacionada a un evento antes de cualquier borrado.
+- Se creó `event-deletion-contract.js`.
+- La eliminación queda restringida al Owner.
+- Se exige confirmación fuerte exacta con nombre + eventId.
+- Se genera un plan explícito de recursos afectados: raíz, members, índices de usuario, planner legacy/nuevo, invitaciones y RSVP.
+- El plan queda con `execute: false`.
+- No se ejecutó ningún borrado real ni deleteDoc.
+- Se agregó QA seguro específico para MGD-029.
+- Estado: MGD-029 🟡 CONTRATO SEGURO IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-028 aprobado
 
 - QA seguro reportado en verde por el usuario.
