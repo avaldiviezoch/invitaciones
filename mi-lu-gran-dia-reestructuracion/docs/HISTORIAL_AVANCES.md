@@ -1,3 +1,14 @@
+## 2026-10-06 — MGD-011: auditoría de usuario único multi-evento
+
+- Se auditó la arquitectura actual sin modificar Firestore ni datos.
+- La base ya soporta múltiples bodas para un mismo UID mediante `users/{uid}/weddings/{weddingId}`, con `activeWeddingId` para seleccionar el contexto activo.
+- `listWeddingContexts()`, `loadActiveWeddingContext()` y `selectActiveWedding()` ya implementan listado, carga y cambio de contexto para un mismo usuario.
+- La UI ya permite abrir el selector de bodas, crear una nueva boda y cambiar entre bodas. Al cambiar de contexto, el dashboard invalida el cache de módulos por `weddingId` antes de volver a montar la vista activa.
+- Los colaboradores usan el mismo UID y acceden por membresía; no se crean usuarios diferentes por boda.
+- El límite actual es semántico/arquitectónico: todo sigue siendo `wedding`, por lo que existe multi-boda pero todavía no multi-evento genérico. MGD-012 será la capa que introduzca `eventType` sin migración destructiva.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth, RSVP ni datos reales.
+- Estado: MGD-011 🟡 AUDITORÍA / BASE EXISTENTE PARCIAL.
+
 ## 2026-10-06 — MGD-009 / MGD-010: QA seguro DEV aprobado
 
 - La corrida de GitHub Actions posterior a la implementación de registro por correo y recuperación de contraseña fue reportada en verde por el usuario.
