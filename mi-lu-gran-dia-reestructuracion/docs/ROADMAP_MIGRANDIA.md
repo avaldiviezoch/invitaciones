@@ -2533,3 +2533,16 @@ Decisión:
 - sumar **Invitaciones** a la próxima tanda autenticada de solo lectura;
 - mantener **Distribución** y **Música** fuera del QA autenticado automático hasta definir una estrategia segura que garantice cero escritura;
 - no modificar el código funcional de ambos módulos solo para facilitar pruebas.
+
+
+### MGD-008A autenticado — ampliación de tanda segura
+
+- tras la auditoría específica, `Invitaciones` se incorporó a `tests/e2e-auth-readonly.spec.js`;
+- la tanda autenticada preparada queda en siete módulos: Checklist, Presupuesto, Proveedores, Invitados, Cronograma, Ideas e Invitaciones;
+- Distribución y Música continúan excluidos por riesgo de escritura automática durante el montaje;
+- commit: `1e1287f4ce59f5a391dc43bdb8307c25a96a2a88`.
+
+Limitación operativa actual:
+- como el trabajo del usuario se realiza directamente en GitHub y no existe un entorno local con sesión iniciada, la suite autenticada no puede ejecutarse todavía sin entregar una sesión/credencial a GitHub Actions;
+- no se almacenará contraseña, token de Google ni estado autenticado en el repositorio ni en Actions sin autorización expresa;
+- por ello se continúa avanzando en auditoría y cobertura segura mientras E2E autenticado real queda preparado pero pendiente de mecanismo de sesión aprobado.
