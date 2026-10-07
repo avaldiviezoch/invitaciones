@@ -1,3 +1,16 @@
+## 2026-10-07 — MGD-032 contrato de marcha blanca implementado
+
+- Se reutiliza la observabilidad existente; no se creó un segundo sistema de errores.
+- Se creó `controlled-rollout.js`.
+- Se formalizaron cohortes interna, externa pequeña (5–10) y externa ampliada (20–30).
+- Se centralizaron métricas: errores, Firebase, Workers, costos, UX, móvil, persistencia, permisos y RSVP.
+- El gate exige E2E/móvil/desktop en verde, cero fallos críticos y salud operativa antes de avanzar.
+- Cualquier fallo bloquea el avance.
+- autoEnroll y publicBeta permanecen en false.
+- No se habilitó ningún usuario externo ni se modificó producción.
+- Se agregó QA seguro específico para MGD-032.
+- Estado: MGD-032 🟡 CONTRATO IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-07 — MGD-031 aprobado
 
 - QA seguro reportado en verde por el usuario.
