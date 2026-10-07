@@ -27,30 +27,53 @@ async function readPlannerDomainEntry(context, storageKey) {
   return {
     exists: true,
     value: snapshot.data()?.value ?? null,
-    schemaVersion: Number(snapshot.data()?.schemaVersion || 0)
+    schemaVersion: Number(snapshot.data()?.schemaVersion || 0),
+    syncToken: String(snapshot.data()?.syncToken || '')
   };
 }
 
-async function writePlannerDomainShadow(context, storageKey, value) {
+async function readPlannerDomainEntries(context, storageKeys) {
+  const keys = Array.isArray(storageKeys)
+    ? [...new Set(storageKeys.map(String).filter(Boolean))]
+    : [];
+  if (!keys.length) return {};
+
+  const results = await Promise.allSettled(
+    keys.map((storageKey) => readPlannerDomainEntry(context, storageKey))
+  );
+
+  return Object.fromEntries(keys.map((storageKey, index) => {
+    const result = results[index];
+    return [
+      storageKey,
+      result.status === 'fulfilled'
+        ? result.value
+        : { exists: false, value: null, schemaVersion: 0, syncToken: '' }
+    ];
+  }));
+}
+
+async function writePlannerDomainShadow(context, storageKey, value, syncToken = '') {
   if (!isPlannerDomainMigrated(storageKey)) return false;
   await setDoc(domainEntryRef(context, storageKey), {
     storageKey: plannerDomainEntryId(storageKey),
     domain: getPlannerDomain(storageKey),
     schemaVersion: DOMAIN_SCHEMA_VERSION,
     value,
+    syncToken: String(syncToken || ''),
     updatedAt: serverTimestamp()
   }, { merge: true });
   return true;
 }
 
-async function writePlannerDomainShadowEntries(context, entries) {
+async function writePlannerDomainShadowEntries(context, entries, syncToken = '') {
   const candidates = Object.entries(entries || {})
     .filter(([storageKey]) => isPlannerDomainMigrated(storageKey));
   if (!candidates.length) return { attempted: 0, fulfilled: 0 };
 
   const results = await Promise.allSettled(
     candidates.map(([storageKey, value]) =>
-      writePlannerDomainShadow(context, storageKey, value)
+      writePlannerDomainShadow(context, storageKey, value, syncToken)
     )
   );
 
@@ -62,6 +85,7 @@ async function writePlannerDomainShadowEntries(context, entries) {
 
 export {
   readPlannerDomainEntry,
+  readPlannerDomainEntries,
   writePlannerDomainShadow,
   writePlannerDomainShadowEntries
 };
