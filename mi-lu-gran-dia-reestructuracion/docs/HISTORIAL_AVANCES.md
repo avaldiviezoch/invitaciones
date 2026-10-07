@@ -1,3 +1,14 @@
+## 2026-10-07 — MGD-010 prueba real aprobada
+
+- Se ejecutó recuperación real de contraseña sobre la cuenta QA autorizada.
+- La app mostró el mensaje neutro esperado para evitar enumeración de usuarios.
+- El correo de Firebase llegó correctamente.
+- El enlace permitió cambiar la contraseña.
+- El acceso posterior con la nueva contraseña fue exitoso.
+- MGD-010 queda funcionalmente aprobado en DEV.
+- Hallazgo derivado para MGD-026: el correo aún usa branding técnico `migrandiaweb`, contenido en inglés, remitente `noreply@migrandia.firebaseapp.com` y fue clasificado inicialmente como correo no deseado en Outlook.
+- Sin cambios en Firestore, datos de boda, invitados, Storage ni Rules.
+
 ## 2026-10-07 — MGD-008 autenticado readonly: 8/8 verde
 
 - Se ejecutó la suite `test:e2e:auth-readonly` con una sesión QA real capturada localmente.
