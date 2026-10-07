@@ -340,3 +340,43 @@ test('MGD-017: diccionario de lenguaje cambia términos sin cambiar lógica', as
   });
   expect(errors).toEqual([]);
 });
+
+
+test('MGD-018: plantillas de Checklist se resuelven por evento sin duplicar motor', async ({ page }) => {
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+
+  const result = await page.evaluate(async () => {
+    const templatesUrl = new URL('src/core/app/checklist-templates.js', window.location.href).href;
+    const profileUrl = new URL('src/core/app/event-profile.js', window.location.href).href;
+    const { CHECKLIST_TEMPLATES, getChecklistTemplate } = await import(templatesUrl);
+    const { getEventProfile } = await import(profileUrl);
+
+    return {
+      count: Object.keys(CHECKLIST_TEMPLATES).length,
+      weddingMode: getChecklistTemplate('wedding').mode,
+      weddingGroups: getChecklistTemplate('wedding').groups.length,
+      quinceHasDress: getChecklistTemplate('quince').tasks.some((task) => task.title === 'Elegir vestido'),
+      babyHasGames: getChecklistTemplate('baby_shower').tasks.some((task) => task.title === 'Definir juegos y actividades'),
+      birthdayHasCake: getChecklistTemplate('birthday').tasks.some((task) => task.title === 'Elegir torta'),
+      corporateUsesAttendees: getChecklistTemplate('corporate').groups.includes('Asistentes'),
+      fallback: getChecklistTemplate('unknown').id,
+      profileTemplate: getEventProfile('quince').checklist.id,
+      immutable: Object.isFrozen(CHECKLIST_TEMPLATES.quince) && Object.isFrozen(CHECKLIST_TEMPLATES.quince.tasks)
+    };
+  });
+
+  expect(result).toEqual({
+    count: 8,
+    weddingMode: 'legacy-rich',
+    weddingGroups: 10,
+    quinceHasDress: true,
+    babyHasGames: true,
+    birthdayHasCake: true,
+    corporateUsesAttendees: true,
+    fallback: 'wedding',
+    profileTemplate: 'quince',
+    immutable: true
+  });
+  expect(errors).toEqual([]);
+});
