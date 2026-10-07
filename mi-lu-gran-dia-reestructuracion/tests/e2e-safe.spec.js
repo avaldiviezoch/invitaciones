@@ -96,3 +96,38 @@ test('E2E-02-pre: login Google abre el flujo sin completar autenticación', asyn
   );
   expect(unexpectedLoginErrors).toEqual([]);
 });
+
+
+test('MGD-009: registro por correo valida UI sin crear cuenta', async ({ page }) => {
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  await page.locator('#discoverSkipButton').click();
+  await expect(page.locator('#authModeToggle')).toBeVisible();
+  await page.locator('#authModeToggle').click();
+
+  await expect(page.locator('#authTitle')).toHaveText('Crea tu cuenta');
+  await expect(page.locator('#authConfirmLabel')).toBeVisible();
+  await expect(page.locator('#emailLoginButton')).toHaveText('Crear cuenta');
+  await expect(page.locator('#authForgotPassword')).toBeHidden();
+
+  await page.locator('#authEmail').fill('persona@example.com');
+  await page.locator('#authPassword').fill('abcdef');
+  await page.locator('#authPasswordConfirm').fill('abcdefg');
+  await page.locator('#emailLoginButton').click();
+  await expect(page.locator('#authStatus')).toHaveText('Las contraseñas no coinciden.');
+
+  expect(errors).toEqual([]);
+});
+
+test('MGD-010: recuperación exige correo válido sin enviar solicitud', async ({ page }) => {
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  await page.locator('#discoverSkipButton').click();
+  await expect(page.locator('#authForgotPassword')).toBeVisible();
+
+  await page.locator('#authEmail').fill('correo-invalido');
+  await page.locator('#authForgotPassword').click();
+  await expect(page.locator('#authStatus')).toHaveText('Escribe un correo válido para enviarte el enlace de recuperación.');
+
+  expect(errors).toEqual([]);
+});
