@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-025 fase 7 aprobada
+
+- QA seguro reportado en verde por el usuario.
+- La Fase 7 del piloto Checklist queda aprobada.
+- Checklist sigue en modo hybrid y el piloto permanece desactivado.
+- No se retiró fallback legacy ni se modificó Firestore.
+- Se audita la activación controlada del primer domain-only.
+
 ## 2026-10-07 — MGD-025 fase 7 piloto Checklist preparado
 
 - Tras aprobar la Fase 6 se auditó la primera candidata a domain-only.
