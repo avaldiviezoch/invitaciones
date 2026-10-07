@@ -1,4 +1,6 @@
 import { test, expect } from '@playwright/test';
+import path from 'node:path';
+import { pathToFileURL } from 'node:url';
 
 const MODULES = [
   'checklist',
@@ -531,7 +533,7 @@ test('MGD-021: motor de invitación y plantilla visual quedan separados', async 
 
 
 test('MGD-022: contrato de URL pública usa dominio Migrandia y no GitHub', async () => {
-  const moduleUrl = new URL('../src/core/app/public-invitation-url.js', import.meta.url).href;
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/public-invitation-url.js')).href;
   const {
     PUBLIC_INVITATION_ORIGIN,
     PUBLIC_INVITATION_PATH,
