@@ -844,7 +844,7 @@ Decisión:
 ---
 
 ## MGD-026 — Branding profesional del login Google / Firebase
-Estado: 🟡 FASE 1 BRANDING CLIENTE IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 FASE 1 QA APROBADA / PENDIENTE CONFIGURACIÓN EXTERNA GOOGLE-FIREBASE
 Prioridad: CRÍTICA ANTES DE MARCHA BLANCA
 
 Problema actual:
