@@ -225,3 +225,33 @@ test('MGD-014: eventProfile central cubre 8 tipos con una forma estable', async 
   });
   expect(errors).toEqual([]);
 });
+
+
+test('MGD-015: eventType y themeId permanecen independientes', async ({ page }) => {
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+
+  const result = await page.evaluate(async () => {
+    const moduleUrl = new URL('src/core/app/theme-id.js', window.location.href).href;
+    const { DEFAULT_THEME_ID, normalizeThemeId, resolveEventPresentation } = await import(moduleUrl);
+    return {
+      defaultTheme: DEFAULT_THEME_ID,
+      normalized: normalizeThemeId(' ONE-PIECE-ELEGANT '),
+      weddingOnePiece: resolveEventPresentation({ eventType: 'wedding', themeId: 'one-piece-elegant' }),
+      birthdayMinimal: resolveEventPresentation({ eventType: 'birthday', themeId: 'minimal-black' }),
+      sameThemeDifferentType: [
+        resolveEventPresentation({ eventType: 'wedding', themeId: 'minimal-black' }).themeId,
+        resolveEventPresentation({ eventType: 'birthday', themeId: 'minimal-black' }).themeId
+      ]
+    };
+  });
+
+  expect(result).toEqual({
+    defaultTheme: 'classic-elegant',
+    normalized: 'one-piece-elegant',
+    weddingOnePiece: { eventType: 'wedding', themeId: 'one-piece-elegant' },
+    birthdayMinimal: { eventType: 'birthday', themeId: 'minimal-black' },
+    sameThemeDifferentType: ['minimal-black', 'minimal-black']
+  });
+  expect(errors).toEqual([]);
+});
