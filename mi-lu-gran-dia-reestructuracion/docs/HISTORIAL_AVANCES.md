@@ -1,3 +1,13 @@
+## 2026-10-06 — MGD-012: auditoría eventType + gate de pruebas controladas
+
+- Se auditó MGD-012 sin modificar persistencia. La introducción de `eventType` puede comenzar en el adaptador de contexto: documentos históricos sin campo se interpretarán en memoria como `wedding`.
+- No se renombrarán colecciones `weddings` ni se hará migración destructiva.
+- Todavía no se escribirá `eventType` en Firestore; esa parte queda sujeta a autorización específica y QA de aislamiento.
+- Se formalizó el gate para MGD-009/010: no ejecutar todavía registro real de una cuenta nueva sobre el flujo actual porque puede disparar `finishOnboardingForNewUser()` y crear una boda de prueba en Firestore.
+- Como MGD-029 (eliminar evento) aún no está implementado, se evita generar datos de QA que luego no puedan limpiarse desde la aplicación.
+- La prueba controlada completa se hará cuando exista limpieza segura o un entorno/cuenta de prueba aislado: registro → logout → login → recuperación → recepción de correo → limpieza.
+- MGD-009/010 siguen con QA seguro DEV aprobado, pero no se marcan cerrados al 100 % todavía.
+
 ## 2026-10-06 — Roadmap consolidado antes de continuar multi-evento
 
 - Se limpiaron duplicados de numeración que podían generar confusión en el seguimiento.
