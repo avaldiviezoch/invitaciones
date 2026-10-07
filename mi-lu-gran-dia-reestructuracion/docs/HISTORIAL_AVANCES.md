@@ -1,3 +1,17 @@
+## 2026-10-06 — MGD-020 implementado en DEV
+
+- Tras aprobar MGD-019 se implementó MGD-020 sobre el mismo motor espacial de Distribución.
+- Se conserva intacto el catálogo base de 38 objetos y se añadió una capa central de 6 objetos especializados.
+- 15 años: mesa principal y zona de coreografía.
+- Baby Shower: zona de regalos y zona de juegos.
+- Graduación: mesa de diplomas y escenario de graduación.
+- Los objetos especializados usan el mismo contrato de catálogo, capacidades, dimensiones, familias espaciales, colisiones, selección, movimiento, rotación y persistencia que los objetos existentes.
+- Se reutilizan assets de iconos existentes mediante `iconAsset`; no se duplicó UI ni motor espacial.
+- La visibilidad se controla por `eventTypes`; otros eventos no reciben estos objetos.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth, RSVP ni datos reales.
+- Se agregó QA seguro MGD-020.
+- Estado: MGD-020 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-06 — MGD-019 aprobado / inicio de MGD-020
 
 - La corrida de GitHub Actions posterior a MGD-019 fue reportada en verde por el usuario.
