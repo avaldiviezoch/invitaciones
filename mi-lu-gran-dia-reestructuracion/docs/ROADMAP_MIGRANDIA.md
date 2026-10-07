@@ -1281,7 +1281,7 @@ Implementación DEV:
 ---
 
 ## MGD-020 — Objetos especializados
-Estado: ⬜ PENDIENTE
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: MEDIA
 
 15 años:
@@ -1297,6 +1297,16 @@ Graduación:
 - escenario.
 
 Reutilizar el mismo motor espacial.
+
+Implementación DEV:
+- se mantiene intacto el catálogo base de 38 objetos;
+- se agrega una capa central de 6 objetos especializados que usa el mismo contrato físico del catálogo;
+- 15 años: mesa principal y zona de coreografía;
+- Baby Shower: zona de regalos y zona de juegos;
+- Graduación: mesa de diplomas y escenario de graduación;
+- cada objeto especializado declara `eventTypes` y reutiliza dimensiones, capacidades, familias espaciales, movimiento, rotación, colisiones y persistencia del motor existente;
+- se reutilizan assets visuales existentes; no se crean motores, listeners ni formatos de guardado paralelos;
+- los objetos especializados solo aparecen para el evento correspondiente y no alteran distribuciones ya guardadas.
 
 ---
 
