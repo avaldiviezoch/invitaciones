@@ -1003,6 +1003,15 @@ Implementación DEV — Fase legal/verificación:
 - E2E seguro valida presencia de los enlaces y respuesta HTTP de ambas páginas;
 - no se modifican Firebase Rules, Firestore, Storage, datos ni contratos de persistencia.
 
+
+Seguimiento pendiente — verificación Google OAuth:
+- 2026-10-07: dominio `migrandiapp.com` verificado correctamente en Google Search Console mediante Cloudflare.
+- Google Auth Platform todavía muestra el hallazgo histórico de propiedad del dominio y advierte que la actualización interna puede demorar hasta 24 horas.
+- revisar nuevamente el **08/10/2026**;
+- si el hallazgo continúa, realizar segunda revisión el **09/10/2026**;
+- cuando desaparezca el aviso, seleccionar **“Corregí los problemas” → Continuar** para reenviar la verificación de marca.
+- no modificar DNS, Search Console ni dominios mientras se espera la propagación, salvo que Google muestre una observación nueva.
+
 Pendiente para completar verificación Google:
 1. aprobar QA DEV y desplegar estas páginas a producción;
 2. confirmar `https://migrandiapp.com/privacy.html` y `https://migrandiapp.com/terms.html`;
