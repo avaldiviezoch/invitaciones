@@ -603,3 +603,39 @@ test('MGD-023: ID público independiente se valida y puede revocarse sin persist
     revokedFlag: true
   });
 });
+
+
+test('MGD-024: URL personalizada actúa como alias del ID público seguro', async () => {
+  const slugModuleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/custom-invite-slug.js')).href;
+  const urlModuleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/public-invitation-url.js')).href;
+  const {
+    normalizeCustomInviteSlug,
+    isValidCustomInviteSlug,
+    createCustomInviteAlias,
+    revokeCustomInviteAlias,
+    resolveCustomInviteAlias
+  } = await import(slugModuleUrl);
+  const { buildPublicInvitationUrl } = await import(urlModuleUrl);
+
+  const alias = createCustomInviteAlias({
+    slug: 'Antonio & Lucero',
+    publicInviteId: 'MGD-ABCDEF'
+  });
+  const revoked = revokeCustomInviteAlias(alias);
+
+  expect({
+    normalized: normalizeCustomInviteSlug('Antonio & Lucero'),
+    valid: isValidCustomInviteSlug('antonio-lucero'),
+    url: buildPublicInvitationUrl(alias.slug),
+    secureTarget: resolveCustomInviteAlias(alias),
+    revokedTarget: resolveCustomInviteAlias(revoked),
+    exposesEventId: Object.hasOwn(alias, 'eventId')
+  }).toEqual({
+    normalized: 'antonio-lucero',
+    valid: true,
+    url: 'https://migrandiapp.com/i/antonio-lucero',
+    secureTarget: 'MGD-ABCDEF',
+    revokedTarget: null,
+    exposesEventId: false
+  });
+});
