@@ -1638,7 +1638,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-031 — Backup y restauración
-Estado: 🟡 CONTRATO FORMAL IMPLEMENTADO EN DEV / PENDIENTE QA
+Estado: 🟢 QA SEGURO DEV APROBADO
 Prioridad: CRÍTICA
 
 Sistema formal de:
