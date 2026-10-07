@@ -1419,7 +1419,7 @@ Implementación DEV segura:
 # BLOQUE I — DATOS Y ESCALABILIDAD
 
 ## MGD-025 — Evolución de `planner-cloud`
-Estado: 🟢 FASE 1-4 QA APROBADAS / FASE 5 EN PREPARACIÓN
+Estado: 🟡 FASE 1-4 QA APROBADAS / FASE 5 DIAGNÓSTICO READINESS IMPLEMENTADA EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA A MEDIANO PLAZO
 
 Problema:
@@ -1492,6 +1492,14 @@ Implementación autorizada — Fase 4 readiness:
 - se agregó un resumen agregado de readiness para impedir decisiones parciales o silenciosas;
 - esta fase no elimina, mueve ni reescribe datos;
 - la retirada gradual queda bloqueada hasta que todas las claves relevantes estén validadas.
+
+Implementación autorizada — Fase 5 diagnóstico readiness:
+- `planner-cloud.js` expone `inspectPlannerDomainReadiness(context, keys)`;
+- el diagnóstico lee metadata legacy, backup legacy y entradas del dominio nuevo;
+- clasifica cada clave usando el motor de readiness de Fase 4;
+- devuelve detalle por clave y resumen agregado;
+- no escribe Firestore, no ejecuta migraciones y no elimina datos;
+- esta función permitirá validar una boda real antes de plantear retirada gradual de cualquier clave.
 
 ---
 
