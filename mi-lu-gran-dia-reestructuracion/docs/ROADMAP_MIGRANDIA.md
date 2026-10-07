@@ -1419,7 +1419,7 @@ Implementación DEV segura:
 # BLOQUE I — DATOS Y ESCALABILIDAD
 
 ## MGD-025 — Evolución de `planner-cloud`
-Estado: 🟢 FASE 1-3 QA APROBADAS / SIGUIENTE FASE EN AUDITORÍA
+Estado: 🟡 FASE 1-3 QA APROBADAS / FASE 4 READINESS IMPLEMENTADA EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA A MEDIANO PLAZO
 
 Problema:
@@ -1478,6 +1478,15 @@ Implementación autorizada — Fase 3 migración lazy:
 - no existe barrido global, backfill masivo ni enumeración de bodas;
 - datos legacy previos a la existencia de `syncToken` continúan usando fallback hasta una escritura posterior o una futura migración controlada;
 - `cloudSync/cloudChunks` sigue intacto.
+
+Implementación autorizada — Fase 4 readiness:
+- se creó `planner-domain-readiness.js`;
+- cada clave puede clasificarse como `ready`, `missing`, `stale`, `legacy-only` o `inaccessible`;
+- solo `ready` puede considerarse apto para una futura retirada del fallback legacy;
+- cualquier ausencia, desfase de token, dato legacy sin token o error de acceso bloquea la retirada;
+- se agregó un resumen agregado de readiness para impedir decisiones parciales o silenciosas;
+- esta fase no elimina, mueve ni reescribe datos;
+- la retirada gradual queda bloqueada hasta que todas las claves relevantes estén validadas.
 
 ---
 
