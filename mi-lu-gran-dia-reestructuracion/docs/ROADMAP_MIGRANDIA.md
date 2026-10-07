@@ -1613,7 +1613,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-030 — Eliminar cuenta
-Estado: ⬜ PENDIENTE
+Estado: 🟡 CONTRATO SEGURO IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: ALTA
 
 Definir:
@@ -1623,6 +1623,17 @@ Definir:
 - RSVP;
 - archivos;
 - responsabilidades de owner.
+
+Implementación DEV segura:
+- nuevo `src/services/account-deletion-contract.js`;
+- confirmación fuerte exacta: `email :: uid`;
+- los eventos propios bloquean la eliminación de cuenta hasta transferirlos o eliminarlos;
+- los eventos compartidos no se eliminan: solo se planifica retirar membresía e índice del usuario;
+- RSVP del evento compartido se preserva;
+- archivos quedan sujetos a inventario previo;
+- Auth se elimina únicamente después de resolver responsabilidades de datos;
+- el plan siempre devuelve `execute: false`;
+- no se ejecuta ningún borrado real ni operación sobre Auth.
 
 ---
 
