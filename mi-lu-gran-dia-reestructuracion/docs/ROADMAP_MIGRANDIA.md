@@ -1419,7 +1419,7 @@ Implementación DEV segura:
 # BLOQUE I — DATOS Y ESCALABILIDAD
 
 ## MGD-025 — Evolución de `planner-cloud`
-Estado: 🟢 FASE 1-7 QA APROBADAS / ACTIVACIÓN CONTROLADA DE CHECKLIST EN AUDITORÍA
+Estado: 🟡 FASE 1-7 QA APROBADAS / FASE 8 SOLICITUD DE ACTIVACIÓN IMPLEMENTADA EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA A MEDIANO PLAZO
 
 Problema:
@@ -1517,6 +1517,14 @@ Implementación autorizada — Fase 7 piloto Checklist:
 - el piloto está explícitamente `enabled: false`;
 - activar el piloto sigue requiriendo readiness positivo y aprobación explícita;
 - esta fase no cambia el modo de lectura de Checklist ni retira fallback legacy.
+
+Implementación autorizada — Fase 8 solicitud de activación:
+- se creó `planner-domain-activation.js`;
+- la solicitud de `domain-only` reutiliza la compuerta de Fase 6;
+- exige readiness positivo y aprobación explícita;
+- devuelve una orden verificable con `requestedMode: domain-only`;
+- la orden lleva `apply: false`, por lo que no modifica todavía el modo de lectura;
+- no cambia Checklist, no toca Firestore y no elimina legacy.
 
 ---
 
