@@ -1,3 +1,11 @@
+## 2026-10-07 — MGD-034 aprobado
+
+- QA seguro reportado en verde por el usuario.
+- MGD-034 queda 🟢 QA SEGURO DEV APROBADO.
+- El motor adaptativo base queda validado con un único engine y perfiles por eventType.
+- La UI y persistencia del onboarding aún no fueron modificadas.
+- Siguiente bloque: MGD-035 — edad / etapa de vida.
+
 ## 2026-10-07 — MGD-035 ageProfile base implementado
 
 - Se creó `src/core/app/age-profile.js`.
