@@ -750,6 +750,16 @@ Commits implementación inicial:
 - `3e4e3282e0e2603e681f3d3d46990674fe13d847` — responsive sobre Chromium;
 - `09cb09db79385a39bd7043d170678efa7420aa4b` — recarga/retorno y barrido de errores globales.
 
+### Hallazgo de prueba autenticada — 2026-10-07
+
+- Google bloquea el inicio de sesión desde navegador automatizado Playwright/Chrome controlado por considerarlo entorno no seguro;
+- no se insistirá con login Google automatizado;
+- DEV sí contiene lógica y UI de registro por correo, aunque “Crear cuenta” es poco visible;
+- una captura con “Tu boda, siempre contigo” correspondía a PRODUCCIÓN y no debe usarse para validar cambios DEV;
+- las pruebas autenticadas de MGD-008 se realizarán exclusivamente sobre DEV;
+- la siguiente estrategia debe evitar depender de Google automatizado y mantener cero escrituras reales no autorizadas.
+
+
 ---
 
 # BLOQUE B — CUENTA, LOGIN Y BRANDING DE ACCESO
