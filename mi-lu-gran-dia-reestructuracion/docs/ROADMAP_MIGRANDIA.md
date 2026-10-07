@@ -1594,12 +1594,21 @@ Implementación DEV:
 # BLOQUE J — PRIVACIDAD Y RECUPERACIÓN
 
 ## MGD-029 — Eliminar evento
-Estado: ⬜ PENDIENTE
+Estado: 🟡 CONTRATO SEGURO IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: ALTA
 
 Eliminar un evento sin afectar los otros eventos del usuario.
 
 Confirmación fuerte.
+
+Implementación DEV segura:
+- nuevo `src/services/event-deletion-contract.js`;
+- solo Owner puede solicitar eliminación;
+- confirmación exacta requerida: `nombre :: eventId`;
+- se genera un plan explícito de recursos relacionados;
+- el plan incluye documento raíz, miembros, índices por usuario, planner legacy/nuevo, invitaciones y RSVP;
+- el plan siempre devuelve `execute: false`;
+- no se ejecuta ningún `deleteDoc`, batch destructivo ni borrado real en esta fase.
 
 ---
 
