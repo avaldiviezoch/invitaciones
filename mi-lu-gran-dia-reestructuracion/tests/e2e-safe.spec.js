@@ -380,3 +380,49 @@ test('MGD-018: plantillas de Checklist se resuelven por evento sin duplicar moto
   });
   expect(errors).toEqual([]);
 });
+
+
+test('MGD-019: catálogo universal filtra visibilidad por eventProfile sin eliminar objetos', async ({ page }) => {
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+
+  const result = await page.evaluate(async () => {
+    const catalogUrl = new URL('src/modules/distribucion/distribution-catalog.js', window.location.href).href;
+    const profileUrl = new URL('src/core/app/event-profile.js', window.location.href).href;
+    const { DISTRIBUTION_OBJECT_CATALOG, getVisibleCatalogGroups } = await import(catalogUrl);
+    const { getEventProfile } = await import(profileUrl);
+    const visibleTypes = (eventType) => getVisibleCatalogGroups(eventType).flatMap((group) => group.items.map((item) => item.type));
+
+    return {
+      catalogCount: Object.keys(DISTRIBUTION_OBJECT_CATALOG).length,
+      weddingProfile: getEventProfile('wedding').distributionCatalog.eventType,
+      birthdayProfile: getEventProfile('birthday').distributionCatalog.eventType,
+      weddingHasCouple: visibleTypes('wedding').includes('couple'),
+      birthdayHasCouple: visibleTypes('birthday').includes('couple'),
+      religiousHasAltar: visibleTypes('religious').includes('altar'),
+      corporateHasAltar: visibleTypes('corporate').includes('altar'),
+      birthdayHasPhoto: visibleTypes('birthday').includes('photo'),
+      babyHasPhoto: visibleTypes('baby_shower').includes('photo'),
+      weddingHasCake: visibleTypes('wedding').includes('cake'),
+      corporateHasCake: visibleTypes('corporate').includes('cake'),
+      barUniversal: ['wedding','birthday','quince','baby_shower','religious','graduation','corporate','custom']
+        .every((eventType) => visibleTypes(eventType).includes('bar'))
+    };
+  });
+
+  expect(result).toEqual({
+    catalogCount: 38,
+    weddingProfile: 'wedding',
+    birthdayProfile: 'birthday',
+    weddingHasCouple: true,
+    birthdayHasCouple: false,
+    religiousHasAltar: true,
+    corporateHasAltar: false,
+    birthdayHasPhoto: true,
+    babyHasPhoto: false,
+    weddingHasCake: true,
+    corporateHasCake: false,
+    barUniversal: true
+  });
+  expect(errors).toEqual([]);
+});
