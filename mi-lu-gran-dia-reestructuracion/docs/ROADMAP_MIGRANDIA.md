@@ -1419,7 +1419,7 @@ Implementación DEV segura:
 # BLOQUE I — DATOS Y ESCALABILIDAD
 
 ## MGD-025 — Evolución de `planner-cloud`
-Estado: 🟢 FASE 1 SOMBRA QA APROBADA / FASE 2 EN PREPARACIÓN
+Estado: 🟡 FASE 1 QA APROBADA / FASE 2 LECTURA+FALLBACK IMPLEMENTADA EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA A MEDIANO PLAZO
 
 Problema:
@@ -1458,6 +1458,16 @@ Implementación autorizada — Fase 1 sombra:
 - todavía no se cambió ninguna lectura del usuario al dominio nuevo;
 - no se ejecutó backfill masivo ni retirada de datos legacy;
 - esta fase permite validar permisos, forma y estabilidad antes de activar lectura nueva/fallback.
+
+Implementación autorizada — Fase 2 lectura nueva + fallback:
+- cada escritura legacy recibe un `syncToken` único en `cloudSync/main`;
+- la copia sombra por dominio almacena el mismo `syncToken`;
+- la lectura intenta primero el dominio nuevo;
+- el dato nuevo solo se acepta cuando su `syncToken` coincide exactamente con el metadata legacy;
+- si el dominio no existe, está desactualizado, falla por permisos o no tiene token válido, se lee automáticamente desde `cloudChunks`;
+- esto evita lecturas obsoletas durante la pequeña ventana entre la transacción legacy y el shadow write;
+- las suscripciones siguen observando metadata legacy, por lo que no se introduce un segundo sistema de listeners;
+- no se retiraron lecturas legacy ni datos existentes.
 
 ---
 
