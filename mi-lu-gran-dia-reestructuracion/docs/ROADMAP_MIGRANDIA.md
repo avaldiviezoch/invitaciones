@@ -1368,7 +1368,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-023 — ID público de invitación
-Estado: ⬜ PENDIENTE
+Estado: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA
 Prioridad: CRÍTICA
 
 No exponer directamente `weddingId` / `eventId`.
@@ -1382,6 +1382,16 @@ Resolución:
 `publicInviteId → eventId → template → RSVP config`
 
 Debe ser revocable.
+
+Implementación DEV segura:
+- nuevo `src/core/app/public-invite-id.js`;
+- formato independiente `MGD-XXXXXX`, sin reutilizar `weddingId` ni `eventId`;
+- generación con alfabeto no ambiguo y validación central;
+- contrato interno `publicInviteId → eventId → templateId → rsvpConfig`;
+- revocación representada como transformación inmutable del contrato;
+- una resolución revocada devuelve `null`;
+- no se creó ninguna colección, escritura, migración ni índice en Firestore;
+- la persistencia y resolución real del ID público quedan pendientes de autorización explícita.
 
 ---
 
