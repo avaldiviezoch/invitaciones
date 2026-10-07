@@ -1489,3 +1489,11 @@ body.menu-open .menu-button svg {
 .discover-guest-exact{margin-top:14px}
 .discover-guest-exact small{color:rgba(247,241,233,.42);font:500 9px/1.45 Arial,sans-serif}
 .discover-guest-exact input{text-align:center;font-size:16px}
+
+
+/* Información legal pública — MGD-026 */
+.discover-legal{grid-column:1/-1;display:flex;justify-content:center;gap:18px;margin-top:16px}
+.discover-legal a,.auth-legal a{color:rgba(247,241,233,.62);font:600 9px/1.4 Arial,sans-serif;text-decoration:none}
+.discover-legal a:hover,.discover-legal a:focus-visible,.auth-legal a:hover,.auth-legal a:focus-visible{color:#f1e5da;text-decoration:underline;text-underline-offset:3px}
+.auth-legal{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;color:rgba(247,241,233,.36)}
+@media(max-width:640px){.discover-legal{gap:14px;margin-top:0;flex-wrap:wrap}.discover-legal a,.auth-legal a{font-size:8px}}

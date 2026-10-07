@@ -31,7 +31,7 @@
   if(moduleId==='checklist'||moduleId==='presupuesto'||moduleId==='proveedores'||moduleId==='invitados'||moduleId==='distribucion'||moduleId==='cronograma'||moduleId==='invitaciones'||moduleId==='musica'||moduleId==='ideas') document.documentElement.classList.add('module-route');
 })();
 </script>
-<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=60">
+<link rel="stylesheet" href="src/modules/dashboard/inicio.css?v=61">
 <link rel="stylesheet" href="src/modules/checklist/checklist.css?v=19">
 <link rel="stylesheet" href="src/modules/presupuesto/presupuesto.css?v=27">
 <link rel="stylesheet" href="src/modules/proveedores/proveedores.css?v=5">
@@ -504,6 +504,10 @@ Antonio Valdiviezo © Derechos reservados
       <button class="discover-back" id="discoverBackButton" type="button" hidden>← Atrás</button>
       <div class="discover-dots" id="discoverDots" aria-label="Progreso"></div>
       <button class="discover-next" id="discoverNextButton" type="button">Descubrir Migrandia</button>
+      <nav class="discover-legal" aria-label="Información legal">
+        <a href="privacy.html" target="_blank" rel="noopener">Política de Privacidad</a>
+        <a href="terms.html" target="_blank" rel="noopener">Términos y Condiciones</a>
+      </nav>
     </div>
   </div>
 </section>
@@ -539,6 +543,11 @@ Ingresar
 </div>
 <p id="authStatus" class="status" aria-live="polite">
 </p>
+<nav class="auth-legal" aria-label="Información legal">
+<a href="privacy.html" target="_blank" rel="noopener">Privacidad</a>
+<span aria-hidden="true">·</span>
+<a href="terms.html" target="_blank" rel="noopener">Términos</a>
+</nav>
 <button id="authCloseButton" class="close" type="button">
 Cancelar
 </button>

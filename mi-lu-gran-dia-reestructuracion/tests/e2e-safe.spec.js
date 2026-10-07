@@ -1550,6 +1550,25 @@ test('MGD-026: branding de acceso es multi-evento y no expone Firebase en la UI 
   expect(errors).toEqual([]);
 });
 
+test('MGD-026: la home publica privacidad y términos y ambas páginas responden', async ({ page }) => {
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+
+  const privacyLink = page.locator('a[href="privacy.html"]').first();
+  const termsLink = page.locator('a[href="terms.html"]').first();
+  await expect(privacyLink).toHaveText(/Privacidad/);
+  await expect(termsLink).toHaveText(/Términos/);
+
+  const privacyResponse = await page.request.get(new URL('privacy.html', page.url()).href);
+  const termsResponse = await page.request.get(new URL('terms.html', page.url()).href);
+  expect(privacyResponse.ok()).toBe(true);
+  expect(termsResponse.ok()).toBe(true);
+
+  const privacyHtml = await privacyResponse.text();
+  const termsHtml = await termsResponse.text();
+  expect(privacyHtml).toContain('<h1>Política de Privacidad</h1>');
+  expect(termsHtml).toContain('<h1>Términos y Condiciones</h1>');
+});
+
 
 test('MGD-011: un UID admite múltiples eventos con rutas aisladas por eventId', async () => {
   const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/event-context-isolation.js')).href;

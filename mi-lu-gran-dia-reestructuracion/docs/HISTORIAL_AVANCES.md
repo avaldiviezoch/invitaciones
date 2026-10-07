@@ -1,3 +1,14 @@
+## 2026-10-07 — MGD-026: páginas legales y preparación de verificación Google
+
+- Firebase quedó con nombre del proyecto y nombre público “Mi Gran Día”; se preservaron IDs y alias internos.
+- Google Auth Platform quedó con nombre “Mi Gran Día”, logo oficial, página principal `https://migrandiapp.com`, dominio autorizado `migrandiapp.com` y correo de contacto.
+- Google rechazó el primer intento de verificación porque el dominio no figura aún como propiedad verificada, la home no enlaza privacidad y `/privacy.html` no respondía.
+- En DEV se agregaron `privacy.html` y `terms.html`, ambas públicas, responsivas y enlazadas entre sí.
+- La home/onboarding y el acceso muestran enlaces visibles a Política de Privacidad y Términos y Condiciones.
+- Se agregó cobertura E2E segura para comprobar enlaces y respuesta de ambas páginas.
+- Próximo paso: QA DEV, despliegue productivo de las páginas legales, verificación de propiedad en Search Console y nueva solicitud de verificación de marca.
+- Sin cambios en Firebase Rules, Firestore, Storage, datos ni producción en esta fase de código.
+
 ## 2026-10-07 — MGD-010 prueba real aprobada
 
 - Se ejecutó recuperación real de contraseña sobre la cuenta QA autorizada.

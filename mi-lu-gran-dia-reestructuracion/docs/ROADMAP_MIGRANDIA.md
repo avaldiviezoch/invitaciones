@@ -925,7 +925,7 @@ Implementación DEV MGD-011 — aislamiento estructural:
 ---
 
 ## MGD-026 — Branding profesional del login Google / Firebase
-Estado: 🟢 FASE 1 QA APROBADA / PENDIENTE CONFIGURACIÓN EXTERNA GOOGLE-FIREBASE
+Estado: 🟠 QA — BRANDING EXTERNO AVANZADO / PENDIENTE LEGAL + VERIFICACIÓN DE DOMINIO
 Prioridad: CRÍTICA ANTES DE MARCHA BLANCA
 
 Problema actual:
@@ -984,6 +984,32 @@ Criterio de diseño:
 - boda sigue siendo el producto estrella, pero la identidad pública es multi-evento;
 - visual sobrio y profesional;
 - eliminar rastros técnicos innecesarios de Firebase del recorrido del usuario cuando la plataforma lo permita.
+
+Configuración externa realizada — 2026-10-07:
+- Firebase: nombre del proyecto actualizado a “Mi Gran Día”;
+- Firebase: nombre público actualizado de `migrandiaweb` a “Mi Gran Día”;
+- se conservaron sin cambios el ID de proyecto `migrandia`, el alias interno de la app web `migrandiaweb`, SDK, AuthDomain y demás identificadores técnicos;
+- Google Auth Platform: nombre de aplicación “Mi Gran Día”;
+- logo oficial de Migrandia cargado en formato cuadrado optimizado;
+- página principal configurada como `https://migrandiapp.com`;
+- dominio autorizado `migrandiapp.com` agregado sin retirar `migrandia.firebaseapp.com`;
+- correo de soporte/contacto configurado;
+- primer intento de verificación de marca rechazado porque Google no detecta propiedad verificada del dominio, la home no contiene enlace a privacidad y `/privacy.html` todavía no responde.
+
+Implementación DEV — Fase legal/verificación:
+- se crean `privacy.html` y `terms.html` como páginas públicas, responsivas y sin dependencias nuevas;
+- la home pública enlaza visiblemente Política de Privacidad y Términos y Condiciones desde el onboarding;
+- el overlay de acceso también expone enlaces legales;
+- E2E seguro valida presencia de los enlaces y respuesta HTTP de ambas páginas;
+- no se modifican Firebase Rules, Firestore, Storage, datos ni contratos de persistencia.
+
+Pendiente para completar verificación Google:
+1. aprobar QA DEV y desplegar estas páginas a producción;
+2. confirmar `https://migrandiapp.com/privacy.html` y `https://migrandiapp.com/terms.html`;
+3. confirmar que la home productiva enlaza la política;
+4. verificar propiedad de `migrandiapp.com` en Google Search Console;
+5. esperar propagación indicada por Google y volver a solicitar verificación de marca;
+6. revisar después el branding de las plantillas de correo de Firebase, cuya edición desde consola devolvió restricción temporal del proyecto.
 
 Validar en:
 - Google Login desktop;
