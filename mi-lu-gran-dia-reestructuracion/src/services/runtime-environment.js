@@ -5,7 +5,7 @@ const ENVIRONMENTS = Object.freeze({
   }),
   production: Object.freeze({
     name: 'production',
-    serviceBaseUrl: 'https://wedding.avaldiviezoch.workers.dev'
+    serviceBaseUrl: 'https://migrandia-api.avaldiviezoch.workers.dev'
   })
 });
 
