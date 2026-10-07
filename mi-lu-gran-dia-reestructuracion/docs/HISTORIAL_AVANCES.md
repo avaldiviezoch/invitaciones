@@ -1,3 +1,15 @@
+## 2026-10-06 — MGD-014 aprobado / MGD-015 implementado en DEV
+
+- La corrida posterior a MGD-014 fue reportada en verde por el usuario; MGD-014 queda 🟢 QA SEGURO DEV APROBADO.
+- Se implementó la separación formal entre `eventType` y `themeId`.
+- Nuevo `src/core/app/theme-id.js`: normalización y resolución de presentación sin mezclar lógica funcional del evento con la temática.
+- `wedding-context.js` expone ahora `themeId` en memoria con fallback `classic-elegant`, sin escribir el campo en Firestore.
+- Se añadió QA seguro que demuestra que wedding puede usar one-piece-elegant, birthday puede usar minimal-black y que un mismo tema puede compartirse entre tipos distintos.
+- MGD-016 será responsable de tokens y apariencia global; MGD-015 no introduce CSS temático ni duplicación visual.
+- Commits: `dc585f703af955f16e1eccc5f06ddd9af855d417`, `f2fc3ce148db6deed40bd92a3fd3cb0db32b542b`, `9da4cf55a473a7b46cef1a63587df35d2f885c8c`.
+- No se modificaron Firebase, Firestore, Storage, Rules, Auth ni datos reales.
+- Estado: MGD-015 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
 ## 2026-10-06 — MGD-013 aprobado / MGD-014 eventProfile implementado en DEV
 
 - La corrida posterior a MGD-013 fue reportada en verde por el usuario; MGD-013 queda 🟢 QA SEGURO DEV APROBADO.
