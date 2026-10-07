@@ -30,7 +30,7 @@ function profile(type, overrides = {}) {
     distributionCatalog: overrides.distributionCatalog || { profileId: type, eventType: type },
     theme: overrides.theme || { defaultThemeId: null },
     onboarding: overrides.onboarding || { profileId: type },
-    invitationCapabilities: overrides.invitationCapabilities || { enabled: true },
+    invitationCapabilities: overrides.invitationCapabilities || { enabled: true, engine: 'generic-v1', defaultTemplateId: null },
     audienceProfile: overrides.audienceProfile || { mode: 'general' }
   });
 }
