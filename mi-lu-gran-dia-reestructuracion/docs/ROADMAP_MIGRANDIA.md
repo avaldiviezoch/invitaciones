@@ -721,7 +721,7 @@ Commits implementación inicial:
 # BLOQUE B — CUENTA, LOGIN Y BRANDING DE ACCESO
 
 ## MGD-009 — Registro por correo
-Estado: ⬜ PENDIENTE
+Estado: 🟡 AUDITORÍA / PENDIENTE DE AUTORIZACIÓN AUTH
 Prioridad: ALTA
 
 Agregar:
@@ -729,6 +729,27 @@ Agregar:
 - validación;
 - mensajes amigables;
 - flujo consistente con Google.
+
+### Auditoría inicial — 2026-10-06
+
+Estado actual:
+- la UI solo ofrece login por correo/contraseña; no existe botón ni flujo de “Crear cuenta”;
+- el código importa `signInWithEmailAndPassword`, pero no `createUserWithEmailAndPassword`;
+- `errorText()` solo distingue credencial inválida y, para el resto, devuelve “No se pudo iniciar sesión”;
+- la persistencia de Auth ya está centralizada en `firebase-client.js` mediante `browserLocalPersistence`;
+- Google y correo convergen después en `onAuthStateChanged`, por lo que el registro por correo debe reutilizar esa misma carga de contexto y no crear una ruta paralela.
+
+Diseño propuesto:
+- agregar un modo “Crear cuenta” dentro del mismo `authOverlay`, sin duplicar modal;
+- reutilizar `authEmail` y `authPassword`;
+- usar `createUserWithEmailAndPassword` únicamente al confirmar registro;
+- tras registro exitoso, reutilizar el mismo flujo de bodas/onboarding existente;
+- mensajes específicos y amigables para correo inválido, contraseña débil y correo ya registrado;
+- no crear documentos, bodas ni onboarding automáticamente fuera del flujo actual ya definido;
+- no modificar Firebase Rules, Firestore, Storage ni configuración de proyecto.
+
+Bloqueo:
+- implementar MGD-009 modifica el flujo Firebase Auth, por lo que requiere autorización expresa antes de tocar código funcional de autenticación.
 
 ---
 
