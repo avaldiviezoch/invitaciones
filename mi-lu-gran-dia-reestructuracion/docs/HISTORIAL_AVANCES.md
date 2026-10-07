@@ -1,3 +1,13 @@
+## 2026-10-07 — MGD-025 auditado / pendiente de autorización
+
+- MGD-024 fue aprobado en QA seguro.
+- Se auditó `src/services/planner-cloud.js`.
+- El servicio actual lee y escribe Firestore en `weddings/{id}/cloudSync/main` y `cloudChunks/*`.
+- La escritura usa una transacción que reconstruye el backup agregado, escribe chunks, elimina sobrantes y actualiza metadata.
+- Cumplir MGD-025 requiere introducir dominios separados y una migración progresiva de datos.
+- Por las reglas no negociables, no se inicia esa modificación sin autorización explícita.
+- No se realizó ningún cambio de persistencia ni de datos reales.
+
 ## 2026-10-07 — MGD-024 aprobado
 
 - QA seguro reportado en verde.
