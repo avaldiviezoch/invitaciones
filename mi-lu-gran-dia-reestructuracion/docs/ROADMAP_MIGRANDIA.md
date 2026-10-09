@@ -2554,6 +2554,31 @@ reducir dependencia de soporte manual por WhatsApp o mensajes directos.
 
 ---
 
+## MGD-050 — Diferenciar invitados estimados e invitados registrados
+Estado: ⬜ PENDIENTE
+Prioridad: MEDIA
+
+Objetivo:
+hacer explícita en la UX la diferencia entre la cantidad estimada de invitados definida durante el onboarding/presupuesto y las personas realmente registradas en el módulo Invitados.
+
+Contexto actual:
+- el onboarding puede guardar un `guestCount` estimado dentro de la configuración de Presupuesto;
+- el módulo Invitados contabiliza únicamente personas reales registradas en `canonical.guests`;
+- el dashboard principal usa los invitados reales para confirmados, pendientes, mesas y distribución;
+- por diseño, un estimado de 122 invitados no debe crear 122 registros vacíos ni alterar automáticamente el padrón real.
+
+Mejora futura:
+- mostrar de forma visible en Presupuesto algo como **“Invitados estimados: 122”**;
+- mantener en Invitados el conteo exclusivo de personas realmente registradas;
+- evaluar un indicador comparativo **estimados vs. registrados**;
+- cuando corresponda, alertar de forma no intrusiva si el número registrado difiere mucho del estimado;
+- conservar una única fuente de verdad para cada concepto y no duplicar registros.
+
+Regla:
+el valor estimado sirve para planificación y cálculos como presupuesto por invitado; nunca debe interpretarse automáticamente como una lista de personas reales.
+
+---
+
 ### RSVP DEV direct clients con App Check — 2026-10-05
 - `invitacion_0_2/rsvp-nominal-widget.js` ahora inicializa App Check tanto en la app Firebase por defecto como en la app anónima `mgd-rsvp-anonymous`.
 - `invitacion_0_3/rsvp-nominal-widget.js` hace lo mismo y deja preinicializada la app anónima que reutiliza el cliente RSVP compartido.
