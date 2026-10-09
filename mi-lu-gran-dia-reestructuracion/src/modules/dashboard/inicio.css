@@ -1497,3 +1497,12 @@ body.menu-open .menu-button svg {
 .discover-legal a:hover,.discover-legal a:focus-visible,.auth-legal a:hover,.auth-legal a:focus-visible{color:#f1e5da;text-decoration:underline;text-underline-offset:3px}
 .auth-legal{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;color:rgba(247,241,233,.36)}
 @media(max-width:640px){.discover-legal{gap:14px;margin-top:0;flex-wrap:wrap}.discover-legal a,.auth-legal a{font-size:8px}}
+
+
+/* MGD-037 · Landing general multi-evento */
+.discover-event-types{width:min(760px,100%);display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:30px}
+.discover-event-types span{min-height:42px;display:grid;place-items:center;padding:7px 10px;border:1px solid rgba(241,229,218,.12);border-radius:14px;background:rgba(241,229,218,.045);color:rgba(247,241,233,.76);font:700 9px/1.25 Arial,sans-serif;text-align:center}
+@media(max-width:640px){
+  .discover-event-types{grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin-top:22px}
+  .discover-event-types span{min-height:38px;font-size:8px}
+}
