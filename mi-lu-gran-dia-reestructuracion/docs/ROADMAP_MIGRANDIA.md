@@ -1,26 +1,30 @@
 # ROADMAP MIGRANDIA
 
-Última actualización: 2026-10-07
-Último commit DEV registrado: 557de4dcb02010110520a189e76492aacb667e37
-Último commit PROD: a2be5675a22199e244ae3f981e1196250911516e
-Versión producción: pendiente de versionado formal
-Trabajo actual: cerrar bloqueadores restantes de beta y preparar inicio del desarrollo visual multi-evento
-Próximo trabajo: revisar MGD-010 y MGD-026 externo; después iniciar implementación visual del onboarding multi-evento
-Bloqueadores: MGD-010 pendiente prueba real controlada; MGD-026 pendiente configuración externa Google/Firebase; MGD-003 pendiente validación productiva controlada; MGD-008 pendiente únicamente escritura controlada E2E-17 a E2E-19; MGD-033 mantiene beta pública bloqueada por diseño
+Última actualización: 2026-10-09
+Último commit DEV verificado: 0d8f49eba834572f895bdba8d62182a0bef9a41f
+Último commit PROD verificado: 1c8412c82b03599919f7cc8b92fe595be4288113
+Versión producción: Migrandia 0.7.0
+Trabajo actual: reconciliar DEV/PROD y cerrar bloques ya aprobados antes de continuar ampliando arquitectura.
+Próximo trabajo: cerrar MGD-002 en producción; después preparar promoción controlada de autenticación/E2E/multi-evento.
+Bloqueadores actuales: MGD-002 pendiente PROD; MGD-026 pendiente revisión/propagación externa Google; MGD-025 domain-only sin activar; MGD-042, MGD-044, MGD-047 y MGD-048 pendientes antes de marcha blanca; MGD-033 mantiene beta pública bloqueada.
 
-## Estado operativo actual — 2026-10-07
+## Estado operativo actual — 2026-10-09
 
-- MGD-004, MGD-005, MGD-006 y MGD-007: producción / QA aprobado según cada bloque.
-- MGD-009 y MGD-010: QA seguro DEV aprobado; falta prueba real controlada.
-- MGD-011: aislamiento estructural multi-evento implementado; pendiente QA seguro y prueba real controlada.
-- MGD-012 a MGD-024: capas multi-evento e invitaciones aprobadas en QA seguro DEV.
-- MGD-025: fases 1–8 aprobadas; activación real domain-only continúa bloqueada.
-- MGD-026: Fase 1 de branding cliente aprobada; falta configuración externa Google/Firebase.
-- MGD-027 a MGD-032: QA seguro DEV aprobado.
-- MGD-033: gate aprobado; beta pública sigue bloqueada hasta cerrar prerequisitos.
-- MGD-034, MGD-035 y MGD-036: QA seguro DEV aprobado.
-- No se habilitó beta pública.
-- No se realizaron cambios destructivos en Firebase, Firestore, Storage o Auth en esta ronda.
+- MGD-001: baseline capturado y su pendiente de versionado quedó resuelto por MGD-007.
+- MGD-002: separación DEV/PROD corregida y aprobada en DEV; PROD todavía apunta su `runtime-environment.js` al Worker estático `wedding` y debe migrar a `migrandia-api`.
+- MGD-003: Turnstile + Worker + rate limit están funcionales en producción; QA DEV adicional de 2026-10-09 confirmó HTTP 200 y 429 en desktop y móvil. App Check Enforcement permanece desactivado.
+- MGD-004, MGD-005, MGD-006 y MGD-007: producción / QA aprobado.
+- MGD-008: E2E readonly autenticado y E2E-17, E2E-18 y E2E-19 aprobados en DEV.
+- MGD-009 y MGD-010: pruebas reales de registro por correo y recuperación de contraseña aprobadas en DEV; pendientes de promoción productiva.
+- MGD-011: prueba real multi-evento aprobada en DEV con persistencia independiente entre dos contextos.
+- MGD-012 a MGD-024: capas multi-evento e invitaciones aprobadas en QA seguro DEV; no asumir que están promovidas a PROD.
+- MGD-025: fases 1–8 aprobadas; `domain-only` no está activado y Checklist sigue en auditoría.
+- MGD-026: branding y páginas legales publicadas en PROD; revisión/propagación externa de Google sigue pendiente.
+- MGD-027 a MGD-032 y MGD-034 a MGD-036: QA seguro DEV aprobado; promoción productiva no completada como bloque.
+- MGD-033: gate aprobado; beta pública continúa bloqueada por prerequisitos.
+- MGD-037 a MGD-050: revisar estado individual; MGD-042, MGD-044, MGD-047 y MGD-048 son críticos antes de marcha blanca.
+- No realizar promoción masiva DEV → PROD. Migrar por bloques pequeños con QA productivo verificable.
+- No se habilitó beta pública ni App Check Enforcement.
 
 ---
 
@@ -115,7 +119,7 @@ Lo que cambia según el evento:
 # BLOQUE A — PREPARAR MIGRANDIA PARA MÁS USUARIOS
 
 ## MGD-001 — Baseline y versión estable
-Estado: 🟠 QA
+Estado: 🟢 CERRADO — BASELINE DOCUMENTADO
 Prioridad: CRÍTICA
 
 Crear una referencia de estabilidad antes de cambios estructurales.
@@ -167,7 +171,7 @@ Pendiente:
 ---
 
 ## MGD-002 — Separación total DEV / PROD
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟣 APROBADO DEV / PENDIENTE PROD
 Prioridad: CRÍTICA
 
 Objetivo:
@@ -241,7 +245,7 @@ Pendiente:
 ---
 
 ## MGD-003 — Protección contra abuso de RSVP
-Estado: 🟣 QA DEV COMPLETO APROBADO / PENDIENTE NUEVA ACTIVACIÓN CONTROLADA EN PROD
+Estado: 🟢 PRODUCCIÓN FUNCIONAL / APP CHECK ENFORCEMENT PENDIENTE
 Prioridad: CRÍTICA
 
 Objetivo:
@@ -408,15 +412,13 @@ La capa Cloudflare de MGD-003 queda validada en DEV: origen → Worker → rate 
 - no se usaron tokens ni datos de la boda real durante esta validación;
 - QA DEV de MGD-003 queda cerrado y aprobado.
 
-### Pendiente para cerrar MGD-003
-1. QA manual DEV de `invitacion_0_2` con Turnstile silencioso.
-2. Confirmar envío normal sin mensajes técnicos visibles.
-3. Confirmar móvil y desktop.
-4. Confirmar 429 con mensaje de UX controlado.
-5. Solo después preparar una nueva migración a PROD.
-6. Tras una ventana limpia de tráfico, evaluar Enforcement de App Check; no activarlo antes.
-
-Siguiente fase: revisión Firebase/App Check/Rules para impedir bypass directo a Firestore.
+### Pendiente real MGD-003 — reconciliado 2026-10-09
+- Turnstile y rate limit ya están funcionales en producción.
+- El QA aislado DEV confirmó HTTP 200 y 429 en desktop y móvil sin escribir RSVP ni Firestore.
+- App Check permanece integrado pero sin Enforcement.
+- Antes de activar Enforcement debe observarse tráfico limpio e identificarse el tráfico legado/no verificado.
+- Cualquier cambio de Rules, Enforcement o ruta de escritura requiere autorización explícita y QA específico.
+- La revisión futura para reducir bypass directo a Firestore sigue siendo una fase separada de endurecimiento.
 
 ### Firebase App Check — DEV integrado 2026-10-05
 - App web registrada en Firebase App Check: `migrandiaweb`.
@@ -654,7 +656,7 @@ Release registrada:
 ---
 
 ## MGD-008 — Tests E2E reales
-Estado: 🟣 AUTH READONLY APROBADO DEV / E2E-17, E2E-18 Y E2E-19 APROBADOS
+Estado: 🟣 APROBADO DEV — AUTH READONLY + E2E-17/18/19
 Prioridad: CRÍTICA
 
 Incorporar pruebas de navegador.
@@ -989,7 +991,7 @@ Implementación DEV MGD-011 — aislamiento estructural:
 ---
 
 ## MGD-026 — Branding profesional del login Google / Firebase
-Estado: 🟡 PRODUCCIÓN ACTUALIZADA / PENDIENTE PROPAGACIÓN GOOGLE
+Estado: 🟡 PROD ACTUALIZADA / REVISIÓN EXTERNA GOOGLE PENDIENTE
 Prioridad: CRÍTICA ANTES DE MARCHA BLANCA
 
 Problema actual:
