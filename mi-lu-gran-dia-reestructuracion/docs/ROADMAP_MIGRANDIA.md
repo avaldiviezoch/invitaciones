@@ -1310,7 +1310,7 @@ la edad orienta presets y recomendaciones, pero nunca debe imponer estereotipos 
 # BLOQUE E — TERMINOLOGÍA DINÁMICA
 
 ## MGD-017 — Diccionario de lenguaje por evento
-Estado: 🟢 PROD TÉCNICO / SIN CONSUMO UI
+Estado: 🟢 PRODUCCIÓN / CONSUMO UI APROBADO
 Prioridad: ALTA
 
 Evitar texto matrimonial hardcodeado.
@@ -1336,6 +1336,15 @@ Graduación:
 - Graduado/a
 
 La interfaz debe consultar el perfil del evento.
+
+### Cierre PROD MGD-017 — 2026-10-09
+
+- PR PROD #559 conectó el diccionario central al dashboard Inicio.
+- PR PROD #560 completó el nombre dinámico del contexto en móvil.
+- Commit PROD tras el cierre: `81d0e71fe0ebc9b21fa6cb7fe552ebb81726ecdb`.
+- Los documentos históricos mantienen semántica de boda mediante fallback `eventType = wedding`.
+- Se eliminaron textos matrimoniales hardcodeados del resumen de Inicio dentro de este alcance.
+- No se modificó persistencia, Firestore Rules, Auth, Storage ni creación de eventos.
 
 ---
 

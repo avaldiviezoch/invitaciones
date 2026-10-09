@@ -1,3 +1,11 @@
+## 2026-10-09 — MGD-017 cerrado en producción
+
+- PR PROD #559 conectó terminología dinámica al dashboard Inicio.
+- PR PROD #560 eliminó el prefijo móvil hardcodeado y dejó el nombre del contexto como única fuente visible.
+- Commit productivo: `81d0e71fe0ebc9b21fa6cb7fe552ebb81726ecdb`.
+- Para eventos históricos, el fallback `wedding` conserva el lenguaje actual de boda.
+- No hubo cambios de persistencia, Rules, Auth, Storage ni creación de eventos.
+
 ## 2026-10-09 — MGD-013/014/017/018 promovidos técnicamente a producción
 
 - PR PROD #557 fusionado en `avaldiviezoch/Wedding`.
