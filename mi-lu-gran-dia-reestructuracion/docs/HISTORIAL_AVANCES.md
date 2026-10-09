@@ -1,3 +1,12 @@
+## 2026-10-09 — MGD-011 cerrado en producción
+
+- PR PROD #554 promovió las correcciones de Presupuesto detectadas en la prueba multi-contexto.
+- PR PROD #555 corrigió la causa real del fallo de caché posterior, incrementando únicamente el cache-buster del dashboard.
+- Commit productivo verificado: `eeda06c7d7ec8bdbb64d8d0bca430d4b693578cd`.
+- QA productivo aprobado: presupuesto total editable/persistente, categoría General para eventos sin categorías y cambio entre contextos sin mezcla de datos.
+- La base un UID → múltiples contextos queda aprobada en producción.
+- `eventType` y la semántica multi-evento completa continúan en MGD-012+.
+
 ## 2026-10-09 — MGD-009 y MGD-010 cerrados en producción
 
 - PR PROD #553 fusionado en `avaldiviezoch/Wedding`.
