@@ -1571,14 +1571,15 @@ test('MGD-026: la home publica privacidad y términos y ambas páginas responden
 
 
 test('Presupuesto: primer gasto siempre tiene categoría visible y una sola instancia de módulo', async ({ page }) => {
-  const budgetResponse = await page.request.get(new URL('src/modules/presupuesto/index.js?v=17', baseURL || page.url()).href);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  const budgetResponse = await page.request.get(new URL('src/modules/presupuesto/index.js?v=17', page.url()).href);
   expect(budgetResponse.ok()).toBe(true);
   const budgetSource = await budgetResponse.text();
   expect(budgetSource).toContain("const GENERAL_CATEGORY_ID='cat_general'");
   expect(budgetSource).toContain("if(!state.categories.length)ensureGeneralCategory()");
   expect(budgetSource).toContain("orphanItems.forEach(item=>{item.categoryId=GENERAL_CATEGORY_ID})");
 
-  const dashboardResponse = await page.request.get(new URL('src/modules/dashboard/inicio.js', baseURL || page.url()).href);
+  const dashboardResponse = await page.request.get(new URL('src/modules/dashboard/inicio.js', page.url()).href);
   expect(dashboardResponse.ok()).toBe(true);
   const dashboardSource = await dashboardResponse.text();
   expect(dashboardSource).toContain("../presupuesto/index.js?v=17");
