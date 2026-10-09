@@ -1588,6 +1588,24 @@ test('Presupuesto: primer gasto siempre tiene categoría visible y una sola inst
   expect(dashboardSource).not.toContain("../presupuesto/index.js?v=16");
 });
 
+test('Presupuesto: total editable alimenta saldo disponible y persiste por evento', async ({ page }) => {
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+
+  const htmlResponse = await page.request.get(new URL('src/modules/presupuesto/index.html?v=9', page.url()).href);
+  expect(htmlResponse.ok()).toBe(true);
+  const html = await htmlResponse.text();
+  expect(html).toContain('data-budget-total-input');
+  expect(html).toContain('Presupuesto total de la boda');
+
+  const jsResponse = await page.request.get(new URL('src/modules/presupuesto/index.js?v=18', page.url()).href);
+  expect(jsResponse.ok()).toBe(true);
+  const source = await jsResponse.text();
+  expect(source).toContain("state.settings.totalBudget=n(e.target.value)");
+  expect(source).toContain("const t=grandTotals(),budget=n(state.settings.totalBudget),available=Math.max(0,budget-t.paid)");
+  expect(source).toContain("void persist('Presupuesto total actualizado')");
+});
+
+
 test('MGD-011: un UID admite múltiples eventos con rutas aisladas por eventId', async () => {
   const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/event-context-isolation.js')).href;
   const {
