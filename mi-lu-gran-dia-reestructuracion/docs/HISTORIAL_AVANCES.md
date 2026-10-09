@@ -1,3 +1,11 @@
+## 2026-10-09 — MGD-050: estimados vs. invitados registrados
+
+- Durante E2E-18 se confirmó que la cantidad de invitados capturada en onboarding se guarda como `guestCount` de planificación dentro de Presupuesto.
+- El módulo Invitados mantiene correctamente su conteo basado solo en personas reales registradas en `canonical.guests`.
+- No se considera un bug que el dashboard muestre 0/0 invitados reales aunque exista un estimado de planificación.
+- Se crea MGD-050 como mejora UX futura para mostrar claramente **invitados estimados** y mantener separados los **invitados realmente registrados**.
+- Se evaluará además un indicador comparativo estimados vs. registrados sin generar personas ficticias ni duplicar fuentes de verdad.
+
 ## 2026-10-09 — MGD-008 / E2E-17: persistencia real aprobada
 
 - Se ejecutó en DEV una escritura controlada sobre el nombre del evento de prueba.
