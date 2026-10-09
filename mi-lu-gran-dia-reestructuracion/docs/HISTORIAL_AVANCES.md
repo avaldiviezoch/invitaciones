@@ -1,3 +1,12 @@
+## 2026-10-09 — MGD-009: registro real por correo aprobado
+
+- Se ejecutó en DEV el flujo real completo con una cuenta nueva por correo.
+- El registro se completó correctamente en Firebase Auth.
+- La cuenta accedió a Migrandia sin errores visibles.
+- Se validó cierre de sesión y reingreso con la misma cuenta.
+- No se observaron errores de consola ni comportamientos anómalos durante la prueba.
+- MGD-009 queda cerrado en DEV con prueba real completada.
+
 ## 2026-10-07 — MGD-026: producción actualizada y dominio verificado
 
 - PR #551 de producción fusionado; `Wedding/main` quedó en `1c8412c82b03599919f7cc8b92fe595be4288113` y el despliegue GitHub Pages terminó correctamente.
