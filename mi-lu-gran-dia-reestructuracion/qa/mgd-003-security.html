@@ -68,8 +68,14 @@ const timer=setInterval(()=>{
 },100);
 document.getElementById('verify').addEventListener('click',async()=>{
   const out=document.getElementById('out');
-  token=token||(widgetId!==null&&window.turnstile?turnstile.getResponse(widgetId):'');
-  if(!token){out.textContent='Turnstile cargó, pero todavía no entregó token.';setReady(false);return;}
+  const currentToken=token||(widgetId!==null&&window.turnstile?turnstile.getResponse(widgetId):'');
+  if(!currentToken){out.textContent='Turnstile cargó, pero todavía no entregó token.';setReady(false);return;}
+
+  // Consumir este token una sola vez y bloquear nuevos clics hasta que Turnstile regenere otro.
+  token='';
+  setReady(false);
+  verifyButton.textContent='Validando…';
+
   const started=Date.now();
   await new Promise(r=>setTimeout(r,1300));
   try{
@@ -77,7 +83,7 @@ document.getElementById('verify').addEventListener('click',async()=>{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({
-        turnstileToken:token,
+        turnstileToken:currentToken,
         rsvpToken:RSVP_TOKEN,
         responseId:RESPONSE_ID,
         elapsedMs:Date.now()-started+1300,
@@ -86,11 +92,11 @@ document.getElementById('verify').addEventListener('click',async()=>{
     });
     const body=await res.json().catch(()=>({}));
     out.textContent='HTTP '+res.status+'\n'+JSON.stringify(body,null,2);
-    token='';
-    setReady(false);
-    if(widgetId!==null)turnstile.reset(widgetId);
   }catch(error){
     out.textContent='ERROR\n'+String(error?.message||error);
+  }finally{
+    verifyButton.textContent='Validar seguridad';
+    if(widgetId!==null)turnstile.reset(widgetId);
   }
 });
 </script>
