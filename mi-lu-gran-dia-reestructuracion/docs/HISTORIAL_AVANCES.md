@@ -1,3 +1,12 @@
+## 2026-10-09 — MGD-012 cerrado en producción
+
+- PR PROD #556 fusionado.
+- Commit productivo: `9f79ec7b59f0ad44c026e975495783526d348705`.
+- `eventType` quedó como capa conceptual compatible con fallback `wedding` en memoria.
+- No hubo escritura nueva de `eventType` en Firestore, migración ni backfill.
+- QA real productivo: una misma cuenta cambió entre múltiples contextos, modificó datos y al volver cada contexto conservó sus propios cambios.
+- MGD-012 queda oficialmente cerrado en producción.
+
 ## 2026-10-09 — MGD-011 cerrado en producción
 
 - PR PROD #554 promovió las correcciones de Presupuesto detectadas en la prueba multi-contexto.

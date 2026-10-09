@@ -1145,7 +1145,7 @@ Validar en:
 # BLOQUE C — ARQUITECTURA MULTI-EVENTO
 
 ## MGD-012 — Concepto EVENTO sin romper `weddings`
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PRODUCCIÓN / QA REAL APROBADO
 Prioridad: CRÍTICA
 
 No renombrar todavía `weddings` a `events`.
@@ -1178,6 +1178,16 @@ Diseño propuesto sin migración:
 Gate de datos:
 - **todavía no se escribe `eventType` en Firestore**;
 - cualquier cambio que agregue el campo a documentos nuevos o existentes requerirá autorización específica de persistencia y QA de aislamiento.
+
+### Cierre PROD MGD-012 — 2026-10-09
+
+- PR PROD #556 fusionado.
+- Commit PROD: `9f79ec7b59f0ad44c026e975495783526d348705`.
+- `eventType` se interpreta en memoria con fallback `wedding` para documentos históricos sin ese campo.
+- No se escribió `eventType` en Firestore ni se ejecutó backfill o migración.
+- QA productivo real aprobado con una misma cuenta y múltiples contextos: cambio entre contextos, modificaciones independientes y persistencia correcta al volver.
+- No se detectó mezcla de datos entre contextos.
+- MGD-012 queda cerrado en producción.
 
 ---
 
