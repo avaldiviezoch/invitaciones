@@ -1,3 +1,13 @@
+## 2026-10-09 — MGD-003: QA DEV completo aprobado
+
+- Se validó la protección RSVP en una página QA aislada que no escribe Firestore ni crea respuestas RSVP.
+- Desktop: Turnstile operativo, HTTP 200 en flujo normal y HTTP 429 al superar el límite.
+- Móvil: se corrigió una carrera de carga de Turnstile esperando a que `turnstile.render()` estuviera disponible antes de inicializar.
+- Móvil post-corrección: HTTP 200 y HTTP 429 confirmados.
+- Mensaje de rate limit controlado: “Demasiados intentos. Espera un momento.”.
+- No se utilizaron datos ni tokens de la boda real.
+- MGD-003 queda cerrado en DEV; la nueva activación productiva sigue pendiente y debe hacerse de forma controlada.
+
 ## 2026-10-09 — MGD-011: prueba real multi-evento aprobada
 
 - Se validó en DEV el uso de un único UID con dos contextos distintos: `Mi boda` y `MGD-011 · Evento B`.
