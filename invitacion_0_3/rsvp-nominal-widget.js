@@ -1,6 +1,6 @@
 import { initializeApp, getApp, getApps } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-app.js';
 import { doc, getDoc, getFirestore, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-firestore.js';
-import { LEGACY_RSVP_MESSAGE, saveOwnedRsvp, saveOwnedRsvpMusic } from 'https://avaldiviezoch.github.io/Wedding/app_integral/js/modules/invitados/rsvp-owner-client.js?v=20260820-5b2';
+import { LEGACY_RSVP_MESSAGE, saveOwnedRsvp, saveOwnedRsvpMusic } from 'https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_0/rsvp-owner-client.js?v=20261009-e2e19';
 
 const VERSION='20260819-2520-inv5-music-fields1';
 const firebaseConfig={apiKey:'AIzaSyDCRuQgMjnm7KcAN_qo8AHPD3ueyis4-LY',authDomain:'migrandia.firebaseapp.com',projectId:'migrandia',storageBucket:'migrandia.firebasestorage.app',messagingSenderId:'7432985765',appId:'1:7432985765:web:b3a4844f41ac2a1376c14c'};
