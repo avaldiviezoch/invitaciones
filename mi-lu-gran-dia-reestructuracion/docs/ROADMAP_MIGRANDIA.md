@@ -632,7 +632,7 @@ Release registrada:
 ---
 
 ## MGD-008 — Tests E2E reales
-Estado: 🟣 AUTH READONLY APROBADO DEV / E2E-17 Y E2E-18 APROBADOS / PENDIENTE E2E-19
+Estado: 🟣 AUTH READONLY APROBADO DEV / E2E-17, E2E-18 Y E2E-19 APROBADOS
 Prioridad: CRÍTICA
 
 Incorporar pruebas de navegador.
@@ -730,6 +730,18 @@ Resultado E2E-18 — 2026-10-09:
 - tras cerrar sesión y volver a ingresar, el evento y el presupuesto permanecieron;
 - el onboarding no volvió a mostrarse como si el usuario fuera nuevo;
 - E2E-18 aprobado.
+
+Resultado E2E-19 — 2026-10-09:
+- se creó una página temporal aislada de QA para evitar usar invitaciones nominales;
+- el primer intento detectó un `ReferenceError: saveOwnedRsvp is not defined`;
+- se corrigió la importación del helper owned RSVP y luego una ruta histórica rota del helper;
+- el Worker DEV `/api/rsvp/verify` respondió 200 OK durante la validación;
+- se envió una respuesta controlada con nombre `E2E19 QA TEST`, asistencia confirmada y cantidad 1;
+- la respuesta apareció en Invitados → Confirmaciones RSVP;
+- administración la mostró como **Confirmado**, **Por revisar** y **Sin vínculo**;
+- no se vinculó a ningún invitado real;
+- por decisión del responsable, la respuesta se conserva temporalmente como registro QA para futuras pruebas;
+- E2E-19 aprobado funcionalmente.
 
 Clasificación:
 - **Fase segura inmediata:** E2E-01 y E2E-03 a E2E-16; navegación/lectura solamente. E2E-02 requiere autenticación pero no cambios de negocio.
