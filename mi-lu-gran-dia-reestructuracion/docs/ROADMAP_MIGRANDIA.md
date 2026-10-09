@@ -1,13 +1,47 @@
 # ROADMAP MIGRANDIA
 
-Última actualización: 2026-10-09
-Último commit DEV verificado: 0d8f49eba834572f895bdba8d62182a0bef9a41f
-Último commit PROD verificado: 1c8412c82b03599919f7cc8b92fe595be4288113
-Versión producción: Migrandia 0.7.0
-Trabajo actual: reconciliar DEV/PROD y cerrar bloques ya aprobados antes de continuar ampliando arquitectura.
-Próximo trabajo: cerrar MGD-002 en producción; después preparar promoción controlada de autenticación/E2E/multi-evento.
-Bloqueadores actuales: MGD-002 pendiente PROD; MGD-026 pendiente revisión/propagación externa Google; MGD-025 domain-only sin activar; MGD-042, MGD-044, MGD-047 y MGD-048 pendientes antes de marcha blanca; MGD-033 mantiene beta pública bloqueada.
+Última consolidación documental: 2026-10-09
+HEAD DEV verificado antes de esta consolidación: `ecf46a5c12d3513126391f67a9aa159cadc3c615` (PR #118 fusionado).
+HEAD PROD verificado: `ff22d555188a777fc7ce1ad239ba6a92ac2a470c` (PR #565 fusionado).
+Versión formal documentada en PROD: Migrandia 0.7.0; verificar versión desplegada antes de anunciar una versión nueva.
+Trabajo actual: consolidación documental y cierre verificable de DEV/PROD, antes de nuevas funcionalidades o cambios visuales.
+Siguiente bloque funcional, TODAVÍA PENDIENTE: MGD-037 fase 2b, selección real de eventType en onboarding y QA real con cuenta/evento de prueba.
+Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), MGD-026 (revisión Google), MGD-042, MGD-044, MGD-047 y MGD-048. MGD-033 no publica beta.
 
+## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
+
+Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
+
+**Reglas para estados:**
+- **PROD operativo**: integrado y validado funcionalmente en PROD, sin implicar que subfases futuras estén terminadas.
+- **PROD técnico**: código o contrato promovido; falta conectar, activar o verificar flujo final. NO equivale a cierre funcional.
+- **DEV**: trabajo fusionado o QA seguro aprobado en DEV; no declarar cierre PROD.
+- **PARCIAL / externo**: capacidad desplegada pero verificación/activación pendiente.
+- **PENDIENTE**: sin cierre demostrado. Se deja pendiente, sin porcentajes inventados.
+- No poner VERDE para una nueva acción sin CI verificable y, cuando corresponda, QA funcional REAL.
+- No activar App Check Enforcement, domain-only, beta pública, restauraciones, borrados, ni modificar Rules/Auth/Storage o datos reales por efecto de esta conciliación.
+
+| Estado | MGD | Evidencia y límites |
+| --- | --- | --- |
+| PROD operativo | 001, 002, 004, 005, 006, 007, 009, 010, 011, 012, 017 | Baseline, separación API DEV/PROD, seguridad, observabilidad, versión, registro, recuperación, contextos y terminología Inicio. Verificar regresiones al desplegar nuevas versiones. |
+| PROD parcial | 003, 019, 026 | RSVP protegido pero App Check Enforcement pendiente; catálogo de Distribución requiere QA no-wedding; branding Google pendiente revisión externa. |
+| PROD técnico, no cierre funcional | 013, 014, 015, 016, 018, 020, 021, 022, 023, 024, 028, 029, 030, 031, 032, 033, 034, 035, 036 | Código/contratos presentes en PROD; consumos reales, activaciones, persistencia, routing, gates o QA específicos pendientes según el MGD. MGD-034 tiene motor técnico en PROD, no UI adaptativa real. |
+| DEV / QA parcial | 008, 025, 027, 037 | E2E seguro en DEV, planner-cloud híbrido sin domain-only, permisos Ideas pendientes de revisión conjunta, landing fase 1 y contrato de creación fase 2a fusionado mediante PR DEV #118. |
+| PENDIENTE | 038, 039, 040, 041, 042, 043, 044, 045, 046, 047, 048, 049, 050 | Mantener abiertos; páginas legales existentes NO cierran MGD-042. |
+ 
+**Recuento sin doble contabilizar:** 11 PROD operativos + 3 parciales + 19 técnicos + 4 DEV + 13 pendientes = 50 MGD. Este recuento NO es porcentaje de producto terminado.
+
+**PR DEV #118:** fusionado con merge commit `ecf46a5c12d3513126391f67a9aa159cadc3c615`. Modificó solamente `src/services/wedding-context.js`, este roadmap y el historial. La firma `createWedding({ name, date, eventType, themeId })` persiste ambos metadatos en nuevas escrituras y respeta fallback. Todavía no existe selección real desde onboarding ni QA no-wedding. NO promover a PROD solo por este merge.
+
+**Pendientes de cierre antes de continuar desarrollo:**
+1. Validar PR de consolidación documental (diff/CI); fusionar solo con checks verdes o verificación técnica equivalente explícita.
+2. Confirmar en `invitaciones/main` y `Wedding/main` los HEAD después del merge documental.
+3. Inventariar PR abiertos históricos por antigüedad; NO fusionar ni cerrar automáticamente PR no relacionados. Decidir duplicados/supersedidos individualmente.
+4. Preparar QA seguro de MGD-037 fase 2a (normalización, escritura solo para eventos nuevos y no-regresión legacy); confirmar antes de usar cuentas test o persistencia real.
+5. MGD-025/027, Google MGD-026, MGD-003 Enforcement y beta siguen en espera de sus gates propios.
+6. Luego revisar app completa con Antonio, antes de cambios visuales o funcionales nuevos.
+
+---
 ## Estado operativo actual — 2026-10-09
 
 - MGD-001: baseline capturado y su pendiente de versionado quedó resuelto por MGD-007.
@@ -1397,7 +1431,7 @@ Implementación DEV:
 ---
 
 ## MGD-034 — Onboarding dinámico por tipo de evento
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟡 MOTOR EN PROD TÉCNICO; UI ADAPTATIVA NO ACTIVADA / QA DEV SEGURO APROBADO
 Prioridad: CRÍTICA
 
 El onboarding actual está orientado a boda (Novia / Novio / Ayudo a organizar). Debe convertirse en un flujo adaptativo.
@@ -2465,7 +2499,7 @@ Migrandia tendrá **dos formas distintas de entrada**, ambas conectadas al mismo
 Estas dos entradas no deben convertirse en aplicaciones separadas. Deben compartir el mismo core, autenticación, módulos, eventProfile, sistema de temas y backend.
 
 ### MGD-037 — Landing general de Mi Gran Día
-**Estado:** 🟡 DEV FASE 1 FUSIONADA / QA Y EVENTTYPE REAL PENDIENTES  
+**Estado:** 🟡 DEV FASE 1 Y FASE 2a FUSIONADAS (PR #116 / #118) / QA EVENTTYPE REAL PENDIENTE  
 **Prioridad:** ALTA
 
 Objetivo:
