@@ -1,3 +1,15 @@
+## 2026-10-09 — MGD-011: prueba real multi-evento aprobada
+
+- Se validó en DEV el uso de un único UID con dos contextos distintos: `Mi boda` y `MGD-011 · Evento B`.
+- El segundo evento fue creado desde la UI de selección de bodas/eventos.
+- Se registraron datos reconocibles en Presupuesto dentro de Evento B.
+- Al cambiar a `Mi boda`, se mostraron y conservaron sus propios datos.
+- Al volver a Evento B, sus datos siguieron persistentes.
+- No se observó mezcla de Presupuesto entre ambos contextos.
+- Durante la prueba se detectaron y corrigieron dos problemas del módulo Presupuesto: gastos huérfanos sin categoría visible y carga duplicada de distintas versiones del mismo módulo.
+- También se agregó edición directa del presupuesto total y el saldo disponible quedó calculado automáticamente como presupuesto total menos pagado.
+- MGD-011 queda aprobado en DEV con prueba real controlada.
+
 ## 2026-10-09 — MGD-008 / E2E-19: RSVP controlado aprobado
 
 - Se ejecutó en DEV una respuesta RSVP real y controlada identificada como `E2E19 QA TEST`.
