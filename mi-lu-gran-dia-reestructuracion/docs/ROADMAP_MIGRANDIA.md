@@ -2493,7 +2493,8 @@ Bautizo-Comunión / Graduación / Corporativo / Otro
 - Commit DEV: `039e78c533cffccbbc8643a4e31466f623433d4c`.
 - La portada general ya comunica plataforma multi-evento y muestra los 8 tipos base.
 - Los tipos todavía no son seleccionables; no se persiste `eventType`.
-- Siguiente fase: conectar selección real al onboarding y ampliar `createWedding()` para nuevos eventos, sin migrar históricos.
+- Fase 2a — contrato de persistencia preparado en PR DEV: `createWedding({ name, date, eventType, themeId })` normaliza y escribe ambos campos exclusivamente al crear eventos nuevos, en raíz e índice; sin backfill ni migración. Pendiente QA DEV y fusión.
+- Siguiente fase: conectar selección real al onboarding en un PR separado, después de validar el contrato de creación con un evento de prueba.
 - Auditoría de Rules: los documentos raíz de `weddings` y el índice bajo `users/{uid}` permiten campos adicionales bajo las condiciones actuales; no se requiere cambiar Rules para guardar `eventType/themeId`.
 - Cualquier escritura nueva se implementará primero en DEV y deberá probarse con contexto de prueba.
 
