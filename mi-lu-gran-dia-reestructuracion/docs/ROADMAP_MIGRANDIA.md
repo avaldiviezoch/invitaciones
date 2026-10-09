@@ -15,7 +15,7 @@ Bloqueadores actuales: MGD-002 pendiente PROD; MGD-026 pendiente revisión/propa
 - MGD-003: Turnstile + Worker + rate limit están funcionales en producción; QA DEV adicional de 2026-10-09 confirmó HTTP 200 y 429 en desktop y móvil. App Check Enforcement permanece desactivado.
 - MGD-004, MGD-005, MGD-006 y MGD-007: producción / QA aprobado.
 - MGD-008: E2E readonly autenticado y E2E-17, E2E-18 y E2E-19 aprobados en DEV.
-- MGD-009 y MGD-010: pruebas reales de registro por correo y recuperación de contraseña aprobadas en DEV; pendientes de promoción productiva.
+- MGD-009 y MGD-010: producción / QA real aprobado; registro, login y recuperación por correo validados.
 - MGD-011: prueba real multi-evento aprobada en DEV con persistencia independiente entre dos contextos.
 - MGD-012 a MGD-024: capas multi-evento e invitaciones aprobadas en QA seguro DEV; no asumir que están promovidas a PROD.
 - MGD-025: fases 1–8 aprobadas; `domain-only` no está activado y Checklist sigue en auditoría.
@@ -832,7 +832,7 @@ Commits implementación inicial:
 # BLOQUE B — CUENTA, LOGIN Y BRANDING DE ACCESO
 
 ## MGD-009 — Registro por correo
-Estado: 🟣 APROBADO DEV — PRUEBA REAL COMPLETADA
+Estado: 🟢 PRODUCCIÓN / QA REAL APROBADO
 Prioridad: ALTA
 
 Agregar:
@@ -895,7 +895,7 @@ Prueba real MGD-009 — 2026-10-09:
 - MGD-009 queda cerrado en DEV.
 
 ## MGD-010 — Recuperación de contraseña
-Estado: 🟣 APROBADO DEV — PRUEBA REAL COMPLETADA
+Estado: 🟢 PRODUCCIÓN / QA REAL APROBADO
 Prioridad: ALTA
 
 Agregar:
@@ -948,6 +948,19 @@ Resultado:
 
 Pendiente no bloqueante de MGD-010:
 - ninguno. El branding visual del correo pertenece a MGD-026.
+
+---
+
+### Cierre PROD MGD-009 / MGD-010 — 2026-10-09
+
+- PR PROD #553 fusionado.
+- Commit PROD: `f819f65d2778be91ce1b4872fa2923f9171a8ea8`.
+- MGD-009: creación de cuenta por correo validada en producción.
+- Login posterior con la misma cuenta validado.
+- MGD-010: recuperación de contraseña por correo validada en producción.
+- Flujo completo de cambio de contraseña validado.
+- QA productivo confirmado por Antonio.
+- No se modificaron Firestore Rules, Storage ni estructura de datos.
 
 ---
 
