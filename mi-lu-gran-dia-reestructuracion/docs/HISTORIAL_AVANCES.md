@@ -1,3 +1,13 @@
+## 2026-10-09 — MGD-009 y MGD-010 cerrados en producción
+
+- PR PROD #553 fusionado en `avaldiviezoch/Wedding`.
+- Commit productivo: `f819f65d2778be91ce1b4872fa2923f9171a8ea8`.
+- Registro por correo probado en producción con cuenta nueva de prueba.
+- Login posterior con la misma cuenta probado correctamente.
+- Recuperación de contraseña por correo probada correctamente.
+- Cambio de contraseña completado y validado.
+- MGD-009 y MGD-010 quedan oficialmente cerrados en producción.
+
 ## 2026-10-09 — MGD-002 cerrado en producción
 
 - PR PROD #552 fusionado en `avaldiviezoch/Wedding`.
