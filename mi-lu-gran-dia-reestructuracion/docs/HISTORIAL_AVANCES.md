@@ -1,3 +1,17 @@
+## 2026-10-09 — MGD-008 / E2E-18: usuario nuevo, onboarding y evento aprobados
+
+- Se ejecutó en DEV el flujo completo con una cuenta nueva real.
+- El usuario recorrió el onboarding completo sin omitirlo.
+- Se ingresaron datos reconocibles de prueba: 122 invitados estimados y presupuesto S/ 12,345.
+- Migrandia creó automáticamente el evento `Mi boda`.
+- El presupuesto quedó aplicado correctamente.
+- El estimado de invitados se conservó como dato de planificación y no generó registros ficticios en el módulo Invitados.
+- El estado sobrevivió una recarga forzada Ctrl+F5.
+- Tras cerrar sesión y volver a iniciar sesión con la misma cuenta, el evento y el presupuesto permanecieron.
+- El onboarding no volvió a mostrarse como usuario nuevo.
+- E2E-18 queda aprobado.
+- Hallazgo UX derivado: el botón `Usar correo` desde onboarding abre primero el login y obliga a seleccionar después `Crear cuenta`; funciona, pero puede optimizarse en una mejora futura.
+
 ## 2026-10-09 — MGD-050: estimados vs. invitados registrados
 
 - Durante E2E-18 se confirmó que la cantidad de invitados capturada en onboarding se guarda como `guestCount` de planificación dentro de Presupuesto.
