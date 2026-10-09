@@ -115,7 +115,7 @@ async function saveWeddingOnboarding(context, profile = {}) {
   });
 }
 
-async function createWedding({ name, date = '' } = {}) {
+async function createWedding({ name, date = '', eventType = DEFAULT_EVENT_TYPE, themeId = DEFAULT_THEME_ID } = {}) {
   const user = auth.currentUser;
   if (!user) throw new Error('Debes iniciar sesión.');
   const cleanName = String(name || '').trim();
@@ -123,13 +123,15 @@ async function createWedding({ name, date = '' } = {}) {
   const weddingRef = doc(collection(db, 'weddings'));
   const weddingId = weddingRef.id;
   const cleanDate = String(date || '');
+  const cleanEventType = normalizeEventType(eventType);
+  const cleanThemeId = normalizeThemeId(themeId);
   const batch = writeBatch(db);
-  batch.set(weddingRef, { name: cleanName, date: cleanDate, ownerUid: user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp(), version: 1 });
+  batch.set(weddingRef, { name: cleanName, date: cleanDate, eventType: cleanEventType, themeId: cleanThemeId, ownerUid: user.uid, createdAt: serverTimestamp(), updatedAt: serverTimestamp(), version: 1 });
   batch.set(doc(db, 'weddings', weddingId, 'members', user.uid), { uid: user.uid, email: String(user.email || '').toLowerCase(), displayName: user.displayName || '', role: 'owner', status: 'active', weddingName: cleanName, joinedAt: serverTimestamp() });
-  batch.set(doc(db, 'users', user.uid, 'weddings', weddingId), { weddingId, name: cleanName, date: cleanDate, role: 'owner', ownerUid: user.uid, addedAt: serverTimestamp() });
+  batch.set(doc(db, 'users', user.uid, 'weddings', weddingId), { weddingId, name: cleanName, date: cleanDate, eventType: cleanEventType, themeId: cleanThemeId, role: 'owner', ownerUid: user.uid, addedAt: serverTimestamp() });
   batch.set(doc(db, 'users', user.uid), { activeWeddingId: weddingId, lastSeenAt: serverTimestamp() }, { merge: true });
   await batch.commit();
-  return { id: weddingId, name: cleanName, date: cleanDate, role: 'owner', eventType: DEFAULT_EVENT_TYPE, themeId: DEFAULT_THEME_ID };
+  return { id: weddingId, name: cleanName, date: cleanDate, role: 'owner', eventType: cleanEventType, themeId: cleanThemeId };
 }
 
 async function listPendingInvitations() {
