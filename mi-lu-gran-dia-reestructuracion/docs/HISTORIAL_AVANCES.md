@@ -1,3 +1,12 @@
+## 2026-10-09 — MGD-013/014/017/018 promovidos técnicamente a producción
+
+- PR PROD #557 fusionado en `avaldiviezoch/Wedding`.
+- Commit productivo: `f74a517bb4d2ac67ba7eb7ca8eb0fa2061d7d405`.
+- Se desplegaron catálogo de 8 tipos de evento, motor `eventProfile`, terminología, plantillas de Checklist y perfiles de onboarding.
+- No hay consumidores productivos de `getEventProfile()` todavía.
+- No hubo cambios de UI, persistencia, Firestore Rules, Auth, Storage ni migración de datos.
+- La promoción es técnica; la activación funcional se mantiene separada.
+
 ## 2026-10-09 — MGD-012 cerrado en producción
 
 - PR PROD #556 fusionado.
