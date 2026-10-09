@@ -1,3 +1,14 @@
+## 2026-10-09 — Reconciliación oficial DEV / PROD
+
+- Se auditó el estado real de Roadmap, Historial, `invitaciones/main` y `Wedding/main`.
+- DEV verificado: `0d8f49eba834572f895bdba8d62182a0bef9a41f`.
+- PROD verificado: `1c8412c82b03599919f7cc8b92fe595be4288113`.
+- Se corrigió la interpretación de MGD-003: Turnstile + Worker + rate limit ya están funcionales en producción; lo pendiente es App Check Enforcement y endurecimiento futuro, no una nueva activación básica.
+- Se confirmó que MGD-002 aún no está cerrado en producción: `Wedding/app_integral/src/services/runtime-environment.js` continúa apuntando la API productiva al Worker estático `wedding.avaldiviezoch.workers.dev`, mientras DEV ya usa `migrandia-api.avaldiviezoch.workers.dev`.
+- Se confirmó que E2E-17/18/19, registro por correo, recuperación de contraseña y prueba real multi-evento están aprobados en DEV, pero no deben tratarse como promovidos automáticamente a producción.
+- MGD-025 permanece híbrido; no se activa `domain-only` ni se retira fallback legacy.
+- Se decide detener ampliaciones no esenciales hasta reconciliar primero DEV/PROD por bloques pequeños y verificables.
+
 ## 2026-10-09 — MGD-003: QA DEV completo aprobado
 
 - Se validó la protección RSVP en una página QA aislada que no escribe Firestore ni crea respuestas RSVP.
