@@ -765,7 +765,7 @@ Commits implementación inicial:
 # BLOQUE B — CUENTA, LOGIN Y BRANDING DE ACCESO
 
 ## MGD-009 — Registro por correo
-Estado: 🟢 QA SEGURO DEV APROBADO / PENDIENTE PRUEBA REAL CONTROLADA
+Estado: 🟣 APROBADO DEV — PRUEBA REAL COMPLETADA
 Prioridad: ALTA
 
 Agregar:
@@ -817,6 +817,15 @@ Pendiente:
 - prueba real de creación de cuenta solo con una cuenta de prueba autorizada, no con datos reales.
 
 ---
+
+Prueba real MGD-009 — 2026-10-09:
+- se creó una cuenta nueva real por correo en DEV;
+- la cuenta se registró correctamente en Firebase Auth;
+- el usuario ingresó a Migrandia sin errores visibles;
+- se cerró sesión correctamente;
+- se volvió a iniciar sesión con la misma cuenta;
+- no se observaron errores de consola ni comportamientos anómalos durante el flujo;
+- MGD-009 queda cerrado en DEV.
 
 ## MGD-010 — Recuperación de contraseña
 Estado: 🟣 APROBADO DEV — PRUEBA REAL COMPLETADA
