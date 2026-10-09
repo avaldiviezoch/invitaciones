@@ -1,3 +1,13 @@
+## 2026-10-09 — MGD-008 / E2E-17: persistencia real aprobada
+
+- Se ejecutó en DEV una escritura controlada sobre el nombre del evento de prueba.
+- Valor temporal: `E2E-17 · Persistencia`.
+- El cambio sobrevivió una recarga forzada Ctrl+F5.
+- Se revirtió el nombre a `cuenta de prueba`.
+- La reversión sobrevivió una nueva recarga forzada Ctrl+F5.
+- La prueba confirmó persistencia real y reversión limpia sin tocar RSVP, invitados, presupuesto, distribución, Auth, Rules ni Storage.
+- E2E-17 queda aprobado.
+
 ## 2026-10-09 — MGD-009: registro real por correo aprobado
 
 - Se ejecutó en DEV el flujo real completo con una cuenta nueva por correo.
