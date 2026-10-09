@@ -1570,6 +1570,24 @@ test('MGD-026: la home publica privacidad y términos y ambas páginas responden
 });
 
 
+test('Presupuesto: primer gasto siempre tiene categoría visible y una sola instancia de módulo', async ({ page }) => {
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  const budgetResponse = await page.request.get(new URL('src/modules/presupuesto/index.js?v=17', page.url()).href);
+  expect(budgetResponse.ok()).toBe(true);
+  const budgetSource = await budgetResponse.text();
+  expect(budgetSource).toContain("const GENERAL_CATEGORY_ID='cat_general'");
+  expect(budgetSource).toContain("if(!state.categories.length)ensureGeneralCategory()");
+  expect(budgetSource).toContain("orphanItems.forEach(item=>{item.categoryId=GENERAL_CATEGORY_ID})");
+
+  const dashboardResponse = await page.request.get(new URL('src/modules/dashboard/inicio.js', page.url()).href);
+  expect(dashboardResponse.ok()).toBe(true);
+  const dashboardSource = await dashboardResponse.text();
+  expect(dashboardSource).toContain("../presupuesto/index.js?v=17");
+  expect((dashboardSource.match(/presupuesto\/index\.js\?v=17/g) || []).length).toBe(2);
+  expect(dashboardSource).not.toContain("../presupuesto/index.js?v=15");
+  expect(dashboardSource).not.toContain("../presupuesto/index.js?v=16");
+});
+
 test('MGD-011: un UID admite múltiples eventos con rutas aisladas por eventId', async () => {
   const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/event-context-isolation.js')).href;
   const {
