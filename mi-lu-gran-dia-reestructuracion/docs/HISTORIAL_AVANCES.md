@@ -1,3 +1,13 @@
+## 2026-10-09 — MGD-002 cerrado en producción
+
+- PR PROD #552 fusionado en `avaldiviezoch/Wedding`.
+- Commit productivo: `a2d713200312be29a754946c5084d51d4ad8e37d`.
+- Producción dejó de resolver servicios HTTP contra el Worker estático `wedding` y utiliza `migrandia-api`.
+- Ideas usa el runtime central para Link Preview e Image Proxy.
+- Música usa el runtime central para Music Preview.
+- QA manual productivo completado: Ideas OK y Música OK.
+- MGD-002 queda oficialmente cerrado en producción.
+
 ## 2026-10-09 — Reconciliación oficial DEV / PROD
 
 - Se auditó el estado real de Roadmap, Historial, `invitaciones/main` y `Wedding/main`.

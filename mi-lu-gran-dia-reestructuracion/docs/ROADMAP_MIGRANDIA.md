@@ -11,7 +11,7 @@ Bloqueadores actuales: MGD-002 pendiente PROD; MGD-026 pendiente revisión/propa
 ## Estado operativo actual — 2026-10-09
 
 - MGD-001: baseline capturado y su pendiente de versionado quedó resuelto por MGD-007.
-- MGD-002: separación DEV/PROD corregida y aprobada en DEV; PROD todavía apunta su `runtime-environment.js` al Worker estático `wedding` y debe migrar a `migrandia-api`.
+- MGD-002: separación DEV/PROD cerrada y validada en producción; `runtime-environment.js`, Ideas y Música usan el Worker productivo dedicado `migrandia-api`.
 - MGD-003: Turnstile + Worker + rate limit están funcionales en producción; QA DEV adicional de 2026-10-09 confirmó HTTP 200 y 429 en desktop y móvil. App Check Enforcement permanece desactivado.
 - MGD-004, MGD-005, MGD-006 y MGD-007: producción / QA aprobado.
 - MGD-008: E2E readonly autenticado y E2E-17, E2E-18 y E2E-19 aprobados en DEV.
@@ -171,7 +171,7 @@ Pendiente:
 ---
 
 ## MGD-002 — Separación total DEV / PROD
-Estado: 🟣 APROBADO DEV / PENDIENTE PROD
+Estado: 🟢 PRODUCCIÓN / QA APROBADO
 Prioridad: CRÍTICA
 
 Objetivo:
@@ -227,6 +227,16 @@ Decisiones:
 - no tocar Firebase, Firestore, Auth, Storage ni persistencia;
 - no migrar a producción hasta comprobar funcionalmente los endpoints del Worker PROD;
 - una sola configuración central para servicios actuales y futuros.
+
+### Cierre PROD MGD-002 — 2026-10-09
+
+- PR PROD #552 fusionado en `avaldiviezoch/Wedding`.
+- Commit PROD: `a2d713200312be29a754946c5084d51d4ad8e37d`.
+- `Wedding/app_integral/src/services/runtime-environment.js` resuelve producción contra `https://migrandia-api.avaldiviezoch.workers.dev`.
+- Ideas dejó de usar URLs DEV hardcodeadas y consume `serviceUrl('/api/link-preview')` y `serviceUrl('/api/image-proxy')`.
+- Música dejó de usar URL DEV hardcodeada y consume `serviceUrl('/api/music-preview')`.
+- QA manual productivo confirmado por Antonio: Ideas OK y Música OK.
+- MGD-002 queda cerrado en producción.
 
 ### Corrección final detectada — 2026-10-07
 
