@@ -474,6 +474,17 @@ Hallazgos prioritarios:
 10. MEDIO — `json()` aplica `Cache-Control: public, max-age=3600` también a varias respuestas de error; conviene separar cache de éxito/error.
 11. BAJO — rutas GET desconocidas responden health check 200 en vez de 404; dificulta observabilidad y detección de rutas incorrectas.
 
+Prueba real controlada — 2026-10-09:
+- se utilizó una cuenta de prueba con un primer evento existente (`Mi boda`);
+- con el mismo UID se creó un segundo contexto `MGD-011 · Evento B`;
+- el segundo evento inició con su propio contexto y datos independientes;
+- se registraron datos distintos en Presupuesto dentro de Evento B;
+- al cambiar nuevamente a `Mi boda`, se conservaron los datos propios del primer evento;
+- al volver a Evento B, sus datos permanecieron persistentes;
+- no se observó mezcla de Presupuesto entre ambos contextos;
+- la persistencia sobrevivió los cambios de evento;
+- MGD-011 queda aprobado en DEV como prueba real de aislamiento multi-evento con un solo UID.
+
 Decisión:
 - no tocar Firebase, Firestore Rules, Auth, Storage ni BD;
 - endurecer primero DEV;
@@ -918,7 +929,7 @@ Pendiente no bloqueante de MGD-010:
 ---
 
 ## MGD-011 — Usuario único multi-evento
-Estado: 🟢 AISLAMIENTO ESTRUCTURAL QA APROBADO / PENDIENTE PRUEBA REAL CONTROLADA
+Estado: 🟣 PRUEBA REAL MULTI-EVENTO APROBADA DEV
 Prioridad: CRÍTICA
 
 Se mantiene:
