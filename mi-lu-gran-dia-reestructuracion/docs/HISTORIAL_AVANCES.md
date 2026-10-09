@@ -1,3 +1,15 @@
+## 2026-10-09 — MGD-008 / E2E-19: RSVP controlado aprobado
+
+- Se ejecutó en DEV una respuesta RSVP real y controlada identificada como `E2E19 QA TEST`.
+- El flujo de seguridad del Worker DEV respondió correctamente.
+- Durante la prueba se detectaron y corrigieron dos defectos reales del widget DEV: helper owned RSVP no importado y ruta histórica inexistente del helper.
+- Tras la corrección, el envío final mostró confirmación exitosa.
+- La respuesta llegó a Invitados → Confirmaciones RSVP y aparece como **Confirmado**, **Por revisar** y **Sin vínculo**.
+- No se vinculó la respuesta a ningún invitado real.
+- La respuesta se conserva temporalmente por decisión del responsable para futuras pruebas controladas.
+- La página temporal de envío debe retirarse una vez cerrada la validación para evitar nuevos registros QA accidentales.
+- E2E-19 queda aprobado funcionalmente.
+
 ## 2026-10-09 — MGD-008 / E2E-18: usuario nuevo, onboarding y evento aprobados
 
 - Se ejecutó en DEV el flujo completo con una cuenta nueva real.
