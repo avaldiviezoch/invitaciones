@@ -37,7 +37,7 @@ function setReady(value){
   statusNode.innerHTML='<strong>Turnstile:</strong> '+(value?'listo ✓':'esperando token…');
 }
 function render(){
-  if(widgetId!==null||!window.turnstile)return;
+  if(widgetId!==null||!window.turnstile||typeof window.turnstile.render!=='function')return;
   statusNode.innerHTML='<strong>Turnstile:</strong> script cargado, inicializando widget…';
   try{
     widgetId=turnstile.render('#turnstile',{
@@ -59,11 +59,11 @@ function render(){
 let checks=0;
 const timer=setInterval(()=>{
   checks+=1;
-  if(window.turnstile){clearInterval(timer);render();return;}
+  if(window.turnstile&&typeof window.turnstile.render==='function'){clearInterval(timer);render();return;}
   if(checks>=100){
     clearInterval(timer);
-    statusNode.innerHTML='<strong>Turnstile:</strong> el script no cargó ✕';
-    document.getElementById('out').textContent='No cargó https://challenges.cloudflare.com/turnstile/v0/api.js';
+    statusNode.innerHTML='<strong>Turnstile:</strong> la API no quedó lista ✕';
+    document.getElementById('out').textContent='Cloudflare cargó parcialmente, pero turnstile.render no quedó disponible.';
   }
 },100);
 document.getElementById('verify').addEventListener('click',async()=>{
