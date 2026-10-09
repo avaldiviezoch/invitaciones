@@ -1,3 +1,12 @@
+## 2026-10-09 — MGD-037 Fase 2a: contrato de nuevos eventos, PR DEV en preparación
+
+- Se verificaron HEAD DEV `f6cd474f18ba760085297c60698cb704713b6f44` y PROD `ff22d555188a777fc7ce1ad239ba6a92ac2a470c` sin cambios posteriores.
+- Se revisaron los seis documentos obligatorios, incluyendo Arquitectura y Contratos en `docs/`.
+- Branch DEV: `mgd/037-eventtype-persistence-20261009`.
+- `createWedding()` admite `eventType` y `themeId`, normalizados con los adaptadores centrales existentes, y guarda ambos únicamente en documentos de nueva creación: `weddings/{id}` y `users/{uid}/weddings/{id}`.
+- Se conservan `weddings`, members, UIDs, fallback histórico y el batch existente; no hay backfill, migración, cambios en Rules/Auth/Storage ni modificaciones de PROD.
+- Pendiente: PR DEV, pruebas seguras, QA real con cuenta/evento de prueba y, por separado, conexión de selección de tipo de evento al onboarding.
+
 ## 2026-10-09 — HANDOFF detallado: reconciliación DEV/PROD y siguiente punto de trabajo
 
 ### Estado de repositorios al cierre de esta sesión
