@@ -1703,3 +1703,14 @@ test('MGD-003: infraestructura RSVP anti-abuso está configurada en DEV y PROD s
     separateNamespaces: true
   });
 });
+
+
+test('Música: módulo conserva helper de hosts y HTML válido', async () => {
+  const musicJs = readFileSync(new URL('../src/modules/musica/index.js', import.meta.url), 'utf8');
+  const musicHtml = readFileSync(new URL('../src/modules/musica/index.html', import.meta.url), 'utf8');
+
+  expect(musicJs).toMatch(/function\s+hostMatches\s*\(/);
+  expect(musicJs).toContain("host.endsWith('.'+domain)");
+  expect(musicHtml.trim().endsWith('</div>')).toBe(true);
+  expect(musicHtml.includes('\n/div>')).toBe(false);
+});

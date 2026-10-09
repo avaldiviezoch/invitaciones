@@ -10,6 +10,7 @@ const DEFAULT_MOMENTS=[
 let cleanup=null;
 const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
 const clean=(v,n=140)=>String(v??'').trim().slice(0,n);
+function hostMatches(host,domain){return host===domain||host.endsWith('.'+domain);}
 function safeHttpUrl(value){
   try{
     const url=new URL(String(value||'').trim());
