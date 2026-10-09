@@ -16,7 +16,7 @@ Bloqueadores actuales: MGD-002 pendiente PROD; MGD-026 pendiente revisión/propa
 - MGD-004, MGD-005, MGD-006 y MGD-007: producción / QA aprobado.
 - MGD-008: E2E readonly autenticado y E2E-17, E2E-18 y E2E-19 aprobados en DEV.
 - MGD-009 y MGD-010: producción / QA real aprobado; registro, login y recuperación por correo validados.
-- MGD-011: prueba real multi-evento aprobada en DEV con persistencia independiente entre dos contextos.
+- MGD-011: producción / QA real aprobado para un UID con múltiples contextos aislados; el soporte semántico `eventType` continúa en MGD-012+.
 - MGD-012 a MGD-024: capas multi-evento e invitaciones aprobadas en QA seguro DEV; no asumir que están promovidas a PROD.
 - MGD-025: fases 1–8 aprobadas; `domain-only` no está activado y Checklist sigue en auditoría.
 - MGD-026: branding y páginas legales publicadas en PROD; revisión/propagación externa de Google sigue pendiente.
@@ -965,7 +965,7 @@ Pendiente no bloqueante de MGD-010:
 ---
 
 ## MGD-011 — Usuario único multi-evento
-Estado: 🟣 PRUEBA REAL MULTI-EVENTO APROBADA DEV
+Estado: 🟢 PRODUCCIÓN / QA REAL MULTI-CONTEXTO APROBADO
 Prioridad: CRÍTICA
 
 Se mantiene:
@@ -1010,6 +1010,18 @@ Implementación DEV MGD-011 — aislamiento estructural:
 - el contrato verifica que dos eventos nunca compartan eventRoot, userIndex ni plannerMeta;
 - no se escriben datos ni se crean cuentas/eventos de prueba;
 - el cierre total seguirá requiriendo una prueba real controlada con cuentas/eventos de prueba autorizados.
+
+### Cierre PROD MGD-011 — 2026-10-09
+
+- PR PROD #554 fusionado con las correcciones de Presupuesto detectadas durante la prueba multi-contexto.
+- PR PROD #555 fusionado para corregir la invalidación de caché del propietario real del módulo, sin parches ni guards que oculten el problema.
+- Commit PROD verificado tras el fix: `eeda06c7d7ec8bdbb64d8d0bca430d4b693578cd`.
+- Presupuesto total editable validado en producción y persistente tras recarga.
+- Creación de gasto en evento sin categorías validada mediante categoría `General`.
+- Cambio entre dos contextos validado sin mezcla de Presupuesto.
+- Se mantiene un único UID Firebase con múltiples contextos asociados.
+- Este cierre corresponde a la base multi-contexto; la incorporación formal de distintos `eventType` continúa en MGD-012 y siguientes.
+- No se modificaron Firestore Rules, Auth, Storage ni se ejecutaron migraciones destructivas.
 
 ---
 
