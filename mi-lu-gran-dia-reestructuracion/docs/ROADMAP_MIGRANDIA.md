@@ -1251,7 +1251,7 @@ Este perfil no escala con usuarios y por ello sí puede ser configuración JS/JS
 # BLOQUE D — EVENTO VS TEMÁTICA
 
 ## MGD-015 — Separar tipo de evento de temática
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / SIN PERSISTENCIA
 Prioridad: ALTA
 
 Ejemplos:
@@ -1270,7 +1270,7 @@ No mezclar lógica funcional con tema visual.
 ---
 
 ## MGD-016 — Tema global y tokens visuales
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / APLICACIÓN GLOBAL PENDIENTE
 Prioridad: ALTA
 
 El tema será **global para toda la aplicación** y consumido por cada módulo.
@@ -1473,7 +1473,7 @@ Implementación DEV base MGD-034:
 ---
 
 ## MGD-035 — Edad / etapa de vida y adaptación de experiencia
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / ACTIVACIÓN FUNCIONAL PENDIENTE
 Prioridad: ALTA
 
 Cuando el tipo de evento lo requiera, el onboarding preguntará edad exacta o rango etario del homenajeado.
@@ -1512,7 +1512,7 @@ Implementación DEV base MGD-035:
 ---
 
 ## MGD-036 — Onboarding con previsualización temática progresiva
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / ACTIVACIÓN FUNCIONAL PENDIENTE
 Prioridad: ALTA
 
 Mientras el usuario completa el onboarding, la interfaz podrá ir adaptándose en tiempo real.
@@ -1552,7 +1552,7 @@ Implementación DEV base MGD-036:
 # BLOQUE G — DISTRIBUCIÓN MULTI-EVENTO
 
 ## MGD-019 — Catálogo universal + filtros por evento
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟡 PROD DESPLEGADO / QA VISUAL ESPECÍFICO PENDIENTE
 Prioridad: ALTA
 
 Los 46 iconos actuales se mantienen.
@@ -1587,7 +1587,7 @@ Implementación DEV:
 ---
 
 ## MGD-020 — Objetos especializados
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / REQUIERE EVENTTYPE REAL PARA QA
 Prioridad: MEDIA
 
 15 años:
@@ -1619,7 +1619,7 @@ Implementación DEV:
 # BLOQUE H — INVITACIONES
 
 ## MGD-021 — Separar motor de invitación de plantilla de boda
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / ACTIVACIÓN FUNCIONAL PENDIENTE
 Prioridad: CRÍTICA
 
 Arquitectura:
@@ -1650,7 +1650,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-022 — Invitaciones bajo dominio Migrandia
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / ACTIVACIÓN FUNCIONAL PENDIENTE
 Prioridad: CRÍTICA
 
 Nunca enviar al usuario final enlaces de GitHub.
@@ -1674,7 +1674,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-023 — ID público de invitación
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / ACTIVACIÓN FUNCIONAL PENDIENTE
 Prioridad: CRÍTICA
 
 No exponer directamente `weddingId` / `eventId`.
@@ -1702,7 +1702,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-024 — URL personalizada
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / ACTIVACIÓN FUNCIONAL PENDIENTE
 Prioridad: MEDIA
 
 Posible:
@@ -1859,7 +1859,7 @@ Implementación DEV:
 ---
 
 ## MGD-028 — Límites de plataforma
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / ACTIVACIÓN FUNCIONAL PENDIENTE
 Prioridad: ALTA
 
 Definir límites técnicos:
@@ -1900,7 +1900,7 @@ Implementación DEV:
 # BLOQUE J — PRIVACIDAD Y RECUPERACIÓN
 
 ## MGD-029 — Eliminar evento
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / ACTIVACIÓN FUNCIONAL PENDIENTE
 Prioridad: ALTA
 
 Eliminar un evento sin afectar los otros eventos del usuario.
@@ -1919,7 +1919,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-030 — Eliminar cuenta
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / ACTIVACIÓN FUNCIONAL PENDIENTE
 Prioridad: ALTA
 
 Definir:
@@ -1944,7 +1944,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-031 — Backup y restauración
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / ACTIVACIÓN FUNCIONAL PENDIENTE
 Prioridad: CRÍTICA
 
 Sistema formal de:
@@ -1970,7 +1970,7 @@ Implementación DEV segura:
 # BLOQUE K — MARCHA BLANCA Y BETA
 
 ## MGD-032 — Marcha blanca controlada
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / ACTIVACIÓN FUNCIONAL PENDIENTE
 Prioridad: ALTA
 
 Primero:
@@ -2003,7 +2003,7 @@ Implementación DEV segura:
 ---
 
 ## MGD-033 — Beta pública
-Estado: 🟢 GATE QA APROBADO / BETA BLOQUEADA POR PREREQUISITOS
+Estado: 🟢 PROD TÉCNICO / ACTIVACIÓN FUNCIONAL PENDIENTE
 Prioridad: FUTURA
 
 Requisitos mínimos:
@@ -2465,7 +2465,7 @@ Migrandia tendrá **dos formas distintas de entrada**, ambas conectadas al mismo
 Estas dos entradas no deben convertirse en aplicaciones separadas. Deben compartir el mismo core, autenticación, módulos, eventProfile, sistema de temas y backend.
 
 ### MGD-037 — Landing general de Mi Gran Día
-**Estado:** ⬜ PENDIENTE  
+**Estado:** 🟡 DEV FASE 1 FUSIONADA / QA Y EVENTTYPE REAL PENDIENTES  
 **Prioridad:** ALTA
 
 Objetivo:
@@ -2487,6 +2487,15 @@ Mi Gran Día — plataforma general
 Boda / Cumpleaños / 15 años / Baby Shower /
 Bautizo-Comunión / Graduación / Corporativo / Otro
 ```
+
+### Fase 1 DEV MGD-037 — 2026-10-09
+- PR DEV #116 fusionado.
+- Commit DEV: `039e78c533cffccbbc8643a4e31466f623433d4c`.
+- La portada general ya comunica plataforma multi-evento y muestra los 8 tipos base.
+- Los tipos todavía no son seleccionables; no se persiste `eventType`.
+- Siguiente fase: conectar selección real al onboarding y ampliar `createWedding()` para nuevos eventos, sin migrar históricos.
+- Auditoría de Rules: los documentos raíz de `weddings` y el índice bajo `users/{uid}` permiten campos adicionales bajo las condiciones actuales; no se requiere cambiar Rules para guardar `eventType/themeId`.
+- Cualquier escritura nueva se implementará primero en DEV y deberá probarse con contexto de prueba.
 
 ### MGD-038 — Landings específicas por tipo de evento
 **Estado:** ⬜ PENDIENTE  

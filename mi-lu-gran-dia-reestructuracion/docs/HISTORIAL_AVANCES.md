@@ -1,3 +1,164 @@
+## 2026-10-09 — HANDOFF detallado: reconciliación DEV/PROD y siguiente punto de trabajo
+
+### Estado de repositorios al cierre de esta sesión
+- DEV `avaldiviezoch/invitaciones` / `main`: `039e78c533cffccbbc8643a4e31466f623433d4c` después de fusionar PR DEV #116.
+- PROD `avaldiviezoch/Wedding` / `main`: `ff22d555188a777fc7ce1ad239ba6a92ac2a470c` después de fusionar PR PROD #565.
+- Se mantiene la regla de trabajo: **DEV primero → QA → PROD**. La reconciliación reciente promovió a PROD únicamente código ya existente/aprobado en DEV, en bloques pequeños y verificables.
+
+### MGD-015 / MGD-016 — tema separado de eventType y tokens visuales
+- PR PROD #558 fusionado.
+- Commit PROD tras el merge: `714dd554955d1d620f5d02ce200ad37119921c28`.
+- Se promovieron `theme-id.js` y `theme-tokens.js`.
+- `themeId` queda separado conceptualmente de `eventType`.
+- Se definieron tokens visuales globales compartidos; no se creó CSS por tipo de evento.
+- En esta promoción NO se conectó todavía `applyEventTheme()` de forma global al producto; por ello no se alteró la apariencia productiva.
+- No se escribió `themeId` en Firestore ni se ejecutó migración.
+
+### MGD-017 — terminología dinámica cerrada en PROD
+- PR PROD #559 conectó el diccionario central de terminología al dashboard Inicio.
+- PR PROD #560 completó el nombre del contexto en móvil, eliminando el prefijo hardcodeado `La boda de ...`.
+- Commit PROD tras #560: `81d0e71fe0ebc9b21fa6cb7fe552ebb81726ecdb`.
+- Los documentos históricos siguen resolviendo `eventType = wedding` por fallback, por lo que conservan el lenguaje de boda.
+- Se eliminó dentro del alcance de Inicio el hardcode matrimonial para invitado(s), prompts y nombre por defecto.
+- No se tocó persistencia, Rules, Auth ni Storage.
+
+### MGD-019 — catálogo de Distribución filtrado por eventType
+- PR PROD #561 fusionado.
+- Commit PROD: `d7f69bd2921b04abba26d26937a228427d18b27d`.
+- El catálogo de alta ahora puede filtrar objetos por `eventType`.
+- Restricciones iniciales:
+  - `couple` / Mesa de novios → wedding;
+  - `photo` → wedding, quince, birthday, graduation;
+  - `altar` → wedding, religious;
+  - `cake` → wedding, quince, birthday, baby_shower.
+- El resto del catálogo base permanece universal.
+- El filtro afecta únicamente qué objetos se ofrecen para agregar; **no elimina ni modifica elementos ya guardados**.
+- Se actualizó correctamente la cadena de caché: catálogo → módulo Distribución → dashboard.
+- QA visual productivo específico de este bloque quedó pendiente; para bodas existentes el fallback `wedding` debe conservar la experiencia actual.
+
+### MGD-020 — objetos especializados de Distribución
+- PR PROD #562 fusionado.
+- Commit PROD: `6fa0bf977599002aef3f2411046b700ff0295e9c`.
+- Se agregaron 6 objetos especializados usando el mismo motor espacial:
+  - quince: Mesa principal de 15 años y Zona de coreografía;
+  - baby_shower: Zona de regalos y Zona de juegos;
+  - graduation: Mesa de diplomas y Escenario de graduación.
+- El catálogo base de 38 objetos se mantiene intacto.
+- Los objetos especializados reutilizan dimensiones, colisiones, movimiento, rotación, persistencia y assets del motor existente; no existe motor/listener paralelo.
+- No se modificó Firestore, Rules, Auth, Storage ni el formato de datos guardados.
+- Su aparición efectiva depende de que exista un contexto con `eventType` distinto de wedding; ese flujo todavía no está activado para creación real.
+
+### MGD-021 a MGD-024 — infraestructura pública de invitaciones en PROD
+- PR PROD #563 fusionado.
+- Commit PROD: `f672da3d522271098c5b77a214a759c3bd8694fb`.
+- Se promovieron:
+  - `invitation-engine.js`: motor funcional genérico de 9 campos;
+  - `invitation-templates.js`: plantillas declarativas separadas de la lógica;
+  - `public-invitation-url.js`: contrato canónico `https://migrandiapp.com/i/{publicInviteId}`;
+  - `public-invite-id.js`: ID seguro independiente de `eventId`;
+  - `custom-invite-slug.js`: alias legible que resuelve hacia el ID público.
+- Es infraestructura técnica únicamente:
+  - no se conectó a invitaciones reales;
+  - no se modificó RSVP;
+  - no existe routing real `/i/*` todavía;
+  - no se tocó Worker/DNS;
+  - no se persisten IDs ni slugs;
+  - no se expone `weddingId/eventId`.
+
+### MGD-028 a MGD-032 — contratos seguros en PROD
+- PR PROD #564 fusionado.
+- Commit PROD: `3648cae6fee96795683edcb0a0a1b16af4c76cbf`.
+- MGD-028: límites técnicos V1 centralizados, todavía sin enforcement.
+- MGD-029: contrato de eliminación de evento con confirmación fuerte; siempre `execute:false`.
+- MGD-030: contrato de eliminación de cuenta; eventos propios bloquean borrado hasta resolver responsabilidades; siempre `execute:false`.
+- MGD-031: envelope de backup y plan de restore; bloquea restaurar un evento sobre otro; siempre `restore:false` / `overwriteAllowed:false`.
+- MGD-032: gate de marcha blanca controlada; `autoEnroll:false` y `publicBeta:false`.
+- Ninguno de estos contratos está conectado todavía a acciones destructivas o UI productiva.
+- No se borró, movió, restauró ni alteró ningún dato.
+
+### MGD-033 / MGD-035 / MGD-036 — infraestructura adaptativa y gate de beta en PROD
+- PR PROD #565 fusionado.
+- Commit PROD: `ff22d555188a777fc7ce1ad239ba6a92ac2a470c`.
+- MGD-035: perfiles etarios `child`, `teen`, `young-adult`, `adult`, `older-adult`; solo recomendaciones, no permisos/identidad.
+- MGD-036: preview adaptativo `eventType → organizerRole → ageProfile → themeId → eventProfile`.
+- La preview permanece con `previewOnly:true` y `persist:false`.
+- MGD-033: gate de beta pública; incluso con requisitos completos mantiene `autoPublish:false`.
+- No se habilitó beta, no se persistió edad, `eventType` ni `themeId`.
+
+### MGD-034 — onboarding dinámico
+- La infraestructura base de MGD-034 ya estaba promovida técnicamente a PROD desde PR #557 mediante `onboarding-profiles.js`.
+- Existe un solo engine conceptual `adaptive-onboarding-v1` con perfiles por tipo de evento.
+- La UI productiva todavía NO usa este motor para crear eventos distintos de boda.
+- No crear ocho onboardings separados.
+
+### MGD-037 — Landing general multi-evento, Fase 1 DEV
+- PR DEV #116 fusionado.
+- Commit DEV: `039e78c533cffccbbc8643a4e31466f623433d4c`.
+- Se generalizó la portada/overlay de descubrimiento:
+  - copy inicial deja de presentar Migrandia como exclusivamente de bodas;
+  - se muestran los 8 tipos base: boda, cumpleaños, 15 años, baby shower, bautizo/comunión, graduación, corporativo y otro;
+  - el bloque `Una boda que se sienta como ustedes` pasó a lenguaje general de evento;
+  - Open Graph y Twitter description dejaron de hablar solo de boda;
+  - se agregó estilo responsive del catálogo de tipos;
+  - cache CSS pasó a v62.
+- **Los tipos se muestran, pero todavía NO son seleccionables.**
+- Motivo: permitir seleccionar birthday/quince/etc. sin persistir `eventType` crearía una incoherencia entre UI y datos.
+- MGD-037 todavía NO se promueve a PROD hasta completar QA DEV y definir la siguiente fase.
+
+### Punto exacto donde se detuvo el desarrollo
+Se inició la auditoría para habilitar selección real de `eventType` en onboarding/creación.
+
+Hallazgos confirmados:
+1. `wedding-context.js` ya lee:
+   - `eventType: normalizeEventType(wedding.eventType || indexData.eventType)`;
+   - `themeId: normalizeThemeId(wedding.themeId || indexData.themeId)`.
+2. `createWedding({ name, date })` todavía NO recibe ni persiste `eventType` o `themeId`.
+3. Hoy crea:
+   - `weddings/{eventId}` con nombre, fecha, ownerUid, timestamps y version;
+   - `weddings/{eventId}/members/{uid}`;
+   - `users/{uid}/weddings/{eventId}` con índice del contexto;
+   - `users/{uid}.activeWeddingId`.
+4. Firestore Rules productivas fueron auditadas:
+   - `match /weddings/{weddingId}` permite create si el usuario está autenticado y `ownerUid == request.auth.uid`;
+   - no hay whitelist de campos en el documento raíz, por lo que agregar `eventType/themeId` no requiere cambiar esa Rule;
+   - `match /users/{uid}` y subdocumentos permiten read/write únicamente al propio UID, sin whitelist de campos.
+5. Conclusión técnica preliminar: se puede persistir `eventType` y `themeId` en nuevos eventos **sin migrar ni tocar documentos históricos** y sin cambiar Rules.
+6. **Aún NO se implementó esa escritura.**
+7. Antes de implementarla se debe decidir el contrato exacto:
+   - ampliar `createWedding({ name, date, eventType, themeId })`;
+   - normalizar ambos valores;
+   - guardar `eventType/themeId` en documento raíz y en índice `users/{uid}/weddings/{eventId}`;
+   - mantener fallback histórico `wedding` para documentos viejos;
+   - no hacer backfill;
+   - conectar la primera pregunta del onboarding a `EVENT_TYPES` / `onboarding-profiles`;
+   - adaptar las preguntas siguientes desde un solo motor;
+   - validar nueva cuenta + creación de un evento de prueba no-boda;
+   - verificar aislamiento entre dos tipos de evento con el mismo UID.
+8. Este cambio **sí es una nueva escritura de datos**. Debe desarrollarse primero en DEV, con QA controlado, y solo después considerar PROD.
+
+### Bloques deliberadamente NO promovidos / NO activados
+- MGD-025: evolución real de `planner-cloud` sigue híbrida; no activar `domain-only`, no retirar fallback legacy, no ejecutar backfill.
+- MGD-027: permisos Ideas en capa de aplicación debe revisarse junto a MGD-025 porque toca validación de escritura.
+- MGD-037–041: bloque de adquisición/landing/SEO está en desarrollo; solo MGD-037 Fase 1 existe en DEV.
+- MGD-042, 043, 044, 045, 046, 047, 048, 049, 050 siguen pendientes funcionalmente salvo piezas parciales ya documentadas.
+- MGD-026: branding/producto actualizado, pero la revisión externa de Google sigue siendo dependencia antes de beta pública.
+- MGD-033: beta pública sigue bloqueada; no habilitarla automáticamente.
+
+### Regla de seguridad reforzada por E2E-19
+- Nunca utilizar tokens, IDs o datos de la boda real Antonio & Lucero para QA sin identificar explícitamente que son reales y obtener autorización previa.
+- La respuesta `E2E19 QA TEST` se conserva por decisión del responsable y sigue sin vínculo a invitado real.
+- Para nuevas pruebas usar cuentas/eventos de prueba siempre que sea posible.
+- Si se requiere una escritura real, explicar antes qué se escribirá, dónde y cómo se revertirá.
+
+### Próxima acción recomendada
+1. En el siguiente chat, leer primero `REGLAS_NO_NEGOCIABLES.md`, `ROADMAP_MIGRANDIA.md`, `HISTORIAL_AVANCES.md`, `AGENTS.md`, `ARQUITECTURA.md` y `CONTRATOS_MODULOS.md`.
+2. Confirmar HEAD actual de DEV y PROD antes de tocar código.
+3. Retomar desde **MGD-037 / MGD-034: selección real de eventType en DEV**.
+4. Diseñar el contrato mínimo de persistencia para nuevos eventos sin migración:
+   `createWedding({ name, date, eventType, themeId })`.
+5. No tocar MGD-025/027, Rules, Auth, Storage ni datos históricos durante ese bloque.
+6. Preparar PR DEV pequeño, QA con cuenta/evento de prueba y esperar aprobación antes de cualquier PROD.
+
 ## 2026-10-09 — MGD-017 cerrado en producción
 
 - PR PROD #559 conectó terminología dinámica al dashboard Inicio.
