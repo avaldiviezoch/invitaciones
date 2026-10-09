@@ -1192,7 +1192,7 @@ Gate de datos:
 ---
 
 ## MGD-013 — Tipos iniciales
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / SIN CONSUMO UI
 Prioridad: ALTA
 
 Primera versión acordada: **máximo 8 tipos base**, evitando fragmentar demasiado el producto.
@@ -1216,7 +1216,7 @@ Regla:
 ---
 
 ## MGD-014 — Motor central `eventProfile`
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / SIN CONSUMO UI
 Prioridad: CRÍTICA
 
 No llenar el código de:
@@ -1310,7 +1310,7 @@ la edad orienta presets y recomendaciones, pero nunca debe imponer estereotipos 
 # BLOQUE E — TERMINOLOGÍA DINÁMICA
 
 ## MGD-017 — Diccionario de lenguaje por evento
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / SIN CONSUMO UI
 Prioridad: ALTA
 
 Evitar texto matrimonial hardcodeado.
@@ -1342,7 +1342,7 @@ La interfaz debe consultar el perfil del evento.
 # BLOQUE F — CHECKLIST POR EVENTO
 
 ## MGD-018 — Plantillas iniciales de Checklist
-Estado: 🟢 QA SEGURO DEV APROBADO
+Estado: 🟢 PROD TÉCNICO / SIN MATERIALIZACIÓN
 Prioridad: ALTA
 
 Boda:
