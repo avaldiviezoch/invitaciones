@@ -241,7 +241,7 @@ Pendiente:
 ---
 
 ## MGD-003 — Protección contra abuso de RSVP
-Estado: 🟢 QA TÉCNICO DEV APROBADO / PENDIENTE VALIDACIÓN PRODUCTIVA CONTROLADA
+Estado: 🟣 QA DEV COMPLETO APROBADO / PENDIENTE NUEVA ACTIVACIÓN CONTROLADA EN PROD
 Prioridad: CRÍTICA
 
 Objetivo:
@@ -396,6 +396,17 @@ La capa Cloudflare de MGD-003 queda validada en DEV: origen → Worker → rate 
 - App Check productivo se mantiene activo.
 - DEV incluye corrección de UX silenciosa para Turnstile; PR #73 fusionado; commit DEV `cfcd89cca480250412b6be38d555c0524defdac3`.
 - Producción queda estable mientras se valida la nueva UX exclusivamente en DEV.
+
+### Cierre QA DEV — 2026-10-09
+
+- prueba aislada de seguridad ejecutada sin escribir RSVP ni Firestore;
+- desktop: Turnstile operativo, flujo normal HTTP 200 y rate limit HTTP 429 confirmados;
+- móvil: se detectó una condición de carrera porque `window.turnstile` podía existir antes de `turnstile.render()`;
+- se corrigió esperando explícitamente a que `turnstile.render` esté disponible antes de inicializar el widget;
+- móvil post-corrección: HTTP 200 confirmado y, tras varios intentos, HTTP 429 confirmado;
+- mensaje de abuso controlado: “Demasiados intentos. Espera un momento.”;
+- no se usaron tokens ni datos de la boda real durante esta validación;
+- QA DEV de MGD-003 queda cerrado y aprobado.
 
 ### Pendiente para cerrar MGD-003
 1. QA manual DEV de `invitacion_0_2` con Turnstile silencioso.
