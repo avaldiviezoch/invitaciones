@@ -632,7 +632,7 @@ Release registrada:
 ---
 
 ## MGD-008 — Tests E2E reales
-Estado: 🟣 AUTH READONLY APROBADO DEV / E2E-17 APROBADO / PENDIENTE E2E-18 Y E2E-19
+Estado: 🟣 AUTH READONLY APROBADO DEV / E2E-17 Y E2E-18 APROBADOS / PENDIENTE E2E-19
 Prioridad: CRÍTICA
 
 Incorporar pruebas de navegador.
@@ -707,7 +707,7 @@ Estado auditoría: infraestructura y alcance identificados; implementación de t
 | E2E-15 | Responsive desktop/tablet/mobile | Automático visual/DOM | No | Shell y navegación siguen utilizables en viewports objetivo. |
 | E2E-16 | Observabilidad durante recorrido | Automático | No | No aparecen errores globales inesperados; los fallos reales quedan asociados a versión 0.7.0. |
 | E2E-17 | Persistencia con cambio controlado | Manual posterior | **Sí** | ✅ APROBADO 2026-10-09: nombre del evento cambiado a `E2E-17 · Persistencia`, sobrevivió Ctrl+F5 y se revirtió a `cuenta de prueba`, sobreviviendo nuevamente Ctrl+F5. |
-| E2E-18 | Usuario nuevo + onboarding + crear evento | Manual posterior | **Sí** | Cuenta/evento de prueba se crea y persiste. No ejecutar sobre cuenta/datos reales sin autorización. |
+| E2E-18 | Usuario nuevo + onboarding + crear evento | Manual posterior | **Sí** | ✅ APROBADO 2026-10-09: usuario nuevo completó onboarding, se creó `Mi boda`, se aplicó presupuesto S/ 12,345, sobrevivió Ctrl+F5, logout y reingreso sin repetir onboarding. |
 | E2E-19 | RSVP | Manual posterior | **Sí** | Confirmación de prueba controlada completa el flujo y luego se limpia según procedimiento autorizado. |
 
 Resultado E2E-17 — 2026-10-09:
@@ -718,6 +718,18 @@ Resultado E2E-17 — 2026-10-09:
 - reversión validada tras nuevo Ctrl+F5;
 - sin cambios en RSVP, invitados, presupuesto, distribución, Auth, Rules ni Storage;
 - E2E-17 aprobado.
+
+Resultado E2E-18 — 2026-10-09:
+- se utilizó una cuenta nueva real en DEV;
+- se recorrió el onboarding completo sin omitirlo;
+- se registraron datos de prueba reconocibles, incluyendo 122 invitados estimados y presupuesto S/ 12,345;
+- tras el registro se creó automáticamente el evento `Mi boda`;
+- el presupuesto S/ 12,345 quedó aplicado;
+- el estimado de invitados se mantuvo como dato de planificación y no creó personas ficticias en Invitados;
+- el estado sobrevivió Ctrl+F5;
+- tras cerrar sesión y volver a ingresar, el evento y el presupuesto permanecieron;
+- el onboarding no volvió a mostrarse como si el usuario fuera nuevo;
+- E2E-18 aprobado.
 
 Clasificación:
 - **Fase segura inmediata:** E2E-01 y E2E-03 a E2E-16; navegación/lectura solamente. E2E-02 requiere autenticación pero no cambios de negocio.
