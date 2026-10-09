@@ -19,8 +19,9 @@
   <h1>Protección RSVP</h1>
   <p>Primero ejecuta una validación normal. Luego repite varias veces para comprobar el 429 controlado.</p>
   <div id="turnstile"></div>
-  <p><button id="verify" type="button">Validar seguridad</button></p>
-  <pre id="out">Listo para probar.</pre>
+  <p id="turnstile-status"><strong>Turnstile:</strong> cargando…</p>
+  <p><button id="verify" type="button" disabled>Validar seguridad</button></p>
+  <pre id="out">Esperando que Turnstile quede listo.</pre>
 </main>
 <script>
 const ENDPOINT='https://migrandia-dev.avaldiviezoch.workers.dev/api/rsvp/verify';
@@ -29,19 +30,46 @@ const RSVP_TOKEN='mgd003-qa-security-only';
 const RESPONSE_ID='mgd003-qa-fixed-response';
 let widgetId=null;
 let token='';
+const verifyButton=document.getElementById('verify');
+const statusNode=document.getElementById('turnstile-status');
+function setReady(value){
+  verifyButton.disabled=!value;
+  statusNode.innerHTML='<strong>Turnstile:</strong> '+(value?'listo ✓':'esperando token…');
+}
 function render(){
   if(widgetId!==null||!window.turnstile)return;
-  widgetId=turnstile.render('#turnstile',{
-    sitekey:SITE_KEY,
-    action:'rsvp_submit',
-    callback:value=>{token=value||'';},
-    'expired-callback':()=>{token='';}
-  });
+  statusNode.innerHTML='<strong>Turnstile:</strong> script cargado, inicializando widget…';
+  try{
+    widgetId=turnstile.render('#turnstile',{
+      sitekey:SITE_KEY,
+      action:'rsvp_submit',
+      callback:value=>{token=value||'';setReady(Boolean(token));},
+      'expired-callback':()=>{token='';setReady(false);},
+      'error-callback':code=>{
+        token='';
+        setReady(false);
+        document.getElementById('out').textContent='Turnstile error: '+String(code||'desconocido');
+      }
+    });
+  }catch(error){
+    statusNode.innerHTML='<strong>Turnstile:</strong> error al inicializar ✕';
+    document.getElementById('out').textContent='ERROR TURNSTILE\n'+String(error?.message||error);
+  }
 }
-const timer=setInterval(()=>{if(window.turnstile){clearInterval(timer);render()}},100);
+let checks=0;
+const timer=setInterval(()=>{
+  checks+=1;
+  if(window.turnstile){clearInterval(timer);render();return;}
+  if(checks>=100){
+    clearInterval(timer);
+    statusNode.innerHTML='<strong>Turnstile:</strong> el script no cargó ✕';
+    document.getElementById('out').textContent='No cargó https://challenges.cloudflare.com/turnstile/v0/api.js';
+  }
+},100);
 document.getElementById('verify').addEventListener('click',async()=>{
   const out=document.getElementById('out');
-  if(!token){out.textContent='Esperando token Turnstile. Reintenta en un momento.';return;}
+  token=token||(widgetId!==null&&window.turnstile?turnstile.getResponse(widgetId):'');
+  if(!token){out.textContent='Turnstile cargó, pero todavía no entregó token.';setReady(false);return;}
   const started=Date.now();
   await new Promise(r=>setTimeout(r,1300));
   try{
@@ -59,6 +87,7 @@ document.getElementById('verify').addEventListener('click',async()=>{
     const body=await res.json().catch(()=>({}));
     out.textContent='HTTP '+res.status+'\n'+JSON.stringify(body,null,2);
     token='';
+    setReady(false);
     if(widgetId!==null)turnstile.reset(widgetId);
   }catch(error){
     out.textContent='ERROR\n'+String(error?.message||error);
