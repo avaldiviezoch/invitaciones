@@ -38,25 +38,31 @@ function profile(type, overrides = {}) {
 
 const EVENT_PROFILES = Object.freeze({
   wedding: profile('wedding', {
-    audienceProfile: { mode: 'couple' }
+    audienceProfile: { mode: 'couple' },
+    theme: { defaultThemeId: 'classic-elegant' }
   }),
   birthday: profile('birthday', {
-    audienceProfile: { mode: 'age-aware' }
+    audienceProfile: { mode: 'age-aware' },
+    theme: { defaultThemeId: 'minimal-black' }
   }),
   quince: profile('quince', {
-    audienceProfile: { mode: 'teen' }
+    audienceProfile: { mode: 'teen' },
+    theme: { defaultThemeId: 'classic-elegant' }
   }),
   baby_shower: profile('baby_shower', {
-    audienceProfile: { mode: 'family' }
+    audienceProfile: { mode: 'family' },
+    theme: { defaultThemeId: 'classic-elegant' }
   }),
   religious: profile('religious', {
     audienceProfile: { mode: 'family' }
   }),
   graduation: profile('graduation', {
-    audienceProfile: { mode: 'graduate' }
+    audienceProfile: { mode: 'graduate' },
+    theme: { defaultThemeId: 'minimal-black' }
   }),
   corporate: profile('corporate', {
-    audienceProfile: { mode: 'organization' }
+    audienceProfile: { mode: 'organization' },
+    theme: { defaultThemeId: 'minimal-black' }
   }),
   custom: profile('custom')
 });
