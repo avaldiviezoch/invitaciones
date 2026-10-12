@@ -452,6 +452,10 @@ document.querySelectorAll('[data-answer]').forEach((button) => {
     }
     if (name === 'dateStatus') {
       discoverAnswers.dateStatus = value;
+      if (value !== 'si') {
+        discoverAnswers.date = '';
+        if (discoverDateInput) discoverDateInput.value = '';
+      }
       if (discoverDateField) discoverDateField.hidden = value !== 'si';
     } else if (name === 'budgetStatus') {
       discoverAnswers.budgetStatus = value;
