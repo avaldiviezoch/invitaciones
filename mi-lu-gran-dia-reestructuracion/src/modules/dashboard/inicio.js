@@ -364,6 +364,7 @@ function renderDiscover() {
   discoverSlides.forEach((slide, index) => slide.classList.toggle('is-active', index === discoverIndex));
   [...(discoverDots?.children || [])].forEach((dot, index) => dot.classList.toggle('is-active', index === discoverIndex));
   const slide = discoverSlides[discoverIndex];
+  if (slide) slide.scrollTop = 0;
   const kind = slide?.dataset.discoverKind;
   if (discoverBackButton) discoverBackButton.hidden = discoverIndex === 0;
   if (discoverDots?.children[discoverAgeSlideIndex]) discoverDots.children[discoverAgeSlideIndex].hidden = Boolean(discoverAgeSlide?.hidden);
