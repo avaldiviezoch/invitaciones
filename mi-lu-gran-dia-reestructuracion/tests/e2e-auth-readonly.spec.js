@@ -81,3 +81,26 @@ test('MGD-036: reingreso autenticado conserva tema y contexto activo sin escritu
   expect(after).toEqual(before);
   // Solo lectura del contexto activo y recarga. No cambia a otro evento ni llama APIs de escritura.
 });
+
+test('MGD-037: selector multi-evento muestra contexto activo sin cambiar datos', async ({ page }) => {
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('body')).not.toHaveClass(/auth-locked/);
+  await page.locator('#menuButton').click();
+  const currentName = (await page.locator('#activeWeddingName').textContent() || '').trim();
+  expect(currentName.length).toBeGreaterThan(0);
+  const themeBefore = await page.locator('html').getAttribute('data-event-theme');
+
+  await page.locator('#activeWeddingButton').click();
+  await expect(page.locator('#weddingSwitcher')).toHaveClass(/show/);
+  await expect(page.locator('#weddingSwitcherTitle')).toHaveText('Mis eventos');
+  const current = page.locator('#weddingsList [data-wedding-id].is-current');
+  await expect(current).toHaveCount(1);
+  await expect(current.locator('strong')).toHaveText(currentName);
+  const categories = ['Boda', 'Cumpleaños', '15 años', 'Baby Shower', 'Bautizo / Primera Comunión', 'Graduación', 'Evento corporativo', 'Otro / personalizado'];
+  const categoryText = (await current.locator('small').textContent() || '').trim();
+  expect(categories.some((name) => categoryText.startsWith(name + ' · '))).toBe(true);
+  await expect(page.locator('html')).toHaveAttribute('data-event-theme', themeBefore);
+  expect(errors).toEqual([]);
+  // Solo consulta listado; nunca selecciona otro weddingId ni escribe en Firestore.
+});
