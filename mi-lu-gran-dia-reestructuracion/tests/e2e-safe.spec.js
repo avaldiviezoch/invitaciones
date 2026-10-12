@@ -1371,7 +1371,7 @@ test('MGD-034: onboarding usa un solo motor con opciones adaptativas por tipo de
     firstQuestion: true,
     weddingRoles: ['Novia','Novio','Somos la pareja','Ayudo a organizar'],
     birthdayRoles: ['Es para mí','Para mi hijo/a','Para un familiar','Para otra persona','Ayudo a organizar'],
-    corporateRoles: ['Represento a la empresa','Colaborador/a','Organizador interno','Organizador / proveedor externo'],
+    corporateRoles: ['Lo organizo para mi empresa','Soy parte del equipo organizador','Ayudo a organizar'],
     fallback: 'wedding',
     profileConsumesContract: 'graduation',
     noIndependentEngines: 1
