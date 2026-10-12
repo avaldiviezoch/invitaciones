@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: prueba opt-in Mesas/Distribución por evento (DEV)
+
+- PR #136 verificado fusionado. Se codificó en suite Playwright existente un escenario A → B → A con marcadores exclusivos de mesas para revisar Invitados y Distribución.
+- Condiciones previas de seguridad: usuario QA identificado, dos eventos ficticios diferenciados, Boda/Cumpleaños y activación explícita; la prueba está deshabilitada por defecto. No crea ni modifica invitados, mesas o presupuestos; si se habilita, cambia la selección activa solo de QA.
+- No se ha ejecutado, por lo que aislamiento funcional sigue **pendiente**, igual que pruebas responsive, reglas y autorización de promoción PROD.
+
 ## 2026-10-12 — MGD-037: test E2E opt-in de Invitados/Presupuesto entre contextos
 
 - PR #135 verificado fusionado y coincidente con main. Se codificó en suite existente recorrido A → B → A con marcas QA precargadas en Invitados y Presupuesto, verificando que la marca contraria nunca aparezca.

@@ -110,6 +110,13 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Se exige correo de cuenta QA, IDs distintos, etiquetas QA, categorías Boda/Cumpleaños, dos marcadores prefijados QA diferentes y `MGD_QA_FIXTURE_SWITCH=AUTHORIZED_TEST_ONLY`. Cambia `activeWeddingId` **solo** después de verificar barreras, por lo que está omitido por defecto.
 - Las marcas deben existir previamente en ambos módulos y contextos; el test no crea ni modifica invitados/presupuesto. Mesas y Distribución requieren un escenario adicional. La prueba no se ha ejecutado y no certifica aislamiento hasta QA real aprobado.
 
+## MGD-037 — Mesas / Distribución con dos contextos ficticios (12/10/2026)
+
+- El PR de QA propone un recorrido Playwright opt-in A → B → A con nombres de mesa marcados `QA-` distintos por contexto, verificando sus apariciones y ausencia cruzada en Invitados (mesas canónicas) y Distribución.
+- **Por defecto se omite.** Exige cuenta de QA, dos IDs QA preexistentes, categorías Boda/Cumpleaños, marcadores `MGD_QA_FIXTURE_TABLE_MARKER_A/B` y autorización expresa; solo al ejecutarlo cambia `activeWeddingId` en la cuenta ficticia.
+- Se exige que los marcadores de mesa sean efectivamente visibles en ambas pantallas; si la UX de Distribución no los expone, se documenta el fallo y se ajusta el diseño o las aserciones, no se declara éxito.
+- No se toca código funcional, datos ni producción. QA móvil, sesiones, permisos y validación de persistencia siguen pendientes.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
