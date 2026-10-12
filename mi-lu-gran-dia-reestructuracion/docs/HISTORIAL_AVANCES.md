@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: QA autenticado de selector multi-evento, solo lectura (DEV)
+
+- Se añadió una prueba Playwright existente para verificar listado de "Mis eventos", una fila activa con nombre y etiqueta de tipo, y tema intacto al abrir el selector.
+- No cambia evento activo, no crea registros ni escribe datos; exige estado autenticado de prueba y checks antes de considerar que pasa.
+- Pendientes: ejecución real, QA móvil y prueba A → B → A con dos eventos ficticios, aislamiento por módulos y aprobación PROD.
+
 ## 2026-10-12 — MGD-037: selector multi-evento con etiqueta de categoría (DEV)
 
 - Se corrigió el texto del selector (Mis eventos y estados vacío/error) y se mostró categoría usando el `eventType` canónico de cada contexto.
