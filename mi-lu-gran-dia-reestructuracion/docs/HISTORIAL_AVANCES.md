@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: CI seguro automático de Pull Requests en DEV
+
+- PR #141 confirmado fusionado en `main` (`24a5beae77cb`). Se constató que ya existía el workflow `mgd-008-e2e-safe.yml` pero solo con disparador manual `workflow_dispatch`.
+- Se amplía el workflow para ejecutar `test:e2e:safe` en PRs del directorio de la app y cambios del propio workflow, con permiso `contents: read`; no ejecuta tests con sesión ni cambios de contexto.
+- No hay todavía resultados de ejecución disponibles para este nuevo PR; los Checks deberán revisarse. Sin acceso al entorno local de pruebas autenticadas, queda pendiente QA A → B → A con cuenta y fixtures exclusivos; PROD intacto.
+
 ## 2026-10-12 — MGD-037: control de regresión de seguridad para comandos Playwright
 
 - Confirmado PR #140 fusionado en `DEV/main` (`ddc52e4569dc`). Se inspeccionaron los comandos y las etiquetas; los tres escenarios de conmutación están segregados del comando readonly.
