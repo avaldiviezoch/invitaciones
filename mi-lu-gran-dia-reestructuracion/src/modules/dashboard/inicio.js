@@ -641,7 +641,7 @@ async function hydrateWedding(user) {
     const context = await loadActiveWeddingContext(user);
     applyWeddingContext(context);
   } catch (error) {
-    console.error('No se pudo cargar la boda activa:', error);
+    console.error('No se pudo cargar el evento activo:', error);
     applyWeddingContext(null);
   }
 }
@@ -678,7 +678,7 @@ async function renderReceivedInvitations() {
   try {
     const invitations = await listPendingInvitations();
     $('receivedInvitesCount').textContent = String(invitations.length);
-    receivedInvitesList.innerHTML = invitations.length ? invitations.map((invite) => `<article class="wedding-option wedding-invite-option"><span><strong>${escapeHtml(invite.weddingName || 'Boda compartida')}</strong><small>Te invitaron como ${escapeHtml(roleLabel(invite.role))}</small></span><button type="button" data-accept-invite="${escapeHtml(invite.id)}">Aceptar</button></article>`).join('') : '<div class="wedding-empty">No tienes invitaciones pendientes.</div>';
+    receivedInvitesList.innerHTML = invitations.length ? invitations.map((invite) => `<article class="wedding-option wedding-invite-option"><span><strong>${escapeHtml(invite.weddingName || 'Evento compartido')}</strong><small>Te invitaron como ${escapeHtml(roleLabel(invite.role))}</small></span><button type="button" data-accept-invite="${escapeHtml(invite.id)}">Aceptar</button></article>`).join('') : '<div class="wedding-empty">No tienes invitaciones pendientes.</div>';
   } catch (error) {
     receivedInvitesList.innerHTML = '<div class="wedding-empty">No se pudieron cargar tus invitaciones.</div>';
   }
