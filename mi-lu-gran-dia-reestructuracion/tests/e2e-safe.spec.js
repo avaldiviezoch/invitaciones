@@ -1863,10 +1863,19 @@ test('MGD-034/037: navegación de rol usa el catálogo y no permite saltar sin r
   }
 });
 
+test('MGD-034/037: reingresar al mismo tipo conserva el rol y la edad seleccionados', async () => {
+  const fs = await import('node:fs/promises');
+  const code = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
+  expect(code).toContain('const eventChanged = discoverAnswers.eventType !== id;');
+  expect(code).toContain('if (eventChanged) renderDiscoverRoleOptions();');
+  expect(code).not.toContain('    renderDiscoverRoleOptions();\n    moveDiscover(1);');
+});
+
 test('MGD-034/037: al cambiar de evento se borran rol y edad previa', async () => {
   const fs = await import('node:fs/promises');
   const dashboard = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
-  expect(dashboard).toContain('if (discoverAnswers.eventType !== id) {');
+  expect(dashboard).toContain('const eventChanged = discoverAnswers.eventType !== id;');
+  expect(dashboard).toContain('if (eventChanged) {');
   expect(dashboard).toContain("discoverAnswers.role = '';");
   expect(dashboard).toContain('discoverAnswers.age = null;');
   expect(dashboard).toContain("if (discoverAgeInput) discoverAgeInput.value = '';");
