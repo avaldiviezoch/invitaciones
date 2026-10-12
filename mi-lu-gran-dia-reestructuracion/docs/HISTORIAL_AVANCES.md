@@ -1,3 +1,12 @@
+## 2026-10-12 — MGD-034/037: matriz de roles y menú de onboarding (DEV)
+
+- Decisión funcional: eventType es el filtro maestro de roles, y el rol transversal **Ayudo a organizar** debe estar disponible en los ocho tipos de evento, incluyendo corporativo. No existen roles de boda en cumpleaños.
+- Matriz aprobada: boda (Novia, Novio, Somos la pareja, Ayudo a organizar); cumpleaños (Es para mí, Para mi hijo/a, Para un familiar, Para otra persona, Ayudo a organizar); quince (Es para mí, Para mi hija, Somos sus padres, Para un familiar, Ayudo a organizar); baby shower (Es para mí, Somos los futuros padres, Para mi pareja, Para otra persona, Ayudo a organizar); religioso (Para mi hijo/a, Somos los padres, Para un familiar, Ayudo a organizar); graduación (Es para mí, Para mi hijo/a, Para un familiar, Para otra persona, Ayudo a organizar); corporativo (Lo organizo para mi empresa, Soy parte del equipo organizador, Ayudo a organizar); personalizado (Es para mí, Para mi hijo/a, Para un familiar, Para otra persona, Ayudo a organizar).
+- Primera entrega: centralizar los valores y etiquetas en `src/core/app/onboarding-profiles.js`, reutilizando `getOnboardingProfile` y el motor existente; no duplicar tarjetas ni implementar filtros por CSS. Los identificadores existentes se preservan cuando corresponde.
+- Criterios siguientes: confirmar que la UI realmente derive las tarjetas de `eventType`, que al cambiar de tipo se invalide el rol incompatible, que la pregunta y el texto acompañante sean contextuales y que todas las rutas de render usen un solo origen de datos; probar avance/retroceso y los ocho tipos en desktop/tablet/móvil.
+- Incidencia visual observada: en pantalla de selección de rol, el menú hamburguesa o su contenedor parece generar una barra superpuesta; corregir en el componente/shell propietario tras identificar su estructura y estado, manteniendo solo el botón aislado arriba a la derecha cuando esté cerrado. Revisar además desbordamiento del título, tarjetas y navegación inferior en 360, 390–430, 768, 1024 y 1440 px. Sin `!important` ni CSS superpuesto.
+- MGD-037 sigue **sin QA auténtico A → B → A**; ninguna prueba estática es evidencia de aislamiento. No modificar Auth, Firestore, Rules, Storage, persistencia canónica, datos reales o PROD.
+
 ## 2026-10-12 — preflight MGD-037 comprueba identidad completa de B
 
 - PR #147 fusionado (61e59ed895fa), Check de PR verde; main aún en validación al consultar.
