@@ -61,6 +61,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Se comprueban contratos de recuperación de `eventType/themeId` desde contexto activo y del intercambio mediante `selectActiveWedding`. Son invariantes de código, **no QA real autenticado**.
 - Ningún cambio en producto, servicios, persistencia, Firebase, Rules, Auth, Storage, PROD ni datos reales. Se mantienen los gates visuales y QA real.
 
+## MGD-036 — reingreso de solo lectura en sesión autenticada (12/10/2026)
+
+- PR DEV añade a `tests/e2e-auth-readonly.spec.js` una prueba de recarga: mismo contexto activo, mismo tema y mismos nueve tokens CSS antes/después del reload.
+- Usa el perfil autenticado ya capturado por el usuario (almacenamiento de pruebas local) y **no crea ni cambia eventos**. No acredita aislamiento A → B → A ni permisos, y requiere un ambiente de prueba separado para probar cambios de contexto.
+- Estado: prueba propuesta; ejecutar `npm run test:e2e:auth-readonly` y validar checks/QA antes de cerrar. No se ejecutó una autenticación real desde esta operación.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
