@@ -1,3 +1,8 @@
+## 2026-10-12 — ajuste del footer tras fallo CI
+
+- Run 38298290678: clic de dots interceptado por opciones de rol en onboarding. Se ajusta la regla original de `.discover-footer` para priorizar los controles de navegación, sin forzar clics ni ocultar el test.
+- Pendiente confirmación en nueva corrida; los datos reales y PROD permanecen intactos.
+
 ## 2026-10-12 — Fallo real CI #142: 182 pasaron, 25 fallaron
 
 - Run `38298290678` analizado: versiones obsoletas en pruebas de Presupuesto, onboarding y selector; lectura Música sin importar `readFileSync`; clic de punto de onboarding interceptado por opciones de rol.
