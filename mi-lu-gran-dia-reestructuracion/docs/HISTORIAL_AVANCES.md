@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: alcance estricto de cuenta QA
+
+- PR #146 fusionado; run `38302223688` de `main` verde.
+- Auditoría reveló que las pruebas protegidas validaban IDs A/B, pero toleraban eventos adicionales en la misma cuenta. Se incorpora bloqueo previo cuando «Mis eventos» no tiene exactamente dos tarjetas y se actualiza la guía.
+- No afecta código funcional, sesión ni persistencia; QA A/B/A real sigue pendiente.
+
 ## 2026-10-12 — MGD-037: procedimiento seguro para ejecutar QA real
 
 - PR #145 confirmado fusionado; CI de PR verde, ejecución main pendiente en la consulta.
