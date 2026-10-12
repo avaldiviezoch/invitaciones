@@ -209,10 +209,15 @@ for (const { id, label } of EVENT_TYPES) {
 function renderDiscoverRoleOptions() {
   const type = discoverAnswers.eventType || 'wedding';
   const isWedding = type === 'wedding';
+  const roleQuestion = getOnboardingProfile(type).organizerRoleQuestion;
+  const roleSlide = discoverRoleOptions?.closest('[data-question="role"]');
+  const roleHeading = roleSlide?.querySelector('h2');
+  if (roleHeading) roleHeading.textContent = type === 'wedding' ? '¿Cuál es tu papel en esta boda?' : type === 'corporate' ? '¿Cuál es tu rol en este evento corporativo?' : type === 'birthday' ? '¿Para quién organizas este cumpleaños?' : roleQuestion.label;
   discoverRoleOptions?.querySelectorAll('[data-dynamic-role]').forEach((button) => button.remove());
   weddingRoleButtons.forEach((button) => {
     button.hidden = !isWedding;
     button.classList.remove('is-selected');
+    button.setAttribute('aria-pressed', 'false');
   });
   if (isWedding || !discoverRoleOptions) return;
   const profile = getOnboardingProfile(type);

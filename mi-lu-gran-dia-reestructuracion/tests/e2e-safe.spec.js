@@ -1803,7 +1803,7 @@ test('MGD-037 fase 2b: selector de ocho tipos reutiliza el contrato existente si
   expect(dashboard).toContain('newEventTypeField.replaceChildren(...EVENT_TYPES.map');
   expect(dashboard).toContain('if (!isKnownEventType(eventType))');
   expect(dashboard).toContain("eventType\n    });");
-  expect(html).toContain('inicio.js?v=275-20261012');
+  expect(html).toContain('inicio.js?v=276-20261012');
   expect((dashboard.match(/async function finishOnboardingForNewUser/g) || [])).toHaveLength(1);
   // No se autentica ni se crea ningún evento durante la prueba.
 });
@@ -1821,7 +1821,7 @@ test('MGD-034/037: el onboarding pregunta tipo de evento y reutiliza perfiles ca
   expect(dashboard).toContain("eventType: isKnownEventType(discoverAnswers.eventType)");
   expect(dashboard).toContain('if (!discoverAnswers.eventType && next > eventTypeSlideIndex) return');
   expect(dashboard).toContain("eventTypeLabel(discoverAnswers.eventType)");
-  expect(html).toContain('inicio.js?v=275-20261012');
+  expect(html).toContain('inicio.js?v=276-20261012');
   for (const { id } of EVENT_TYPES) {
     expect(getOnboardingProfile(id).organizerRoleQuestion.options.length).toBeGreaterThan(0);
   }
@@ -1834,7 +1834,7 @@ test('MGD-034/035: edad opcional solo en perfiles que la necesitan, sin escritur
   const { getOnboardingProfile } = await import(pathToFileURL(path.resolve(process.cwd(), 'src/core/app/onboarding-profiles.js')).href);
   expect(html).toContain('data-question="age" hidden');
   expect(html).toContain('id="discoverAgeInput"');
-  expect(html).toContain('inicio.js?v=275-20261012');
+  expect(html).toContain('inicio.js?v=276-20261012');
   expect(getOnboardingProfile('wedding').ageQuestion).toBeNull();
   expect(getOnboardingProfile('baby_shower').ageQuestion).toBeNull();
   expect(getOnboardingProfile('birthday').ageQuestion.mode).toBe('optional-exact-age');
@@ -1843,6 +1843,27 @@ test('MGD-034/035: edad opcional solo en perfiles que la necesitan, sin escritur
   expect(code).toContain('discoverAnswers.age = null');
   expect(code).toContain("if (discoverAgeSlide?.hidden && next === discoverAgeSlideIndex)");
   // Solo memoria/preview. No modifica createWedding(), saveWeddingOnboarding() ni datos reales.
+});
+
+test('MGD-034/037: contrato local de ocultamiento y cabecera del onboarding pendiente de QA publicado', async () => {
+  // CI de PR trabaja con la fuente del commit; GitHub Pages sirve main hasta fusionar.
+  // Este control no sustituye la verificación visual posterior al despliegue.
+  const fs = await import('node:fs/promises');
+  const root = process.cwd();
+  const [css, dashboard, html] = await Promise.all([
+    fs.readFile(path.resolve(root, 'src/modules/dashboard/inicio.css'), 'utf8'),
+    fs.readFile(path.resolve(root, 'src/modules/dashboard/inicio.js'), 'utf8'),
+    fs.readFile(path.resolve(root, 'index.html'), 'utf8')
+  ]);
+  expect(css).toContain('.discover-options button[hidden]{display:none}');
+  expect(css).toContain('grid-template-rows:minmax(0,1fr) auto');
+  expect(css).toContain('.discover-skip{position:absolute;');
+  expect(dashboard).toContain("roleHeading.textContent = type === 'wedding'");
+  expect(dashboard).toContain("type === 'birthday' ? '¿Para quién organizas este cumpleaños?'");
+  expect(dashboard).toContain('button.hidden = !isWedding');
+  expect(dashboard).toContain('button.setAttribute(\'aria-pressed\', \'false\')');
+  expect(html).toContain('id="discoverMenuButton"');
+  expect(html).toContain('inicio.js?v=276-20261012');
 });
 
 test('MGD-034/037: navegación pública adaptativa boda y cumpleaños sin autenticación', async ({ page }) => {
@@ -1890,7 +1911,7 @@ test('MGD-036: vista previa de paleta aislada usa motor canónico sin persistir'
   expect(dashboard).toContain('getThemeTokens(profile.theme.defaultThemeId)');
   expect(dashboard).toContain("preview.className = 'discover-theme-preview'");
   expect(dashboard).toContain('discoverSummary.append(preview)');
-  expect(html).toContain('inicio.js?v=275-20261012');
+  expect(html).toContain('inicio.js?v=276-20261012');
   // No writes, no automatic theme switching, no change to an existing event's themeId.
 });
 
@@ -1961,7 +1982,7 @@ test('MGD-037: selector multi-evento muestra tipo y texto neutral sin alterar co
   const dashboard = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
   expect(html).toContain('id="weddingSwitcherTitle">Mis eventos</h2>');
   expect(html).toContain('data-wedding-view="mine">Mis eventos</button>');
-  expect(html).toContain('inicio.js?v=275-20261012');
+  expect(html).toContain('inicio.js?v=276-20261012');
   expect(dashboard).toContain('eventTypeLabel(item.eventType)');
   expect(dashboard).toContain('Todavía no tienes eventos disponibles.');
   expect(dashboard).toContain('No se pudieron cargar tus eventos.');
@@ -1977,7 +1998,7 @@ test('MGD-037: invitaciones recibidas tienen fallback neutro multi-evento', asyn
   expect(dashboard).toContain("invite.weddingName || 'Evento compartido'");
   expect(dashboard).not.toContain("'Boda compartida'");
   expect(dashboard).toContain('No se pudo cargar el evento activo:');
-  expect(html).toContain('inicio.js?v=275-20261012');
+  expect(html).toContain('inicio.js?v=276-20261012');
   // El nombre real de la invitación conserva precedencia; no cambia ninguna escritura.
 });
 
@@ -2026,7 +2047,7 @@ test('MGD-037: Presupuesto y selector conservan redacción neutral multi-evento'
   expect(budget).toContain('Datos del evento activo · edición habilitada');
   expect(budget).not.toContain('Datos de la boda activa · edición habilitada');
   expect(dashboard).toContain('No se pudo cambiar de evento:');
-  expect(html).toContain('inicio.js?v=275-20261012');
+  expect(html).toContain('inicio.js?v=276-20261012');
   // Cambios solo de texto visible y consola, sin tocar módulos de persistencia.
 });
 
