@@ -2027,3 +2027,25 @@ test('MGD-037: Presupuesto y selector conservan redacción neutral multi-evento'
   expect(html).toContain('inicio.js?v=275-20261012');
   // Cambios solo de texto visible y consola, sin tocar módulos de persistencia.
 });
+
+test('MGD-037: comandos QA mantienen separadas las pruebas con escrituras', async () => {
+  const fs = await import('node:fs/promises');
+  const pkg = JSON.parse(await fs.readFile(path.resolve(process.cwd(), 'package.json'), 'utf8'));
+  const spec = await fs.readFile(path.resolve(process.cwd(), 'tests/e2e-auth-readonly.spec.js'), 'utf8');
+  const scripts = pkg.scripts || {};
+  expect(scripts['test:e2e:auth-readonly']).toContain('--grep-invert @fixture');
+  expect(scripts['test:e2e:fixture-preflight']).toContain('--grep @fixture-preflight');
+  expect(scripts['test:e2e:fixture-switch']).toContain('--grep @fixture-switch');
+  const switchTests = [...spec.matchAll(/test\(['"]([^'"]*@fixture-switch[^'"]*)['"]/g)];
+  const preflightTests = [...spec.matchAll(/test\(['"]([^'"]*@fixture-preflight[^'"]*)['"]/g)];
+  expect(switchTests).toHaveLength(3);
+  expect(preflightTests).toHaveLength(1);
+  for (const match of switchTests) {
+    const start = match.index;
+    const next = spec.indexOf("\ntest(", start + match[0].length);
+    const block = spec.slice(start, next < 0 ? undefined : next);
+    expect(block).toContain("AUTHORIZED_TEST_ONLY");
+    expect(block).toMatch(/test\.skip\(!(?:valid|approved)/);
+    expect(block).toContain("MGD_QA_FIXTURE_ACCOUNT_EMAIL");
+  }
+});
