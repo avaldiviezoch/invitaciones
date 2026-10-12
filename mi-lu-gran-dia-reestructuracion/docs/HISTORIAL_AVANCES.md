@@ -1,3 +1,26 @@
+## 2026-10-12 — ajuste del footer tras fallo CI
+
+- Run 38298290678: clic de dots interceptado por opciones de rol en onboarding. Se ajusta la regla original de `.discover-footer` para priorizar los controles de navegación, sin forzar clics ni ocultar el test.
+- Pendiente confirmación en nueva corrida; los datos reales y PROD permanecen intactos.
+
+## 2026-10-12 — Fallo real CI #142: 182 pasaron, 25 fallaron
+
+- Run `38298290678` analizado: versiones obsoletas en pruebas de Presupuesto, onboarding y selector; lectura Música sin importar `readFileSync`; clic de punto de onboarding interceptado por opciones de rol.
+- Se actualizan pruebas de contrato sin tocar lógica de producción. No se oculta el fallo del clic y se debe comprobar su traza si persiste.
+- Pendiente nueva ejecución GitHub Actions, sin promoción PROD ni cambios a datos reales.
+
+## 2026-10-12 — PR #142: fallo real de Actions y corrección en misma rama
+
+- PR #142 sigue **abierto**. GitHub Actions run `38297094437` concluyó en **failure**: `import.meta` no admitido en la carga de la suite E2E; `No tests found`.
+- Se sustituyen únicamente dos rutas de lectura de fixtures del módulo Música en `tests/e2e-safe.spec.js` por rutas basadas en `process.cwd()`. No se crea PR adicional ni se cambia `package.json` a ESM; mantenemos la ruta habitual de Playwright.
+- Pendiente comprobar nuevo run y corregir otros fallos efectivos si aparecen. No ejecuta fixtures ni escribe datos; PROD sin alteraciones.
+
+## 2026-10-12 — MGD-037: CI seguro automático de Pull Requests en DEV
+
+- PR #141 confirmado fusionado en `main` (`24a5beae77cb`). Se constató que ya existía el workflow `mgd-008-e2e-safe.yml` pero solo con disparador manual `workflow_dispatch`.
+- Se amplía el workflow para ejecutar `test:e2e:safe` en PRs del directorio de la app y cambios del propio workflow, con permiso `contents: read`; no ejecuta tests con sesión ni cambios de contexto.
+- No hay todavía resultados de ejecución disponibles para este nuevo PR; los Checks deberán revisarse. Sin acceso al entorno local de pruebas autenticadas, queda pendiente QA A → B → A con cuenta y fixtures exclusivos; PROD intacto.
+
 ## 2026-10-12 — MGD-037: control de regresión de seguridad para comandos Playwright
 
 - Confirmado PR #140 fusionado en `DEV/main` (`ddc52e4569dc`). Se inspeccionaron los comandos y las etiquetas; los tres escenarios de conmutación están segregados del comando readonly.

@@ -141,6 +141,30 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Se inspeccionan el `package.json` y los escenarios etiquetados existentes. Es un **control de regresión de configuración**, no ejecuta Firebase, ni realiza la prueba funcional de aislamiento de datos.
 - PR #140 verificado fusionado. Aún se necesita cuenta QA y fixtures autorizados para pruebas de módulos A → B → A, análisis de fallos, responsive y evaluación de pase a PROD.
 
+## MGD-037 — comprobación segura automática en Pull Requests (12/10/2026)
+
+- El flujo existente `.github/workflows/mgd-008-e2e-safe.yml` se amplía para activarse con `pull_request` cuando se modifica código/documentación de la aplicación DEV o el propio workflow. Conserva `workflow_dispatch`.
+- Única suite ejecutada por CI: `npm run test:e2e:safe`. No usa storage-state, credenciales, variables de fixture ni escenarios `@fixture-switch`; permisos del job limitados a `contents: read`.
+- Objetivo: obtener resultados comprobables de tests seguros por PR, en lugar de suponer verde por fusión. El QA autenticado A → B → A sigue pendiente de datos ficticios, autorización y ejecución separada.
+- No cambia PROD, persistencia, reglas ni funciones de negocio.
+
+## MGD-037 — incidencia CI real y corrección (12/10/2026)
+
+- El PR #142 sí activó GitHub Actions (ejecución 38297094437), pero el job terminó en **failure** antes de recopilar tests, debido a `SyntaxError: Cannot use 'import.meta' outside a module` en `tests/e2e-safe.spec.js`.
+- Se corrigen las dos referencias `import.meta.url` usadas únicamente para leer archivos locales de Música en pruebas, utilizando `path.resolve(process.cwd(), ...)` ya disponible; sin modificar configuración global de módulos ni código de producción.
+- Corrección realizada en la **misma rama del PR #142**; volver a consultar Checks tras el commit. No afirmar verde hasta resultado comprobado. QA autenticado A/B continúa pendiente.
+
+## MGD-037 — Fallo CI real de PR #142 (12/10/2026)
+
+- Run `38298290678`: 182 tests aprobados y 25 fallidos en desktop/tablet/mobile. Se detectaron expectativas de versiones antiguas, presupuesto importado como v18 en lugar de v17, referencia `readFileSync` sin definir y bloqueo del clic en la navegación por puntos del onboarding.
+- Se reparan contratos estáticos desfasados y lectura de Música. El fallo de interacción de paleta **se mantiene visible** hasta comprobar la UX y su causa, sin `force click` ni omitir tests.
+- Pendiente nueva ejecución y trazas. No autorizar merge si continúa rojo. No se cambia producción ni datos.
+
+## MGD-036 — interfaz de footer de onboarding (12/10/2026)
+
+- El run 38298290678 detectó que `discover-options-role` interceptaba el clic en los indicadores del onboarding. Se priorizó el footer en la regla CSS existente, sin `!important` ni clic forzado.
+- Verificar nueva corrida y su comportamiento en desktop/tablet/mobile. No fusionar en rojo.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.

@@ -1582,8 +1582,8 @@ test('Presupuesto: primer gasto siempre tiene categoría visible y una sola inst
   const dashboardResponse = await page.request.get(new URL('src/modules/dashboard/inicio.js', page.url()).href);
   expect(dashboardResponse.ok()).toBe(true);
   const dashboardSource = await dashboardResponse.text();
-  expect(dashboardSource).toContain("../presupuesto/index.js?v=17");
-  expect((dashboardSource.match(/presupuesto\/index\.js\?v=17/g) || []).length).toBe(2);
+  expect(dashboardSource).toContain("../presupuesto/index.js?v=18");
+  expect((dashboardSource.match(/presupuesto\/index\.js\?v=18/g) || []).length).toBe(2);
   expect(dashboardSource).not.toContain("../presupuesto/index.js?v=15");
   expect(dashboardSource).not.toContain("../presupuesto/index.js?v=16");
 });
@@ -1742,8 +1742,8 @@ test('MGD-003: infraestructura RSVP anti-abuso está configurada en DEV y PROD s
 
 
 test('Música: módulo conserva helper de hosts y HTML válido', async () => {
-  const musicJs = readFileSync(new URL('../src/modules/musica/index.js', import.meta.url), 'utf8');
-  const musicHtml = readFileSync(new URL('../src/modules/musica/index.html', import.meta.url), 'utf8');
+  const musicJs = await (await import('node:fs/promises')).readFile(path.resolve(process.cwd(), 'src/modules/musica/index.js'), 'utf8');
+  const musicHtml = await (await import('node:fs/promises')).readFile(path.resolve(process.cwd(), 'src/modules/musica/index.html'), 'utf8');
 
   expect(musicJs).toMatch(/function\s+hostMatches\s*\(/);
   expect(musicJs).toContain("host.endsWith('.'+domain)");
@@ -1797,11 +1797,11 @@ test('MGD-037 fase 2b: selector de ocho tipos reutiliza el contrato existente si
   expect(EVENT_TYPES).toHaveLength(8);
   expect(html).toContain('id="newWeddingEventType"');
   expect(html).toContain('id="createWeddingForm"');
-  expect(dashboard).toContain("import { EVENT_TYPES, isKnownEventType } from '../../core/app/event-types.js'");
+  expect(dashboard).toContain("import { EVENT_TYPES, isKnownEventType, eventTypeLabel } from '../../core/app/event-types.js'");
   expect(dashboard).toContain('newEventTypeField.replaceChildren(...EVENT_TYPES.map');
   expect(dashboard).toContain('if (!isKnownEventType(eventType))');
   expect(dashboard).toContain("eventType\n    });");
-  expect(html).toContain('src/modules/dashboard/inicio.js?v=269-20261012');
+  expect(html).toContain('inicio.js?v=275-20261012');
   expect((dashboard.match(/async function finishOnboardingForNewUser/g) || [])).toHaveLength(1);
   // No se autentica ni se crea ningún evento durante la prueba.
 });
@@ -1819,7 +1819,7 @@ test('MGD-034/037: el onboarding pregunta tipo de evento y reutiliza perfiles ca
   expect(dashboard).toContain("eventType: isKnownEventType(discoverAnswers.eventType)");
   expect(dashboard).toContain('if (!discoverAnswers.eventType && next > eventTypeSlideIndex) return');
   expect(dashboard).toContain("eventTypeLabel(discoverAnswers.eventType)");
-  expect(html).toContain('inicio.js?v=270-20261012');
+  expect(html).toContain('inicio.js?v=275-20261012');
   for (const { id } of EVENT_TYPES) {
     expect(getOnboardingProfile(id).organizerRoleQuestion.options.length).toBeGreaterThan(0);
   }
@@ -1832,7 +1832,7 @@ test('MGD-034/035: edad opcional solo en perfiles que la necesitan, sin escritur
   const { getOnboardingProfile } = await import(pathToFileURL(path.resolve(process.cwd(), 'src/core/app/onboarding-profiles.js')).href);
   expect(html).toContain('data-question="age" hidden');
   expect(html).toContain('id="discoverAgeInput"');
-  expect(html).toContain('inicio.js?v=271-20261012');
+  expect(html).toContain('inicio.js?v=275-20261012');
   expect(getOnboardingProfile('wedding').ageQuestion).toBeNull();
   expect(getOnboardingProfile('baby_shower').ageQuestion).toBeNull();
   expect(getOnboardingProfile('birthday').ageQuestion.mode).toBe('optional-exact-age');
@@ -1888,7 +1888,7 @@ test('MGD-036: vista previa de paleta aislada usa motor canónico sin persistir'
   expect(dashboard).toContain('getThemeTokens(profile.theme.defaultThemeId)');
   expect(dashboard).toContain("preview.className = 'discover-theme-preview'");
   expect(dashboard).toContain('discoverSummary.append(preview)');
-  expect(html).toContain('inicio.js?v=272-20261012');
+  expect(html).toContain('inicio.js?v=275-20261012');
   // No writes, no automatic theme switching, no change to an existing event's themeId.
 });
 
@@ -1959,7 +1959,7 @@ test('MGD-037: selector multi-evento muestra tipo y texto neutral sin alterar co
   const dashboard = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
   expect(html).toContain('id="weddingSwitcherTitle">Mis eventos</h2>');
   expect(html).toContain('data-wedding-view="mine">Mis eventos</button>');
-  expect(html).toContain('inicio.js?v=273-20261012');
+  expect(html).toContain('inicio.js?v=275-20261012');
   expect(dashboard).toContain('eventTypeLabel(item.eventType)');
   expect(dashboard).toContain('Todavía no tienes eventos disponibles.');
   expect(dashboard).toContain('No se pudieron cargar tus eventos.');
@@ -1975,7 +1975,7 @@ test('MGD-037: invitaciones recibidas tienen fallback neutro multi-evento', asyn
   expect(dashboard).toContain("invite.weddingName || 'Evento compartido'");
   expect(dashboard).not.toContain("'Boda compartida'");
   expect(dashboard).toContain('No se pudo cargar el evento activo:');
-  expect(html).toContain('inicio.js?v=274-20261012');
+  expect(html).toContain('inicio.js?v=275-20261012');
   // El nombre real de la invitación conserva precedencia; no cambia ninguna escritura.
 });
 
