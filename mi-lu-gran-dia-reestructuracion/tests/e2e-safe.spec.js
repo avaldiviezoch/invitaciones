@@ -1863,6 +1863,16 @@ test('MGD-034/037: navegación de rol usa el catálogo y no permite saltar sin r
   }
 });
 
+test('MGD-034/037: al cambiar de evento se borran rol y edad previa', async () => {
+  const fs = await import('node:fs/promises');
+  const dashboard = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
+  expect(dashboard).toContain('if (discoverAnswers.eventType !== id) {');
+  expect(dashboard).toContain("discoverAnswers.role = '';");
+  expect(dashboard).toContain('discoverAnswers.age = null;');
+  expect(dashboard).toContain("if (discoverAgeInput) discoverAgeInput.value = '';");
+  expect(dashboard.indexOf('discoverAnswers.age = null;', dashboard.indexOf('if (discoverAnswers.eventType !== id)'))).toBeLessThan(dashboard.indexOf('discoverAnswers.eventType = id;', dashboard.indexOf('if (discoverAnswers.eventType !== id)')));
+});
+
 test('MGD-034/037: contrato local de ocultamiento y cabecera del onboarding pendiente de QA publicado', async () => {
   // CI de PR trabaja con la fuente del commit; GitHub Pages sirve main hasta fusionar.
   // Este control no sustituye la verificación visual posterior al despliegue.
