@@ -1,5 +1,14 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-12 — MGD-034/037: resumen de fecha y presupuesto (DEV)
+
+- Verificado PR #155 fusionado en `main` (`9c49a762`).
+- El resumen previo al inicio de sesión incorpora **Fecha** y **Presupuesto** cuando se proporcionaron durante el onboarding; si la persona indicó que aún no los conoce, muestra «Por definir».
+- Reutiliza `formatDate` y `onboardingBudgetNumber` ya existentes. Es solo presentación del estado local; no modifica persistencia, Auth, Firestore, Rules ni datos reales.
+- Test de invariantes agregado. Continúan pendientes QA visual responsive de ocho eventos y el escenario autenticado A → B → A.
+
+
+
 ## 2026-10-12 — MGD-034/037: scroll de preguntas largas sin recorte (DEV)
 
 - PR #154 verificado fusionado y CI exitoso.

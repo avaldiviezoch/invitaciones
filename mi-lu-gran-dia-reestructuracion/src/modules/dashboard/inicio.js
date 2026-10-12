@@ -338,6 +338,11 @@ function renderDiscoverSummary() {
   if (discoverAnswers.age !== null) items.push(['Edad (orientativa)', String(discoverAnswers.age)]);
   if (discoverAnswers.stage) items.push(['Etapa', discoverAnswerLabel('stage', discoverAnswers.stage)]);
   if (discoverAnswers.guests) items.push(['Invitados', discoverAnswers.guestCount ? `${discoverAnswers.guestCount} aprox.` : discoverAnswerLabel('guests', discoverAnswers.guests)]);
+  if (discoverAnswers.dateStatus === 'si' && /^\d{4}-\d{2}-\d{2}$/.test(discoverAnswers.date)) items.push(['Fecha', formatDate(discoverAnswers.date)]);
+  else if (discoverAnswers.dateStatus === 'no') items.push(['Fecha', 'Por definir']);
+  if (discoverAnswers.budgetStatus === 'definido' && onboardingBudgetNumber(discoverAnswers.budget) > 0) {
+    items.push(['Presupuesto', 'S/ ' + onboardingBudgetNumber(discoverAnswers.budget).toLocaleString('es-PE')]);
+  } else if (discoverAnswers.budgetStatus === 'no-se') items.push(['Presupuesto', 'Por definir']);
   if (discoverAnswers.priorities.size) items.push(['Primero', [...discoverAnswers.priorities].slice(0,3).join(' · ')]);
   discoverSummary.innerHTML = items.map(([label,value]) => `<span><small>${label}</small><strong>${escapeHtml(String(value))}</strong></span>`).join('');
   const profile = getEventProfile(discoverAnswers.eventType);

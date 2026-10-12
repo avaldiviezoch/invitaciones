@@ -1916,6 +1916,17 @@ test('MGD-034/037: contrato local de ocultamiento y cabecera del onboarding pend
   expect(html).toContain('inicio.js?v=277-20261012');
 });
 
+test('MGD-034/037: resumen muestra fecha y presupuesto solamente cuando se responden', async () => {
+  const fs = await import('node:fs/promises');
+  const js = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
+  expect(js).toContain("items.push(['Fecha', formatDate(discoverAnswers.date)])");
+  expect(js).toContain("items.push(['Fecha', 'Por definir'])");
+  expect(js).toContain("items.push(['Presupuesto', 'S/ ' + onboardingBudgetNumber(discoverAnswers.budget).toLocaleString('es-PE')])");
+  expect(js).toContain("items.push(['Presupuesto', 'Por definir'])");
+  expect(js).toContain("discoverAnswers.budgetStatus === 'definido'");
+  expect(js).toContain("discoverAnswers.dateStatus === 'si'");
+});
+
 test('MGD-034/037: contenido de preguntas desplazable sin perder footer', async () => {
   const fs = await import('node:fs/promises');
   const [css, js] = await Promise.all([
