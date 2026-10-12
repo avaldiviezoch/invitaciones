@@ -1,3 +1,11 @@
+## 2026-10-12 — MGD-037 Fase 2a: suite segura de regresión propuesta en DEV
+
+- Se incorpora prueba de contrato en `tests/e2e-safe.spec.js` (sin llamadas Firebase, Auth ni escrituras), reutilizando la suite y módulos puros existentes.
+- Comprueba defaults `wedding/classic-elegant`, normalización, preservación de metadatos en raíz/índice de nuevos contextos, batch único y fallback histórico.
+- **Alcance limitado:** inspección de invariantes de código; NO prueba funcional de persistencia real, no acredita pruebas CI hasta ver verde y no permite promoción automática a PROD.
+- Pendiente: fusionar PR DEV con checks aprobados; ejecutar posteriormente QA con cuenta/evento de prueba autorizado.
+- Sin archivos auxiliares, parches visuales, Rules, Auth, Storage, migraciones ni cambios en PROD.
+
 ## 2026-10-09 — CONSOLIDACIÓN HISTÓRICA Y AUDITORÍA DE CIERRES (sin reescribir hitos anteriores)
 
 **Fuentes revisadas:** ROADMAP_MIGRANDIA.md e HISTORIAL_AVANCES.md del DEV main, PR DEV #118 fusionado, HEAD DEV `ecf46a5c12d3513126391f67a9aa159cadc3c615`, HEAD PROD `ff22d555188a777fc7ce1ad239ba6a92ac2a470c`. Los HEAD son referencias de auditoría **anteriores al PR de consolidación**.
