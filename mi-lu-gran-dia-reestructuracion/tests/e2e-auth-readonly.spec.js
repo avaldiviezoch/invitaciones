@@ -275,11 +275,12 @@ test('@fixture-switch MGD-037: Mesas y Distribución A/B/A solo con fixtures exc
 test('@fixture-preflight MGD-037: preflight de fixtures QA en contexto activo sin conmutar', async ({ page }) => {
   const account = (process.env.MGD_QA_FIXTURE_ACCOUNT_EMAIL || '').trim().toLowerCase();
   const idA = process.env.MGD_QA_FIXTURE_EVENT_A || '';
+  const idB = process.env.MGD_QA_FIXTURE_EVENT_B || '';
   const markerGuests = process.env.MGD_QA_FIXTURE_MARKER_A || '';
   const markerBudget = process.env.MGD_QA_FIXTURE_BUDGET_MARKER_A || '';
   const markerTable = process.env.MGD_QA_FIXTURE_TABLE_MARKER_A || '';
   const approved = process.env.MGD_QA_FIXTURE_PREFLIGHT === 'READ_ONLY_TEST_ONLY';
-  const valid = approved && account && idA && /^QA[- ]/.test(markerGuests) && /^QA[- ]/.test(markerBudget) && /^QA[- ]/.test(markerTable);
+  const valid = approved && account && idA && idB && idA !== idB && /^QA[- ]/.test(markerGuests) && /^QA[- ]/.test(markerBudget) && /^QA[- ]/.test(markerTable);
   test.skip(!valid, 'Preflight inactivo sin cuenta QA, contexto A y marcas ficticias.');
   if (!valid) return;
 
@@ -288,7 +289,13 @@ test('@fixture-preflight MGD-037: preflight de fixtures QA en contexto activo si
   await expect(page.locator('#accountEmail')).toHaveText(account);
   await page.locator('#menuButton').click();
   await page.locator('#activeWeddingButton').click();
-  await expect(page.locator('#weddingsList [data-wedding-id]')).toHaveCount(2);
+  const qaRows = page.locator('#weddingsList [data-wedding-id]');
+  await expect(qaRows).toHaveCount(2);
+  const other = page.locator('#weddingsList [data-wedding-id="' + idB + '"]');
+  await expect(other).toHaveCount(1);
+  await expect(other.locator('strong')).toContainText(/^QA[- ]/);
+  await expect(other.locator('small')).toContainText(/^Cumpleaños · /);
+  await expect(other).not.toHaveClass(/is-current/);
   const active = page.locator('#weddingsList [data-wedding-id].is-current');
   await expect(active).toHaveCount(1);
   await expect(active).toHaveAttribute('data-wedding-id', idA);

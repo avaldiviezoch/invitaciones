@@ -1,3 +1,9 @@
+## 2026-10-12 — preflight MGD-037 comprueba identidad completa de B
+
+- PR #147 fusionado (61e59ed895fa), Check de PR verde; main aún en validación al consultar.
+- Añadido control de evento B al preflight de solo lectura: ID distinto de A, tipo Cumpleaños, nombre QA- y no activo. Procedimiento actualizado.
+- Sin pruebas autenticadas ejecutadas ni cambios en datos reales/PROD.
+
 ## 2026-10-12 — MGD-037: alcance estricto de cuenta QA
 
 - PR #146 fusionado; run `38302223688` de `main` verde.
