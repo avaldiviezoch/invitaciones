@@ -1879,7 +1879,7 @@ test('MGD-034/037: al cambiar de evento se borran rol y edad previa', async () =
   expect(dashboard).toContain("discoverAnswers.role = '';");
   expect(dashboard).toContain('discoverAnswers.age = null;');
   expect(dashboard).toContain("if (discoverAgeInput) discoverAgeInput.value = '';");
-  expect(dashboard.indexOf('discoverAnswers.age = null;', dashboard.indexOf('if (discoverAnswers.eventType !== id)'))).toBeLessThan(dashboard.indexOf('discoverAnswers.eventType = id;', dashboard.indexOf('if (discoverAnswers.eventType !== id)')));
+  expect(dashboard.indexOf('discoverAnswers.age = null;', dashboard.indexOf('if (eventChanged)'))).toBeLessThan(dashboard.indexOf('discoverAnswers.eventType = id;', dashboard.indexOf('if (eventChanged)')));
 });
 
 test('MGD-034/037: contrato local de ocultamiento y cabecera del onboarding pendiente de QA publicado', async () => {
