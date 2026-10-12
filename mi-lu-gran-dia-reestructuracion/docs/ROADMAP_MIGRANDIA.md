@@ -195,6 +195,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Se agrega `docs/QA_MGD037_EJECUCION.md`, guía concreta Windows/PowerShell para crear cuenta exclusiva, dos eventos ficticios, datos de Invitados/Presupuesto/Mesas, capturar sesión **local** y ejecutar primero preflight de solo lectura y después A → B → A con consentimiento expreso.
 - Se registran criterios de evidencia, protección de credenciales y decisión de NO pasar a PROD sin QA autenticado aprobado. La guía no ejecuta pruebas ni crea cuentas.
 
+## MGD-037 — barrera de exactamente dos eventos QA (12/10/2026)
+
+- PR #146 verificado fusionado y run `38302223688` exitoso sobre `DEV/main`.
+- Los tres escenarios opt-in de conmutación y el preflight verifican ahora **exactamente dos** tarjetas con `data-wedding-id` antes de operar. Impide proceder si una cuenta tiene eventos adicionales, evitando cambiar el contexto de cuentas con datos no previstos.
+- Se actualiza el procedimiento QA: cuenta exclusiva con solo Boda A y Cumpleaños B. Es una protección de tests; no ejecuta acceso, no crea ni modifica eventos y no reemplaza la revisión humana de que ambos eventos son ficticios.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
