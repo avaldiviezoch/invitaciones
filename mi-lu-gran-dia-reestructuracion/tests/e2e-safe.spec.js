@@ -1845,19 +1845,25 @@ test('MGD-034/035: edad opcional solo en perfiles que la necesitan, sin escritur
   // Solo memoria/preview. No modifica createWedding(), saveWeddingOnboarding() ni datos reales.
 });
 
-test('MGD-034/037: roles de boda no invaden cumpleaños y menú no reserva barra', async ({ page }) => {
-  await page.goto('', { waitUntil: 'domcontentloaded' });
-  for (let i = 0; i < 4; i++) await page.locator('#discoverNextButton').click();
-  await page.locator('[data-question="eventType"] [data-event-type="birthday"]').click();
-  const role = page.locator('[data-question="role"]');
-  await expect(role.locator('h2')).toContainText('cumpleaños');
-  await expect(role.locator('[data-answer="role"][data-value="novia"]')).toBeHidden();
-  await expect(role.locator('[data-answer="role"][data-value="novio"]')).toBeHidden();
-  await expect(role.locator('[data-dynamic-role="organizer"]')).toBeVisible();
-  const menu = page.locator('#discoverMenuButton');
-  await expect(menu).toBeVisible();
-  const gridRows = await page.locator('.discover-shell').evaluate((node) => getComputedStyle(node).gridTemplateRows.split(' ').length);
-  expect(gridRows).toBe(2);
+test('MGD-034/037: contrato local de ocultamiento y cabecera del onboarding pendiente de QA publicado', async () => {
+  // CI de PR trabaja con la fuente del commit; GitHub Pages sirve main hasta fusionar.
+  // Este control no sustituye la verificación visual posterior al despliegue.
+  const fs = await import('node:fs/promises');
+  const root = process.cwd();
+  const [css, dashboard, html] = await Promise.all([
+    fs.readFile(path.resolve(root, 'src/modules/dashboard/inicio.css'), 'utf8'),
+    fs.readFile(path.resolve(root, 'src/modules/dashboard/inicio.js'), 'utf8'),
+    fs.readFile(path.resolve(root, 'index.html'), 'utf8')
+  ]);
+  expect(css).toContain('.discover-options button[hidden]{display:none}');
+  expect(css).toContain('grid-template-rows:minmax(0,1fr) auto');
+  expect(css).toContain('.discover-skip{position:absolute;');
+  expect(dashboard).toContain("roleHeading.textContent = type === 'wedding'");
+  expect(dashboard).toContain("type === 'birthday' ? '¿Para quién organizas este cumpleaños?'");
+  expect(dashboard).toContain('button.hidden = !isWedding');
+  expect(dashboard).toContain('button.setAttribute(\'aria-pressed\', \'false\')');
+  expect(html).toContain('id="discoverMenuButton"');
+  expect(html).toContain('inicio.js?v=276-20261012');
 });
 
 test('MGD-034/037: navegación pública adaptativa boda y cumpleaños sin autenticación', async ({ page }) => {
