@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: preflight de cuenta/fixtures previo a aislamiento (DEV)
+
+- Confirmado PR #137 fusionado en `main`. Se añadió un test opt-in de solo lectura para detectar si la cuenta QA y los marcadores presembrados están listos antes de habilitar pruebas que cambian `activeWeddingId`.
+- El preflight comprueba el evento A activo, nombre/tipo ficticios y marcas en Invitados, Presupuesto y Distribución; no cambia evento, no escribe Firestore y está omitido por defecto.
+- Pendientes: ejecución auténtica del preflight, fixtures presembrados, QA móvil y pruebas A → B → A de datos reales de QA. Ninguna promoción PROD ni modificación de datos personales.
+
 ## 2026-10-12 — MGD-037: prueba opt-in Mesas/Distribución por evento (DEV)
 
 - PR #136 verificado fusionado. Se codificó en suite Playwright existente un escenario A → B → A con marcadores exclusivos de mesas para revisar Invitados y Distribución.
