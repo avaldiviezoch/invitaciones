@@ -1,3 +1,11 @@
+## 2026-10-12 — MGD-034/037: visibilidad contextual y cabecera compacta (PR DEV)
+
+- Se corrige en el CSS propietario el conflicto entre `button{display:grid}` y el atributo `hidden`: los roles exclusivos de boda no se renderizan visibles en cumpleaños ni otros eventos.
+- El título del paso de rol se adapta al tipo de evento utilizando el perfil ya existente. Se reinicia `aria-pressed` al conmutar el tipo, sin crear motores ni persistencia nuevas.
+- El botón Omitir deja de reservar una fila completa en `discover-shell`; hamburguesa continúa como botón independiente en la esquina superior derecha. Se mantiene la acción previa de iniciar sesión.
+- Test E2E público comprueba ocultamiento de Novia/Novio, aparición de Ayudo a organizar y estructura compacta del shell.
+- QA responsive y checks de PR pendientes. MGD-037 A → B → A autenticado no está cerrado. Ningún cambio en PROD, Rules, Auth, Storage, Firestore o datos reales.
+
 ## 2026-10-12 — MGD-034/037: matriz de roles y menú de onboarding (DEV)
 
 - Decisión funcional: eventType es el filtro maestro de roles, y el rol transversal **Ayudo a organizar** debe estar disponible en los ocho tipos de evento, incluyendo corporativo. No existen roles de boda en cumpleaños.
