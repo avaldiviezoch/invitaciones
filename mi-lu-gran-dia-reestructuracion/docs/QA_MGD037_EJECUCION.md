@@ -9,7 +9,7 @@
    - **A:** Boda con nombre que comienza por `QA-`.
    - **B:** Cumpleaños con nombre que comienza por `QA-`.
 3. En cada evento insertar manualmente datos reconocibles y sin información personal: un marcador `QA-` de Invitados, uno **distinto** de Presupuesto y un nombre de Mesa **distinto**; usar valores separados en A y B. Los marcadores deben verse en las pantallas de los módulos correspondientes, no solo estar en Firebase.
-4. Obtener los dos IDs desde los registros de eventos de la cuenta QA (nunca inferirlos del nombre). Dejar **A como evento activo** antes de comenzar y verificar que no hay otros eventos asociados a la cuenta. No ejecutar sobre producción.
+4. Obtener los dos IDs desde los registros de eventos de la cuenta QA (nunca inferirlos del nombre). Dejar **A como evento activo** antes de comenzar. **La cuenta debe tener exactamente dos eventos en «Mis eventos»: A y B.** Si hay otros eventos, no ejecutar el test; usar otra cuenta QA completamente aislada. No ejecutar sobre producción.
 
 ## 2. Preparar Playwright local (Windows PowerShell)
 
