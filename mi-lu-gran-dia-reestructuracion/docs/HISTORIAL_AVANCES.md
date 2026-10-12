@@ -1,3 +1,10 @@
+## 2026-10-12 — MGD-036: vista previa temática sin persistencia (DEV)
+
+- Se enriqueció `event-profile.js` con tema sugerido por tipo de evento, reutilizando los identificadores existentes: `classic-elegant` y `minimal-black`.
+- Se agregó en el resumen del onboarding una muestra de tres colores desde `getThemeTokens`. Se mantiene un único `applyEventTheme()` para contextos reales, sin cambiarlo.
+- Este paso NO modifica `themeId` persistido, ni Firestore, Auth, Storage, Rules, Worker, PROD ni bodas antiguas; las nuevas propuestas son orientativas.
+- Se actualizan test de invariantes y cache-buster; QA visual/CI pendiente. No implica experiencia multi-evento visualmente terminada.
+
 ## 2026-10-12 — MGD-034/037: regresión Playwright de navegación adaptativa (PR DEV)
 
 - Se añade recorrido sin autenticación sobre el onboarding público: cumpleaños con edad opcional y boda sin edad, roles por tipo, avance/retroceso.

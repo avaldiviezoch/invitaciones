@@ -2,7 +2,8 @@ import { installObservability, reportError } from '../../services/observability.
 import { AUTH_BRANDING } from '../../core/app/auth-branding.js?v=2';
 import { APP_VERSION_LABEL } from '../../core/app/version.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { applyEventTheme } from '../../core/app/theme-tokens.js';
+import { applyEventTheme, getThemeTokens } from '../../core/app/theme-tokens.js';
+import { getEventProfile } from '../../core/app/event-profile.js';
 import { getEventTerminology } from '../../core/app/event-terminology.js';
 import { EVENT_TYPES, isKnownEventType, eventTypeLabel } from '../../core/app/event-types.js';
 import { getOnboardingProfile } from '../../core/app/onboarding-profiles.js';
@@ -310,7 +311,25 @@ function renderDiscoverSummary() {
   if (discoverAnswers.stage) items.push(['Etapa', discoverAnswerLabel('stage', discoverAnswers.stage)]);
   if (discoverAnswers.guests) items.push(['Invitados', discoverAnswers.guestCount ? `${discoverAnswers.guestCount} aprox.` : discoverAnswerLabel('guests', discoverAnswers.guests)]);
   if (discoverAnswers.priorities.size) items.push(['Primero', [...discoverAnswers.priorities].slice(0,3).join(' · ')]);
-  discoverSummary.innerHTML = items.map(([label,value]) => `<span><small>${label}</small><strong>${value}</strong></span>`).join('');
+  discoverSummary.innerHTML = items.map(([label,value]) => `<span><small>${label}</small><strong>${escapeHtml(String(value))}</strong></span>`).join('');
+  const profile = getEventProfile(discoverAnswers.eventType);
+  const tokens = getThemeTokens(profile.theme.defaultThemeId);
+  const preview = document.createElement('div');
+  preview.className = 'discover-theme-preview';
+  preview.setAttribute('aria-label', 'Vista previa orientativa de colores');
+  const caption = document.createElement('small');
+  caption.textContent = 'PALETA SUGERIDA · VISTA PREVIA';
+  preview.append(caption);
+  const samples = document.createElement('div');
+  samples.className = 'discover-theme-swatches';
+  for (const color of [tokens.primary, tokens.secondary, tokens.accent]) {
+    const swatch = document.createElement('span');
+    swatch.style.backgroundColor = color;
+    swatch.setAttribute('aria-hidden', 'true');
+    samples.append(swatch);
+  }
+  preview.append(samples);
+  discoverSummary.append(preview);
 }
 
 function renderDiscover() {

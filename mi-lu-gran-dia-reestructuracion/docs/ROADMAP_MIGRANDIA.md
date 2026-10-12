@@ -42,6 +42,13 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Este recorrido complementa tests estáticos. Se ejecutará en CI contra el DEV servido; **aún no se acredita VERDE** hasta que GitHub Actions confirme su ejecución.
 - QA real con autenticación, recarga, aislamiento y persistencia de evento de prueba sigue pendiente. PROD intacto.
 
+## MGD-036 — vista previa de paleta contextual (PR DEV 12/10/2026)
+
+- Configuración `eventProfile.theme.defaultThemeId` sugiere tema por tipo de evento reutilizando los tres `theme-tokens` existentes; solo para **preview**, no cambia el `themeId` guardado ni el tema aplicado del evento.
+- El resumen de onboarding muestra tres muestras de color tomadas de `getThemeTokens`; usa nodos DOM sin motores CSS duplicados.
+- Queda pendiente QA visual de responsive, contraste, tipografía, assets/video por evento, reingreso y tema global antes de activar una experiencia diferenciada en PROD.
+- Estado: PR DEV / QA pendiente; producción sin cambios. **No declarar MGD-036 cerrado**.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
