@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-036: pruebas de restauración de tema y aislamiento visual (DEV)
+
+- Se añadieron a la suite existente tests sin escrituras para validar secuencia de temas sobre un root DOM simulado, tokens completos y retorno al tema seguro tras logout.
+- Invariantes de código comprueban que la lectura del contexto activo trae `themeId` y `eventType` y que el cambio de contexto invoca `applyWeddingContext`.
+- Pendiente: checks ejecutados, QA autenticado A → B → A, recarga, responsive, consola, y validación productiva posterior. No hay cambio de funcionalidad ni Firestore.
+
 ## 2026-10-12 — MGD-036: prueba Playwright de paleta temática en navegador (DEV)
 
 - Se añadió en `tests/e2e-safe.spec.js` una comprobación de renderizado de las tres muestras de color para cumpleaños y boda en el resumen del onboarding público.
