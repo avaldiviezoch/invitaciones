@@ -4,7 +4,9 @@
   "scripts": {
     "test:e2e:safe": "playwright test tests/e2e-safe.spec.js",
     "auth:e2e:capture": "node -e \"require('fs').mkdirSync('tests/.auth',{recursive:true})\" && playwright codegen --save-storage=tests/.auth/storage-state.json https://avaldiviezoch.github.io/invitaciones/mi-lu-gran-dia-reestructuracion/",
-    "test:e2e:auth-readonly": "playwright test tests/e2e-auth-readonly.spec.js --config=playwright.auth.config.js"
+    "test:e2e:auth-readonly": "playwright test tests/e2e-auth-readonly.spec.js --config=playwright.auth.config.js --grep-invert @fixture",
+    "test:e2e:fixture-preflight": "playwright test tests/e2e-auth-readonly.spec.js --config=playwright.auth.config.js --grep @fixture-preflight",
+    "test:e2e:fixture-switch": "playwright test tests/e2e-auth-readonly.spec.js --config=playwright.auth.config.js --grep @fixture-switch"
   },
   "devDependencies": {
     "@playwright/test": "^1.56.0"
