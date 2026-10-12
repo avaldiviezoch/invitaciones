@@ -2015,3 +2015,15 @@ test('MGD-037: contratos de aislamiento por contexto de invitados, mesas y presu
   expect(dashboard).toContain('if (epoch !== homeSummaryEpoch || weddingContext?.id !== weddingId) return');
   // Solo comprueba contratos de código; no certifica aislamiento E2E con datos.
 });
+
+test('MGD-037: Presupuesto y selector conservan redacción neutral multi-evento', async () => {
+  const fs = await import('node:fs/promises');
+  const budget = await fs.readFile(path.resolve(process.cwd(), 'src/modules/presupuesto/index.js'), 'utf8');
+  const dashboard = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
+  const html = await fs.readFile(path.resolve(process.cwd(), 'index.html'), 'utf8');
+  expect(budget).toContain('Datos del evento activo · edición habilitada');
+  expect(budget).not.toContain('Datos de la boda activa · edición habilitada');
+  expect(dashboard).toContain('No se pudo cambiar de evento:');
+  expect(html).toContain('inicio.js?v=275-20261012');
+  // Cambios solo de texto visible y consola, sin tocar módulos de persistencia.
+});
