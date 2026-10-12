@@ -1,5 +1,14 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-12 — MGD-034/037: scroll de preguntas largas sin recorte (DEV)
+
+- PR #154 verificado fusionado y CI exitoso.
+- Las preguntas del onboarding ahora permiten desplazamiento vertical dentro de su propio panel cuando las tarjetas no caben en la pantalla. El footer conserva su espacio y el scroll se restablece al cambiar de pantalla.
+- Se edita la regla CSS propietaria del onboarding, sin `!important` ni crear capas o archivos paralelos. Prueba segura de invariantes incorporada.
+- Pendiente comprobar visualmente en 360, 390–430, 768, 1024 y 1440 px y con alturas reducidas. No confundir test estático con QA visual. Sin cambios en Firebase ni PROD.
+
+
+
 ## 2026-10-12 — MGD-034/037: microcopy según evento en onboarding (DEV)
 
 - Verificados PR #153 fusionado y QA de PR exitoso.
