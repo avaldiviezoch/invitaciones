@@ -165,6 +165,23 @@ const discoverAgeSlideIndex = discoverSlides.findIndex((slide) => slide.dataset.
 const discoverAgeSlide = discoverSlides[discoverAgeSlideIndex];
 const discoverAgeInput = $('discoverAgeInput');
 const discoverAgeQuestion = $('discoverAgeQuestion');
+const discoverGuestsSlide = discoverSlides.find((slide) => slide.dataset.question === 'guests');
+const discoverDateSlide = discoverSlides.find((slide) => slide.dataset.question === 'date');
+const discoverBudgetSlide = discoverSlides.find((slide) => slide.dataset.question === 'budget');
+
+function syncDiscoverQuestionCopy() {
+  const type = discoverAnswers.eventType || 'wedding';
+  const isWedding = type === 'wedding';
+  const eventLabel = eventTypeLabel(type).toLowerCase();
+  const guestTitle = discoverGuestsSlide?.querySelector('h2');
+  const guestNote = $('discoverGuestExactNote');
+  const dateTitle = discoverDateSlide?.querySelector('h2');
+  const budgetTitle = discoverBudgetSlide?.querySelector('h2');
+  if (guestTitle) guestTitle.textContent = isWedding ? '¿Cuántas personas imaginan celebrar?' : '¿Cuántas personas asistirán al evento?';
+  if (guestNote) guestNote.textContent = isWedding ? 'Este número configurará el cálculo de invitados de tu boda.' : 'Este número será una estimación inicial de asistentes para tu ' + eventLabel + '.';
+  if (dateTitle) dateTitle.textContent = isWedding ? '¿Ya tienen fecha para el gran día?' : '¿Ya tienes fecha para el evento?';
+  if (budgetTitle) budgetTitle.textContent = isWedding ? '¿Tienen un presupuesto aproximado?' : '¿Tienes un presupuesto aproximado?';
+}
 
 function syncOptionalAgeQuestion() {
   const ageQuestion = getOnboardingProfile(discoverAnswers.eventType || 'wedding').ageQuestion;
@@ -200,6 +217,7 @@ for (const { id, label } of EVENT_TYPES) {
     }
     discoverAnswers.eventType = id;
     syncOptionalAgeQuestion();
+    syncDiscoverQuestionCopy();
     discoverEventOptions.querySelectorAll('[data-event-type]').forEach((candidate) => {
       const chosen = candidate === button;
       candidate.classList.toggle('is-selected', chosen);
