@@ -1742,8 +1742,8 @@ test('MGD-003: infraestructura RSVP anti-abuso está configurada en DEV y PROD s
 
 
 test('Música: módulo conserva helper de hosts y HTML válido', async () => {
-  const musicJs = readFileSync(new URL('../src/modules/musica/index.js', import.meta.url), 'utf8');
-  const musicHtml = readFileSync(new URL('../src/modules/musica/index.html', import.meta.url), 'utf8');
+  const musicJs = readFileSync(path.resolve(process.cwd(), 'src/modules/musica/index.js'), 'utf8');
+  const musicHtml = readFileSync(path.resolve(process.cwd(), 'src/modules/musica/index.html'), 'utf8');
 
   expect(musicJs).toMatch(/function\s+hostMatches\s*\(/);
   expect(musicJs).toContain("host.endsWith('.'+domain)");
