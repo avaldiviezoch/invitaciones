@@ -49,6 +49,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Queda pendiente QA visual de responsive, contraste, tipografía, assets/video por evento, reingreso y tema global antes de activar una experiencia diferenciada en PROD.
 - Estado: PR DEV / QA pendiente; producción sin cambios. **No declarar MGD-036 cerrado**.
 
+## MGD-036 — QA de renderizado real de paleta en navegador (12/10/2026)
+
+- PR DEV añade recorrido Playwright público que llega al resumen, comprueba tres colores renderizados para cumpleaños y boda y verifica que sus paletas sean distintas.
+- La prueba no inicia sesión, no escribe Firebase ni cambia `themeId` de un contexto. Es QA de interfaz solamente.
+- Pendiente ejecutar CI, comprobar visual/responsive, persistencia y aislamiento con cuenta test. No promover a PROD todavía.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
