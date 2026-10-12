@@ -1788,3 +1788,20 @@ test('MGD-037 Fase 2a: contrato de creación nuevo evento y fallback legacy sin 
   expect(service).toContain('normalizeThemeId(wedding.themeId || indexData.themeId)');
   // No se invoca createWedding ni se autentica: esta prueba no escribe Firebase.
 });
+
+test('MGD-037 fase 2b: selector de ocho tipos reutiliza el contrato existente sin nuevo motor', async () => {
+  const fs = await import('node:fs/promises');
+  const html = await fs.readFile(path.resolve(process.cwd(), 'index.html'), 'utf8');
+  const dashboard = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
+  const { EVENT_TYPES } = await import(pathToFileURL(path.resolve(process.cwd(), 'src/core/app/event-types.js')).href);
+  expect(EVENT_TYPES).toHaveLength(8);
+  expect(html).toContain('id="newWeddingEventType"');
+  expect(html).toContain('id="createWeddingForm"');
+  expect(dashboard).toContain("import { EVENT_TYPES, isKnownEventType } from '../../core/app/event-types.js'");
+  expect(dashboard).toContain('newEventTypeField.replaceChildren(...EVENT_TYPES.map');
+  expect(dashboard).toContain('if (!isKnownEventType(eventType))');
+  expect(dashboard).toContain("eventType\n    });");
+  expect(html).toContain('src/modules/dashboard/inicio.js?v=269-20261012');
+  expect((dashboard.match(/async function finishOnboardingForNewUser/g) || [])).toHaveLength(1);
+  // No se autentica ni se crea ningún evento durante la prueba.
+});
