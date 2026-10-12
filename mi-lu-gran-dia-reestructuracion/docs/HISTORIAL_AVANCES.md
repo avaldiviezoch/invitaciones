@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: separación de suite de solo lectura y pruebas de conmutación (DEV)
+
+- PR #139 confirmado fusionado y coincidente con `main`. Se detectó que la suite denominada `auth-readonly` contenía tests opt-in capaces de escribir el `activeWeddingId` de una cuenta QA.
+- Se añadieron etiquetas `@fixture-switch` y `@fixture-preflight` a esos escenarios y comandos separados en `package.json`; `test:e2e:auth-readonly` excluye ahora todos los `@fixture`.
+- No se ha ejecutado ninguna prueba autenticada, ni cambiado contexto real, datos, servicios, Rules/Auth/Storage o PROD. Falta CI real, cuenta QA y verificaciones funcionales.
+
 ## 2026-10-12 — MGD-037: terminología de Presupuesto/selector y verificación PR #138
 
 - PR #138 confirmado fusionado en `DEV/main` (`aec3988ed69e`). Aún no se dispone de evidencia de prueba autenticada ni de dos eventos ficticios.
