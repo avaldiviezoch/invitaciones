@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-036: QA autenticado de reingreso, exclusivamente lectura (PR DEV)
+
+- Se añade una prueba Playwright que compara nombre del evento, `data-event-theme` y los nueve tokens CSS antes/después de recargar la sesión.
+- Reutiliza `playwright.auth.config.js` y `tests/e2e-auth-readonly.spec.js`, sin nuevos motores, dependencias, login automatizado ni modificaciones de datos.
+- Pendiente de ejecución con estado autenticado de una **cuenta de prueba**, checks, QA responsive y prueba A → B → A con dos eventos ficticios. Esta prueba NO autoriza usar/modificar la boda real ni promoción PROD.
+
 ## 2026-10-12 — MGD-036: pruebas de restauración de tema y aislamiento visual (DEV)
 
 - Se añadieron a la suite existente tests sin escrituras para validar secuencia de temas sobre un root DOM simulado, tokens completos y retorno al tema seguro tras logout.
