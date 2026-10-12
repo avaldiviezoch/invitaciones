@@ -48,3 +48,36 @@ for (const moduleId of READ_ONLY_MODULES) {
     expect(errors).toEqual([]);
   });
 }
+
+test('MGD-036: reingreso autenticado conserva tema y contexto activo sin escrituras', async ({ page }) => {
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('body')).not.toHaveClass(/auth-locked/);
+  await page.locator('#menuButton').click();
+  const activeName = page.locator('#activeWeddingName');
+  await expect(activeName).not.toHaveText('');
+  const nameBefore = await activeName.textContent();
+  const themeBefore = await page.locator('html').getAttribute('data-event-theme');
+  expect(themeBefore).toBeTruthy();
+  const tokenNames = [
+    '--event-primary', '--event-secondary', '--event-accent',
+    '--event-background', '--event-surface', '--event-heading-font',
+    '--event-body-font', '--event-radius', '--event-decoration-style'
+  ];
+  const before = await page.locator('html').evaluate((el, names) => {
+    const styles = getComputedStyle(el);
+    return names.map((name) => styles.getPropertyValue(name).trim());
+  }, tokenNames);
+  expect(before.every(Boolean)).toBe(true);
+
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await expect(page.locator('body')).not.toHaveClass(/auth-locked/);
+  await page.locator('#menuButton').click();
+  await expect(activeName).toHaveText(nameBefore.trim());
+  await expect(page.locator('html')).toHaveAttribute('data-event-theme', themeBefore);
+  const after = await page.locator('html').evaluate((el, names) => {
+    const styles = getComputedStyle(el);
+    return names.map((name) => styles.getPropertyValue(name).trim());
+  }, tokenNames);
+  expect(after).toEqual(before);
+  // Solo lectura del contexto activo y recarga. No cambia a otro evento ni llama APIs de escritura.
+});
