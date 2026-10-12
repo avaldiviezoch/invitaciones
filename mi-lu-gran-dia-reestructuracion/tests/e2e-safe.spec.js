@@ -1913,3 +1913,42 @@ test('MGD-036: paletas de boda y cumpleaños se renderizan en onboarding sin aut
   await expect(page.locator('#discoverOverlay')).toBeVisible();
   // No login, writes, change of persisted themeId, or Firebase operation.
 });
+
+test('MGD-036: alternar contextos restablece todos los tokens sin arrastrar tema anterior', async () => {
+  const moduleUrl = pathToFileURL(path.resolve(process.cwd(), 'src/core/app/theme-tokens.js')).href;
+  const { applyEventTheme, TOKEN_MAP, getThemeTokens } = await import(moduleUrl);
+  const values = new Map();
+  const root = {
+    dataset: {},
+    style: { setProperty: (name, value) => values.set(name, value) }
+  };
+  const check = (themeId, expectedId) => {
+    expect(applyEventTheme(themeId, root)).toBe(expectedId);
+    expect(root.dataset.eventTheme).toBe(expectedId);
+    const tokens = getThemeTokens(expectedId);
+    for (const [property, cssName] of Object.entries(TOKEN_MAP)) {
+      expect(values.get(cssName)).toBe(tokens[property]);
+    }
+    expect(values.size).toBe(Object.keys(TOKEN_MAP).length);
+  };
+  check('one-piece-elegant', 'one-piece-elegant');
+  check('minimal-black', 'minimal-black');
+  check('classic-elegant', 'classic-elegant');
+  check(undefined, 'classic-elegant'); // logout / sin contexto activo
+  check('tema-no-existente', 'classic-elegant'); // fallback seguro
+  // DOM simulado; no Auth, navegación, Firestore ni datos reales.
+});
+
+test('MGD-036: restauración de contexto toma themeId/eventType del evento, no de la pantalla anterior', async () => {
+  const fs = await import('node:fs/promises');
+  const source = await fs.readFile(path.resolve(process.cwd(), 'src/services/wedding-context.js'), 'utf8');
+  const dashboard = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
+  expect(source).toContain('themeId: normalizeThemeId(wedding.themeId || indexData.themeId)');
+  expect(source).toContain('eventType: normalizeEventType(wedding.eventType || indexData.eventType)');
+  expect(dashboard).toContain('function applyWeddingContext(context)');
+  expect(dashboard).toContain('applyEventTheme(context?.themeId)');
+  expect(dashboard).toContain('const context = await selectActiveWedding(button.dataset.weddingId)');
+  expect(dashboard).toContain('applyWeddingContext(context)');
+  expect(dashboard).toContain('const context = await loadActiveWeddingContext(user)');
+  // Invariantes de lectura; la reentrada autenticada real sigue pendiente.
+});

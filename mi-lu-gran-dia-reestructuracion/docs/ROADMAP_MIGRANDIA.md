@@ -55,6 +55,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - La prueba no inicia sesión, no escribe Firebase ni cambia `themeId` de un contexto. Es QA de interfaz solamente.
 - Pendiente ejecutar CI, comprobar visual/responsive, persistencia y aislamiento con cuenta test. No promover a PROD todavía.
 
+## MGD-036 — pruebas de no contaminación visual entre contextos (12/10/2026)
+
+- Se proponen tests seguros del motor central `applyEventTheme()` en DOM simulado: boda temática → cumpleaños → boda clásica → logout → tema inválido. Se verifican todos los tokens restablecidos, no solo color principal.
+- Se comprueban contratos de recuperación de `eventType/themeId` desde contexto activo y del intercambio mediante `selectActiveWedding`. Son invariantes de código, **no QA real autenticado**.
+- Ningún cambio en producto, servicios, persistencia, Firebase, Rules, Auth, Storage, PROD ni datos reales. Se mantienen los gates visuales y QA real.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
