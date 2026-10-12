@@ -104,3 +104,49 @@ test('MGD-037: selector multi-evento muestra contexto activo sin cambiar datos',
   expect(errors).toEqual([]);
   // Solo consulta listado; nunca selecciona otro weddingId ni escribe en Firestore.
 });
+
+test('MGD-037: conmutación A → B → A solo en cuenta fixture explícitamente autorizada', async ({ page }) => {
+  const approved = process.env.MGD_QA_FIXTURE_SWITCH === 'AUTHORIZED_TEST_ONLY';
+  const fixtureA = process.env.MGD_QA_FIXTURE_EVENT_A || '';
+  const fixtureB = process.env.MGD_QA_FIXTURE_EVENT_B || '';
+  test.skip(!approved || !fixtureA || !fixtureB || fixtureA === fixtureB,
+    'Requiere autorización explícita y dos weddingIds ficticios de una cuenta exclusiva de QA.');
+  if (!approved || !fixtureA || !fixtureB || fixtureA === fixtureB) return;
+  // Esta prueba NO es de solo lectura: selectActiveWedding escribe activeWeddingId.
+  // Nunca habilitar en cuenta personal, compartida o con eventos reales.
+  const errors = collectUnexpectedErrors(page);
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('body')).not.toHaveClass(/auth-locked/);
+  await page.locator('#menuButton').click();
+  await page.locator('#activeWeddingButton').click();
+  const selector = page.locator('#weddingsList');
+  const rowA = selector.locator('[data-wedding-id="' + fixtureA + '"]');
+  const rowB = selector.locator('[data-wedding-id="' + fixtureB + '"]');
+  await expect(rowA).toHaveCount(1);
+  await expect(rowB).toHaveCount(1);
+  const nameA = (await rowA.locator('strong').textContent() || '').trim();
+  const nameB = (await rowB.locator('strong').textContent() || '').trim();
+  expect(nameA).not.toBe(nameB);
+  // El perfil guardado se inspecciona antes de escribir; solo dos fixtures preexistentes.
+  const switchTo = async (id, expectedName) => {
+    const row = selector.locator('[data-wedding-id="' + id + '"]');
+    await row.click();
+    await expect(page.locator('#activeWeddingName')).toHaveText(expectedName);
+    await expect(page.locator('html')).toHaveAttribute('data-event-theme', /.+/);
+    return page.locator('html').getAttribute('data-event-theme');
+  };
+  // Asegura que el test comienza en el contexto A; no conmutar desde un tercer evento.
+  const selectedId = await selector.locator('[data-wedding-id].is-current').getAttribute('data-wedding-id');
+  expect(selectedId).toBe(fixtureA);
+  const themeA = await page.locator('html').getAttribute('data-event-theme');
+  await switchTo(fixtureB, nameB);
+  await page.locator('#activeWeddingButton').click();
+  const themeRestored = await switchTo(fixtureA, nameA);
+  expect(themeRestored).toBe(themeA);
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await expect(page.locator('body')).not.toHaveClass(/auth-locked/);
+  await page.locator('#menuButton').click();
+  await expect(page.locator('#activeWeddingName')).toHaveText(nameA);
+  await expect(page.locator('html')).toHaveAttribute('data-event-theme', themeA);
+  expect(errors).toEqual([]);
+});
