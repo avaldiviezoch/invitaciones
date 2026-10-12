@@ -440,6 +440,13 @@ Antonio Valdiviezo © Derechos reservados
         </div>
       </article>
 
+      <article class="discover-slide discover-question" data-discover-slide data-discover-kind="question" data-question="age" hidden>
+        <span class="discover-step">03 · EDAD (OPCIONAL)</span>
+        <h2 id="discoverAgeQuestion">¿Qué edad tiene el/la homenajeado/a?</h2>
+        <p>Es opcional; podrás continuar sin indicar una edad.</p>
+        <label><span>Edad en años</span><input type="number" id="discoverAgeInput" min="0" max="120" step="1" inputmode="numeric" placeholder="Por definir"></label>
+      </article>
+
       <article class="discover-slide discover-question" data-discover-slide data-discover-kind="question" data-question="stage">
         <span class="discover-step">02 · SU MOMENTO</span>
         <h2>¿En qué etapa<br>se encuentran?</h2>
@@ -623,7 +630,7 @@ Cancelar
 <form class="create-wedding-card" id="createWeddingForm" hidden><h3>Crear un nuevo evento</h3><label><span>Tipo de evento</span><select id="newWeddingEventType" required><option value="wedding">Boda</option></select></label><label><span>Nombre del evento</span><input id="newWeddingName" type="text" maxlength="90" placeholder="Ej. Nuestro gran día" required></label><label><span>Fecha</span><input id="newWeddingDate" type="date"></label><div><button type="button" id="cancelCreateWedding">Cancelar</button><button type="submit">Crear y abrir</button></div><p id="createWeddingStatus" aria-live="polite"></p></form>
 </div>
 </section>
-<script type="module" src="src/modules/dashboard/inicio.js?v=270-20261012">
+<script type="module" src="src/modules/dashboard/inicio.js?v=271-20261012">
 </script>
 </body>
 </html>

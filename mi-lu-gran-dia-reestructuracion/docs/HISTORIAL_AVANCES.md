@@ -1,3 +1,10 @@
+## 2026-10-12 — MGD-034/035: edad opcional por tipo de evento (DEV)
+
+- Se agregó dentro del onboarding existente una pregunta opcional de edad según el perfil central (`birthday`, `quince`, `custom`).
+- La pregunta se omite para bodas y otros tipos; la edad solo se utiliza en la vista previa de resumen, no se escribe en Firestore.
+- Se actualiza caché y suite segura existente.
+- Pendiente: PR, checks, QA visual/navegación, test con cuenta ficticia, adaptación visual posterior y revisión de manejo de perfiles etarios.
+
 ## 2026-10-12 — MGD-034/037: primer paso multi-evento dentro del onboarding existente (DEV)
 
 - Se agregó selección explícita de los ocho tipos antes del rol, con opciones por `onboarding-profiles.js` y contrato `createWedding({ eventType })`.

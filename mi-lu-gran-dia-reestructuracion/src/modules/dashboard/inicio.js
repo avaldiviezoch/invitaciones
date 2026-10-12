@@ -154,12 +154,33 @@ const discoverBudgetInput = $('discoverBudgetInput');
 const discoverSummary = $('discoverSummary');
 let discoverIndex = 0;
 let discoverSeenThisSession = false;
-const discoverAnswers = { eventType:'', role:'', stage:'', priorities:new Set(), guests:'', guestCount:0, dateStatus:'', date:'', budgetStatus:'', budget:'' };
+const discoverAnswers = { eventType:'', role:'', age:null, stage:'', priorities:new Set(), guests:'', guestCount:0, dateStatus:'', date:'', budgetStatus:'', budget:'' };
 
 const discoverEventOptions = $('discoverEventOptions');
 const discoverRoleOptions = document.querySelector('.discover-options-role');
 const weddingRoleButtons = [...(discoverRoleOptions?.querySelectorAll('[data-answer="role"]') || [])];
 const eventTypeSlideIndex = discoverSlides.findIndex((slide) => slide.dataset.question === 'eventType');
+const discoverAgeSlideIndex = discoverSlides.findIndex((slide) => slide.dataset.question === 'age');
+const discoverAgeSlide = discoverSlides[discoverAgeSlideIndex];
+const discoverAgeInput = $('discoverAgeInput');
+const discoverAgeQuestion = $('discoverAgeQuestion');
+
+function syncOptionalAgeQuestion() {
+  const ageQuestion = getOnboardingProfile(discoverAnswers.eventType || 'wedding').ageQuestion;
+  if (discoverAgeSlide) discoverAgeSlide.hidden = !ageQuestion;
+  if (discoverAgeQuestion && ageQuestion) discoverAgeQuestion.textContent = ageQuestion.label;
+  if (!ageQuestion) {
+    discoverAnswers.age = null;
+    if (discoverAgeInput) discoverAgeInput.value = '';
+  }
+}
+
+discoverAgeInput?.addEventListener('input', () => {
+  const raw = discoverAgeInput.value.trim();
+  const age = Number(raw);
+  discoverAnswers.age = raw !== '' && Number.isInteger(age) && age >= 0 && age <= 120 ? age : null;
+});
+
 
 for (const { id, label } of EVENT_TYPES) {
   const button = document.createElement('button');
@@ -172,6 +193,7 @@ for (const { id, label } of EVENT_TYPES) {
   button.addEventListener('click', () => {
     discoverAnswers.eventType = id;
     discoverAnswers.role = '';
+    syncOptionalAgeQuestion();
     discoverEventOptions.querySelectorAll('[data-event-type]').forEach((candidate) => {
       const chosen = candidate === button;
       candidate.classList.toggle('is-selected', chosen);
@@ -284,6 +306,7 @@ function renderDiscoverSummary() {
   const items = [];
   if (discoverAnswers.eventType) items.push(['Evento', eventTypeLabel(discoverAnswers.eventType)]);
   if (discoverAnswers.role) items.push(['Tu papel', discoverAnswerLabel('role', discoverAnswers.role)]);
+  if (discoverAnswers.age !== null) items.push(['Edad (orientativa)', String(discoverAnswers.age)]);
   if (discoverAnswers.stage) items.push(['Etapa', discoverAnswerLabel('stage', discoverAnswers.stage)]);
   if (discoverAnswers.guests) items.push(['Invitados', discoverAnswers.guestCount ? `${discoverAnswers.guestCount} aprox.` : discoverAnswerLabel('guests', discoverAnswers.guests)]);
   if (discoverAnswers.priorities.size) items.push(['Primero', [...discoverAnswers.priorities].slice(0,3).join(' · ')]);
@@ -296,6 +319,7 @@ function renderDiscover() {
   const slide = discoverSlides[discoverIndex];
   const kind = slide?.dataset.discoverKind;
   if (discoverBackButton) discoverBackButton.hidden = discoverIndex === 0;
+  if (discoverDots?.children[discoverAgeSlideIndex]) discoverDots.children[discoverAgeSlideIndex].hidden = Boolean(discoverAgeSlide?.hidden);
   if (discoverNextButton) {
     discoverNextButton.hidden = kind === 'finish';
     discoverNextButton.textContent = discoverIndex === 0 ? 'Descubrir Migrandia' : (kind === 'intro' ? 'Continuar' : 'Siguiente');
@@ -316,8 +340,11 @@ function closeDiscover() {
 }
 
 function moveDiscover(delta) {
-  const next = Math.max(0, Math.min(discoverSlides.length - 1, discoverIndex + delta));
+  let next = Math.max(0, Math.min(discoverSlides.length - 1, discoverIndex + delta));
   if (!discoverAnswers.eventType && next > eventTypeSlideIndex) return;
+  if (discoverAgeSlide?.hidden && next === discoverAgeSlideIndex) {
+    next = Math.max(0, Math.min(discoverSlides.length - 1, next + (delta >= 0 ? 1 : -1)));
+  }
   discoverIndex = next;
   renderDiscover();
 }
@@ -329,6 +356,7 @@ if (discoverDots) {
     dot.setAttribute('aria-label', `Ir a la pantalla ${index + 1}`);
     dot.addEventListener('click', () => {
       if (!discoverAnswers.eventType && index > eventTypeSlideIndex) return;
+      if (index === discoverAgeSlideIndex && discoverAgeSlide?.hidden) return;
       discoverIndex = index;
       renderDiscover();
     });
