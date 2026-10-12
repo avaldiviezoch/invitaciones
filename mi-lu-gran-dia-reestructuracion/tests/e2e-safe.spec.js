@@ -1967,3 +1967,14 @@ test('MGD-037: selector multi-evento muestra tipo y texto neutral sin alterar co
   expect(dashboard).toContain('applyWeddingContext(context)');
   // Solo etiquetas existentes; se conservan IDs, servicios y datos.
 });
+
+test('MGD-037: invitaciones recibidas tienen fallback neutro multi-evento', async () => {
+  const fs = await import('node:fs/promises');
+  const dashboard = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
+  const html = await fs.readFile(path.resolve(process.cwd(), 'index.html'), 'utf8');
+  expect(dashboard).toContain("invite.weddingName || 'Evento compartido'");
+  expect(dashboard).not.toContain("'Boda compartida'");
+  expect(dashboard).toContain('No se pudo cargar el evento activo:');
+  expect(html).toContain('inicio.js?v=274-20261012');
+  // El nombre real de la invitación conserva precedencia; no cambia ninguna escritura.
+});
