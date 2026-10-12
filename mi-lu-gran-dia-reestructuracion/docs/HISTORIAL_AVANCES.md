@@ -1,3 +1,11 @@
+## 2026-10-12 — MGD-037 fase 2b: selector de tipo de evento en formulario existente (PR DEV)
+
+- Se integró `EVENT_TYPES` en el formulario existente `createWeddingForm` mediante un `select`, sin crear otro motor de onboarding.
+- Se enlazó al contrato `createWedding({ name, date, eventType })`, validando catálogo canónico y conservando `themeId` por defecto.
+- Se modificaron HTML, dashboard y test seguro existentes; cache-buster actualizado.
+- Limitación: el flujo introductorio de usuario nuevo sigue siendo de boda; NO se declara onboarding multi-evento completo ni UX no-wedding aprobado.
+- PENDIENTE: Checks verdes, merge DEV, QA real con cuenta/evento de prueba, y posterior adecuación del onboarding central. Sin PROD ni migración de datos.
+
 ## 2026-10-12 — MGD-037 Fase 2a: suite segura de regresión propuesta en DEV
 
 - Se incorpora prueba de contrato en `tests/e2e-safe.spec.js` (sin llamadas Firebase, Auth ni escrituras), reutilizando la suite y módulos puros existentes.
