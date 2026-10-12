@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: auditoría de fixtures de Presupuesto
+
+- PR #143 confirmado fusionado (`a8d797dfbfe8`); la ejecución asociada a `main` quedó pendiente de resultado en la consulta realizada.
+- Se detectó que los tests opt-in buscaban un marcador de Invitados también en Presupuesto, supuesto que no corresponde a la separación de datos por módulo. Se incorporan dos variables explícitas de marcadores de gasto/presupuesto por evento y preflight independiente.
+- No se ejecutan escenarios autenticados ni se modifican registros de usuario. CI y QA A/B/A quedan pendientes de evidencia.
+
 ## 2026-10-12 — PR #143 rojo por 403 externo en MGD-010, evidencia guardada
 
 - GitHub Actions run 38299734389: 206/207 verde; 1 fallo MGD-010 desktop al observar mensaje de consola por recurso 403. El flujo nuevo de artefactos funcionó y dejó traza/captura 11769393236.

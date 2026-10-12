@@ -166,8 +166,11 @@ test('@fixture-switch MGD-037: aislamiento visual A/B/A de Invitados y Presupues
   const idB = process.env.MGD_QA_FIXTURE_EVENT_B || '';
   const markerA = process.env.MGD_QA_FIXTURE_MARKER_A || '';
   const markerB = process.env.MGD_QA_FIXTURE_MARKER_B || '';
+  const budgetA = process.env.MGD_QA_FIXTURE_BUDGET_MARKER_A || '';
+  const budgetB = process.env.MGD_QA_FIXTURE_BUDGET_MARKER_B || '';
   const valid = approved && account && idA && idB && idA !== idB && markerA && markerB && markerA !== markerB
-    && /^QA[- ]/.test(markerA) && /^QA[- ]/.test(markerB);
+    && /^QA[- ]/.test(markerA) && /^QA[- ]/.test(markerB)
+    && budgetA !== budgetB && /^QA[- ]/.test(budgetA) && /^QA[- ]/.test(budgetB);
   test.skip(!valid, 'Solo dos contextos ficticios presembrados y autorización opt-in expresa.');
   if (!valid) return;
 
@@ -189,12 +192,14 @@ test('@fixture-switch MGD-037: aislamiento visual A/B/A de Invitados y Presupues
   // Solo cuando todas las barreras anteriores pasan se permite cambiar activeWeddingId.
   const inspect = async (expected, forbidden) => {
     for (const module of ['invitados', 'presupuesto']) {
+      const visibleMarker = module === 'presupuesto' ? (expected === markerA ? budgetA : budgetB) : expected;
+      const hiddenMarker = module === 'presupuesto' ? (forbidden === markerA ? budgetA : budgetB) : forbidden;
       await page.goto('#' + module, { waitUntil: 'domcontentloaded' });
       await expect(page.locator('body')).not.toHaveClass(/auth-locked/);
       const view = page.locator('[data-module-view="' + module + '"]');
       await expect(view).toBeVisible();
-      await expect(view).toContainText(expected);
-      await expect(view).not.toContainText(forbidden);
+      await expect(view).toContainText(visibleMarker);
+      await expect(view).not.toContainText(hiddenMarker);
     }
   };
   const choose = async (id) => {
@@ -268,9 +273,10 @@ test('@fixture-preflight MGD-037: preflight de fixtures QA en contexto activo si
   const account = (process.env.MGD_QA_FIXTURE_ACCOUNT_EMAIL || '').trim().toLowerCase();
   const idA = process.env.MGD_QA_FIXTURE_EVENT_A || '';
   const markerGuests = process.env.MGD_QA_FIXTURE_MARKER_A || '';
+  const markerBudget = process.env.MGD_QA_FIXTURE_BUDGET_MARKER_A || '';
   const markerTable = process.env.MGD_QA_FIXTURE_TABLE_MARKER_A || '';
   const approved = process.env.MGD_QA_FIXTURE_PREFLIGHT === 'READ_ONLY_TEST_ONLY';
-  const valid = approved && account && idA && /^QA[- ]/.test(markerGuests) && /^QA[- ]/.test(markerTable);
+  const valid = approved && account && idA && /^QA[- ]/.test(markerGuests) && /^QA[- ]/.test(markerBudget) && /^QA[- ]/.test(markerTable);
   test.skip(!valid, 'Preflight inactivo sin cuenta QA, contexto A y marcas ficticias.');
   if (!valid) return;
 
@@ -287,7 +293,7 @@ test('@fixture-preflight MGD-037: preflight de fixtures QA en contexto activo si
 
   for (const [module, marker] of [
     ['invitados', markerGuests],
-    ['presupuesto', markerGuests],
+    ['presupuesto', markerBudget],
     ['distribucion', markerTable]
   ]) {
     await page.goto('#' + module, { waitUntil: 'domcontentloaded' });

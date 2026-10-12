@@ -177,6 +177,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Ajuste acotado: `collectUnexpectedErrors` acepta opción `consoleErrors`; solo el test de recuperación local comprueba `pageerror` sin exigir consola vacía, pues depende de infraestructura externa que puede emitir 403. Las demás pruebas mantienen verificación completa de errores de consola.
 - Sigue pendiente revisar Checks del nuevo commit; no se silencian errores globalmente, no se modifican Auth/Firebase ni datos de producción.
 
+## MGD-037 — corrección de contrato de fixtures Presupuesto (12/10/2026)
+
+- PR #143 confirmado fusionado en `DEV/main` (`a8d797dfbfe8`); el CI posterior a la fusión todavía estaba en cola al comprobarlo. No atribuirle resultado verde sin verificarlo.
+- Auditoría de escenarios opt-in detectó una suposición incorrecta: se pedía el **marcador de Invitados dentro de Presupuesto**. Se exigen marcadores propios `MGD_QA_FIXTURE_BUDGET_MARKER_A` y `MGD_QA_FIXTURE_BUDGET_MARKER_B` con prefijo `QA-` y distintos por evento; tanto la comparación A/B/A como el preflight verifican ahora los marcadores del módulo correspondiente.
+- Sin fixtures reales de QA presembrados ni sesión autenticada, estos tests siguen omitidos; no se ha probado el aislamiento completo. Sin cambios en servicios, UI, Firestore ni PROD.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
