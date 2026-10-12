@@ -80,6 +80,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Requiere una sesión de **cuenta de prueba** y ejecución real de Playwright. No cambia `weddingId` activo ni toca Firebase; no acredita todavía la prueba A → B → A.
 - Sin cambios de código funcional ni datos. CI y QA responsive siguen pendientes; PROD no se promueve.
 
+## MGD-037 — neutralidad de invitaciones recibidas (DEV 12/10/2026)
+
+- En la vista "Mis eventos" se sustituye exclusivamente el fallback de `invite.weddingName`: "Boda compartida" → "Evento compartido". No se reescriben nombres reales ni registros; se conserva el mismo origen de datos y flujo de aceptación.
+- Se neutraliza el mensaje técnico de carga fallida del evento activo; cache-buster y test seguro incorporados.
+- Pendiente QA con cuenta de prueba e invitaciones de diferentes tipos, aislamiento completo de contextos y comprobación de permisos. No promueve PROD ni cierra MGD-037.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
