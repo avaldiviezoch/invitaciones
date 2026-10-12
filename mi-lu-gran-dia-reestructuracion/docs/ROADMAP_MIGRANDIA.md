@@ -29,6 +29,13 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Las preguntas posteriores (etapa, prioridades, invitados, fecha, presupuesto) se mantienen comunes. Edad opcional, temática, módulos y redacción contextual completa siguen pendientes.
 - En QA DEV: exige revisar navegador, comportamiento retroceso, registro, persistencia, y aislamiento con cuenta de prueba; no autoriza promoción a PROD ni declara UX terminada.
 
+## MGD-034/035 — edad opcional en onboarding DEV (12/10/2026)
+
+- Se prepara una pregunta opcional, guiada por `getOnboardingProfile(eventType).ageQuestion`, solo para cumpleaños, quince y evento personalizado.
+- Boda y eventos sin perfil etario saltan automáticamente ese paso; puntos de navegación ocultos para esos tipos.
+- Se muestra como referencia en el resumen, solo en memoria. No se persiste edad ni se modifican esquemas, Rules o datos existentes.
+- Estado: PR DEV pendiente de checks y QA visual responsive; MGD-035 sigue sin activación funcional productiva.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
