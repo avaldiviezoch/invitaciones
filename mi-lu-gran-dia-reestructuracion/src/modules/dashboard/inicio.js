@@ -192,7 +192,8 @@ for (const { id, label } of EVENT_TYPES) {
   title.textContent = label;
   button.append(title);
   button.addEventListener('click', () => {
-    if (discoverAnswers.eventType !== id) {
+    const eventChanged = discoverAnswers.eventType !== id;
+    if (eventChanged) {
       discoverAnswers.role = '';
       discoverAnswers.age = null;
       if (discoverAgeInput) discoverAgeInput.value = '';
@@ -204,7 +205,7 @@ for (const { id, label } of EVENT_TYPES) {
       candidate.classList.toggle('is-selected', chosen);
       candidate.setAttribute('aria-pressed', String(chosen));
     });
-    renderDiscoverRoleOptions();
+    if (eventChanged) renderDiscoverRoleOptions();
     moveDiscover(1);
   });
   discoverEventOptions?.append(button);

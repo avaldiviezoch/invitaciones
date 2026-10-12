@@ -1,5 +1,13 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-12 — MGD-034/037: conservar respuestas al elegir el mismo evento (DEV)
+
+- Verificado PR #152 fusionado (`c49ec413`). La limpieza de edad/rol al cambiar de tipo ya está en main.
+- Se corrige una regresión del onboarding: volver a la pregunta de tipo y seleccionar otra vez **el mismo tipo** ya no reconstruye las tarjetas de roles ni pierde la selección visual. Solo se invalida y reconstruye el rol cuando el tipo realmente cambia.
+- Se ajustan las pruebas de invariantes y se registra la decisión. Sin nuevas dependencias, cambios de persistencia o PROD. Sigue pendiente QA visual funcional en ocho tipos y MGD-037 A→B→A autenticado.
+
+
+
 ## 2026-10-12 — MGD-034/037: limpieza de edad al cambiar de tipo de evento (DEV)
 
 - Tras PR #151 fusionado y CI verde, se identificó que el cambio `birthday → quince` podía conservar la edad opcional anterior porque ambos perfiles permiten edad. Ahora el cambio efectivo de `eventType` invalida rol y edad, y vacía el campo visual; si se vuelve a seleccionar el mismo tipo no se descarta el progreso innecesariamente.
