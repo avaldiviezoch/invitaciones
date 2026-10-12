@@ -36,6 +36,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Se muestra como referencia en el resumen, solo en memoria. No se persiste edad ni se modifican esquemas, Rules o datos existentes.
 - Estado: PR DEV pendiente de checks y QA visual responsive; MGD-035 sigue sin activación funcional productiva.
 
+## QA de navegador propuesto — MGD-034/037 (12/10/2026)
+
+- Se incorpora recorrido Playwright sobre el onboarding público sin login ni escrituras: cumpleaños → rol → edad opcional → etapa → volver al selector → boda → rol → etapa sin edad.
+- Este recorrido complementa tests estáticos. Se ejecutará en CI contra el DEV servido; **aún no se acredita VERDE** hasta que GitHub Actions confirme su ejecución.
+- QA real con autenticación, recarga, aislamiento y persistencia de evento de prueba sigue pendiente. PROD intacto.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
