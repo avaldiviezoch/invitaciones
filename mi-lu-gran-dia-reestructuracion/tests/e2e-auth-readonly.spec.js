@@ -263,3 +263,38 @@ test('MGD-037: Mesas y Distribución A/B/A solo con fixtures exclusivos opt-in',
   await choose(idA);
   await inspect(markerA, markerB);
 });
+
+test('MGD-037: preflight de fixtures QA en contexto activo sin conmutar', async ({ page }) => {
+  const account = (process.env.MGD_QA_FIXTURE_ACCOUNT_EMAIL || '').trim().toLowerCase();
+  const idA = process.env.MGD_QA_FIXTURE_EVENT_A || '';
+  const markerGuests = process.env.MGD_QA_FIXTURE_MARKER_A || '';
+  const markerTable = process.env.MGD_QA_FIXTURE_TABLE_MARKER_A || '';
+  const approved = process.env.MGD_QA_FIXTURE_PREFLIGHT === 'READ_ONLY_TEST_ONLY';
+  const valid = approved && account && idA && /^QA[- ]/.test(markerGuests) && /^QA[- ]/.test(markerTable);
+  test.skip(!valid, 'Preflight inactivo sin cuenta QA, contexto A y marcas ficticias.');
+  if (!valid) return;
+
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('body')).not.toHaveClass(/auth-locked/);
+  await expect(page.locator('#accountEmail')).toHaveText(account);
+  await page.locator('#menuButton').click();
+  await page.locator('#activeWeddingButton').click();
+  const active = page.locator('#weddingsList [data-wedding-id].is-current');
+  await expect(active).toHaveCount(1);
+  await expect(active).toHaveAttribute('data-wedding-id', idA);
+  await expect(active.locator('strong')).toContainText(/^QA[- ]/);
+  await expect(active.locator('small')).toContainText(/^Boda · /);
+
+  for (const [module, marker] of [
+    ['invitados', markerGuests],
+    ['presupuesto', markerGuests],
+    ['distribucion', markerTable]
+  ]) {
+    await page.goto('#' + module, { waitUntil: 'domcontentloaded' });
+    await expect(page.locator('body')).not.toHaveClass(/auth-locked/);
+    const view = page.locator('[data-module-view="' + module + '"]');
+    await expect(view).toBeVisible();
+    await expect(view).toContainText(marker);
+  }
+  // Preflight no usa selectActiveWedding ni APIs de escritura.
+});
