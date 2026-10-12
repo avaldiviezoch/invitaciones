@@ -123,6 +123,7 @@ test('@fixture-switch MGD-037: conmutación A → B → A solo en cuenta fixture
   await page.locator('#menuButton').click();
   await page.locator('#activeWeddingButton').click();
   const selector = page.locator('#weddingsList');
+  await expect(selector.locator('[data-wedding-id]')).toHaveCount(2);
   const rowA = selector.locator('[data-wedding-id="' + fixtureA + '"]');
   const rowB = selector.locator('[data-wedding-id="' + fixtureB + '"]');
   await expect(rowA).toHaveCount(1);
@@ -180,6 +181,7 @@ test('@fixture-switch MGD-037: aislamiento visual A/B/A de Invitados y Presupues
   await page.locator('#menuButton').click();
   await page.locator('#activeWeddingButton').click();
   const rows = page.locator('#weddingsList');
+  await expect(rows.locator('[data-wedding-id]')).toHaveCount(2);
   const rowA = rows.locator('[data-wedding-id="' + idA + '"]');
   const rowB = rows.locator('[data-wedding-id="' + idB + '"]');
   await expect(rowA).toHaveCount(1);
@@ -235,6 +237,7 @@ test('@fixture-switch MGD-037: Mesas y Distribución A/B/A solo con fixtures exc
   await page.locator('#menuButton').click();
   await page.locator('#activeWeddingButton').click();
   const rows = page.locator('#weddingsList');
+  await expect(rows.locator('[data-wedding-id]')).toHaveCount(2);
   const rowA = rows.locator('[data-wedding-id="' + idA + '"]');
   const rowB = rows.locator('[data-wedding-id="' + idB + '"]');
   await expect(rowA).toHaveClass(/is-current/);
@@ -285,6 +288,7 @@ test('@fixture-preflight MGD-037: preflight de fixtures QA en contexto activo si
   await expect(page.locator('#accountEmail')).toHaveText(account);
   await page.locator('#menuButton').click();
   await page.locator('#activeWeddingButton').click();
+  await expect(page.locator('#weddingsList [data-wedding-id]')).toHaveCount(2);
   const active = page.locator('#weddingsList [data-wedding-id].is-current');
   await expect(active).toHaveCount(1);
   await expect(active).toHaveAttribute('data-wedding-id', idA);
