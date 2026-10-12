@@ -165,6 +165,18 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - El run 38298290678 detectó que `discover-options-role` interceptaba el clic en los indicadores del onboarding. Se priorizó el footer en la regla CSS existente, sin `!important` ni clic forzado.
 - Verificar nueva corrida y su comportamiento en desktop/tablet/mobile. No fusionar en rojo.
 
+## MGD-008 / MGD-037 — Evidencias CI y control de ejecuciones redundantes (12/10/2026)
+
+- PR #142 confirmado fusionado; GitHub Actions run `38299227585` finalizó `success` sobre commit de integración `931148e98a83`.
+- En el workflow seguro ya existente se introduce `concurrency` por PR para cancelar ejecuciones obsoletas al subir otro commit. En caso de fallo se adjuntan capturas/trazas de `test-results/` (si existen), con retención de siete días. No se adjunta estado de autenticación ni información de usuarios.
+- La suite continúa siendo únicamente `test:e2e:safe` sin credenciales ni escritura. La ejecución de escenarios A → B → A exige cuenta exclusiva de QA, fixtures y autorización separada. **Sin evidencia real de ese aislamiento.**
+
+## MGD-008 — CI #143: fallo de consola 403 en recuperación pública (12/10/2026)
+
+- Run `38299734389`: 206 aprobadas y una fallida (`MGD-010`, desktop) al aparecer un 403 en consola, sin fallo de la validación local de formulario. El workflow sí subió capturas/traza como artefacto (`11769393236`).
+- Ajuste acotado: `collectUnexpectedErrors` acepta opción `consoleErrors`; solo el test de recuperación local comprueba `pageerror` sin exigir consola vacía, pues depende de infraestructura externa que puede emitir 403. Las demás pruebas mantienen verificación completa de errores de consola.
+- Sigue pendiente revisar Checks del nuevo commit; no se silencian errores globalmente, no se modifican Auth/Firebase ni datos de producción.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
