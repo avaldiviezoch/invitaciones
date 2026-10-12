@@ -1916,6 +1916,18 @@ test('MGD-034/037: contrato local de ocultamiento y cabecera del onboarding pend
   expect(html).toContain('inicio.js?v=277-20261012');
 });
 
+test('MGD-034/037: al elegir el mismo rango de invitados se conserva el número exacto', async () => {
+  const fs = await import('node:fs/promises');
+  const code = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
+  const start = code.indexOf("if (name === 'guests') {");
+  const end = code.indexOf("if (name === 'dateStatus') {", start);
+  const handler = code.slice(start, end);
+  expect(handler).toContain('if (discoverAnswers.guests !== value) {');
+  expect(handler).toContain('discoverAnswers.guestCount = 0;');
+  expect(handler).toContain("if (discoverGuestExactInput) discoverGuestExactInput.value = '';");
+  expect(handler.indexOf('if (discoverAnswers.guests !== value) {')).toBeLessThan(handler.indexOf('discoverAnswers.guests = value;'));
+});
+
 test('MGD-034/037: responder sin fecha borra fecha anterior y campo visual', async () => {
   const fs = await import('node:fs/promises');
   const js = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
