@@ -55,6 +55,8 @@ $env:MGD_QA_FIXTURE_PREFLIGHT = "READ_ONLY_TEST_ONLY"
 npm run test:e2e:fixture-preflight
 ```
 
+El preflight verifica que B existe, que es un **Cumpleaños QA-** distinto de A, que no está activo y que no hay terceros eventos, sin conmutar a B.
+
 **Si el preflight no está verde, detenerse.** Revisar identidad de cuenta, evento A activo y que los marcadores propios de Invitados, Presupuesto y Distribución aparezcan visualmente. No relajar aserciones para forzar un verde.
 
 Solo tras pasar el preflight y comprobar otra vez que se trata de cuenta y eventos exclusivamente ficticios, autorizar el cambio de contexto:
