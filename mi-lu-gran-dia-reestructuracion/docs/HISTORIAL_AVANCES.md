@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: procedimiento seguro para ejecutar QA real
+
+- PR #145 confirmado fusionado; CI de PR verde, ejecución main pendiente en la consulta.
+- Creada guía operativa `docs/QA_MGD037_EJECUCION.md` con preparación de cuenta y datos ficticios, comandos de PowerShell, orden preflight → switch y evidencias mínimas de aceptación.
+- Sin ejecución autenticada ni modificación de datos, Auth, Rules, Storage o PROD. La prueba real continúa pendiente.
+
 ## 2026-10-12 — MGD-037: descubrimiento seguro de suites de QA en CI
 
 - PR #144 fusionado (`25e257690df589ac`), con Check de PR `38300524053` en success. El run posterior de main estaba pendiente al momento de revisar.
