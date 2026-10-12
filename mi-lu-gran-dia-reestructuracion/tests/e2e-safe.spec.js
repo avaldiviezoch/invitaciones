@@ -1891,3 +1891,25 @@ test('MGD-036: vista previa de paleta aislada usa motor canónico sin persistir'
   expect(html).toContain('inicio.js?v=272-20261012');
   // No writes, no automatic theme switching, no change to an existing event's themeId.
 });
+
+test('MGD-036: paletas de boda y cumpleaños se renderizan en onboarding sin autenticación', async ({ page }) => {
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  const next = page.locator('#discoverNextButton');
+  for (let i = 0; i < 4; i++) await next.click();
+  const finishDot = page.locator('#discoverDots button').last();
+  const choose = async (type) => {
+    await page.locator('[data-question="eventType"] [data-event-type="' + type + '"]').click();
+    await finishDot.click();
+    const preview = page.locator('#discoverSummary .discover-theme-preview');
+    await expect(preview).toBeVisible();
+    const swatches = preview.locator('.discover-theme-swatches span');
+    await expect(swatches).toHaveCount(3);
+    return swatches.evaluateAll((nodes) => nodes.map((node) => getComputedStyle(node).backgroundColor));
+  };
+  const birthday = await choose('birthday');
+  await page.locator('#discoverDots button').nth(4).click();
+  const wedding = await choose('wedding');
+  expect(birthday).not.toEqual(wedding);
+  await expect(page.locator('#discoverOverlay')).toBeVisible();
+  // No login, writes, change of persisted themeId, or Firebase operation.
+});
