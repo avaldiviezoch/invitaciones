@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-034/037: regresión Playwright de navegación adaptativa (PR DEV)
+
+- Se añade recorrido sin autenticación sobre el onboarding público: cumpleaños con edad opcional y boda sin edad, roles por tipo, avance/retroceso.
+- Reutiliza exclusivamente `tests/e2e-safe.spec.js`; no toca servicios ni datos.
+- No declarar verde hasta ejecución CI. Se mantiene QA autenticado/integración pendiente.
+
 ## 2026-10-12 — MGD-034/035: edad opcional por tipo de evento (DEV)
 
 - Se agregó dentro del onboarding existente una pregunta opcional de edad según el perfil central (`birthday`, `quince`, `custom`).
