@@ -1983,6 +1983,8 @@ test('MGD-036: paletas de boda y cumpleaños se renderizan en onboarding sin aut
   for (let i = 0; i < 4; i++) await next.click();
   const finishDot = page.locator('#discoverDots button').last();
   const choose = async (type) => {
+    await expect(page.locator('[data-question="eventType"]')).toHaveClass(/is-active/);
+    await expect(page.locator('[data-discover-kind="finish"]')).toBeHidden();
     await page.locator('[data-question="eventType"] [data-event-type="' + type + '"]').click();
     const roleSelector = type === 'wedding'
       ? '[data-question="role"] [data-answer="role"][data-value="novia"]'
