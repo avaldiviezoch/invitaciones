@@ -154,6 +154,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Se corrigen las dos referencias `import.meta.url` usadas únicamente para leer archivos locales de Música en pruebas, utilizando `path.resolve(process.cwd(), ...)` ya disponible; sin modificar configuración global de módulos ni código de producción.
 - Corrección realizada en la **misma rama del PR #142**; volver a consultar Checks tras el commit. No afirmar verde hasta resultado comprobado. QA autenticado A/B continúa pendiente.
 
+## MGD-037 — Fallo CI real de PR #142 (12/10/2026)
+
+- Run `38298290678`: 182 tests aprobados y 25 fallidos en desktop/tablet/mobile. Se detectaron expectativas de versiones antiguas, presupuesto importado como v18 en lugar de v17, referencia `readFileSync` sin definir y bloqueo del clic en la navegación por puntos del onboarding.
+- Se reparan contratos estáticos desfasados y lectura de Música. El fallo de interacción de paleta **se mantiene visible** hasta comprobar la UX y su causa, sin `force click` ni omitir tests.
+- Pendiente nueva ejecución y trazas. No autorizar merge si continúa rojo. No se cambia producción ni datos.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
