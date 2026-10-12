@@ -1,3 +1,9 @@
+## 2026-10-12 — PR #143 rojo por 403 externo en MGD-010, evidencia guardada
+
+- GitHub Actions run 38299734389: 206/207 verde; 1 fallo MGD-010 desktop al observar mensaje de consola por recurso 403. El flujo nuevo de artefactos funcionó y dejó traza/captura 11769393236.
+- Se limita el test de validación de correo a errores JS (pageerror) sin monitorizar ruido de consola de recursos externos; resto de suite sigue estricto. No se omite la prueba ni se alteran aplicaciones, reglas o usuarios.
+- PR #143 abierto; falta verificar run actualizado.
+
 ## 2026-10-12 — MGD-008: artefactos de fallos y concurrencia de CI en DEV
 
 - PR #142 verificado fusionado en `main`, y run `38299227585` exitoso sobre commit `931148e98a83`. Queda cerrada la incidencia del workflow público, no el QA autenticado multi-evento.
