@@ -1916,6 +1916,18 @@ test('MGD-034/037: contrato local de ocultamiento y cabecera del onboarding pend
   expect(html).toContain('inicio.js?v=277-20261012');
 });
 
+test('MGD-034/037: responder sin fecha borra fecha anterior y campo visual', async () => {
+  const fs = await import('node:fs/promises');
+  const js = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
+  const begin = js.indexOf("if (name === 'dateStatus')");
+  const end = js.indexOf("} else if (name === 'budgetStatus')", begin);
+  const branch = js.slice(begin, end);
+  expect(branch).toContain("if (value !== 'si') {");
+  expect(branch).toContain("discoverAnswers.date = '';");
+  expect(branch).toContain("if (discoverDateInput) discoverDateInput.value = '';");
+  expect(branch).toContain("discoverDateField.hidden = value !== 'si'");
+});
+
 test('MGD-034/037: resumen muestra fecha y presupuesto solamente cuando se responden', async () => {
   const fs = await import('node:fs/promises');
   const js = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
