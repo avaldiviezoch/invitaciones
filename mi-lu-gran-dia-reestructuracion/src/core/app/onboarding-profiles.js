@@ -42,39 +42,42 @@ const ONBOARDING_PROFILES = Object.freeze({
     option('organizer', 'Ayudo a organizar')
   ]),
   quince: onboardingProfile('quince', [
-    option('quinceanera', 'Soy la quinceañera/o'),
-    option('parent', 'Mamá / papá'),
-    option('family', 'Familiar'),
-    option('organizer', 'Organizador/a')
+    option('quinceanera', 'Es para mí'),
+    option('parent', 'Para mi hija'),
+    option('parents', 'Somos sus padres'),
+    option('family', 'Para un familiar'),
+    option('organizer', 'Ayudo a organizar')
   ]),
   baby_shower: onboardingProfile('baby_shower', [
-    option('parents', 'Futura mamá / futuros padres'),
-    option('family', 'Familiar'),
-    option('friend', 'Amigo/a'),
-    option('organizer', 'Organizador/a')
+    option('self', 'Es para mí'),
+    option('parents', 'Somos los futuros padres'),
+    option('partner', 'Para mi pareja'),
+    option('other', 'Para otra persona'),
+    option('organizer', 'Ayudo a organizar')
   ]),
   religious: onboardingProfile('religious', [
-    option('parent', 'Mamá / papá'),
-    option('family', 'Familiar'),
-    option('godparent', 'Padrino / madrina'),
-    option('organizer', 'Organizador/a')
+    option('child', 'Para mi hijo/a'),
+    option('parents', 'Somos los padres'),
+    option('family', 'Para un familiar'),
+    option('organizer', 'Ayudo a organizar')
   ]),
   graduation: onboardingProfile('graduation', [
-    option('graduate', 'Soy el/la graduado/a'),
-    option('family', 'Familiar'),
-    option('institution', 'Institución / promoción'),
-    option('organizer', 'Organizador/a')
+    option('self', 'Es para mí'),
+    option('child', 'Para mi hijo/a'),
+    option('family', 'Para un familiar'),
+    option('other', 'Para otra persona'),
+    option('organizer', 'Ayudo a organizar')
   ]),
   corporate: onboardingProfile('corporate', [
-    option('company', 'Represento a la empresa'),
-    option('employee', 'Colaborador/a'),
-    option('internal-organizer', 'Organizador interno'),
-    option('external-organizer', 'Organizador / proveedor externo')
+    option('company', 'Lo organizo para mi empresa'),
+    option('internal-organizer', 'Soy parte del equipo organizador'),
+    option('organizer', 'Ayudo a organizar')
   ]),
   custom: onboardingProfile('custom', [
-    option('self', 'Para mí'),
+    option('self', 'Es para mí'),
+    option('child', 'Para mi hijo/a'),
+    option('family', 'Para un familiar'),
     option('other', 'Para otra persona'),
-    option('organization', 'Para una organización'),
     option('organizer', 'Ayudo a organizar')
   ])
 });
