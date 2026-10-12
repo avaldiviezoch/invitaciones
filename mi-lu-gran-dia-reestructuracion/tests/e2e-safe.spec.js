@@ -1952,3 +1952,18 @@ test('MGD-036: restauración de contexto toma themeId/eventType del evento, no d
   expect(dashboard).toContain('const context = await loadActiveWeddingContext(user)');
   // Invariantes de lectura; la reentrada autenticada real sigue pendiente.
 });
+
+test('MGD-037: selector multi-evento muestra tipo y texto neutral sin alterar contrato', async () => {
+  const fs = await import('node:fs/promises');
+  const html = await fs.readFile(path.resolve(process.cwd(), 'index.html'), 'utf8');
+  const dashboard = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
+  expect(html).toContain('id="weddingSwitcherTitle">Mis eventos</h2>');
+  expect(html).toContain('data-wedding-view="mine">Mis eventos</button>');
+  expect(html).toContain('inicio.js?v=273-20261012');
+  expect(dashboard).toContain('eventTypeLabel(item.eventType)');
+  expect(dashboard).toContain('Todavía no tienes eventos disponibles.');
+  expect(dashboard).toContain('No se pudieron cargar tus eventos.');
+  expect(dashboard).toContain('const context = await selectActiveWedding(button.dataset.weddingId)');
+  expect(dashboard).toContain('applyWeddingContext(context)');
+  // Solo etiquetas existentes; se conservan IDs, servicios y datos.
+});
