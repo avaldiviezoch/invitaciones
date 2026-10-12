@@ -1,3 +1,10 @@
+## 2026-10-12 — MGD-037: invitaciones recibidas con fallback multi-evento (PR DEV)
+
+- Se revisó PR #131: fusionado en `main`; comprobación de integración, no de ejecución CI.
+- En el mismo dashboard se reemplazó el texto de respaldo "Boda compartida" por "Evento compartido" sin cambiar `weddingName` ni la lógica de aceptación de invitaciones; mensaje técnico de carga neutralizado.
+- Test de invariantes agregado a suite existente. Sin cambio de Firestore, Auth, Rules, Storage, eventos reales ni PROD.
+- QA real de invitaciones de múltiples tipos y conmutación A → B → A sigue pendiente.
+
 ## 2026-10-12 — MGD-037: QA autenticado de selector multi-evento, solo lectura (DEV)
 
 - Se añadió una prueba Playwright existente para verificar listado de "Mis eventos", una fila activa con nombre y etiqueta de tipo, y tema intacto al abrir el selector.
