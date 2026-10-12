@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-034/037: navegación bloqueada si el rol no corresponde al evento (PR DEV)
+
+- Tras PR #150 fusionado, se refuerza el mismo motor de onboarding: el botón Siguiente no puede saltar la pregunta de rol sin un valor permitido por `getOnboardingProfile(eventType)`; los puntos de navegación tampoco pueden omitir esa validación.
+- Al cambiar `eventType` se conserva el reset de `discoverAnswers.role` y la selección debe corresponder al nuevo catálogo. La prueba de invariantes cubre ocho tipos y la opción transversal **Ayudo a organizar**.
+- No se añade nueva capa JS/CSS, motores, colecciones ni persistencia; QA del navegador publicado y A → B → A siguen pendientes. PROD y datos reales intactos.
+
 ## 2026-10-12 — MGD-034/037: visibilidad contextual y cabecera compacta (PR DEV)
 
 - Se corrige en el CSS propietario el conflicto entre `button{display:grid}` y el atributo `hidden`: los roles exclusivos de boda no se renderizan visibles en cumpleaños ni otros eventos.

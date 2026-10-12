@@ -1,3 +1,11 @@
+# ROADMAP MIGRANDIA
+
+## 2026-10-12 — MGD-034/037: navegación bloqueada si el rol no corresponde al evento (PR DEV)
+
+- Tras PR #150 fusionado, se refuerza el mismo motor de onboarding: el botón Siguiente no puede saltar la pregunta de rol sin un valor permitido por `getOnboardingProfile(eventType)`; los puntos de navegación tampoco pueden omitir esa validación.
+- Al cambiar `eventType` se conserva el reset de `discoverAnswers.role` y la selección debe corresponder al nuevo catálogo. La prueba de invariantes cubre ocho tipos y la opción transversal **Ayudo a organizar**.
+- No se añade nueva capa JS/CSS, motores, colecciones ni persistencia; QA del navegador publicado y A → B → A siguen pendientes. PROD y datos reales intactos.
+
 ## 2026-10-12 — MGD-034/037: visibilidad contextual y cabecera compacta (PR DEV)
 
 - Se corrige en el CSS propietario el conflicto entre `button{display:grid}` y el atributo `hidden`: los roles exclusivos de boda no se renderizan visibles en cumpleaños ni otros eventos.
@@ -6,10 +14,9 @@
 - Test E2E público comprueba ocultamiento de Novia/Novio, aparición de Ayudo a organizar y estructura compacta del shell.
 - QA responsive y checks de PR pendientes. MGD-037 A → B → A autenticado no está cerrado. Ningún cambio en PROD, Rules, Auth, Storage, Firestore o datos reales.
 
-# ROADMAP MIGRANDIA
 
 Última consolidación documental: 2026-10-12
-HEAD DEV verificado antes de esta actualización: `165bf215171b0d4128b52c93c69e2323f34126b5` (PR #148 fusionado).
+HEAD DEV verificado antes de esta actualización: `820043970c5fb45931c66fe8ef2a720bca89c030` (PR #150 fusionado).
 HEAD PROD verificado: `ff22d555188a777fc7ce1ad239ba6a92ac2a470c` (PR #565 fusionado).
 Versión formal documentada en PROD: Migrandia 0.7.0; verificar versión desplegada antes de anunciar una versión nueva.
 Trabajo actual: MGD-034/037, onboarding adaptativo por tipo de evento y corrección visual del shell en DEV; QA A → B → A pendiente.
