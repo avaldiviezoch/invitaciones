@@ -92,6 +92,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - **A diferencia de la suite readonly**, al seleccionar otro evento se escribe `activeWeddingId` en el perfil de la cuenta: por eso exige `MGD_QA_FIXTURE_SWITCH=AUTHORIZED_TEST_ONLY`, dos IDs distintos y autorización expresa antes de ejecutarse. No usar cuenta personal, eventos reales o PROD.
 - Queda pendiente QA de aislamiento de invitados/mesas/presupuesto entre contextos, así como ejecución CI, responsive y autenticación controlada; este PR no demuestra esos resultados.
 
+## MGD-037 — barreras adicionales para QA A → B → A (12/10/2026)
+
+- El test de conmutación que **escribe activeWeddingId** permanece deshabilitado por defecto e incorpora barreras previas a la primera escritura: `MGD_QA_FIXTURE_ACCOUNT_EMAIL` debe coincidir con la sesión, ambos eventos deben tener nombres `QA-` o `QA `, y tipos visibles `Boda` para A y `Cumpleaños` para B.
+- Además exige variable explícita de autorización `MGD_QA_FIXTURE_SWITCH=AUTHORIZED_TEST_ONLY` y dos IDs diferentes. Si falta algo, omite o falla antes de cambiar el contexto.
+- Este código NO ejecuta ni habilita la prueba, NO confirma aislamiento de datos por módulos; la autorización humana sobre cuenta de prueba sigue siendo obligatoria. Sin cambios a servicios ni PROD.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
