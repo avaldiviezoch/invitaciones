@@ -1,5 +1,14 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-12 — MGD-034/037: reiniciar fecha al responder «Todavía no» (DEV)
+
+- PR #156 verificado fusionado; se corrige que el onboarding conserve una fecha anterior en memoria al cambiar la respuesta de «Sí» a «Todavía no».
+- El manejador existente limpia `discoverAnswers.date` y el input `discoverDateInput` cuando `dateStatus` deja de ser «si». El campo se oculta como antes.
+- Test de regresión en suite segura, sin motor nuevo, persistencia, cambios Firebase ni PROD.
+- QA visual de ocho eventos y MGD-037 A→B→A auténtico siguen pendientes.
+
+
+
 ## 2026-10-12 — MGD-034/037: resumen de fecha y presupuesto (DEV)
 
 - Verificado PR #155 fusionado en `main` (`9c49a762`).
