@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: terminología de Presupuesto/selector y verificación PR #138
+
+- PR #138 confirmado fusionado en `DEV/main` (`aec3988ed69e`). Aún no se dispone de evidencia de prueba autenticada ni de dos eventos ficticios.
+- Se prepara corrección mínima de textos visibles en Presupuesto ("evento activo") y mensajes de error del selector ("cambiar de evento"), con test de invariantes y actualización de caché del dashboard.
+- Sin cambios en servicios, datos, Firebase/Auth/Rules/Storage, modelos `weddingId` ni PROD. Pendiente ejecutar QA real, responsive, aislar módulos y completar experiencia temática.
+
 ## 2026-10-12 — MGD-037: preflight de cuenta/fixtures previo a aislamiento (DEV)
 
 - Confirmado PR #137 fusionado en `main`. Se añadió un test opt-in de solo lectura para detectar si la cuenta QA y los marcadores presembrados están listos antes de habilitar pruebas que cambian `activeWeddingId`.

@@ -123,6 +123,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Reutiliza la sesión capturada por Playwright. No ejecuta `selectActiveWedding` ni modifica datos. Si faltan fixtures, falla sin cambiar contexto; de forma predeterminada se omite.
 - Esto no equivale a aislamiento B ni ejecución confirmada; el escenario A → B → A continúa protegido y pendiente. Revisar que los marcadores sean realmente visibles en cada vista y corregir el fixture/test si no lo son. PROD intacto.
 
+## MGD-037 — consistencia de texto multi-evento en Presupuesto (12/10/2026)
+
+- Corrección de terminología visible en Presupuesto: "Datos de la boda activa" → "Datos del evento activo"; corrección del error de selector "No se pudo cambiar de boda" → "No se pudo cambiar de evento".
+- Sin modificar estructura de `weddingId`, persistencia, controles de permiso, suscripciones ni modelos de datos; prueba de invariantes en suite existente.
+- El preflight del PR #138 fue fusionado, **no ejecutado con fixtures autenticados**, por lo que aislamiento A → B → A y QA de permisos siguen pendientes. Sin pase a PROD.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.

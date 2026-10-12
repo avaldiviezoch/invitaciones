@@ -1134,7 +1134,7 @@ weddingsList.onclick = async (event) => {
     setWeddingSwitcher(false);
     if (ACTIVE_MODULES.has(activeModule)) void openModule(activeModule);
   } catch (error) {
-    console.error('No se pudo cambiar de boda:', error);
+    console.error('No se pudo cambiar de evento:', error);
   }
 };
 
