@@ -74,6 +74,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Se añade prueba de invariantes, cache-buster y bitácora. Pendientes: pruebas responsive, permisos, QA autenticado A → B → A, aislamiento de datos y cierre de módulos multi-evento.
 - PR DEV bajo verificación. No implica MGD-037 terminado ni promoción PROD.
 
+## MGD-037 — lectura del selector autenticado sin cambios de contexto (12/10/2026)
+
+- PR DEV añade test a la suite autenticada de solo lectura: abre "Mis eventos", comprueba una fila actual, coincidencia de nombre y categoría canónica, y verifica que el tema no cambió por abrir el diálogo.
+- Requiere una sesión de **cuenta de prueba** y ejecución real de Playwright. No cambia `weddingId` activo ni toca Firebase; no acredita todavía la prueba A → B → A.
+- Sin cambios de código funcional ni datos. CI y QA responsive siguen pendientes; PROD no se promueve.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
