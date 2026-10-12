@@ -1978,3 +1978,40 @@ test('MGD-037: invitaciones recibidas tienen fallback neutro multi-evento', asyn
   expect(html).toContain('inicio.js?v=274-20261012');
   // El nombre real de la invitación conserva precedencia; no cambia ninguna escritura.
 });
+
+test('MGD-037: contratos de aislamiento por contexto de invitados, mesas y presupuesto', async () => {
+  const fs = await import('node:fs/promises');
+  const source = async (file) => fs.readFile(path.resolve(process.cwd(), file), 'utf8');
+  const cloud = await source('src/services/planner-cloud.js');
+  const guests = await source('src/modules/invitados/invitados-data.js');
+  const budget = await source('src/modules/presupuesto/index.js');
+  const distribution = await source('src/modules/distribucion/index.js');
+  const dashboard = await source('src/modules/dashboard/inicio.js');
+
+  // Una sola ruta de nube por contexto; nunca una clave global compartida entre eventos.
+  expect(cloud).toContain("doc(db, 'weddings', context.id, 'cloudSync', 'main')");
+  expect(cloud).toContain("doc(db, 'weddings', context.id, 'cloudChunks'");
+  expect(cloud).toContain('readPlannerStorageKeys(context, [key])');
+  expect(cloud).toContain('function subscribePlannerStorageKey(context, key, onValue, onError)');
+  expect(cloud).toContain('if (stopped || generation !== readGeneration) return');
+
+  // Invitados y mesas canónicas heredan la identidad del contexto recibido.
+  expect(guests).toContain('readPlannerStorageKeys(context, [GUEST_STORAGE_KEY, SHARED_STORAGE_KEY])');
+  expect(guests).toContain('writePlannerStorageKeys(context, {');
+  expect(guests).toContain('async function updateCanonicalTable(context, tableId, mutateTable)');
+
+  // Presupuesto invalida lecturas asincrónicas iniciadas para otro weddingId.
+  expect(budget).toContain('const epoch=++mountEpoch');
+  expect(budget).toContain('activeContext=context');
+  expect(budget).toContain('if(epoch!==mountEpoch||activeContext?.id!==context.id)return false');
+
+  // Distribución lee y escucha únicamente el contexto activo y desmonta los listeners.
+  expect(distribution).toContain('subscribePlannerStorageKey(context, DISTRIBUTION_STORAGE_KEY');
+  expect(distribution).toContain('subscribePlannerStorageKey(context, GUEST_STORAGE_KEY');
+  expect(distribution).toContain('registerCleanup(() => distributionCloudUnsubscribe?.())');
+  expect(distribution).toContain('registerCleanup(() => canonicalCloudUnsubscribe?.())');
+
+  // La portada descarta un resumen devuelto fuera de su epoch/contexto.
+  expect(dashboard).toContain('if (epoch !== homeSummaryEpoch || weddingContext?.id !== weddingId) return');
+  // Solo comprueba contratos de código; no certifica aislamiento E2E con datos.
+});
