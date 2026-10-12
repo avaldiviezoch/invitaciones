@@ -1845,6 +1845,24 @@ test('MGD-034/035: edad opcional solo en perfiles que la necesitan, sin escritur
   // Solo memoria/preview. No modifica createWedding(), saveWeddingOnboarding() ni datos reales.
 });
 
+test('MGD-034/037: navegación de rol usa el catálogo y no permite saltar sin respuesta válida', async () => {
+  const fs = await import('node:fs/promises');
+  const dashboard = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
+  const { EVENT_TYPES } = await import(pathToFileURL(path.resolve(process.cwd(), 'src/core/app/event-types.js')).href);
+  const { getOnboardingProfile } = await import(pathToFileURL(path.resolve(process.cwd(), 'src/core/app/onboarding-profiles.js')).href);
+  expect(dashboard).toContain("allowedRoles.some(({ value }) => value === discoverAnswers.role)");
+  expect(dashboard).toContain("index > roleIndex && !getOnboardingProfile");
+  expect(dashboard).toContain("discoverAnswers.role = ''");
+  for (const { id } of EVENT_TYPES) {
+    const options = getOnboardingProfile(id).organizerRoleQuestion.options;
+    expect(options.some(({ label }) => label === 'Ayudo a organizar')).toBe(true);
+    expect(new Set(options.map(({ value }) => value)).size).toBe(options.length);
+    if (id !== 'wedding') {
+      expect(options.some(({ label }) => ['Novia', 'Novio', 'Somos la pareja'].includes(label))).toBe(false);
+    }
+  }
+});
+
 test('MGD-034/037: contrato local de ocultamiento y cabecera del onboarding pendiente de QA publicado', async () => {
   // CI de PR trabaja con la fuente del commit; GitHub Pages sirve main hasta fusionar.
   // Este control no sustituye la verificación visual posterior al despliegue.
