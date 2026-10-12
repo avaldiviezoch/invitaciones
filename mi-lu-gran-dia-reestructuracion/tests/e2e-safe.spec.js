@@ -1916,6 +1916,18 @@ test('MGD-034/037: contrato local de ocultamiento y cabecera del onboarding pend
   expect(html).toContain('inicio.js?v=277-20261012');
 });
 
+test('MGD-034/037: contenido de preguntas desplazable sin perder footer', async () => {
+  const fs = await import('node:fs/promises');
+  const [css, js] = await Promise.all([
+    fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.css'), 'utf8'),
+    fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8')
+  ]);
+  expect(css).toContain('.discover-question{justify-content:flex-start;overflow-y:auto;overscroll-behavior:contain;padding-top:86px}');
+  expect(css).toContain('.discover-track{position:relative;min-height:0}');
+  expect(css).toContain('grid-template-rows:minmax(0,1fr) auto');
+  expect(js).toContain('if (slide) slide.scrollTop = 0;');
+});
+
 test('MGD-034/037: navegación pública adaptativa boda y cumpleaños sin autenticación', async ({ page }) => {
   await page.goto('', { waitUntil: 'domcontentloaded' });
   const overlay = page.locator('#discoverOverlay');
