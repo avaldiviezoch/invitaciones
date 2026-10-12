@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: selector multi-evento con etiqueta de categoría (DEV)
+
+- Se corrigió el texto del selector (Mis eventos y estados vacío/error) y se mostró categoría usando el `eventType` canónico de cada contexto.
+- Sin cambiar `weddingId`, estructura de datos, servicios, persistencia, autenticación, Rules o Storage; sin crear otro motor.
+- Tests estáticos y cache-buster agregados. Pendiente CI, QA responsive, aislamiento autenticado A → B → A y aprobación PROD.
+
 ## 2026-10-12 — MGD-036: QA autenticado de reingreso, exclusivamente lectura (PR DEV)
 
 - Se añade una prueba Playwright que compara nombre del evento, `data-event-theme` y los nueve tokens CSS antes/después de recargar la sesión.
