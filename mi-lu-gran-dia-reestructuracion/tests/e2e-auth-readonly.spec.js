@@ -158,3 +158,56 @@ test('MGD-037: conmutación A → B → A solo en cuenta fixture explícitamente
   await expect(page.locator('html')).toHaveAttribute('data-event-theme', themeA);
   expect(errors).toEqual([]);
 });
+
+test('MGD-037: aislamiento visual A/B/A de Invitados y Presupuesto con fixtures exclusivos', async ({ page }) => {
+  const approved = process.env.MGD_QA_FIXTURE_SWITCH === 'AUTHORIZED_TEST_ONLY';
+  const account = (process.env.MGD_QA_FIXTURE_ACCOUNT_EMAIL || '').trim().toLowerCase();
+  const idA = process.env.MGD_QA_FIXTURE_EVENT_A || '';
+  const idB = process.env.MGD_QA_FIXTURE_EVENT_B || '';
+  const markerA = process.env.MGD_QA_FIXTURE_MARKER_A || '';
+  const markerB = process.env.MGD_QA_FIXTURE_MARKER_B || '';
+  const valid = approved && account && idA && idB && idA !== idB && markerA && markerB && markerA !== markerB
+    && /^QA[- ]/.test(markerA) && /^QA[- ]/.test(markerB);
+  test.skip(!valid, 'Solo dos contextos ficticios presembrados y autorización opt-in expresa.');
+  if (!valid) return;
+
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  await expect(page.locator('body')).not.toHaveClass(/auth-locked/);
+  await expect(page.locator('#accountEmail')).toHaveText(account);
+  await page.locator('#menuButton').click();
+  await page.locator('#activeWeddingButton').click();
+  const rows = page.locator('#weddingsList');
+  const rowA = rows.locator('[data-wedding-id="' + idA + '"]');
+  const rowB = rows.locator('[data-wedding-id="' + idB + '"]');
+  await expect(rowA).toHaveCount(1);
+  await expect(rowB).toHaveCount(1);
+  await expect(rowA.locator('strong')).toContainText(/^QA[- ]/);
+  await expect(rowB.locator('strong')).toContainText(/^QA[- ]/);
+  await expect(rowA.locator('small')).toContainText(/^Boda · /);
+  await expect(rowB.locator('small')).toContainText(/^Cumpleaños · /);
+  await expect(rowA).toHaveClass(/is-current/);
+  // Solo cuando todas las barreras anteriores pasan se permite cambiar activeWeddingId.
+  const inspect = async (expected, forbidden) => {
+    for (const module of ['invitados', 'presupuesto']) {
+      await page.goto('#' + module, { waitUntil: 'domcontentloaded' });
+      await expect(page.locator('body')).not.toHaveClass(/auth-locked/);
+      const view = page.locator('[data-module-view="' + module + '"]');
+      await expect(view).toBeVisible();
+      await expect(view).toContainText(expected);
+      await expect(view).not.toContainText(forbidden);
+    }
+  };
+  const choose = async (id) => {
+    await page.goto('', { waitUntil: 'domcontentloaded' });
+    await page.locator('#menuButton').click();
+    await page.locator('#activeWeddingButton').click();
+    await page.locator('#weddingsList [data-wedding-id="' + id + '"]').click();
+    await expect(page.locator('#weddingSwitcher')).not.toHaveClass(/show/);
+  };
+  await inspect(markerA, markerB);
+  await choose(idB);
+  await inspect(markerB, markerA);
+  await choose(idA);
+  await inspect(markerA, markerB);
+  // No crea/borra fixtures: únicamente escribe el activeWeddingId de la cuenta QA.
+});

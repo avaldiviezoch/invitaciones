@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: test E2E opt-in de Invitados/Presupuesto entre contextos
+
+- PR #135 verificado fusionado y coincidente con main. Se codificó en suite existente recorrido A → B → A con marcas QA precargadas en Invitados y Presupuesto, verificando que la marca contraria nunca aparezca.
+- Requiere opt-in explícito, correo de cuenta QA, dos IDs, nombres QA, categorías Boda/Cumpleaños y marcas diferenciadas; sin estas condiciones se omite. Cambia únicamente la selección `activeWeddingId` de la cuenta ficticia, **no es de solo lectura cuando se habilita**.
+- No se ejecutó, no se creó información ni se alteraron datos reales, autenticación, Rules, Storage, servicios ni producción. Pendiente CI, datos fixture autorizados y cobertura de Mesas/Distribución.
+
 ## 2026-10-12 — MGD-037: auditoría de contratos por weddingId en módulos (DEV)
 
 - PR #134 confirmado fusionado en `main`. Se revisó `planner-cloud.js`, `invitados-data.js`, `presupuesto/index.js` y `distribucion/index.js` para localizar rutas y protecciones de contexto existentes.
