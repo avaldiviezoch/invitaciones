@@ -201,6 +201,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Los tres escenarios opt-in de conmutación y el preflight verifican ahora **exactamente dos** tarjetas con `data-wedding-id` antes de operar. Impide proceder si una cuenta tiene eventos adicionales, evitando cambiar el contexto de cuentas con datos no previstos.
 - Se actualiza el procedimiento QA: cuenta exclusiva con solo Boda A y Cumpleaños B. Es una protección de tests; no ejecuta acceso, no crea ni modifica eventos y no reemplaza la revisión humana de que ambos eventos son ficticios.
 
+## MGD-037 — preflight identifica también el evento B (12/10/2026)
+
+- PR #147 confirmado fusionado con Check de PR 38302801263 exitoso; ejecución posterior de main aún en curso al revisar.
+- Preflight autorizado solo de lectura comprueba ahora ID B distinto del A, tarjeta B con etiqueta QA-, tipo Cumpleaños y estado no activo, además de A y los datos propios de Invitados, Presupuesto y Distribución.
+- Impide aprobar accidentalmente un preflight con un segundo evento distinto del fixture esperado. No conmutar ni modificar Firestore; sigue pendiente ejecución real.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
