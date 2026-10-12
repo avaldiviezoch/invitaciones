@@ -1,3 +1,8 @@
+## 2026-10-12 — 206/207 tests y filtro restringido
+
+- CI 38298969021: 206 aprobadas, una fallida por respuesta 403 externa durante MGD-010 tablet.
+- Corrección acotada de filtro de consola por origen externo Google y mensaje exacto; sin modificación de aplicación ni PROD. Pendiente CI del último commit.
+
 ## 2026-10-12 — ajuste del footer tras fallo CI
 
 - Run 38298290678: clic de dots interceptado por opciones de rol en onboarding. Se ajusta la regla original de `.discover-footer` para priorizar los controles de navegación, sin forzar clics ni ocultar el test.
