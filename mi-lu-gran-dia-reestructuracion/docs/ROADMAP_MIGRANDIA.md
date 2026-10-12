@@ -160,6 +160,11 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Se reparan contratos estáticos desfasados y lectura de Música. El fallo de interacción de paleta **se mantiene visible** hasta comprobar la UX y su causa, sin `force click` ni omitir tests.
 - Pendiente nueva ejecución y trazas. No autorizar merge si continúa rojo. No se cambia producción ni datos.
 
+## MGD-036 — interfaz de footer de onboarding (12/10/2026)
+
+- El run 38298290678 detectó que `discover-options-role` interceptaba el clic en los indicadores del onboarding. Se priorizó el footer en la regla CSS existente, sin `!important` ni clic forzado.
+- Verificar nueva corrida y su comportamiento en desktop/tablet/mobile. No fusionar en rojo.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
