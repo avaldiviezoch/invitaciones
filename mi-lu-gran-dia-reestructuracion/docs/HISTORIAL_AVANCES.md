@@ -13,6 +13,19 @@
 **Pendiente tras este PR:** comprobar checks de consolidación, fusionar, constatar HEAD, revisar MGD-037 en DEV con pruebas seguras y después con contexto test autorizado. No hay evidencia para afirmar que toda la cartera está «VERDE».
 
 ---
+## 2026-10-12 — MGD-037/041: criterio UX multi-evento especializado
+
+- Se formaliza dentro del roadmap existente, sin crear un MGD nuevo, el criterio de experiencia especializada por tipo de evento.
+- La entrada general `migrandiapp.com` mantiene selección de tipo de evento cuando aún no existe contexto; las rutas específicas como `/bodas`, `/cumpleanos` o `/quinceaneros` deben entrar con el `eventType` ya definido.
+- La URL queda definida solo como puerta de entrada. La fuente de verdad permanente es el evento persistido y su contexto.
+- `eventType` gobierna comportamiento, terminología, roles, checklist, módulos/capabilities, catálogo y reglas; `themeId` gobierna identidad visual y permanece desacoplado.
+- Cada tipo de evento deberá poder definir video/entrada, iconografía, imágenes, paleta/tokens, tipografías, elementos decorativos y microcopy mediante configuración central.
+- El objetivo UX obligatorio es que cada tipo de evento se perciba como una aplicación especializada, aunque todos compartan el mismo core técnico.
+- Al reingresar a un evento ya creado, la app debe reconstruir automáticamente la experiencia según `eventType + themeId`, sin volver al selector general y sin heredar recursos visuales exclusivos de boda cuando el evento no sea `wedding`.
+- Se mantiene la regla de no duplicar HTML/CSS/JS ni crear motores separados por evento.
+- Este criterio se incorpora a MGD-037 y queda reforzado en el criterio de aceptación del bloque MGD-037 a MGD-041.
+- Cambio exclusivamente documental; no modifica código, Firebase, Firestore, Auth, Storage, Rules ni datos reales.
+
 ## 2026-10-09 — MGD-037 Fase 2a: contrato de nuevos eventos, PR DEV en preparación
 
 - Se verificaron HEAD DEV `f6cd474f18ba760085297c60698cb704713b6f44` y PROD `ff22d555188a777fc7ce1ad239ba6a92ac2a470c` sin cambios posteriores.
