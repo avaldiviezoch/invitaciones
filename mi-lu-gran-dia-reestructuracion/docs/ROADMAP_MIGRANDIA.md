@@ -2488,6 +2488,52 @@ Boda / Cumpleaños / 15 años / Baby Shower /
 Bautizo-Comunión / Graduación / Corporativo / Otro
 ```
 
+### Criterio UX obligatorio — experiencia especializada por `eventType`
+
+Este criterio forma parte de MGD-037 y debe conservarse en las fases siguientes MGD-038 a MGD-041. No crea un motor paralelo ni una aplicación distinta por evento.
+
+**Principio rector:** cada tipo de evento debe percibirse para el usuario como una aplicación especializada en ese evento, aunque internamente todos compartan el mismo motor, componentes, autenticación, persistencia y arquitectura de Mi Gran Día.
+
+#### Comportamiento esperado
+
+- `migrandiapp.com` funciona como entrada general. Si todavía no existe contexto de evento, pregunta qué tipo de evento se organizará.
+- Las entradas específicas (`/bodas`, `/cumpleanos`, `/quinceaneros`, etc.) deben iniciar la experiencia con el `eventType` correspondiente ya definido y no volver a preguntar el tipo de evento.
+- La URL es una puerta de entrada, no la fuente de verdad permanente. Una vez creado el evento, la fuente de verdad es el contexto persistido del evento.
+- `eventType` define comportamiento, terminología, roles, checklist, módulos/capabilities, catálogo de Distribución y reglas específicas.
+- `themeId` define la identidad visual aplicable dentro de ese tipo de evento y permanece separado de `eventType`.
+- Al volver a abrir un evento existente, la aplicación debe leer su `eventType + themeId` y reconstruir directamente su experiencia completa, sin regresar al selector general.
+
+#### Identidad visual mínima por tipo de evento
+
+La adaptación NO se considera completa si solo cambia textos. Cada familia de evento debe poder definir, mediante configuración central y sin duplicar HTML/CSS/JS:
+
+- video, animación o recurso principal de entrada;
+- iconografía;
+- imágenes/ilustraciones;
+- paleta y tokens visuales;
+- tipografías;
+- elementos decorativos;
+- microcopy y terminología;
+- recursos visuales de portada/dashboard cuando corresponda.
+
+La boda actual funciona como referencia de experiencia `wedding`. Cumpleaños, quinceañero y los demás tipos deberán tener su propia configuración y assets, sin clonar la aplicación.
+
+#### Reingreso y persistencia
+
+Ejemplo obligatorio:
+```text
+Usuario crea cumpleaños
+→ eventType = birthday
+→ themeId = tema seleccionado
+→ cierra sesión / vuelve otro día
+→ abre el mismo evento
+→ la app carga directamente experiencia Cumpleaños
+→ NO vuelve a interfaz genérica
+→ NO muestra recursos de boda
+```
+
+La implementación debe reutilizar `eventProfile`, `eventType`, `themeId` y el motor global de temas. No se permiten condicionales dispersos por toda la app ni archivos paralelos por tipo de evento.
+
 ### Fase 1 DEV MGD-037 — 2026-10-09
 - PR DEV #116 fusionado.
 - Commit DEV: `039e78c533cffccbbc8643a4e31466f623433d4c`.
@@ -2635,6 +2681,10 @@ Este bloque se considera terminado cuando:
 - cada landing específica inicia el onboarding con el eventType correcto;
 - no se pregunta dos veces el tipo de evento cuando ya viene definido;
 - la app interna conserva el contexto del evento;
+- cada tipo de evento se percibe visual y funcionalmente como una experiencia especializada;
+- el reingreso a un evento existente reconstruye su identidad con `eventType + themeId` sin pasar nuevamente por el selector;
+- ningún evento no-wedding hereda por accidente video, iconografía, terminología o elementos decorativos exclusivos de boda;
+- la especialización se resuelve por configuración central y assets, sin duplicar el motor de la aplicación;
 - las URLs son indexables y tienen metadata propia;
 - no existe dependencia de GitHub Pages visible para el usuario final;
 - todo se sirve bajo el dominio de Mi Gran Día;
