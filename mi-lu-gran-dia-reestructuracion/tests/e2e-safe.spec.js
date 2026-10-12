@@ -1950,6 +1950,10 @@ test('MGD-036: paletas de boda y cumpleaños se renderizan en onboarding sin aut
   const finishDot = page.locator('#discoverDots button').last();
   const choose = async (type) => {
     await page.locator('[data-question="eventType"] [data-event-type="' + type + '"]').click();
+    const roleSelector = type === 'wedding'
+      ? '[data-question="role"] [data-answer="role"][data-value="novia"]'
+      : '[data-question="role"] [data-dynamic-role="self"]';
+    await page.locator(roleSelector).click();
     await finishDot.click();
     const preview = page.locator('#discoverSummary .discover-theme-preview');
     await expect(preview).toBeVisible();
