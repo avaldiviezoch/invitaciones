@@ -148,6 +148,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Objetivo: obtener resultados comprobables de tests seguros por PR, en lugar de suponer verde por fusión. El QA autenticado A → B → A sigue pendiente de datos ficticios, autorización y ejecución separada.
 - No cambia PROD, persistencia, reglas ni funciones de negocio.
 
+## MGD-037 — incidencia CI real y corrección (12/10/2026)
+
+- El PR #142 sí activó GitHub Actions (ejecución 38297094437), pero el job terminó en **failure** antes de recopilar tests, debido a `SyntaxError: Cannot use 'import.meta' outside a module` en `tests/e2e-safe.spec.js`.
+- Se corrigen las dos referencias `import.meta.url` usadas únicamente para leer archivos locales de Música en pruebas, utilizando `path.resolve(process.cwd(), ...)` ya disponible; sin modificar configuración global de módulos ni código de producción.
+- Corrección realizada en la **misma rama del PR #142**; volver a consultar Checks tras el commit. No afirmar verde hasta resultado comprobado. QA autenticado A/B continúa pendiente.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
