@@ -105,7 +105,7 @@ test('MGD-037: selector multi-evento muestra contexto activo sin cambiar datos',
   // Solo consulta listado; nunca selecciona otro weddingId ni escribe en Firestore.
 });
 
-test('MGD-037: conmutación A → B → A solo en cuenta fixture explícitamente autorizada', async ({ page }) => {
+test('@fixture-switch MGD-037: conmutación A → B → A solo en cuenta fixture explícitamente autorizada', async ({ page }) => {
   const approved = process.env.MGD_QA_FIXTURE_SWITCH === 'AUTHORIZED_TEST_ONLY';
   const fixtureA = process.env.MGD_QA_FIXTURE_EVENT_A || '';
   const fixtureB = process.env.MGD_QA_FIXTURE_EVENT_B || '';
@@ -159,7 +159,7 @@ test('MGD-037: conmutación A → B → A solo en cuenta fixture explícitamente
   expect(errors).toEqual([]);
 });
 
-test('MGD-037: aislamiento visual A/B/A de Invitados y Presupuesto con fixtures exclusivos', async ({ page }) => {
+test('@fixture-switch MGD-037: aislamiento visual A/B/A de Invitados y Presupuesto con fixtures exclusivos', async ({ page }) => {
   const approved = process.env.MGD_QA_FIXTURE_SWITCH === 'AUTHORIZED_TEST_ONLY';
   const account = (process.env.MGD_QA_FIXTURE_ACCOUNT_EMAIL || '').trim().toLowerCase();
   const idA = process.env.MGD_QA_FIXTURE_EVENT_A || '';
@@ -212,7 +212,7 @@ test('MGD-037: aislamiento visual A/B/A de Invitados y Presupuesto con fixtures 
   // No crea/borra fixtures: únicamente escribe el activeWeddingId de la cuenta QA.
 });
 
-test('MGD-037: Mesas y Distribución A/B/A solo con fixtures exclusivos opt-in', async ({ page }) => {
+test('@fixture-switch MGD-037: Mesas y Distribución A/B/A solo con fixtures exclusivos opt-in', async ({ page }) => {
   const approved = process.env.MGD_QA_FIXTURE_SWITCH === 'AUTHORIZED_TEST_ONLY';
   const account = (process.env.MGD_QA_FIXTURE_ACCOUNT_EMAIL || '').trim().toLowerCase();
   const idA = process.env.MGD_QA_FIXTURE_EVENT_A || '';
@@ -264,7 +264,7 @@ test('MGD-037: Mesas y Distribución A/B/A solo con fixtures exclusivos opt-in',
   await inspect(markerA, markerB);
 });
 
-test('MGD-037: preflight de fixtures QA en contexto activo sin conmutar', async ({ page }) => {
+test('@fixture-preflight MGD-037: preflight de fixtures QA en contexto activo sin conmutar', async ({ page }) => {
   const account = (process.env.MGD_QA_FIXTURE_ACCOUNT_EMAIL || '').trim().toLowerCase();
   const idA = process.env.MGD_QA_FIXTURE_EVENT_A || '';
   const markerGuests = process.env.MGD_QA_FIXTURE_MARKER_A || '';
