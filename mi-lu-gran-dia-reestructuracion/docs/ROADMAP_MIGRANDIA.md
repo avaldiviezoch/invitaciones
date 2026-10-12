@@ -8,6 +8,12 @@ Trabajo actual: consolidación documental y cierre verificable de DEV/PROD, ante
 Siguiente bloque funcional, TODAVÍA PENDIENTE: MGD-037 fase 2b, selección real de eventType en onboarding y QA real con cuenta/evento de prueba.
 Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), MGD-026 (revisión Google), MGD-042, MGD-044, MGD-047 y MGD-048. MGD-033 no publica beta.
 
+## QA en curso — MGD-037 Fase 2a (12/10/2026)
+
+- Se añadió prueba segura en el archivo E2E existente, sin Firebase ni usuarios reales, para revisar el contrato `createWedding`, escritura atómica en dos rutas nuevas, fallback legacy y normalización.
+- Esta prueba es **estática / de invariantes**: no demuestra persistencia real en Firestore ni QA de un cumpleaños. No sustituye pruebas de integración con cuenta/evento de prueba.
+- Estado del bloque: **EN QA DEV** hasta verificar GitHub Actions y QA de contexto real autorizado. MGD-037 fase 2b permanece pendiente; PROD sin cambios.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
