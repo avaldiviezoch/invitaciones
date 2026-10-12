@@ -1,5 +1,14 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-12 — MGD-034/037: microcopy según evento en onboarding (DEV)
+
+- Verificados PR #153 fusionado y QA de PR exitoso.
+- Se contextualizan las preguntas de Invitados, Fecha y Presupuesto para que no se dirijan exclusivamente a una pareja o boda; la nota del número estimado muestra el tipo de evento seleccionado.
+- Se reutiliza `eventTypeLabel` del catálogo existente en `inicio.js`; no se crea motor ni diccionario paralelo. Se añade test de invariantes y se actualiza el cache-buster para el JavaScript.
+- QA visual de ocho rutas y prueba A → B → A real siguen pendientes. Sin cambios de Firebase, datos reales ni producción.
+
+
+
 ## 2026-10-12 — MGD-034/037: conservar respuestas al elegir el mismo evento (DEV)
 
 - Verificado PR #152 fusionado (`c49ec413`). La limpieza de edad/rol al cambiar de tipo ya está en main.
