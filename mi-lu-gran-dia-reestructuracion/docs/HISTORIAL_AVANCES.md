@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: control de regresión de seguridad para comandos Playwright
+
+- Confirmado PR #140 fusionado en `DEV/main` (`ddc52e4569dc`). Se inspeccionaron los comandos y las etiquetas; los tres escenarios de conmutación están segregados del comando readonly.
+- Se agrega test seguro para impedir regresiones accidentales de comandos/etiquetas y de barreras mínimas de autorización. No requiere sesión autenticada y no crea/modifica eventos.
+- Resultado de ejecución y QA real A/B todavía no disponibles. Sin cambios en datos, código funcional, Auth/Rules/Storage/Firebase ni PROD.
+
 ## 2026-10-12 — MGD-037: separación de suite de solo lectura y pruebas de conmutación (DEV)
 
 - PR #139 confirmado fusionado y coincidente con `main`. Se detectó que la suite denominada `auth-readonly` contenía tests opt-in capaces de escribir el `activeWeddingId` de una cuenta QA.
