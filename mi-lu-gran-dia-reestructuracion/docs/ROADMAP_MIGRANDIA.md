@@ -189,6 +189,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - El workflow seguro añade verificación `--list` de las tres suites: `auth-readonly`, `fixture-preflight` y `fixture-switch`. Esto permite detectar fallos de importación o selección de pruebas sin iniciar navegador, leer sesión, cambiar contextos ni escribir Firestore.
 - **Solo se recopilan pruebas:** no equivalen a la validación de aislamiento de eventos A → B → A; esa validación requiere cuenta y dos eventos ficticios previamente preparados. No se alteran reglas, servicios, datos ni PROD.
 
+## MGD-037 — protocolo reproducible para QA autenticado (12/10/2026)
+
+- PR #145 confirmado fusionado, con run de PR 38301047163 exitoso; la ejecución de main estaba en cola al comprobar.
+- Se agrega `docs/QA_MGD037_EJECUCION.md`, guía concreta Windows/PowerShell para crear cuenta exclusiva, dos eventos ficticios, datos de Invitados/Presupuesto/Mesas, capturar sesión **local** y ejecutar primero preflight de solo lectura y después A → B → A con consentimiento expreso.
+- Se registran criterios de evidencia, protección de credenciales y decisión de NO pasar a PROD sin QA autenticado aprobado. La guía no ejecuta pruebas ni crea cuentas.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
