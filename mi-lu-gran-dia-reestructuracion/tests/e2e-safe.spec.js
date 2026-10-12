@@ -1750,3 +1750,41 @@ test('Música: módulo conserva helper de hosts y HTML válido', async () => {
   expect(musicHtml.trim().endsWith('</div>')).toBe(true);
   expect(musicHtml.includes('\n/div>')).toBe(false);
 });
+
+test('MGD-037 Fase 2a: contrato de creación nuevo evento y fallback legacy sin escrituras reales', async () => {
+  const fs = await import('node:fs/promises');
+  const service = await fs.readFile(path.resolve(process.cwd(), 'src/services/wedding-context.js'), 'utf8');
+  const { DEFAULT_EVENT_TYPE, normalizeEventType } = await import(
+    pathToFileURL(path.resolve(process.cwd(), 'src/core/app/event-type.js')).href
+  );
+  const { DEFAULT_THEME_ID, normalizeThemeId } = await import(
+    pathToFileURL(path.resolve(process.cwd(), 'src/core/app/theme-id.js')).href
+  );
+
+  const creation = service.match(/async function createWedding\(\{[\s\S]*?\n\}\n/);
+  expect(creation).not.toBeNull();
+  const source = creation[0];
+  expect(source).toContain('eventType = DEFAULT_EVENT_TYPE');
+  expect(source).toContain('themeId = DEFAULT_THEME_ID');
+  expect(source).toContain('const cleanEventType = normalizeEventType(eventType)');
+  expect(source).toContain('const cleanThemeId = normalizeThemeId(themeId)');
+  expect(source).toContain('batch.set(weddingRef, {');
+  expect(source).toContain('date: cleanDate, eventType: cleanEventType, themeId: cleanThemeId');
+  expect(source).toContain("batch.set(doc(db, 'users', user.uid, 'weddings', weddingId), {");
+  expect(source).toContain('return { id: weddingId, name: cleanName, date: cleanDate, role:');
+  expect(source).toContain('eventType: cleanEventType, themeId: cleanThemeId');
+  expect(source).toContain('await batch.commit()');
+  expect((source.match(/await batch\.commit\(\)/g) || []).length).toBe(1);
+  expect(source).not.toContain('deleteDoc(');
+  expect(source).not.toContain('updateDoc(');
+
+  expect(DEFAULT_EVENT_TYPE).toBe('wedding');
+  expect(DEFAULT_THEME_ID).toBe('classic-elegant');
+  expect(normalizeEventType('')).toBe('wedding');
+  expect(normalizeEventType(' BIRTHDAY ')).toBe('birthday');
+  expect(normalizeThemeId('')).toBe('classic-elegant');
+  expect(normalizeThemeId(' MINIMAL-BLACK ')).toBe('minimal-black');
+  expect(service).toContain('normalizeEventType(wedding.eventType || indexData.eventType)');
+  expect(service).toContain('normalizeThemeId(wedding.themeId || indexData.themeId)');
+  // No se invoca createWedding ni se autentica: esta prueba no escribe Firebase.
+});
