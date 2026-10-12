@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: auditoría de contratos por weddingId en módulos (DEV)
+
+- PR #134 confirmado fusionado en `main`. Se revisó `planner-cloud.js`, `invitados-data.js`, `presupuesto/index.js` y `distribucion/index.js` para localizar rutas y protecciones de contexto existentes.
+- Se codificaron pruebas de invariantes de Invitados/Mesas/Presupuesto: rutas `weddings/{context.id}`, lectura/escritura canónica por contexto, epoch de presupuesto/portada y baja de suscripciones de Distribución.
+- No se inventan resultados funcionales: ejecución de tests, datos separados A/B, permisos y aislamiento autenticado siguen pendientes. Sin alteraciones de Auth, Rules, Storage, servicios, bodas reales o PROD.
+
 ## 2026-10-12 — MGD-037: endurecimiento de las precondiciones del test de conmutación (DEV)
 
 - PR #133 confirmado fusionado en DEV. Se añaden barreras al escenario A → B → A para verificar correo exacto de cuenta QA, nombres explícitamente prefijados QA, categorías Boda y Cumpleaños y dos IDs diferentes, todo antes de escribir `activeWeddingId`.

@@ -98,6 +98,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Además exige variable explícita de autorización `MGD_QA_FIXTURE_SWITCH=AUTHORIZED_TEST_ONLY` y dos IDs diferentes. Si falta algo, omite o falla antes de cambiar el contexto.
 - Este código NO ejecuta ni habilita la prueba, NO confirma aislamiento de datos por módulos; la autorización humana sobre cuenta de prueba sigue siendo obligatoria. Sin cambios a servicios ni PROD.
 
+## MGD-037 — contratos de aislamiento de Invitados, Mesas y Presupuesto (12/10/2026)
+
+- Se incorporan invariantes en `tests/e2e-safe.spec.js` sobre las rutas por `context.id` de `planner-cloud`, consumo de Invitados/Mesas canónicas, invalidación por epoch en Presupuesto y la portada, y cleanup de suscripciones de Distribución.
+- Pruebas exclusivamente estáticas y no destructivas. La verificación de código **no certifica** aislamiento en Firestore ni prueba que A/B tengan datos distintos; sigue pendiente QA real con cuenta exclusiva y dos eventos ficticios.
+- El test opt-in de cambio de contexto del PR #133/#134 sigue sujeto a autorización y nunca se ejecuta automáticamente. Sin cambios de servicios ni PROD.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
