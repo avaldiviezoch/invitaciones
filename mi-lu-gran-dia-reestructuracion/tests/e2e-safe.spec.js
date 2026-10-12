@@ -1842,3 +1842,34 @@ test('MGD-034/035: edad opcional solo en perfiles que la necesitan, sin escritur
   expect(code).toContain("if (discoverAgeSlide?.hidden && next === discoverAgeSlideIndex)");
   // Solo memoria/preview. No modifica createWedding(), saveWeddingOnboarding() ni datos reales.
 });
+
+test('MGD-034/037: navegación pública adaptativa boda y cumpleaños sin autenticación', async ({ page }) => {
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  const overlay = page.locator('#discoverOverlay');
+  await expect(overlay).toBeVisible();
+  const slide = (name) => page.locator('[data-discover-slide][data-question="' + name + '"]');
+  for (let i = 0; i < 4; i++) await page.locator('#discoverNextButton').click();
+  await expect(slide('eventType')).toHaveClass(/is-active/);
+
+  await slide('eventType').locator('[data-event-type="birthday"]').click();
+  await expect(slide('role')).toHaveClass(/is-active/);
+  await expect(slide('role').locator('[data-dynamic-role="self"]')).toBeVisible();
+  await slide('role').locator('[data-dynamic-role="self"]').click();
+  await expect(slide('age')).toHaveClass(/is-active/);
+  await expect(slide('age')).toBeVisible();
+  await page.locator('#discoverAgeInput').fill('25');
+  await page.locator('#discoverNextButton').click();
+  await expect(slide('stage')).toHaveClass(/is-active/);
+
+  await page.locator('#discoverBackButton').click();
+  await expect(slide('age')).toHaveClass(/is-active/);
+  await page.locator('#discoverBackButton').click();
+  await page.locator('#discoverBackButton').click();
+  await expect(slide('eventType')).toHaveClass(/is-active/);
+  await slide('eventType').locator('[data-event-type="wedding"]').click();
+  await expect(slide('role').locator('[data-answer="role"][data-value="novia"]')).toBeVisible();
+  await slide('role').locator('[data-answer="role"][data-value="novia"]').click();
+  await expect(slide('stage')).toHaveClass(/is-active/);
+  await expect(slide('age')).toBeHidden();
+  // Se prueban únicamente navegación y DOM públicos, nunca se autentica ni escribe Firestore.
+});
