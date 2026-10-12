@@ -27,6 +27,9 @@ function collectUnexpectedErrors(page) {
     if (message.type() !== 'error') return;
     const text = message.text();
     if (KNOWN_BROWSER_NOISE.some((known) => text.includes(known))) return;
+    const source = message.location()?.url || '';
+    if (text === 'Failed to load resource: the server responded with a status of 403 ()'
+      && /^https:\/\/(?:www\.google\.com|www\.gstatic\.com|www\.recaptcha\.net|www\.googleapis\.com)\//.test(source)) return;
     errors.push(`console: ${text}`);
   });
   return errors;
