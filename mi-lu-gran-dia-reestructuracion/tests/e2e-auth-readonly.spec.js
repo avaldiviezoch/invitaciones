@@ -109,7 +109,8 @@ test('MGD-037: conmutación A → B → A solo en cuenta fixture explícitamente
   const approved = process.env.MGD_QA_FIXTURE_SWITCH === 'AUTHORIZED_TEST_ONLY';
   const fixtureA = process.env.MGD_QA_FIXTURE_EVENT_A || '';
   const fixtureB = process.env.MGD_QA_FIXTURE_EVENT_B || '';
-  test.skip(!approved || !fixtureA || !fixtureB || fixtureA === fixtureB,
+  const fixtureAccountEmail = (process.env.MGD_QA_FIXTURE_ACCOUNT_EMAIL || '').trim().toLowerCase();
+  test.skip(!approved || !fixtureA || !fixtureB || fixtureA === fixtureB || !fixtureAccountEmail,
     'Requiere autorización explícita y dos weddingIds ficticios de una cuenta exclusiva de QA.');
   if (!approved || !fixtureA || !fixtureB || fixtureA === fixtureB) return;
   // Esta prueba NO es de solo lectura: selectActiveWedding escribe activeWeddingId.
@@ -117,6 +118,8 @@ test('MGD-037: conmutación A → B → A solo en cuenta fixture explícitamente
   const errors = collectUnexpectedErrors(page);
   await page.goto('', { waitUntil: 'domcontentloaded' });
   await expect(page.locator('body')).not.toHaveClass(/auth-locked/);
+  // Barrera de identidad ANTES de cualquier selectActiveWedding/write.
+  await expect(page.locator('#accountEmail')).toHaveText(fixtureAccountEmail);
   await page.locator('#menuButton').click();
   await page.locator('#activeWeddingButton').click();
   const selector = page.locator('#weddingsList');
@@ -127,7 +130,12 @@ test('MGD-037: conmutación A → B → A solo en cuenta fixture explícitamente
   const nameA = (await rowA.locator('strong').textContent() || '').trim();
   const nameB = (await rowB.locator('strong').textContent() || '').trim();
   expect(nameA).not.toBe(nameB);
-  // El perfil guardado se inspecciona antes de escribir; solo dos fixtures preexistentes.
+  // Barreras visibles que evitan conmutar sobre eventos no ficticios.
+  expect(nameA).toMatch(/^QA[- ]/i);
+  expect(nameB).toMatch(/^QA[- ]/i);
+  await expect(rowA.locator('small')).toContainText(/^Boda · /);
+  await expect(rowB.locator('small')).toContainText(/^Cumpleaños · /);
+  // Identidad de cuenta, nombres, tipos y IDs se comprueban ANTES de escribir activeWeddingId.
   const switchTo = async (id, expectedName) => {
     const row = selector.locator('[data-wedding-id="' + id + '"]');
     await row.click();
