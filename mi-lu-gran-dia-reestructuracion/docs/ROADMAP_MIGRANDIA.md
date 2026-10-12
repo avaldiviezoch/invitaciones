@@ -141,6 +141,13 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Se inspeccionan el `package.json` y los escenarios etiquetados existentes. Es un **control de regresión de configuración**, no ejecuta Firebase, ni realiza la prueba funcional de aislamiento de datos.
 - PR #140 verificado fusionado. Aún se necesita cuenta QA y fixtures autorizados para pruebas de módulos A → B → A, análisis de fallos, responsive y evaluación de pase a PROD.
 
+## MGD-037 — comprobación segura automática en Pull Requests (12/10/2026)
+
+- El flujo existente `.github/workflows/mgd-008-e2e-safe.yml` se amplía para activarse con `pull_request` cuando se modifica código/documentación de la aplicación DEV o el propio workflow. Conserva `workflow_dispatch`.
+- Única suite ejecutada por CI: `npm run test:e2e:safe`. No usa storage-state, credenciales, variables de fixture ni escenarios `@fixture-switch`; permisos del job limitados a `contents: read`.
+- Objetivo: obtener resultados comprobables de tests seguros por PR, en lugar de suponer verde por fusión. El QA autenticado A → B → A sigue pendiente de datos ficticios, autorización y ejecución separada.
+- No cambia PROD, persistencia, reglas ni funciones de negocio.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
