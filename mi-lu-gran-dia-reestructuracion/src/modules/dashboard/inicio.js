@@ -4,7 +4,8 @@ import { APP_VERSION_LABEL } from '../../core/app/version.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { applyEventTheme } from '../../core/app/theme-tokens.js';
 import { getEventTerminology } from '../../core/app/event-terminology.js';
-import { EVENT_TYPES, isKnownEventType } from '../../core/app/event-types.js';
+import { EVENT_TYPES, isKnownEventType, eventTypeLabel } from '../../core/app/event-types.js';
+import { getOnboardingProfile } from '../../core/app/onboarding-profiles.js';
 import { auth } from '../../services/firebase-client.js';
 import { readPlannerStorageKeys, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
 import { GUEST_STORAGE_KEY, summarizeInvitadosValue } from '../invitados/invitados-data.js?v=10';
@@ -153,7 +154,65 @@ const discoverBudgetInput = $('discoverBudgetInput');
 const discoverSummary = $('discoverSummary');
 let discoverIndex = 0;
 let discoverSeenThisSession = false;
-const discoverAnswers = { role:'', stage:'', priorities:new Set(), guests:'', guestCount:0, dateStatus:'', date:'', budgetStatus:'', budget:'' };
+const discoverAnswers = { eventType:'', role:'', stage:'', priorities:new Set(), guests:'', guestCount:0, dateStatus:'', date:'', budgetStatus:'', budget:'' };
+
+const discoverEventOptions = $('discoverEventOptions');
+const discoverRoleOptions = document.querySelector('.discover-options-role');
+const weddingRoleButtons = [...(discoverRoleOptions?.querySelectorAll('[data-answer="role"]') || [])];
+const eventTypeSlideIndex = discoverSlides.findIndex((slide) => slide.dataset.question === 'eventType');
+
+for (const { id, label } of EVENT_TYPES) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.dataset.eventType = id;
+  button.setAttribute('aria-pressed', 'false');
+  const title = document.createElement('strong');
+  title.textContent = label;
+  button.append(title);
+  button.addEventListener('click', () => {
+    discoverAnswers.eventType = id;
+    discoverAnswers.role = '';
+    discoverEventOptions.querySelectorAll('[data-event-type]').forEach((candidate) => {
+      const chosen = candidate === button;
+      candidate.classList.toggle('is-selected', chosen);
+      candidate.setAttribute('aria-pressed', String(chosen));
+    });
+    renderDiscoverRoleOptions();
+    moveDiscover(1);
+  });
+  discoverEventOptions?.append(button);
+}
+
+function renderDiscoverRoleOptions() {
+  const type = discoverAnswers.eventType || 'wedding';
+  const isWedding = type === 'wedding';
+  discoverRoleOptions?.querySelectorAll('[data-dynamic-role]').forEach((button) => button.remove());
+  weddingRoleButtons.forEach((button) => {
+    button.hidden = !isWedding;
+    button.classList.remove('is-selected');
+  });
+  if (isWedding || !discoverRoleOptions) return;
+  const profile = getOnboardingProfile(type);
+  for (const { value, label } of profile.organizerRoleQuestion.options) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.dynamicRole = value;
+    button.setAttribute('aria-pressed', 'false');
+    const title = document.createElement('strong');
+    title.textContent = label;
+    button.append(title);
+    button.addEventListener('click', () => {
+      discoverAnswers.role = value;
+      discoverRoleOptions.querySelectorAll('[data-dynamic-role]').forEach((candidate) => {
+        const chosen = candidate === button;
+        candidate.classList.toggle('is-selected', chosen);
+        candidate.setAttribute('aria-pressed', String(chosen));
+      });
+      window.setTimeout(() => moveDiscover(1), 170);
+    });
+    discoverRoleOptions.append(button);
+  }
+}
 
 function onboardingBudgetNumber(value) {
   const normalized = String(value || '').replace(/[^0-9.,]/g, '').replaceAll(',', '');
@@ -200,8 +259,11 @@ async function finishOnboardingForNewUser(user) {
     return context;
   }
   const context = await createWedding({
-    name: user.displayName ? `Boda de ${String(user.displayName).split(/\s+/)[0]}` : 'Mi boda',
-    date: discoverAnswers.dateStatus === 'si' ? discoverAnswers.date : ''
+    name: discoverAnswers.eventType && discoverAnswers.eventType !== 'wedding'
+      ? `${eventTypeLabel(discoverAnswers.eventType)} de ${String(user.displayName || 'Mi Gran Día').trim()}`
+      : (user.displayName ? `Boda de ${String(user.displayName).split(/\s+/)[0]}` : 'Mi boda'),
+    date: discoverAnswers.dateStatus === 'si' ? discoverAnswers.date : '',
+    eventType: isKnownEventType(discoverAnswers.eventType) ? discoverAnswers.eventType : 'wedding'
   });
   const configured = await applyOnboardingToWedding(context);
   applyWeddingContext(configured);
@@ -210,7 +272,7 @@ async function finishOnboardingForNewUser(user) {
 
 function discoverAnswerLabel(name, value) {
   const labels = {
-    role:{novia:'Novia',novio:'Novio',pareja:'Somos la pareja',organiza:'Ayudo a organizar'},
+    role:Object.fromEntries(getOnboardingProfile(discoverAnswers.eventType || 'wedding').organizerRoleQuestion.options.map(({ value, label }) => [value, label])),
     stage:{inicio:'Recién empezamos',algunas:'Ya tenemos algunas cosas',avanzado:'Vamos avanzados',final:'Últimos detalles'},
     guests:{'menos-50':'Menos de 50','50-100':'50 – 100','100-150':'100 – 150','mas-150':'Más de 150','no-se':'Por definir'}
   };
@@ -220,6 +282,7 @@ function discoverAnswerLabel(name, value) {
 function renderDiscoverSummary() {
   if (!discoverSummary) return;
   const items = [];
+  if (discoverAnswers.eventType) items.push(['Evento', eventTypeLabel(discoverAnswers.eventType)]);
   if (discoverAnswers.role) items.push(['Tu papel', discoverAnswerLabel('role', discoverAnswers.role)]);
   if (discoverAnswers.stage) items.push(['Etapa', discoverAnswerLabel('stage', discoverAnswers.stage)]);
   if (discoverAnswers.guests) items.push(['Invitados', discoverAnswers.guestCount ? `${discoverAnswers.guestCount} aprox.` : discoverAnswerLabel('guests', discoverAnswers.guests)]);
@@ -253,7 +316,9 @@ function closeDiscover() {
 }
 
 function moveDiscover(delta) {
-  discoverIndex = Math.max(0, Math.min(discoverSlides.length - 1, discoverIndex + delta));
+  const next = Math.max(0, Math.min(discoverSlides.length - 1, discoverIndex + delta));
+  if (!discoverAnswers.eventType && next > eventTypeSlideIndex) return;
+  discoverIndex = next;
   renderDiscover();
 }
 
@@ -263,6 +328,7 @@ if (discoverDots) {
     dot.type = 'button';
     dot.setAttribute('aria-label', `Ir a la pantalla ${index + 1}`);
     dot.addEventListener('click', () => {
+      if (!discoverAnswers.eventType && index > eventTypeSlideIndex) return;
       discoverIndex = index;
       renderDiscover();
     });

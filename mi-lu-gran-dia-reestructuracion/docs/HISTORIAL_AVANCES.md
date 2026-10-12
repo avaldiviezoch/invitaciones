@@ -1,3 +1,10 @@
+## 2026-10-12 — MGD-034/037: primer paso multi-evento dentro del onboarding existente (DEV)
+
+- Se agregó selección explícita de los ocho tipos antes del rol, con opciones por `onboarding-profiles.js` y contrato `createWedding({ eventType })`.
+- No se crea otro motor de onboarding ni se modifica Firebase, Rules, Auth, Storage o eventos históricos.
+- Se conserva fallback wedding para entradas que omiten onboarding; se mantienen preguntas comunes posteriores.
+- Pendiente: QA de navegador y test con evento nuevo controlado, adaptar pregunta de edad/temática, completar experiencia interna diferenciada y aprobar paso PROD.
+
 ## 2026-10-12 — MGD-037 fase 2b: selector de tipo de evento en formulario existente (PR DEV)
 
 - Se integró `EVENT_TYPES` en el formulario existente `createWeddingForm` mediante un `select`, sin crear otro motor de onboarding.
