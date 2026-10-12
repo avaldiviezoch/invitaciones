@@ -183,6 +183,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Auditoría de escenarios opt-in detectó una suposición incorrecta: se pedía el **marcador de Invitados dentro de Presupuesto**. Se exigen marcadores propios `MGD_QA_FIXTURE_BUDGET_MARKER_A` y `MGD_QA_FIXTURE_BUDGET_MARKER_B` con prefijo `QA-` y distintos por evento; tanto la comparación A/B/A como el preflight verifican ahora los marcadores del módulo correspondiente.
 - Sin fixtures reales de QA presembrados ni sesión autenticada, estos tests siguen omitidos; no se ha probado el aislamiento completo. Sin cambios en servicios, UI, Firestore ni PROD.
 
+## MGD-037 — descubrimiento de escenarios QA sin autenticación (12/10/2026)
+
+- PR #144 confirmado fusionado. Check del PR `38300524053` exitoso; ejecución de `main` `38300874650` estaba en cola al revisar.
+- El workflow seguro añade verificación `--list` de las tres suites: `auth-readonly`, `fixture-preflight` y `fixture-switch`. Esto permite detectar fallos de importación o selección de pruebas sin iniciar navegador, leer sesión, cambiar contextos ni escribir Firestore.
+- **Solo se recopilan pruebas:** no equivalen a la validación de aislamiento de eventos A → B → A; esa validación requiere cuenta y dos eventos ficticios previamente preparados. No se alteran reglas, servicios, datos ni PROD.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
