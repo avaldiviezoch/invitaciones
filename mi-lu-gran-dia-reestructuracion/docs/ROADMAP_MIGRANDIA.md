@@ -86,6 +86,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Se neutraliza el mensaje técnico de carga fallida del evento activo; cache-buster y test seguro incorporados.
 - Pendiente QA con cuenta de prueba e invitaciones de diferentes tipos, aislamiento completo de contextos y comprobación de permisos. No promueve PROD ni cierra MGD-037.
 
+## MGD-037 — escenario controlado A → B → A con dos fixtures (12/10/2026)
+
+- Se codificó en la suite autenticada existente una prueba **deshabilitada por defecto** para dos `weddingId` ficticios, obligatoriamente de una cuenta exclusiva de QA. El escenario valida el selector, alternancia A → B → A, recuperación del nombre, tema y recarga.
+- **A diferencia de la suite readonly**, al seleccionar otro evento se escribe `activeWeddingId` en el perfil de la cuenta: por eso exige `MGD_QA_FIXTURE_SWITCH=AUTHORIZED_TEST_ONLY`, dos IDs distintos y autorización expresa antes de ejecutarse. No usar cuenta personal, eventos reales o PROD.
+- Queda pendiente QA de aislamiento de invitados/mesas/presupuesto entre contextos, así como ejecución CI, responsive y autenticación controlada; este PR no demuestra esos resultados.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
