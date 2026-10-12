@@ -14,6 +14,14 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Esta prueba es **estática / de invariantes**: no demuestra persistencia real en Firestore ni QA de un cumpleaños. No sustituye pruebas de integración con cuenta/evento de prueba.
 - Estado del bloque: **EN QA DEV** hasta verificar GitHub Actions y QA de contexto real autorizado. MGD-037 fase 2b permanece pendiente; PROD sin cambios.
 
+## MGD-037 fase 2b — Integración inicial de selector en DEV (12/10/2026)
+
+- En PR DEV se propone convertir `Crear boda` del selector de espacios a `Crear evento`, mostrando los 8 tipos del catálogo central `EVENT_TYPES`.
+- El formulario reutiliza `createWedding({ name, date, eventType })`, sin crear un motor ni una segunda ruta de persistencia. Se valida `isKnownEventType` antes de enviar.
+- Esta **primera integración solo cubre la creación manual desde el selector de espacios**. El onboarding inicial para usuarios nuevos todavía conserva preguntas de boda y NO debe darse por aprobado para cumpleaños.
+- Se actualiza el cache-buster del dashboard y se incorpora prueba segura de invariantes, sin escrituras a Firebase.
+- **Estado: EN QA DEV.** Se requiere CI, revisión visual, aislamiento y prueba de creación con un evento de prueba para continuar. PROD y datos históricos intactos.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
