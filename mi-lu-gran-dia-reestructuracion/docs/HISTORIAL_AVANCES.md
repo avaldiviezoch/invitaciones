@@ -1,5 +1,18 @@
-## 2026-10-09 — MGD-037 Fase 2a: contrato de nuevos eventos, PR DEV en preparación
+## 2026-10-09 — CONSOLIDACIÓN HISTÓRICA Y AUDITORÍA DE CIERRES (sin reescribir hitos anteriores)
 
+**Fuentes revisadas:** ROADMAP_MIGRANDIA.md e HISTORIAL_AVANCES.md del DEV main, PR DEV #118 fusionado, HEAD DEV `ecf46a5c12d3513126391f67a9aa159cadc3c615`, HEAD PROD `ff22d555188a777fc7ce1ad239ba6a92ac2a470c`. Los HEAD son referencias de auditoría **anteriores al PR de consolidación**.
+
+**Corrección documental:** la cabecera anterior del roadmap todavía presentaba MGD-002 pendiente aunque PR PROD #552 y QA productivo lo cerraron. También generalizaba que bloques 012–024 no estaban promovidos cuando PR PROD #556–#563 promovieron buena parte de su infraestructura. Se corrigen las cabeceras y se incorpora una matriz maestra, conservando todos los hitos históricos sin borrar detalles.
+
+**Estado MGD-001–050:** 11 PROD operativos (001,002,004,005,006,007,009,010,011,012,017); 3 PROD parciales (003,019,026); 19 PROD técnicos (013–016,018,020–024,028–036 con MGD-034 incluido); 4 DEV/parcial (008,025,027,037); 13 pendientes (038–050). El estado «técnico» no se confunde con funcionalidad terminada.
+
+**MGD-037:** PR #116 landing fase 1 y PR #118 contrato persistencia fase 2a ya fusionados a DEV. NO hay selección real ni QA de cumpleaños; NO hay promoción a PROD de esta fase.
+
+**Decisiones de cierre:** (1) documentación únicamente en este PR; (2) no implementar funciones nuevas ni mover PROD hasta completar QA; (3) MGD-025/027, MGD-003 Enforcement y beta pública continúan sin activarse; (4) validar PR abiertos viejos individualmente y no hacer merge/cierre masivo; (5) requisitos de QA no cumplidos permanecen pendientes.
+
+**Pendiente tras este PR:** comprobar checks de consolidación, fusionar, constatar HEAD, revisar MGD-037 en DEV con pruebas seguras y después con contexto test autorizado. No hay evidencia para afirmar que toda la cartera está «VERDE».
+
+---
 ## 2026-10-12 — MGD-037/041: criterio UX multi-evento especializado
 
 - Se formaliza dentro del roadmap existente, sin crear un MGD nuevo, el criterio de experiencia especializada por tipo de evento.
@@ -12,6 +25,8 @@
 - Se mantiene la regla de no duplicar HTML/CSS/JS ni crear motores separados por evento.
 - Este criterio se incorpora a MGD-037 y queda reforzado en el criterio de aceptación del bloque MGD-037 a MGD-041.
 - Cambio exclusivamente documental; no modifica código, Firebase, Firestore, Auth, Storage, Rules ni datos reales.
+
+## 2026-10-09 — MGD-037 Fase 2a: contrato de nuevos eventos, PR DEV en preparación
 
 - Se verificaron HEAD DEV `f6cd474f18ba760085297c60698cb704713b6f44` y PROD `ff22d555188a777fc7ce1ad239ba6a92ac2a470c` sin cambios posteriores.
 - Se revisaron los seis documentos obligatorios, incluyendo Arquitectura y Contratos en `docs/`.
