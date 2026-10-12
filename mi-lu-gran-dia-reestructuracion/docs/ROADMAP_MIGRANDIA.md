@@ -129,6 +129,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Sin modificar estructura de `weddingId`, persistencia, controles de permiso, suscripciones ni modelos de datos; prueba de invariantes en suite existente.
 - El preflight del PR #138 fue fusionado, **no ejecutado con fixtures autenticados**, por lo que aislamiento A → B → A y QA de permisos siguen pendientes. Sin pase a PROD.
 
+## MGD-037 — separación explícita de suites QA (12/10/2026)
+
+- `npm run test:e2e:auth-readonly` excluye por filtro `@fixture` todos los escenarios especiales; se separan `test:e2e:fixture-preflight` (lectura previa de fixtures) y `test:e2e:fixture-switch` (escenarios que escriben `activeWeddingId`).
+- Los tres recorridos de cambio A → B → A llevan etiqueta `@fixture-switch` y siguen protegidos por autorización, correo QA y IDs ficticios. El preflight usa `@fixture-preflight`; este cambio **no habilita** ninguna prueba ni crea datos.
+- Pendiente ejecutar el comando realmente, configurar una sesión de QA local sin publicar `tests/.auth/storage-state.json`, documentar evidencia real y validar aislamiento. No cambia negocio ni PROD.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
