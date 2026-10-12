@@ -1,5 +1,12 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-12 — MGD-034/037: limpieza de edad al cambiar de tipo de evento (DEV)
+
+- Tras PR #151 fusionado y CI verde, se identificó que el cambio `birthday → quince` podía conservar la edad opcional anterior porque ambos perfiles permiten edad. Ahora el cambio efectivo de `eventType` invalida rol y edad, y vacía el campo visual; si se vuelve a seleccionar el mismo tipo no se descarta el progreso innecesariamente.
+- Se incorpora prueba segura de regresión a la suite existente. No se modifica persistencia, contratos Auth/Firestore, datos reales ni PROD. QA funcional de navegador sigue pendiente y no sustituye el A → B → A autenticado.
+
+
+
 ## 2026-10-12 — MGD-034/037: navegación bloqueada si el rol no corresponde al evento (PR DEV)
 
 - Tras PR #150 fusionado, se refuerza el mismo motor de onboarding: el botón Siguiente no puede saltar la pregunta de rol sin un valor permitido por `getOnboardingProfile(eventType)`; los puntos de navegación tampoco pueden omitir esa validación.
