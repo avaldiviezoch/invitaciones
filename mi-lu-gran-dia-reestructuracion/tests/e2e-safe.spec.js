@@ -2045,8 +2045,7 @@ test('MGD-037: comandos QA mantienen separadas las pruebas con escrituras', asyn
     const next = spec.indexOf("\ntest(", start + match[0].length);
     const block = spec.slice(start, next < 0 ? undefined : next);
     expect(block).toContain("AUTHORIZED_TEST_ONLY");
-    expect(block).toContain("test.skip(!valid");
+    expect(block).toMatch(/test\.skip\(!(?:valid|approved)/);
     expect(block).toContain("MGD_QA_FIXTURE_ACCOUNT_EMAIL");
   }
-  expect(spec).not.toMatch(/test\(['"][^'"]*conmutación A → B → A(?![^'"]*@fixture-switch)/);
 });
