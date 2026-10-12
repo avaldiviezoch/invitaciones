@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: test opt-in de conmutación de contextos ficticios (DEV)
+
+- Se creó prueba Playwright en el archivo existente `tests/e2e-auth-readonly.spec.js`, con activación explícita y dos IDs de fixtures; está **omitida por defecto**.
+- Valida A → B → A, nombre y tema por contexto, recarga y ausencia de errores. Como `selectActiveWedding` cambia `activeWeddingId`, **no es solo lectura**: solo se puede ejecutar tras autorización específica en cuenta de QA exclusiva.
+- No se ejecutó la prueba ni se crearon eventos; no se tocó Firestore, servicios, Auth/Rules/Storage, datos reales ni PROD. Pendiente ejecución segura y aislamiento de módulos.
+
 ## 2026-10-12 — MGD-037: invitaciones recibidas con fallback multi-evento (PR DEV)
 
 - Se revisó PR #131: fusionado en `main`; comprobación de integración, no de ejecución CI.
