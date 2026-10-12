@@ -165,6 +165,11 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - El run 38298290678 detectó que `discover-options-role` interceptaba el clic en los indicadores del onboarding. Se priorizó el footer en la regla CSS existente, sin `!important` ni clic forzado.
 - Verificar nueva corrida y su comportamiento en desktop/tablet/mobile. No fusionar en rojo.
 
+## MGD-037 — CI 206/207 y ruido externo (12/10/2026)
+
+- Run 38298969021: 206 aprobadas, una fallida en MGD-010 tablet por respuesta 403 externa.
+- El filtro de mensajes ignora solo un 403 exacto con origen Google externo identificado, sin silenciar errores del dominio de Migrandia. Pendiente resultado CI nuevo; PR #142 sigue abierto.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
