@@ -4,6 +4,7 @@ import { APP_VERSION_LABEL } from '../../core/app/version.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { applyEventTheme } from '../../core/app/theme-tokens.js';
 import { getEventTerminology } from '../../core/app/event-terminology.js';
+import { EVENT_TYPES, isKnownEventType } from '../../core/app/event-types.js';
 import { auth } from '../../services/firebase-client.js';
 import { readPlannerStorageKeys, writePlannerStorageKey } from '../../services/planner-cloud.js?v=4';
 import { GUEST_STORAGE_KEY, summarizeInvitadosValue } from '../invitados/invitados-data.js?v=10';
@@ -952,6 +953,15 @@ $('activeWeddingButton').onclick = openWeddingSwitcher;
 document.querySelectorAll('[data-wedding-view]').forEach((button) => {
   button.onclick = () => setWeddingView(button.dataset.weddingView);
 });
+const newEventTypeField = $('newWeddingEventType');
+newEventTypeField.replaceChildren(...EVENT_TYPES.map(({ id, label }) => {
+  const option = document.createElement('option');
+  option.value = id;
+  option.textContent = label;
+  return option;
+}));
+newEventTypeField.value = 'wedding';
+
 $('newWeddingButton').onclick = () => {
   $('createWeddingForm').hidden = false;
   $('createWeddingStatus').textContent = '';
@@ -960,9 +970,18 @@ $('newWeddingButton').onclick = () => {
 $('cancelCreateWedding').onclick = () => { $('createWeddingForm').hidden = true; };
 $('createWeddingForm').onsubmit = async (event) => {
   event.preventDefault();
-  $('createWeddingStatus').textContent = 'Creando boda…';
+  const eventType = newEventTypeField.value;
+  if (!isKnownEventType(eventType)) {
+    $('createWeddingStatus').textContent = 'Selecciona un tipo de evento válido.';
+    return;
+  }
+  $('createWeddingStatus').textContent = 'Creando evento…';
   try {
-    const context = await createWedding({ name: $('newWeddingName').value, date: $('newWeddingDate').value });
+    const context = await createWedding({
+      name: $('newWeddingName').value,
+      date: $('newWeddingDate').value,
+      eventType
+    });
     applyWeddingContext(context);
     $('createWeddingForm').reset();
     $('createWeddingForm').hidden = true;
