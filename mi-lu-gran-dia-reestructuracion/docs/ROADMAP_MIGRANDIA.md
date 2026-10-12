@@ -135,6 +135,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Los tres recorridos de cambio A → B → A llevan etiqueta `@fixture-switch` y siguen protegidos por autorización, correo QA y IDs ficticios. El preflight usa `@fixture-preflight`; este cambio **no habilita** ninguna prueba ni crea datos.
 - Pendiente ejecutar el comando realmente, configurar una sesión de QA local sin publicar `tests/.auth/storage-state.json`, documentar evidencia real y validar aislamiento. No cambia negocio ni PROD.
 
+## MGD-037 — invariante de seguridad de comandos QA (12/10/2026)
+
+- Prueba no autenticada incorporada a `test:e2e:safe` para detectar si el comando `auth-readonly` deja de excluir `@fixture`, si se eliminan los comandos específicos para preflight/switch, o si los tres escenarios con conmutación pierden condiciones mínimas de autorización.
+- Se inspeccionan el `package.json` y los escenarios etiquetados existentes. Es un **control de regresión de configuración**, no ejecuta Firebase, ni realiza la prueba funcional de aislamiento de datos.
+- PR #140 verificado fusionado. Aún se necesita cuenta QA y fixtures autorizados para pruebas de módulos A → B → A, análisis de fallos, responsive y evaluación de pase a PROD.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
