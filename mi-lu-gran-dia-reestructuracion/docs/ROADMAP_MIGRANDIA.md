@@ -67,6 +67,13 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Usa el perfil autenticado ya capturado por el usuario (almacenamiento de pruebas local) y **no crea ni cambia eventos**. No acredita aislamiento A → B → A ni permisos, y requiere un ambiente de prueba separado para probar cambios de contexto.
 - Estado: prueba propuesta; ejecutar `npm run test:e2e:auth-readonly` y validar checks/QA antes de cerrar. No se ejecutó una autenticación real desde esta operación.
 
+## MGD-037 — selector multi-evento: textos y categoría por contexto (12/10/2026)
+
+- Se reemplazan etiquetas heredadas visibles "Mis bodas" por "Mis eventos" en el selector de contextos (solo UI).
+- Cada fila lista la categoría del `eventType` del contexto mediante `eventTypeLabel` además del rol y fecha. Se conserva `weddingId`, `data-wedding-id` y el servicio canónico de selección; cero migraciones.
+- Se añade prueba de invariantes, cache-buster y bitácora. Pendientes: pruebas responsive, permisos, QA autenticado A → B → A, aislamiento de datos y cierre de módulos multi-evento.
+- PR DEV bajo verificación. No implica MGD-037 terminado ni promoción PROD.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
