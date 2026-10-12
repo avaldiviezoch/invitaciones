@@ -1873,3 +1873,21 @@ test('MGD-034/037: navegación pública adaptativa boda y cumpleaños sin autent
   await expect(slide('age')).toBeHidden();
   // Se prueban únicamente navegación y DOM públicos, nunca se autentica ni escribe Firestore.
 });
+
+test('MGD-036: vista previa de paleta aislada usa motor canónico sin persistir', async () => {
+  const fs = await import('node:fs/promises');
+  const dashboard = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
+  const html = await fs.readFile(path.resolve(process.cwd(), 'index.html'), 'utf8');
+  const { getEventProfile } = await import(pathToFileURL(path.resolve(process.cwd(), 'src/core/app/event-profile.js')).href);
+  const { getThemeTokens } = await import(pathToFileURL(path.resolve(process.cwd(), 'src/core/app/theme-tokens.js')).href);
+  for (const type of ['wedding', 'birthday', 'quince', 'baby_shower', 'religious', 'graduation', 'corporate', 'custom']) {
+    const profile = getEventProfile(type);
+    const palette = getThemeTokens(profile.theme.defaultThemeId);
+    expect(palette.primary).toMatch(/^#[0-9a-f]{6}$/i);
+  }
+  expect(dashboard).toContain('getThemeTokens(profile.theme.defaultThemeId)');
+  expect(dashboard).toContain("preview.className = 'discover-theme-preview'");
+  expect(dashboard).toContain('discoverSummary.append(preview)');
+  expect(html).toContain('inicio.js?v=272-20261012');
+  // No writes, no automatic theme switching, no change to an existing event's themeId.
+});
