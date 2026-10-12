@@ -700,12 +700,12 @@ async function openWeddingSwitcher() {
     const weddings = await listWeddingContexts(auth.currentUser);
     weddingsList.innerHTML = weddings.length ? weddings.map((item) => `
       <button type="button" class="wedding-list-item ${item.id === weddingContext?.id ? 'is-current' : ''}" data-wedding-id="${item.id}">
-        <span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(roleLabel(item.role))}${item.date ? ` · ${escapeHtml(formatDate(item.date))}` : ''}</small></span>
+        <span><strong>${escapeHtml(item.name)}</strong><small>${escapeHtml(eventTypeLabel(item.eventType))} · ${escapeHtml(roleLabel(item.role))}${item.date ? ` · ${escapeHtml(formatDate(item.date))}` : ''}</small></span>
         <b>${item.id === weddingContext?.id ? 'Actual' : 'Abrir'}</b>
-      </button>`).join('') : '<div class="wedding-list-empty">No hay otras bodas disponibles.</div>';
+      </button>`).join('') : '<div class="wedding-list-empty">Todavía no tienes eventos disponibles.</div>';
   } catch (error) {
     console.error('No se pudieron listar las bodas:', error);
-    weddingsList.innerHTML = '<div class="wedding-list-empty">No se pudieron cargar tus bodas.</div>';
+    weddingsList.innerHTML = '<div class="wedding-list-empty">No se pudieron cargar tus eventos.</div>';
   }
 }
 
