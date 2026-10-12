@@ -22,6 +22,13 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Se actualiza el cache-buster del dashboard y se incorpora prueba segura de invariantes, sin escrituras a Firebase.
 - **Estado: EN QA DEV.** Se requiere CI, revisión visual, aislamiento y prueba de creación con un evento de prueba para continuar. PROD y datos históricos intactos.
 
+## MGD-034/037 — primera pregunta adaptativa en onboarding DEV (12/10/2026)
+
+- Se introduce una pregunta **eventType** antes de la pregunta de rol en el flujo existente de descubrimiento, alimentada por los ocho tipos de `EVENT_TYPES`. Las opciones de rol provienen de `getOnboardingProfile`, sin duplicar el engine.
+- El flujo de creación inicial envía `eventType` a `createWedding()`; si se omite onboarding se preserva fallback `wedding`.
+- Las preguntas posteriores (etapa, prioridades, invitados, fecha, presupuesto) se mantienen comunes. Edad opcional, temática, módulos y redacción contextual completa siguen pendientes.
+- En QA DEV: exige revisar navegador, comportamiento retroceso, registro, persistencia, y aislamiento con cuenta de prueba; no autoriza promoción a PROD ni declara UX terminada.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
