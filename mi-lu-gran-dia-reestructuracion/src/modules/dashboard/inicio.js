@@ -192,8 +192,12 @@ for (const { id, label } of EVENT_TYPES) {
   title.textContent = label;
   button.append(title);
   button.addEventListener('click', () => {
+    if (discoverAnswers.eventType !== id) {
+      discoverAnswers.role = '';
+      discoverAnswers.age = null;
+      if (discoverAgeInput) discoverAgeInput.value = '';
+    }
     discoverAnswers.eventType = id;
-    discoverAnswers.role = '';
     syncOptionalAgeQuestion();
     discoverEventOptions.querySelectorAll('[data-event-type]').forEach((candidate) => {
       const chosen = candidate === button;
