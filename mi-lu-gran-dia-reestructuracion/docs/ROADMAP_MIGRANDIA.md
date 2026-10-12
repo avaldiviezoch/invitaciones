@@ -104,6 +104,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Pruebas exclusivamente estáticas y no destructivas. La verificación de código **no certifica** aislamiento en Firestore ni prueba que A/B tengan datos distintos; sigue pendiente QA real con cuenta exclusiva y dos eventos ficticios.
 - El test opt-in de cambio de contexto del PR #133/#134 sigue sujeto a autorización y nunca se ejecuta automáticamente. Sin cambios de servicios ni PROD.
 
+## MGD-037 — comprobación E2E de aislamiento de módulos (DEV, 12/10/2026)
+
+- Nuevo escenario Playwright **opt-in** comprueba en dos eventos presembrados las marcas ficticias exclusivas de Invitados y Presupuesto siguiendo A → B → A, y ausencia cruzada de la marca del otro evento.
+- Se exige correo de cuenta QA, IDs distintos, etiquetas QA, categorías Boda/Cumpleaños, dos marcadores prefijados QA diferentes y `MGD_QA_FIXTURE_SWITCH=AUTHORIZED_TEST_ONLY`. Cambia `activeWeddingId` **solo** después de verificar barreras, por lo que está omitido por defecto.
+- Las marcas deben existir previamente en ambos módulos y contextos; el test no crea ni modifica invitados/presupuesto. Mesas y Distribución requieren un escenario adicional. La prueba no se ha ejecutado y no certifica aislamiento hasta QA real aprobado.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
