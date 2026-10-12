@@ -1,3 +1,9 @@
+## 2026-10-12 — PR #142: fallo real de Actions y corrección en misma rama
+
+- PR #142 sigue **abierto**. GitHub Actions run `38297094437` concluyó en **failure**: `import.meta` no admitido en la carga de la suite E2E; `No tests found`.
+- Se sustituyen únicamente dos rutas de lectura de fixtures del módulo Música en `tests/e2e-safe.spec.js` por rutas basadas en `process.cwd()`. No se crea PR adicional ni se cambia `package.json` a ESM; mantenemos la ruta habitual de Playwright.
+- Pendiente comprobar nuevo run y corregir otros fallos efectivos si aparecen. No ejecuta fixtures ni escribe datos; PROD sin alteraciones.
+
 ## 2026-10-12 — MGD-037: CI seguro automático de Pull Requests en DEV
 
 - PR #141 confirmado fusionado en `main` (`24a5beae77cb`). Se constató que ya existía el workflow `mgd-008-e2e-safe.yml` pero solo con disparador manual `workflow_dispatch`.
