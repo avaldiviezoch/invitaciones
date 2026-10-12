@@ -117,6 +117,12 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Se exige que los marcadores de mesa sean efectivamente visibles en ambas pantallas; si la UX de Distribución no los expone, se documenta el fallo y se ajusta el diseño o las aserciones, no se declara éxito.
 - No se toca código funcional, datos ni producción. QA móvil, sesiones, permisos y validación de persistencia siguen pendientes.
 
+## MGD-037 — preflight de fixtures de QA (12/10/2026)
+
+- Test Playwright de **solo lectura** (opt-in `MGD_QA_FIXTURE_PREFLIGHT=READ_ONLY_TEST_ONLY`) valida, sobre una cuenta de QA exclusiva y evento A ya activo, identidad de usuario, ID del contexto, nombre con prefijo QA, tipo Boda y presencia de marcadores preexistentes en Invitados, Presupuesto y Distribución.
+- Reutiliza la sesión capturada por Playwright. No ejecuta `selectActiveWedding` ni modifica datos. Si faltan fixtures, falla sin cambiar contexto; de forma predeterminada se omite.
+- Esto no equivale a aislamiento B ni ejecución confirmada; el escenario A → B → A continúa protegido y pendiente. Revisar que los marcadores sean realmente visibles en cada vista y corregir el fixture/test si no lo son. PROD intacto.
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
