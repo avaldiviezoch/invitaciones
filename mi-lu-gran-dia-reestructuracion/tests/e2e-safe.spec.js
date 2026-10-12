@@ -1824,3 +1824,21 @@ test('MGD-034/037: el onboarding pregunta tipo de evento y reutiliza perfiles ca
     expect(getOnboardingProfile(id).organizerRoleQuestion.options.length).toBeGreaterThan(0);
   }
 });
+
+test('MGD-034/035: edad opcional solo en perfiles que la necesitan, sin escritura', async () => {
+  const fs = await import('node:fs/promises');
+  const html = await fs.readFile(path.resolve(process.cwd(), 'index.html'), 'utf8');
+  const code = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
+  const { getOnboardingProfile } = await import(pathToFileURL(path.resolve(process.cwd(), 'src/core/app/onboarding-profiles.js')).href);
+  expect(html).toContain('data-question="age" hidden');
+  expect(html).toContain('id="discoverAgeInput"');
+  expect(html).toContain('inicio.js?v=271-20261012');
+  expect(getOnboardingProfile('wedding').ageQuestion).toBeNull();
+  expect(getOnboardingProfile('baby_shower').ageQuestion).toBeNull();
+  expect(getOnboardingProfile('birthday').ageQuestion.mode).toBe('optional-exact-age');
+  expect(getOnboardingProfile('quince').ageQuestion.mode).toBe('optional-exact-age');
+  expect(code).toContain('syncOptionalAgeQuestion()');
+  expect(code).toContain('discoverAnswers.age = null');
+  expect(code).toContain("if (discoverAgeSlide?.hidden && next === discoverAgeSlideIndex)");
+  // Solo memoria/preview. No modifica createWedding(), saveWeddingOnboarding() ni datos reales.
+});
