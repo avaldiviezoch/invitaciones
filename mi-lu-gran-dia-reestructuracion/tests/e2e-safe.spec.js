@@ -1805,3 +1805,22 @@ test('MGD-037 fase 2b: selector de ocho tipos reutiliza el contrato existente si
   expect((dashboard.match(/async function finishOnboardingForNewUser/g) || [])).toHaveLength(1);
   // No se autentica ni se crea ningún evento durante la prueba.
 });
+
+test('MGD-034/037: el onboarding pregunta tipo de evento y reutiliza perfiles canónicos', async () => {
+  const fs = await import('node:fs/promises');
+  const html = await fs.readFile(path.resolve(process.cwd(), 'index.html'), 'utf8');
+  const dashboard = await fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8');
+  const { EVENT_TYPES } = await import(pathToFileURL(path.resolve(process.cwd(), 'src/core/app/event-types.js')).href);
+  const { getOnboardingProfile } = await import(pathToFileURL(path.resolve(process.cwd(), 'src/core/app/onboarding-profiles.js')).href);
+  expect(EVENT_TYPES).toHaveLength(8);
+  expect(html.indexOf('data-question="eventType"')).toBeLessThan(html.indexOf('data-question="role"'));
+  expect(html).toContain('id="discoverEventOptions"');
+  expect(dashboard).toContain('getOnboardingProfile(type)');
+  expect(dashboard).toContain("eventType: isKnownEventType(discoverAnswers.eventType)");
+  expect(dashboard).toContain('if (!discoverAnswers.eventType && next > eventTypeSlideIndex) return');
+  expect(dashboard).toContain("eventTypeLabel(discoverAnswers.eventType)");
+  expect(html).toContain('inicio.js?v=270-20261012');
+  for (const { id } of EVENT_TYPES) {
+    expect(getOnboardingProfile(id).organizerRoleQuestion.options.length).toBeGreaterThan(0);
+  }
+});
