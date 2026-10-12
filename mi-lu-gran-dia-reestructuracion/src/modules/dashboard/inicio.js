@@ -366,6 +366,9 @@ function closeDiscover() {
 function moveDiscover(delta) {
   let next = Math.max(0, Math.min(discoverSlides.length - 1, discoverIndex + delta));
   if (!discoverAnswers.eventType && next > eventTypeSlideIndex) return;
+  const roleSlideIndex = discoverSlides.findIndex((slide) => slide.dataset.question === 'role');
+  const allowedRoles = getOnboardingProfile(discoverAnswers.eventType || 'wedding').organizerRoleQuestion.options;
+  if (delta > 0 && discoverIndex === roleSlideIndex && !allowedRoles.some(({ value }) => value === discoverAnswers.role)) return;
   if (discoverAgeSlide?.hidden && next === discoverAgeSlideIndex) {
     next = Math.max(0, Math.min(discoverSlides.length - 1, next + (delta >= 0 ? 1 : -1)));
   }
@@ -380,6 +383,8 @@ if (discoverDots) {
     dot.setAttribute('aria-label', `Ir a la pantalla ${index + 1}`);
     dot.addEventListener('click', () => {
       if (!discoverAnswers.eventType && index > eventTypeSlideIndex) return;
+      const roleIndex = discoverSlides.findIndex((slide) => slide.dataset.question === 'role');
+      if (index > roleIndex && !getOnboardingProfile(discoverAnswers.eventType || 'wedding').organizerRoleQuestion.options.some(({ value }) => value === discoverAnswers.role)) return;
       if (index === discoverAgeSlideIndex && discoverAgeSlide?.hidden) return;
       discoverIndex = index;
       renderDiscover();
