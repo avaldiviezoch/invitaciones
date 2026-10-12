@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: endurecimiento de las precondiciones del test de conmutación (DEV)
+
+- PR #133 confirmado fusionado en DEV. Se añaden barreras al escenario A → B → A para verificar correo exacto de cuenta QA, nombres explícitamente prefijados QA, categorías Boda y Cumpleaños y dos IDs diferentes, todo antes de escribir `activeWeddingId`.
+- La prueba sigue opt-in y se omite si no se facilitan autorización y fixtures. No se ejecutó ni se utilizaron datos reales, y no cambian servicios, Firestore, Auth, Rules, Storage ni PROD.
+- Pendiente de revisión/CI, prueba con cuenta de QA exclusiva y verificación de aislamiento por módulos.
+
 ## 2026-10-12 — MGD-037: test opt-in de conmutación de contextos ficticios (DEV)
 
 - Se creó prueba Playwright en el archivo existente `tests/e2e-auth-readonly.spec.js`, con activación explícita y dos IDs de fixtures; está **omitida por defecto**.
