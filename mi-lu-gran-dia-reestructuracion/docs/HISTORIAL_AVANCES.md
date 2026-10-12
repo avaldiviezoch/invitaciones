@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-036: prueba Playwright de paleta temática en navegador (DEV)
+
+- Se añadió en `tests/e2e-safe.spec.js` una comprobación de renderizado de las tres muestras de color para cumpleaños y boda en el resumen del onboarding público.
+- Verifica cambios de paleta entre eventos sin acceso autenticado, sin mutaciones Firebase y sin cambios de código de producto.
+- Pendiente: checks CI, QA responsive y test autorizado con datos de prueba; producción continúa sin cambios.
+
 ## 2026-10-12 — MGD-036: vista previa temática sin persistencia (DEV)
 
 - Se enriqueció `event-profile.js` con tema sugerido por tipo de evento, reutilizando los identificadores existentes: `classic-elegant` y `minimal-black`.
