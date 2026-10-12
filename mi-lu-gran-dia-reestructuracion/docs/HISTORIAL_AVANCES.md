@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-008: artefactos de fallos y concurrencia de CI en DEV
+
+- PR #142 verificado fusionado en `main`, y run `38299227585` exitoso sobre commit `931148e98a83`. Queda cerrada la incidencia del workflow público, no el QA autenticado multi-evento.
+- Se ajusta el workflow existente para cancelar ejecuciones anteriores del mismo PR y adjuntar trazas/capturas solo si falla, con retención 7 días; no incorpora credenciales ni pruebas fixture.
+- Pendiente comprobar Checks del nuevo PR y posteriormente realizar A → B → A exclusivamente con datos ficticios autorizados. Sin alteraciones de PROD ni datos reales.
+
 ## 2026-10-12 — ajuste del footer tras fallo CI
 
 - Run 38298290678: clic de dots interceptado por opciones de rol en onboarding. Se ajusta la regla original de `.discover-footer` para priorizar los controles de navegación, sin forzar clics ni ocultar el test.
