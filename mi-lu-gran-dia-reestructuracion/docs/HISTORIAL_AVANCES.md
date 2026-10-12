@@ -1,3 +1,9 @@
+## 2026-10-12 — Fallo real CI #142: 182 pasaron, 25 fallaron
+
+- Run `38298290678` analizado: versiones obsoletas en pruebas de Presupuesto, onboarding y selector; lectura Música sin importar `readFileSync`; clic de punto de onboarding interceptado por opciones de rol.
+- Se actualizan pruebas de contrato sin tocar lógica de producción. No se oculta el fallo del clic y se debe comprobar su traza si persiste.
+- Pendiente nueva ejecución GitHub Actions, sin promoción PROD ni cambios a datos reales.
+
 ## 2026-10-12 — PR #142: fallo real de Actions y corrección en misma rama
 
 - PR #142 sigue **abierto**. GitHub Actions run `38297094437` concluyó en **failure**: `import.meta` no admitido en la carga de la suite E2E; `No tests found`.
