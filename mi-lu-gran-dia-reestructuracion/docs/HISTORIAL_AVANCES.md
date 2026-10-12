@@ -1,3 +1,9 @@
+## 2026-10-12 — MGD-037: descubrimiento seguro de suites de QA en CI
+
+- PR #144 fusionado (`25e257690df589ac`), con Check de PR `38300524053` en success. El run posterior de main estaba pendiente al momento de revisar.
+- Se incorporan tres comandos Playwright `--list` al workflow seguro para detectar pruebas no cargables, sintaxis rota o filtros mal escritos, sin ejecutar casos que requieren sesión de cuenta QA.
+- Pendiente confirmar Checks del nuevo PR y ejecutar realmente A → B → A con cuenta y datos sintéticos; sin modificaciones a Firebase ni PROD.
+
 ## 2026-10-12 — MGD-037: auditoría de fixtures de Presupuesto
 
 - PR #143 confirmado fusionado (`a8d797dfbfe8`); la ejecución asociada a `main` quedó pendiente de resultado en la consulta realizada.

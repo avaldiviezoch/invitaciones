@@ -37,6 +37,13 @@ jobs:
       - name: Instalar Chromium
         run: npx playwright install --with-deps chromium
 
+      # Valida carga y selección de tests, sin navegador, sesión ni datos de eventos.
+      - name: Verificar descubrimiento de suites autenticadas sin ejecutarlas
+        run: |
+          npm run test:e2e:auth-readonly -- --list
+          npm run test:e2e:fixture-preflight -- --list
+          npm run test:e2e:fixture-switch -- --list
+
       # Este job NO carga storage-state ni autenticación; nunca ejecuta suites fixture.
       - name: Ejecutar MGD-008A seguro
         run: npm run test:e2e:safe
