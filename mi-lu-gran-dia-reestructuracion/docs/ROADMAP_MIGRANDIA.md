@@ -1,5 +1,13 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-037: nombre «Checklist» siempre genérico (DEV)
+
+- PR #168 confirmado fusionado. Corrección adicional solicitada: tanto la cabecera **principal** del módulo como el enlace del **acordeón inicial** deben llamarse exactamente «Checklist», incluso cuando el evento sea boda.
+- Se elimina la transformación contextual de ese título en `applyWeddingContext` y en el encabezado propio de Checklist; siguen siendo contextualizados solo los **grupos y tareas**, no el nombre del módulo.
+- Se ajusta la regresión previa para evitar exigir «Checklist de boda»; no se tocan tareas, categorías ni datos persistidos. PROD intacta.
+
+
+
 ## 2026-10-13 — MGD-037: Checklist utiliza categorías propias de cada evento (DEV)
 
 - Hallazgo: la vista de Checklist generaba los diez grupos de boda desde `BASE_GROUPS` incluso cuando el evento activo era una graduación, cumpleaños u otro tipo. El motor canónico `getChecklistTemplate` ya tiene grupos por tipo, pero la vista no los utilizaba.

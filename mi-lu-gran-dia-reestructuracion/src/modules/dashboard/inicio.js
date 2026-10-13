@@ -669,7 +669,7 @@ function applyWeddingContext(context) {
   };
   setEventCopy('[data-event-copy="current"]', isWeddingContext ? 'BODA ACTUAL' : 'EVENTO ACTUAL');
   setEventCopy('[data-event-copy="active"]', isWeddingContext ? 'Boda activa' : 'Evento activo');
-  setEventCopy('.module-link[data-module="checklist"] span', isWeddingContext ? 'Checklist de boda' : 'Checklist');
+  setEventCopy('.module-link[data-module="checklist"] span', 'Checklist');
   setEventCopy('[data-event-copy="space"]', isWeddingContext ? 'Espacio de la boda' : 'Espacio del evento');
   setEventCopy('[data-event-copy="during"]', isWeddingContext ? 'En la boda' : 'Durante el evento');
   setEventCopy('.home-focus > div > span', isWeddingContext ? 'LO PRÓXIMO DE TU BODA' : 'LO PRÓXIMO DE TU EVENTO');
