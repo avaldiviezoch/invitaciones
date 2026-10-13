@@ -32,6 +32,19 @@ function collectUnexpectedErrors(page, { consoleErrors = true } = {}) {
   return errors;
 }
 
+test('MGD-037: Música mantiene plantilla neutra y solicitudes RSVP opcionales', async () => {
+  const fs = await import('node:fs/promises');
+  const [html, js] = await Promise.all([
+    fs.readFile(path.resolve(process.cwd(), 'src/modules/musica/index.html'), 'utf8'),
+    fs.readFile(path.resolve(process.cwd(), 'src/modules/musica/index.js'), 'utf8')
+  ]);
+  expect(html).toContain('MÓDULO · ESPACIO DEL EVENTO');
+  expect(html).not.toMatch(/MÚSICA DE BODA|Momento de la boda|música de tu boda/);
+  expect(js).toContain('try { requests=requestEntries(await loadRsvpAdminSnapshot(context)); }');
+  expect(js).toContain('try { coversChanged=await hydratePlaylistCovers(plan); }');
+  expect(js).toContain('if(coversChanged)');
+});
+
 test('MGD-037: textos iniciales son neutros y se contextualizan por evento sin duplicar motores', async () => {
   const fs = await import('node:fs/promises');
   const [html, dashboard] = await Promise.all([
