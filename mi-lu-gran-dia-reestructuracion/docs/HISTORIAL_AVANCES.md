@@ -1,3 +1,11 @@
+## 2026-10-13 — Repriorización y auditoría Checklist (sin modificación funcional)
+
+Por decisión del propietario: se conservan ocho tipos de evento. Primero QA A→B→A, auditoría visual DEV/PROD, Checklist contextual e Invitaciones multievento; después landings/SEO, analytics/monetización e internacionalización. Se mantiene el inventario completo de 50 MGD sin crear duplicados. Producción, Auth, Firestore y datos reales intactos.
+
+Verificado en DEV: existen ocho definiciones de plantilla en `src/core/app/checklist-templates.js`; `src/modules/checklist/index.js` usa grupos según eventType para no-boda y mantiene grupos históricos para boda y datos persistidos. No se confirmó materialización de tareas starter en nuevas celebraciones. Prohibida la inserción automática sobre eventos preexistentes sin autorización; validar diseño y QA antes de escribir código. Revisión técnica pendiente de Invitaciones y paridad visual completa.
+
+Siguiente control: terminar QA ficticio A→B→A y preparar la matriz de categorías/tareas de Checklist para revisión antes de implementar. La promoción parcial a PROD requerirá autorización y PR independientes.
+
 ## 2026-10-13 — MGD-026 / MGD-040: verificación de Google pendiente tras reactivación de migrandiapp.com
 
 - Nota de integración: la documentación posterior de auditoría visual y Checklist por evento se mantiene en este historial.
