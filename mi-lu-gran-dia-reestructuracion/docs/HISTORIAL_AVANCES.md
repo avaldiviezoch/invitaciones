@@ -1,3 +1,9 @@
+## 2026-10-13 — MGD-018/037: fallback de categorías Checklist contextual (PR DEV)
+
+- Auditoría detectó que `taskCategory` asignaba categorías históricas de boda por índice a tareas sin `category` explícita, incluso para cumpleaños u otros tipos.
+- Corrección mínima: conservar ese fallback exclusivamente para `wedding`; para otros tipos, una tarea sin categoría explícita aparece en «Sin categoría». Se respetan todas las categorías explícitas, grupos persistidos y compatibilidad de boda.
+- Prueba de regresión estática añadida a suite E2E segura. Pendiente CI real y QA visual; no se crean tareas ni se modifica persistencia, Firebase, Rules o PROD.
+
 ## 2026-10-13 — MGD-026 / MGD-040: verificación de Google pendiente tras reactivación de migrandiapp.com
 
 - Nota de integración: la documentación posterior de auditoría visual y Checklist por evento se mantiene en este historial.
