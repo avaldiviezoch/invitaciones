@@ -1,3 +1,5 @@
+import { invitationEngineModel, hasStableInvitationEngineShape } from '../../core/app/invitation-engine.js';
+import { getInvitationTemplate } from '../../core/app/invitation-templates.js';
 import {
   subscribePersonalInvitations,
   addPersonalInvitation,
@@ -94,13 +96,21 @@ export async function mountInvitaciones() {
     const values = new FormData(editorForm);
     const type = String(values.get('eventType') || 'wedding');
     const label = typeLabels[type] || 'Celebración';
-    const name = String(values.get('eventName') || '').trim() || 'Tu gran día';
-    const date = String(values.get('date') || '').trim();
-    const place = String(values.get('location') || '').trim();
-    const guest = String(values.get('guestName') || '').trim();
-    const design = String(values.get('templateId') || 'classic-elegant');
-    editorPreview.dataset.template = design;
-    editorPreview.innerHTML = `<article class="invitations-editor-card"><p>${escapeHtml(label)}</p><h2>${escapeHtml(name)}</h2><p>${guest ? 'Para ' + escapeHtml(guest) : 'Te esperamos'}</p><p>${escapeHtml(date || 'Fecha por definir')}</p><p>${escapeHtml(place || 'Lugar por definir')}</p><small>Vista previa · sin publicar</small></article>`;
+    const template = getInvitationTemplate(values.get('templateId'));
+    const model = invitationEngineModel({
+      event: { eventType: type, name: String(values.get('eventName') || '').trim() },
+      date: String(values.get('date') || '').trim() || null,
+      location: { name: String(values.get('location') || '').trim() },
+      guest: { name: String(values.get('guestName') || '').trim() },
+      status: 'draft'
+    });
+    if (!hasStableInvitationEngineShape(model)) return;
+    const name = model.event.name || 'Tu gran día';
+    const date = model.date || 'Fecha por definir';
+    const place = model.location.name || 'Lugar por definir';
+    const guest = model.guest.name;
+    editorPreview.dataset.template = template.id;
+    editorPreview.innerHTML = `<article class="invitations-editor-card"><p>${escapeHtml(label)}</p><h2>${escapeHtml(name)}</h2><p>${guest ? 'Para ' + escapeHtml(guest) : 'Te esperamos'}</p><p>${escapeHtml(date)}</p><p>${escapeHtml(place)}</p><small>${escapeHtml(template.label)} · Vista previa sin publicar</small></article>`;
   }
   editorForm.addEventListener('input', renderEditorPreview, { signal });
   editorForm.addEventListener('change', renderEditorPreview, { signal });

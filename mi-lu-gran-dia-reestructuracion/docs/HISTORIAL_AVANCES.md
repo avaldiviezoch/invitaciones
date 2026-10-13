@@ -1,3 +1,9 @@
+## 2026-10-13 — MGD-021: previsualización basada en motor y plantillas canónicas (DEV)
+
+- PR #181 verificado presente en main. El formulario local de Invitaciones ya funciona para ocho tipos.
+- Se sustituye la composición ad hoc de la previsualización por `invitationEngineModel` y `getInvitationTemplate` existentes. Se conserva `status: draft`, escape de texto y cero escrituras; selector sigue en tres opciones declarativas, sin inventar diseños ni publicar rutas.
+- Suite E2E segura amplía invariantes. Pendiente CI y QA real escritorio/móvil; no se considera finalizada integración con biblioteca, RSVP ni enlaces públicos. Sin modificar Firestore/Auth/Rules/PROD.
+
 ## 2026-10-13 — MGD-021: editor de invitaciones en borrador local (DEV PR, QA PENDIENTE)
 
 - Se conecta el botón «Crear invitación» a un formulario local para ocho eventType, nombre, fecha, lugar, destinatario y tres identificadores de presentación existentes. Se muestra una tarjeta de previsualización HTML escapada, sin iframe externo y sin publicación.
