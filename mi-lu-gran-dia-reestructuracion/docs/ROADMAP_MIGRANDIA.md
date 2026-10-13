@@ -1,5 +1,14 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-034/037: QA de presupuesto al cambiar respuesta (DEV)
+
+- PR #164 confirmado fusionado (`55f38a3a`) y corrida corregida aprobada.
+- Test real de navegador público para presupuesto: escribir 35000, comprobar el resumen, volver, elegir «Todavía no lo sabemos», verificar que el campo se vacíe y que el resumen muestre «Por definir» sin la cifra antigua.
+- El test utiliza la suite Playwright existente y el motor único; no modifica lógica de negocio, Auth, Firestore, reglas, datos ni PROD.
+- QA manual de ocho eventos y MGD-037 A→B→A autenticado aún pendientes.
+
+
+
 ## 2026-10-13 — MGD-034/037: QA navegador de número exacto de invitados (DEV)
 
 - PR #163 fusionado (`edf7a8dd`) y CI verde (run `38422911957`).

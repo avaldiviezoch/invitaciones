@@ -2041,6 +2041,32 @@ test('MGD-034/037: edad opcional se conserva para mismo evento y se limpia al ca
   // Solo DOM público, sin autenticación ni escrituras.
 });
 
+test('MGD-034/037: cambiar presupuesto definido a Por definir limpia el dato y resumen', async ({ page }) => {
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  const slide = (name) => page.locator('[data-discover-slide][data-question="' + name + '"]');
+  for (let i = 0; i < 4; i++) await page.locator('#discoverNextButton').click();
+  await slide('eventType').locator('[data-event-type="birthday"]').click();
+  await slide('role').locator('[data-dynamic-role="self"]').click();
+  await expect(slide('age')).toHaveClass(/is-active/);
+  const budgetIndex = await slide('budget').evaluate((node) => Array.from(node.parentElement.children).indexOf(node));
+  await page.locator('#discoverDots button').nth(budgetIndex).click();
+  await expect(slide('budget')).toHaveClass(/is-active/);
+  const budgetInput = page.locator('#discoverBudgetInput');
+  await budgetInput.fill('35000');
+  const finishIndex = await slide('budget').evaluate((node) => node.parentElement.children.length - 1);
+  await page.locator('#discoverDots button').nth(finishIndex).click();
+  await expect(page.locator('#discoverSummary')).toContainText('35,000');
+  await page.locator('#discoverDots button').nth(budgetIndex).click();
+  await expect(slide('budget')).toHaveClass(/is-active/);
+  await slide('budget').locator('[data-answer="budgetStatus"][data-value="no-se"]').click();
+  await expect(budgetInput).toHaveValue('');
+  await expect(slide('budget')).toHaveClass(/is-active/);
+  await page.locator('#discoverDots button').nth(finishIndex).click();
+  await expect(page.locator('#discoverSummary')).toContainText('Por definir');
+  await expect(page.locator('#discoverSummary')).not.toContainText('35,000');
+  // Solo DOM público, sin sesión ni escrituras.
+});
+
 test('MGD-034/037: rango de invitados mantiene o limpia el número exacto', async ({ page }) => {
   await page.goto('', { waitUntil: 'domcontentloaded' });
   const slide = (name) => page.locator('[data-discover-slide][data-question="' + name + '"]');
@@ -2178,7 +2204,11 @@ test('MGD-036: paletas de boda y cumpleaños se renderizan en onboarding sin aut
   const choose = async (type) => {
     await expect(page.locator('[data-question="eventType"]')).toHaveClass(/is-active/);
     await expect(page.locator('[data-discover-kind="finish"]')).toBeHidden();
-    await page.locator('[data-question="eventType"] [data-event-type="' + type + '"]').click();
+    // El cambio de slide tiene animación; esperar que la tarjeta sea visible
+    // evita intentar pulsarla mientras el slide aún está oculto.
+    const eventOption = page.locator('[data-question="eventType"] [data-event-type="' + type + '"]');
+    await expect(eventOption).toBeVisible();
+    await eventOption.click();
     const roleSelector = type === 'wedding'
       ? '[data-question="role"] [data-answer="role"][data-value="novia"]'
       : '[data-question="role"] [data-dynamic-role="self"]';
