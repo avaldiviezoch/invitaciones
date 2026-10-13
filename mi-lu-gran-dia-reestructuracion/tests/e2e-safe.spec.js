@@ -1963,6 +1963,34 @@ test('MGD-034/037: contenido de preguntas desplazable sin perder footer', async 
   expect(js).toContain('if (slide) slide.scrollTop = 0;');
 });
 
+test('MGD-034/037: pantalla móvil baja conserva navegación y permite desplazarse por roles', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 620 });
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  const slide = (name) => page.locator('[data-discover-slide][data-question="' + name + '"]');
+  for (let i = 0; i < 4; i++) await page.locator('#discoverNextButton').click();
+  await slide('eventType').locator('[data-event-type="birthday"]').click();
+  await expect(slide('role')).toHaveClass(/is-active/);
+  const next = page.locator('#discoverNextButton');
+  const back = page.locator('#discoverBackButton');
+  await expect(next).toBeVisible();
+  await expect(back).toBeVisible();
+  const nextBox = await next.boundingBox();
+  const backBox = await back.boundingBox();
+  expect(nextBox).not.toBeNull();
+  expect(backBox).not.toBeNull();
+  expect(nextBox.y + nextBox.height).toBeLessThanOrEqual(620);
+  expect(backBox.y + backBox.height).toBeLessThanOrEqual(620);
+  const role = slide('role');
+  const before = await role.evaluate((node) => ({ top: node.scrollTop, overflow: node.scrollHeight - node.clientHeight }));
+  expect(before.overflow).toBeGreaterThan(0);
+  await role.evaluate((node) => { node.scrollTop = node.scrollHeight; });
+  await expect.poll(() => role.evaluate((node) => node.scrollTop)).toBeGreaterThan(0);
+  await expect(role.locator('[data-dynamic-role="organizer"]')).toBeVisible();
+  await role.locator('[data-dynamic-role="organizer"]').click();
+  await expect(slide('age')).toHaveClass(/is-active/);
+  // Prueba pública: sin inicio de sesión, sin Firebase ni escrituras.
+});
+
 test('MGD-034/037: los ocho eventos muestran solo sus roles reales en navegador', async ({ page }) => {
   await page.goto('', { waitUntil: 'domcontentloaded' });
   const slide = (name) => page.locator('[data-discover-slide][data-question="' + name + '"]');
