@@ -7,6 +7,18 @@
 - Prueba de regresión estática añadida a suite E2E segura. Pendiente CI real y QA visual; no se crean tareas ni se modifica persistencia, Firebase, Rules o PROD.
 
 
+
+## 2026-10-13 — Orden corto aprobado para primera entrega multievento (DEV)
+
+Decisión: mantener los ocho eventType. **Ahora:** (1) MGD-037 QA real A→B→A, seguridad y persistencia MGD-008/025/027/044; (2) auditoría visual DEV/PROD de nueve módulos MGD-034/036/037/041/048; (3) contenido Checklist por evento MGD-018/037; (4) experiencia Invitaciones multievento MGD-021–024/041/047; (5) QA de promoción selectiva. No tocar producción sin aprobación.
+
+**Después:** landings y SEO MGD-038–040; analítica/monetización MGD-043; internacionalización MGD-046. MGD-045, 049 y 050 solo si una dependencia esencial los exige. No se elimina ningún MGD del roadmap.
+
+Auditoría de código existente: `src/core/app/checklist-templates.js` define los ocho templates; boda mantiene grupos históricos y los demás tienen grupos y tareas sugeridas. `src/modules/checklist/index.js` consulta `getChecklistTemplate(eventType).groups` para no-boda y preserva grupos y tareas guardados. **No se ha demostrado que las tareas starter se creen automáticamente**: comprobar antes de cualquier implementación; no sembrar/migrar eventos existentes ni sobrescribir tareas. Fallback a boda para tipo desconocido exige revisión posterior.
+
+Promoción candidata: tras QA de aislamiento, integridad, permisos y paridad, publicar primero el bloque funcional multievento con PR PROD mínimo y autorizado. Luego adaptar Invitaciones y Checklist por lotes funcionales verificables. Gate legal/privacidad y seguridad MGD-003/026/028–033/042/044/047/048 obligatorio antes de marcha blanca externa; beta y App Check Enforcement siguen desactivados.
+
+
 ## 2026-10-13 — MGD-026 / MGD-040: verificación de Google pendiente tras reactivación de migrandiapp.com
 
 - Incidencia de dominio resuelta por el propietario: Namecheap suspendió temporalmente `migrandiapp.com` por falta de verificación del correo del titular; la verificación se completó y el usuario confirmó que el dominio volvió a abrir.
