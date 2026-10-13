@@ -109,9 +109,12 @@ export async function mountInvitaciones() {
     const date = model.date || 'Fecha por definir';
     const place = model.location.name || 'Lugar por definir';
     const guest = model.guest.name;
+    const message = String(values.get('message') || '').trim();
+    const fontStyle = String(values.get('fontStyle') || 'serif') === 'sans' ? 'sans' : 'serif';
+    editorPreview.dataset.fontStyle = fontStyle;
     editorPreview.dataset.template = template.id;
     editorPreview.dataset.eventType = type;
-    editorPreview.innerHTML = `<article class="invitations-editor-card"><p class="invitations-editor-kicker">${escapeHtml(label)}</p><h2 class="invitations-editor-title">${escapeHtml(name)}</h2><div class="invitations-editor-rule" aria-hidden="true"></div><p class="invitations-editor-text">${guest ? 'Para ' + escapeHtml(guest) : 'Te esperamos'}</p><p class="invitations-editor-text">${escapeHtml(date)}</p><p class="invitations-editor-text">${escapeHtml(place)}</p><small class="invitations-editor-foot">${escapeHtml(template.label)} · Borrador sin publicar</small></article>`;
+    editorPreview.innerHTML = `<article class="invitations-editor-card"><p class="invitations-editor-kicker">${escapeHtml(label)}</p><h2 class="invitations-editor-title">${escapeHtml(name)}</h2><div class="invitations-editor-rule" aria-hidden="true"></div>${message ? `<p class="invitations-editor-message">${escapeHtml(message)}</p>` : ''}<p class="invitations-editor-text">${guest ? 'Para ' + escapeHtml(guest) : 'Te esperamos'}</p><p class="invitations-editor-text">${escapeHtml(date)}</p><p class="invitations-editor-text">${escapeHtml(place)}</p><small class="invitations-editor-foot">${escapeHtml(template.label)} · Borrador sin publicar</small></article>`;
   }
   editorForm.addEventListener('input', renderEditorPreview, { signal });
   editorForm.addEventListener('change', renderEditorPreview, { signal });
