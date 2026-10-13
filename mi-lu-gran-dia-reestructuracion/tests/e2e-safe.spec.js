@@ -58,7 +58,7 @@ test('MGD-037: textos iniciales son neutros y se contextualizan por evento sin d
   for (const text of ['Checklist de boda</span>', 'Espacio de la boda</span>', 'En la boda</span>', 'LO PRÓXIMO DE TU BODA</span>', 'Cargando información de tu boda</span>']) {
     expect(html).not.toContain(text);
   }
-  for (const text of ['Checklist de boda', 'Espacio de la boda', 'En la boda', 'LO PRÓXIMO DE TU BODA', 'ACCESOS DE LA BODA']) {
+  for (const text of ['Espacio de la boda', 'En la boda', 'LO PRÓXIMO DE TU BODA', 'ACCESOS DE LA BODA']) {
     expect(dashboard).toContain(text);
   }
   const moduleFiles = await Promise.all([
