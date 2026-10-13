@@ -1963,6 +1963,32 @@ test('MGD-034/037: contenido de preguntas desplazable sin perder footer', async 
   expect(js).toContain('if (slide) slide.scrollTop = 0;');
 });
 
+test('MGD-034/037: los ocho eventos muestran solo sus roles reales en navegador', async ({ page }) => {
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  const slide = (name) => page.locator('[data-discover-slide][data-question="' + name + '"]');
+  for (let i = 0; i < 4; i++) await page.locator('#discoverNextButton').click();
+  await expect(slide('eventType')).toHaveClass(/is-active/);
+  const { EVENT_TYPES } = await import(pathToFileURL(path.resolve(process.cwd(), 'src/core/app/event-types.js')).href);
+  const { getOnboardingProfile } = await import(pathToFileURL(path.resolve(process.cwd(), 'src/core/app/onboarding-profiles.js')).href);
+  for (const { id } of EVENT_TYPES) {
+    await slide('eventType').locator('[data-event-type="' + id + '"]').click();
+    await expect(slide('role')).toHaveClass(/is-active/);
+    const role = slide('role');
+    const profile = getOnboardingProfile(id);
+    if (id === 'wedding') {
+      await expect(role.locator('[data-answer="role"]:visible')).toHaveCount(profile.organizerRoleQuestion.options.length);
+      await expect(role.locator('[data-dynamic-role]')).toHaveCount(0);
+    } else {
+      await expect(role.locator('[data-answer="role"]:visible')).toHaveCount(0);
+      await expect(role.locator('[data-dynamic-role]:visible')).toHaveCount(profile.organizerRoleQuestion.options.length);
+      await expect(role.locator('[data-dynamic-role="organizer"]')).toBeVisible();
+    }
+    await page.locator('#discoverBackButton').click();
+    await expect(slide('eventType')).toHaveClass(/is-active/);
+  }
+  // Recorrido público de lectura: no necesita autenticación ni modifica Firestore.
+});
+
 test('MGD-034/037: navegación pública adaptativa boda y cumpleaños sin autenticación', async ({ page }) => {
   await page.goto('', { waitUntil: 'domcontentloaded' });
   const overlay = page.locator('#discoverOverlay');
