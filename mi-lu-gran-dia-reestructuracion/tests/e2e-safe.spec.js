@@ -2507,3 +2507,22 @@ test('MGD-021: vista previa usa motor y plantilla canónicos sin guardado', asyn
   expect(render).not.toContain('addPersonalInvitation(');
   expect(render).not.toContain('writePlannerStorageKey(');
 });
+
+test('MGD-021: vista previa visual encapsulada y responsive sin publicación', async () => {
+  const fs = await import('node:fs/promises');
+  const js = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/index.js'), 'utf8');
+  const html = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/index.html'), 'utf8');
+  const css = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/editor-preview.css'), 'utf8');
+  expect(html).toContain('src/modules/invitaciones/editor-preview.css');
+  expect(js).toContain('editorPreview.dataset.eventType = type');
+  expect(js).toContain('invitations-editor-title');
+  expect(js).toContain('escapeHtml(name)');
+  expect(js).toContain('escapeHtml(place)');
+  expect(css).toContain('data-template="minimal-black"');
+  expect(css).toContain('data-template="one-piece-elegant"');
+  expect(css).toContain('@media(max-width:600px)');
+  expect(css).not.toContain('!important');
+  const preview = js.slice(js.indexOf('function renderEditorPreview()'),js.indexOf("  editorForm.addEventListener('input'"));
+  expect(preview).not.toContain('addPersonalInvitation(');
+  expect(preview).not.toContain('writePlannerStorageKey(');
+});
