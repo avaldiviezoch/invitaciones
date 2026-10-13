@@ -2014,6 +2014,33 @@ test('MGD-034/037: mismo evento conserva rol y cambio de evento invalida selecci
   // Sin autenticación ni escrituras.
 });
 
+test('MGD-034/037: edad opcional se conserva para mismo evento y se limpia al cambiar', async ({ page }) => {
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  const slide = (name) => page.locator('[data-discover-slide][data-question="' + name + '"]');
+  for (let i = 0; i < 4; i++) await page.locator('#discoverNextButton').click();
+  await slide('eventType').locator('[data-event-type="birthday"]').click();
+  await expect(slide('role')).toHaveClass(/is-active/);
+  await slide('role').locator('[data-dynamic-role="self"]').click();
+  await expect(slide('age')).toHaveClass(/is-active/);
+  const age = page.locator('#discoverAgeInput');
+  await age.fill('25');
+  await page.locator('#discoverBackButton').click();
+  await page.locator('#discoverBackButton').click();
+  await expect(slide('eventType')).toHaveClass(/is-active/);
+  await slide('eventType').locator('[data-event-type="birthday"]').click();
+  await slide('role').locator('[data-dynamic-role="self"]').click();
+  await expect(slide('age')).toHaveClass(/is-active/);
+  await expect(age).toHaveValue('25');
+  await page.locator('#discoverBackButton').click();
+  await page.locator('#discoverBackButton').click();
+  await slide('eventType').locator('[data-event-type="quince"]').click();
+  await expect(slide('role')).toHaveClass(/is-active/);
+  await slide('role').locator('[data-dynamic-role="quinceanera"]').click();
+  await expect(slide('age')).toHaveClass(/is-active/);
+  await expect(age).toHaveValue('');
+  // Solo DOM público, sin autenticación ni escrituras.
+});
+
 test('MGD-034/037: los ocho eventos muestran solo sus roles reales en navegador', async ({ page }) => {
   await page.goto('', { waitUntil: 'domcontentloaded' });
   const slide = (name) => page.locator('[data-discover-slide][data-question="' + name + '"]');
