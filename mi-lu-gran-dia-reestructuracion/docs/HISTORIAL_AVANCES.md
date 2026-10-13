@@ -1,3 +1,15 @@
+## 2026-10-13 — MGD-021–024: auditoría de integración de Invitaciones (DEV, NO IMPLEMENTADO)
+
+**Evidencia en código DEV:** `src/core/app/invitation-engine.js` expone un modelo genérico de nueve campos, pero no está conectado a una experiencia de edición. `src/core/app/invitation-templates.js` solo enumera tres plantillas de presentación. `src/core/app/public-invitation-url.js` genera el contrato de ruta `/i/{id}`; `src/core/app/public-invite-id.js` implementa identificadores/revocación en memoria, no persistencia ni resolución pública operativa. En `src/modules/invitaciones/index.js` la interfaz vigente lista enlaces de la biblioteca personal, permite agregarlos y previsualizarlos; el botón «crear» muestra texto informativo. No declarar terminado el editor ni el routing público.
+
+**Ruta crítica de integración propuesta:**
+1. Auditar el contrato real de biblioteca personal `users/{uid}/invitations`, las invitaciones existentes y las rutas RSVP antes de tocar cualquier dato.
+2. Diseñar un editor mínimo adaptativo para ocho `eventType`, mediante el motor existente: datos del evento, destinatario, lugar, fecha y controles de invitación. Separar plantilla visual de lógica, sin iframe externo que dependa de permisos `frame-ancestors`.
+3. Establecer claramente qué recurso pertenece a `uid` y qué referencia corresponde al `eventId`; no inferir autorización del enlace. No crear escrituras nuevas, resolver IDs en Firestore, ni desplegar rutas `/i/` hasta revisión y autorización de persistencia/seguridad.
+4. QA: compatibilidad de enlaces históricos, biblioteca al cambiar A→B→A y al cambiar de cuenta, accesibilidad, escritorio/móvil, RSVP y dominio; desplegar componentes validados y autorizados selectivamente.
+
+**Bloqueo actual:** aún no existe editor funcional integrado ni resolución pública `/i/{id}`. Se prioriza flujo MVP de editor + vista previa local y no SEO/slug personalizado; MGD-024 puede diferirse sin bloquear el editor. Esta entrada documenta auditoría, no implementación de código.
+
 ## 2026-10-13 — MGD-018: sugerencias de Checklist solo por acción voluntaria (DEV, QA PENDIENTE)
 
 - Tras PR #178 incorporado en main, se habilita para eventos no-boda con rol editable un botón «Tareas sugeridas» en el módulo Checklist, basado exclusivamente en getChecklistTemplate(eventType).
