@@ -1,5 +1,14 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-034/037: QA de edad opcional entre eventos (DEV)
+
+- PR #161 verificado fusionado (`040a776c`) y CI verde (run `38421131552`).
+- Nueva prueba Playwright pública: en cumpleaños, retroceder y elegir otra vez cumpleaños debe conservar la edad indicada; al cambiar de cumpleaños a quinceañero, aunque ambos tipos solicitan edad opcional, el valor antiguo debe limpiarse.
+- Cobertura de comportamiento real en navegador sin cambios del motor ni persistencia, reglas, Auth, Firestore o producción.
+- Pendientes QA visual manual y MGD-037 A → B → A auténtico con cuenta ficticia.
+
+
+
 ## 2026-10-13 — MGD-034/037: QA navegador para conservar e invalidar rol (DEV)
 
 - PR #160 verificado fusionado (`3e278da6`) y CI verde, run `38419897694`.
