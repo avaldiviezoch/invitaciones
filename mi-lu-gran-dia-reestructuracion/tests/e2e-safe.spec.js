@@ -2041,6 +2041,33 @@ test('MGD-034/037: edad opcional se conserva para mismo evento y se limpia al ca
   // Solo DOM público, sin autenticación ni escrituras.
 });
 
+test('MGD-034/037: rango de invitados mantiene o limpia el número exacto', async ({ page }) => {
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  const slide = (name) => page.locator('[data-discover-slide][data-question="' + name + '"]');
+  for (let i = 0; i < 4; i++) await page.locator('#discoverNextButton').click();
+  await slide('eventType').locator('[data-event-type="wedding"]').click();
+  await slide('role').locator('[data-answer="role"][data-value="novia"]').click();
+  await expect(slide('stage')).toHaveClass(/is-active/);
+  const guestsIndex = await slide('guests').evaluate((node) => Array.from(node.parentElement.children).indexOf(node));
+  await page.locator('#discoverDots button').nth(guestsIndex).click();
+  await expect(slide('guests')).toHaveClass(/is-active/);
+  const options = slide('guests');
+  await options.locator('[data-answer="guests"][data-value="50-100"]').click();
+  const count = page.locator('#discoverGuestExactInput');
+  await count.fill('82');
+  // El formulario avanza automáticamente tras el evento change del input.
+  // No pulsar Siguiente mientras sigue pendiente su temporizador de avance.
+  await count.press('Tab');
+  await expect(slide('date')).toHaveClass(/is-active/);
+  await page.locator('#discoverBackButton').click();
+  await expect(slide('guests')).toHaveClass(/is-active/);
+  await options.locator('[data-answer="guests"][data-value="50-100"]').click();
+  await expect(count).toHaveValue('82');
+  await options.locator('[data-answer="guests"][data-value="100-150"]').click();
+  await expect(count).toHaveValue('');
+  // QA público sin autenticación ni escrituras.
+});
+
 test('MGD-034/037: fecha elegida deja de figurar al responder Todavía no', async ({ page }) => {
   await page.goto('', { waitUntil: 'domcontentloaded' });
   const slide = (name) => page.locator('[data-discover-slide][data-question="' + name + '"]');
