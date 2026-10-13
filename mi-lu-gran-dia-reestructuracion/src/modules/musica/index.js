@@ -164,10 +164,19 @@ export async function mountMusica(context){
   const response=await fetch('src/modules/musica/index.html?v=4',{cache:'no-store'});if(!response.ok)throw new Error('No se pudo cargar la interfaz de Música.');
   root.innerHTML=await response.text();
   let plan=normalizePlan(await readPlannerStorageKey(context,STORAGE_KEY));
-  const coversChanged=await hydratePlaylistCovers(plan);
-  const snapshot=await loadRsvpAdminSnapshot(context);let requests=requestEntries(snapshot),search='';
-  const save=async message=>{await writePlannerStorageKey(context,STORAGE_KEY,normalizePlan(plan));root.querySelector('[data-music-state]').textContent=message||'Cambios guardados en la boda.'};
-  if(coversChanged)await writePlannerStorageKey(context,STORAGE_KEY,normalizePlan(plan));
+  // Portadas y solicitudes RSVP son datos auxiliares: su error no debe
+  // impedir abrir Música ni modificar los registros musicales del usuario.
+  let coversChanged=false;
+  try { coversChanged=await hydratePlaylistCovers(plan); }
+  catch (error) { console.warn('Música: no se pudieron actualizar las portadas.',error); }
+  let requests=[],search='';
+  try { requests=requestEntries(await loadRsvpAdminSnapshot(context)); }
+  catch (error) { console.warn('Música: solicitudes RSVP temporalmente no disponibles.',error); }
+  const save=async message=>{await writePlannerStorageKey(context,STORAGE_KEY,normalizePlan(plan));root.querySelector('[data-music-state]').textContent=message||(musicEventType==='wedding'?'Cambios guardados en la boda.':'Cambios guardados en el evento.')};
+  if(coversChanged) {
+    try { await writePlannerStorageKey(context,STORAGE_KEY,normalizePlan(plan)); }
+    catch (error) { console.warn('Música: portadas actualizadas solo durante esta sesión.',error); }
+  }
   render(plan,requests,search);
   const addDialog=document.querySelector('[data-add-music-dialog]');
   const editCoverDialog=document.querySelector('[data-edit-cover-dialog]');
