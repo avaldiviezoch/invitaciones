@@ -2204,7 +2204,11 @@ test('MGD-036: paletas de boda y cumpleaños se renderizan en onboarding sin aut
   const choose = async (type) => {
     await expect(page.locator('[data-question="eventType"]')).toHaveClass(/is-active/);
     await expect(page.locator('[data-discover-kind="finish"]')).toBeHidden();
-    await page.locator('[data-question="eventType"] [data-event-type="' + type + '"]').click();
+    // El cambio de slide tiene animación; esperar que la tarjeta sea visible
+    // evita intentar pulsarla mientras el slide aún está oculto.
+    const eventOption = page.locator('[data-question="eventType"] [data-event-type="' + type + '"]');
+    await expect(eventOption).toBeVisible();
+    await eventOption.click();
     const roleSelector = type === 'wedding'
       ? '[data-question="role"] [data-answer="role"][data-value="novia"]'
       : '[data-question="role"] [data-dynamic-role="self"]';
