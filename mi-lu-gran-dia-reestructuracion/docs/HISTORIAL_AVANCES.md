@@ -1,3 +1,10 @@
+## 2026-10-12 — MGD-034/037: conservar número de invitados al repetir rango (DEV)
+
+- PR #157 fusionado y CI aprobado; se identifica pérdida del valor exacto de invitados al volver a seleccionar el **mismo rango** en el onboarding.
+- El manejador original ahora solo reinicia `guestCount` y vacía el campo exacto cuando el rango efectivamente cambia. Volver a elegir el mismo rango preserva el valor ya digitado.
+- Test de regresión dentro de la suite existente y actualización de bitácora/roadmap. Sin motor nuevo ni cambios de Firebase, persistencia canónica o producción.
+- Sigue pendiente QA visual y funcional de las ocho rutas y prueba MGD-037 A → B → A autenticada.
+
 ## 2026-10-12 — MGD-034/037: reiniciar fecha al responder «Todavía no» (DEV)
 
 - PR #156 verificado fusionado; se corrige que el onboarding conserve una fecha anterior en memoria al cambiar la respuesta de «Sí» a «Todavía no».

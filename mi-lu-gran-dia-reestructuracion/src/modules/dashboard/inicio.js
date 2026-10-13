@@ -438,8 +438,11 @@ document.querySelectorAll('[data-answer]').forEach((button) => {
       return;
     }
     if (name === 'guests') {
+      if (discoverAnswers.guests !== value) {
+        discoverAnswers.guestCount = 0;
+        if (discoverGuestExactInput) discoverGuestExactInput.value = '';
+      }
       discoverAnswers.guests = value;
-      discoverAnswers.guestCount = 0;
       document.querySelectorAll('[data-answer="guests"]').forEach((candidate) => candidate.classList.toggle('is-selected', candidate === button));
       if (discoverGuestExactField) discoverGuestExactField.hidden = value === 'no-se';
       if (value === 'no-se') {
