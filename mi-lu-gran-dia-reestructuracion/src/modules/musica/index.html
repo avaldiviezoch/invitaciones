@@ -1,25 +1,25 @@
 <div class="music-admin-shell">
   <header class="music-admin-hero">
-    <span class="music-admin-eyebrow">MÓDULO · ESPACIO DE LA BODA</span>
+    <span class="music-admin-eyebrow">MÓDULO · ESPACIO DEL EVENTO</span>
     <div class="music-admin-title-row">
       <div class="music-admin-title-icon" aria-hidden="true">♫</div>
-      <div><h1>Música</h1><p>Organiza la música de tu boda y administra las solicitudes de tus invitados.</p></div>
+      <div><h1>Música</h1><p>Organiza la música de tu evento y administra las solicitudes de tus invitados.</p></div>
       <div class="music-admin-hero-total"><strong data-music-total>0</strong><span>selecciones</span></div>
     </div>
   </header>
 
   <main class="music-admin-content">
     <section class="music-admin-kpis">
-      <article><span>Selecciones</span><strong data-music-kpi-playlists>0</strong><small>de música de boda</small></article>
+      <article><span>Selecciones</span><strong data-music-kpi-playlists>0</strong><small>de música del evento</small></article>
       <article><span>Canciones</span><strong data-music-kpi-songs>0</strong><small>organizadas</small></article>
       <article><span>Invitados</span><strong data-music-kpi-guests>0</strong><small>con solicitudes</small></article>
       <article><span>Solicitudes</span><strong data-music-kpi-requests>0</strong><small>recibidas</small></article>
     </section>
 
     <section class="music-admin-intro">
-      <div><span class="music-admin-section-label">MÚSICA DE BODA</span>
+      <div><span class="music-admin-section-label">MÚSICA DEL EVENTO</span>
         <h2>Una sola entrada para organizar toda tu música</h2>
-        <p>Agrega una playlist o canción, elige el momento de la boda y listo. No necesitas administrar cada momento por separado.</p>
+        <p>Agrega una playlist o canción, elige el momento del evento y listo. No necesitas administrar cada momento por separado.</p>
       </div>
       <div class="music-admin-flow">
         <span><b>01</b> Agrega música</span><i>→</i><span><b>02</b> Elige el momento</span><i>→</i><span><b>03</b> Vincula la playlist</span>
@@ -28,8 +28,8 @@
 
     <section class="music-playlists-section">
       <div class="music-admin-toolbar">
-        <div><span class="music-admin-section-label">MÚSICA DE BODA</span><h2>Mis selecciones</h2><p>Las playlists aparecen aquí con su portada y momento asignado.</p></div>
-        <button type="button" class="music-primary" data-add-wedding-music>＋ Agregar música de boda</button>
+        <div><span class="music-admin-section-label">MÚSICA DEL EVENTO</span><h2>Mis selecciones</h2><p>Las playlists aparecen aquí con su portada y momento asignado.</p></div>
+        <button type="button" class="music-primary" data-add-wedding-music>＋ Agregar música</button>
       </div>
       <div class="music-playlist-list" data-music-playlists></div>
     </section>
@@ -60,7 +60,7 @@
 
   <dialog class="music-dialog music-add-dialog" data-add-music-dialog>
     <form data-add-music-form>
-      <div class="music-dialog-head"><div><span>AGREGAR MÚSICA DE BODA</span><h2>¿Qué música quieres agregar?</h2></div><button type="button" data-close-add-music aria-label="Cerrar">×</button></div>
+      <div class="music-dialog-head"><div><span>AGREGAR MÚSICA DEL EVENTO</span><h2>¿Qué música quieres agregar?</h2></div><button type="button" data-close-add-music aria-label="Cerrar">×</button></div>
 
       <label>Tipo de música
         <select name="kind" data-music-kind>
@@ -69,7 +69,7 @@
         </select>
       </label>
 
-      <label>Momento de la boda
+      <label>Momento del evento
         <select name="momentMode" data-moment-mode>
           <option value="single">Un momento</option>
           <option value="combined">Combinado · varios momentos</option>
@@ -90,7 +90,7 @@
 
       <div data-custom-category hidden>
         <label>Nombre de tu categoría
-          <input name="customCategory" maxlength="80" placeholder="Ej. Fiesta después de la boda">
+          <input name="customCategory" maxlength="80" placeholder="Ej. Fiesta de cierre">
         </label>
       </div>
 

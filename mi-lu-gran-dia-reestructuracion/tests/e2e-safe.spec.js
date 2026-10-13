@@ -32,6 +32,49 @@ function collectUnexpectedErrors(page, { consoleErrors = true } = {}) {
   return errors;
 }
 
+test('MGD-037: Música mantiene plantilla neutra y solicitudes RSVP opcionales', async () => {
+  const fs = await import('node:fs/promises');
+  const [html, js] = await Promise.all([
+    fs.readFile(path.resolve(process.cwd(), 'src/modules/musica/index.html'), 'utf8'),
+    fs.readFile(path.resolve(process.cwd(), 'src/modules/musica/index.js'), 'utf8')
+  ]);
+  expect(html).toContain('MÓDULO · ESPACIO DEL EVENTO');
+  expect(html).not.toMatch(/MÚSICA DE BODA|Momento de la boda|música de tu boda/);
+  expect(js).toContain('try { requests=requestEntries(await loadRsvpAdminSnapshot(context)); }');
+  expect(js).toContain('try { coversChanged=await hydratePlaylistCovers(plan); }');
+  expect(js).toContain('if(coversChanged)');
+});
+
+test('MGD-037: textos iniciales son neutros y se contextualizan por evento sin duplicar motores', async () => {
+  const fs = await import('node:fs/promises');
+  const [html, dashboard] = await Promise.all([
+    fs.readFile(path.resolve(process.cwd(), 'index.html'), 'utf8'),
+    fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8')
+  ]);
+  expect(html).toContain('data-event-copy="space"');
+  expect(html).toContain('data-event-copy="during"');
+  expect(html).toContain('data-event-copy="current"');
+  expect(html).toContain('data-event-copy="active"');
+  for (const text of ['Checklist de boda</span>', 'Espacio de la boda</span>', 'En la boda</span>', 'LO PRÓXIMO DE TU BODA</span>', 'Cargando información de tu boda</span>']) {
+    expect(html).not.toContain(text);
+  }
+  for (const text of ['Checklist de boda', 'Espacio de la boda', 'En la boda', 'LO PRÓXIMO DE TU BODA', 'ACCESOS DE LA BODA']) {
+    expect(dashboard).toContain(text);
+  }
+  const moduleFiles = await Promise.all([
+    'src/modules/checklist/index.js',
+    'src/modules/cronograma/index.js',
+    'src/modules/musica/index.js',
+    'src/modules/presupuesto/index.js'
+  ].map((file) => fs.readFile(path.resolve(process.cwd(), file), 'utf8')));
+  expect(moduleFiles[0]).toContain("activeContext?.eventType === 'wedding' ? 'Checklist de boda' : 'Checklist del evento'");
+  expect(moduleFiles[1]).toContain("'Datos del evento activo · edición habilitada'");
+  expect(moduleFiles[2]).toContain("musicEventType==='wedding'?'MÚSICA DE BODA':'MÚSICA DEL EVENTO'");
+  expect(moduleFiles[3]).toContain("'presupuesto-evento.csv'");
+  expect(dashboard).toContain("const isWeddingContext = context?.eventType === 'wedding'");
+  expect(dashboard).toContain("setEventCopy('.module-link[data-module=\"checklist\"] span'");
+});
+
 test('E2E-01: carga pública y versión formal', async ({ page }) => {
   const errors = collectUnexpectedErrors(page);
   await page.goto('', { waitUntil: 'domcontentloaded' });

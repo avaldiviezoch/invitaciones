@@ -8,6 +8,7 @@ const DEFAULT_MOMENTS=[
 ].map(([id,name])=>({id,name,description:'',songs:[],playlist:null}));
 
 let cleanup=null;
+let musicEventType='';
 const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
 const clean=(v,n=140)=>String(v??'').trim().slice(0,n);
 function hostMatches(host,domain){return host===domain||host.endsWith('.'+domain);}
@@ -89,7 +90,7 @@ function openMusicPreview(item,media,url){
   const tracks=Array.isArray(item?.tracks)?item.tracks:[];
   const rows=tracks.length?tracks.map((t,i)=>{const trackUrl=safeHttpUrl(t.url)||('https://www.youtube.com/watch?v='+encodeURIComponent(t.videoId||''));const coverUrl=safeImageUrl(t.coverUrl);return '<a class="music-track-row" href="'+esc(trackUrl)+'" target="_blank" rel="noopener noreferrer">'+(coverUrl?'<img src="'+esc(coverUrl)+'" alt="" loading="lazy">':'<span class="music-track-cover">♫</span>')+'<span class="music-track-index">'+String(i+1).padStart(2,'0')+'</span><span class="music-track-info"><strong>'+esc(t.title)+'</strong><small>'+esc(t.artist||'')+'</small></span><span class="music-track-play">↗</span></a>').join(''):'<div class="music-empty-selection">Todavía no se han importado las canciones de esta playlist.</div>';
   const overlay=document.createElement('div'); overlay.className='music-preview-overlay'; overlay.dataset.musicPreviewOverlay='';
-  overlay.innerHTML='<div class="music-preview-card music-playlist-view" role="dialog" aria-modal="true"><div class="music-preview-head"><div><span class="music-admin-section-label">PLAYLIST</span><h2>'+esc(item?.name||'Música de boda')+'</h2><p class="music-preview-sub">'+esc(platformLabel(media?.platform)||'Música')+' · '+(item?.totalResults||tracks.length||0)+' canciones</p></div><button type="button" class="music-preview-close" aria-label="Cerrar">×</button></div><div class="music-playlist-summary">'+(safeImageUrl(item?.coverUrl)?'<img src="'+esc(safeImageUrl(item.coverUrl))+'" alt="" loading="lazy">':visualFallback(media?.platform||'generic'))+'<div><strong>'+esc(item?.name||'Música de boda')+'</strong><span>'+esc(platformLabel(media?.platform)||'Música')+'</span><a href="'+esc(sourceUrl)+'" target="_blank" rel="noopener noreferrer">Ver playlist original ↗</a></div></div><div class="music-track-list">'+rows+'</div></div>';
+  overlay.innerHTML='<div class="music-preview-card music-playlist-view" role="dialog" aria-modal="true"><div class="music-preview-head"><div><span class="music-admin-section-label">PLAYLIST</span><h2>'+esc(item?.name||(musicEventType==='wedding'?'Música de boda':'Música del evento'))+'</h2><p class="music-preview-sub">'+esc(platformLabel(media?.platform)||'Música')+' · '+(item?.totalResults||tracks.length||0)+' canciones</p></div><button type="button" class="music-preview-close" aria-label="Cerrar">×</button></div><div class="music-playlist-summary">'+(safeImageUrl(item?.coverUrl)?'<img src="'+esc(safeImageUrl(item.coverUrl))+'" alt="" loading="lazy">':visualFallback(media?.platform||'generic'))+'<div><strong>'+esc(item?.name||(musicEventType==='wedding'?'Música de boda':'Música del evento'))+'</strong><span>'+esc(platformLabel(media?.platform)||'Música')+'</span><a href="'+esc(sourceUrl)+'" target="_blank" rel="noopener noreferrer">Ver playlist original ↗</a></div></div><div class="music-track-list">'+rows+'</div></div>';
   document.body.appendChild(overlay);
   const close=()=>overlay.remove(); overlay.querySelector('.music-preview-close').addEventListener('click',close); overlay.addEventListener('click',event=>{if(event.target===overlay)close()});
   const onKey=event=>{if(event.key==='Escape'){close();document.removeEventListener('keydown',onKey)}}; document.addEventListener('keydown',onKey);
@@ -125,15 +126,15 @@ function render(plan,requests,search){
   });
   const items=[...grouped.values()];
   root.innerHTML='<div class="music-board">'+
-    '<div class="music-board-head"><div><span class="music-admin-section-label">MÚSICA DE BODA</span><h3>Mis referencias musicales</h3><p>Todas las playlists y canciones que has agregado a tu boda.</p></div><span class="music-board-count">'+items.length+' '+(items.length===1?'referencia':'referencias')+'</span></div>'+
+    '<div class="music-board-head"><div><span class="music-admin-section-label">'+(musicEventType==='wedding'?'MÚSICA DE BODA':'MÚSICA DEL EVENTO')+'</span><h3>Mis referencias musicales</h3><p>Todas las playlists y canciones que has agregado a tu '+(musicEventType==='wedding'?'boda':'evento')+'.</p></div><span class="music-board-count">'+items.length+' '+(items.length===1?'referencia':'referencias')+'</span></div>'+
     '<div class="music-reference-list">'+
     (items.length?items.map((item,i)=>{
       const p=item.playlist;
       return '<article class="music-reference-row">'+
         (safeImageUrl(p.coverUrl)?'<img src="'+esc(safeImageUrl(p.coverUrl))+'" alt="" loading="lazy">':visualFallback(p.platform))+
-        '<div class="music-reference-main"><strong>'+esc(p.name||'Música de boda')+'</strong><div class="music-reference-moments">'+item.moments.map(name=>'<span>'+esc(name)+'</span>').join('')+'</div><small>'+esc(platformLabel(p.platform))+(safeHttpUrl(p.url)?' · <a href="'+esc(safeHttpUrl(p.url))+'" target="_blank" rel="noopener noreferrer">ver referencia</a>':'')+(p.coverSource==='custom'?' · portada personalizada':'')+'</small></div>'+
-        '<button type="button" class="music-row-cover" data-edit-cover-url="'+esc(p.url)+'" data-edit-cover-title="'+esc(p.name||'Música de boda')+'" aria-label="Cambiar portada">▧</button>'+
-        '<button type="button" class="music-row-play" data-preview-url="'+esc(p.url)+'" data-preview-title="'+esc(p.name||'Música de boda')+'" aria-label="Ver canciones">♫</button>'+
+        '<div class="music-reference-main"><strong>'+esc(p.name||(musicEventType==='wedding'?'Música de boda':'Música del evento'))+'</strong><div class="music-reference-moments">'+item.moments.map(name=>'<span>'+esc(name)+'</span>').join('')+'</div><small>'+esc(platformLabel(p.platform))+(safeHttpUrl(p.url)?' · <a href="'+esc(safeHttpUrl(p.url))+'" target="_blank" rel="noopener noreferrer">ver referencia</a>':'')+(p.coverSource==='custom'?' · portada personalizada':'')+'</small></div>'+
+        '<button type="button" class="music-row-cover" data-edit-cover-url="'+esc(p.url)+'" data-edit-cover-title="'+esc(p.name||(musicEventType==='wedding'?'Música de boda':'Música del evento'))+'" aria-label="Cambiar portada">▧</button>'+
+        '<button type="button" class="music-row-play" data-preview-url="'+esc(p.url)+'" data-preview-title="'+esc(p.name||(musicEventType==='wedding'?'Música de boda':'Música del evento'))+'" aria-label="Ver canciones">♫</button>'+
         '<button type="button" class="music-row-remove" data-remove-url="'+esc(p.url)+'" aria-label="Quitar referencia">×</button>'+
       '</article>';
     }).join(''):'<div class="music-empty-selection">Todavía no has agregado música de boda.<br><span>Usa “＋ Agregar música de boda” para comenzar.</span></div>')+
@@ -159,14 +160,23 @@ function fillCategoryControls(plan,root){
 }
 export async function mountMusica(context){
   const root=document.querySelector('[data-module-view="musica"]');if(!root||!context?.id)return false;
-  cleanup?.();const controller=new AbortController(),{signal}=controller;
+  cleanup?.();musicEventType=context.eventType||'';const controller=new AbortController(),{signal}=controller;
   const response=await fetch('src/modules/musica/index.html?v=4',{cache:'no-store'});if(!response.ok)throw new Error('No se pudo cargar la interfaz de Música.');
   root.innerHTML=await response.text();
   let plan=normalizePlan(await readPlannerStorageKey(context,STORAGE_KEY));
-  const coversChanged=await hydratePlaylistCovers(plan);
-  const snapshot=await loadRsvpAdminSnapshot(context);let requests=requestEntries(snapshot),search='';
-  const save=async message=>{await writePlannerStorageKey(context,STORAGE_KEY,normalizePlan(plan));root.querySelector('[data-music-state]').textContent=message||'Cambios guardados en la boda.'};
-  if(coversChanged)await writePlannerStorageKey(context,STORAGE_KEY,normalizePlan(plan));
+  // Portadas y solicitudes RSVP son datos auxiliares: su error no debe
+  // impedir abrir Música ni modificar los registros musicales del usuario.
+  let coversChanged=false;
+  try { coversChanged=await hydratePlaylistCovers(plan); }
+  catch (error) { console.warn('Música: no se pudieron actualizar las portadas.',error); }
+  let requests=[],search='';
+  try { requests=requestEntries(await loadRsvpAdminSnapshot(context)); }
+  catch (error) { console.warn('Música: solicitudes RSVP temporalmente no disponibles.',error); }
+  const save=async message=>{await writePlannerStorageKey(context,STORAGE_KEY,normalizePlan(plan));root.querySelector('[data-music-state]').textContent=message||(musicEventType==='wedding'?'Cambios guardados en la boda.':'Cambios guardados en el evento.')};
+  if(coversChanged) {
+    try { await writePlannerStorageKey(context,STORAGE_KEY,normalizePlan(plan)); }
+    catch (error) { console.warn('Música: portadas actualizadas solo durante esta sesión.',error); }
+  }
   render(plan,requests,search);
   const addDialog=document.querySelector('[data-add-music-dialog]');
   const editCoverDialog=document.querySelector('[data-edit-cover-dialog]');

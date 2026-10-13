@@ -64,7 +64,7 @@
 Gestión integral</span>
 <div class="wedding-heading">
 <h1 id="mainWeddingTitle">
-Mi boda
+Mi evento
 </h1>
 <button id="editMainWeddingTitleButton" type="button">
 Editar nombre
@@ -86,12 +86,11 @@ Cuenta</strong>
 </div>
 <div class="wedding-context" id="weddingContext" aria-live="polite">
 <div class="wedding-context-head">
-<span>
-BODA ACTUAL</span>
+<span data-event-copy="current">EVENTO ACTUAL</span>
 </div>
-<button class="active-wedding-button" id="activeWeddingButton" type="button" aria-label="Ver mis bodas"><strong id="activeWeddingName">Mi boda</strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
+<button class="active-wedding-button" id="activeWeddingButton" type="button" aria-label="Ver mis eventos"><strong id="activeWeddingName">Mi evento</strong><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>
 <div class="wedding-title-editor" id="weddingTitleEditor">
-<input id="weddingTitleInput" type="text" maxlength="80" autocomplete="off" aria-label="Nombre de la boda" placeholder="Escribe el nombre de tu boda">
+<input id="weddingTitleInput" type="text" maxlength="80" autocomplete="off" aria-label="Nombre del evento" placeholder="Escribe el nombre de tu evento">
 <div>
 <button id="saveWeddingTitleButton" type="button">
 Guardar
@@ -190,7 +189,7 @@ Tareas, presupuesto, proveedores e ideas.</span>
 <div class="module-links">
 <a class="module-link" href="#checklist" data-module="checklist">
 <span>
-Checklist de boda</span>
+Checklist</span>
 <svg viewBox="0 0 24 24">
 <path d="m9 18 6-6-6-6"/>
 </svg>
@@ -226,8 +225,7 @@ Ideas e inspiración</span>
 <span class="module-number">
 02</span>
 <span>
-<span class="module-name">
-Espacio de la boda</span>
+<span class="module-name" data-event-copy="space">Espacio del evento</span>
 <span class="module-description">
 Invitados, distribución, cronograma e invitaciones.</span>
 </span>
@@ -277,8 +275,7 @@ Invitaciones</span>
 <span class="module-number">
 03</span>
 <span>
-<span class="module-name">
-En la boda</span>
+<span class="module-name" data-event-copy="during">Durante el evento</span>
 <span class="module-description">
 Música y fotografías.</span>
 </span>
@@ -309,8 +306,8 @@ Fotos</span>
 </div>
 </article>
 </section>
-<section class="home-dashboard" id="homeDashboard" aria-label="Resumen de la boda" aria-hidden="true" aria-busy="false">
-<article class="home-focus" data-home-focus><div><span>LO PRÓXIMO DE TU BODA</span><strong data-home-focus-title>Organizando prioridades…</strong><small data-home-focus-detail></small></div><button type="button" data-home-focus-action hidden>Ver</button></article>
+<section class="home-dashboard" id="homeDashboard" aria-label="Resumen del evento" aria-hidden="true" aria-busy="false">
+<article class="home-focus" data-home-focus><div><span>LO PRÓXIMO DE TU EVENTO</span><strong data-home-focus-title>Organizando prioridades…</strong><small data-home-focus-detail></small></div><button type="button" data-home-focus-action hidden>Ver</button></article>
 <article class="home-glass home-guests">
 <div class="home-head">
 <span>INVITADOS</span>
@@ -576,7 +573,7 @@ Cancelar
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
     </button>
     <span class="app-mobile-brand-mark" aria-hidden="true">MGD</span>
-    <span class="app-mobile-identity"><strong>Mi Gran Día</strong><small id="appMobileWeddingName">Mi boda</small></span>
+    <span class="app-mobile-identity"><strong>Mi Gran Día</strong><small id="appMobileWeddingName">Mi evento</small></span>
   </header>
   <button class="app-mobile-nav-backdrop" id="appMobileNavBackdrop" type="button" tabindex="-1" aria-label="Cerrar navegación" aria-hidden="true"></button>
   <nav class="app-module-nav" id="appModuleNav" aria-label="Navegación de Mi Gran Día">
@@ -592,13 +589,13 @@ Cancelar
       <button class="app-nav-item" type="button" data-app-module="musica"><img src="../mi-gran-dia/barra/icons/musica.png?v=1" alt=""><span>Música</span></button>
       <button class="app-nav-item" type="button" data-app-module="ideas"><img src="../mi-gran-dia/barra/icons/ideas.png?v=1" alt=""><span>Ideas</span></button>
     </div>
-    <div class="app-nav-account-wrap" id="appNavAccountWrap"><button class="app-nav-account" id="appNavAccountButton" type="button" aria-haspopup="true" aria-expanded="false"><span class="app-nav-account-avatar"><img id="appNavAvatar" alt="Foto de perfil"><span id="appNavInitials">MGD</span></span><span class="app-nav-account-copy"><strong id="appNavAccountName">Mi cuenta</strong><small id="appNavRole">Mi acceso</small></span><span class="app-nav-chevron">⌄</span></button><div class="app-nav-account-popover" role="dialog" aria-label="Cuenta activa"><strong id="appNavPopoverName">Mi cuenta</strong><span id="appNavPopoverEmail"></span><button class="app-nav-wedding" id="appNavWeddingButton" type="button"><span>Boda activa</span><strong id="appNavPopoverWedding">Mi boda</strong><small>Ver mis bodas y accesos</small></button><button class="app-nav-logout" id="appNavLogout" type="button">Cerrar sesión</button></div></div>
+    <div class="app-nav-account-wrap" id="appNavAccountWrap"><button class="app-nav-account" id="appNavAccountButton" type="button" aria-haspopup="true" aria-expanded="false"><span class="app-nav-account-avatar"><img id="appNavAvatar" alt="Foto de perfil"><span id="appNavInitials">MGD</span></span><span class="app-nav-account-copy"><strong id="appNavAccountName">Mi cuenta</strong><small id="appNavRole">Mi acceso</small></span><span class="app-nav-chevron">⌄</span></button><div class="app-nav-account-popover" role="dialog" aria-label="Cuenta activa"><strong id="appNavPopoverName">Mi cuenta</strong><span id="appNavPopoverEmail"></span><button class="app-nav-wedding" id="appNavWeddingButton" type="button"><span data-event-copy="active">Evento activo</span><strong id="appNavPopoverWedding">Mi boda</strong><small>Ver mis eventos y accesos</small></button><button class="app-nav-logout" id="appNavLogout" type="button">Cerrar sesión</button></div></div>
   </nav>
   <main class="module-stage" id="moduleStage">
     <div class="module-loader" id="moduleLoader" role="status" aria-live="polite" aria-label="Cargando módulo">
       <div class="module-loader-mark" aria-hidden="true"><span><img src="https://avaldiviezoch.github.io/Wedding/invitaciones/invitacion_0/assets/LOGO4.gif" alt=""></span><i></i></div>
       <strong>Preparando tu espacio</strong>
-      <span class="module-loader-copy">Cargando información de tu boda</span>
+      <span class="module-loader-copy">Cargando información de tu evento</span>
       <div class="module-loader-dots" aria-hidden="true"><i></i><i></i><i></i></div>
     </div>
     <section class="checklist-review" data-module-view="checklist"><div class="module-loading" role="status" aria-live="polite">Cargando…</div></section>
@@ -614,7 +611,7 @@ Cancelar
 </section><section class="access-manager" id="accessManager" aria-hidden="true">
 <div class="access-manager-backdrop" data-close-access></div>
 <div class="access-manager-panel" role="dialog" aria-modal="true" aria-labelledby="accessManagerTitle">
-<header class="access-manager-head"><div><span>ACCESOS DE LA BODA</span><h2 id="accessManagerTitle">Gestionar personas</h2><p id="accessManagerWedding">Mi boda</p></div><button type="button" data-close-access aria-label="Cerrar">×</button></header>
+<header class="access-manager-head"><div><span>ACCESOS DEL EVENTO</span><h2 id="accessManagerTitle">Gestionar personas</h2><p id="accessManagerWedding">Mi evento</p></div><button type="button" data-close-access aria-label="Cerrar">×</button></header>
 <form class="access-invite" id="accessInviteForm"><label><span>Correo</span><input id="accessInviteEmail" type="email" autocomplete="email" placeholder="persona@correo.com" required></label><label><span>Rol</span><select id="accessInviteRole"><option value="admin">Administrador</option><option value="editor">Editor</option><option value="provider">Proveedor</option><option value="viewer">Solo lectura</option></select></label><button type="submit">Invitar</button></form>
 <p class="access-status" id="accessStatus" aria-live="polite"></p>
 <div class="access-section"><div class="access-section-title"><strong>Personas con acceso</strong><span id="accessMembersCount"></span></div><div class="access-list" id="accessMembers"></div></div>

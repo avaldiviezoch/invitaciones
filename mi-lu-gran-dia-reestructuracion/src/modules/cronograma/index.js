@@ -439,7 +439,7 @@ async function mountCronograma(context){
     bind(root); render();
     const editable=canEdit();
     root.querySelector('[data-timeline-new]').hidden=!editable;
-    root.querySelector('[data-timeline-state]').textContent=editable?'Datos de la boda activa · edición habilitada':'Datos de la boda activa · solo lectura';
+    root.querySelector('[data-timeline-state]').textContent=editable?(activeContext?.eventType === 'wedding' ? 'Datos de la boda activa · edición habilitada' : 'Datos del evento activo · edición habilitada'):(activeContext?.eventType === 'wedding' ? 'Datos de la boda activa · solo lectura' : 'Datos del evento activo · solo lectura');
     return true;
   }catch(error){
     if(epoch!==mountEpoch) return false;
