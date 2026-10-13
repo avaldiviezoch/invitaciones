@@ -1,3 +1,13 @@
+## 2026-10-13 — Secuencia posterior a QA MGD-037: paridad visual y Checklist por evento (PENDIENTE)
+
+**Dependencia obligatoria:** ejecutar y aprobar primero la prueba autenticada MGD-037 de cambio de evento A → B → A con cuentas y eventos ficticios, comprobando aislamiento real (Invitados, Presupuesto, Distribución, Checklist, Música, persistencia, datos y regresiones). No adelantar promoción a producción.
+
+**Siguiente bloque — auditoría DEV ↔ PROD de UI:** cotejar navegación superior, márgenes y dimensiones (top, height, padding, espacio barra→módulo), iconografía/recursos, encabezados, tarjetas, controles, fuentes y responsive de **todos los módulos** (Checklist, Presupuesto, Proveedores, Invitados, Distribución, Cronograma, Invitaciones, Música, Ideas). Comparar en navegadores con mismo viewport, zoom 100% y sesión/contexto equivalente; registrar medidas computadas y capturas. La coincidencia de reglas CSS del shell no implica paridad visual; separar cambios visuales inocuos de cambios funcionales multievento. Preparar PR mínimo en DEV, QA visual y después promoción selectiva a PROD, nunca sincronizar directorios en bloque. Revisar específicamente el ícono de cabecera Checklist (DEV imagen externa de GitHub frente a PROD recurso local) sin alterar datos ni reglas.
+
+**Siguiente bloque — propuestas de Checklist específicas por tipo:** definir categorías y tareas iniciales apropiadas para cada uno de los ocho eventType canónicos (boda, cumpleaños, quinceañero, baby shower, bautizo/comunión, graduación, corporativo y evento personalizado), aprovechando `getChecklistTemplate(eventType)`/MGD-018, sin duplicar el motor; conservar la riqueza y compatibilidad de boda. Revisar las propuestas en una matriz de contenido con el usuario antes de implementar. El título visible del módulo se mantiene **«Checklist»** para todos los eventos, mientras categorías y tareas sí se adaptan. Si se autoriza materializar plantillas, hacerlo **solo una vez para eventos nuevos**, sin insertar, reemplazar, renombrar ni borrar categorías/tareas de eventos existentes. Validar persistencia, aislamiento A→B→A, móvil y compatibilidad con MGD-025 antes de producción.
+
+**Estado:** plan documentado, no implementado ni desplegado. Orden: QA cambio de evento → auditoría/paridad visual → diseño y aprobación de Checklist por evento → implementación DEV y QA → promoción controlada PROD.
+
 ## 2026-10-13 — MGD-037: nombre «Checklist» siempre genérico (DEV)
 
 - PR #168 confirmado fusionado. Corrección adicional solicitada: tanto la cabecera **principal** del módulo como el enlace del **acordeón inicial** deben llamarse exactamente «Checklist», incluso cuando el evento sea boda.
