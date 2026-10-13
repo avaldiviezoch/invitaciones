@@ -48,6 +48,16 @@ test('MGD-037: textos iniciales son neutros y se contextualizan por evento sin d
   for (const text of ['Checklist de boda', 'Espacio de la boda', 'En la boda', 'LO PRÓXIMO DE TU BODA', 'ACCESOS DE LA BODA']) {
     expect(dashboard).toContain(text);
   }
+  const moduleFiles = await Promise.all([
+    'src/modules/checklist/index.js',
+    'src/modules/cronograma/index.js',
+    'src/modules/musica/index.js',
+    'src/modules/presupuesto/index.js'
+  ].map((file) => fs.readFile(path.resolve(process.cwd(), file), 'utf8')));
+  expect(moduleFiles[0]).toContain("activeContext?.eventType === 'wedding' ? 'Checklist de boda' : 'Checklist del evento'");
+  expect(moduleFiles[1]).toContain("'Datos del evento activo · edición habilitada'");
+  expect(moduleFiles[2]).toContain("musicEventType==='wedding'?'MÚSICA DE BODA':'MÚSICA DEL EVENTO'");
+  expect(moduleFiles[3]).toContain("'presupuesto-evento.csv'");
   expect(dashboard).toContain("const isWeddingContext = context?.eventType === 'wedding'");
   expect(dashboard).toContain("setEventCopy('.module-link[data-module=\"checklist\"] span'");
 });
