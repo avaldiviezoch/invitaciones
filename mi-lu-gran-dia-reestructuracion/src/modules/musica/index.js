@@ -126,7 +126,7 @@ function render(plan,requests,search){
   });
   const items=[...grouped.values()];
   root.innerHTML='<div class="music-board">'+
-    '<div class="music-board-head"><div><span class="music-admin-section-label">MÚSICA DE BODA</span><h3>Mis referencias musicales</h3><p>Todas las playlists y canciones que has agregado a tu evento.</p></div><span class="music-board-count">'+items.length+' '+(items.length===1?'referencia':'referencias')+'</span></div>'+
+    '<div class="music-board-head"><div><span class="music-admin-section-label">'+(musicEventType==='wedding'?'MÚSICA DE BODA':'MÚSICA DEL EVENTO')+'</span><h3>Mis referencias musicales</h3><p>Todas las playlists y canciones que has agregado a tu '+(musicEventType==='wedding'?'boda':'evento')+'.</p></div><span class="music-board-count">'+items.length+' '+(items.length===1?'referencia':'referencias')+'</span></div>'+
     '<div class="music-reference-list">'+
     (items.length?items.map((item,i)=>{
       const p=item.playlist;
