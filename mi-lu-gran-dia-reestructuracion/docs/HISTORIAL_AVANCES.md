@@ -1,3 +1,7 @@
+## 2026-10-13 — MGD-018: matriz de Checklist especializados para aprobación
+
+Tras comprobar que el fix de PR #177 está en `main`, se preparó en ROADMAP_MIGRANDIA.md una matriz ampliada de categorías y ejemplos de tareas para los ocho eventos. Boda conserva su plantilla histórica. Los siete restantes disponen de propuesta más completa, aún pendiente de revisión con el propietario. El trabajo es exclusivamente documental: no modifica código funcional, no crea tareas, no ejecuta escrituras, no cambia Firebase ni producción. Verificar después la primera inicialización segura y preservar datos de eventos existentes.
+
 ## 2026-10-13 — MGD-018/037: fallback de categorías Checklist contextual (PR DEV)
 
 - Auditoría detectó que `taskCategory` asignaba categorías históricas de boda por índice a tareas sin `category` explícita, incluso para cumpleaños u otros tipos.
