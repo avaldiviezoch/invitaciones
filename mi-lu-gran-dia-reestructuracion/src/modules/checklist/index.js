@@ -119,6 +119,14 @@ function checklistGroups() {
   return [...names];
 }
 
+function pendingTemplateSuggestions() {
+  const eventType = activeContext?.eventType || 'wedding';
+  const template = getChecklistTemplate(eventType);
+  if (eventType === 'wedding' || template.id !== eventType) return [];
+  const existing = new Set(state.tasks.map((task) => taskTitle(task).trim().toLocaleLowerCase('es')));
+  return template.tasks.filter(({ title }) => !existing.has(title.trim().toLocaleLowerCase('es')));
+}
+
 function visibleTasks() {
   const needle = search.trim().toLocaleLowerCase('es');
   return state.tasks
@@ -207,6 +215,7 @@ function render() {
 
     <section class="ck-original-toolbar">
       ${editable ? '<button class="ck-toolbar-new" type="button" data-checklist-add><b>＋</b><span>Nueva tarea</span></button>' : ''}
+      ${editable && pendingTemplateSuggestions().length ? '<button class="ck-toolbar-new" type="button" data-checklist-suggestions><span>＋ Tareas sugeridas</span></button>' : ''}
       <div class="ck-segments">
         <button data-checklist-filter="all" class="${filter==='all'?'is-active':''}">Todas</button>
         <button data-checklist-filter="pending" class="${filter==='pending'?'is-active':''}">Pendientes</button>
@@ -329,6 +338,28 @@ async function handleClick(event) {
   if (filterButton) {
     filter = filterButton.dataset.checklistFilter;
     render();
+    return;
+  }
+  if (event.target.closest('[data-checklist-suggestions]')) {
+    if (!weddingCapabilities(activeContext?.role).canEdit || saving) return;
+    const suggestions = pendingTemplateSuggestions();
+    if (!suggestions.length) return;
+    if (!window.confirm(`Agregar ${suggestions.length} tareas sugeridas a este evento? Se conservarán todas las tareas existentes.`)) return;
+    const contextId = activeContext.id;
+    const previousTasks = [...state.tasks];
+    state.tasks.push(...suggestions.map(({ title, category }) => ({
+      id: crypto.randomUUID(), title, category, status: 'pending', createdAt: new Date().toISOString()
+    })));
+    try {
+      await persist('Tareas sugeridas agregadas');
+    } catch (error) {
+      if (activeContext?.id === contextId) {
+        state.tasks = previousTasks;
+        render();
+      }
+      return;
+    }
+    if (activeContext?.id === contextId) render();
     return;
   }
   if (event.target.closest('[data-checklist-add]')) {

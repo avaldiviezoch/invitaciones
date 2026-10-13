@@ -2460,3 +2460,18 @@ test('MGD-018/037: tareas sin categoría no heredan grupos históricos de boda e
   expect(template).toContain('function getChecklistTemplate(eventType)');
   // Invariante de código: no escribe ni modifica datos históricos ni fixtures.
 });
+
+test('MGD-018: sugerencias de Checklist requieren confirmación y no se insertan al montar', async () => {
+  const fs = await import('node:fs/promises');
+  const source = await fs.readFile(path.resolve(process.cwd(), 'src/modules/checklist/index.js'), 'utf8');
+  expect(source).toContain('function pendingTemplateSuggestions()');
+  expect(source).toContain("eventType === 'wedding'");
+  expect(source).toContain("data-checklist-suggestions");
+  expect(source).toContain('window.confirm(');
+  expect(source).toContain('!weddingCapabilities(activeContext?.role).canEdit || saving');
+  expect(source).toContain('const previousTasks = [...state.tasks]');
+  expect(source).toContain('state.tasks = previousTasks');
+  const mount = source.slice(source.indexOf('async function mountChecklist(context)'));
+  expect(mount).not.toContain('pendingTemplateSuggestions(');
+  expect(mount).not.toContain('writePlannerStorageKey(');
+});
