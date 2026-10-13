@@ -1,5 +1,14 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-034/037: QA móvil de altura reducida (DEV)
+
+- PR #159 fusionado (`553f8b9a`) y Actions aprobado (run `38415294082`).
+- Se añade una prueba Playwright funcional en viewport **390 × 620 px**: verifica que Siguiente y Atrás permanezcan dentro del área visible y que la lista extensa de roles pueda desplazarse hasta «Ayudo a organizar» y avanzar.
+- Se reutiliza la suite E2E segura existente; no se modifica UI, CSS, motor, Auth, Firestore ni producción.
+- Esta cobertura automatizada no reemplaza la inspección visual manual en 360/390/430/768/1024/1440 px. MGD-037 A → B → A autenticado aún pendiente.
+
+
+
 ## 2026-10-13 — MGD-034/037: QA de navegador para ocho tipos de evento (DEV)
 
 - PR #158 fusionado en DEV (`5bfbf2c3`), segundo intento de GitHub Actions aprobado.
