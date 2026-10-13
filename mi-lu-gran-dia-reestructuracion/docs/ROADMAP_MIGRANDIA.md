@@ -1,5 +1,15 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-026 / MGD-040: verificación de Google pendiente tras reactivación de migrandiapp.com
+
+- Incidencia de dominio resuelta por el propietario: Namecheap suspendió temporalmente `migrandiapp.com` por falta de verificación del correo del titular; la verificación se completó y el usuario confirmó que el dominio volvió a abrir.
+- **Pendiente (no aprobado):** revisar el estado de propiedad de `migrandiapp.com` en Google Search Console y completar o reintentar la verificación externa de dominio, branding/pantalla de consentimiento y enlaces legales en Google Auth Platform / OAuth.
+- Confirmar desde navegador que `https://migrandiapp.com/`, `/privacy.html` y `/terms.html` responden antes de solicitar revisión externa, y contrastar los registros de propiedad DNS si Google los requiere.
+- No implica modificar DNS, Firebase/Auth ni la configuración OAuth automáticamente; requiere comprobación externa y, en su caso, autorización para cambios. Mantener este bloqueo en MGD-026 y la preparación SEO MGD-040 antes de marcha blanca.
+- Desarrollo actual: PR #170 (Checklist genérico) integrado en DEV; MGD-037 A→B→A autenticado, materialización de plantillas de Checklist y validación visual transversal continúan pendientes. No declarar beta pública lista.
+
+
+
 ## 2026-10-13 — MGD-037: nombre «Checklist» siempre genérico (DEV)
 
 - PR #168 confirmado fusionado. Corrección adicional solicitada: tanto la cabecera **principal** del módulo como el enlace del **acordeón inicial** deben llamarse exactamente «Checklist», incluso cuando el evento sea boda.
