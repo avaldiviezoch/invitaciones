@@ -1,3 +1,10 @@
+## 2026-10-13 — MGD-034/037: QA navegador de número exacto de invitados (DEV)
+
+- PR #163 fusionado (`edf7a8dd`) y CI verde (run `38422911957`).
+- Se incorpora test Playwright público del flujo Invitados: elegir 50–100 y registrar 82, volver y elegir el mismo rango (se conserva 82); cambiar a 100–150 (se limpia el número).
+- No altera la aplicación, motor, Auth, reglas, Firestore ni PROD. Documentación y suite segura existentes.
+- Persisten como pendientes la revisión visual manual completa y MGD-037 A→B→A con cuenta ficticia.
+
 ## 2026-10-13 — MGD-034/037: QA real de reinicio de fecha (DEV)
 
 - PR #162 fusionado (`09426d4e`) y Actions run `38422154945` exitoso.
