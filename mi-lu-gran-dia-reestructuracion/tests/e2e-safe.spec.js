@@ -67,7 +67,7 @@ test('MGD-037: textos iniciales son neutros y se contextualizan por evento sin d
     'src/modules/musica/index.js',
     'src/modules/presupuesto/index.js'
   ].map((file) => fs.readFile(path.resolve(process.cwd(), file), 'utf8')));
-  expect(moduleFiles[0]).toContain("activeContext?.eventType === 'wedding' ? 'Checklist de boda' : 'Checklist del evento'");
+  expect(moduleFiles[0]).toContain('<h1>Checklist</h1>');
   expect(moduleFiles[1]).toContain("'Datos del evento activo · edición habilitada'");
   expect(moduleFiles[2]).toContain("musicEventType==='wedding'?'MÚSICA DE BODA':'MÚSICA DEL EVENTO'");
   expect(moduleFiles[3]).toContain("'presupuesto-evento.csv'");
@@ -97,6 +97,20 @@ test('MGD-037: Checklist usa categorías de cada evento sin alterar tareas guard
   expect(graduation).not.toContain('Ceremonia civil y religiosa');
   expect(getChecklistTemplate('birthday').groups).toContain('Comida y torta');
   expect(getChecklistTemplate('wedding').groups).toContain('Ceremonia civil y religiosa');
+});
+
+test('MGD-037: Checklist es siempre nombre genérico en título y acordeón', async () => {
+  const fs = await import('node:fs/promises');
+  const [checklist, dashboard, html] = await Promise.all([
+    fs.readFile(path.resolve(process.cwd(), 'src/modules/checklist/index.js'), 'utf8'),
+    fs.readFile(path.resolve(process.cwd(), 'src/modules/dashboard/inicio.js'), 'utf8'),
+    fs.readFile(path.resolve(process.cwd(), 'index.html'), 'utf8')
+  ]);
+  expect(checklist).toContain('<h1>Checklist</h1>');
+  expect(checklist).not.toContain('<h1>Checklist de boda</h1>');
+  expect(checklist).not.toContain('<h1>Checklist del evento</h1>');
+  expect(dashboard).toContain("setEventCopy('.module-link[data-module=\"checklist\"] span', 'Checklist')");
+  expect(html).toContain('Checklist</span>');
 });
 
 test('E2E-01: carga pública y versión formal', async ({ page }) => {
