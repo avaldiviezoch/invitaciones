@@ -82,6 +82,40 @@ export async function mountInvitaciones() {
   const addStatus = root.querySelector('[data-invitations-add-status]');
   const createButton = root.querySelector('[data-invitations-create]');
 
+  const editor = root.querySelector('[data-invitations-editor]');
+  const editorForm = root.querySelector('[data-invitations-editor-form]');
+  const editorPreview = root.querySelector('[data-invitations-editor-preview]');
+  const typeLabels = Object.freeze({
+    wedding: 'Boda', birthday: 'Cumpleaños', quince: 'Quinceañero',
+    baby_shower: 'Baby shower', religious: 'Bautizo / Comunión',
+    graduation: 'Graduación', corporate: 'Evento corporativo', custom: 'Celebración'
+  });
+  function renderEditorPreview() {
+    const values = new FormData(editorForm);
+    const type = String(values.get('eventType') || 'wedding');
+    const label = typeLabels[type] || 'Celebración';
+    const name = String(values.get('eventName') || '').trim() || 'Tu gran día';
+    const date = String(values.get('date') || '').trim();
+    const place = String(values.get('location') || '').trim();
+    const guest = String(values.get('guestName') || '').trim();
+    const design = String(values.get('templateId') || 'classic-elegant');
+    editorPreview.dataset.template = design;
+    editorPreview.innerHTML = `<article class="invitations-editor-card"><p>${escapeHtml(label)}</p><h2>${escapeHtml(name)}</h2><p>${guest ? 'Para ' + escapeHtml(guest) : 'Te esperamos'}</p><p>${escapeHtml(date || 'Fecha por definir')}</p><p>${escapeHtml(place || 'Lugar por definir')}</p><small>Vista previa · sin publicar</small></article>`;
+  }
+  editorForm.addEventListener('input', renderEditorPreview, { signal });
+  editorForm.addEventListener('change', renderEditorPreview, { signal });
+  const openLocalEditor = () => {
+    editor.hidden = false;
+    renderEditorPreview();
+    editor.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    editorForm.elements.eventName.focus();
+  };
+  root.querySelector('[data-invitations-editor-close]').addEventListener('click', () => {
+    editor.hidden = true;
+    editorForm.reset();
+    editorPreview.replaceChildren();
+  }, { signal });
+
   let invitations = [];
   let selected = null;
   let selectedDevice = DEVICES[1];
@@ -207,14 +241,8 @@ export async function mountInvitaciones() {
     }
   }, { signal });
 
-  const showCreatorMessage = () => {
-    addStatus.textContent = 'El creador de invitaciones se habilitará en su módulo correspondiente.';
-    addStatus.className = 'invitations-add-status';
-    addUrl.focus();
-  };
-
-  createButton.addEventListener('click', showCreatorMessage, { signal });
-  root.querySelector('[data-invitations-create-empty]')?.addEventListener('click', showCreatorMessage, { signal });
+  createButton.addEventListener('click', openLocalEditor, { signal });
+  root.querySelector('[data-invitations-create-empty]')?.addEventListener('click', openLocalEditor, { signal });
   root.querySelector('[data-invitations-empty-focus]')?.addEventListener('click', () => {
     addUrl.focus();
     addUrl.scrollIntoView({ behavior: 'smooth', block: 'center' });
