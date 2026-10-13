@@ -661,6 +661,27 @@ function applyWeddingContext(context) {
   const terminology = getEventTerminology(context?.eventType);
   const name = context?.name || terminology.defaultName;
   const capabilities = weddingCapabilities(context?.role);
+  // Copy específico de boda solo si el evento activo es una boda.
+  const isWeddingContext = context?.eventType === 'wedding';
+  const setEventCopy = (selector, value) => {
+    const node = document.querySelector(selector);
+    if (node) node.textContent = value;
+  };
+  setEventCopy('[data-event-copy="current"]', isWeddingContext ? 'BODA ACTUAL' : 'EVENTO ACTUAL');
+  setEventCopy('[data-event-copy="active"]', isWeddingContext ? 'Boda activa' : 'Evento activo');
+  setEventCopy('.module-link[data-module="checklist"] span', isWeddingContext ? 'Checklist de boda' : 'Checklist');
+  setEventCopy('[data-event-copy="space"]', isWeddingContext ? 'Espacio de la boda' : 'Espacio del evento');
+  setEventCopy('[data-event-copy="during"]', isWeddingContext ? 'En la boda' : 'Durante el evento');
+  setEventCopy('.home-focus > div > span', isWeddingContext ? 'LO PRÓXIMO DE TU BODA' : 'LO PRÓXIMO DE TU EVENTO');
+  setEventCopy('.module-loader-copy', isWeddingContext ? 'Cargando información de tu boda' : 'Cargando información de tu evento');
+  setEventCopy('.access-manager-head > div > span', isWeddingContext ? 'ACCESOS DE LA BODA' : 'ACCESOS DEL EVENTO');
+  const homeSummary = $('homeDashboard');
+  if (homeSummary) homeSummary.setAttribute('aria-label', isWeddingContext ? 'Resumen de la boda' : 'Resumen del evento');
+  const titleInput = $('weddingTitleInput');
+  if (titleInput) {
+    titleInput.setAttribute('aria-label', isWeddingContext ? 'Nombre de la boda' : 'Nombre del evento');
+    titleInput.placeholder = isWeddingContext ? 'Escribe el nombre de tu boda' : 'Escribe el nombre de tu evento';
+  }
 
   $('activeWeddingName').textContent = name;
   $('mainWeddingTitle').textContent = name;
