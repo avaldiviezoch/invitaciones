@@ -1,0 +1,15 @@
+/* MGD-021: previsualización local, encapsulada y sin efectos en biblioteca/RSVP */
+[data-invitations-editor] .invitations-editor-preview{display:flex;justify-content:center;padding:22px 12px;background:#ecebe8;border-radius:14px;min-height:350px}
+[data-invitations-editor] .invitations-editor-card{--paper:#faf5ed;--ink:#36342f;--ornament:#b0a083;box-sizing:border-box;position:relative;overflow:hidden;width:min(100%,380px);min-height:460px;padding:58px 28px 34px;text-align:center;color:var(--ink);background:var(--paper);border:1px solid var(--ornament);box-shadow:0 12px 35px #1b1b1b17;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px}
+[data-invitations-editor] .invitations-editor-card::before,[data-invitations-editor] .invitations-editor-card::after{content:"";position:absolute;pointer-events:none;inset:12px;border:1px solid var(--ornament);opacity:.48}
+[data-invitations-editor] .invitations-editor-card::after{inset:19px;opacity:.24}
+[data-invitations-editor] .invitations-editor-kicker{font:600 11px/1.5 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.26em;margin:0;color:var(--ornament)}
+[data-invitations-editor] .invitations-editor-title{font:400 clamp(34px,7vw,48px)/1.12 Georgia,serif;overflow-wrap:anywhere;margin:4px 0;letter-spacing:-.03em}
+[data-invitations-editor] .invitations-editor-rule{width:65px;height:1px;background:var(--ornament);margin:2px auto}
+[data-invitations-editor] .invitations-editor-text{font:400 15px/1.5 Georgia,serif;margin:0;overflow-wrap:anywhere}
+[data-invitations-editor] .invitations-editor-foot{margin-top:20px;letter-spacing:.16em;text-transform:uppercase;font:600 9px/1.6 system-ui,sans-serif;color:var(--ornament)}
+[data-invitations-editor] .invitations-editor-preview[data-template="minimal-black"] .invitations-editor-card{--paper:#202120;--ink:#f6f3ec;--ornament:#b8b4a7}
+[data-invitations-editor] .invitations-editor-preview[data-template="one-piece-elegant"] .invitations-editor-card{--paper:#f5eee1;--ink:#273947;--ornament:#9c8057}
+[data-invitations-editor] .invitations-editor-preview[data-event-type="birthday"] .invitations-editor-card{border-radius:110px 110px 8px 8px}
+[data-invitations-editor] .invitations-editor-preview[data-event-type="corporate"] .invitations-editor-card{border-radius:3px}
+@media(max-width:600px){[data-invitations-editor] .invitations-editor-preview{padding:12px 4px}[data-invitations-editor] .invitations-editor-card{min-height:390px;padding:45px 26px}}

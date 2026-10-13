@@ -1,5 +1,12 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-021: tarjetas de vista previa visual por evento y plantilla (DEV)
+
+- Se añadió `src/modules/invitaciones/editor-preview.css`, encapsulado al editor, sin `!important` ni cambios a biblioteca personal. La tarjeta de previsualización presenta jerarquía tipográfica, bordes y composiciones responsive; estilos diferenciados según `templateId` y ligeras variaciones por `eventType`.
+- El motor y catálogo de plantillas existentes siguen siendo la fuente de datos. Texto escapado; el editor no escribe en Firebase ni modifica invitaciones publicadas, RSVP o producción.
+- Se añadió test seguro de estructura, adaptabilidad, ausencia de escrituras en render y aislamiento CSS. Pendiente CI y QA visual real de escritorio/móvil; no declarar diseño final ni editor completo.
+
+
 ## 2026-10-13 — MGD-021: previsualización basada en motor y plantillas canónicas (DEV)
 
 - PR #181 verificado presente en main. El formulario local de Invitaciones ya funciona para ocho tipos.
