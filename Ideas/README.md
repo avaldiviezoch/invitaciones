@@ -211,3 +211,97 @@ Cuando se retome:
 ## 12. Idea central
 
 > **No buscamos adivinar una aplicación ganadora. Buscamos construir un sistema que nos permita experimentar de forma barata y repetible hasta encontrar productos que generen ingresos y merezcan escalar.**
+
+
+## 13. Metodología de investigación de mercado
+
+Antes de desarrollar la siguiente aplicación se realizará una investigación de mercado práctica y orientada a decisiones. No se partirá de intuiciones ni se programará primero para luego buscar usuarios.
+
+### 13.1 Mapeo de demanda
+- Identificar problemas que las personas ya intentan resolver mediante búsquedas.
+- Analizar cómo expresan esas búsquedas y qué intención existe detrás.
+- Separar búsquedas informativas de búsquedas donde el usuario realmente necesita ejecutar una tarea.
+- Priorizar necesidades repetitivas y suficientemente amplias.
+
+### 13.2 Análisis competitivo
+Para cada candidato:
+- revisar qué herramientas aparecen actualmente;
+- identificar qué permiten gratuitamente;
+- identificar dónde colocan límites;
+- registrar precios por archivo, créditos, mensualidad y anualidad;
+- evaluar velocidad, experiencia móvil, publicidad, fricción, registro y privacidad;
+- identificar ventajas y deficiencias visibles.
+
+La existencia de competidores que cobran es una señal de mercado, pero no garantiza que una nueva herramienta sea rentable.
+
+### 13.3 Voz del usuario
+Investigar reseñas, foros, Reddit y otras comunidades para detectar:
+- quejas recurrentes;
+- funciones faltantes;
+- problemas de precio;
+- límites molestos;
+- problemas de calidad;
+- preocupaciones por privacidad;
+- procesos demasiado complejos.
+
+El objetivo es encontrar huecos reales, no solamente copiar herramientas existentes.
+
+### 13.4 Mercado geográfico
+No limitar automáticamente los productos a Perú.
+
+Clasificar cada oportunidad como:
+- Perú/local;
+- Latinoamérica/hispanohablante;
+- internacional/multidioma.
+
+Herramientas universales —por ejemplo conversiones de archivos, imágenes o video— pueden evaluarse para un mercado global. Herramientas administrativas, normativas o documentales pueden requerir una estrategia local.
+
+### 13.5 Validación de monetización
+Para responder a la pregunta “¿la gente realmente paga?”, estudiar evidencia competitiva:
+- qué funciones permanecen gratis;
+- qué evento activa el pago;
+- precio de una operación individual;
+- paquetes de créditos;
+- planes mensuales/anuales;
+- límites de tamaño/calidad/cantidad;
+- funciones profesionales;
+- presencia de publicidad.
+
+Hipótesis preferida a validar: **freemium útil + premium con valor claro + publicidad solo como monetización secundaria cuando tenga sentido**.
+
+No asumir tasas de conversión sin datos propios.
+
+### 13.6 Matriz de oportunidades
+Crear inicialmente un universo de aproximadamente **30–100 candidatos**.
+
+Cada candidato tendrá puntuaciones comparables para:
+- demanda;
+- intención;
+- competencia;
+- calidad de competidores;
+- facilidad de diferenciación;
+- dificultad técnica;
+- tiempo de MVP;
+- costo de infraestructura;
+- mantenimiento;
+- SEO/distribución;
+- monetización;
+- recurrencia;
+- escalabilidad;
+- mercado potencial.
+
+El resultado debe ser un ranking, no una colección de ideas.
+
+### 13.7 Embudo de decisión
+1. Explorar 30–100 oportunidades.
+2. Seleccionar aproximadamente 10–20 para análisis profundo.
+3. Reducir a 2–5 finalistas.
+4. Elegir 1–3 experimentos de bajo costo.
+5. Construir el MVP mínimo.
+6. Publicar y medir.
+7. Evaluar tráfico, uso, conversión, costo e ingresos reales.
+8. Escalar solo las herramientas que demuestren tracción.
+
+### 13.8 Principio de decisión
+
+> **Primero demostrar que existe el problema y una oportunidad razonable; después desarrollar. La investigación reduce apuestas ciegas, pero la validación definitiva siempre será el comportamiento real de los usuarios.**
