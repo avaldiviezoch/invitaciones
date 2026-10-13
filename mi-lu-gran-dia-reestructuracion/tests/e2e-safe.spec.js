@@ -75,6 +75,16 @@ test('MGD-037: textos iniciales son neutros y se contextualizan por evento sin d
   expect(dashboard).toContain("setEventCopy('.module-link[data-module=\"checklist\"] span'");
 });
 
+test('MGD-037: módulo Música conserva sintaxis JavaScript válida', async () => {
+  const fs = await import('node:fs/promises');
+  const { spawnSync } = await import('node:child_process');
+  const file = path.resolve(process.cwd(), 'src/modules/musica/index.js');
+  const { status, stderr } = spawnSync(process.execPath, ['--check', file], { encoding: 'utf8' });
+  expect(status, stderr || 'Fallo de sintaxis del módulo Música').toBe(0);
+  const code = await fs.readFile(file, 'utf8');
+  expect(code).toContain("</span></a>';}).join('')");
+});
+
 test('E2E-01: carga pública y versión formal', async ({ page }) => {
   const errors = collectUnexpectedErrors(page);
   await page.goto('', { waitUntil: 'domcontentloaded' });

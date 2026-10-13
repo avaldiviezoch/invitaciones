@@ -1,5 +1,14 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — Corrección bloqueante MGD-037: Música no importaba por SyntaxError (DEV)
+
+- Incidencia confirmada por consola real del usuario: `inicio.js: No se pudo montar musica: SyntaxError: Unexpected token ')'`.
+- Causa identificada en `src/modules/musica/index.js`: falta el cierre `};` del callback `tracks.map((t,i)=>{...}` antes del `.join('')` al renderizar canciones de playlist.
+- Se restaura el cierre del callback sin modificar datos, permisos, Firebase ni lógica funcional. El archivo completo supera validación JavaScript; se incorpora prueba `node --check` al E2E seguro para bloquear regresiones de sintaxis en futuros PR.
+- La compilación estática no sustituye comprobar el módulo Música abierto con sesión QA de graduación tras merge y despliegue DEV. La prueba A→B→A sigue pendiente.
+
+
+
 ## 2026-10-13 — MGD-037: auditoría contextual de microtextos en inicio y onboarding (DEV)
 
 - Incidencia visual reportada: al abrir Música de una graduación aparece «No se pudo cargar este módulo». Se revisó el arranque y se aislaron fallos auxiliares de RSVP/portadas para no bloquear la apertura, sin suprimir errores ni sobrescribir el plan principal. Se neutralizó además el copy de la plantilla HTML de Música y se añadió regresión estática. La causa concreta requiere validar en navegador autenticado DEV y observar consola si persiste; no afirmar QA funcional verde sin ejecutar.
