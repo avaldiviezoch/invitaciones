@@ -1,4 +1,5 @@
 import { weddingCapabilities } from '../../core/app/permissions.js';
+import { getChecklistTemplate } from '../../core/app/checklist-templates.js';
 import { readPlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js?v=2';
 
 const STORAGE_KEY = 'planificador_bodas_checklist_v1';
@@ -110,7 +111,9 @@ function normalizedState(value) {
 }
 
 function checklistGroups() {
-  const names = new Set(BASE_GROUPS.map(([name]) => name));
+  const eventType = activeContext?.eventType || 'wedding';
+  const defaults = eventType === 'wedding' ? BASE_GROUPS.map(([name]) => name) : getChecklistTemplate(eventType).groups;
+  const names = new Set(defaults);
   state.groups.forEach((name) => names.add(name));
   state.tasks.forEach((task, index) => names.add(taskCategory(task, index)));
   return [...names];

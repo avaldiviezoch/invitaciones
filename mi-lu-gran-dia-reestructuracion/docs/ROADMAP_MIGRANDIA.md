@@ -1,5 +1,14 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-037: Checklist utiliza categorías propias de cada evento (DEV)
+
+- Hallazgo: la vista de Checklist generaba los diez grupos de boda desde `BASE_GROUPS` incluso cuando el evento activo era una graduación, cumpleaños u otro tipo. El motor canónico `getChecklistTemplate` ya tiene grupos por tipo, pero la vista no los utilizaba.
+- Ajuste mínimo en el propietario del módulo: para boda conserva `BASE_GROUPS` por compatibilidad; para los demás usa los grupos de `getChecklistTemplate(eventType)`. Los grupos y categorías de tareas **ya guardados** se siguen mostrando, sin renombrar, borrar, sembrar ni migrar información.
+- Prueba de regresión en la suite E2E segura; sin cambios de claves, Firestore, Auth, reglas, producción ni motores duplicados.
+- Pendiente QA manual con graduación/cumpleaños ficticios y decidir explícitamente si se desean sugerencias de tareas iniciales; no se escriben automáticamente.
+
+
+
 ## 2026-10-13 — Corrección bloqueante MGD-037: Música no importaba por SyntaxError (DEV)
 
 - Incidencia confirmada por consola real del usuario: `inicio.js: No se pudo montar musica: SyntaxError: Unexpected token ')'`.
