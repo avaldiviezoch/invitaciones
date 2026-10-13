@@ -2055,7 +2055,9 @@ test('MGD-034/037: rango de invitados mantiene o limpia el número exacto', asyn
   await options.locator('[data-answer="guests"][data-value="50-100"]').click();
   const count = page.locator('#discoverGuestExactInput');
   await count.fill('82');
-  await page.locator('#discoverNextButton').click();
+  // El formulario avanza automáticamente tras el evento change del input.
+  // No pulsar Siguiente mientras sigue pendiente su temporizador de avance.
+  await count.press('Tab');
   await expect(slide('date')).toHaveClass(/is-active/);
   await page.locator('#discoverBackButton').click();
   await expect(slide('guests')).toHaveClass(/is-active/);
