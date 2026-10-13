@@ -1,5 +1,26 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-018: propuesta de contenidos Checklist por los ocho tipos (POR APROBAR)
+
+**Alcance:** matriz funcional para revisión. No ejecuta siembra automática, no modifica Firebase ni tareas existentes. Motor canónico: `getChecklistTemplate(eventType)`. Para eventos nuevos, materializar sugerencias solo cuando se defina y apruebe un mecanismo opt-in o primera inicialización segura; eventos existentes jamás deben recibir inserciones silenciosas. Los grupos y tareas guardados prevalecen. Mantener título del módulo como «Checklist».
+
+**Boda (`wedding`):** mantener los 10 grupos y conjunto histórico de tareas. No sustituirlos por un starter reducido.
+
+| eventType | Categorías propuestas | Tareas de referencia |
+|---|---|---|
+| `birthday` — Cumpleaños | Lugar y fecha; Invitados; Presupuesto; Comida, bebidas y torta; Decoración; Entretenimiento; Fotografía; Últimos detalles | Confirmar fecha y presupuesto; elegir local; preparar y enviar invitaciones; definir comida, bebidas y torta; organizar decoración y entretenimiento; definir fotografía; confirmar proveedores y horario |
+| `quince` — Quinceañero | Planificación; Ceremonia; Local y recepción; Vestimenta; Invitados; Música y coreografía; Catering y torta; Fotografía y video; Últimos detalles | Definir presupuesto y fecha; reservar local; coordinar ceremonia cuando aplique; elegir vestido y accesorios; lista e invitaciones; ensayar coreografía; contratar DJ; catering y torta; foto/video; confirmar montaje |
+| `baby_shower` — Baby shower | Planificación; Invitados; Lugar; Decoración; Comida y mesa de dulces; Regalos; Juegos; Fotografía | Definir anfitriones y presupuesto; reservar lugar; enviar invitaciones; definir temática y decoración; organizar mesa de dulces; lista de regalos; coordinar juegos; preparar fotos y recuerdos |
+| `religious` — Bautizo / Primera Comunión | Ceremonia; Documentación y requisitos; Padrinos y familia; Invitados; Vestimenta; Recepción; Recuerdos y fotografía | Confirmar requisitos y fecha en parroquia; organizar documentos; coordinar padrinos cuando corresponda; lista e invitaciones; vestimenta; recepción; recuerdos y fotógrafo |
+| `graduation` — Graduación | Planificación; Ceremonia; Invitados; Lugar y celebración; Vestimenta; Comida y bebidas; Música; Fotografía y recuerdos | Confirmar fecha y participantes; coordinar ceremonia; preparar invitados; reservar espacio de celebración; vestimenta; catering; música; fotos; recuerdos |
+| `corporate` — Evento corporativo | Objetivos; Presupuesto; Agenda; Participantes e invitaciones; Sede y logística; Producción técnica; Catering; Comunicación; Cierre y evaluación | Definir objetivo y público; aprobar presupuesto; agenda y ponentes; enviar convocatorias; reservar sede; comprobar audio/proyección/conectividad; catering; materiales y señalética; recopilar evaluación posterior |
+| `custom` — Evento personalizado | Planificación; Invitados; Espacio y logística; Servicios; Seguimiento | Definir propósito, fecha y presupuesto; preparar invitados; confirmar local y montaje; contratar servicios requeridos; comprobar tareas pendientes |
+
+**Observación:** actualmente el catálogo tiene grupos y tareas starter para los siete tipos no-boda, pero `mountChecklist` solo lee lo guardado y no materializa `template.tasks`. Esta matriz amplía la propuesta de contenido, no implica que el usuario vea las tareas ya creadas.
+
+**Criterios de aceptación antes de programar:** aprobación del contenido, sin duplicar motor; categorías por tipo; bodegas históricas y categorías explícitas intactas; no escritura al montar ni al cambiar de evento; aislamiento A→B→A, persistencia y QA móvil; ninguna promoción PROD sin aprobación.
+
+
 ## 2026-10-13 — MGD-018/037: fallback de categorías Checklist contextual (PR DEV)
 
 - Auditoría detectó que `taskCategory` asignaba categorías históricas de boda por índice a tareas sin `category` explícita, incluso para cumpleaños u otros tipos.
