@@ -62,7 +62,7 @@ function legacyBaseCategory(index) {
 function taskCategory(task, index = -1) {
   const explicit = explicitTaskCategory(task);
   if (explicit) return explicit;
-  return legacyBaseCategory(index) || 'Sin categoría';
+  return activeContext?.eventType === 'wedding' ? (legacyBaseCategory(index) || 'Sin categoría') : 'Sin categoría';
 }
 
 function taskPriority(task) {
