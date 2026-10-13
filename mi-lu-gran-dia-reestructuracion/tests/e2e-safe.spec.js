@@ -2493,3 +2493,17 @@ test('MGD-021: editor preliminar multievento sin escrituras ni RSVP', async () =
   expect(previewBlock).not.toContain('addPersonalInvitation(');
   expect(previewBlock).not.toContain('writePlannerStorageKey(');
 });
+
+test('MGD-021: vista previa usa motor y plantilla canónicos sin guardado', async () => {
+  const fs = await import('node:fs/promises');
+  const source = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/index.js'), 'utf8');
+  expect(source).toContain("import { invitationEngineModel, hasStableInvitationEngineShape }");
+  expect(source).toContain("import { getInvitationTemplate }");
+  expect(source).toContain('const model = invitationEngineModel({');
+  expect(source).toContain("status: 'draft'");
+  expect(source).toContain('editorPreview.dataset.template = template.id;');
+  expect(source).toContain('escapeHtml(template.label)');
+  const render = source.slice(source.indexOf('function renderEditorPreview()'),source.indexOf("  editorForm.addEventListener('input'"));
+  expect(render).not.toContain('addPersonalInvitation(');
+  expect(render).not.toContain('writePlannerStorageKey(');
+});
