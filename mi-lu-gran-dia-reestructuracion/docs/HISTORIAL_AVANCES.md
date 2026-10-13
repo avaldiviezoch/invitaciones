@@ -1,3 +1,10 @@
+## 2026-10-13 — MGD-018: sugerencias de Checklist solo por acción voluntaria (DEV, QA PENDIENTE)
+
+- Tras PR #178 incorporado en main, se habilita para eventos no-boda con rol editable un botón «Tareas sugeridas» en el módulo Checklist, basado exclusivamente en getChecklistTemplate(eventType).
+- La lista se filtra por título normalizado contra tareas ya existentes; pide confirmación explícita antes de anexar solo sugerencias faltantes. Conserva tareas actuales y categorías, sin siembra al montar ni migraciones. Boda histórica intacta; tipos desconocidos no siembran contenido de boda.
+- La operación se ejecuta solo sobre el contexto activo y utiliza persistencia existente; revierte el estado de tareas ante error de escritura. No modifica Firebase, reglas, Auth, contratos ni producción.
+- Se añade prueba estática de invariantes en suite E2E segura. **Pendiente CI y QA funcional autenticado con cuenta ficticia:** clic cancelar, clic aceptar, recarga, cambio A→B→A, ausencia de duplicación y error de red. No declarar listo para PROD sin ese QA.
+
 ## 2026-10-13 — MGD-018: matriz de Checklist especializados para aprobación
 
 Tras comprobar que el fix de PR #177 está en `main`, se preparó en ROADMAP_MIGRANDIA.md una matriz ampliada de categorías y ejemplos de tareas para los ocho eventos. Boda conserva su plantilla histórica. Los siete restantes disponen de propuesta más completa, aún pendiente de revisión con el propietario. El trabajo es exclusivamente documental: no modifica código funcional, no crea tareas, no ejecuta escrituras, no cambia Firebase ni producción. Verificar después la primera inicialización segura y preservar datos de eventos existentes.
