@@ -3,7 +3,8 @@
 - Hallazgo: textos fijos «Checklist de boda», «Espacio de la boda», «En la boda», cabecera de resumen, «Boda activa», carga y accesos seguían visibles independientemente del tipo de evento.
 - Solución sin duplicación: placeholders genéricos en HTML y una única asignación de copy en el dueño de contexto `applyWeddingContext`, derivada del `context.eventType`. Si es boda recupera etiquetas de boda; para cumpleaños, quince, graduación y restantes muestra términos neutros. Antes de identificar contexto, los placeholders también son neutros.
 - Se conserva el flujo público de selección de evento y textos de boda dentro del perfil de boda. No se cambian Firebase, Auth, Rules, persistencia, permisos ni producción.
-- Auditoría transversal: existen referencias internas legadas `wedding` en IDs y nombres técnicos; no renombrarlas por riesgo de compatibilidad. Revisar microcopy dentro de cada módulo por separado antes de cierre funcional de ocho eventos.
+- Auditoría transversal ampliada: se corrigieron además títulos y exportaciones de Checklist y Presupuesto, estado del Cronograma y etiquetas visibles de Música. Los identificadores técnicos legados `wedding`/`bodas` en claves de almacenamiento NO se renombraron por riesgo de compatibilidad.
+- Pendiente de revisión por tipo: catálogo de momentos de Música (incluye «Ingreso de los novios») y plantillas históricas de contenido, que podrían requerir diferenciación sin cambiar datos existentes. No considerar cerrada toda la adaptación multievento con este PR.
 - QA agregado en suite segura. Pendiente QA autenticado A→B→A con dos eventos ficticios y revisión visual completa.
 
 ## 2026-10-13 — MGD-034/037: QA de presupuesto al cambiar respuesta (DEV)
