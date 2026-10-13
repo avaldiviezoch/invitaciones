@@ -1,3 +1,10 @@
+## 2026-10-13 — MGD-034/037: QA de navegador para ocho tipos de evento (DEV)
+
+- PR #158 fusionado en DEV (`5bfbf2c3`), segundo intento de GitHub Actions aprobado.
+- Se añade un **único test funcional Playwright** al conjunto E2E seguro existente: recorre los ocho eventos en la web DEV, verifica tarjetas visibles según perfil central y confirma que los roles exclusivos de boda permanecen ocultos en los demás eventos.
+- Comprueba ida y vuelta entre tipo y rol sin iniciar sesión, crear eventos ni escribir datos. No altera el motor de onboarding; el objetivo es obtener evidencia real de navegador, no solo inspección estática.
+- Aún pendientes: QA visual detallado de alturas reducidas y el ensayo MGD-037 autenticado A → B → A con fixtures exclusivos.
+
 ## 2026-10-12 — MGD-034/037: conservar número de invitados al repetir rango (DEV)
 
 - PR #157 fusionado y CI aprobado; se identifica pérdida del valor exacto de invitados al volver a seleccionar el **mismo rango** en el onboarding.
