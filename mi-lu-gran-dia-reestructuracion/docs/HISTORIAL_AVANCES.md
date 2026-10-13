@@ -1,3 +1,9 @@
+## 2026-10-13 — MGD-018/037: fallback de categorías Checklist contextual (PR DEV)
+
+- Auditoría detectó que `taskCategory` asignaba categorías históricas de boda por índice a tareas sin `category` explícita, incluso para cumpleaños u otros tipos.
+- Corrección mínima: conservar ese fallback exclusivamente para `wedding`; para otros tipos, una tarea sin categoría explícita aparece en «Sin categoría». Se respetan todas las categorías explícitas, grupos persistidos y compatibilidad de boda.
+- Prueba de regresión estática añadida a suite E2E segura. Pendiente CI real y QA visual; no se crean tareas ni se modifica persistencia, Firebase, Rules o PROD.
+
 ## 2026-10-13 — Repriorización y auditoría Checklist (sin modificación funcional)
 
 Por decisión del propietario: se conservan ocho tipos de evento. Primero QA A→B→A, auditoría visual DEV/PROD, Checklist contextual e Invitaciones multievento; después landings/SEO, analytics/monetización e internacionalización. Se mantiene el inventario completo de 50 MGD sin crear duplicados. Producción, Auth, Firestore y datos reales intactos.
