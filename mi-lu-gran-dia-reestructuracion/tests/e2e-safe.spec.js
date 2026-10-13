@@ -1991,6 +1991,29 @@ test('MGD-034/037: pantalla móvil baja conserva navegación y permite desplazar
   // Prueba pública: sin inicio de sesión, sin Firebase ni escrituras.
 });
 
+test('MGD-034/037: mismo evento conserva rol y cambio de evento invalida selección', async ({ page }) => {
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  const slide = (name) => page.locator('[data-discover-slide][data-question="' + name + '"]');
+  for (let i = 0; i < 4; i++) await page.locator('#discoverNextButton').click();
+  await slide('eventType').locator('[data-event-type="birthday"]').click();
+  await expect(slide('role')).toHaveClass(/is-active/);
+  await slide('role').locator('[data-dynamic-role="organizer"]').click();
+  await expect(slide('age')).toHaveClass(/is-active/);
+  await page.locator('#discoverBackButton').click();
+  await page.locator('#discoverBackButton').click();
+  await expect(slide('eventType')).toHaveClass(/is-active/);
+  await slide('eventType').locator('[data-event-type="birthday"]').click();
+  await expect(slide('role').locator('[data-dynamic-role="organizer"]')).toHaveAttribute('aria-pressed', 'true');
+  await page.locator('#discoverBackButton').click();
+  await expect(slide('eventType')).toHaveClass(/is-active/);
+  await slide('eventType').locator('[data-event-type="corporate"]').click();
+  await expect(slide('role')).toHaveClass(/is-active/);
+  await expect(slide('role').locator('[data-dynamic-role="organizer"]')).toHaveAttribute('aria-pressed', 'false');
+  await page.locator('#discoverNextButton').click();
+  await expect(slide('role')).toHaveClass(/is-active/);
+  // Sin autenticación ni escrituras.
+});
+
 test('MGD-034/037: los ocho eventos muestran solo sus roles reales en navegador', async ({ page }) => {
   await page.goto('', { waitUntil: 'domcontentloaded' });
   const slide = (name) => page.locator('[data-discover-slide][data-question="' + name + '"]');

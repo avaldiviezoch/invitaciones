@@ -1,5 +1,13 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-034/037: QA navegador para conservar e invalidar rol (DEV)
+
+- PR #160 verificado fusionado (`3e278da6`) y CI verde, run `38419897694`.
+- Se agrega prueba real Playwright que selecciona cumpleaños / Ayudo a organizar, retrocede, elige **el mismo cumpleaños** y comprueba que el rol sigue marcado. Luego cambia a evento corporativo, comprueba reinicio de la selección y que Siguiente no salta el rol obligatorio.
+- No altera motor ni persistencia; cubre una regresión UX crítica en navegador público. QA autenticado A→B→A de MGD-037 sigue pendiente.
+
+
+
 ## 2026-10-13 — MGD-034/037: QA móvil de altura reducida (DEV)
 
 - PR #159 fusionado (`553f8b9a`) y Actions aprobado (run `38415294082`).
