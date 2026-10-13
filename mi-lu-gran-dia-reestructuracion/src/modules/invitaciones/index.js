@@ -110,7 +110,8 @@ export async function mountInvitaciones() {
     const place = model.location.name || 'Lugar por definir';
     const guest = model.guest.name;
     editorPreview.dataset.template = template.id;
-    editorPreview.innerHTML = `<article class="invitations-editor-card"><p>${escapeHtml(label)}</p><h2>${escapeHtml(name)}</h2><p>${guest ? 'Para ' + escapeHtml(guest) : 'Te esperamos'}</p><p>${escapeHtml(date)}</p><p>${escapeHtml(place)}</p><small>${escapeHtml(template.label)} · Vista previa sin publicar</small></article>`;
+    editorPreview.dataset.eventType = type;
+    editorPreview.innerHTML = `<article class="invitations-editor-card"><p class="invitations-editor-kicker">${escapeHtml(label)}</p><h2 class="invitations-editor-title">${escapeHtml(name)}</h2><div class="invitations-editor-rule" aria-hidden="true"></div><p class="invitations-editor-text">${guest ? 'Para ' + escapeHtml(guest) : 'Te esperamos'}</p><p class="invitations-editor-text">${escapeHtml(date)}</p><p class="invitations-editor-text">${escapeHtml(place)}</p><small class="invitations-editor-foot">${escapeHtml(template.label)} · Borrador sin publicar</small></article>`;
   }
   editorForm.addEventListener('input', renderEditorPreview, { signal });
   editorForm.addEventListener('change', renderEditorPreview, { signal });
