@@ -2448,3 +2448,15 @@ test('MGD-037: comandos QA mantienen separadas las pruebas con escrituras', asyn
     expect(block).toContain("MGD_QA_FIXTURE_ACCOUNT_EMAIL");
   }
 });
+
+
+test('MGD-018/037: tareas sin categoría no heredan grupos históricos de boda en otros eventos', async () => {
+  const fs = await import('node:fs/promises');
+  const source = await fs.readFile(path.resolve(process.cwd(), 'src/modules/checklist/index.js'), 'utf8');
+  const template = await fs.readFile(path.resolve(process.cwd(), 'src/core/app/checklist-templates.js'), 'utf8');
+  expect(source).toContain("return activeContext?.eventType === 'wedding' ? (legacyBaseCategory(index) || 'Sin categoría') : 'Sin categoría';");
+  expect(source).toContain('if (explicit) return explicit;');
+  expect(source).toContain('state.groups.forEach((name) => names.add(name));');
+  expect(template).toContain('function getChecklistTemplate(eventType)');
+  // Invariante de código: no escribe ni modifica datos históricos ni fixtures.
+});
