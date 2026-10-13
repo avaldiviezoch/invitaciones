@@ -2294,6 +2294,10 @@ test('MGD-036: paletas de boda y cumpleaños se renderizan en onboarding sin aut
       ? '[data-question="role"] [data-answer="role"][data-value="novia"]'
       : '[data-question="role"] [data-dynamic-role="self"]';
     await page.locator(roleSelector).click();
+    // El clic del rol programa un avance con setTimeout(170 ms). Esperar su
+    // finalización evita que ese avance tardío oculte eventType tras volver
+    // desde el resumen en el viewport móvil.
+    await expect(page.locator('[data-question="' + (type === 'birthday' ? 'age' : 'stage') + '"]')).toHaveClass(/is-active/);
     await finishDot.click();
     const preview = page.locator('#discoverSummary .discover-theme-preview');
     await expect(preview).toBeVisible();
