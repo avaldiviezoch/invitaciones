@@ -85,6 +85,20 @@ test('MGD-037: módulo Música conserva sintaxis JavaScript válida', async () =
   expect(code).toContain("</span></a>';}).join('')");
 });
 
+test('MGD-037: Checklist usa categorías de cada evento sin alterar tareas guardadas', async () => {
+  const fs = await import('node:fs/promises');
+  const { getChecklistTemplate } = await import(pathToFileURL(path.resolve(process.cwd(), 'src/core/app/checklist-templates.js')).href);
+  const src = await fs.readFile(path.resolve(process.cwd(), 'src/modules/checklist/index.js'), 'utf8');
+  expect(src).toContain("getChecklistTemplate(eventType).groups");
+  expect(src).toContain("state.groups.forEach((name) => names.add(name))");
+  expect(src).toContain("state.tasks.forEach((task, index) => names.add(taskCategory(task, index)))");
+  const graduation = getChecklistTemplate('graduation').groups;
+  expect(graduation).toContain('Celebración');
+  expect(graduation).not.toContain('Ceremonia civil y religiosa');
+  expect(getChecklistTemplate('birthday').groups).toContain('Comida y torta');
+  expect(getChecklistTemplate('wedding').groups).toContain('Ceremonia civil y religiosa');
+});
+
 test('E2E-01: carga pública y versión formal', async ({ page }) => {
   const errors = collectUnexpectedErrors(page);
   await page.goto('', { waitUntil: 'domcontentloaded' });
