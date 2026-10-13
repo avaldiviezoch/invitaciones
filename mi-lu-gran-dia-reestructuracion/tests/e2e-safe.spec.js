@@ -2475,3 +2475,21 @@ test('MGD-018: sugerencias de Checklist requieren confirmación y no se insertan
   expect(mount).not.toContain('pendingTemplateSuggestions(');
   expect(mount).not.toContain('writePlannerStorageKey(');
 });
+
+test('MGD-021: editor preliminar multievento sin escrituras ni RSVP', async () => {
+  const fs = await import('node:fs/promises');
+  const js = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/index.js'), 'utf8');
+  const html = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/index.html'), 'utf8');
+  expect(html).toContain('data-invitations-editor-form');
+  expect(html).toContain('data-invitations-editor-preview');
+  for (const id of ['wedding','birthday','quince','baby_shower','religious','graduation','corporate','custom']) {
+    expect(html).toContain('value="' + id + '"');
+  }
+  expect(js).toContain('function renderEditorPreview()');
+  expect(js).toContain('escapeHtml(name)');
+  expect(js).toContain("createButton.addEventListener('click', openLocalEditor");
+  expect(js).toContain('editorForm.reset()');
+  const previewBlock = js.slice(js.indexOf('function renderEditorPreview()'), js.indexOf('  let invitations = []'));
+  expect(previewBlock).not.toContain('addPersonalInvitation(');
+  expect(previewBlock).not.toContain('writePlannerStorageKey(');
+});

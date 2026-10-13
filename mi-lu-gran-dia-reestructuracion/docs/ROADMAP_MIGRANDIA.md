@@ -1,5 +1,12 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-021: editor de invitaciones en borrador local (DEV PR, QA PENDIENTE)
+
+- Se conecta el botón «Crear invitación» a un formulario local para ocho eventType, nombre, fecha, lugar, destinatario y tres identificadores de presentación existentes. Se muestra una tarjeta de previsualización HTML escapada, sin iframe externo y sin publicación.
+- No guarda datos de invitación ni modifica biblioteca personal, RSVP, Firestore, Auth, Storage o rutas públicas. Cerrar el borrador lo reinicia. La representación de plantilla es genérica y no certifica diseños completos.
+- Se agrega invariante de suite E2E segura. Pendiente GitHub Actions y QA funcional visual móvil/escritorio. Antes de implementar guardado: diseñar vínculos uid/eventId, permisos, rutas públicas y compatibilidad histórica.
+
+
 ## 2026-10-13 — MGD-021–024: auditoría de integración de Invitaciones (DEV, NO IMPLEMENTADO)
 
 **Evidencia en código DEV:** `src/core/app/invitation-engine.js` expone un modelo genérico de nueve campos, pero no está conectado a una experiencia de edición. `src/core/app/invitation-templates.js` solo enumera tres plantillas de presentación. `src/core/app/public-invitation-url.js` genera el contrato de ruta `/i/{id}`; `src/core/app/public-invite-id.js` implementa identificadores/revocación en memoria, no persistencia ni resolución pública operativa. En `src/modules/invitaciones/index.js` la interfaz vigente lista enlaces de la biblioteca personal, permite agregarlos y previsualizarlos; el botón «crear» muestra texto informativo. No declarar terminado el editor ni el routing público.
