@@ -1,5 +1,12 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-021: personalización de mensaje y tipografía (DEV)
+
+- Confirmado PR #183 integrado en main. Se añaden controles de mensaje libre (máx. 240 caracteres) y selección tipográfica entre clásico y contemporáneo para la vista previa local.
+- El mensaje se escapa antes de representarse; el selector se aplica mediante atributos del editor y CSS encapsulado. No se alteran biblioteca, RSVP, Auth, Rules, Storage, Firestore ni producción. Cerrar el editor reinicia los controles.
+- Añadido test seguro; pendientes CI y QA visual/manual en escritorio y móvil. Ningún cambio de guardado o publicación, no declarar editor completo.
+
+
 ## 2026-10-13 — MGD-021: tarjetas de vista previa visual por evento y plantilla (DEV)
 
 - Se añadió `src/modules/invitaciones/editor-preview.css`, encapsulado al editor, sin `!important` ni cambios a biblioteca personal. La tarjeta de previsualización presenta jerarquía tipográfica, bordes y composiciones responsive; estilos diferenciados según `templateId` y ligeras variaciones por `eventType`.
