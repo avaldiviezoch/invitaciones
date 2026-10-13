@@ -2297,7 +2297,7 @@ test('MGD-036: paletas de boda y cumpleaños se renderizan en onboarding sin aut
     // El clic del rol programa un avance con setTimeout(170 ms). Esperar su
     // finalización evita que ese avance tardío oculte eventType tras volver
     // desde el resumen en el viewport móvil.
-    await expect(page.locator('[data-question="stage"]')).toHaveClass(/is-active/);
+    await expect(page.locator('[data-question="' + (type === 'birthday' ? 'age' : 'stage') + '"]')).toHaveClass(/is-active/);
     await finishDot.click();
     const preview = page.locator('#discoverSummary .discover-theme-preview');
     await expect(preview).toBeVisible();
