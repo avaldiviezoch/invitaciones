@@ -2041,6 +2041,33 @@ test('MGD-034/037: edad opcional se conserva para mismo evento y se limpia al ca
   // Solo DOM público, sin autenticación ni escrituras.
 });
 
+test('MGD-034/037: fecha elegida deja de figurar al responder Todavía no', async ({ page }) => {
+  await page.goto('', { waitUntil: 'domcontentloaded' });
+  const slide = (name) => page.locator('[data-discover-slide][data-question="' + name + '"]');
+  for (let i = 0; i < 4; i++) await page.locator('#discoverNextButton').click();
+  await slide('eventType').locator('[data-event-type="wedding"]').click();
+  await slide('role').locator('[data-answer="role"][data-value="novia"]').click();
+  await expect(slide('stage')).toHaveClass(/is-active/);
+  const dateIndex = await slide('date').evaluate((node) => Array.from(node.parentElement.children).indexOf(node));
+  await page.locator('#discoverDots button').nth(dateIndex).click();
+  await expect(slide('date')).toHaveClass(/is-active/);
+  await slide('date').locator('[data-answer="dateStatus"][data-value="si"]').click();
+  const dateInput = page.locator('#discoverDateInput');
+  await dateInput.fill('2027-01-16');
+  await expect(slide('budget')).toHaveClass(/is-active/);
+  await page.locator('#discoverBackButton').click();
+  await expect(slide('date')).toHaveClass(/is-active/);
+  await expect(dateInput).toHaveValue('2027-01-16');
+  await slide('date').locator('[data-answer="dateStatus"][data-value="no"]').click();
+  await expect(slide('budget')).toHaveClass(/is-active/);
+  await expect(dateInput).toHaveValue('');
+  const finishIndex = await slide('date').evaluate((node) => node.parentElement.children.length - 1);
+  await page.locator('#discoverDots button').nth(finishIndex).click();
+  await expect(page.locator('#discoverSummary')).toContainText('Por definir');
+  await expect(page.locator('#discoverSummary')).not.toContainText('16.01.2027');
+  // Interacción pública sin autenticación ni escrituras.
+});
+
 test('MGD-034/037: los ocho eventos muestran solo sus roles reales en navegador', async ({ page }) => {
   await page.goto('', { waitUntil: 'domcontentloaded' });
   const slide = (name) => page.locator('[data-discover-slide][data-question="' + name + '"]');

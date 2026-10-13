@@ -1,3 +1,9 @@
+## 2026-10-13 — MGD-034/037: QA real de reinicio de fecha (DEV)
+
+- PR #162 fusionado (`09426d4e`) y Actions run `38422154945` exitoso.
+- Se incorpora prueba funcional Playwright pública para fecha: seleccionar Sí y fecha, volver, seleccionar Todavía no y comprobar que desaparece del input y del resumen final.
+- Sin motores ni archivos nuevos; se usa el flujo E2E seguro, sin Auth, persistencia ni datos reales. Revisión visual y MGD-037 A→B→A auténtico continúan pendientes.
+
 ## 2026-10-13 — MGD-034/037: QA de edad opcional entre eventos (DEV)
 
 - PR #161 verificado fusionado (`040a776c`) y CI verde (run `38421131552`).
