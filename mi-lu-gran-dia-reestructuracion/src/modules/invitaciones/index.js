@@ -155,6 +155,39 @@ export async function mountInvitaciones() {
     link.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
   }, { signal });
+  root.querySelector('[data-invitations-import-draft]').addEventListener('change', async (event) => {
+    const input = event.currentTarget;
+    const status = root.querySelector('[data-invitations-import-status]');
+    const file = input.files?.[0];
+    if (!file) return;
+    input.value = '';
+    if (file.size > 32 * 1024) {
+      status.textContent = 'El archivo supera el límite de 32 KB.';
+      return;
+    }
+    try {
+      const record = JSON.parse(await file.text());
+      const fields = ['eventType', 'eventName', 'date', 'location', 'guestName', 'message', 'templateId', 'fontStyle', 'colorPalette'];
+      const isRecord = record && typeof record === 'object' && !Array.isArray(record);
+      if (!isRecord || record.schema !== 'migrandia-invitation-draft-v1'
+        || !Object.keys(record).every((key) => key === 'schema' || fields.includes(key))
+        || !fields.every((key) => typeof record[key] === 'string')
+        || !Object.hasOwn(typeLabels, record.eventType)
+        || !/^$|^\\d{4}-\\d{2}-\\d{2}$/.test(record.date)
+        || record.eventName.length > 100 || record.location.length > 140
+        || record.guestName.length > 100 || record.message.length > 240
+        || getInvitationTemplate(record.templateId).id !== record.templateId
+        || !['serif', 'sans'].includes(record.fontStyle)
+        || !['auto', 'ivory', 'sage', 'rose', 'navy'].includes(record.colorPalette)) {
+        throw new Error('El borrador no tiene un formato válido.');
+      }
+      for (const key of fields) editorForm.elements[key].value = record[key];
+      renderEditorPreview();
+      status.textContent = 'Borrador recuperado en el editor local. Aún no se ha guardado en tu cuenta.';
+    } catch {
+      status.textContent = 'No se pudo abrir el borrador. Verifica que sea un JSON exportado por Migrandia.';
+    }
+  }, { signal });
   editorForm.addEventListener('input', renderEditorPreview, { signal });
   editorForm.addEventListener('change', renderEditorPreview, { signal });
   const openLocalEditor = () => {

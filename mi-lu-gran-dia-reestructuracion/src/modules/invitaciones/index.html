@@ -34,6 +34,8 @@
           <label>Paleta de color<select name="colorPalette"><option value="auto">Según el evento</option><option value="ivory">Marfil</option><option value="sage">Olivo</option><option value="rose">Rosa empolvado</option><option value="navy">Azul noche</option></select></label>
           <label>Estilo de letra<select name="fontStyle"><option value="serif">Clásico</option><option value="sans">Contemporáneo</option></select></label>
           <label>Diseño<select name="templateId"><option value="classic-elegant">Clásica elegante</option><option value="minimal-black">Minimal black</option><option value="one-piece-elegant">One Piece elegante (borrador genérico)</option></select></label>
+          <label>Recuperar borrador (.json)<input type="file" data-invitations-import-draft accept=".json,application/json"></label>
+          <small data-invitations-import-status role="status" aria-live="polite"></small>
           <button type="button" data-invitations-export-draft>Descargar borrador (.json)</button>
           <button type="button" data-invitations-editor-close class="is-secondary">Cerrar borrador</button>
         </form>

@@ -1,5 +1,13 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-021: recuperar borradores JSON descargados (DEV)
+
+- Confirmado PR #189 en main, GitHub Actions segunda ejecución success (fallo anterior por HTTP 503 externo en MGD-014).
+- El editor incorpora recuperación de un archivo `.json` local del esquema `migrandia-invitation-draft-v1`; valida estructura, tipos, ocho eventos, límites, opciones visuales y archivo máximo de 32 KB antes de poblar el formulario y refrescar la vista previa.
+- No hay escritura, autosave, publicación, acceso a RSVP ni cambios en Firebase, Rules, Auth o PROD. El usuario debe mantener el archivo privado si contiene datos de invitados.
+- Test estático incorporado; pendientes CI y QA manual de roundtrip exportar/importar, archivo corrupto y cambio de eventos.
+
+
 ## 2026-10-13 — MGD-021: exportación manual de borrador de invitación (DEV)
 
 - Verificado PR #188 en main. El editor local incorpora el botón «Descargar borrador (.json)» para guardar en el dispositivo los campos y elecciones visuales como esquema versionado `migrandia-invitation-draft-v1`. No descarga credenciales, ni identificadores internos del evento ni datos de RSVP.
