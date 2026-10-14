@@ -2631,3 +2631,27 @@ test('MGD-021: recuperación de borrador JSON es local y validada', async () => 
   expect(handler).not.toContain('writePlannerStorageKey(');
   expect(handler).not.toContain('addPersonalInvitation(');
 });
+
+test('MGD-021: contrato de borradores restringe esquema y contexto antes de persistir', async () => {
+  const { normalizeDraftInput, draftStorageScope, isDraftInScope } =
+    await import('../src/core/app/invitation-draft-contract.js');
+  const sample = {
+    schema: 'migrandia-invitation-draft-v1', eventType: 'birthday',
+    eventName: 'Cumpleaños', date: '', location: '', guestName: '',
+    message: 'Te esperamos', templateId: 'classic-elegant',
+    fontStyle: 'serif', colorPalette: 'auto'
+  };
+  expect(normalizeDraftInput(sample)).toEqual(sample);
+  expect(() => normalizeDraftInput({ ...sample, unknownField: 'x' })).toThrow();
+  expect(() => normalizeDraftInput({ ...sample, eventType: 'wedding/../../x' })).toThrow();
+  expect(() => normalizeDraftInput({ ...sample, message: 'x'.repeat(241) })).toThrow();
+  const a = draftStorageScope('uidA','eventoA');
+  const b = draftStorageScope('uidA','eventoB');
+  const otherUser = draftStorageScope('uidB','eventoA');
+  expect(a.proposedCollectionPath).not.toBe(b.proposedCollectionPath);
+  expect(a.proposedCollectionPath).not.toBe(otherUser.proposedCollectionPath);
+  expect(isDraftInScope({ ownerUid:'uidA', eventId:'eventoA' }, a)).toBe(true);
+  expect(isDraftInScope({ ownerUid:'uidA', eventId:'eventoA' }, b)).toBe(false);
+  expect(isDraftInScope({ ownerUid:'uidA', eventId:'eventoA' }, otherUser)).toBe(false);
+  expect(() => draftStorageScope('uidA','../eventoB')).toThrow();
+});

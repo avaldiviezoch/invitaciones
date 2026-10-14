@@ -1,5 +1,14 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-021: auditoría de persistencia y contrato seguro de borradores (DEV)
+
+- Verificado PR #190 incorporado en main; importación/exportación JSON local existe y está separada de invitaciones personales.
+- Servicio actual `src/services/personal-invitations.js`: biblioteca de enlaces bajo `users/{uid}/invitations`. No mezclar borradores dentro de dicha colección, ni cambiar su contrato.
+- Nuevo `src/core/app/invitation-draft-contract.js` puro: esquema versionado, campos permitidos, límites de texto, tipologías de evento, opciones del diseño y contrato explícito `uid + eventId` para impedir que una invitación de A se interprete como B. Ruta **propuesta y NO habilitada**: `users/{uid}/eventInvitationDrafts/{eventId}/drafts`; debe contrastarse contra Firestore Rules y evaluar relación entre biblioteca personal y datos del evento antes de cualquier activación.
+- Tests de aceptación inicial: rechazar campos no autorizados, opciones inválidas, límites de longitud y cruzado de cuenta/evento. **No se ha habilitado guardar/autosave, no se modifica Rules ni Firebase, no se ha hecho QA autenticado A→B→A**.
+- Próximo paso: revisión explícita de modelo de propiedad, Firestore Rules y adapter de persistencia, previo permiso para escrituras nuevas; preservar eventos y RSVP existentes, validar errores/reintentos/doble pestaña.
+
+
 ## 2026-10-13 — MGD-021: recuperar borradores JSON descargados (DEV)
 
 - Confirmado PR #189 en main, GitHub Actions segunda ejecución success (fallo anterior por HTTP 503 externo en MGD-014).
