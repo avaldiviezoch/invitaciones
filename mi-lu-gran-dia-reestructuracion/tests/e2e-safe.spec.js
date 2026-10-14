@@ -2692,3 +2692,33 @@ test('MGD-021: adaptador de borradores valida ámbito y revisiones sin Firebase'
   const badPort = { ...port, read: async () => ({ ...first, ownerUid:'uid2' }) };
   await expect(createInvitationDraftRepository(badPort).read('uid1','eventoA','x')).rejects.toThrow('no pertenece');
 });
+
+test('MGD-021: puerto Firestore desactivado y bloqueo de escrituras hasta aprobar Rules', async () => {
+  const { createFirestoreInvitationDraftRepository } =
+    await import('../src/services/invitation-drafts-firestore.js');
+  let calls = 0;
+  const sdk = {
+    collection: (...parts) => parts.slice(1).join('/'),
+    doc: (parent,id) => parent + '/' + id,
+    getDocs: async () => { calls += 1; return { docs: [] }; },
+    getDoc: async () => { calls += 1; return { exists: () => false }; },
+    runTransaction: async () => { calls += 1; throw new Error('No se deben ejecutar transacciones.'); },
+    serverTimestamp: () => null
+  };
+  const port = createFirestoreInvitationDraftRepository({
+    firestore: {}, sdk, currentUid: () => 'uidA'
+  });
+  const draft = { schema:'migrandia-invitation-draft-v1', eventType:'birthday',
+    eventName:'Fiesta', date:'', location:'', guestName:'', message:'',
+    templateId:'classic-elegant', fontStyle:'serif', colorPalette:'auto' };
+  await expect(port.list('uidA','eventoA')).rejects.toThrow('no está habilitada');
+  await expect(port.read('uidA','eventoA','draft1')).rejects.toThrow('no está habilitada');
+  await expect(port.save('uidA','eventoA','draft1',draft)).rejects.toThrow('no está habilitada');
+  await expect(port.remove('uidA','eventoA','draft1')).rejects.toThrow('no está habilitada');
+  expect(calls).toBe(0);
+  const enabledPort = createFirestoreInvitationDraftRepository({
+    firestore: {}, sdk, currentUid: () => 'uidA', enabled:true
+  });
+  await expect(enabledPort.list('uidB','eventoA')).rejects.toThrow('cuenta activa');
+  expect(calls).toBe(0);
+});
