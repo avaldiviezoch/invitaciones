@@ -22,7 +22,7 @@ function normalizeDraftInput(value) {
     || !DRAFT_TEMPLATES.includes(value.templateId)
     || !DRAFT_FONTS.includes(value.fontStyle)
     || !DRAFT_PALETTES.includes(value.colorPalette)
-    || (value.date && !/^\\d{4}-\\d{2}-\\d{2}$/.test(value.date))) {
+    || (value.date && ! /^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(value.date))) {
     throw new Error('Opciones de borrador inválidas.');
   }
   return Object.freeze(Object.fromEntries(['schema', ...DRAFT_FIELDS].map((field) => [field, value[field]])));
@@ -32,7 +32,7 @@ function normalizeDraftInput(value) {
 function draftStorageScope(uid, eventId) {
   const validSegment = (value) => typeof value === 'string'
     && value.length >= 1 && value.length <= 128
-    && !/[\\/\\?#]/.test(value) && value !== '.' && value !== '..';
+    && !['/', '\\\\', '?', '#'].some((char) => value.includes(char)) && value !== '.' && value !== '..';
   if (!validSegment(uid) || !validSegment(eventId)) throw new Error('Se requiere cuenta y evento válidos.');
   return Object.freeze({ ownerUid:uid, eventId, proposedCollectionPath:`users/${uid}/eventInvitationDrafts/${eventId}/drafts` });
 }
