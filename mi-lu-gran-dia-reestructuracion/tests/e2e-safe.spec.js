@@ -2570,3 +2570,16 @@ test('MGD-021: workspace de editor y vista previa responsive conserva el editor 
   expect(css).toContain('@media(max-width:780px)');
   expect(css).not.toContain('!important');
 });
+
+test('MGD-021: conmutador de preview móvil/escritorio no altera datos', async () => {
+  const fs = await import('node:fs/promises');
+  const html = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/index.html'), 'utf8');
+  const js = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/index.js'), 'utf8');
+  const css = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/editor-preview.css'), 'utf8');
+  expect(html).toContain('data-editor-viewport="mobile"');
+  expect(html).toContain('data-editor-viewport="desktop"');
+  expect(js).toContain("editorPreview.dataset.viewport = viewport");
+  expect(js).toContain("item.setAttribute('aria-pressed', String(item === button))");
+  expect(css).toContain('data-viewport="desktop"');
+  expect(css).not.toContain('!important');
+});
