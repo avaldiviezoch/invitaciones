@@ -23,3 +23,12 @@
 [data-invitations-editor] .invitations-editor-preview[data-palette="sage"] .invitations-editor-card{--paper:#edf0e7;--ink:#354838;--ornament:#879781}
 [data-invitations-editor] .invitations-editor-preview[data-palette="rose"] .invitations-editor-card{--paper:#f6eceb;--ink:#62494c;--ornament:#c29598}
 [data-invitations-editor] .invitations-editor-preview[data-palette="navy"] .invitations-editor-card{--paper:#e9eef2;--ink:#253e51;--ornament:#849eaf}
+
+/* Área única de edición y previsualización: no afecta las invitaciones existentes. */
+[data-invitations-editor] .invitations-editor-workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,1fr);gap:22px;align-items:start;margin:20px 0}
+[data-invitations-editor] .invitations-editor-workspace>[data-invitations-editor-form]{min-width:0;display:grid;gap:12px}
+[data-invitations-editor] .invitations-editor-workspace>[data-invitations-editor-form] label{display:grid;gap:6px;min-width:0;font-size:13px}
+[data-invitations-editor] .invitations-editor-workspace>[data-invitations-editor-form] :is(input,select,textarea){box-sizing:border-box;min-width:0;width:100%;font:inherit}
+[data-invitations-editor] .invitations-editor-preview-side{min-width:0}
+[data-invitations-editor] .invitations-editor-preview-side>.invitations-panel-label{display:block;margin-bottom:10px}
+@media(max-width:780px){[data-invitations-editor] .invitations-editor-workspace{grid-template-columns:minmax(0,1fr);gap:18px}}
