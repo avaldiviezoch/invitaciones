@@ -2526,3 +2526,19 @@ test('MGD-021: vista previa visual encapsulada y responsive sin publicación', a
   expect(preview).not.toContain('addPersonalInvitation(');
   expect(preview).not.toContain('writePlannerStorageKey(');
 });
+
+test('MGD-021: personalización del borrador local sin escritura ni HTML inseguro', async () => {
+  const fs = await import('node:fs/promises');
+  const js = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/index.js'), 'utf8');
+  const html = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/index.html'), 'utf8');
+  const css = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/editor-preview.css'), 'utf8');
+  expect(html).toContain('name="message" maxlength="240"');
+  expect(html).toContain('name="fontStyle"');
+  expect(js).toContain("editorPreview.dataset.fontStyle = fontStyle");
+  expect(js).toContain('escapeHtml(message)');
+  expect(css).toContain('data-font-style="sans"');
+  expect(css).not.toContain('!important');
+  const preview = js.slice(js.indexOf('function renderEditorPreview()'), js.indexOf("  editorForm.addEventListener('input'"));
+  expect(preview).not.toContain('addPersonalInvitation(');
+  expect(preview).not.toContain('writePlannerStorageKey(');
+});

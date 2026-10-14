@@ -13,3 +13,7 @@
 [data-invitations-editor] .invitations-editor-preview[data-event-type="birthday"] .invitations-editor-card{border-radius:110px 110px 8px 8px}
 [data-invitations-editor] .invitations-editor-preview[data-event-type="corporate"] .invitations-editor-card{border-radius:3px}
 @media(max-width:600px){[data-invitations-editor] .invitations-editor-preview{padding:12px 4px}[data-invitations-editor] .invitations-editor-card{min-height:390px;padding:45px 26px}}
+
+[data-invitations-editor] .invitations-editor-message{font:italic 17px/1.5 Georgia,serif;overflow-wrap:anywhere;white-space:pre-line;margin:0;max-width:28ch}
+[data-invitations-editor] .invitations-editor-preview[data-font-style="sans"] .invitations-editor-title{font-family:system-ui,sans-serif;font-weight:300;letter-spacing:-.045em}
+[data-invitations-editor] .invitations-editor-preview[data-font-style="sans"] .invitations-editor-text,[data-invitations-editor] .invitations-editor-preview[data-font-style="sans"] .invitations-editor-message{font-family:system-ui,sans-serif}
