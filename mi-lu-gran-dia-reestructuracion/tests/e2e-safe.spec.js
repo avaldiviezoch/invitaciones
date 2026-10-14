@@ -2655,3 +2655,40 @@ test('MGD-021: contrato de borradores restringe esquema y contexto antes de pers
   expect(isDraftInScope({ ownerUid:'uidA', eventId:'eventoA' }, otherUser)).toBe(false);
   expect(() => draftStorageScope('uidA','../eventoB')).toThrow();
 });
+
+test('MGD-021: adaptador de borradores valida ámbito y revisiones sin Firebase', async () => {
+  const { createInvitationDraftRepository } = await import('../src/services/invitation-drafts-repository.js');
+  const value = { schema:'migrandia-invitation-draft-v1', eventType:'birthday',
+    eventName:'Fiesta', date:'', location:'', guestName:'', message:'',
+    templateId:'classic-elegant', fontStyle:'serif', colorPalette:'auto' };
+  const records = new Map();
+  const port = {
+    list: async (scope) => [...records.values()].filter((r) => r.ownerUid === scope.ownerUid && r.eventId === scope.eventId),
+    read: async (scope, id) => records.get(scope.proposedCollectionPath + '/' + id) ?? null,
+    save: async (scope, id, draft, revision) => {
+      const key = scope.proposedCollectionPath + '/' + id;
+      const previous = records.get(key);
+      if (previous && previous.revision !== revision) throw new Error('Conflicto de revisión.');
+      const record = { id, ownerUid:scope.ownerUid, eventId:scope.eventId, value:draft, revision:String(Number(revision || 0) + 1) };
+      records.set(key, record);
+      return record;
+    },
+    remove: async (scope, id, revision) => {
+      const key = scope.proposedCollectionPath + '/' + id;
+      if (records.get(key)?.revision !== revision) throw new Error('Conflicto de revisión.');
+      return records.delete(key);
+    }
+  };
+  const adapter = createInvitationDraftRepository(port);
+  const first = await adapter.save('uid1','eventoA','borrador1',value);
+  expect(first.revision).toBe('1');
+  expect((await adapter.list('uid1','eventoB'))).toEqual([]);
+  expect((await adapter.list('uid2','eventoA'))).toEqual([]);
+  await expect(adapter.save('uid1','eventoA','borrador1',value,'0')).rejects.toThrow('Conflicto');
+  expect((await adapter.read('uid1','eventoA','borrador1')).value).toEqual(value);
+  await expect(adapter.read('uid1','eventoB','borrador1')).resolves.toBeNull();
+  await adapter.remove('uid1','eventoA','borrador1','1');
+  expect(await adapter.list('uid1','eventoA')).toEqual([]);
+  const badPort = { ...port, read: async () => ({ ...first, ownerUid:'uid2' }) };
+  await expect(createInvitationDraftRepository(badPort).read('uid1','eventoA','x')).rejects.toThrow('no pertenece');
+});
