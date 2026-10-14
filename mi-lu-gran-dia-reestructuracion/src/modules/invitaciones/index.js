@@ -120,7 +120,7 @@ export async function mountInvitaciones() {
     editorPreview.dataset.fontStyle = fontStyle;
     editorPreview.dataset.template = template.id;
     editorPreview.dataset.eventType = type;
-    editorPreview.innerHTML = `<article class="invitations-editor-card"><p class="invitations-editor-kicker">${escapeHtml(label)}</p><h2 class="invitations-editor-title">${escapeHtml(name)}</h2><div class="invitations-editor-rule" aria-hidden="true"></div>${message ? `<p class="invitations-editor-message">${escapeHtml(message)}</p>` : ''}<p class="invitations-editor-text">${guest ? 'Para ' + escapeHtml(guest) : 'Te esperamos'}</p><p class="invitations-editor-text">${escapeHtml(date)}</p><p class="invitations-editor-text">${escapeHtml(place)}</p><small class="invitations-editor-foot">${escapeHtml(template.label)} · Borrador sin publicar</small></article>`;
+    editorPreview.innerHTML = `<article class="invitations-editor-card"><p class="invitations-editor-kicker">${escapeHtml(label)}</p><h2 class="invitations-editor-title">${escapeHtml(name)}</h2><div class="invitations-editor-rule" aria-hidden="true"></div>${message ? `<p class="invitations-editor-message">${escapeHtml(message)}</p>` : ''}<p class="invitations-editor-text">${guest ? 'Para ' + escapeHtml(guest) : 'Te esperamos'}</p><p class="invitations-editor-text">${escapeHtml(copy.dateLabel)} ${escapeHtml(date)}</p><p class="invitations-editor-text">${escapeHtml(place)}</p><small class="invitations-editor-foot">${escapeHtml(template.label)} · Borrador sin publicar</small></article>`;
   }
   root.querySelectorAll('[data-editor-viewport]').forEach((button) => {
     button.addEventListener('click', () => {
