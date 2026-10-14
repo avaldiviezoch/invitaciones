@@ -1,3 +1,9 @@
+## 2026-10-13 — MGD-021: textos por tipo de evento en editor preliminar (DEV)
+
+- PR #187 confirmado incorporado en main. Se agrega un diccionario independiente `src/core/app/invitation-copy.js` con título, saludo y encabezado de fecha para los ocho tipos de evento.
+- El editor presenta contenido de muestra contextual cuando el usuario todavía no escribió nombre ni mensaje, pero siempre prevalecen sus textos explícitos. Las vistas previas mantienen escape HTML y se conserva la biblioteca personal; no hay cambios de Firestore/Rules/Auth/Storage/PROD ni publicación RSVP.
+- Se añade test estático y queda pendiente CI, QA visual y revisión editorial de cada frase. Las plantillas siguen siendo borradores; no afirmar editor listo para publicar.
+
 ## 2026-10-13 — MGD-021: vista previa con tamaños móvil/escritorio (DEV)
 
 - Verificado PR #186 incorporado en main. Se añadió selector accesible de vista previa «Móvil / Escritorio» dentro del editor local con atributos aria-pressed y CSS encapsulado.
