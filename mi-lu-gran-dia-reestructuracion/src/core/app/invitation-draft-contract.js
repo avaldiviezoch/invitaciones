@@ -32,7 +32,7 @@ function normalizeDraftInput(value) {
 function draftStorageScope(uid, eventId) {
   const validSegment = (value) => typeof value === 'string'
     && value.length >= 1 && value.length <= 128
-    && !['/', '\\\\', '?', '#'].some((char) => value.includes(char)) && value !== '.' && value !== '..';
+    && !['/', '?', '#'].some((char) => value.includes(char)) && !value.includes(String.fromCharCode(92)) && value !== '.' && value !== '..';
   if (!validSegment(uid) || !validSegment(eventId)) throw new Error('Se requiere cuenta y evento válidos.');
   return Object.freeze({ ownerUid:uid, eventId, proposedCollectionPath:`users/${uid}/eventInvitationDrafts/${eventId}/drafts` });
 }
