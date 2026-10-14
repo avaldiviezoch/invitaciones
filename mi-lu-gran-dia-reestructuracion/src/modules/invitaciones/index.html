@@ -21,6 +21,7 @@
     <section class="invitations-library">
       <section class="invitations-add-panel" data-invitations-editor hidden aria-label="Borrador de invitación">
         <div><span class="invitations-panel-label">BORRADOR LOCAL</span><h2>Crear invitación</h2><p>Previsualiza sin publicar ni guardar datos. Este borrador desaparece al salir.</p></div>
+        <div class="invitations-editor-workspace">
         <form data-invitations-editor-form class="invitations-add-form">
           <label>Tipo de evento<select name="eventType" required>
             <option value="wedding">Boda</option><option value="birthday">Cumpleaños</option><option value="quince">Quinceañero</option><option value="baby_shower">Baby shower</option><option value="religious">Bautizo / Comunión</option><option value="graduation">Graduación</option><option value="corporate">Evento corporativo</option><option value="custom">Personalizado</option>
@@ -35,7 +36,8 @@
           <label>Diseño<select name="templateId"><option value="classic-elegant">Clásica elegante</option><option value="minimal-black">Minimal black</option><option value="one-piece-elegant">One Piece elegante (borrador genérico)</option></select></label>
           <button type="button" data-invitations-editor-close class="is-secondary">Cerrar borrador</button>
         </form>
-        <div data-invitations-editor-preview aria-live="polite" class="invitations-editor-preview"></div>
+        <div class="invitations-editor-preview-side"><span class="invitations-panel-label">VISTA PREVIA EN TIEMPO REAL</span><div data-invitations-editor-preview aria-live="polite" class="invitations-editor-preview"></div></div>
+        </div>
         <small>Vista preliminar local. No representa una invitación publicada ni habilita RSVP.</small>
       </section>
       <div class="invitations-add-panel">
