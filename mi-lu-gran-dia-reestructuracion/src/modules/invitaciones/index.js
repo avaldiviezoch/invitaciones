@@ -111,6 +111,10 @@ export async function mountInvitaciones() {
     const guest = model.guest.name;
     const message = String(values.get('message') || '').trim();
     const fontStyle = String(values.get('fontStyle') || 'serif') === 'sans' ? 'sans' : 'serif';
+    const paletteChoice = String(values.get('colorPalette') || 'auto');
+    const eventPalettes = { wedding: 'ivory', birthday: 'rose', quince: 'rose', baby_shower: 'sage', religious: 'ivory', graduation: 'navy', corporate: 'navy', custom: 'sage' };
+    const allowedPalettes = ['ivory', 'sage', 'rose', 'navy'];
+    editorPreview.dataset.palette = allowedPalettes.includes(paletteChoice) ? paletteChoice : eventPalettes[type] || 'ivory';
     editorPreview.dataset.fontStyle = fontStyle;
     editorPreview.dataset.template = template.id;
     editorPreview.dataset.eventType = type;

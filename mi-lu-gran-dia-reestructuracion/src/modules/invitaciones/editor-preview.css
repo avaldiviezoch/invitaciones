@@ -17,3 +17,9 @@
 [data-invitations-editor] .invitations-editor-message{font:italic 17px/1.5 Georgia,serif;overflow-wrap:anywhere;white-space:pre-line;margin:0;max-width:28ch}
 [data-invitations-editor] .invitations-editor-preview[data-font-style="sans"] .invitations-editor-title{font-family:system-ui,sans-serif;font-weight:300;letter-spacing:-.045em}
 [data-invitations-editor] .invitations-editor-preview[data-font-style="sans"] .invitations-editor-text,[data-invitations-editor] .invitations-editor-preview[data-font-style="sans"] .invitations-editor-message{font-family:system-ui,sans-serif}
+
+/* Paletas elegidas por evento o explícitamente por el usuario. Los diseños base se conservan. */
+[data-invitations-editor] .invitations-editor-preview[data-palette="ivory"] .invitations-editor-card{--paper:#fbf7f0;--ink:#3b362f;--ornament:#a48d72}
+[data-invitations-editor] .invitations-editor-preview[data-palette="sage"] .invitations-editor-card{--paper:#edf0e7;--ink:#354838;--ornament:#879781}
+[data-invitations-editor] .invitations-editor-preview[data-palette="rose"] .invitations-editor-card{--paper:#f6eceb;--ink:#62494c;--ornament:#c29598}
+[data-invitations-editor] .invitations-editor-preview[data-palette="navy"] .invitations-editor-card{--paper:#e9eef2;--ink:#253e51;--ornament:#849eaf}
