@@ -1,3 +1,9 @@
+## 2026-10-13 — MGD-021: exportación manual de borrador de invitación (DEV)
+
+- Verificado PR #188 en main. El editor local incorpora el botón «Descargar borrador (.json)» para guardar en el dispositivo los campos y elecciones visuales como esquema versionado `migrandia-invitation-draft-v1`. No descarga credenciales, ni identificadores internos del evento ni datos de RSVP.
+- Acción explícita sin escrituras en Firestore, Storage, biblioteca personal o backend; no implementa todavía restauración, autosave ni publicación. El archivo descargado puede contener nombre de invitado y requiere custodia del usuario.
+- Prueba de invariantes agregada, pendientes CI y QA funcional. La futura importación y persistencia bajo UID/eventId necesitarán validación de esquema y permisos. PROD intacta.
+
 ## 2026-10-13 — MGD-021: textos por tipo de evento en editor preliminar (DEV)
 
 - PR #187 confirmado incorporado en main. Se agrega un diccionario independiente `src/core/app/invitation-copy.js` con título, saludo y encabezado de fecha para los ocho tipos de evento.

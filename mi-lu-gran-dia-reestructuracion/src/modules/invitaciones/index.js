@@ -131,6 +131,30 @@ export async function mountInvitaciones() {
       });
     }, { signal });
   });
+  root.querySelector('[data-invitations-export-draft]').addEventListener('click', () => {
+    const fields = new FormData(editorForm);
+    const allowedTypes = new Set(Object.keys(typeLabels));
+    const type = String(fields.get('eventType') || '');
+    if (!allowedTypes.has(type)) return;
+    const draft = {
+      schema: 'migrandia-invitation-draft-v1',
+      eventType: type,
+      eventName: String(fields.get('eventName') || '').slice(0, 100),
+      date: String(fields.get('date') || ''),
+      location: String(fields.get('location') || '').slice(0, 140),
+      guestName: String(fields.get('guestName') || '').slice(0, 100),
+      message: String(fields.get('message') || '').slice(0, 240),
+      templateId: getInvitationTemplate(fields.get('templateId')).id,
+      fontStyle: fields.get('fontStyle') === 'sans' ? 'sans' : 'serif',
+      colorPalette: ['auto', 'ivory', 'sage', 'rose', 'navy'].includes(fields.get('colorPalette')) ? fields.get('colorPalette') : 'auto'
+    };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(draft, null, 2)], { type: 'application/json' }));
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'migrandia-borrador-invitacion.json';
+    link.click();
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }, { signal });
   editorForm.addEventListener('input', renderEditorPreview, { signal });
   editorForm.addEventListener('change', renderEditorPreview, { signal });
   const openLocalEditor = () => {
