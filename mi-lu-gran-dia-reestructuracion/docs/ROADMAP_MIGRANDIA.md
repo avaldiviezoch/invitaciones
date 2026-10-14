@@ -1,5 +1,12 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-021: vista previa con tamaños móvil/escritorio (DEV)
+
+- Verificado PR #186 incorporado en main. Se añadió selector accesible de vista previa «Móvil / Escritorio» dentro del editor local con atributos aria-pressed y CSS encapsulado.
+- Este selector cambia únicamente el ancho de la tarjeta de borrador, no la ventana real, no publica ni persiste información, no altera las invitaciones personales ni RSVP.
+- Añadido test estático; pendientes GitHub Actions y QA real de navegador en ambos tamaños. No modificar Firebase/Auth/Rules/Storage ni PROD.
+
+
 ## 2026-10-13 — MGD-021: workspace de edición y vista previa en una pantalla (DEV)
 
 - PR #185 confirmado en main. Se consolidó el editor local de Invitaciones en una cuadrícula de formulario y vista previa en vivo, adaptable a una columna en pantallas estrechas. Se mantiene el catálogo de eventos, plantillas, mensajes, fuente y paletas, sin duplicar motores.
