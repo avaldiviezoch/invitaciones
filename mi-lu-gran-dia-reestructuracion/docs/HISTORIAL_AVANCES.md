@@ -1,3 +1,9 @@
+## 2026-10-13 — MGD-021: workspace de edición y vista previa en una pantalla (DEV)
+
+- PR #185 confirmado en main. Se consolidó el editor local de Invitaciones en una cuadrícula de formulario y vista previa en vivo, adaptable a una columna en pantallas estrechas. Se mantiene el catálogo de eventos, plantillas, mensajes, fuente y paletas, sin duplicar motores.
+- Estilos aislados en `editor-preview.css`, sin `!important`. Biblioteca personal y flujos RSVP no se modificaron. Sin escrituras nuevas, cambios en Firebase ni PROD.
+- Prueba estática incorporada; pendiente CI y QA visual real. No afirmar que la publicación o persistencia de borradores esté implementada.
+
 ## 2026-10-13 — MGD-021: paletas contextuales para borrador de Invitaciones (DEV)
 
 - PR #184 confirmado en main. Nuevo selector de color: automático según los ocho `eventType` o elección explícita de marfil, olivo, rosa empolvado y azul noche.

@@ -2557,3 +2557,16 @@ test('MGD-021: paleta local por evento y selector sin persistencia', async () =>
   const preview = js.slice(js.indexOf('function renderEditorPreview()'), js.indexOf("  editorForm.addEventListener('input'"));
   expect(preview).not.toContain('addPersonalInvitation(');
 });
+
+test('MGD-021: workspace de editor y vista previa responsive conserva el editor local', async () => {
+  const fs = await import('node:fs/promises');
+  const html = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/index.html'), 'utf8');
+  const css = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/editor-preview.css'), 'utf8');
+  expect(html).toContain('class="invitations-editor-workspace"');
+  expect(html).toContain('class="invitations-editor-preview-side"');
+  expect(html).toContain('data-invitations-editor-form');
+  expect(html).toContain('data-invitations-editor-preview');
+  expect(css).toContain('grid-template-columns:minmax(0,1fr) minmax(280px,1fr)');
+  expect(css).toContain('@media(max-width:780px)');
+  expect(css).not.toContain('!important');
+});
