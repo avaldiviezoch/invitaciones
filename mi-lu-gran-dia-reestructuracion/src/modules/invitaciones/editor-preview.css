@@ -32,3 +32,9 @@
 [data-invitations-editor] .invitations-editor-preview-side{min-width:0}
 [data-invitations-editor] .invitations-editor-preview-side>.invitations-panel-label{display:block;margin-bottom:10px}
 @media(max-width:780px){[data-invitations-editor] .invitations-editor-workspace{grid-template-columns:minmax(0,1fr);gap:18px}}
+
+[data-invitations-editor] .invitations-editor-viewports{display:flex;gap:8px;margin:10px 0}
+[data-invitations-editor] .invitations-editor-viewports button{padding:7px 14px;border:1px solid #b5b5b5;border-radius:8px;background:transparent;color:inherit;cursor:pointer}
+[data-invitations-editor] .invitations-editor-viewports button[aria-pressed="true"]{border-color:currentColor;font-weight:700}
+[data-invitations-editor] .invitations-editor-preview[data-viewport="desktop"] .invitations-editor-card{width:min(100%,560px);min-height:360px}
+[data-invitations-editor] .invitations-editor-preview[data-viewport="mobile"] .invitations-editor-card{width:min(100%,380px)}
