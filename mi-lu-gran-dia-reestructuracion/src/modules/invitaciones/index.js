@@ -1,3 +1,4 @@
+import { getInvitationCopy } from '../../core/app/invitation-copy.js';
 import { invitationEngineModel, hasStableInvitationEngineShape } from '../../core/app/invitation-engine.js';
 import { getInvitationTemplate } from '../../core/app/invitation-templates.js';
 import {
@@ -96,6 +97,7 @@ export async function mountInvitaciones() {
     const values = new FormData(editorForm);
     const type = String(values.get('eventType') || 'wedding');
     const label = typeLabels[type] || 'Celebración';
+    const copy = getInvitationCopy(type);
     const template = getInvitationTemplate(values.get('templateId'));
     const model = invitationEngineModel({
       event: { eventType: type, name: String(values.get('eventName') || '').trim() },
@@ -105,11 +107,11 @@ export async function mountInvitaciones() {
       status: 'draft'
     });
     if (!hasStableInvitationEngineShape(model)) return;
-    const name = model.event.name || 'Tu gran día';
+    const name = model.event.name || copy.heading;
     const date = model.date || 'Fecha por definir';
     const place = model.location.name || 'Lugar por definir';
     const guest = model.guest.name;
-    const message = String(values.get('message') || '').trim();
+    const message = String(values.get('message') || '').trim() || copy.greeting;
     const fontStyle = String(values.get('fontStyle') || 'serif') === 'sans' ? 'sans' : 'serif';
     const paletteChoice = String(values.get('colorPalette') || 'auto');
     const eventPalettes = { wedding: 'ivory', birthday: 'rose', quince: 'rose', baby_shower: 'sage', religious: 'ivory', graduation: 'navy', corporate: 'navy', custom: 'sage' };
