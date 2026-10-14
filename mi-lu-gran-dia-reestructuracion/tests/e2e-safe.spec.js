@@ -2583,3 +2583,19 @@ test('MGD-021: conmutador de preview móvil/escritorio no altera datos', async (
   expect(css).toContain('data-viewport="desktop"');
   expect(css).not.toContain('!important');
 });
+
+test('MGD-021: textos contextuales por evento sin modificar invitaciones guardadas', async () => {
+  const fs = await import('node:fs/promises');
+  const config = await fs.readFile(path.resolve(process.cwd(), 'src/core/app/invitation-copy.js'), 'utf8');
+  const js = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/index.js'), 'utf8');
+  for (const id of ['wedding','birthday','quince','baby_shower','religious','graduation','corporate','custom']) {
+    expect(config).toContain(id + ': Object.freeze(');
+  }
+  expect(js).toContain('getInvitationCopy(type)');
+  expect(js).toContain("trim() || copy.greeting");
+  expect(js).toContain('escapeHtml(copy.dateLabel)');
+  expect(js).toContain('escapeHtml(message)');
+  const preview = js.slice(js.indexOf('function renderEditorPreview()'), js.indexOf("  editorForm.addEventListener('input'"));
+  expect(preview).not.toContain('addPersonalInvitation(');
+  expect(preview).not.toContain('writePlannerStorageKey(');
+});
