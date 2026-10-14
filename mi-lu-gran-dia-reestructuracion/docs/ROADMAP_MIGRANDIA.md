@@ -1,5 +1,13 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-021: adaptador de repositorio de borradores desacoplado (DEV)
+
+- Se reutiliza `invitation-draft-contract.js` mediante `src/services/invitation-drafts-repository.js`, sin importación ni conexión a Firebase. El adaptador define `list/read/save/remove` mediante un puerto inyectable, comprueba cuenta y evento antes de aceptar resultados y valida el contenido con esquema canónico.
+- Los métodos de escritura contemplan una revisión esperada que el proveedor futuro deberá aplicar atómicamente para evitar pérdida por doble pestaña. El adaptador **no implementa transacciones ni persiste por sí mismo**: la garantía de control de concurrencia dependerá del backend cuando se autorice.
+- Prueba con puerto simulado: A/B, usuarios distintos, creación, lectura, conflicto de revisión, eliminación y rechazo de un registro de otro propietario.
+- Bloqueos pendientes: revisar Firestore Rules, definir autorización del recurso por `uid/eventId`, implementar puerto real con transacción, UI autosave/recuperación, pruebas autenticadas y autorización de nuevas escrituras. No se modificaron Firebase/Rules/Auth/Storage/PROD.
+
+
 ## 2026-10-13 — MGD-021: auditoría de persistencia y contrato seguro de borradores (DEV)
 
 - Verificado PR #190 incorporado en main; importación/exportación JSON local existe y está separada de invitaciones personales.
