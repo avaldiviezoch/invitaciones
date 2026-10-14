@@ -1,5 +1,13 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-021: puerto Firestore transaccional con bloqueo de activación (DEV)
+
+- Se implementó `src/services/invitation-drafts-firestore.js` como fábrica inyectable que usa el adaptador canónico de borradores. Su configuración **enabled=false por defecto** impide list/read/save/remove y no inicia peticiones a Firebase sin activación deliberada. No se instancia ni se conecta aún al editor.
+- En activación futura, cada operación comprueba `uid` activo y `eventId`, valida IDs del documento y utiliza transacciones con revisión esperada para guardar/eliminar. Se comprueba de nuevo la sesión antes de escribir. Esta implementación NO sustituye Firestore Security Rules ni autoriza desplegarlas.
+- QA estático con SDK simulado: sin activar, cero lecturas/escrituras; con activación simulada se rechaza otro usuario. Aún faltan pruebas con emulador Firestore y reglas vigentes, autorización de nuevas rutas, aislamiento con cuentas/eventos ficticios, doble pestaña y UI autosave.
+- **Advertencia de alcance:** DEV apunta al proyecto Firebase `migrandia`; no ejecutar operaciones reales ni habilitar el puerto sin revisar reglas y destino. No se alteran Firebase/Auth/Storage/Rules ni PROD.
+
+
 ## 2026-10-13 — MGD-021: adaptador de repositorio de borradores desacoplado (DEV)
 
 - Se reutiliza `invitation-draft-contract.js` mediante `src/services/invitation-drafts-repository.js`, sin importación ni conexión a Firebase. El adaptador define `list/read/save/remove` mediante un puerto inyectable, comprueba cuenta y evento antes de aceptar resultados y valida el contenido con esquema canónico.
