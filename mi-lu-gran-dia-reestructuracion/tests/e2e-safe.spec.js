@@ -2542,3 +2542,18 @@ test('MGD-021: personalización del borrador local sin escritura ni HTML insegur
   expect(preview).not.toContain('addPersonalInvitation(');
   expect(preview).not.toContain('writePlannerStorageKey(');
 });
+
+test('MGD-021: paleta local por evento y selector sin persistencia', async () => {
+  const fs = await import('node:fs/promises');
+  const js = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/index.js'), 'utf8');
+  const html = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/index.html'), 'utf8');
+  const css = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/editor-preview.css'), 'utf8');
+  expect(html).toContain('name="colorPalette"');
+  for (const palette of ['auto','ivory','sage','rose','navy']) expect(html).toContain('value="' + palette + '"');
+  expect(js).toContain('editorPreview.dataset.palette = allowedPalettes.includes(paletteChoice)');
+  for (const id of ['wedding','birthday','quince','baby_shower','religious','graduation','corporate','custom']) expect(js).toContain(id + ':');
+  for (const palette of ['ivory','sage','rose','navy']) expect(css).toContain('data-palette="' + palette + '"');
+  expect(css).not.toContain('!important');
+  const preview = js.slice(js.indexOf('function renderEditorPreview()'), js.indexOf("  editorForm.addEventListener('input'"));
+  expect(preview).not.toContain('addPersonalInvitation(');
+});
