@@ -2599,3 +2599,18 @@ test('MGD-021: textos contextuales por evento sin modificar invitaciones guardad
   expect(preview).not.toContain('addPersonalInvitation(');
   expect(preview).not.toContain('writePlannerStorageKey(');
 });
+
+test('MGD-021: exportar borrador no implica persistencia ni publicación', async () => {
+  const fs = await import('node:fs/promises');
+  const html = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/index.html'), 'utf8');
+  const js = await fs.readFile(path.resolve(process.cwd(), 'src/modules/invitaciones/index.js'), 'utf8');
+  expect(html).toContain('data-invitations-export-draft');
+  const start = js.indexOf("  root.querySelector('[data-invitations-export-draft]')");
+  const end = js.indexOf("  editorForm.addEventListener('input'", start);
+  const handler = js.slice(start, end);
+  expect(handler).toContain('migrandia-invitation-draft-v1');
+  expect(handler).toContain('JSON.stringify(draft, null, 2)');
+  expect(handler).toContain('URL.createObjectURL(');
+  expect(handler).not.toContain('writePlannerStorageKey(');
+  expect(handler).not.toContain('addPersonalInvitation(');
+});
