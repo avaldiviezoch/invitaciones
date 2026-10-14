@@ -39,6 +39,7 @@ function createFirestoreInvitationDraftRepository({ firestore, sdk, currentUid, 
         if (old && (old.ownerUid !== scope.ownerUid || old.eventId !== scope.eventId)) throw new Error('Borrador de otro contexto.');
         const nextRevision = String(Number(old?.revision || 0) + 1);
         if (!Number.isSafeInteger(Number(nextRevision))) throw new Error('Revisión inválida.');
+        assertEnabled(scope);
         transaction.set(ref, { ownerUid: scope.ownerUid, eventId: scope.eventId,
           value, revision: nextRevision, updatedAt: sdk.serverTimestamp() });
         return { id, ownerUid: scope.ownerUid, eventId: scope.eventId, value, revision: nextRevision };
@@ -53,6 +54,7 @@ function createFirestoreInvitationDraftRepository({ firestore, sdk, currentUid, 
         const old = previous.data();
         if (old.ownerUid !== scope.ownerUid || old.eventId !== scope.eventId) throw new Error('Borrador de otro contexto.');
         if (String(old.revision ?? '') !== revision) throw new Error('Conflicto de revisión: vuelve a cargar el borrador.');
+        assertEnabled(scope);
         transaction.delete(ref);
         return true;
       });
