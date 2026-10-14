@@ -1,5 +1,12 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-13 — MGD-021: paletas contextuales para borrador de Invitaciones (DEV)
+
+- PR #184 confirmado en main. Nuevo selector de color: automático según los ocho `eventType` o elección explícita de marfil, olivo, rosa empolvado y azul noche.
+- El render local usa atributos `data-palette` con tokens CSS encapsulados, conserva las tres plantillas y las dos tipografías; no persiste elecciones ni publica invitaciones.
+- Añadido test estático de ocho eventos, cuatro paletas y ausencia de `!important`; pendientes CI y QA real visual responsive. No se tocaron Rules/Auth/Storage, Firebase ni PROD.
+
+
 ## 2026-10-13 — MGD-021: personalización de mensaje y tipografía (DEV)
 
 - Confirmado PR #183 integrado en main. Se añaden controles de mensaje libre (máx. 240 caracteres) y selección tipográfica entre clásico y contemporáneo para la vista previa local.
