@@ -38,6 +38,9 @@ function createInvitationDraftAutosave({ save, delay = 800, enabled = false, sch
       throw error;
     } finally {
       inflight = false;
+      if (!stopped && pending && scope && timer === null && enabled) {
+        timer = schedule(() => { timer = null; void flush().catch(() => {}); }, delay);
+      }
     }
   }
   function change(value) {
