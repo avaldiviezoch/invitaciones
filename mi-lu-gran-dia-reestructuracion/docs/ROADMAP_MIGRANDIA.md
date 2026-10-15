@@ -1,5 +1,12 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-15 — MGD-021: matriz ejecutable de permisos por evento (DEV)
+
+- PR #203 confirmado verde y fusionado. Se agrega `src/core/app/invitation-draft-permissions.js`: evaluación pura de autorización por sesión, membresía activa, coincidencia de evento y rol. Reglas: owner/admin/editor leen y escriben, provider/viewer solo leen, ajenos/inactivos/no autenticados denegados.
+- Prueba automatizada cubre operaciones read/list/create/update/delete, usuario ajeno, membresía inactiva, A→B y operación desconocida. **Es una matriz de preflight, no una implementación ni test del emulador de Firestore**. Sigue pendiente implementar Rules reales en entorno aislado y comprobar las desplegadas, y resolver la ruta definitiva del evento.
+- Persistencia Firestore y autosave siguen desactivados; sin cambios a Rules, Firebase ni PROD.
+
+
 ## 2026-10-15 — MGD-021: borrador no desplegable de reglas de invitaciones (DEV)
 
 - PR #202 confirmado fusionado con CI success. Se agregó `docs/mgd021-invitation-drafts-rules.PROPOSAL.txt` como **fragmento de discusión**, NO regla lista para deploy.

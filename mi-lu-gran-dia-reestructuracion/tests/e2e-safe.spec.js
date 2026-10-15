@@ -2912,3 +2912,27 @@ test('MGD-021: puente de persistencia impide guardar y recuperar antes de activa
   expect(reads).toBe(0);
   expect(writes).toBe(0);
 });
+
+test('MGD-021: matriz de permisos de borradores por membresia y evento', async () => {
+  const { assessInvitationDraftAccess: allowed } = await import('../src/core/app/invitation-draft-permissions.js');
+  const ctx = (role, operation, overrides = {}) => ({
+    authenticated: true, membershipStatus: 'active', memberEventId: 'eventA',
+    eventId: 'eventA', role, operation, ...overrides
+  });
+  for (const role of ['owner', 'admin', 'editor']) {
+    for (const operation of ['read', 'list', 'create', 'update', 'delete']) {
+      expect(allowed(ctx(role, operation))).toBe(true);
+    }
+  }
+  for (const role of ['provider', 'viewer']) {
+    expect(allowed(ctx(role, 'read'))).toBe(true);
+    for (const operation of ['create', 'update', 'delete']) expect(allowed(ctx(role, operation))).toBe(false);
+  }
+  for (const operation of ['read', 'create', 'delete']) {
+    expect(allowed(ctx('owner', operation, { authenticated: false }))).toBe(false);
+    expect(allowed(ctx('owner', operation, { membershipStatus: 'inactive' }))).toBe(false);
+    expect(allowed(ctx('owner', operation, { eventId: 'eventB' }))).toBe(false);
+    expect(allowed(ctx('outsider', operation))).toBe(false);
+  }
+  expect(allowed(ctx('owner', 'unexpected-operation'))).toBe(false);
+});
