@@ -1,3 +1,9 @@
+## 2026-10-15 — MGD-021: unificación del contrato JSON en editor (DEV)
+
+- PR #198 verificado fusionado, CI success. Exportación/importación JSON del editor usa ahora `normalizeDraftInput` y `DRAFT_FIELDS` de `invitation-draft-contract.js`; una sola validación de formato y campos para transferencia local y almacenamiento futuro.
+- Prueba de regresión del uso del contrato y roundtrip JSON con rechazo de campos adicionales. La funcionalidad sigue exclusivamente local; la biblioteca personal y sus enlaces no cambian.
+- Pendiente validar Firestore Rules actuales y entorno aislado antes de activar persistencia real, QA autenticado A→B→A y monkey test de importación/exportación. No hay cambios a Firebase/Auth/Storage/Rules/PROD.
+
 ## 2026-10-15 — MGD-021: protección ante cerrar o recargar con borrador sin exportar (DEV)
 
 - PR #197 confirmado verde y fusionado en main.
