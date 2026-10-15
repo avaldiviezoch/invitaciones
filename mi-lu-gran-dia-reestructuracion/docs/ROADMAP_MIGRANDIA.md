@@ -1,5 +1,13 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-15 — MGD-021: protección ante cerrar o recargar con borrador sin exportar (DEV)
+
+- PR #197 confirmado verde y fusionado en main.
+- Se añadió `beforeunload` exclusivamente mientras exista un editor visible con cambios sin exportar; permite al navegador avisar antes de recargar/cerrar pestaña. El listener queda vinculado al AbortController del módulo y se elimina al desmontar.
+- Se mantiene el aviso existente de confirmación de descarte dentro del editor. Esto no equivale a guardado persistente; el navegador puede decidir no mostrar el diálogo en algunos entornos. No se modifica el estado Firebase, Rules ni PROD.
+- Test estático de regresión para guardia condicional y cleanup; QA de navegación real en móviles queda pendiente.
+
+
 ## 2026-10-15 — MGD-021: aviso de cambios no guardados del editor local (DEV)
 
 - PR #196 confirmado fusionado con CI verde.

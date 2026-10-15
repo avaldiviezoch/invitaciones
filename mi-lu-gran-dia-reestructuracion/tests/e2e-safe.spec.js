@@ -2845,3 +2845,12 @@ test('MGD-021: editor identifica cambios sin guardar y exige confirmacion antes 
   expect(js).toContain("window.confirm('Este borrador tiene cambios");
   expect(js).toContain("updateDraftStatus(false)");
 });
+
+test('MGD-021: cierre de pestaña advierte por cambios no exportados y limpia listener', async () => {
+  const fs = await import('node:fs/promises');
+  const js = await fs.readFile(path.resolve('src/modules/invitaciones/index.js'), 'utf8');
+  expect(js).toContain("window.addEventListener('beforeunload', warnOnUnsavedDraft, { signal })");
+  expect(js).toContain("if (editor.hidden || !dirtyDraft) return;");
+  expect(js).toContain("event.returnValue = '';");
+  expect(js).toContain("controller.abort();");
+});
