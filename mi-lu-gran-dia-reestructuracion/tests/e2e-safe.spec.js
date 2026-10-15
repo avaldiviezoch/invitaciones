@@ -2722,3 +2722,44 @@ test('MGD-021: puerto Firestore desactivado y bloqueo de escrituras hasta aproba
   await expect(enabledPort.list('uidB','eventoA')).rejects.toThrow('cuenta activa');
   expect(calls).toBe(0);
 });
+
+test('MGD-021: transacciones de borradores validan revision y cambio de usuario', async () => {
+  const { createFirestoreInvitationDraftRepository } = await import('../src/services/invitation-drafts-firestore.js');
+  const entries = new Map();
+  let uid = 'cuentaA';
+  const sdk = {
+    collection: (_, ...parts) => parts.join('/'),
+    doc: (parent, id) => parent + '/' + id,
+    getDocs: async () => ({ docs: [] }),
+    getDoc: async () => ({ exists: () => false }),
+    serverTimestamp: () => 'test-timestamp',
+    runTransaction: async (_, operation) => operation({
+      get: async (ref) => ({
+        exists: () => entries.has(ref),
+        data: () => entries.get(ref)
+      }),
+      set: (ref, data) => { entries.set(ref, data); },
+      delete: (ref) => { entries.delete(ref); }
+    })
+  };
+  const repository = createFirestoreInvitationDraftRepository({
+    firestore: {}, sdk, currentUid: () => uid, enabled: true
+  });
+  const value = {
+    schema: 'migrandia-invitation-draft-v1', eventType: 'birthday',
+    eventName: 'Fiesta', date: '', location: '', guestName: '',
+    message: '', templateId: 'classic-elegant', fontStyle: 'serif', colorPalette: 'auto'
+  };
+  const first = await repository.save('cuentaA', 'eventoA', 'borrador1', value);
+  expect(first.revision).toBe('1');
+  await expect(repository.save('cuentaA', 'eventoA', 'borrador1', value, '')).rejects.toThrow('Conflicto');
+  const second = await repository.save('cuentaA', 'eventoA', 'borrador1', value, '1');
+  expect(second.revision).toBe('2');
+  await expect(repository.remove('cuentaA', 'eventoA', 'borrador1', '1')).rejects.toThrow('Conflicto');
+  uid = 'cuentaB';
+  await expect(repository.save('cuentaA', 'eventoA', 'borrador1', value, '2')).rejects.toThrow('cuenta activa');
+  await expect(repository.read('cuentaA', 'eventoA', 'borrador1')).rejects.toThrow('cuenta activa');
+  uid = 'cuentaA';
+  expect(await repository.remove('cuentaA', 'eventoA', 'borrador1', '2')).toBe(true);
+  expect(await repository.read('cuentaA', 'eventoA', 'borrador1')).toBeNull();
+});
