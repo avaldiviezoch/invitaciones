@@ -3003,3 +3003,46 @@ test('MGD-021: sesion de borrador colaborativo bloqueada y aisla evento y cuenta
   await expect(pending2).rejects.toThrow('cambió');
   enabled.close();
 });
+
+test('MGD-021: integracion sesion y puerto colaborativo con cambios entre eventos', async () => {
+  const { createEventInvitationDraftSession } = await import('../src/services/event-invitation-draft-session.js');
+  const { createEventInvitationDraftPort } = await import('../src/services/event-invitation-drafts-firestore.js');
+  const docs = new Map();
+  let uid = 'organizador';
+  const sdk = {
+    collection: (_db,...parts) => parts.join('/'),
+    doc: (parent,id) => parent+'/'+id,
+    serverTimestamp: () => 'timestamp-test',
+    getDoc: async (key) => ({ id:key.split('/').at(-1), exists:()=>docs.has(key), data:()=>docs.get(key) }),
+    getDocs: async (path) => ({ docs:[...docs].filter(([key])=>key.startsWith(path+'/')).map(([key,val])=>({
+      id:key.split('/').at(-1),exists:()=>true,data:()=>val
+    })) }),
+    runTransaction: async (_db,fn) => fn({
+      get:async(key)=>({exists:()=>docs.has(key),data:()=>docs.get(key)}),
+      set:(key,data)=>docs.set(key,data),
+      delete:(key)=>docs.delete(key)
+    })
+  };
+  const port = createEventInvitationDraftPort({ db:{},sdk,currentUid:()=>uid,enabled:true });
+  const session = createEventInvitationDraftSession({ repository:port,currentUid:()=>uid,enabled:true });
+  const draft = { schema:'migrandia-invitation-draft-v1', eventType:'wedding',
+    eventName:'Boda A',date:'',location:'',guestName:'',message:'Original',
+    templateId:'classic-elegant',fontStyle:'serif',colorPalette:'auto' };
+  session.select({eventId:'eventA',draftId:'draft1'});
+  expect(session.change(draft)).toBe(true);
+  expect(await session.flush()).toBe(true);
+  expect(session.status().revision).toBe('1');
+  session.select({eventId:'eventB',draftId:'draft1'});
+  expect(await session.recover()).toBeNull();
+  session.select({eventId:'eventA',draftId:'draft1'});
+  expect(await session.recover()).toEqual(draft);
+  expect(session.status().revision).toBe('1');
+  uid='editor';
+  await expect(session.recover()).rejects.toThrow('cambió');
+  session.select({eventId:'eventA',draftId:'draft1'});
+  expect(session.change({...draft,message:'Editado por colaborador'})).toBe(true);
+  expect(await session.flush()).toBe(true);
+  expect(session.status().revision).toBe('2');
+  expect((await port.read('eventA','draft1')).ownerUid).toBe('organizador');
+  session.close();
+});
