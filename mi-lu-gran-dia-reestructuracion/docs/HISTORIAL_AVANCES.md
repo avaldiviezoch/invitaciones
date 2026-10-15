@@ -1,3 +1,10 @@
+## 2026-10-15 — MGD-021: CI de Firestore Emulator aislado (DEV)
+
+- PR #205 confirmado fusionado, CI general success, **sin ejecución anterior de emulador**.
+- Nuevo workflow `.github/workflows/mgd021-firestore-drafts-emulator.yml`, que instala Java y dependencias de prueba, y ejecuta `firebase emulators:exec` solo con el proyecto `demo-mgd021-invitation-drafts` y la configuración `tests/firestore-drafts/firebase.json`.
+- El job es independiente, disparado manualmente o en PRs que alteren la fixture/workflow. No despliega reglas ni requiere credenciales Firebase, no conecta a `migrandia`. **Resultado pendiente de ejecución CI**; no se declara verde todavía.
+- Solo después de superar la suite deben revisarse las Rules reales y adaptar la ruta de persistencia, actualmente bloqueada. PROD/Firebase/Auth/datos reales intactos.
+
 ## 2026-10-15 — MGD-021: modelo colaborativo confirmado y pruebas para emulador aislado (DEV)
 
 - Decisión expresamente aprobada: los borradores son datos del evento y se comparten entre sus colaboradores autorizados, no una biblioteca privada por `uid`. Ruta de trabajo `weddings/{weddingId}/invitationDrafts/{draftId}`, sujeta a verificar el modelo multievento activo.
