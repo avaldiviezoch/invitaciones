@@ -2796,3 +2796,41 @@ test('MGD-021: autosave bloqueado por defecto y aislado al cambiar de evento', a
   controller.close();
   expect(controller.change('luego de cerrar')).toBe(false);
 });
+
+test('MGD-021: autosave retiene la edición reciente y no repite errores indefinidamente', async () => {
+  const { createInvitationDraftAutosave } = await import('../src/core/app/invitation-draft-autosave.js');
+  const tasks = new Map();
+  let next = 0;
+  const schedule = (fn) => { const id = ++next; tasks.set(id, fn); return id; };
+  const cancel = (id) => tasks.delete(id);
+  let release;
+  const calls = [];
+  const save = async (_scope, value, revision) => {
+    calls.push({ value, revision });
+    if (value === 'primera') return new Promise((resolve) => { release = resolve; });
+    if (value === 'con conflicto') throw new Error('Conflicto de revisión');
+    return { revision:'2' };
+  };
+  const c = createInvitationDraftAutosave({ save, enabled:true, schedule, cancel });
+  c.setScope({ ownerUid:'u', eventId:'e', draftId:'d' });
+  c.change('primera');
+  const first = c.flush();
+  c.change('segunda');
+  release({ revision:'1' });
+  await first;
+  expect(c.getStatus().revision).toBe('1');
+  expect(c.getStatus().pending).toBe(true);
+  await c.flush();
+  expect(calls.map((v) => v.value)).toEqual(['primera','segunda']);
+  expect(calls[1].revision).toBe('1');
+  c.change('con conflicto');
+  await expect(c.flush()).rejects.toThrow('Conflicto');
+  expect(c.getStatus().pending).toBe(true);
+  expect(c.getStatus().error).toContain('Conflicto');
+  expect(tasks.size).toBe(0);
+  c.change('recuperada');
+  await c.flush();
+  expect(c.getStatus().error).toBe('');
+  expect(c.getStatus().revision).toBe('2');
+  c.close();
+});
