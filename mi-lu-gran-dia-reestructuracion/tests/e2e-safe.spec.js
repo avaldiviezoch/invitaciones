@@ -2869,3 +2869,26 @@ test('MGD-021: editor importa y exporta usando contrato canonico de borradores',
   expect(normalizeDraftInput(JSON.parse(JSON.stringify(normalizeDraftInput(valid))))).toEqual(valid);
   expect(() => normalizeDraftInput({ ...valid, extra:'unsafe' })).toThrow();
 });
+
+test('MGD-021: lectura tardia de borradores se descarta si cambio la cuenta', async () => {
+  const { createFirestoreInvitationDraftRepository } = await import('../src/services/invitation-drafts-firestore.js');
+  let uid = 'userA';
+  let deliver;
+  const sdk = {
+    collection: (_db, ...parts) => parts.join('/'),
+    doc: (parent, id) => parent + '/' + id,
+    getDocs: () => new Promise((resolve) => { deliver = resolve; }),
+    getDoc: () => new Promise((resolve) => { deliver = resolve; }),
+    runTransaction: async () => { throw new Error('No se deben iniciar escrituras.'); }
+  };
+  const repo = createFirestoreInvitationDraftRepository({ firestore:{}, sdk, currentUid:() => uid, enabled:true });
+  const list = repo.list('userA','eventA');
+  uid = 'userB';
+  deliver({ docs:[] });
+  await expect(list).rejects.toThrow('cuenta activa');
+  uid = 'userA';
+  const read = repo.read('userA','eventA','draft1');
+  uid = 'userB';
+  deliver({ exists:() => false });
+  await expect(read).rejects.toThrow('cuenta activa');
+});
