@@ -1,3 +1,9 @@
+## 2026-10-15 — MGD-021: borrador no desplegable de reglas de invitaciones (DEV)
+
+- PR #202 confirmado fusionado con CI success. Se agregó `docs/mgd021-invitation-drafts-rules.PROPOSAL.txt` como **fragmento de discusión**, NO regla lista para deploy.
+- La propuesta plantea colección de borradores bajo `weddings/{weddingId}/invitationDrafts/{draftId}`, con lectura de miembros activos, escritura de owner/admin/editor y prohibición de cambiar propietario/evento. Este borrador **aún no** valida en profundidad la estructura/longitudes ni revisión creciente; no debe integrarse hasta completar dichas validaciones.
+- Se requiere copiar y verificar en proyecto emulador las reglas desplegadas reales, definir la ruta canónica multievento y ejecutar pruebas negativas/positivas de roles antes de modificar Firebase. No se modifica Rules ni PROD, ni se habilita autosave.
+
 ## 2026-10-15 — MGD-021: auditoría de Firestore Rules y bloqueo de diseño (DEV)
 
 - Se localizaron en `avaldiviezoch/Wedding` las reglas `firebase/firestore.rules` y el test de emulador. Se inspeccionaron **solo en lectura**, sin confirmar aún las reglas desplegadas.
