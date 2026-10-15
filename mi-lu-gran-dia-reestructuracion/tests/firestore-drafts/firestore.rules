@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() { return request.auth != null; }
+    function membership(weddingId) {
+      return /databases/$(database)/documents/weddings/$(weddingId)/members/$(request.auth.uid);
+    }
+    function activeMember(weddingId) {
+      return signedIn() && exists(membership(weddingId))
+        && get(membership(weddingId)).data.get('status', '') == 'active';
+    }
+    function editor(weddingId) {
+      return activeMember(weddingId)
+        && get(membership(weddingId)).data.get('role', '') in ['owner','admin','editor'];
+    }
+    function validDraft(weddingId) {
+      let v = request.resource.data.value;
+      return request.resource.data.keys().hasOnly(['ownerUid','eventId','value','revision','updatedAt'])
+        && request.resource.data.keys().hasAll(['ownerUid','eventId','value','revision','updatedAt'])
+        && request.resource.data.ownerUid is string
+        && request.resource.data.ownerUid.size() > 0
+        && request.resource.data.eventId == weddingId
+        && request.resource.data.revision is string
+        && request.resource.data.revision.matches('^[1-9][0-9]{0,12}$')
+        && v is map
+        && v.keys().hasOnly(['schema','eventType','eventName','date','location','guestName','message','templateId','fontStyle','colorPalette'])
+        && v.keys().hasAll(['schema','eventType','eventName','date','location','guestName','message','templateId','fontStyle','colorPalette'])
+        && v.schema == 'migrandia-invitation-draft-v1'
+        && v.eventType in ['wedding','birthday','quince','baby_shower','religious','graduation','corporate','custom']
+        && v.eventName is string && v.eventName.size() <= 100
+        && v.date is string && v.date.size() <= 10
+        && v.location is string && v.location.size() <= 140
+        && v.guestName is string && v.guestName.size() <= 100
+        && v.message is string && v.message.size() <= 240
+        && v.templateId in ['classic-elegant','minimal-black','one-piece-elegant']
+        && v.fontStyle in ['serif','sans']
+        && v.colorPalette in ['auto','ivory','sage','rose','navy'];
+    }
+    // Fixture independiente, deliberadamente sin rutas de RSVP o de producción.
+    match /weddings/{weddingId}/invitationDrafts/{draftId} {
+      allow read: if activeMember(weddingId);
+      allow create: if editor(weddingId) && validDraft(weddingId)
+        && request.resource.data.ownerUid == request.auth.uid
+        && request.resource.data.revision == '1';
+      allow update: if editor(weddingId) && validDraft(weddingId)
+        && request.resource.data.ownerUid == resource.data.ownerUid
+        && request.resource.data.eventId == resource.data.eventId
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['value','revision','updatedAt'])
+        && int(request.resource.data.revision) == int(resource.data.revision) + 1;
+      allow delete: if editor(weddingId);
+    }
+  }
+}

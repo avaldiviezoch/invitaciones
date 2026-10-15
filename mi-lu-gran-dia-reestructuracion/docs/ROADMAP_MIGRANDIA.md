@@ -1,5 +1,13 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-15 — MGD-021: modelo colaborativo confirmado y pruebas para emulador aislado (DEV)
+
+- Decisión expresamente aprobada: los borradores son datos del evento y se comparten entre sus colaboradores autorizados, no una biblioteca privada por `uid`. Ruta de trabajo `weddings/{weddingId}/invitationDrafts/{draftId}`, sujeta a verificar el modelo multievento activo.
+- Se agregaron exclusivamente en `tests/firestore-drafts/` una **fixture independiente** de Rules, configuración de emulador `demo-mgd021-invitation-drafts`, suite `node:test` con `@firebase/rules-unit-testing` y guía de ejecución. Comprueba owner/admin/editor, viewer/provider, inactivos/ajenos/anónimos, A/B y ataques sobre propietario, evento, revisión y contenido.
+- **Todavía no se ha ejecutado esta suite de emulador ni está integrada en CI**; dependerá de instalar librerías y Java. No confundir la suite estática general verde con validación real de Rules. No se modificaron Rules canónicas, adaptadores efectivos, Firebase, Auth, datos ni PROD; autosave sigue desactivado.
+- Antes de cualquier activación: ejecutar emulador, solucionar cualquier error de sintaxis/permisos, comparar reglas realmente desplegadas, precisar esquema multievento, completar control de concurrencia y verificar no regresión del RSVP.
+
+
 ## 2026-10-15 — MGD-021: matriz ejecutable de permisos por evento (DEV)
 
 - PR #203 confirmado verde y fusionado. Se agrega `src/core/app/invitation-draft-permissions.js`: evaluación pura de autorización por sesión, membresía activa, coincidencia de evento y rol. Reglas: owner/admin/editor leen y escriben, provider/viewer solo leen, ajenos/inactivos/no autenticados denegados.
