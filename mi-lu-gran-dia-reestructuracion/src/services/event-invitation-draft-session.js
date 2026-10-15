@@ -42,8 +42,16 @@ function createEventInvitationDraftSession({ repository, currentUid, enabled = f
     const selected = context && { ...context };
     const token = contextVersion;
     assertSession(selected, token);
+    if (saver.getStatus().pending || saver.getStatus().inflight) {
+      throw new Error('Hay cambios pendientes: guarda o descarta antes de recuperar.');
+    }
+    const editVersion = saver.getStatus().changeVersion;
     const item = await repository.read(selected.eventId, selected.draftId);
     assertSession(selected, token);
+    if (saver.getStatus().pending || saver.getStatus().inflight
+      || saver.getStatus().changeVersion !== editVersion) {
+      throw new Error('Hay cambios pendientes o ediciones recientes: no se reemplazó el borrador local.');
+    }
     if (item) saver.setScope({ ownerUid:selected.uid, eventId:selected.eventId, draftId:selected.draftId, revision:item.revision });
     return item?.value ? normalizeDraftInput(item.value) : null;
   }

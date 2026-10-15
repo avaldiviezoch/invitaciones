@@ -3048,3 +3048,49 @@ test('MGD-021: integracion sesion y puerto colaborativo con cambios entre evento
   expect((await port.read('eventA','draft1')).ownerUid).toBe('organizador');
   session.close();
 });
+
+test('MGD-021: recuperar nunca descarta ediciones locales pendientes o creadas durante lectura', async () => {
+  const { createEventInvitationDraftSession } = await import('../src/services/event-invitation-draft-session.js');
+  let release;
+  const draft = { schema:'migrandia-invitation-draft-v1',eventType:'wedding',eventName:'Boda',
+    date:'',location:'',guestName:'',message:'',templateId:'classic-elegant',fontStyle:'serif',colorPalette:'auto' };
+  const session = createEventInvitationDraftSession({
+    enabled:true, currentUid:()=>'owner',
+    repository:{save:async()=>({revision:'1'}), read:async()=>new Promise(resolve=>{release=resolve})},
+    schedule:()=>1, cancel:()=>{}
+  });
+  session.select({eventId:'eventA',draftId:'draft1'});
+  session.change(draft);
+  await expect(session.recover()).rejects.toThrow('cambios pendientes');
+  expect(session.status().pending).toBe(true);
+  session.select({eventId:'eventA',draftId:'draft1'});
+  const reading = session.recover();
+  session.change({...draft,message:'edición reciente'});
+  release({revision:'4',value:draft});
+  await expect(reading).rejects.toThrow('cambios pendientes');
+  expect(session.status().pending).toBe(true);
+  expect(session.status().revision).toBe('');
+  session.close();
+});
+
+
+test('MGD-021: lectura tardía no sobrescribe revisión tras completarse autosave', async () => {
+  const { createEventInvitationDraftSession } = await import('../src/services/event-invitation-draft-session.js');
+  let release;
+  const draft = { schema:'migrandia-invitation-draft-v1',eventType:'wedding',eventName:'Boda',
+    date:'',location:'',guestName:'',message:'',templateId:'classic-elegant',fontStyle:'serif',colorPalette:'auto' };
+  const session = createEventInvitationDraftSession({ enabled:true, currentUid:()=>'owner',
+    repository:{ save:async()=>({revision:'8'}), read:()=>new Promise(resolve=>{ release=resolve; }) },
+    schedule:()=>1, cancel:()=>{} });
+  session.select({ eventId:'eventA',draftId:'draft1' });
+  const reading = session.recover();
+  session.change({...draft,message:'Edición nueva'});
+  expect(await session.flush()).toBe(true);
+  expect(session.status().pending).toBe(false);
+  expect(session.status().inflight).toBe(false);
+  expect(session.status().revision).toBe('8');
+  release({ revision:'3',value:draft });
+  await expect(reading).rejects.toThrow('ediciones recientes');
+  expect(session.status().revision).toBe('8');
+  session.close();
+});

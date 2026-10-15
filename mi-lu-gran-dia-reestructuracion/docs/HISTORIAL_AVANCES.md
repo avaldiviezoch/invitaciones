@@ -1,3 +1,9 @@
+## 2026-10-15 — MGD-021: impedir pérdida de cambios locales al recuperar borradores (DEV)
+
+- PR #209 confirmado fusionado y CI verde tras recuperar revisión vigente antes de editar como colaborador.
+- Se corrigió `src/services/event-invitation-draft-session.js` para bloquear `recover()` cuando hay guardado pendiente o en curso, tanto antes como después de la lectura asíncrona. Impide reemplazar el estado/revisión local si el usuario editó mientras la consulta estaba en vuelo.
+- Prueba automatizada verifica los dos escenarios (cambios previos y durante lectura), sin Firebase real. Autosave sigue `enabled=false` por defecto y no existe conexión del puerto con la UI. No cambia Rules ni PROD.
+
 ## 2026-10-15 — MGD-021: integración de sesión y repositorio colaborativo (DEV)
 
 - PR #208 confirmado verde y fusionado. Se incorporó una prueba automatizada que ejecuta juntos el controlador de autosave, la sesión y el puerto colaborativo, con proveedor Firestore simulado exclusivamente en memoria.
@@ -3175,3 +3181,11 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Errores públicos normalizados y errores sin caché.
 - 404 real para rutas inexistentes.
 - Sin cambios en Firebase Rules, Auth, Storage ni estructura de BD.
+
+
+### 2026-10-15 — MGD-021: guardia adicional ante recuperación tardía (PR #210)
+- Se detectó un caso límite: una edición ocurrida durante `recover()` podía completar su autosave antes de que terminara la lectura; comprobar solo `pending/inflight` no detectaba esa edición ya guardada.
+- Se expuso `changeVersion` en el estado del autosave y `recover()` compara la versión anterior y posterior a la lectura. Una lectura iniciada antes de una edición no puede sobrescribir la revisión reciente.
+- Se añadió prueba de regresión de lectura tardía después de autosave completado en `tests/e2e-safe.spec.js`.
+- Commits: `d7004b7`, `f38f984`, `1df909f`. CI pendiente de comprobación; no declarar verde todavía.
+- Solo DEV, sin conectar UI a Firebase ni activar persistencia real; sin cambios de Rules ni PROD.
