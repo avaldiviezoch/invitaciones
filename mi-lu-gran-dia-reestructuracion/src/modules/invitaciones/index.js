@@ -1,3 +1,4 @@
+import { normalizeDraftInput, DRAFT_FIELDS } from '../../core/app/invitation-draft-contract.js';
 import { getInvitationCopy } from '../../core/app/invitation-copy.js';
 import { invitationEngineModel, hasStableInvitationEngineShape } from '../../core/app/invitation-engine.js';
 import { getInvitationTemplate } from '../../core/app/invitation-templates.js';
@@ -153,7 +154,7 @@ export async function mountInvitaciones() {
     const allowedTypes = new Set(Object.keys(typeLabels));
     const type = String(fields.get('eventType') || '');
     if (!allowedTypes.has(type)) return;
-    const draft = {
+    const draft = normalizeDraftInput({
       schema: 'migrandia-invitation-draft-v1',
       eventType: type,
       eventName: String(fields.get('eventName') || '').slice(0, 100),
@@ -164,7 +165,7 @@ export async function mountInvitaciones() {
       templateId: getInvitationTemplate(fields.get('templateId')).id,
       fontStyle: fields.get('fontStyle') === 'sans' ? 'sans' : 'serif',
       colorPalette: ['auto', 'ivory', 'sage', 'rose', 'navy'].includes(fields.get('colorPalette')) ? fields.get('colorPalette') : 'auto'
-    };
+    });
     const url = URL.createObjectURL(new Blob([JSON.stringify(draft, null, 2)], { type: 'application/json' }));
     const link = document.createElement('a');
     link.href = url;
@@ -185,21 +186,8 @@ export async function mountInvitaciones() {
     }
     try {
       const record = JSON.parse(await file.text());
-      const fields = ['eventType', 'eventName', 'date', 'location', 'guestName', 'message', 'templateId', 'fontStyle', 'colorPalette'];
-      const isRecord = record && typeof record === 'object' && !Array.isArray(record);
-      if (!isRecord || record.schema !== 'migrandia-invitation-draft-v1'
-        || !Object.keys(record).every((key) => key === 'schema' || fields.includes(key))
-        || !fields.every((key) => typeof record[key] === 'string')
-        || !Object.hasOwn(typeLabels, record.eventType)
-        || !/^$|^\\d{4}-\\d{2}-\\d{2}$/.test(record.date)
-        || record.eventName.length > 100 || record.location.length > 140
-        || record.guestName.length > 100 || record.message.length > 240
-        || getInvitationTemplate(record.templateId).id !== record.templateId
-        || !['serif', 'sans'].includes(record.fontStyle)
-        || !['auto', 'ivory', 'sage', 'rose', 'navy'].includes(record.colorPalette)) {
-        throw new Error('El borrador no tiene un formato válido.');
-      }
-      for (const key of fields) editorForm.elements[key].value = record[key];
+      const draft = normalizeDraftInput(record);
+      for (const key of DRAFT_FIELDS) editorForm.elements[key].value = draft[key];
       renderEditorPreview();
       updateDraftStatus(true);
       status.textContent = 'Borrador recuperado en el editor local. Aún no se ha guardado en tu cuenta.';
