@@ -2763,3 +2763,36 @@ test('MGD-021: transacciones de borradores validan revision y cambio de usuario'
   expect(await repository.remove('cuentaA', 'eventoA', 'borrador1', '2')).toBe(true);
   expect(await repository.read('cuentaA', 'eventoA', 'borrador1')).toBeNull();
 });
+
+test('MGD-021: autosave bloqueado por defecto y aislado al cambiar de evento', async () => {
+  const { createInvitationDraftAutosave } = await import('../src/core/app/invitation-draft-autosave.js');
+  const tasks = new Map();
+  let id = 0;
+  const schedule = (callback) => { tasks.set(++id, callback); return id; };
+  const cancel = (key) => tasks.delete(key);
+  const calls = [];
+  const save = async (scope, value, revision) => {
+    calls.push({ scope, value, revision });
+    return { revision: String(Number(revision || 0) + 1) };
+  };
+  const disabled = createInvitationDraftAutosave({ save, schedule, cancel });
+  disabled.setScope({ ownerUid:'a',eventId:'A',draftId:'1' });
+  expect(disabled.change({ title:'no guardar' })).toBe(false);
+  expect(await disabled.flush()).toBe(false);
+  expect(calls).toEqual([]);
+  const controller = createInvitationDraftAutosave({ save, schedule, cancel, enabled:true });
+  controller.setScope({ ownerUid:'a',eventId:'A',draftId:'1' });
+  expect(controller.change('primero')).toBe(true);
+  controller.change('segundo');
+  expect(controller.getStatus().pending).toBe(true);
+  controller.setScope({ ownerUid:'a',eventId:'B',draftId:'1' });
+  expect(controller.getStatus().pending).toBe(false);
+  controller.change('nuevo evento');
+  await controller.flush();
+  expect(calls).toHaveLength(1);
+  expect(calls[0].scope.eventId).toBe('B');
+  expect(calls[0].value).toBe('nuevo evento');
+  expect(controller.getStatus().revision).toBe('1');
+  controller.close();
+  expect(controller.change('luego de cerrar')).toBe(false);
+});

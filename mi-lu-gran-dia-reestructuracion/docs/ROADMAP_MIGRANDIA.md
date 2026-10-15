@@ -1,5 +1,12 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-15 — MGD-021: controlador de autosave aislado, aún sin activación (DEV)
+
+- PR #194 verificado fusionado y con CI success. Nuevo `src/core/app/invitation-draft-autosave.js` puro, sin dependencia de Firebase ni conexión al editor: desactivado por defecto, agrupa cambios mediante debounce, permite flush explícito y descarta pendientes al cambiar cuenta/evento/borrador.
+- Mantiene revisión devuelta por el proveedor, conserva pendientes ante error, reprograma cambios recibidos durante una operación y realiza limpieza al cerrar. La validación final de sesión y conflictos sigue en el adaptador Firestore y reglas del backend; la activación no está autorizada.
+- Test seguro comprueba ausencia total de guardado cuando está desactivado y aislamiento entre eventos A/B con proveedor falso. Pendientes QA de fallas de red/doble pestaña, Rules reales, pruebas autenticadas y habilitación controlada. No hay escritura en Firebase ni modificación de PROD.
+
+
 ## 2026-10-15 — MGD-021: regresión transaccional de borradores (DEV)
 
 - PR #193 confirmado incorporado a main. El adaptador Firestore continúa `enabled=false` por defecto y no está enlazado a la interfaz.
