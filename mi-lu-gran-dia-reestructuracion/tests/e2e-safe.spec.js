@@ -3040,6 +3040,8 @@ test('MGD-021: integracion sesion y puerto colaborativo con cambios entre evento
   uid='editor';
   await expect(session.recover()).rejects.toThrow('cambió');
   session.select({eventId:'eventA',draftId:'draft1'});
+  expect(await session.recover()).toEqual(draft);
+  expect(session.status().revision).toBe('1');
   expect(session.change({...draft,message:'Editado por colaborador'})).toBe(true);
   expect(await session.flush()).toBe(true);
   expect(session.status().revision).toBe('2');
