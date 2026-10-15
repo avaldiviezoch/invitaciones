@@ -1,3 +1,9 @@
+## 2026-10-15 — MGD-021: impedir pérdida de cambios locales al recuperar borradores (DEV)
+
+- PR #209 confirmado fusionado y CI verde tras recuperar revisión vigente antes de editar como colaborador.
+- Se corrigió `src/services/event-invitation-draft-session.js` para bloquear `recover()` cuando hay guardado pendiente o en curso, tanto antes como después de la lectura asíncrona. Impide reemplazar el estado/revisión local si el usuario editó mientras la consulta estaba en vuelo.
+- Prueba automatizada verifica los dos escenarios (cambios previos y durante lectura), sin Firebase real. Autosave sigue `enabled=false` por defecto y no existe conexión del puerto con la UI. No cambia Rules ni PROD.
+
 ## 2026-10-15 — MGD-021: integración de sesión y repositorio colaborativo (DEV)
 
 - PR #208 confirmado verde y fusionado. Se incorporó una prueba automatizada que ejecuta juntos el controlador de autosave, la sesión y el puerto colaborativo, con proveedor Firestore simulado exclusivamente en memoria.
