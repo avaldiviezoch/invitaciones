@@ -2837,8 +2837,8 @@ test('MGD-021: autosave retiene la edición reciente y no repite errores indefin
 
 test('MGD-021: editor identifica cambios sin guardar y exige confirmacion antes de descartarlos', async () => {
   const fs = await import('node:fs/promises');
-  const js = await fs.readFile(new URL('../src/modules/invitaciones/index.js', import.meta.url), 'utf8');
-  const html = await fs.readFile(new URL('../src/modules/invitaciones/index.html', import.meta.url), 'utf8');
+  const js = await fs.readFile(require('node:path').join(__dirname, '../src/modules/invitaciones/index.js'), 'utf8');
+  const html = await fs.readFile(require('node:path').join(__dirname, '../src/modules/invitaciones/index.html'), 'utf8');
   expect(html).toContain('data-invitations-draft-status');
   expect(js).toContain("editorForm.addEventListener('input', markChanged");
   expect(js).toContain("updateDraftStatus(true)");
