@@ -1,3 +1,9 @@
+## 2026-10-15 — MGD-021: corrección de concurrencia y manejo de errores de autosave (DEV)
+
+- PR #195 confirmado fusionado con CI verde. En `invitation-draft-autosave.js` se conserva la edición más reciente si falla una escritura anterior y se informa el último error mediante `getStatus().error`.
+- Se evita el bucle de reintentos automáticos ante errores persistentes/conflictos de revisión: el usuario deberá reintentar explícitamente o realizar otra modificación; los cambios que llegan mientras se guarda se procesan después del resultado correcto, con la revisión actualizada.
+- Nueva prueba con operaciones asíncronas y proveedor simulado: cambio durante guardado, nueva revisión, conflicto, no reintento infinito y recuperación posterior. Sin conexión ni escritura en Firebase; el controlador sigue desactivado por defecto, falta revisión de Rules reales y QA autenticado A→B→A.
+
 ## 2026-10-15 — MGD-021: controlador de autosave aislado, aún sin activación (DEV)
 
 - PR #194 verificado fusionado y con CI success. Nuevo `src/core/app/invitation-draft-autosave.js` puro, sin dependencia de Firebase ni conexión al editor: desactivado por defecto, agrupa cambios mediante debounce, permite flush explícito y descarta pendientes al cambiar cuenta/evento/borrador.
