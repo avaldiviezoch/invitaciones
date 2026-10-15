@@ -2854,3 +2854,18 @@ test('MGD-021: cierre de pestaña advierte por cambios no exportados y limpia li
   expect(js).toContain("event.returnValue = '';");
   expect(js).toContain("controller.abort();");
 });
+
+test('MGD-021: editor importa y exporta usando contrato canonico de borradores', async () => {
+  const fs = await import('node:fs/promises');
+  const source = await fs.readFile(path.resolve('src/modules/invitaciones/index.js'), 'utf8');
+  expect(source).toContain("import { normalizeDraftInput, DRAFT_FIELDS }");
+  expect(source).toContain('const draft = normalizeDraftInput(record)');
+  expect(source).toContain('const draft = normalizeDraftInput({');
+  expect(source).toContain('for (const key of DRAFT_FIELDS)');
+  const { normalizeDraftInput } = await import('../src/core/app/invitation-draft-contract.js');
+  const valid = { schema:'migrandia-invitation-draft-v1', eventType:'wedding', eventName:'Ceremonia',
+    date:'2027-01-16', location:'Casa', guestName:'', message:'Te esperamos',
+    templateId:'classic-elegant', fontStyle:'serif', colorPalette:'auto' };
+  expect(normalizeDraftInput(JSON.parse(JSON.stringify(normalizeDraftInput(valid))))).toEqual(valid);
+  expect(() => normalizeDraftInput({ ...valid, extra:'unsafe' })).toThrow();
+});
