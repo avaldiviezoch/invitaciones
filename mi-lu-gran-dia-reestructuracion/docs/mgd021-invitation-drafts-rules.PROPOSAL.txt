@@ -1,0 +1,24 @@
+// MGD-021 — FRAGMENTO DE PROPUESTA; NO desplegar como reglas completas.
+// Integrar manualmente dentro de match /weddings/{weddingId} SOLO tras aprobar y
+// verificar las Rules vigentes, y ensayar en emulador. Este archivo NO es la Rules canónica.
+//
+// match /invitationDrafts/{draftId} {
+//   allow read: if hasActiveMembership(weddingId);
+//   allow create: if canEditPlanner(weddingId)
+//     && request.resource.data.keys().hasOnly(['ownerUid','eventId','value','revision','updatedAt'])
+//     && request.resource.data.eventId == weddingId
+//     && request.resource.data.ownerUid == request.auth.uid
+//     && request.resource.data.revision == '1'
+//     && request.resource.data.value is map;
+//   allow update: if canEditPlanner(weddingId)
+//     && request.resource.data.eventId == resource.data.eventId
+//     && request.resource.data.ownerUid == resource.data.ownerUid
+//     && request.resource.data.diff(resource.data).affectedKeys()
+//       .hasOnly(['value','revision','updatedAt'])
+//     && request.resource.data.value is map;
+//   allow delete: if canEditPlanner(weddingId);
+// }
+//
+// ATENCIÓN: aquí faltan validación estricta del esquema/longitud de value,
+// control de progresión de revision y reglas de compatibilidad para distintos
+// tipos de evento. Por diseño este fragmento no se activa ni se copia a PROD.
