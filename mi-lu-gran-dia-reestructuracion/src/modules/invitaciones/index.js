@@ -88,6 +88,15 @@ export async function mountInvitaciones() {
   const editor = root.querySelector('[data-invitations-editor]');
   const editorForm = root.querySelector('[data-invitations-editor-form]');
   const editorPreview = root.querySelector('[data-invitations-editor-preview]');
+  const draftStatus = root.querySelector('[data-invitations-draft-status]');
+  let dirtyDraft = false;
+  const updateDraftStatus = (dirty) => {
+    dirtyDraft = dirty;
+    draftStatus.textContent = dirty
+      ? 'Cambios sin guardar en tu cuenta. Descarga el archivo JSON antes de salir.'
+      : 'Borrador temporal: no se guarda en tu cuenta.';
+  };
+  updateDraftStatus(false);
   const typeLabels = Object.freeze({
     wedding: 'Boda', birthday: 'Cumpleaños', quince: 'Quinceañero',
     baby_shower: 'Baby shower', religious: 'Bautizo / Comunión',
@@ -154,6 +163,7 @@ export async function mountInvitaciones() {
     link.download = 'migrandia-borrador-invitacion.json';
     link.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    updateDraftStatus(false);
   }, { signal });
   root.querySelector('[data-invitations-import-draft]').addEventListener('change', async (event) => {
     const input = event.currentTarget;
@@ -183,13 +193,15 @@ export async function mountInvitaciones() {
       }
       for (const key of fields) editorForm.elements[key].value = record[key];
       renderEditorPreview();
+      updateDraftStatus(true);
       status.textContent = 'Borrador recuperado en el editor local. Aún no se ha guardado en tu cuenta.';
     } catch {
       status.textContent = 'No se pudo abrir el borrador. Verifica que sea un JSON exportado por Migrandia.';
     }
   }, { signal });
-  editorForm.addEventListener('input', renderEditorPreview, { signal });
-  editorForm.addEventListener('change', renderEditorPreview, { signal });
+  const markChanged = () => { renderEditorPreview(); updateDraftStatus(true); };
+  editorForm.addEventListener('input', markChanged, { signal });
+  editorForm.addEventListener('change', markChanged, { signal });
   const openLocalEditor = () => {
     editor.hidden = false;
     renderEditorPreview();
@@ -197,6 +209,8 @@ export async function mountInvitaciones() {
     editorForm.elements.eventName.focus();
   };
   root.querySelector('[data-invitations-editor-close]').addEventListener('click', () => {
+    if (dirtyDraft && !window.confirm('Este borrador tiene cambios que no has descargado. ¿Quieres cerrarlo y descartarlos?')) return;
+    updateDraftStatus(false);
     editor.hidden = true;
     editorForm.reset();
     editorPreview.replaceChildren();

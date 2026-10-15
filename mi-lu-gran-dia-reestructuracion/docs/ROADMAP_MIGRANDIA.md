@@ -1,5 +1,13 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-15 — MGD-021: aviso de cambios no guardados del editor local (DEV)
+
+- PR #196 confirmado fusionado con CI verde.
+- El editor local identifica cambios recientes y muestra aviso claro de que **no se guardan en la cuenta**. El botón de descarga JSON limpia el aviso de cambios no exportados y la importación marca el borrador como pendiente. El cierre con cambios no exportados requiere confirmación explícita.
+- El aviso no equivale a autosave ni protege contra el cierre de la pestaña/navegador. Prueba de regresión verifica presencia y cableado básicos; QA funcional del diálogo sigue pendiente.
+- Sin activación ni conexión con Firebase, cambios en Rules o despliegue PROD. Pendiente revisar reglas vigentes antes de conectar el puerto Firestore.
+
+
 ## 2026-10-15 — MGD-021: corrección de concurrencia y manejo de errores de autosave (DEV)
 
 - PR #195 confirmado fusionado con CI verde. En `invitation-draft-autosave.js` se conserva la edición más reciente si falla una escritura anterior y se informa el último error mediante `getStatus().error`.
