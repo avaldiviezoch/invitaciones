@@ -2624,9 +2624,9 @@ test('MGD-021: recuperación de borrador JSON es local y validada', async () => 
   const start = js.indexOf("  root.querySelector('[data-invitations-import-draft]')");
   const end = js.indexOf("  editorForm.addEventListener('input'", start);
   const handler = js.slice(start, end);
-  expect(handler).toContain("record.schema !== 'migrandia-invitation-draft-v1'");
+  expect(handler).toContain('normalizeDraftInput(record)');
   expect(handler).toContain('file.size > 32 * 1024');
-  expect(handler).toContain('Object.hasOwn(typeLabels, record.eventType)');
+  expect(handler).toContain('for (const key of DRAFT_FIELDS)');
   expect(handler).toContain('renderEditorPreview()');
   expect(handler).not.toContain('writePlannerStorageKey(');
   expect(handler).not.toContain('addPersonalInvitation(');
