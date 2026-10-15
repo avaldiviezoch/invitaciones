@@ -1,5 +1,12 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-15 — MGD-021: bloqueo de respuestas tardías tras cambio de cuenta (DEV)
+
+- PR #199 confirmado fusionado con CI success. Se reforzó `invitation-drafts-firestore.js` para verificar nuevamente el UID activo **después** de respuestas asíncronas de Firestore (list/read) y de transacciones (save/remove). Así no se entregan resultados del usuario A como si continuara su sesión cuando pasó a B.
+- Test con SDK falso y promesas diferidas: consulta lanzada en cuenta A, cambio a B y rechazo del resultado tardío sin escritura.
+- Sigue `enabled=false` por defecto y no conectado a UI; las verificaciones cliente no sustituyen las Security Rules ni la prueba del cambio de evento en tiempo real. Firebase/Rules/PROD no se modifican.
+
+
 ## 2026-10-15 — MGD-021: unificación del contrato JSON en editor (DEV)
 
 - PR #198 verificado fusionado, CI success. Exportación/importación JSON del editor usa ahora `normalizeDraftInput` y `DRAFT_FIELDS` de `invitation-draft-contract.js`; una sola validación de formato y campos para transferencia local y almacenamiento futuro.
