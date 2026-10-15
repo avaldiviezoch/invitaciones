@@ -66,7 +66,7 @@ function createInvitationDraftAutosave({ save, delay = 800, enabled = false, sch
   }
   function close() { ++epoch; clearPending(); scope = null; stopped = true; }
   return Object.freeze({ setScope, change, flush, close, getStatus: () => Object.freeze({
-    enabled: enabled && !stopped, pending: pending !== null, inflight, revision,
+    enabled: enabled && !stopped, pending: pending !== null, inflight, revision, changeVersion,
     error: lastError ? String(lastError.message || lastError) : '',
     scope:scope ? { ...scope } : null
   }) });
