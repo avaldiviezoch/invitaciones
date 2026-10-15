@@ -4086,3 +4086,10 @@ Commits:
 Estado:
 - MGD-016: 🟢 QA SEGURO DEV APROBADO;
 - MGD-017: 🟡 IMPLEMENTADO EN DEV / PENDIENTE QA.
+
+### 2026-10-15 — MGD-021: guardia adicional ante recuperación tardía (PR #210)
+- Se detectó un caso límite: una edición ocurrida durante `recover()` podía completar su autosave antes de que terminara la lectura; comprobar solo `pending/inflight` no detectaba esa edición ya guardada.
+- Se expuso `changeVersion` en el estado del autosave y `recover()` compara la versión anterior y posterior a la lectura. Una lectura iniciada antes de una edición no puede sobrescribir la revisión reciente.
+- Se añadió prueba de regresión de lectura tardía después de autosave completado en `tests/e2e-safe.spec.js`.
+- Commits: `d7004b7`, `f38f984`, `1df909f`. CI pendiente de comprobación; no declarar verde todavía.
+- Solo DEV, sin conectar UI a Firebase ni activar persistencia real; sin cambios de Rules ni PROD.
