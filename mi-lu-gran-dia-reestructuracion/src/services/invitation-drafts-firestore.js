@@ -23,16 +23,19 @@ function createFirestoreInvitationDraftRepository({ firestore, sdk, currentUid, 
     async list(scope) {
       assertEnabled(scope);
       const snapshot = await sdk.getDocs(collectionRef(scope));
+      assertEnabled(scope);
       return snapshot.docs.map((item) => recordFromSnapshot(scope, item));
     },
     async read(scope, id) {
       assertEnabled(scope);
-      return recordFromSnapshot(scope, await sdk.getDoc(documentRef(scope, id)));
+      const snapshot = await sdk.getDoc(documentRef(scope, id));
+      assertEnabled(scope);
+      return recordFromSnapshot(scope, snapshot);
     },
     async save(scope, id, value, revision) {
       assertEnabled(scope);
       const ref = documentRef(scope, id);
-      return sdk.runTransaction(firestore, async (transaction) => {
+      const result = await sdk.runTransaction(firestore, async (transaction) => {
         const previous = await transaction.get(ref);
         const old = previous.exists() ? previous.data() : null;
         if ((old ? String(old.revision ?? '') : '') !== revision) throw new Error('Conflicto de revisión: vuelve a cargar el borrador.');
@@ -44,11 +47,13 @@ function createFirestoreInvitationDraftRepository({ firestore, sdk, currentUid, 
           value, revision: nextRevision, updatedAt: sdk.serverTimestamp() });
         return { id, ownerUid: scope.ownerUid, eventId: scope.eventId, value, revision: nextRevision };
       });
+      assertEnabled(scope);
+      return result;
     },
     async remove(scope, id, revision) {
       assertEnabled(scope);
       const ref = documentRef(scope, id);
-      return sdk.runTransaction(firestore, async (transaction) => {
+      const result = await sdk.runTransaction(firestore, async (transaction) => {
         const previous = await transaction.get(ref);
         if (!previous.exists()) return false;
         const old = previous.data();
@@ -58,6 +63,8 @@ function createFirestoreInvitationDraftRepository({ firestore, sdk, currentUid, 
         transaction.delete(ref);
         return true;
       });
+      assertEnabled(scope);
+      return result;
     }
   };
   return createInvitationDraftRepository(port);
