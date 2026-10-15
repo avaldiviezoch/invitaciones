@@ -1,5 +1,12 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-15 — MGD-021: regresión transaccional de borradores (DEV)
+
+- PR #193 confirmado incorporado a main. El adaptador Firestore continúa `enabled=false` por defecto y no está enlazado a la interfaz.
+- Se amplía el QA automatizado con un proveedor simulado de transacciones: crear borrador, incrementar revisión, rechazar actualización obsoleta, rechazar eliminación obsoleta, rechazar cambio de sesión y confirmar eliminación con revisión válida.
+- Pruebas de simulación **no prueban las reglas reales de Firestore ni la atomicidad de producción**; sigue pendiente revisión de reglas, pruebas con emulador, aislamiento autenticado A→B→A y permiso explícito antes de activar nuevas escrituras. Sin cambios a Firebase/Rules/Auth/Storage o PROD.
+
+
 ## 2026-10-13 — MGD-021: puerto Firestore transaccional con bloqueo de activación (DEV)
 
 - Se implementó `src/services/invitation-drafts-firestore.js` como fábrica inyectable que usa el adaptador canónico de borradores. Su configuración **enabled=false por defecto** impide list/read/save/remove y no inicia peticiones a Firebase sin activación deliberada. No se instancia ni se conecta aún al editor.
