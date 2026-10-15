@@ -3072,3 +3072,25 @@ test('MGD-021: recuperar nunca descarta ediciones locales pendientes o creadas d
   expect(session.status().revision).toBe('');
   session.close();
 });
+
+
+test('MGD-021: lectura tardía no sobrescribe revisión tras completarse autosave', async () => {
+  const { createEventInvitationDraftSession } = await import('../src/services/event-invitation-draft-session.js');
+  let release;
+  const draft = { schema:'migrandia-invitation-draft-v1',eventType:'wedding',eventName:'Boda',
+    date:'',location:'',guestName:'',message:'',templateId:'classic-elegant',fontStyle:'serif',colorPalette:'auto' };
+  const session = createEventInvitationDraftSession({ enabled:true, currentUid:()=>'owner',
+    repository:{ save:async()=>({revision:'8'}), read:()=>new Promise(resolve=>{ release=resolve; }) },
+    schedule:()=>1, cancel:()=>{} });
+  session.select({ eventId:'eventA',draftId:'draft1' });
+  const reading = session.recover();
+  session.change({...draft,message:'Edición nueva'});
+  expect(await session.flush()).toBe(true);
+  expect(session.status().pending).toBe(false);
+  expect(session.status().inflight).toBe(false);
+  expect(session.status().revision).toBe('8');
+  release({ revision:'3',value:draft });
+  await expect(reading).rejects.toThrow('ediciones recientes');
+  expect(session.status().revision).toBe('8');
+  session.close();
+});
