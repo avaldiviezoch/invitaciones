@@ -1,5 +1,12 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-15 — MGD-021: integración de sesión y repositorio colaborativo (DEV)
+
+- PR #208 confirmado verde y fusionado. Se incorporó una prueba automatizada que ejecuta juntos el controlador de autosave, la sesión y el puerto colaborativo, con proveedor Firestore simulado exclusivamente en memoria.
+- Comprueba creación y recuperación en evento A, ausencia de borrador A al pasar a B, conservación de revisión al regresar A, bloqueo ante cambio de cuenta, edición por colaborador y preservación del propietario original.
+- **Este test no prueba reglas Firestore desplegadas ni escribe datos reales**. La activación sigue bloqueada; pendientes QA de navegador autenticado con fixtures A→B→A y verificación de las reglas publicadas.
+
+
 ## 2026-10-15 — MGD-021: puente de sesión para borradores colaborativos (DEV)
 
 - PR #207 confirmado fusionado y CI success. Nuevo `src/services/event-invitation-draft-session.js` articula el puerto colaborativo por `eventId/draftId` y el controlador autosave. La identidad de sesión se verifica al iniciar y completar lecturas/guardados, y se descartan respuestas tardías cuando cambia la cuenta o el evento.
