@@ -1,5 +1,12 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-15 — MGD-021: puente de sesión para borradores colaborativos (DEV)
+
+- PR #207 confirmado fusionado y CI success. Nuevo `src/services/event-invitation-draft-session.js` articula el puerto colaborativo por `eventId/draftId` y el controlador autosave. La identidad de sesión se verifica al iniciar y completar lecturas/guardados, y se descartan respuestas tardías cuando cambia la cuenta o el evento.
+- `enabled=false` por defecto, no está conectado al editor y no realiza solicitudes a Firebase. Prueba simulada confirma cero operaciones en estado bloqueado y rechazo de lecturas tardías A→B/cambio de usuario.
+- No sustituye Rules desplegadas ni verifica el modelo multievento real. Pendientes: integración UI autorizada, QA con emulador del puerto completo, despliegue controlado de Rules tras aprobación expresa. Firebase/Auth/Storage/PROD intactos.
+
+
 ## 2026-10-15 — MGD-021: adaptador experimental compartido por evento (DEV)
 
 - PR #206 confirmado fusionado: tanto E2E seguro como workflow real de Firestore Emulator concluyeron en verde para las **Rules de laboratorio**.
