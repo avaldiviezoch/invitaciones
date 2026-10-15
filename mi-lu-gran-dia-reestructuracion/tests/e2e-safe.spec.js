@@ -2973,3 +2973,33 @@ test('MGD-021: puerto compartido por evento bloqueado y revisiones colaborativas
   expect(await port.read('eventA','draft1')).toBeNull();
   await expect(port.save('bad/event','draft1',value)).rejects.toThrow('inválido');
 });
+
+test('MGD-021: sesion de borrador colaborativo bloqueada y aisla evento y cuenta', async () => {
+  const { createEventInvitationDraftSession } = await import('../src/services/event-invitation-draft-session.js');
+  let uid = 'uA', reads = 0, writes = 0;
+  let releaseRead;
+  const repository = {
+    read: async () => { reads++; return new Promise((resolve) => { releaseRead = resolve; }); },
+    save: async () => { writes++; return { revision:'1' }; }
+  };
+  const draft = { schema:'migrandia-invitation-draft-v1',eventType:'wedding',eventName:'Boda',
+    date:'',location:'',guestName:'',message:'',templateId:'classic-elegant',fontStyle:'serif',colorPalette:'auto' };
+  const closed = createEventInvitationDraftSession({ repository, currentUid:() => uid });
+  closed.select({ eventId:'A',draftId:'uno' });
+  expect(closed.change(draft)).toBe(false);
+  expect(await closed.flush()).toBe(false);
+  await expect(closed.recover()).rejects.toThrow('no habilitada');
+  expect(reads).toBe(0);
+  expect(writes).toBe(0);
+  const enabled = createEventInvitationDraftSession({ repository, currentUid:() => uid, enabled:true });
+  enabled.select({ eventId:'A',draftId:'uno' });
+  const pending = enabled.recover();
+  enabled.select({ eventId:'B',draftId:'dos' });
+  releaseRead({ revision:'1',value:draft });
+  await expect(pending).rejects.toThrow('cambió');
+  const pending2 = enabled.recover();
+  uid = 'uB';
+  releaseRead({ revision:'1',value:draft });
+  await expect(pending2).rejects.toThrow('cambió');
+  enabled.close();
+});
