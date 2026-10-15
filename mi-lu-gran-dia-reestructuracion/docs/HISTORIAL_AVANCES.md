@@ -1,3 +1,10 @@
+## 2026-10-15 — MGD-021: adaptador experimental compartido por evento (DEV)
+
+- PR #206 confirmado fusionado: tanto E2E seguro como workflow real de Firestore Emulator concluyeron en verde para las **Rules de laboratorio**.
+- Nuevo `src/services/event-invitation-drafts-firestore.js`: ruta experimental `weddings/{weddingId}/invitationDrafts/{draftId}` con list/read/save/remove, control de revisión, preservación de `ownerUid` cuando otro colaborador edita y validación del usuario al completar cada operación. **enabled=false por defecto, no se importa desde la UI ni sustituye aún al puerto anterior**.
+- Test con SDK inyectado verifica cero operaciones en modo bloqueado, edición colaborativa, conflicto y separación A/B. La autorización efectiva depende de las Security Rules; este test falso no la reproduce.
+- PENDIENTE: validar cómo se resuelve `weddingId` en los ocho tipos de evento, integrar con sesión del editor y hacer QA autenticado A→B→A. No se alteraron Rules reales, Firebase ni PROD.
+
 ## 2026-10-15 — MGD-021: CI de Firestore Emulator aislado (DEV)
 
 - PR #205 confirmado fusionado, CI general success, **sin ejecución anterior de emulador**.
