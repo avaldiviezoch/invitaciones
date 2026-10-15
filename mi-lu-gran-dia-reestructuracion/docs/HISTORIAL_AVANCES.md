@@ -1,3 +1,10 @@
+## 2026-10-15 — MGD-021: auditoría de Firestore Rules y bloqueo de diseño (DEV)
+
+- Se localizaron en `avaldiviezoch/Wedding` las reglas `firebase/firestore.rules` y el test de emulador. Se inspeccionaron **solo en lectura**, sin confirmar aún las reglas desplegadas.
+- Hallazgo: la ruta inicial `users/{uid}/eventInvitationDrafts/{eventId}/drafts` hereda permisos de dueño de cuenta, pero no comprueba membresía ni rol del evento; no representa colaboración. El árbol `weddings/{weddingId}` sí distingue membresía y permisos de edición, pero aún no define `invitationDrafts`.
+- Se documentó `docs/MGD021_FIRESTORE_PERMISOS.md` con alternativa propuesta bajo evento, matriz de owner/admin/editor/viewer/ajeno/inactivo y QA emulador A→B→A, conflicto de revisiones y regresión RSVP.
+- No se cambia todavía ninguna ruta efectiva ni el adaptador, Rules, Auth, Storage o PROD; **persistencia de borradores continúa desactivada** hasta resolver el modelo multievento y autorización formal de reglas.
+
 ## 2026-10-15 — MGD-021: puente de sesión para persistencia, bloqueado (DEV)
 
 - PR #200 confirmado verde y fusionado. Se incorpora `src/services/invitation-draft-session.js`, que articula contrato, repositorio y autosave para una futura integración del editor, con `enabled=false` como valor obligatorio por defecto. No se instancia en la UI.
