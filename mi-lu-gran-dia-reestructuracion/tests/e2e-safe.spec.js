@@ -2936,3 +2936,40 @@ test('MGD-021: matriz de permisos de borradores por membresia y evento', async (
   }
   expect(allowed(ctx('owner', 'unexpected-operation'))).toBe(false);
 });
+
+test('MGD-021: puerto compartido por evento bloqueado y revisiones colaborativas', async () => {
+  const { createEventInvitationDraftPort } = await import('../src/services/event-invitation-drafts-firestore.js');
+  const docs = new Map();
+  let uid = 'owner'; let calls = 0;
+  const sdk = {
+    collection: (_db, ...parts) => parts.join('/'),
+    doc: (parent, id) => parent + '/' + id,
+    getDocs: async (path) => { calls++; return { docs:[...docs.entries()].filter(([k]) => k.startsWith(path+'/')).map(([k,data])=>({id:k.split('/').at(-1),exists:()=>true,data:()=>data})) }; },
+    getDoc: async (path) => { calls++; return {id:path.split('/').at(-1),exists:()=>docs.has(path),data:()=>docs.get(path)}; },
+    serverTimestamp: () => 'fixture-timestamp',
+    runTransaction: async (_db, fn) => { calls++; return fn({
+      get: async (key) => ({exists:()=>docs.has(key),data:()=>docs.get(key)}),
+      set: (key,val) => docs.set(key,val),
+      delete: (key) => docs.delete(key)
+    }); }
+  };
+  const value = {schema:'migrandia-invitation-draft-v1',eventType:'wedding',eventName:'Boda',
+    date:'',location:'',guestName:'',message:'',templateId:'classic-elegant',fontStyle:'serif',colorPalette:'auto'};
+  const closed = createEventInvitationDraftPort({db:{},sdk,currentUid:()=>uid});
+  await expect(closed.list('eventA')).rejects.toThrow('no habilitada');
+  await expect(closed.save('eventA','draft1',value)).rejects.toThrow('no habilitada');
+  expect(calls).toBe(0);
+  const port = createEventInvitationDraftPort({db:{},sdk,currentUid:()=>uid,enabled:true});
+  const initial = await port.save('eventA','draft1',value);
+  expect(initial.revision).toBe('1');
+  uid='editor';
+  expect((await port.read('eventA','draft1')).ownerUid).toBe('owner');
+  const edited=await port.save('eventA','draft1',{...value,message:'Actualizado'},'1');
+  expect(edited.ownerUid).toBe('owner');
+  expect(edited.revision).toBe('2');
+  await expect(port.save('eventA','draft1',value,'1')).rejects.toThrow('Conflicto');
+  expect(await port.list('eventB')).toEqual([]);
+  await port.remove('eventA','draft1','2');
+  expect(await port.read('eventA','draft1')).toBeNull();
+  await expect(port.save('bad/event','draft1',value)).rejects.toThrow('inválido');
+});
