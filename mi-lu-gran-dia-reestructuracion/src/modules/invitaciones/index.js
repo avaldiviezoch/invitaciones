@@ -97,6 +97,14 @@ export async function mountInvitaciones() {
       : 'Borrador temporal: no se guarda en tu cuenta.';
   };
   updateDraftStatus(false);
+  // Advertencia nativa solo ante pérdida de cambios del editor local.
+  // El navegador decide cómo mostrar el diálogo; no guarda datos.
+  const warnOnUnsavedDraft = (event) => {
+    if (editor.hidden || !dirtyDraft) return;
+    event.preventDefault();
+    event.returnValue = '';
+  };
+  window.addEventListener('beforeunload', warnOnUnsavedDraft, { signal });
   const typeLabels = Object.freeze({
     wedding: 'Boda', birthday: 'Cumpleaños', quince: 'Quinceañero',
     baby_shower: 'Baby shower', religious: 'Bautizo / Comunión',
