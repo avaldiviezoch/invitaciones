@@ -2892,3 +2892,23 @@ test('MGD-021: lectura tardia de borradores se descarta si cambio la cuenta', as
   deliver({ exists:() => false });
   await expect(read).rejects.toThrow('cuenta activa');
 });
+
+test('MGD-021: puente de persistencia impide guardar y recuperar antes de activar Rules', async () => {
+  const { createInvitationDraftSession } = await import('../src/services/invitation-draft-session.js');
+  let reads = 0; let writes = 0;
+  const repository = {
+    read: async () => { reads++; return null; },
+    save: async () => { writes++; return { revision:'1' }; }
+  };
+  const bridge = createInvitationDraftSession({ repository });
+  bridge.select({ ownerUid:'uidA',eventId:'eventA',draftId:'draftA' });
+  const draft = { schema:'migrandia-invitation-draft-v1',eventType:'wedding',eventName:'Evento',
+    date:'',location:'',guestName:'',message:'',templateId:'classic-elegant',fontStyle:'serif',colorPalette:'auto' };
+  expect(bridge.change(draft)).toBe(false);
+  expect(await bridge.flush()).toBe(false);
+  await expect(bridge.recover()).rejects.toThrow('no habilitada');
+  bridge.select({ ownerUid:'uidA',eventId:'eventB',draftId:'draftA' });
+  bridge.close();
+  expect(reads).toBe(0);
+  expect(writes).toBe(0);
+});

@@ -1,5 +1,12 @@
 # ROADMAP MIGRANDIA
 
+## 2026-10-15 — MGD-021: puente de sesión para persistencia, bloqueado (DEV)
+
+- PR #200 confirmado verde y fusionado. Se incorpora `src/services/invitation-draft-session.js`, que articula contrato, repositorio y autosave para una futura integración del editor, con `enabled=false` como valor obligatorio por defecto. No se instancia en la UI.
+- El puente rechaza recuperación antes de activación y evita guardar sin autorización. Valida cuenta/evento/borrador y descarta resultados tardíos tras cambio de contexto; al cerrar cancela pendientes.
+- Test con repositorio simulado comprueba cero lecturas/escrituras con modo bloqueado. Falta inspección de Firestore Security Rules reales y test emulador/autenticado antes de permitir escrituras. Sin cambios a producción ni Firebase.
+
+
 ## 2026-10-15 — MGD-021: bloqueo de respuestas tardías tras cambio de cuenta (DEV)
 
 - PR #199 confirmado fusionado con CI success. Se reforzó `invitation-drafts-firestore.js` para verificar nuevamente el UID activo **después** de respuestas asíncronas de Firestore (list/read) y de transacciones (save/remove). Así no se entregan resultados del usuario A como si continuara su sesión cuando pasó a B.
