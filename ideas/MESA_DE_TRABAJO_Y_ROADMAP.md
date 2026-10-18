@@ -96,3 +96,28 @@ Fecha | ideas nuevas (incluidas las de ChatGPT) | argumentos a favor | objecione
 - Investigar con más rigor volumen/intención de búsquedas, competencia, precios y distribución; las propuestas actuales son hipótesis, no hallazgos de rentabilidad propia.
 - Evaluar nombre y dominio paraguas esta semana, sin fijarlos aún.
 - **Nueva idea del usuario por escuchar y documentar** en la siguiente conversación.
+
+
+## I-011 — Guerra territorial de logos (idea de ocio / experimento)
+**Origen:** usuario. **Fecha:** 18 de octubre de 2026. **Estado:** bandeja de ideas; pendiente de análisis, no priorizada para construir.
+
+### Concepto
+Inspirada en *The Million Dollar Homepage*, crear un tablero digital donde personas, pequeños negocios, creadores o marcas paguen por colocar su logotipo, imagen y enlace (sitio web, Instagram, X u otro destino). A diferencia de una vitrina estática, nuevos participantes pueden **superponer su logo sobre el de otro**, incluso invadiendo una porción pequeña de una imagen grande. Ejemplo ilustrativo: una marca ocupa un área grande y otra compra un área pequeña justo en el centro, alterando la composición; la primera podría intentar recuperarla. Se busca una dinámica lúdica de conquista, competencia y visibilidad, no un simple catálogo publicitario.
+
+### Mecánicas por decidir (NO acordadas)
+- **Superposición libre:** colocar una imagen rectangular en cualquier coordenada y capa; maximiza creatividad y conflictos, pero dificulta precio, justicia y cálculo de territorio.
+- **Terrenos/celdas discretas:** compra y conquista por unidades; simplifica reglas y cobros, pero reduce libertad. Alternativa híbrida: selección visual libre ajustada a una cuadrícula invisible, con control por celda.
+- Precio por área, incremento tras conquistas, tiempo mínimo protegido para no perder visibilidad inmediatamente y mecanismos contra abuso/spam; son **hipótesis**, no reglas definitivas.
+- Temporadas con fecha de cierre, tablero congelado, ranking, galería histórica y repetición acelerada de conquistas; evaluar si aportan un objetivo entretenido y un final claro, evitando compras infinitas sin sentido.
+- No se prevé inicialmente campaña publicitaria pagada; podrían crearse cuentas sociales del proyecto, pero la captación orgánica/viral es una hipótesis por comprobar.
+
+### Riesgos y preguntas abiertas
+- ¿Por qué alguien pagaría si no hay audiencia? Riesgo de tablero vacío y efecto red.
+- ¿Qué recibe quien paga si otro lo tapa? Definir duración, transparencia y valor real de la compra.
+- ¿Cómo impedir suplantación de marcas conocidas, infracciones de logos/marcas registradas, contenido prohibido, enlaces maliciosos y disputas? No insinuar afiliación oficial; requerir moderación y normas.
+- ¿Qué evita que un participante con más dinero gane siempre? Explorar categorías, límites o reglas alternativas.
+- ¿Qué hace divertido el juego para quienes **no pagan**? Visualización, historial, interacción y compartibilidad.
+- Evaluar costos de cobro, reembolsos, fraudes, moderación, alojamiento y retención; ingresos brutos no equivalen a utilidad.
+
+### Próxima revisión
+Comparar superposición libre, celdas y solución híbrida mediante bocetos y una simulación simple; definir objetivo de temporada, precio y protección, y probar interés antes de desarrollar pagos. **No hay decisión de implementación.**
