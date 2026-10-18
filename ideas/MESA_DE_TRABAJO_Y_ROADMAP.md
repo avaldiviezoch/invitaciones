@@ -59,3 +59,40 @@ Fecha | ideas nuevas (incluidas las de ChatGPT) | argumentos a favor | objecione
 - No confundir ingresos brutos con utilidad ni facturación con recurrencia.
 - Separar hipótesis de mercado de resultados verificados.
 - Mantener este laboratorio aislado del roadmap y producción de Mi Gran Día.
+
+
+## Sesión de estrategia — 18 de octubre de 2026
+
+### Decisiones y preferencias confirmadas
+- **Objetivo económico inicial:** aspirar a S/ 1.000–2.000 mensuales de utilidad adicional, sin garantía de resultados. Hito comercial inicial: lograr **10 clientes desconocidos que paguen**; distinguir visitas, registros, facturación, costos y utilidad.
+- **Visión dual:** el usuario aspira a una aplicación grande a largo plazo, pero prefiere empezar con una microapp pequeña y rentable, sin construir prematuramente una plataforma completa. Mi Gran Día sigue como proyecto separado.
+- **Operación deseada:** autoservicio, captación orgánica por Google/SEO, bajo mantenimiento y mínima venta interpersonal. Se pueden crear contenidos promocionales sin mostrar el rostro.
+- **Modelo comercial a validar:** herramienta gratuita verdaderamente útil + premium por lotes, automatización, exportaciones, plantillas, proyectos guardados o API; evaluar pago por uso frente a suscripción según frecuencia. La publicidad no será la única fuente de ingresos.
+- **No producir aplicaciones al azar:** investigar demanda, competencia, diferenciación, disposición a pagar, canal de adquisición, costos y recurrencia; experimentar barato, medir, continuar o descartar. Los éxitos visibles de micro-SaaS no representan resultados típicos.
+- **Plan acordado para la semana del 19 de octubre:** escoger **una** herramienta mínima, publicar una versión sencilla y comenzar a medir interés; selección y ejecución pendientes. Este experimento acelera el roadmap preliminar de 90 días; no implica lanzar múltiples productos simultáneamente.
+- **Dominio y marca:** NO escoger nombre ni comprar dominio todavía; revisarlo durante la semana. La futura marca debe ser general, sin limitarse a mapas, PDF, Excel ni otro rubro. Un dominio puede alojar varias herramientas en rutas distintas; no es obligatorio comprarlo para el primer prototipo. Cloudflare Pages puede alojar una versión inicial y Search Console/sitemap ayudan al descubrimiento; indexación y posicionamiento en Google no están garantizados.
+
+### Hipótesis de productos discutidas (no validadas)
+1. **Automatización documental:** Excel/CSV a certificados, constancias, informes o PDFs por lotes, con plantillas. Distinguir generación de documentos desde datos de conversión fiel de cualquier Excel a PDF (mucho más compleja).
+2. **Extracción estructurada de PDF:** facturas y tablas a Excel; los PDF escaneados, OCR y diversidad de formatos elevan mucho el costo y riesgo.
+3. **Geografía:** conversión KML/KMZ/GeoJSON/Shapefile, UTM ↔ latitud-longitud, reproyección, recorte de polígonos, validación de geometrías/proyecciones, Excel a mapa interactivo y mapas PDF con leyenda/escala. Hipótesis de diferenciación: usuarios que necesitan mapas sin aprender SIG.
+4. **Otras microapps:** monitoreo de cambios web, herramientas para imágenes, QR, productividad, analítica y automatización para pequeños negocios.
+5. **Evolución eventual:** si las microherramientas relacionadas demuestran demanda, podrían integrarse en un producto mayor, pero no construirlo anticipadamente.
+
+### Referencias competitivas y cautelas
+- Se mencionaron iLovePDF, Smallpdf, MyGeodata Cloud, MapTiler, Felt, Parseur, Documint, Coupler.io, Make y Zapier como ejemplos de ofertas gratuitas y/o de pago. **Sus precios, ingresos, conversiones y condiciones deben verificarse nuevamente antes de decidir**; que una empresa cobre no prueba rentabilidad de nuestra idea.
+- Se conversó sobre casos publicados de micro-SaaS con facturación significativa y sobre experimentos fallidos. **MRR/facturación no equivale a utilidad ni representa el resultado típico de un creador**.
+- Complejidad orientativa, no compromiso de plazo: coordenadas y conversiones sencillas son relativamente fáciles con bibliotecas existentes; manejo robusto de geometrías, Excel complejo, OCR de documentos escaneados y fidelidad total de formato son sustancialmente más difíciles. Preferir procesamiento en navegador cuando sea viable, cuidando privacidad, tamaño de archivo y rendimiento.
+
+### Validación de la primera microapp: checklist de decisión
+1. Identificar búsqueda concreta y usuario objetivo; registrar evidencia de demanda y competidores, especialmente en español.
+2. Precisar una tarea frecuente o dolorosa, resultado esperado y alternativa gratuita existente.
+3. Definir MVP de una sola función y propuesta premium creíble, sin construir pagos de entrada.
+4. Definir canal de adquisición (SEO y contenido específico), instrumentar visitas, ejecuciones exitosas, interés premium y costos.
+5. Establecer fecha de revisión y criterio para continuar, pivotar o detener; no confundir falta de tráfico inicial con ausencia demostrada de demanda.
+
+### Pendientes
+- Elegir la primera microapp y el alcance exacto del experimento de esta semana.
+- Investigar con más rigor volumen/intención de búsquedas, competencia, precios y distribución; las propuestas actuales son hipótesis, no hallazgos de rentabilidad propia.
+- Evaluar nombre y dominio paraguas esta semana, sin fijarlos aún.
+- **Nueva idea del usuario por escuchar y documentar** en la siguiente conversación.
