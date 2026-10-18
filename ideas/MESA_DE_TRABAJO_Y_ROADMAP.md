@@ -121,3 +121,21 @@ Inspirada en *The Million Dollar Homepage*, crear un tablero digital donde perso
 
 ### Próxima revisión
 Comparar superposición libre, celdas y solución híbrida mediante bocetos y una simulación simple; definir objetivo de temporada, precio y protección, y probar interés antes de desarrollar pagos. **No hay decisión de implementación.**
+
+
+## I-012 — Rompecabezas Android con progresión y premium opcional
+**Fecha:** 18 de octubre de 2026. **Estado:** idea registrada para evaluar; sin compromiso de desarrollo.
+
+### Concepto
+Juego de rompecabezas/lógica para Android, 2D, visualmente sencillo, fácil de aprender, con niveles de dificultad progresiva y partidas breves. Objetivo: producto entretenido con poca infraestructura gráfica y operativa; inicialmente individual y utilizable sin conexión, evitando multijugador en tiempo real.
+
+### Monetización propuesta (hipótesis)
+Versión gratuita realmente jugable, **sin anuncios**, con niveles o desafíos suficientes; funciones premium opcionales, por ejemplo paquetes de niveles, desafíos especiales, temas visuales o desbloqueo completo mediante compra única. No forzar suscripción si el uso no la justifica. Evaluar políticas y comisiones de Google Play antes de implementar pagos.
+
+### Opciones técnicas y alcance inicial
+Evaluar Godot 2D o Phaser/HTML/JS empaquetado para Android. Primer prototipo: una mecánica de lógica clara, tutorial breve, progresión, guardado local, niveles iniciales y métricas básicas respetuosas de privacidad. Evitar cuentas, backend y contenido gráfico costoso en la primera versión salvo necesidad comprobada.
+
+### Validación y riesgos
+Investigar competidores, diferenciación y demanda; probar si la mecánica resulta divertida y repetible, medir finalización de niveles y retención antes de construir muchos niveles o monetización. No confundir volumen de descargas con rentabilidad. Los juegos hipercasuales suelen depender más de anuncios; esta idea prioriza experiencia sin publicidad y compras premium opcionales. Considerar esfuerzo de adquisición, actualizaciones, compatibilidad Android y baja conversión a pago.
+
+**Próximo paso:** proponer y comparar tres mecánicas concretas de rompecabezas, elegir una y definir prototipo mínimo. Mantener como línea experimental separada de Mi Gran Día y de las microapps web.
