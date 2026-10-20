@@ -3285,10 +3285,12 @@ test('MGD-EXPORT: botones de descarga siguen diseño Invitados sin CSS inline', 
   const css=await fs.readFile(path.resolve('src/modules/invitados/invitados.css'),'utf8');
   expect(html).not.toMatch(/<style>[\\s\\S]*?guests-export-actions/);
   expect(html).not.toMatch(/data-download-menu[^>]*style=/);
-  for(const action of ['guests','guest-image','rsvp','music']){
-    expect(html).toContain('data-guests-export="'+action+'"');
+  for(const action of ['guests','rsvp','music','tables']){
+    for(const format of ['xlsx','png','pdf']){
+      expect(html).toContain('data-download-action="'+action+':'+format+'"');
+    }
   }
-  expect(html).toContain('data-tables-export-image');
+  expect((html.match(/data-download-menu/g)||[]).length).toBe(4);
   expect(css).toContain('.guests-shell .guests-export-btn');
   expect(css).toContain('var(--guests-export-accent)');
   expect(css).toContain('.guests-export-btn:focus-visible');
