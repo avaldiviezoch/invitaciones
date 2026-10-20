@@ -4100,3 +4100,11 @@ Estado:
 - Se descarta una lectura asíncrona del archivo si el usuario editó, cerró el editor, inició otra importación o desmontó el módulo mientras se leía. Un archivo inválido también invalida la importación anterior.
 - Archivos: `src/modules/invitaciones/index.js` y `tests/e2e-safe.spec.js`.
 - PR en preparación. CI y QA manual pendientes; prueba automatizada de invariantes estáticas agregada. Sin escritura Firebase, cambios de Rules/Auth/Storage ni PROD.
+
+
+### 2026-10-20 — MGD-021: vista previa HTML autónoma (DEV)
+- El editor permite descargar una vista previa `.html` sin conexión mediante una nueva acción visible; conserva la exportación JSON como único formato editable.
+- Render autónomo con CSS incorporado, escape de contenido del usuario y etiqueta «Borrador sin publicar»; no usa servicios externos, no ofrece RSVP ni equivale a publicación pública.
+- Archivos: `src/core/app/invitation-offline-preview.js`, `src/modules/invitaciones/index.js`, `index.html` y `tests/e2e-safe.spec.js`.
+- Se añadió prueba de invariantes de escape, ausencia de recursos remotos y contrato; CI y QA navegador pendientes.
+- No hay Firebase, Storage, Rules, Auth, escrituras ni cambios en PROD.
