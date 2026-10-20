@@ -3271,3 +3271,9 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Origen: invitados y mesas de `snapshot.canonical`, respuestas/gestión RSVP y solicitudes musicales desde controlador RSVP. No se hacen consultas extra ni escrituras.
 - Los PNG se generan en Canvas local, con nombre de evento, indicadores y numeración de páginas; sin envío de datos a servidores externos.
 - Archivos `src/modules/invitados/{index.js,index.html,rsvp-controller.js,export-xlsx.js,export-guest-image.js}` y suite E2E segura. CI y QA de descargas en navegador pendientes. Producción/Firebase/Rules intactos.
+
+### 2026-10-20 — Exportación de Mesas y asientos, cuatro por hoja (DEV)
+- Se incorpora botón en la pestaña Mesas y sillas que genera láminas PNG de 1600×2250 con grilla 2×2: máximo cuatro mesas por hoja, colores diferenciados, sillas ilustradas y lista de asientos asignados.
+- Nombres y ocupación provienen del snapshot canónico del evento activo. Las imágenes se generan en Canvas del dispositivo sin subida a servidores ni creación de documentos Firebase.
+- Pruebas de invariantes para paginación de cuatro mesas y cableado a snapshot, más documentación; QA visual en navegador y CI todavía pendientes.
+- Sin alteraciones en la geometría real de Distribución ni en Firebase, Rules, Auth, Storage o PROD.
