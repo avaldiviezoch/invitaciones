@@ -40,7 +40,7 @@
       </div>
     </section>
 
-    <div class="guests-export-actions" role="group" aria-label="Exportar lista de invitados"><button type="button" class="guests-export-btn" data-guests-export="guests"><span class="guests-export-icon" aria-hidden="true">↧</span><span>Excel</span><span class="guests-export-format">.XLSX</span></button><button type="button" class="guests-export-btn guests-export-btn--soft" data-guests-export="guest-image"><span class="guests-export-icon" aria-hidden="true">▧</span><span>Lista visual</span><span class="guests-export-format">PNG</span></button></div>
+    <div class="guests-export-actions"><div class="guests-download-menu" data-download-menu><button type="button" class="guests-export-btn" data-download-toggle aria-expanded="false" aria-haspopup="true"><span class="guests-export-icon" aria-hidden="true">↧</span><span>Descargar</span><span class="guests-download-chevron" aria-hidden="true">⌄</span></button><div class="guests-download-options" data-download-options hidden role="group" aria-label="Formatos de descarga"><button type="button" data-download-action="guests:xlsx"><span>▦</span> Excel <small>.xlsx</small></button><button type="button" data-download-action="guests:png"><span>▧</span> Imagen <small>.png</small></button><button type="button" data-download-action="guests:pdf"><span>▤</span> PDF <small>Imprimir</small></button></div></div></div>
     <section class="guests-list-head">
       <div><h2>Lista de invitados</h2><p>Una sola persona mantiene la misma identidad en Invitados, RSVP y Mesas.</p></div>
       <span data-guests-results>0 invitados</span>
@@ -60,7 +60,7 @@
     </section>
     <section class="rsvp-head">
       <div><h2>Confirmaciones recibidas</h2><p>Las coincidencias por nombre son sugerencias. Solo se vinculan cuando eliges los invitados y aplicas la respuesta.</p></div>
-      <div class="guests-export-actions" role="group" aria-label="Acciones RSVP"><button type="button" class="guests-export-btn" data-guests-export="rsvp"><span class="guests-export-icon" aria-hidden="true">↧</span><span>Exportar Excel</span><span class="guests-export-format">.XLSX</span></button><button type="button" data-rsvp-refresh>Actualizar</button></div>
+      <div class="guests-export-actions"><div class="guests-download-menu" data-download-menu><button type="button" class="guests-export-btn" data-download-toggle aria-expanded="false" aria-haspopup="true"><span class="guests-export-icon" aria-hidden="true">↧</span><span>Descargar</span><span class="guests-download-chevron" aria-hidden="true">⌄</span></button><div class="guests-download-options" data-download-options hidden role="group" aria-label="Formatos de descarga"><button type="button" data-download-action="rsvp:xlsx"><span>▦</span> Excel <small>.xlsx</small></button><button type="button" data-download-action="rsvp:png"><span>▧</span> Imagen <small>.png</small></button><button type="button" data-download-action="rsvp:pdf"><span>▤</span> PDF <small>Imprimir</small></button></div></div><button type="button" data-rsvp-refresh>Actualizar</button></div>
     </section>
     <section class="rsvp-list" data-rsvp-list></section>
     <p class="guests-read-state" data-rsvp-state></p>
@@ -89,7 +89,7 @@
           <h3>Selección de tus invitados</h3>
           <p>Explora por canción, artista, invitado o dedicatoria.</p>
         </div>
-        <button type="button" class="guests-export-btn guests-export-btn--soft" data-guests-export="music"><span class="guests-export-icon" aria-hidden="true">↧</span><span>Exportar Excel</span><span class="guests-export-format">.XLSX</span></button>
+        <div class="guests-download-menu" data-download-menu><button type="button" class="guests-export-btn" data-download-toggle aria-expanded="false" aria-haspopup="true"><span class="guests-export-icon" aria-hidden="true">↧</span><span>Descargar</span><span class="guests-download-chevron" aria-hidden="true">⌄</span></button><div class="guests-download-options" data-download-options hidden role="group" aria-label="Formatos de descarga"><button type="button" data-download-action="music:xlsx"><span>▦</span> Excel <small>.xlsx</small></button><button type="button" data-download-action="music:png"><span>▧</span> Imagen <small>.png</small></button><button type="button" data-download-action="music:pdf"><span>▤</span> PDF <small>Imprimir</small></button></div></div>
         <label class="guest-music-search">
           <span aria-hidden="true">⌕</span>
           <input type="search" data-guest-music-search placeholder="Buscar canción, artista o invitado" aria-label="Buscar canción, artista o invitado">
@@ -119,7 +119,7 @@
         <p>Organiza visualmente a tus invitados. La posición física de las mesas se definirá después en Distribución.</p>
       </div>
       <div class="tables-head-actions">
-        <button type="button" class="guests-export-btn guests-export-btn--soft" data-tables-export-image title="Descargar láminas PNG de cuatro mesas por hoja"><span class="guests-export-icon" aria-hidden="true">▧</span><span>Exportar mesas</span><span class="guests-export-format">4 / hoja · PNG</span></button>
+        <div class="guests-download-menu" data-download-menu><button type="button" class="guests-export-btn" data-download-toggle aria-expanded="false" aria-haspopup="true"><span class="guests-export-icon" aria-hidden="true">↧</span><span>Descargar</span><span class="guests-download-chevron" aria-hidden="true">⌄</span></button><div class="guests-download-options" data-download-options hidden role="group" aria-label="Formatos de descarga"><button type="button" data-download-action="tables:xlsx"><span>▦</span> Excel <small>.xlsx</small></button><button type="button" data-download-action="tables:png"><span>▧</span> Imagen <small>.png</small></button><button type="button" data-download-action="tables:pdf"><span>▤</span> PDF <small>Imprimir</small></button></div></div>
         <div class="tables-display-toggle" aria-label="Cambiar vista de mesas">
           <button type="button" class="is-active" data-tables-display="visual">Visual</button>
           <button type="button" data-tables-display="list">Lista</button>
