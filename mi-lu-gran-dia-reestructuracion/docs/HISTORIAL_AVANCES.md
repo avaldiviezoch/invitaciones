@@ -3243,3 +3243,10 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - `select(null)` y `close()` siguen limpiando el contexto inmediatamente por seguridad al salir/cerrar sesión, sin retener información de otro usuario.
 - Se añadió prueba de invariantes para bloqueo sin pérdida, descarte deliberado y limpieza obligatoria.
 - No conecta el puente a la UI ni habilita Firebase: `enabled=false` por defecto. CI pendiente; no se modifican Rules/Auth/Storage/PROD.
+
+
+### 2026-10-20 — MGD-021: reselección idempotente de borrador (DEV)
+- Se corrigió `createEventInvitationDraftSession.select()` para que volver a seleccionar el mismo `(uid,eventId,draftId)` no reinicie el autosave, pierda cambios pendientes ni acepte una revisión vieja desde la UI.
+- Cambiar realmente de evento/borrador sigue exigiendo que se guarden o descarten cambios pendientes; cerrar sesión limpia inmediatamente.
+- Prueba de regresión verifica conservación del borrador y revisión, y guardado único en proveedor simulado.
+- No conecta el puente experimental a Firebase/UI; sigue desactivado por defecto. CI y QA funcional pendientes. Sin modificaciones de Rules/Auth/Storage/PROD.
