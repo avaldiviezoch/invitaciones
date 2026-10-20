@@ -27,12 +27,17 @@ function createEventInvitationDraftSession({ repository, currentUid, enabled = f
       return result;
     }
   });
-  function select(next) {
+  function select(next, { discardPending = false } = {}) {
     if (!next) { context = null; contextVersion++; saver.setScope(null); return; }
     const { eventId, draftId, revision = '' } = next;
     const uid = currentUid();
     if (!uid || typeof eventId !== 'string' || !eventId || typeof draftId !== 'string' || !draftId) {
       throw new Error('Cuenta, evento o borrador no disponibles.');
+    }
+    const switching = context && (context.uid !== uid || context.eventId !== eventId || context.draftId !== draftId);
+    const status = saver.getStatus();
+    if (switching && !discardPending && (status.pending || status.inflight)) {
+      throw new Error('Hay cambios pendientes: guarda o descarta antes de cambiar de borrador.');
     }
     contextVersion++;
     saver.setScope({ ownerUid:uid, eventId, draftId, revision });

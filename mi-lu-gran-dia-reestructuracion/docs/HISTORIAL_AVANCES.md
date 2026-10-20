@@ -3236,3 +3236,10 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Clásica elegante mantiene marco y composición; Minimal presenta encabezado fuerte sin marco; One Piece elegante emplea composición temática ornamental sobria, sin recursos externos.
 - Prueba automatizada de invariantes para los tres diseños y conservación de impresión A4, marca de borrador y ausencia de scripts externos.
 - Archivo: `src/core/app/invitation-offline-preview.js`, `tests/e2e-safe.spec.js`; CI y QA visual real pendientes. No se cambia Firestore, Rules, Auth, Storage, ni PROD.
+
+
+### 2026-10-20 — MGD-021: evitar pérdida al cambiar de evento (DEV)
+- El puente colaborativo experimental `event-invitation-draft-session.js` rechaza cambiar de evento/borrador cuando hay un guardado pendiente o en curso, a menos que el consumidor solicite explícitamente `discardPending:true`.
+- `select(null)` y `close()` siguen limpiando el contexto inmediatamente por seguridad al salir/cerrar sesión, sin retener información de otro usuario.
+- Se añadió prueba de invariantes para bloqueo sin pérdida, descarte deliberado y limpieza obligatoria.
+- No conecta el puente a la UI ni habilita Firebase: `enabled=false` por defecto. CI pendiente; no se modifican Rules/Auth/Storage/PROD.
