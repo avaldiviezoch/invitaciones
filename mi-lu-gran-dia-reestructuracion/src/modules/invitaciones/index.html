@@ -23,6 +23,8 @@
         <div><span class="invitations-panel-label">BORRADOR LOCAL</span><h2>Crear invitación</h2><p>Previsualiza sin publicar ni guardar datos. Este borrador desaparece al salir.</p></div>
         <div class="invitations-editor-workspace">
         <form data-invitations-editor-form class="invitations-add-form">
+          <button type="button" data-invitations-use-active-event>Usar datos del evento activo</button>
+          <small data-invitations-active-event-status role="status" aria-live="polite">Copiará únicamente el tipo, nombre y fecha del evento activo cuando lo solicites.</small>
           <label>Tipo de evento<select name="eventType" required>
             <option value="wedding">Boda</option><option value="birthday">Cumpleaños</option><option value="quince">Quinceañero</option><option value="baby_shower">Baby shower</option><option value="religious">Bautizo / Comunión</option><option value="graduation">Graduación</option><option value="corporate">Evento corporativo</option><option value="custom">Personalizado</option>
           </select></label>
