@@ -35,6 +35,8 @@ function createEventInvitationDraftSession({ repository, currentUid, enabled = f
       throw new Error('Cuenta, evento o borrador no disponibles.');
     }
     const switching = context && (context.uid !== uid || context.eventId !== eventId || context.draftId !== draftId);
+    // Reseleccionar el mismo borrador no debe reiniciar autosave ni perder ediciones.
+    if (context && !switching) return;
     const status = saver.getStatus();
     if (switching && !discardPending && (status.pending || status.inflight)) {
       throw new Error('Hay cambios pendientes: guarda o descarta antes de cambiar de borrador.');
