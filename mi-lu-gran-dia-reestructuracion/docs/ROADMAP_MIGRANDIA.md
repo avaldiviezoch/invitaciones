@@ -4195,3 +4195,9 @@ Estado:
 - Cada menú ofrece **Excel (.xlsx), Imagen (.png) y PDF**. Excel usa el generador XLSX existente y los datos canónicos; Imagen se crea en Canvas local, conservando cuatro mesas por lámina; PDF abre el diálogo nativo de impresión para elegir «Guardar como PDF» (no se presenta como descarga PDF automática).
 - Cierre de menú al seleccionar opción o hacer clic fuera; `aria-expanded`, foco visible y adaptación móvil; sin cambios de Firebase ni producción.
 - Se actualizan pruebas E2E para la nueva estructura; quedan pendientes CI verde y QA visual/navegador.
+
+
+### 2026-10-20 — Ajuste visual de botones y branding de exportables (DEV)
+- Se unifica el verde de Descargar con los botones activos de Mesas (`#7d8866`), se limita la anchura de las tarjetas y se aplica truncamiento de nombres a una línea para evitar desbordes en móvil.
+- Se elimina la cabecera grande «MIGRANDIA» de los reportes PNG/PDF y se incorpora la firma discreta `migrandia.com` al pie de láminas de Invitados, RSVP/Música, Mesas y hoja XLSX.
+- La lógica de datos y exportación se mantiene; sin cambios en Firebase, Auth, Rules o producción. QA visual de navegador y CI pendientes.
