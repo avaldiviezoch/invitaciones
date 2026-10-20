@@ -3297,3 +3297,8 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Se unifica el verde de Descargar con los botones activos de Mesas (`#7d8866`), se limita la anchura de las tarjetas y se aplica truncamiento de nombres a una línea para evitar desbordes en móvil.
 - Se elimina la cabecera grande «MIGRANDIA» de los reportes PNG/PDF y se incorpora la firma discreta `migrandia.com` al pie de láminas de Invitados, RSVP/Música, Mesas y hoja XLSX.
 - La lógica de datos y exportación se mantiene; sin cambios en Firebase, Auth, Rules o producción. QA visual de navegador y CI pendientes.
+
+
+### 2026-10-20 — MGD-021: reconciliación segura de PR #221 (DEV)
+- Puente del editor preservado con `enabled=false`, sin sesión ni acceso real a Firebase; se integran únicamente los puntos de edición y cleanup.
+- Rama reconciliada con los cambios recientes de main, conservando pruebas y exportaciones actuales. Pruebas CI pendientes de confirmación; falta QA autenticado de permisos y Rules antes de una activación.
