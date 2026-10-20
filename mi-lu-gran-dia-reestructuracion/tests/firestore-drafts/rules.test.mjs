@@ -2,7 +2,9 @@ import { readFileSync } from 'node:fs';
 import { after, before, beforeEach, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { initializeTestEnvironment, assertFails, assertSucceeds } from '@firebase/rules-unit-testing';
-import { doc, getDoc, setDoc, updateDoc, deleteDoc } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, setDoc, updateDoc, deleteDoc, runTransaction, serverTimestamp } from 'firebase/firestore';
+import { createEventInvitationDraftPort } from '../../src/services/event-invitation-drafts-firestore.js';
+import { createEventInvitationDraftSession } from '../../src/services/event-invitation-draft-session.js';
 
 let env;
 const event = 'eventA';
@@ -116,4 +118,60 @@ test('actualización: revisión debe incrementarse solo de una en una', async ()
   await assertSucceeds(updateDoc(a,{revision:'2'}));
   await assertFails(updateDoc(a,{revision:'2'}));
   await assertSucceeds(updateDoc(a,{revision:'3'}));
+});
+
+const emulatorSdk = { collection, doc, getDoc, getDocs, runTransaction, serverTimestamp };
+
+test('integración real emulador: puerto y sesión comparten borrador entre owner/editor', async () => {
+  const ownerPort = createEventInvitationDraftPort({
+    db:db('owner'), sdk:emulatorSdk, currentUid:()=>'owner', enabled:true
+  });
+  const editorPort = createEventInvitationDraftPort({
+    db:db('editor'), sdk:emulatorSdk, currentUid:()=>'editor', enabled:true
+  });
+  const ownerSession = createEventInvitationDraftSession({
+    repository:ownerPort, currentUid:()=>'owner', enabled:true,
+    schedule:()=>1, cancel:()=>{}
+  });
+  const editorSession = createEventInvitationDraftSession({
+    repository:editorPort, currentUid:()=>'editor', enabled:true,
+    schedule:()=>1, cancel:()=>{}
+  });
+  try {
+    ownerSession.select({eventId:'eventA',draftId:'draft1'});
+    assert.equal(ownerSession.change(valid('owner').value),true);
+    assert.equal(await ownerSession.flush(),true);
+    assert.equal(ownerSession.status().revision,'1');
+    editorSession.select({eventId:'eventA',draftId:'draft1'});
+    const recovered = await editorSession.recover();
+    assert.equal(recovered.eventName,'Boda');
+    editorSession.change({...recovered,message:'Contenido compartido'});
+    assert.equal(await editorSession.flush(),true);
+    assert.equal(editorSession.status().revision,'2');
+    const ownerRead = await ownerPort.read('eventA','draft1');
+    assert.equal(ownerRead.ownerUid,'owner');
+    assert.equal(ownerRead.value.message,'Contenido compartido');
+    assert.equal(ownerRead.revision,'2');
+    const viewerPort=createEventInvitationDraftPort({
+      db:db('viewer'),sdk:emulatorSdk,currentUid:()=>'viewer',enabled:true
+    });
+    assert.equal((await viewerPort.read('eventA','draft1')).revision,'2');
+    await assert.rejects(viewerPort.save('eventA','draft1',recovered,'2'));
+  } finally {
+    ownerSession.close();
+    editorSession.close();
+  }
+});
+
+test('integración real emulador: puerto aísla A → B → A y rechaza revisión obsoleta', async () => {
+  const port=createEventInvitationDraftPort({
+    db:db('owner'),sdk:emulatorSdk,currentUid:()=>'owner',enabled:true
+  });
+  const created=await port.save('eventA','draft1',valid('owner').value,'');
+  assert.equal(created.revision,'1');
+  await assert.rejects(port.read('eventB','draft1'));
+  await assert.rejects(port.save('eventA','draft1',{...valid('owner').value,message:'obsoleto'},''));
+  const restored=await port.read('eventA','draft1');
+  assert.equal(restored.revision,'1');
+  assert.equal(restored.value.eventName,'Boda');
 });
