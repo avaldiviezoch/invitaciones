@@ -3250,3 +3250,9 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Cambiar realmente de evento/borrador sigue exigiendo que se guarden o descarten cambios pendientes; cerrar sesión limpia inmediatamente.
 - Prueba de regresión verifica conservación del borrador y revisión, y guardado único en proveedor simulado.
 - No conecta el puente experimental a Firebase/UI; sigue desactivado por defecto. CI y QA funcional pendientes. Sin modificaciones de Rules/Auth/Storage/PROD.
+
+
+### 2026-10-20 — MGD-021: reforzar matriz de seguridad en Firestore Emulator (DEV)
+- Se añadieron pruebas del fixture `tests/firestore-drafts/rules.test.mjs`: edición colaborativa owner/admin/editor sin cambiar autoría, viewer/provider sin escritura, cruce A→B→A, falsificación de `ownerUid`/evento/esquema y validación de revisiones sucesivas.
+- No se modificaron Rules del proyecto real ni la fixture, servicios de persistencia, Auth, Storage ni producción.
+- Las nuevas pruebas deben ejecutarse en CI del emulador aislado y validarse antes de fusionar. Los resultados del emulador no acreditan reglas efectivamente desplegadas.
