@@ -3263,3 +3263,11 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - La nueva prueba ejercita creación por propietario, recuperación y edición por colaborador, conservación de `ownerUid`, lectura de viewer sin permiso para guardar, aislamiento A→B→A y rechazo de revisión obsoleta.
 - `enabled:true` solo se usa dentro de pruebas con un Firestore emulado; las implementaciones de la aplicación siguen desactivadas y desconectadas de la UI.
 - CI de la nueva suite pendiente. Ninguna escritura real ni cambios en reglas desplegadas, Auth, Storage o PROD.
+
+
+### 2026-10-20 — Exportables Invitados / RSVP / Música (DEV)
+- Se incorporaron acciones visibles para exportar XLSX real en Lista de Invitados, RSVP y Música dentro de Invitados; además, Lista de Invitados puede descargarse como láminas PNG con 25 personas por imagen.
+- XLSX autónomo sin CDN con encabezado coloreado, filas alternas, filtros, anchos controlados y protección frente a fórmulas: datos serializados como cadenas de texto Excel.
+- Origen: invitados y mesas de `snapshot.canonical`, respuestas/gestión RSVP y solicitudes musicales desde controlador RSVP. No se hacen consultas extra ni escrituras.
+- Los PNG se generan en Canvas local, con nombre de evento, indicadores y numeración de páginas; sin envío de datos a servidores externos.
+- Archivos `src/modules/invitados/{index.js,index.html,rsvp-controller.js,export-xlsx.js,export-guest-image.js}` y suite E2E segura. CI y QA de descargas en navegador pendientes. Producción/Firebase/Rules intactos.
