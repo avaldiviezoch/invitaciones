@@ -1,3 +1,4 @@
+import { renderOfflineInvitationDraft } from '../../core/app/invitation-offline-preview.js';
 import { normalizeDraftInput, DRAFT_FIELDS } from '../../core/app/invitation-draft-contract.js';
 import { getInvitationCopy } from '../../core/app/invitation-copy.js';
 import { invitationEngineModel, hasStableInvitationEngineShape } from '../../core/app/invitation-engine.js';
@@ -175,6 +176,25 @@ export async function mountInvitaciones() {
     link.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     updateDraftStatus(false);
+  }, { signal });
+  root.querySelector('[data-invitations-export-html]').addEventListener('click', () => {
+    try {
+      const fields = new FormData(editorForm);
+      const draft = normalizeDraftInput(Object.fromEntries([
+        ['schema', 'migrandia-invitation-draft-v1'],
+        ...DRAFT_FIELDS.map((field) => [field, String(fields.get(field) || '')])
+      ]));
+      const html = renderOfflineInvitationDraft(draft);
+      const url = URL.createObjectURL(new Blob([html], { type: 'text/html;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'migrandia-vista-previa-sin-publicar.html';
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+      // Exportar HTML no guarda el borrador editable JSON.
+    } catch {
+      draftStatus.textContent = 'No se pudo generar la vista previa. Revisa los campos del borrador.';
+    }
   }, { signal });
   root.querySelector('[data-invitations-import-draft]').addEventListener('change', async (event) => {
     const input = event.currentTarget;

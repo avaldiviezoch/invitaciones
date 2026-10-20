@@ -3106,3 +3106,20 @@ test('MGD-021: importación local protege cambios y descarta lectura asíncrona 
   expect(source).toContain('editorChangeVersion++; renderEditorPreview()');
   expect(source).toContain('Importación cancelada. Se conservaron tus cambios.');
 });
+
+
+test('MGD-021: HTML offline escapa datos y no carga dependencias remotas', async () => {
+  const { renderOfflineInvitationDraft } = await import('../src/core/app/invitation-offline-preview.js');
+  const draft = { schema:'migrandia-invitation-draft-v1',eventType:'birthday', eventName:'<script>alert(1)</script>',
+    date:'2027-01-16',location:'Salón & jardín',guestName:'<img src=x onerror=alert(1)>',
+    message:'Te esperamos',templateId:'classic-elegant',fontStyle:'serif',colorPalette:'auto' };
+  const html = renderOfflineInvitationDraft(draft);
+  expect(html).toContain('&lt;script&gt;');
+  expect(html).toContain('&lt;img');
+  expect(html).toContain('Salón &amp; jardín');
+  expect(html).not.toContain('<script');
+  expect(html).not.toContain('src="http');
+  expect(html).toContain('Borrador sin publicar');
+  expect(html).toContain('<meta name="robots" content="noindex,nofollow">');
+  expect(() => renderOfflineInvitationDraft({...draft,colorPalette:'invalid'})).toThrow();
+});
