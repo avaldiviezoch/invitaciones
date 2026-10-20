@@ -16,7 +16,7 @@ function renderTablesPages({eventName='Evento',tables=[],guests=[]}={}) {
     const ctx=canvas.getContext('2d');
     ctx.fillStyle='#F5F8FB';ctx.fillRect(0,0,1600,2250);
     ctx.fillStyle='#243B53';ctx.fillRect(0,0,1600,240);
-    ctx.fillStyle='#B3E5D8';ctx.font='bold 24px Arial';ctx.fillText('MIGRANDIA   •   MESAS Y ASIENTOS',82,73);
+    ctx.fillStyle='#B3E5D8';ctx.font='bold 24px Arial';ctx.fillText('MESAS Y ASIENTOS',82,73);
     ctx.fillStyle='#FFFFFF';ctx.font='bold 48px Georgia';ctx.fillText(clip(eventName,45),82,146);
     ctx.font='24px Arial';ctx.fillText(tables.length+' mesas  ·  '+guests.filter(g=>g.tableId).length+' invitados asignados',82,196);
     tables.slice(page*4,page*4+4).forEach((table,index)=>{
@@ -59,7 +59,7 @@ function renderTablesPages({eventName='Evento',tables=[],guests=[]}={}) {
     });
     ctx.fillStyle='#D7E0E8';ctx.fillRect(75,2165,1450,2);
     ctx.fillStyle='#64748B';ctx.font='22px Arial';
-    ctx.fillText('Distribución para organización · Revisa los asientos antes de imprimir',82,2209);
+    ctx.fillText('migrandia.com · Distribución para organización',82,2209);
     ctx.textAlign='right';ctx.fillText('Hoja '+(page+1)+' / '+total,1512,2209);ctx.textAlign='start';
     pages.push(canvas);
   }
