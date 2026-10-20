@@ -3211,3 +3211,24 @@ test('MGD-021: cambiar evento no descarta cambios colaborativos pendientes sin c
   expect(session.status().pending).toBe(false);
   session.close();
 });
+
+test('MGD-021: reseleccionar mismo borrador conserva cambios pendientes y revisión', async () => {
+  const { createEventInvitationDraftSession } = await import('../src/services/event-invitation-draft-session.js');
+  const draft = {schema:'migrandia-invitation-draft-v1',eventType:'wedding',eventName:'Celebración',
+    date:'',location:'',guestName:'',message:'Nueva edición',templateId:'classic-elegant',fontStyle:'serif',colorPalette:'auto'};
+  let writes=0;
+  const session=createEventInvitationDraftSession({enabled:true,currentUid:()=> 'userA',
+    repository:{read:async()=>null,save:async()=>{writes++; return {revision:'5'};}},
+    schedule:()=>1,cancel:()=>{}});
+  session.select({eventId:'eventA',draftId:'draft1',revision:'4'});
+  expect(session.change(draft)).toBe(true);
+  const version=session.status().changeVersion;
+  session.select({eventId:'eventA',draftId:'draft1',revision:'1'});
+  expect(session.status().pending).toBe(true);
+  expect(session.status().revision).toBe('4');
+  expect(session.status().changeVersion).toBe(version);
+  expect(await session.flush()).toBe(true);
+  expect(writes).toBe(1);
+  expect(session.status().revision).toBe('5');
+  session.close();
+});
