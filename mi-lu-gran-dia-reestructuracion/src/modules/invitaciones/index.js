@@ -198,6 +198,25 @@ export async function mountInvitaciones() {
       draftStatus.textContent = 'No se pudo generar la vista previa. Revisa los campos del borrador.';
     }
   }, { signal });
+  root.querySelector('[data-invitations-preview-full]').addEventListener('click', () => {
+    try {
+      const fields = new FormData(editorForm);
+      const draft = normalizeDraftInput(Object.fromEntries([
+        ['schema', 'migrandia-invitation-draft-v1'],
+        ...DRAFT_FIELDS.map((field) => [field, String(fields.get(field) || '')])
+      ]));
+      const url = URL.createObjectURL(new Blob([renderOfflineInvitationDraft(draft)], { type: 'text/html;charset=utf-8' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.click();
+      window.setTimeout(() => URL.revokeObjectURL(url), 60000);
+      // Vista temporal: no publica enlaces ni guarda los cambios del editor.
+    } catch {
+      draftStatus.textContent = 'No se pudo abrir la vista completa. Revisa los campos del borrador.';
+    }
+  }, { signal });
   root.querySelector('[data-invitations-import-draft]').addEventListener('change', async (event) => {
     const input = event.currentTarget;
     const status = root.querySelector('[data-invitations-import-status]');

@@ -3139,3 +3139,15 @@ test('MGD-021: precarga de evento activo es opt-in, solo lectura y protege edici
   expect(code).toContain('updateDraftStatus(true)');
   expect(code).not.toContain('selectActiveWedding(');
 });
+
+test('MGD-021: vista completa abre borrador local sin publicar ni escribir datos', async () => {
+  const fs = await import('node:fs/promises');
+  const js = await fs.readFile(path.resolve('src/modules/invitaciones/index.js'), 'utf8');
+  const html = await fs.readFile(path.resolve('src/modules/invitaciones/index.html'), 'utf8');
+  expect(html).toContain('data-invitations-preview-full');
+  expect(js).toContain("root.querySelector('[data-invitations-preview-full]')");
+  expect(js).toContain("link.target = '_blank'");
+  expect(js).toContain("link.rel = 'noopener noreferrer'");
+  expect(js).toContain('renderOfflineInvitationDraft(draft)');
+  expect(js).toContain('URL.revokeObjectURL(url)');
+});

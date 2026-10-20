@@ -3214,3 +3214,10 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Se agregó prueba automatizada de invariantes; CI y QA funcional real todavía pendientes.
 - Archivos: `src/modules/invitaciones/index.js`, `index.html`, `tests/e2e-safe.spec.js` y documentación.
 - DEV únicamente, sin modificación de Rules, Auth, Storage, persistencia ni PROD.
+
+
+### 2026-10-20 — MGD-021: vista completa temporal del borrador (DEV)
+- El editor ofrece «Abrir vista completa en otra pestaña», reutilizando el render HTML autónomo existente; mantiene separada la opción de descarga `.html` y el respaldo editable `.json`.
+- La nueva vista usa un Blob URL local con `noopener noreferrer`, sin backend, Firestore, publicación ni RSVP; nunca limpia la señal de cambios sin exportar.
+- Archivo: `src/modules/invitaciones/index.js`, `index.html`, `tests/e2e-safe.spec.js`. Prueba de invariantes incluida; CI y QA funcional de navegador pendientes.
+- DEV únicamente. Rules, Auth, Storage y PROD sin cambios.
