@@ -3236,3 +3236,30 @@ test('MGD-021: reseleccionar mismo borrador conserva cambios pendientes y revisi
   expect(session.status().revision).toBe('5');
   session.close();
 });
+
+test('MGD-EXPORT: XLSX es ZIP auténtico con tablas y datos protegidos', async () => {
+  const { buildXlsx } = await import('../src/modules/invitados/export-xlsx.js');
+  const workbook = buildXlsx({title:'Invitados',columns:['Nombre','Estado'],rows:[['=HYPERLINK("x")','Confirmado'],['María & Luis','Pendiente']]});
+  expect(workbook.type).toBe('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  const bytes=new Uint8Array(await workbook.arrayBuffer());
+  expect([...bytes.slice(0,4)]).toEqual([80,75,3,4]);
+  const payload=new TextDecoder().decode(bytes);
+  expect(payload).toContain('[Content_Types].xml');
+  expect(payload).toContain('xl/worksheets/sheet1.xml');
+  expect(payload).toContain('María &amp; Luis');
+  expect(payload).toContain('=HYPERLINK(&quot;x&quot;)');
+  expect(payload).toContain('t="inlineStr"');
+  expect(payload).toContain('<autoFilter ref="A1:B3"/>');
+});
+
+test('MGD-EXPORT: pestañas Invitados RSVP Música ofrecen botones y datos canónicos', async () => {
+  const fs=await import('node:fs/promises');
+  const html=await fs.readFile(path.resolve('src/modules/invitados/index.html'),'utf8');
+  const js=await fs.readFile(path.resolve('src/modules/invitados/index.js'),'utf8');
+  const rsvp=await fs.readFile(path.resolve('src/modules/invitados/rsvp-controller.js'),'utf8');
+  for(const type of ['guests','guest-image','rsvp','music']) expect(html).toContain('data-guests-export="'+type+'"');
+  expect(js).toContain('snapshot.canonical.guests');
+  expect(js).toContain('ensureRsvpController().exportSnapshot()');
+  expect(rsvp).toContain('music: musicEntries().map(');
+  expect(js).not.toContain('saveInvitadosSnapshot(activeContext, snapshot.canonical);\n  const guests');
+});
