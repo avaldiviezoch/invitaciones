@@ -55,22 +55,23 @@ function buildXlsx({title='Reporte Migrandia',columns=[],rows=[]}={}) {
     const longest=Math.max(String(heading).length,...rows.slice(0,250).map(row=>String(row?.[i]??'').length));
     return '<col min="'+(i+1)+'" max="'+(i+1)+'" width="'+Math.max(15,Math.min(44,longest+5))+'" customWidth="1"/>';
   }).join('');
+  const brandRow='<row r="'+(values.length+2)+'"><c r="A'+(values.length+2)+'" s="3" t="inlineStr"><is><t>migrandia.com</t></is></c></row>';
   const sheet='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
     +'<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
     +'<sheetViews><sheetView showGridLines="0" workbookViewId="0"/></sheetViews><cols>'+widths+'</cols>'
-    +'<sheetData>'+cells+'</sheetData><autoFilter ref="A1:'+maxCol+values.length+'"/>'
+    +'<sheetData>'+cells+brandRow+'</sheetData><autoFilter ref="A1:'+maxCol+values.length+'"/>'
     +'<pageMargins left=".35" right=".35" top=".5" bottom=".5" header=".2" footer=".2"/></worksheet>';
   const styles='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
     +'<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">'
-    +'<fonts count="2"><font><sz val="11"/><name val="Aptos"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Aptos"/></font></fonts>'
+    +'<fonts count="3"><font><sz val="11"/><name val="Aptos"/></font><font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Aptos"/></font><font><sz val="9"/><color rgb="FF75836D"/><name val="Aptos"/></font></fonts>'
     +'<fills count="4"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill>'
     +'<fill><patternFill patternType="solid"><fgColor rgb="FF243B53"/><bgColor indexed="64"/></patternFill></fill>'
     +'<fill><patternFill patternType="solid"><fgColor rgb="FFEAF2F4"/><bgColor indexed="64"/></patternFill></fill></fills>'
     +'<borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders>'
     +'<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>'
-    +'<cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
+    +'<cellXfs count="4"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>'
     +'<xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/>'
-    +'<xf numFmtId="0" fontId="0" fillId="3" borderId="0" xfId="0" applyFill="1"/></cellXfs>'
+    +'<xf numFmtId="0" fontId="0" fillId="3" borderId="0" xfId="0" applyFill="1"/><xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1"/></cellXfs>'
     +'<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>';
   const workbook='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
     +'<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
