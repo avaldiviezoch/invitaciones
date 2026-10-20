@@ -4181,3 +4181,10 @@ Estado:
 - Nombres y ocupación provienen del snapshot canónico del evento activo. Las imágenes se generan en Canvas del dispositivo sin subida a servidores ni creación de documentos Firebase.
 - Pruebas de invariantes para paginación de cuatro mesas y cableado a snapshot, más documentación; QA visual en navegador y CI todavía pendientes.
 - Sin alteraciones en la geometría real de Distribución ni en Firebase, Rules, Auth, Storage o PROD.
+
+
+### 2026-10-20 — Ajuste UX/UI de botones exportables (DEV)
+- Se retiran el bloque `<style>` y los estilos inline añadidos al HTML de Invitados; se integran estilos reutilizables al CSS propio `src/modules/invitados/invitados.css`, conforme a `REGLAS_NO_NEGOCIABLES.md`.
+- Invitados, RSVP, Música y Mesas comparten botones de exportación de tamaño compacto, paleta olivo, tratamiento secundario claro y etiqueta del formato (`XLSX`/`PNG`).
+- Incluye estados hover/focus, comportamiento responsive y reducción de movimiento; no altera los handlers de exportación ni el modelo de datos.
+- CI y QA visual en navegador pendientes. Sin Firebase, Rules, Auth, Storage ni PROD.
