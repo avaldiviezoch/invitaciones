@@ -4093,3 +4093,10 @@ Estado:
 - Se añadió prueba de regresión de lectura tardía después de autosave completado en `tests/e2e-safe.spec.js`.
 - Commits: `d7004b7`, `f38f984`, `1df909f`. CI pendiente de comprobación; no declarar verde todavía.
 - Solo DEV, sin conectar UI a Firebase ni activar persistencia real; sin cambios de Rules ni PROD.
+
+
+### 2026-10-20 — MGD-021: protección de importación JSON local (DEV)
+- El editor pide confirmación antes de sustituir un borrador con cambios no descargados.
+- Se descarta una lectura asíncrona del archivo si el usuario editó, cerró el editor, inició otra importación o desmontó el módulo mientras se leía. Un archivo inválido también invalida la importación anterior.
+- Archivos: `src/modules/invitaciones/index.js` y `tests/e2e-safe.spec.js`.
+- PR en preparación. CI y QA manual pendientes; prueba automatizada de invariantes estáticas agregada. Sin escritura Firebase, cambios de Rules/Auth/Storage ni PROD.

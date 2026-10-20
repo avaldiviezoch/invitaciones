@@ -3094,3 +3094,15 @@ test('MGD-021: lectura tardía no sobrescribe revisión tras completarse autosav
   expect(session.status().revision).toBe('8');
   session.close();
 });
+
+
+test('MGD-021: importación local protege cambios y descarta lectura asíncrona obsoleta', async () => {
+  const fs = await import('node:fs/promises');
+  const source = await fs.readFile(path.resolve('src/modules/invitaciones/index.js'), 'utf8');
+  expect(source).toContain("dirtyDraft && !window.confirm('Tienes cambios sin descargar.");
+  expect(source).toContain('currentImport !== importVersion');
+  expect(source).toContain('currentEdit !== editorChangeVersion');
+  expect(source).toContain('signal.aborted || editor.hidden');
+  expect(source).toContain('editorChangeVersion++; renderEditorPreview()');
+  expect(source).toContain('Importación cancelada. Se conservaron tus cambios.');
+});
