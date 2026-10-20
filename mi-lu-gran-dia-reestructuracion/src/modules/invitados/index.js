@@ -1,3 +1,6 @@
+import { renderReportPages, downloadCanvasPages, printCanvasPages } from './export-formats.js';
+import { createGuestImagePages } from './export-guest-image.js';
+import { renderTablesPages } from './export-tables-image.js';
 import { downloadXlsx } from './export-xlsx.js';
 import { downloadGuestImages } from './export-guest-image.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
@@ -378,11 +381,71 @@ function exportReport(kind) {
   }
 }
 
+function reportFor(scope) {
+  const guests=snapshot?.canonical?.guests||[],tables=snapshot?.canonical?.tables||[];
+  if(scope==='guests') return {
+    title:'Lista de invitados',columns:['Invitado','Estado','Mesa'],
+    rows:guests.map(g=>[text(g.name),statusLabel(guestStatus(g)),tableName(g,tables)||'Sin mesa'])};
+  if(scope==='tables')return {
+    title:'Mesas y asientos',columns:['Mesa','Asiento','Invitado'],
+    rows:tables.flatMap(t=>guests.filter(g=>String(g.tableId||'')===String(t.id))
+      .map(g=>[text(t.name),g.seatNumber||'—',text(g.name)]))};
+  const source=ensureRsvpController().exportSnapshot();
+  if(!source.ready)throw new Error('Primero espera que terminen de cargar las respuestas RSVP.');
+  if(scope==='music')return {
+    title:'Música de invitados',columns:['Canción','Artista','Invitado'],
+    rows:source.music.map(x=>[text(x.title),text(x.artist),text(x.person)])};
+  return {title:'Confirmaciones RSVP',columns:['Invitado','Estado','Personas'],
+    rows:source.responses.map(x=>[text(x.name),statusLabel(x.attendance),x.quantity??1])};
+}
+async function exportWithFormat(scope,format) {
+  if(!snapshot?.canonical||!activeContext?.id)return;
+  const root=getRoot();
+  const status=root?.querySelector('[data-guests-export-state]')||root?.querySelector('[data-tables-export-state]');
+  try {
+    if(format==='xlsx'){
+      if(scope==='tables'){const report=reportFor(scope);downloadXlsx(report,'migrandia-mesas.xlsx');}
+      else exportReport(scope==='guests'?'guests':scope);
+      return;
+    }
+    const report=reportFor(scope);
+    const options={eventName:activeContext.name||'Evento',guests:snapshot.canonical.guests,tables:snapshot.canonical.tables,
+      statusLabel:g=>statusLabel(g)};
+    const pages=scope==='tables'?renderTablesPages(options):
+      scope==='guests'?createGuestImagePages({...options,guests:options.guests.map(g=>({...g,status:guestStatus(g)}))}):
+      renderReportPages({...report,eventName:options.eventName});
+    if(format==='png')await downloadCanvasPages(pages,'migrandia-'+scope);
+    else if(format==='pdf')printCanvasPages(pages,report.title);
+    if(status)status.textContent=format==='pdf'?'Elige «Guardar como PDF» en la ventana de impresión.':'Imágenes preparadas.';
+  } catch(error) {if(status)status.textContent=error?.message||'No se pudo exportar.';}
+}
+function closeDownloadMenus(root) {
+  root.querySelectorAll('[data-download-menu]').forEach(menu=>{
+    menu.querySelector('[data-download-options]').hidden=true;
+    menu.querySelector('[data-download-toggle]').setAttribute('aria-expanded','false');
+  });
+}
 function bind(root) {
   if (root.dataset.guestsBound === 'true') return;
   root.dataset.guestsBound = 'true';
 
   root.addEventListener('click', async (event) => {
+    const menuButton=event.target.closest('[data-download-toggle]');
+    if(menuButton){
+      const menu=menuButton.closest('[data-download-menu]');
+      const wasOpen=!menu.querySelector('[data-download-options]').hidden;
+      closeDownloadMenus(root);
+      if(!wasOpen){menu.querySelector('[data-download-options]').hidden=false;menuButton.setAttribute('aria-expanded','true');}
+      return;
+    }
+    const choice=event.target.closest('[data-download-action]');
+    if(choice){
+      const [scope,format]=choice.dataset.downloadAction.split(':');
+      closeDownloadMenus(root);
+      await exportWithFormat(scope,format);
+      return;
+    }
+    if(!event.target.closest('[data-download-menu]'))closeDownloadMenus(root);
     const exportButton = event.target.closest('[data-guests-export]');
     if (exportButton) { exportReport(exportButton.dataset.guestsExport); return; }
     const viewButton = event.target.closest('[data-guests-view]');
