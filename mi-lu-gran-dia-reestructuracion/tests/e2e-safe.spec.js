@@ -3063,13 +3063,15 @@ test('MGD-021: recuperar nunca descarta ediciones locales pendientes o creadas d
   session.change(draft);
   await expect(session.recover()).rejects.toThrow('cambios pendientes');
   expect(session.status().pending).toBe(true);
+  // Reseleccionar el mismo borrador ya no descarta pendientes: guardar antes de recuperar.
+  expect(await session.flush()).toBe(true);
   session.select({eventId:'eventA',draftId:'draft1'});
   const reading = session.recover();
   session.change({...draft,message:'edición reciente'});
   release({revision:'4',value:draft});
   await expect(reading).rejects.toThrow('cambios pendientes');
   expect(session.status().pending).toBe(true);
-  expect(session.status().revision).toBe('');
+  expect(session.status().revision).toBe('1');
   session.close();
 });
 
@@ -3209,5 +3211,26 @@ test('MGD-021: cambiar evento no descarta cambios colaborativos pendientes sin c
   session.select(null);
   expect(session.status().scope).toBeNull();
   expect(session.status().pending).toBe(false);
+  session.close();
+});
+
+test('MGD-021: reseleccionar mismo borrador conserva cambios pendientes y revisión', async () => {
+  const { createEventInvitationDraftSession } = await import('../src/services/event-invitation-draft-session.js');
+  const draft = {schema:'migrandia-invitation-draft-v1',eventType:'wedding',eventName:'Celebración',
+    date:'',location:'',guestName:'',message:'Nueva edición',templateId:'classic-elegant',fontStyle:'serif',colorPalette:'auto'};
+  let writes=0;
+  const session=createEventInvitationDraftSession({enabled:true,currentUid:()=> 'userA',
+    repository:{read:async()=>null,save:async()=>{writes++; return {revision:'5'};}},
+    schedule:()=>1,cancel:()=>{}});
+  session.select({eventId:'eventA',draftId:'draft1',revision:'4'});
+  expect(session.change(draft)).toBe(true);
+  const version=session.status().changeVersion;
+  session.select({eventId:'eventA',draftId:'draft1',revision:'1'});
+  expect(session.status().pending).toBe(true);
+  expect(session.status().revision).toBe('4');
+  expect(session.status().changeVersion).toBe(version);
+  expect(await session.flush()).toBe(true);
+  expect(writes).toBe(1);
+  expect(session.status().revision).toBe('5');
   session.close();
 });
