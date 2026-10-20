@@ -3278,3 +3278,19 @@ test('MGD-EXPORT: Mesas exporta cuatro tarjetas por hoja desde el snapshot actua
   expect(tables).toContain('downloadTablesPages({eventName:context.name');
   expect(tables).toContain('tables:current.tables||[],guests:current.guests||[]');
 });
+
+test('MGD-EXPORT: botones de descarga siguen diseño Invitados sin CSS inline', async () => {
+  const fs=await import('node:fs/promises');
+  const html=await fs.readFile(path.resolve('src/modules/invitados/index.html'),'utf8');
+  const css=await fs.readFile(path.resolve('src/modules/invitados/invitados.css'),'utf8');
+  expect(html).not.toMatch(/<style>[\\s\\S]*?guests-export-actions/);
+  expect(html).not.toMatch(/data-tables-export-image[^>]*style=/);
+  for(const action of ['guests','guest-image','rsvp','music']){
+    expect(html).toContain('data-guests-export="'+action+'"');
+  }
+  expect(html).toContain('data-tables-export-image');
+  expect(css).toContain('.guests-shell .guests-export-btn');
+  expect(css).toContain('var(--guests-export-accent)');
+  expect(css).toContain('.guests-export-btn:focus-visible');
+  expect(css).toContain('@media(prefers-reduced-motion:reduce)');
+});
