@@ -3151,3 +3151,19 @@ test('MGD-021: vista completa abre borrador local sin publicar ni escribir datos
   expect(js).toContain('renderOfflineInvitationDraft(draft)');
   expect(js).toContain('URL.revokeObjectURL(url)');
 });
+
+test('MGD-021: exportación HTML permite imprimir sin publicar datos', async () => {
+  const { renderOfflineInvitationDraft } = await import('../src/core/app/invitation-offline-preview.js');
+  const draft = {schema:'migrandia-invitation-draft-v1',eventType:'wedding',
+    eventName:'<img src=x onerror=alert(1)>',date:'',location:'',guestName:'',
+    message:'Prueba',templateId:'classic-elegant',fontStyle:'serif',colorPalette:'auto'};
+  const html = renderOfflineInvitationDraft(draft);
+  expect(html).toContain('onclick="window.print()"');
+  expect(html).toContain('aria-label="Imprimir o guardar como PDF"');
+  expect(html).toContain('@page{size:A4;margin:12mm}');
+  expect(html).toContain('.print-control{display:none}');
+  expect(html).toContain('Borrador sin publicar');
+  expect(html).toContain('&lt;img');
+  expect(html).not.toContain('<img src=x onerror=');
+  expect(html).not.toContain('<script');
+});
