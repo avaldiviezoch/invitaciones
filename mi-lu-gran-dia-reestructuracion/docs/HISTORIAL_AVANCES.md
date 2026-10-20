@@ -3221,3 +3221,11 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - La nueva vista usa un Blob URL local con `noopener noreferrer`, sin backend, Firestore, publicación ni RSVP; nunca limpia la señal de cambios sin exportar.
 - Archivo: `src/modules/invitaciones/index.js`, `index.html`, `tests/e2e-safe.spec.js`. Prueba de invariantes incluida; CI y QA funcional de navegador pendientes.
 - DEV únicamente. Rules, Auth, Storage y PROD sin cambios.
+
+
+### 2026-10-20 — MGD-021: impresión local en A4 (DEV)
+- Se mejora el generador de vista previa HTML existente: control visible «Imprimir / Guardar PDF» que usa la función de impresión del navegador. Se oculta al imprimir, aplica página A4 y conserva la señal «Borrador sin publicar».
+- La generación de PDF depende del diálogo del navegador; la aplicación no genera ni almacena PDF en servidores.
+- Test de regresión comprueba botón de impresión, CSS de impresión y escape de HTML del contenido.
+- Archivo funcional: `src/core/app/invitation-offline-preview.js`; pruebas en `tests/e2e-safe.spec.js`.
+- QA funcional real y CI pendientes; sin cambios a Firebase, Rules, Auth, Storage, ni PROD.
