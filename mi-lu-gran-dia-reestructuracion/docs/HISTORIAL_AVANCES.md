@@ -3229,3 +3229,10 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Test de regresión comprueba botón de impresión, CSS de impresión y escape de HTML del contenido.
 - Archivo funcional: `src/core/app/invitation-offline-preview.js`; pruebas en `tests/e2e-safe.spec.js`.
 - QA funcional real y CI pendientes; sin cambios a Firebase, Rules, Auth, Storage, ni PROD.
+
+
+### 2026-10-20 — MGD-021: paridad de diseños para exportación HTML (DEV)
+- Las tres plantillas existentes (classic-elegant, minimal-black, one-piece-elegant) ahora tienen tratamiento visual distinguible en la vista completa descargable/imprimible, reutilizando el generador autónomo actual.
+- Clásica elegante mantiene marco y composición; Minimal presenta encabezado fuerte sin marco; One Piece elegante emplea composición temática ornamental sobria, sin recursos externos.
+- Prueba automatizada de invariantes para los tres diseños y conservación de impresión A4, marca de borrador y ausencia de scripts externos.
+- Archivo: `src/core/app/invitation-offline-preview.js`, `tests/e2e-safe.spec.js`; CI y QA visual real pendientes. No se cambia Firestore, Rules, Auth, Storage, ni PROD.

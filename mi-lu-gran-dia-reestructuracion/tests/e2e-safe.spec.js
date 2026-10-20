@@ -3167,3 +3167,22 @@ test('MGD-021: exportación HTML permite imprimir sin publicar datos', async () 
   expect(html).not.toContain('<img src=x onerror=');
   expect(html).not.toContain('<script');
 });
+
+test('MGD-021: las tres plantillas mantienen identidad visual en HTML exportado', async () => {
+  const { renderOfflineInvitationDraft } = await import('../src/core/app/invitation-offline-preview.js');
+  const value = {schema:'migrandia-invitation-draft-v1',eventType:'wedding',eventName:'Evento',
+    date:'',location:'',guestName:'',message:'',templateId:'classic-elegant',fontStyle:'serif',colorPalette:'auto'};
+  const classic=renderOfflineInvitationDraft(value);
+  const minimal=renderOfflineInvitationDraft({...value,templateId:'minimal-black'});
+  const themed=renderOfflineInvitationDraft({...value,templateId:'one-piece-elegant'});
+  expect(classic).toContain('class="invitation classic"');
+  expect(minimal).toContain('class="invitation minimal"');
+  expect(themed).toContain('class="invitation themed"');
+  expect(themed).toContain('class="theme-mark"');
+  expect(classic).not.toContain('class="theme-mark"');
+  for (const html of [classic,minimal,themed]) {
+    expect(html).toContain('Borrador sin publicar');
+    expect(html).toContain('@page{size:A4');
+    expect(html).not.toContain('<script');
+  }
+});
