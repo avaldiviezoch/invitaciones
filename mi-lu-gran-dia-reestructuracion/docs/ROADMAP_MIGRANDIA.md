@@ -4181,3 +4181,17 @@ Estado:
 - Nombres y ocupación provienen del snapshot canónico del evento activo. Las imágenes se generan en Canvas del dispositivo sin subida a servidores ni creación de documentos Firebase.
 - Pruebas de invariantes para paginación de cuatro mesas y cableado a snapshot, más documentación; QA visual en navegador y CI todavía pendientes.
 - Sin alteraciones en la geometría real de Distribución ni en Firebase, Rules, Auth, Storage o PROD.
+
+
+### 2026-10-20 — Ajuste UX/UI de botones exportables (DEV)
+- Se retiran el bloque `<style>` y los estilos inline añadidos al HTML de Invitados; se integran estilos reutilizables al CSS propio `src/modules/invitados/invitados.css`, conforme a `REGLAS_NO_NEGOCIABLES.md`.
+- Invitados, RSVP, Música y Mesas comparten botones de exportación de tamaño compacto, paleta olivo, tratamiento secundario claro y etiqueta del formato (`XLSX`/`PNG`).
+- Incluye estados hover/focus, comportamiento responsive y reducción de movimiento; no altera los handlers de exportación ni el modelo de datos.
+- CI y QA visual en navegador pendientes. Sin Firebase, Rules, Auth, Storage ni PROD.
+
+
+### 2026-10-20 — Un solo menú Descargar por pestaña (DEV)
+- Ajuste solicitado del PR #224: se sustituyen los botones de formato separados por **un único menú desplegable Descargar** para Lista de invitados, RSVP, Música y Mesas, manteniendo paleta olivo y CSS de módulo.
+- Cada menú ofrece **Excel (.xlsx), Imagen (.png) y PDF**. Excel usa el generador XLSX existente y los datos canónicos; Imagen se crea en Canvas local, conservando cuatro mesas por lámina; PDF abre el diálogo nativo de impresión para elegir «Guardar como PDF» (no se presenta como descarga PDF automática).
+- Cierre de menú al seleccionar opción o hacer clic fuera; `aria-expanded`, foco visible y adaptación móvil; sin cambios de Firebase ni producción.
+- Se actualizan pruebas E2E para la nueva estructura; quedan pendientes CI verde y QA visual/navegador.

@@ -3257,7 +3257,7 @@ test('MGD-EXPORT: pestañas Invitados RSVP Música ofrecen botones y datos canó
   const html=await fs.readFile(path.resolve('src/modules/invitados/index.html'),'utf8');
   const js=await fs.readFile(path.resolve('src/modules/invitados/index.js'),'utf8');
   const rsvp=await fs.readFile(path.resolve('src/modules/invitados/rsvp-controller.js'),'utf8');
-  for(const type of ['guests','guest-image','rsvp','music']) expect(html).toContain('data-guests-export="'+type+'"');
+  for(const type of ['guests','rsvp','music','tables']) expect(html).toContain('data-download-action="'+type+':xlsx"');
   expect(js).toContain('snapshot.canonical.guests');
   expect(js).toContain('ensureRsvpController().exportSnapshot()');
   expect(rsvp).toContain('music: musicEntries().map(');
@@ -3269,7 +3269,7 @@ test('MGD-EXPORT: Mesas exporta cuatro tarjetas por hoja desde el snapshot actua
   const code=await fs.readFile(path.resolve('src/modules/invitados/export-tables-image.js'),'utf8');
   const tables=await fs.readFile(path.resolve('src/modules/invitados/tables-controller.js'),'utf8');
   const html=await fs.readFile(path.resolve('src/modules/invitados/index.html'),'utf8');
-  expect(html).toContain('data-tables-export-image');
+  expect(html).toContain('data-download-action="tables:png"');
   expect(code).toContain('Math.ceil(tables.length/4)');
   expect(code).toContain('tables.slice(page*4,page*4+4)');
   expect(code).toContain('Number(g.seatNumber)');
@@ -3277,4 +3277,36 @@ test('MGD-EXPORT: Mesas exporta cuatro tarjetas por hoja desde el snapshot actua
   expect(code).toContain("a.download='migrandia-mesas-hoja-'");
   expect(tables).toContain('downloadTablesPages({eventName:context.name');
   expect(tables).toContain('tables:current.tables||[],guests:current.guests||[]');
+});
+
+test('MGD-EXPORT: botones de descarga siguen diseño Invitados sin CSS inline', async () => {
+  const fs=await import('node:fs/promises');
+  const html=await fs.readFile(path.resolve('src/modules/invitados/index.html'),'utf8');
+  const css=await fs.readFile(path.resolve('src/modules/invitados/invitados.css'),'utf8');
+  expect(html).not.toMatch(/<style>[\\s\\S]*?guests-export-actions/);
+  expect(html).not.toMatch(/data-download-menu[^>]*style=/);
+  for(const action of ['guests','rsvp','music','tables']){
+    for(const format of ['xlsx','png','pdf']){
+      expect(html).toContain('data-download-action="'+action+':'+format+'"');
+    }
+  }
+  expect((html.match(/data-download-menu/g)||[]).length).toBe(4);
+  expect(css).toContain('.guests-shell .guests-export-btn');
+  expect(css).toContain('var(--guests-export-accent)');
+  expect(css).toContain('.guests-export-btn:focus-visible');
+  expect(css).toContain('@media(prefers-reduced-motion:reduce)');
+});
+
+test('MGD-EXPORT: un solo botón por pestaña despliega los tres formatos', async () => {
+  const fs=await import('node:fs/promises');
+  const html=await fs.readFile(path.resolve('src/modules/invitados/index.html'),'utf8');
+  const js=await fs.readFile(path.resolve('src/modules/invitados/index.js'),'utf8');
+  expect((html.match(/data-download-menu/g)||[]).length).toBe(4);
+  expect((html.match(/data-download-toggle/g)||[]).length).toBe(4);
+  for(const scope of ['guests','rsvp','music','tables']){
+    for(const fmt of ['xlsx','png','pdf'])expect(html).toContain('data-download-action="'+scope+':'+fmt+'"');
+  }
+  expect(js).toContain('closeDownloadMenus(root)');
+  expect(js).toContain("format==='pdf'");
+  expect(js).toContain('renderTablesPages(options)');
 });
