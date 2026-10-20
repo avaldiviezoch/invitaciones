@@ -3123,3 +3123,19 @@ test('MGD-021: HTML offline escapa datos y no carga dependencias remotas', async
   expect(html).toContain('<meta name="robots" content="noindex,nofollow">');
   expect(() => renderOfflineInvitationDraft({...draft,colorPalette:'invalid'})).toThrow();
 });
+
+
+test('MGD-021: precarga de evento activo es opt-in, solo lectura y protege ediciones', async () => {
+  const fs = await import('node:fs/promises');
+  const code = await fs.readFile(path.resolve('src/modules/invitaciones/index.js'), 'utf8');
+  const html = await fs.readFile(path.resolve('src/modules/invitaciones/index.html'), 'utf8');
+  expect(html).toContain('data-invitations-use-active-event');
+  expect(code).toContain('await loadActiveWeddingContext()');
+  expect(code).toContain('dirtyDraft && !window.confirm');
+  expect(code).toContain('expectedEdit !== editorChangeVersion');
+  expect(code).toContain('expectedImport !== importVersion');
+  expect(code).toContain('auth.currentUser?.uid !== userUid');
+  expect(code).toContain("editorForm.elements.eventType.value = active.eventType || 'wedding'");
+  expect(code).toContain('updateDraftStatus(true)');
+  expect(code).not.toContain('selectActiveWedding(');
+});
