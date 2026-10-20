@@ -3186,3 +3186,28 @@ test('MGD-021: las tres plantillas mantienen identidad visual en HTML exportado'
     expect(html).not.toContain('<script');
   }
 });
+
+test('MGD-021: cambiar evento no descarta cambios colaborativos pendientes sin consentimiento', async () => {
+  const { createEventInvitationDraftSession } = await import('../src/services/event-invitation-draft-session.js');
+  const draft = { schema:'migrandia-invitation-draft-v1',eventType:'wedding',eventName:'Evento',
+    date:'',location:'',guestName:'',message:'Sin guardar',templateId:'classic-elegant',
+    fontStyle:'serif',colorPalette:'auto' };
+  const session = createEventInvitationDraftSession({
+    enabled:true, currentUid:()=> 'userA',
+    repository:{read:async()=>null,save:async()=>({revision:'1'})},
+    schedule:()=>1,cancel:()=>{}
+  });
+  session.select({eventId:'eventA',draftId:'draft1'});
+  expect(session.change(draft)).toBe(true);
+  expect(() => session.select({eventId:'eventB',draftId:'draft1'})).toThrow('cambios pendientes');
+  expect(session.status().pending).toBe(true);
+  expect(session.status().scope.eventId).toBe('eventA');
+  session.select({eventId:'eventB',draftId:'draft1'}, {discardPending:true});
+  expect(session.status().pending).toBe(false);
+  expect(session.status().scope.eventId).toBe('eventB');
+  session.change(draft);
+  session.select(null);
+  expect(session.status().scope).toBeNull();
+  expect(session.status().pending).toBe(false);
+  session.close();
+});
