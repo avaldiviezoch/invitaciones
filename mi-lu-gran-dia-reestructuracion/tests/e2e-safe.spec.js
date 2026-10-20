@@ -3263,3 +3263,18 @@ test('MGD-EXPORT: pestañas Invitados RSVP Música ofrecen botones y datos canó
   expect(rsvp).toContain('music: musicEntries().map(');
   expect(js).not.toContain('saveInvitadosSnapshot(activeContext, snapshot.canonical);\n  const guests');
 });
+
+test('MGD-EXPORT: Mesas exporta cuatro tarjetas por hoja desde el snapshot actual', async () => {
+  const fs=await import('node:fs/promises');
+  const code=await fs.readFile(path.resolve('src/modules/invitados/export-tables-image.js'),'utf8');
+  const tables=await fs.readFile(path.resolve('src/modules/invitados/tables-controller.js'),'utf8');
+  const html=await fs.readFile(path.resolve('src/modules/invitados/index.html'),'utf8');
+  expect(html).toContain('data-tables-export-image');
+  expect(code).toContain('Math.ceil(tables.length/4)');
+  expect(code).toContain('tables.slice(page*4,page*4+4)');
+  expect(code).toContain('Number(g.seatNumber)');
+  expect(code).toContain('String(g.tableId||');
+  expect(code).toContain("a.download='migrandia-mesas-hoja-'");
+  expect(tables).toContain('downloadTablesPages({eventName:context.name');
+  expect(tables).toContain('tables:current.tables||[],guests:current.guests||[]');
+});
