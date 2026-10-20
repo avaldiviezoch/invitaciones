@@ -64,3 +64,56 @@ test('no permitir mutar owner/evento, campos extra, revisión obsoleta ni payloa
   const result=await assertSucceeds(getDoc(ref));
   assert.equal(result.data().revision,'2');
 });
+
+
+test('colaboración: los editores mantienen autoría y los espectadores no escriben', async () => {
+  const original=doc(db('owner'),...draftPath('eventA'));
+  await assertSucceeds(setDoc(original,valid('owner')));
+  for (const uid of ['admin','editor']) {
+    const editable=doc(db(uid),...draftPath('eventA'));
+    const revision=uid==='admin'?'2':'3';
+    await assertSucceeds(updateDoc(editable,{'value.message':'Editado por '+uid,revision}));
+    const found=await assertSucceeds(getDoc(editable));
+    assert.equal(found.data().ownerUid,'owner');
+    assert.equal(found.data().revision,revision);
+  }
+  for (const uid of ['viewer','provider']) {
+    const blocked=doc(db(uid),...draftPath('eventA'));
+    await assertFails(setDoc(blocked,{...valid(uid),revision:'4'}));
+    await assertFails(deleteDoc(blocked));
+  }
+  await assertSucceeds(deleteDoc(doc(db('editor'),...draftPath('eventA'))));
+});
+
+test('aislamiento A → B → A: una cuenta ajena nunca ve el borrador de otro evento', async () => {
+  await assertSucceeds(setDoc(doc(db('owner'),...draftPath('eventA')),valid('owner')));
+  await assertFails(getDoc(doc(db('owner'),...draftPath('eventB'))));
+  await assertFails(getDoc(doc(db('other'),...draftPath('eventA'))));
+  await assertSucceeds(setDoc(doc(db('other'),...draftPath('eventB')),
+    {...valid('other'),eventId:'eventB'}));
+  await assertFails(getDoc(doc(db('owner'),...draftPath('eventB'))));
+  const restored=await assertSucceeds(getDoc(doc(db('owner'),...draftPath('eventA'))));
+  assert.equal(restored.data().value.eventName,'Boda');
+  assert.equal(restored.data().ownerUid,'owner');
+});
+
+test('creación: no se puede falsificar propietario, evento ni esquema', async () => {
+  const a=doc(db('editor'),...draftPath('eventA'));
+  await assertFails(setDoc(a,valid('owner')));
+  await assertFails(setDoc(a,{...valid('editor'),eventId:'eventB'}));
+  await assertFails(setDoc(a,{...valid('editor'),revision:'2'}));
+  await assertFails(setDoc(a,{...valid('editor'),value:{...valid().value,schema:'desconocido'}}));
+  await assertFails(setDoc(a,{...valid('editor'),value:{...valid().value,eventName:12}}));
+  await assertSucceeds(setDoc(a,valid('editor')));
+});
+
+test('actualización: revisión debe incrementarse solo de una en una', async () => {
+  const a=doc(db('owner'),...draftPath('eventA'));
+  await assertSucceeds(setDoc(a,valid()));
+  await assertFails(updateDoc(a,{revision:'1'}));
+  await assertFails(updateDoc(a,{revision:'3'}));
+  await assertFails(updateDoc(a,{revision:'abc'}));
+  await assertSucceeds(updateDoc(a,{revision:'2'}));
+  await assertFails(updateDoc(a,{revision:'2'}));
+  await assertSucceeds(updateDoc(a,{revision:'3'}));
+});
