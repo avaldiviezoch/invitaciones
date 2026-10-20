@@ -116,7 +116,9 @@ test('MGD-037: Checklist es siempre nombre genérico en título y acordeón', as
 test('E2E-01: carga pública y versión formal', async ({ page }) => {
   const errors = collectUnexpectedErrors(page);
   await page.goto('', { waitUntil: 'domcontentloaded' });
-  await expect(page.locator('#appVersion')).toHaveText('Migrandia 0.7.0');
+  // La versión se establece tras la carga de módulos remotos en GitHub Pages.
+  // Mantener la aserción real, dando margen a la latencia de la red pública.
+  await expect(page.locator('#appVersion')).toHaveText('Migrandia 0.7.0', { timeout: 20000 });
   await expect(page.locator('#googleLoginButton')).toBeAttached();
   expect(errors).toEqual([]);
 });
