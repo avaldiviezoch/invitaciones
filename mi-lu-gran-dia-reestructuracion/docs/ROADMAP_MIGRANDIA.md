@@ -4160,3 +4160,10 @@ Estado:
 - Se añadieron pruebas del fixture `tests/firestore-drafts/rules.test.mjs`: edición colaborativa owner/admin/editor sin cambiar autoría, viewer/provider sin escritura, cruce A→B→A, falsificación de `ownerUid`/evento/esquema y validación de revisiones sucesivas.
 - No se modificaron Rules del proyecto real ni la fixture, servicios de persistencia, Auth, Storage ni producción.
 - Las nuevas pruebas deben ejecutarse en CI del emulador aislado y validarse antes de fusionar. Los resultados del emulador no acreditan reglas efectivamente desplegadas.
+
+
+### 2026-10-20 — MGD-021: prueba integral con SDK y Firestore Emulator (DEV)
+- Se integraron en la suite aislada las implementaciones reales `createEventInvitationDraftPort` y `createEventInvitationDraftSession` con el SDK Firestore apuntando únicamente a `demo-mgd021-invitation-drafts` en emulador.
+- La nueva prueba ejercita creación por propietario, recuperación y edición por colaborador, conservación de `ownerUid`, lectura de viewer sin permiso para guardar, aislamiento A→B→A y rechazo de revisión obsoleta.
+- `enabled:true` solo se usa dentro de pruebas con un Firestore emulado; las implementaciones de la aplicación siguen desactivadas y desconectadas de la UI.
+- CI de la nueva suite pendiente. Ninguna escritura real ni cambios en reglas desplegadas, Auth, Storage o PROD.
