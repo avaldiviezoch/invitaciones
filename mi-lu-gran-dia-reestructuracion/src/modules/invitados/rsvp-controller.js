@@ -660,7 +660,13 @@ function createRsvpController(api) {
     return submit(event);
   }
 
+  function exportSnapshot() {
+    return { ready: !loading && Boolean(state.token), responses: state.responses.map((item) => ({...item})),
+      management: state.management.map((item) => ({...item})), music: musicEntries().map((item) => ({...item})) };
+  }
+
   return Object.freeze({
+    exportSnapshot,
     beginContext,
     load,
     render,
