@@ -4108,3 +4108,13 @@ Estado:
 - Archivos: `src/core/app/invitation-offline-preview.js`, `src/modules/invitaciones/index.js`, `index.html` y `tests/e2e-safe.spec.js`.
 - Se añadió prueba de invariantes de escape, ausencia de recursos remotos y contrato; CI y QA navegador pendientes.
 - No hay Firebase, Storage, Rules, Auth, escrituras ni cambios en PROD.
+
+
+### 2026-10-20 — MGD-021: precarga voluntaria del evento activo (DEV)
+- Nuevo botón «Usar datos del evento activo» dentro del editor de Invitaciones.
+- Utiliza la consulta existente `loadActiveWeddingContext()` para obtener solo tipo, nombre y fecha del evento; no crea otra fuente de verdad ni escribe en Firebase.
+- Pide confirmación antes de reemplazar campos si el editor tiene modificaciones sin exportar. Desestima lecturas tardías después de editar/importar/cerrar o cambiar de cuenta.
+- No altera lugar, mensaje, destinatario, paleta, plantilla ni tipografía; mantiene edición y exportación JSON/HTML manual.
+- Se agregó prueba automatizada de invariantes; CI y QA funcional real todavía pendientes.
+- Archivos: `src/modules/invitaciones/index.js`, `index.html`, `tests/e2e-safe.spec.js` y documentación.
+- DEV únicamente, sin modificación de Rules, Auth, Storage, persistencia ni PROD.
