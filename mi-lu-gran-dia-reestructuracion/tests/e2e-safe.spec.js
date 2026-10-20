@@ -3107,7 +3107,9 @@ test('MGD-021: importación local protege cambios y descarta lectura asíncrona 
   expect(source).toContain('currentImport !== importVersion');
   expect(source).toContain('currentEdit !== editorChangeVersion');
   expect(source).toContain('signal.aborted || editor.hidden');
-  expect(source).toContain('editorChangeVersion++; renderEditorPreview()');
+  expect(source).toContain('editorChangeVersion++;');
+  expect(source).toContain('renderEditorPreview();');
+  expect(source).toContain('collaboration.edit();');
   expect(source).toContain('Importación cancelada. Se conservaron tus cambios.');
 });
 
@@ -3326,4 +3328,24 @@ test('MGD-EXPORT: marca discreta y colores unificados en los formatos', async ()
   const {buildXlsx}=await import('../src/modules/invitados/export-xlsx.js');
   const bytes=new Uint8Array(await buildXlsx({title:'Invitados',columns:['Nombre'],rows:[['Ana']]}).arrayBuffer());
   expect(new TextDecoder().decode(bytes)).toContain('migrandia.com');
+});
+
+test('MGD-021: puente conectado al editor no lee ni guarda datos con bandera apagada', async () => {
+  const { createInvitationCollaborationBridge } = await import('../src/modules/invitaciones/collaboration-bridge.js');
+  const bridge = createInvitationCollaborationBridge({
+    session: { select:()=>{throw new Error('acceso prohibido');}, change:()=>{throw new Error('escritura prohibida');},
+      recover:()=>{throw new Error('lectura prohibida');}, flush:()=>{throw new Error('escritura prohibida');},
+      close:()=>{throw new Error('cierre no autorizado');} }
+  });
+  expect(bridge.enabled).toBe(false);
+  expect(bridge.select({eventId:'eventA',draftId:'draft1'})).toBe(false);
+  expect(bridge.edit()).toBe(false);
+  expect(await bridge.recover()).toBeNull();
+  expect(await bridge.flush()).toBe(false);
+  bridge.close();
+  const fs = await import('node:fs/promises');
+  const ui = await fs.readFile(path.resolve('src/modules/invitaciones/index.js'),'utf8');
+  expect(ui).toContain('createInvitationCollaborationBridge()');
+  expect(ui).toContain('collaboration.edit()');
+  expect(ui).toContain('collaboration.close()');
 });
