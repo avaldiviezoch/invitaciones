@@ -1,3 +1,5 @@
+import { auth } from '../../services/firebase-client.js';
+import { loadActiveWeddingContext } from '../../services/wedding-context.js';
 import { renderOfflineInvitationDraft } from '../../core/app/invitation-offline-preview.js';
 import { normalizeDraftInput, DRAFT_FIELDS } from '../../core/app/invitation-draft-contract.js';
 import { getInvitationCopy } from '../../core/app/invitation-copy.js';
@@ -225,6 +227,44 @@ export async function mountInvitaciones() {
       status.textContent = 'Borrador recuperado en el editor local. Aún no se ha guardado en tu cuenta.';
     } catch {
       status.textContent = 'No se pudo abrir el borrador. Verifica que sea un JSON exportado por Migrandia.';
+    }
+  }, { signal });
+  root.querySelector('[data-invitations-use-active-event]').addEventListener('click', async (event) => {
+    const button = event.currentTarget;
+    const status = root.querySelector('[data-invitations-active-event-status]');
+    const userUid = auth.currentUser?.uid;
+    if (!userUid) {
+      status.textContent = 'Inicia sesión para utilizar los datos de tu evento.';
+      return;
+    }
+    if (dirtyDraft && !window.confirm('Esto reemplazará el nombre, fecha y tipo de evento actuales. ¿Deseas continuar?')) {
+      status.textContent = 'Se conservaron los datos que estabas editando.';
+      return;
+    }
+    const expectedImport = ++importVersion;
+    const expectedEdit = editorChangeVersion;
+    button.disabled = true;
+    status.textContent = 'Consultando el evento activo…';
+    try {
+      const active = await loadActiveWeddingContext();
+      if (signal.aborted || editor.hidden || expectedImport !== importVersion
+        || expectedEdit !== editorChangeVersion || auth.currentUser?.uid !== userUid) return;
+      if (!active?.id) {
+        status.textContent = 'No se encontró un evento activo para esta cuenta.';
+        return;
+      }
+      // Solo copia campos que ya existen en el contexto autorizado; jamás escribe en Firebase.
+      editorForm.elements.eventType.value = active.eventType || 'wedding';
+      editorForm.elements.eventName.value = String(active.name || '').slice(0, 100);
+      editorForm.elements.date.value = /^\\d{4}-\\d{2}-\\d{2}$/.test(active.date || '') ? active.date : '';
+      editorChangeVersion++;
+      renderEditorPreview();
+      updateDraftStatus(true);
+      status.textContent = 'Datos del evento activo aplicados. Puedes seguir personalizando el borrador.';
+    } catch {
+      if (!signal.aborted) status.textContent = 'No se pudieron consultar los datos del evento activo.';
+    } finally {
+      if (!signal.aborted && button.isConnected) button.disabled = false;
     }
   }, { signal });
   const markChanged = () => { editorChangeVersion++; renderEditorPreview(); updateDraftStatus(true); };
