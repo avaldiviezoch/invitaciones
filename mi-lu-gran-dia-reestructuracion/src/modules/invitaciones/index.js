@@ -181,12 +181,12 @@ export async function mountInvitaciones() {
     const status = root.querySelector('[data-invitations-import-status]');
     const file = input.files?.[0];
     if (!file) return;
+    const currentImport = ++importVersion;
     input.value = '';
     if (file.size > 32 * 1024) {
       status.textContent = 'El archivo supera el límite de 32 KB.';
       return;
     }
-    const currentImport = ++importVersion;
     const currentEdit = editorChangeVersion;
     if (dirtyDraft && !window.confirm('Tienes cambios sin descargar. ¿Quieres reemplazarlos con el archivo importado?')) {
       status.textContent = 'Importación cancelada. Se conservaron tus cambios.';
