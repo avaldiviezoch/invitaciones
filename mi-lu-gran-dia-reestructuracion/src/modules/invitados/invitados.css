@@ -866,3 +866,53 @@
   .guest-music-request-song strong{font-size:15px}
 }
 
+
+
+/* Acciones de exportación · reutilizables en Invitados / RSVP / Música / Mesas.
+   Tokens del módulo, sin estilos en el HTML ni selectores por atributo. */
+.guests-shell{
+  --guests-export-accent:#697858;
+  --guests-export-ink:#45523c;
+  --guests-export-surface:#f3f6ef;
+  --guests-export-border:#d7dfce;
+}
+.guests-export-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:8px;margin:14px 0}
+.guests-shell .guests-export-btn{
+  min-height:40px;display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:8px 12px;border:1px solid var(--guests-export-border);
+  border-radius:11px;background:var(--guests-export-accent);color:#fff;
+  font:700 11px/1.2 var(--event-body-font,Arial,sans-serif);
+  letter-spacing:.005em;white-space:nowrap;cursor:pointer;
+  box-shadow:0 3px 10px rgba(63,75,51,.09);transition:background .16s ease,border-color .16s ease,transform .16s ease,box-shadow .16s ease
+}
+.guests-shell .guests-export-btn:hover{background:#536548;border-color:#536548;transform:translateY(-1px);box-shadow:0 5px 13px rgba(63,75,51,.14)}
+.guests-shell .guests-export-btn:active{transform:translateY(0);box-shadow:0 1px 4px rgba(63,75,51,.10)}
+.guests-shell .guests-export-btn--soft{background:#fff;color:var(--guests-export-ink);box-shadow:none}
+.guests-shell .guests-export-btn--soft:hover{background:var(--guests-export-surface);border-color:#a6b599;color:#36462e;box-shadow:0 3px 10px rgba(63,75,51,.07)}
+.guests-shell .guests-export-btn:focus-visible{outline:3px solid #a1b390;outline-offset:3px}
+.guests-shell .guests-export-icon{
+  width:24px;height:24px;display:grid;place-items:center;
+  border-radius:7px;background:rgba(255,255,255,.17);font:700 17px/1 Georgia,serif
+}
+.guests-shell .guests-export-btn--soft .guests-export-icon{background:var(--guests-export-surface);color:var(--guests-export-ink)}
+.guests-shell .guests-export-format{margin-left:2px;padding:4px 6px;border-radius:5px;background:rgba(255,255,255,.15);font:800 8px/1.2 var(--event-body-font,Arial,sans-serif);letter-spacing:.04em}
+.guests-shell .guests-export-btn--soft .guests-export-format{background:#edf2e9;color:#687961}
+.guest-music-library-toolbar .guests-export-btn{flex-shrink:0}
+.tables-head-actions .guests-export-btn{flex-shrink:0}
+@media(max-width:900px){
+  .guest-music-library-toolbar{flex-wrap:wrap}
+  .guest-music-library-toolbar .guests-export-btn{order:2}
+  .guest-music-library-toolbar .guest-music-search{order:3}
+  .tables-head-actions{flex-wrap:wrap;justify-content:flex-end}
+}
+@media(max-width:600px){
+  .guests-export-actions{justify-content:stretch;gap:8px}
+  .guests-export-actions .guests-export-btn{flex:1 1 auto}
+  .rsvp-head .guests-export-actions{width:100%;justify-content:flex-start}
+  .guest-music-library-toolbar .guests-export-btn{width:100%}
+  .tables-head-actions .guests-export-btn{width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+  .guests-shell .guests-export-btn{transition:none}
+  .guests-shell .guests-export-btn:hover{transform:none}
+}
