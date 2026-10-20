@@ -3310,3 +3310,20 @@ test('MGD-EXPORT: un solo botón por pestaña despliega los tres formatos', asyn
   expect(js).toContain("format==='pdf'");
   expect(js).toContain('renderTablesPages(options)');
 });
+
+test('MGD-EXPORT: marca discreta y colores unificados en los formatos', async () => {
+  const fs=await import('node:fs/promises');
+  const dir=path.resolve('src/modules/invitados');
+  const css=await fs.readFile(path.join(dir,'invitados.css'),'utf8');
+  expect(css).toContain('--guests-export-accent:#7d8866');
+  expect(css).toContain('text-overflow:ellipsis');
+  expect(css).toContain('white-space:nowrap');
+  for(const file of ['export-guest-image.js','export-tables-image.js','export-formats.js']){
+    const js=await fs.readFile(path.join(dir,file),'utf8');
+    expect(js).toContain('migrandia.com');
+    expect(js).not.toContain("fillText('MIGRANDIA");
+  }
+  const {buildXlsx}=await import('../src/modules/invitados/export-xlsx.js');
+  const bytes=new Uint8Array(await buildXlsx({title:'Invitados',columns:['Nombre'],rows:[['Ana']]}).arrayBuffer());
+  expect(new TextDecoder().decode(bytes)).toContain('migrandia.com');
+});

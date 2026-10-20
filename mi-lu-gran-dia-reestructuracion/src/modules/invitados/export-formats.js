@@ -6,7 +6,7 @@ function renderReportPages({title,columns,rows,eventName='Evento'}){
     const cv=document.createElement('canvas');cv.width=1400;cv.height=2050;
     const c=cv.getContext('2d');c.fillStyle='#F9FAF8';c.fillRect(0,0,1400,2050);
     c.fillStyle='#465D46';c.fillRect(0,0,1400,215);c.fillStyle='#E5EEDF';c.font='bold 24px Arial';
-    c.fillText('MIGRANDIA · REPORTE',65,67);c.fillStyle='#fff';c.font='bold 44px Georgia';
+    c.fillText('REPORTE DEL EVENTO',65,67);c.fillStyle='#fff';c.font='bold 44px Georgia';
     c.fillText(safe(title),65,135);c.font='24px Arial';c.fillText(safe(eventName),65,182);
     const widths=columns.map((_,i)=>i===0?470:(1250-470)/(columns.length-1||1));
     const x=[65];for(let i=1;i<columns.length;i++)x.push(x[i-1]+widths[i-1]);
@@ -18,7 +18,7 @@ function renderReportPages({title,columns,rows,eventName='Evento'}){
       columns.forEach((_,i)=>c.fillText(safe(row[i]).slice(0,i===0?31:17),x[i],yy+39));
     });
     c.fillStyle='#718075';c.font='21px Arial';
-    c.fillText('Documento privado · Organización del evento',65,1988);
+    c.fillText('migrandia.com · Organización del evento',65,1988);
     c.fillText('Página '+(p+1)+' / '+Math.max(1,Math.ceil(rows.length/perPage)),1150,1988);
     pages.push(cv);
   }

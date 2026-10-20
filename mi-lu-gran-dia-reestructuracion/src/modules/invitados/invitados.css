@@ -871,7 +871,7 @@
 /* Acciones de exportación · reutilizables en Invitados / RSVP / Música / Mesas.
    Tokens del módulo, sin estilos en el HTML ni selectores por atributo. */
 .guests-shell{
-  --guests-export-accent:#697858;
+  --guests-export-accent:#7d8866;
   --guests-export-ink:#45523c;
   --guests-export-surface:#f3f6ef;
   --guests-export-border:#d7dfce;
@@ -885,7 +885,7 @@
   letter-spacing:.005em;white-space:nowrap;cursor:pointer;
   box-shadow:0 3px 10px rgba(63,75,51,.09);transition:background .16s ease,border-color .16s ease,transform .16s ease,box-shadow .16s ease
 }
-.guests-shell .guests-export-btn:hover{background:#536548;border-color:#536548;transform:translateY(-1px);box-shadow:0 5px 13px rgba(63,75,51,.14)}
+.guests-shell .guests-export-btn:hover{background:#7d8866;border-color:#7d8866;transform:translateY(-1px);box-shadow:0 5px 13px rgba(63,75,51,.14)}
 .guests-shell .guests-export-btn:active{transform:translateY(0);box-shadow:0 1px 4px rgba(63,75,51,.10)}
 .guests-shell .guests-export-btn--soft{background:#fff;color:var(--guests-export-ink);box-shadow:none}
 .guests-shell .guests-export-btn--soft:hover{background:var(--guests-export-surface);border-color:#a6b599;color:#36462e;box-shadow:0 3px 10px rgba(63,75,51,.07)}
@@ -941,4 +941,34 @@
 @media(max-width:600px){
  .guests-download-menu{max-width:100%}
  .guests-download-options{min-width:204px}
+}
+
+/* Igualdad de color y contención: las acciones comparten el verde del módulo. */
+.guests-shell .guests-export-btn,
+.guests-shell .guests-export-btn:hover,
+.tables-head .tables-display-toggle button.is-active,
+.tables-head .tables-add-button{background:#7d8866;border-color:#7d8866;color:#fff}
+.guests-shell .guests-export-btn:hover{filter:brightness(1.04)}
+.guests-shell .guests-download-options button{background:#fff;color:#4a5542}
+.guests-shell .guests-download-options button:hover,
+.guests-shell .guests-download-options button:focus-visible{background:#eff3ea;color:#4a5542}
+.guests-shell [data-guests-pane="list"],
+.guests-shell .guests-toolbar,
+.guests-shell .guests-list-head,
+.guests-shell .guests-list,
+.guests-shell .guests-export-actions{min-width:0;max-width:100%;box-sizing:border-box}
+.guests-shell .guests-export-actions{width:min(94%,1580px);margin:12px auto;justify-content:flex-end}
+.guests-shell .guest-card{min-width:0;max-width:100%}
+.guests-shell .guest-main,
+.guests-shell .guest-copy,
+.guests-shell .guest-name-row,
+.guests-shell .guest-name-row h3{min-width:0;max-width:100%}
+.guests-shell .guest-card .guest-name-row h3{
+  display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+@media(max-width:760px){
+ .guests-shell [data-guests-pane="list"]{min-width:0;width:100%;overflow-x:clip}
+ .guests-shell .guests-list,.guests-shell .guests-list-head{width:calc(100% - 24px);max-width:calc(100% - 24px)}
+ .guests-shell .guests-export-actions{width:calc(100% - 24px);max-width:calc(100% - 24px)}
+ .guests-shell .guest-card{width:100%;max-width:100%}
 }

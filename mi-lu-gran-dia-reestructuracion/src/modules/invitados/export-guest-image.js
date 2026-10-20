@@ -14,7 +14,7 @@ function createGuestImagePages({eventName='Evento',guests=[],tables=[],statusLab
     const ctx=canvas.getContext('2d');
     ctx.fillStyle=colors.paper;ctx.fillRect(0,0,width,canvas.height);
     ctx.fillStyle=colors.navy;ctx.fillRect(0,0,width,210);
-    ctx.fillStyle='#BDE7D8';ctx.font='bold 24px Arial';ctx.fillText('MIGRANDIA  /  LISTA DE INVITADOS',70,78);
+    ctx.fillStyle='#BDE7D8';ctx.font='bold 24px Arial';ctx.fillText('LISTA DE INVITADOS',70,78);
     ctx.fillStyle='white';ctx.font='bold 48px Georgia';ctx.fillText(label(eventName,45),70,143);
     ctx.font='24px Arial';ctx.fillText('Total '+guests.length+' invitados',70,182);
     ctx.fillStyle=colors.muted;ctx.font='22px Arial';ctx.fillText('N.°',70,305);
@@ -31,7 +31,7 @@ function createGuestImagePages({eventName='Evento',guests=[],tables=[],statusLab
       ctx.fillText(label(assigned.get(String(guest.tableId))||'Sin mesa',18),1090,y+44);
     });
     ctx.fillStyle=colors.line;ctx.fillRect(65,canvas.height-95,width-130,2);
-    ctx.fillStyle=colors.muted;ctx.font='20px Arial';ctx.fillText('Documento privado · Solo para organización del evento',70,canvas.height-55);
+    ctx.fillStyle=colors.muted;ctx.font='20px Arial';ctx.fillText('migrandia.com · Documento privado',70,canvas.height-55);
     ctx.fillText('Página '+(page+1)+' de '+total,1160,canvas.height-55);
     pages.push(canvas);
   }
