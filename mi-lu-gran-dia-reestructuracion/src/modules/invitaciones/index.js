@@ -1,3 +1,4 @@
+import { createInvitationCollaborationBridge } from './collaboration-bridge.js';
 import { auth } from '../../services/firebase-client.js';
 import { loadActiveWeddingContext } from '../../services/wedding-context.js';
 import { renderOfflineInvitationDraft } from '../../core/app/invitation-offline-preview.js';
@@ -93,6 +94,8 @@ export async function mountInvitaciones() {
   const editorForm = root.querySelector('[data-invitations-editor-form]');
   const editorPreview = root.querySelector('[data-invitations-editor-preview]');
   const draftStatus = root.querySelector('[data-invitations-draft-status]');
+  // Puente preparado sin sesiones reales ni lecturas o escrituras.
+  const collaboration = createInvitationCollaborationBridge();
   let dirtyDraft = false;
   let editorChangeVersion = 0;
   let importVersion = 0;
@@ -286,7 +289,7 @@ export async function mountInvitaciones() {
       if (!signal.aborted && button.isConnected) button.disabled = false;
     }
   }, { signal });
-  const markChanged = () => { editorChangeVersion++; renderEditorPreview(); updateDraftStatus(true); };
+  const markChanged = () => { editorChangeVersion++; collaboration.edit(); renderEditorPreview(); updateDraftStatus(true); };
   editorForm.addEventListener('input', markChanged, { signal });
   editorForm.addEventListener('change', markChanged, { signal });
   const openLocalEditor = () => {
@@ -449,6 +452,7 @@ export async function mountInvitaciones() {
 
   activeInvitationsCleanup = () => {
     importVersion++;
+    collaboration.close();
     controller.abort();
     unsubscribe();
     stopFrame(frame);
