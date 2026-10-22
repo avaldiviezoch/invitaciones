@@ -3314,3 +3314,9 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - PR #226 se confirma fusionado. Nueva matriz de Rules de laboratorio: revocar `editor→viewer→inactive` debe cortar escrituras y luego lecturas, sin alterar el documento persistido.
 - Un mismo usuario puede ser editor en evento A y viewer en B, sin heredar permisos de edición entre eventos; se verifica rechazo de accesos indebidos.
 - Pruebas ejecutables únicamente en proyecto de emulador `demo-mgd021-invitation-drafts`; CI pendiente. No se modificaron Rules publicadas, Firebase real, Auth, Storage, UI ni PROD.
+
+
+### 2026-10-22 — Inicio de cierre acelerado por bloques
+- Se adopta ejecución por entregas funcionales grandes, evitando PR por pequeños ajustes; el roadmap incorpora una matriz operativa de cierre de A–E sin inventar porcentajes ni declarar como completados los MGD pendientes.
+- Consolidación de evidencia: DEV #221, #226, #227 fusionados; exportaciones #222–#225 y PROD #566 integrados y descarga confirmada por usuario.
+- Próxima entrega funcional: Invitaciones MGD-021–024 con gates de permisos, QA y activación segura. No se autoriza todavía escritura a Firebase real ni PROD para ese bloque.
