@@ -3320,3 +3320,10 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - Se adopta ejecución por entregas funcionales grandes, evitando PR por pequeños ajustes; el roadmap incorpora una matriz operativa de cierre de A–E sin inventar porcentajes ni declarar como completados los MGD pendientes.
 - Consolidación de evidencia: DEV #221, #226, #227 fusionados; exportaciones #222–#225 y PROD #566 integrados y descarga confirmada por usuario.
 - Próxima entrega funcional: Invitaciones MGD-021–024 con gates de permisos, QA y activación segura. No se autoriza todavía escritura a Firebase real ni PROD para ese bloque.
+
+
+### 2026-10-22 — Entrega funcional Invitaciones: respaldo offline completo (Bloque C)
+- El editor local incorpora un botón único «Descargar paquete completo (.zip)» con `borrador-editable.json` y `vista-previa.html` autónoma; se conservan las descargas individuales.
+- El archivo ZIP se genera exclusivamente en el navegador, sin CDN, nuevas consultas o escrituras. Se incluye prueba de contenido, formato y cableado del botón.
+- El ZIP permite conservar una copia de trabajo y volver a importarla mediante la función JSON existente. No equivale a guardado colaborativo ni publicación; Firebase real y PROD siguen intactos.
+- Esta entrega se integra en la misma rama de cierre por bloques. CI y QA funcional del navegador por validar.
