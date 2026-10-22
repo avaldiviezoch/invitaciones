@@ -1,3 +1,4 @@
+import { makeInvitationPackage } from './offline-package.js';
 import { createInvitationCollaborationBridge } from './collaboration-bridge.js';
 import { auth } from '../../services/firebase-client.js';
 import { loadActiveWeddingContext } from '../../services/wedding-context.js';
@@ -181,6 +182,25 @@ export async function mountInvitaciones() {
     link.click();
     window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     updateDraftStatus(false);
+  }, { signal });
+  root.querySelector('[data-invitations-export-package]').addEventListener('click', () => {
+    try {
+      const fields=new FormData(editorForm);
+      const draft=normalizeDraftInput(Object.fromEntries([
+        ['schema','migrandia-invitation-draft-v1'],
+        ...DRAFT_FIELDS.map(field=>[field,String(fields.get(field)||'')])
+      ]));
+      const html=renderOfflineInvitationDraft(draft);
+      const blob=makeInvitationPackage({draft,html});
+      const url=URL.createObjectURL(blob),link=document.createElement('a');
+      link.href=url;link.download='migrandia-paquete-invitacion.zip';link.click();
+      window.setTimeout(()=>URL.revokeObjectURL(url),3000);
+      // El ZIP incluye JSON editable: permite recuperar el borrador sin guardar en Firebase.
+      updateDraftStatus(false);
+      draftStatus.textContent='Paquete descargado: conserva el ZIP para recuperar el JSON cuando lo necesites.';
+    } catch {
+      draftStatus.textContent='No se pudo crear el paquete. Revisa los campos de tu invitación.';
+    }
   }, { signal });
   root.querySelector('[data-invitations-export-html]').addEventListener('click', () => {
     try {
