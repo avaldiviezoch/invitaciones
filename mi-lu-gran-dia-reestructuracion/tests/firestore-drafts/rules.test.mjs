@@ -175,3 +175,42 @@ test('integración real emulador: puerto aísla A → B → A y rechaza revisió
   assert.equal(restored.revision,'1');
   assert.equal(restored.value.eventName,'Boda');
 });
+
+
+test('revocación de permisos: editor pasa a viewer y luego a inactivo sin conservar escritura ni lectura', async () => {
+  const path=draftPath('eventA');
+  const ref=doc(db('editor'),...path);
+  await assertSucceeds(setDoc(doc(db('owner'),...path), valid('owner')));
+  await assertSucceeds(updateDoc(ref, {'value.message':'Editado con permiso',revision:'2'}));
+  await env.withSecurityRulesDisabled(async ctx => {
+    await updateDoc(doc(ctx.firestore(),'weddings','eventA','members','editor'),{role:'viewer'});
+  });
+  const readable=await assertSucceeds(getDoc(ref));
+  assert.equal(readable.data().revision,'2');
+  await assertFails(updateDoc(ref, {'value.message':'No autorizado',revision:'3'}));
+  await assertFails(deleteDoc(ref));
+  await env.withSecurityRulesDisabled(async ctx => {
+    await updateDoc(doc(ctx.firestore(),'weddings','eventA','members','editor'),{status:'inactive'});
+  });
+  await assertFails(getDoc(ref));
+  await assertFails(updateDoc(ref, {'value.message':'Sin sesión activa',revision:'3'}));
+  await assertFails(getDocs(collection(db('editor'),'weddings','eventA','invitationDrafts')));
+  const persisted=await assertSucceeds(getDoc(doc(db('owner'),...path)));
+  assert.equal(persisted.data().revision,'2');
+  assert.equal(persisted.data().value.message,'Editado con permiso');
+});
+
+test('roles por evento: pertenecer al evento A no concede permisos sobre B', async () => {
+  const docA=doc(db('editor'),...draftPath('eventA'));
+  const docB=doc(db('editor'),...draftPath('eventB'));
+  await assertSucceeds(setDoc(docA,valid('editor')));
+  await assertFails(getDoc(docB));
+  await assertFails(setDoc(docB,{...valid('editor'),eventId:'eventB'}));
+  await env.withSecurityRulesDisabled(async ctx => {
+    await setDoc(doc(ctx.firestore(),'weddings','eventB','members','editor'),{role:'viewer',status:'active'});
+  });
+  await assertSucceeds(setDoc(doc(db('other'),...draftPath('eventB')),{...valid('other'),eventId:'eventB'}));
+  await assertSucceeds(getDoc(docB));
+  await assertFails(updateDoc(docB,{'value.message':'Sin permiso para editar B',revision:'2'}));
+  await assertSucceeds(updateDoc(docA,{'value.message':'Con permiso en A',revision:'2'}));
+});

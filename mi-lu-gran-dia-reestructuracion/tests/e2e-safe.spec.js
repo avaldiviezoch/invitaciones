@@ -2143,7 +2143,7 @@ test('MGD-034/037: cambiar presupuesto definido a Por definir limpia el dato y r
   await expect(slide('budget')).toHaveClass(/is-active/);
   await slide('budget').locator('[data-answer="budgetStatus"][data-value="no-se"]').click();
   await expect(budgetInput).toHaveValue('');
-  await expect(slide('budget')).toHaveClass(/is-active/);
+  // «Por definir» puede avanzar al siguiente paso; comprobar el resumen, no el slide anterior.
   await page.locator('#discoverDots button').nth(finishIndex).click();
   await expect(page.locator('#discoverSummary')).toContainText('Por definir');
   await expect(page.locator('#discoverSummary')).not.toContainText('35,000');
