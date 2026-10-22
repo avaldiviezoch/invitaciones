@@ -3308,3 +3308,9 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 - PR posterior al #221 (fusionado y verde). Se agregó una prueba sin Firebase para comprobar rechazo de recuperación tardía tras edición del formulario, cambio de evento A→B y cierre del editor.
 - Se verifica que `flush` y `edit` quedan bloqueados tras `close`, que `session.close` se invoca una sola vez y que un resultado obsoleto no reemplaza datos locales.
 - Solo tests y documentación; puente sigue desactivado en la aplicación, sin Rules reales, Auth, Storage ni despliegue PROD. CI pendiente.
+
+
+### 2026-10-22 — MGD-021: permisos dinámicos por evento (emulador aislado)
+- PR #226 se confirma fusionado. Nueva matriz de Rules de laboratorio: revocar `editor→viewer→inactive` debe cortar escrituras y luego lecturas, sin alterar el documento persistido.
+- Un mismo usuario puede ser editor en evento A y viewer en B, sin heredar permisos de edición entre eventos; se verifica rechazo de accesos indebidos.
+- Pruebas ejecutables únicamente en proyecto de emulador `demo-mgd021-invitation-drafts`; CI pendiente. No se modificaron Rules publicadas, Firebase real, Auth, Storage, UI ni PROD.
