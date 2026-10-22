@@ -3302,3 +3302,9 @@ Si una discrepancia nueva aparece después de las protecciones del 30/09/2026, t
 ### 2026-10-20 — MGD-021: reconciliación segura de PR #221 (DEV)
 - Puente del editor preservado con `enabled=false`, sin sesión ni acceso real a Firebase; se integran únicamente los puntos de edición y cleanup.
 - Rama reconciliada con los cambios recientes de main, conservando pruebas y exportaciones actuales. Pruebas CI pendientes de confirmación; falta QA autenticado de permisos y Rules antes de una activación.
+
+
+### 2026-10-22 — MGD-021: QA de ciclo de vida del puente colaborativo (DEV)
+- PR posterior al #221 (fusionado y verde). Se agregó una prueba sin Firebase para comprobar rechazo de recuperación tardía tras edición del formulario, cambio de evento A→B y cierre del editor.
+- Se verifica que `flush` y `edit` quedan bloqueados tras `close`, que `session.close` se invoca una sola vez y que un resultado obsoleto no reemplaza datos locales.
+- Solo tests y documentación; puente sigue desactivado en la aplicación, sin Rules reales, Auth, Storage ni despliegue PROD. CI pendiente.
