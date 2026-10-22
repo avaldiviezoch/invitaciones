@@ -3355,7 +3355,8 @@ test('MGD-021: puente aislado rechaza recuperación obsoleta por edición y cier
   const { createInvitationCollaborationBridge } = await import('../src/modules/invitaciones/collaboration-bridge.js');
   const previousFormData=globalThis.FormData;
   const fields=['eventType','eventName','date','location','guestName','message','templateId','fontStyle','colorPalette'];
-  const elements=Object.fromEntries(fields.map(k=>[k,{value:k==='eventType'?'wedding':'Inicial'}]));
+  const defaults={eventType:'wedding',eventName:'Inicial',date:'',location:'',guestName:'',message:'Inicial',templateId:'classic-elegant',fontStyle:'serif',colorPalette:'auto'};
+  const elements=Object.fromEntries(fields.map(k=>[k,{value:defaults[k]}]));
   const form={elements};
   globalThis.FormData=class {
     constructor(value){this.form=value;}
