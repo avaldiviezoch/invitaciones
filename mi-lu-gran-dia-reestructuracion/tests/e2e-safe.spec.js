@@ -3349,3 +3349,50 @@ test('MGD-021: puente conectado al editor no lee ni guarda datos con bandera apa
   expect(ui).toContain('collaboration.edit()');
   expect(ui).toContain('collaboration.close()');
 });
+
+
+test('MGD-021: puente aislado rechaza recuperación obsoleta por edición y cierre', async () => {
+  const { createInvitationCollaborationBridge } = await import('../src/modules/invitaciones/collaboration-bridge.js');
+  const previousFormData=globalThis.FormData;
+  const fields=['eventType','eventName','date','location','guestName','message','templateId','fontStyle','colorPalette'];
+  const defaults={eventType:'wedding',eventName:'Inicial',date:'',location:'',guestName:'',message:'Inicial',templateId:'classic-elegant',fontStyle:'serif',colorPalette:'auto'};
+  const elements=Object.fromEntries(fields.map(k=>[k,{value:defaults[k]}]));
+  const form={elements};
+  globalThis.FormData=class {
+    constructor(value){this.form=value;}
+    get(name){return this.form.elements[name]?.value??'';}
+  };
+  try {
+    let finishRecover, calls=0, apply=0, closes=0;
+    const session={
+      select:()=>{},
+      change:()=>{calls++;return true;},
+      recover:()=>new Promise(resolve=>{finishRecover=resolve;}),
+      flush:async()=>true,
+      close:()=>{closes++;}
+    };
+    const bridge=createInvitationCollaborationBridge({enabled:true,session,form,onRecovered:()=>{apply++;}});
+    bridge.select({eventId:'A',draftId:'uno'});
+    const first=bridge.recover();
+    elements.message.value='Edición posterior a la consulta';
+    finishRecover({message:'Remoto',eventType:'wedding'});
+    expect(await first).toBeNull();
+    expect(elements.message.value).toBe('Edición posterior a la consulta');
+    expect(apply).toBe(0);
+    expect(bridge.edit()).toBe(true);
+    expect(calls).toBe(1);
+    const second=bridge.recover();
+    bridge.select({eventId:'B',draftId:'dos'});
+    finishRecover({message:'Borrador de A',eventType:'wedding'});
+    expect(await second).toBeNull();
+    expect(elements.message.value).toBe('Edición posterior a la consulta');
+    const third=bridge.recover();
+    bridge.close();
+    finishRecover({message:'Llegó tarde',eventType:'wedding'});
+    expect(await third).toBeNull();
+    expect(await bridge.flush()).toBe(false);
+    expect(bridge.edit()).toBe(false);
+    expect(closes).toBe(1);
+    expect(apply).toBe(0);
+  } finally {globalThis.FormData=previousFormData;}
+});
