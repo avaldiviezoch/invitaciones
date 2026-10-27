@@ -3465,6 +3465,37 @@ el valor estimado sirve para planificación y cálculos como presupuesto por inv
 
 ---
 
+## MGD-051 — Agentes de IA para desarrollo y QA de Migrandia
+Estado: ⬜ PENDIENTE
+Prioridad: BAJA — FUTURO (después de los MGD funcionales y de estabilización en curso)
+
+Objetivo:
+evaluar e implementar una ejecución asistida por agentes de IA que permita completar tareas de desarrollo y control de calidad en bloques más grandes, con menos intervención manual, reutilizando la documentación y las reglas ya existentes.
+
+Alcance propuesto:
+- auditar los `AGENTS.md`, skills y flujos de CI actuales antes de incorporar nuevas herramientas;
+- evaluar Codex, GitHub Copilot u otra orquestación compatible con GitHub y definir costos, permisos y límites;
+- comenzar con un agente desarrollador integral sobre DEV y un revisor QA independiente, sin multiplicar agentes innecesariamente;
+- consumir el roadmap, la arquitectura, las reglas no negociables y la bitácora como fuentes del contexto de trabajo;
+- trabajar mediante ramas y pull requests pequeños o bloques funcionales verificables, con pruebas automatizadas y revisión;
+- registrar resultados, regresiones, bloqueadores y documentación al cerrar cada tarea;
+- considerar automatización por eventos/planificación solo después de demostrar fiabilidad y control.
+
+Restricciones no negociables:
+- el agente no debe tener permisos de escritura innecesarios sobre Firebase, Firestore, Storage, Auth, Rules, backups ni datos reales;
+- proteger producción con permisos mínimos y aprobación humana; ninguna promoción automática a PROD;
+- no modificar persistencia ni contratos de datos sin autorización expresa y QA específico;
+- evitar parches, duplicidad de implementaciones y ampliaciones de alcance no solicitadas;
+- un `AGENTS.md` o `SKILL.md` es documentación de instrucciones, no evidencia de un agente autónomo ya desplegado.
+
+Criterio de inicio:
+retomar esta iniciativa cuando estén atendidas las prioridades actuales del producto y se hayan identificado tareas repetitivas adecuadas para una prueba piloto aislada en DEV.
+
+Criterio de aceptación futuro:
+un piloto entrega un PR revisable con pruebas y reporte de cambios, sin alterar datos ni despliegues productivos.
+
+---
+
 ### RSVP DEV direct clients con App Check — 2026-10-05
 - `invitacion_0_2/rsvp-nominal-widget.js` ahora inicializa App Check tanto en la app Firebase por defecto como en la app anónima `mgd-rsvp-anonymous`.
 - `invitacion_0_3/rsvp-nominal-widget.js` hace lo mismo y deja preinicializada la app anónima que reutiliza el cliente RSVP compartido.
