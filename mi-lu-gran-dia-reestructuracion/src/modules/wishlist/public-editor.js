@@ -15,6 +15,9 @@ const $ = id => document.getElementById(id);
 const text = (id,value) => { const el=$(id); if(el)el.textContent=value; };
 let context=null, items=[], busy=false, unsubscribe=()=>{}, epoch=0, authUnsubscribe=()=>{};
 let onUpdated=()=>{};
+let legacyListId='';
+let legacySnapshot=[];
+let currentPublicId='';
 function validUrl(value) {
   try { const u=new URL(String(value||''));return ['http:','https:'].includes(u.protocol)?u.href:''; }
   catch{return '';}
@@ -40,7 +43,7 @@ async function publish(gifts) {
   const list=await wishlistPublicId(context.id);
   const res=await fetch(new URL('/api/list',API),{
     method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-    body:JSON.stringify({weddingId:context.id,list,event:context.name,gifts})
+    body:JSON.stringify({weddingId:context.id,list,event:context.name,gifts,legacyList:legacyListId})
   });
   const data=await res.json().catch(()=>({}));
   if(!res.ok||!data.ok)throw new Error(data.error||'No se pudo sincronizar la lista pública.');
@@ -94,16 +97,28 @@ async function activate(user) {
     if(token!==epoch)return;
     const matches=[];
     for(const item of contexts){
-      if(await wishlistPublicId(item.id)===window.__wishlistLiveId)matches.push(item);
+      if(!weddingCapabilities(item.role).canEdit)continue;
+      if(!legacyListId){
+        if(await wishlistPublicId(item.id)===currentPublicId)matches.push({ context:item });
+      }else{
+        // Old snapshot links have no wedding identifier. Only match an authorized
+        // wedding when every original product URL still belongs to its Wishlist.
+        const current=normalized(await readPlannerStorageKey(item,STORAGE_KEY));
+        const links=new Set(current.map(g=>g.url));
+        if(legacySnapshot.length && legacySnapshot.every(g=>links.has(validUrl(g.url)))){
+          matches.push({ context:item, gifts:current });
+        }
+      }
     }
     if(token!==epoch)return;
-    const allowed=matches.find(item=>weddingCapabilities(item.role).canEdit);
-    if(!allowed){
-      ui('Esta cuenta no tiene permisos de edición sobre la boda de este enlace.');
+    if(matches.length!==1){
+      ui(matches.length>1
+        ? 'La cuenta tiene varias bodas con esos regalos. No se puede elegir una automáticamente.'
+        : 'No se pudo vincular este enlace con una boda donde tengas permiso de edición.');
       syncMode();return;
     }
-    context=allowed;
-    items=normalized(await readPlannerStorageKey(context,STORAGE_KEY));
+    context=matches[0].context;
+    items=matches[0].gifts||normalized(await readPlannerStorageKey(context,STORAGE_KEY));
     if(token!==epoch)return;
     syncMode();renderManage();onUpdated(items);
     ui('Puedes agregar, editar o quitar regalos. Se guardarán en Mi Gran Día.');
@@ -113,8 +128,10 @@ async function activate(user) {
     },()=>ui('No se pudo sincronizar Mi Gran Día.'));
   }catch(error){if(token===epoch)ui('No se pudo comprobar el acceso: '+(error?.message||'Inténtalo otra vez.'));}
 }
-export function initWishlistPublicEditor(liveId,updated) {
-  window.__wishlistLiveId=liveId;
+export function initWishlistPublicEditor(liveId,updated,options={}) {
+  currentPublicId=liveId;
+  legacyListId=String(options.legacyListId||'');
+  legacySnapshot=Array.isArray(options.legacyGifts)?options.legacyGifts:[];
   onUpdated=updated;
   const dialog=$('authDialog');
   $('authAction').onclick=()=>{
