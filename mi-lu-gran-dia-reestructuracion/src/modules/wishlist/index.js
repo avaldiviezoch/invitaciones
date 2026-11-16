@@ -88,14 +88,21 @@ export function mountWishlist(context) {
         </div>
         <div class="wishlist-hero-total"><span>Regalos en la lista</span><strong data-wishlist-total>0</strong></div>
       </header>
-      <div class="wishlist-content">
-      <div class="wishlist-layout">
-        <section class="wishlist-panel" aria-labelledby="wishlist-form-title">
-          <div class="wishlist-panel-top"><span>AGREGAR REGALO</span><h2 id="wishlist-form-title">Un detalle para nosotros</h2><p>Pega el enlace de cualquier tienda. Buscaremos sus datos por ti.</p></div>
+      <main class="wishlist-content">
+        <div class="wishlist-actions-row"><button type="button" class="wishlist-add-button" data-wishlist-open>＋ Agregar regalo</button></div>
+        <section class="wishlist-collection" aria-labelledby="wishlist-collection-title">
+          <div class="wishlist-collection-head"><div><h2 id="wishlist-collection-title">Nuestra lista de regalos</h2><p>Los detalles que nos gustaría recibir.</p></div><span data-wishlist-count>0 regalos</span></div>
+          <div class="wishlist-grid" data-wishlist-items></div>
+        </section>
+        <p class="wishlist-footnote">Los regalos añadidos en esta prueba son temporales y se perderán al recargar la página.</p>
+      </main>
+      <dialog class="wishlist-dialog" data-wishlist-dialog aria-labelledby="wishlist-form-title">
+        <div class="wishlist-dialog-frame">
+          <header><div><span>NUEVO REGALO</span><h2 id="wishlist-form-title">Agregar a la lista</h2></div><button type="button" data-wishlist-close aria-label="Cerrar">×</button></header>
           <form data-wishlist-form>
             <label>Enlace del producto <input type="url" name="url" placeholder="https://tienda.com/producto" required></label>
-            <button type="button" class="wishlist-submit" data-wishlist-analyze>Analizar enlace <span>↗</span></button>
-            <p class="wishlist-help">Detectaremos nombre, precio e imagen cuando estén disponibles.</p>
+            <p class="wishlist-help">Pega el enlace de cualquier tienda. Buscaremos nombre, precio e imagen automáticamente.</p>
+            <button type="button" class="wishlist-analyze" data-wishlist-analyze>Analizar enlace <span>↗</span></button>
             <div data-wishlist-details hidden>
               <div class="wishlist-metadata-status" data-wishlist-status role="status"></div>
               <div class="wishlist-metadata-preview" data-wishlist-preview hidden></div>
@@ -104,16 +111,23 @@ export function mountWishlist(context) {
             </div>
             <p class="wishlist-form-error" data-wishlist-error role="alert" hidden></p>
           </form>
-        </section>
-        <section class="wishlist-collection" aria-labelledby="wishlist-collection-title">
-          <div class="wishlist-collection-head"><div><span>REGALOS SELECCIONADOS</span><h2 id="wishlist-collection-title">Nuestra lista de regalos</h2></div><span data-wishlist-count>0 regalos</span></div>
-          <div class="wishlist-grid" data-wishlist-items></div>
-        </section>
-      </div>
-      </div>
-      <p class="wishlist-footnote">Los regalos agregados aquí son temporales y se perderán al recargar la página.</p>
+        </div>
+      </dialog>
     </div>`;
+  const dialog = root.querySelector('[data-wishlist-dialog]');
   const form = root.querySelector('[data-wishlist-form]');
+  root.querySelector('[data-wishlist-open]').addEventListener('click', () => {
+    form.reset();
+    resetAnalysis();
+    dialog.showModal();
+    form.elements.namedItem('url').focus();
+  });
+  function closeDialog() {
+    resetAnalysis();
+    dialog.close();
+  }
+  root.querySelector('[data-wishlist-close]').addEventListener('click', closeDialog);
+  dialog.addEventListener('close', () => resetAnalysis());
   const analyze = root.querySelector('[data-wishlist-analyze]');
   const details = root.querySelector('[data-wishlist-details]');
   const missing = root.querySelector('[data-wishlist-missing]');
@@ -242,6 +256,7 @@ export function mountWishlist(context) {
     draftsByEvent.set(currentEventId, [{ ...item, id: crypto.randomUUID(), url }, ...(draftsByEvent.get(currentEventId) || [])]);
     form.reset();
     resetAnalysis();
+    dialog.close();
     renderCards(root);
   });
   renderCards(root);
@@ -252,6 +267,7 @@ export function destroyWishlist() {
   requestEpoch++;
   metadataRequest?.abort();
   metadataRequest = null;
+  root?.querySelector('[data-wishlist-dialog]')?.close();
   if (root) root.replaceChildren();
   currentEventId = '';
 }
