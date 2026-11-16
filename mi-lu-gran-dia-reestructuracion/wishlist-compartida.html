@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#faf8f5">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Lista de regalos · Mi Gran Día</title>
+  <style>
+    :root{font-family:Arial,Helvetica,sans-serif;color:#34322e;background:#faf8f5}
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh}
+    .wrap{max-width:1050px;margin:0 auto;padding:0 18px 52px}
+    header{padding:48px 20px 44px;text-align:center;background:radial-gradient(circle at 10% 0%,#f6e9ee,transparent 38%),linear-gradient(120deg,#fff,#fcf9fa);border-bottom:1px solid #e9e0df}
+    header .brand{font-size:10px;letter-spacing:.19em;color:#85916d;font-weight:800;text-transform:uppercase}
+    header .symbol{display:grid;place-items:center;width:62px;height:62px;margin:20px auto;border-radius:19px;border:1px solid #ead6da;background:#fcf7f8;color:#b67b87;font:38px Georgia,serif}
+    h1{font:400 clamp(32px,7vw,50px)/1.12 Georgia,serif;margin:0 0 10px}
+    .event{color:#b07884;font:400 21px Georgia,serif}
+    header p{max-width:430px;margin:15px auto 0;color:#817b78;font-size:13px;line-height:1.6}
+    .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:26px 0 18px}
+    .toolbar h2{font:400 23px Georgia,serif;margin:0}
+    .toolbar span{font-size:12px;color:#858087}
+    .cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
+    article{background:#fff;border:1px solid #e8e2df;border-radius:17px;overflow:hidden;box-shadow:0 6px 22px #38342e0a}
+    .media{aspect-ratio:4/3;display:grid;place-items:center;background:#f2f0ed;overflow:hidden}
+    .media img{width:100%;height:100%;object-fit:contain}
+    .placeholder{color:#b47c88;font:48px Georgia,serif}
+    .body{padding:16px;display:flex;flex-direction:column;gap:9px}
+    .shop{color:#a47a85;font-size:10px;letter-spacing:.08em;font-weight:800;text-transform:uppercase}
+    h3{font:500 18px/1.22 Georgia,serif;margin:0;overflow-wrap:anywhere}
+    .description{color:#8a8580;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
+    .price{color:#687650;font-size:16px;font-weight:700}
+    .link{display:block;text-align:center;margin-top:6px;padding:12px;border-radius:10px;background:#819069;color:#fff;text-decoration:none;font-size:12px;font-weight:700;min-height:42px}
+    .empty{background:#fff;border:1px solid #ece5df;border-radius:16px;text-align:center;padding:34px;color:#817c75}
+    .note{text-align:center;padding-top:24px;color:#9a9490;font-size:11px;line-height:1.5}
+    .error{margin:40px auto;max-width:530px;text-align:center;line-height:1.6;color:#8b5561;padding:24px;border:1px solid #ead6da;background:#fff;border-radius:14px}
+    [hidden]{display:none}
+    @media(max-width:800px){.cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
+    @media(max-width:530px){
+      .wrap{padding:0 14px 45px}
+      header{padding:33px 18px 30px}
+      .toolbar{padding:20px 0 14px}
+      .toolbar h2{font-size:21px}
+      .cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+      .body{padding:11px;gap:7px}
+      h3{font-size:15px}
+      .description{font-size:10px}
+      .price{font-size:13px}
+      .link{padding:11px 5px;font-size:11px}
+    }
+    @media(max-width:350px){.cards{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <header><div class="brand">Mi Gran Día · Lista de regalos</div><div class="symbol" aria-hidden="true">♡</div><h1>Nuestros regalos</h1><div class="event" id="eventName"></div><p>Estos son algunos detalles que nos encantaría recibir. Gracias por acompañarnos en un día tan especial.</p></header>
+  <main class="wrap">
+    <div class="toolbar"><h2>Lista de deseos</h2><span id="count"></span></div>
+    <div id="error" class="error" role="alert" hidden></div>
+    <section id="cards" class="cards" aria-label="Regalos disponibles"></section>
+    <div class="note">Esta es una copia de la lista al momento de compartirla. Los precios pueden cambiar según la tienda.</div>
+  </main>
+  <script type="module" src="src/modules/wishlist/public.js?v=1"></script>
+</body>
+</html>
