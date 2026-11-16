@@ -1,3 +1,11 @@
+## 2026-11-16 — Wishlist DEV: enlace público de solo lectura, adaptable a celular
+
+- Botón Compartir lista dentro del módulo privado: a partir de los regalos ya recuperados de Firebase, genera un snapshot portable de datos públicos del producto (nombre, URL, precio, foto, tienda y descripción) junto con el nombre del evento.
+- Nueva vista standalone wishlist-compartida.html para invitados, sin sesión, sin Firebase, sin exponer weddingId ni ruta cloudSync; estilos responsive a 350/530/800 px, tarjetas y enlaces originales a tiendas.
+- Codificación de snapshot en fragmento de URL (gzip cuando está disponible) mediante src/modules/wishlist/share-link.js; tamaño máximo 32 000 caracteres para evitar generar enlaces excesivos. El navegador permite compartir mediante Web Share API o copiar al portapapeles.
+- No se añadieron reglas públicas Firestore, nuevas colecciones, credenciales o cambios a Workers. No hay reservas ni marcas de compra. El enlace representa los regalos al momento de generarlo; las altas posteriores requieren compartir otro enlace.
+- Pendiente validación de visualización móvil y apertura real del enlace en sesión anónima, además de una futura publicación backend para enlaces cortos vivos y reservas seguras.
+
 ## 2026-11-16 — Wishlist DEV: persistencia por boda activa
 
 - Antes Wishlist guardaba únicamente en un Map en memoria; al recargar se perdían todos los regalos.
