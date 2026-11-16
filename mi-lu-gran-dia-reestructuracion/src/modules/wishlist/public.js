@@ -98,9 +98,10 @@ async function main() {
       state.event=data.event;state.gifts=data.gifts;legacyGifts=data.gifts;render();
       try {
         // Once its owner signs in and publishes, this same old URL becomes live.
-        await refreshList();
         state.live=true;
+        await refreshList();
       } catch {
+        state.live=false;
         await refreshLegacy().catch(()=>{
           $('purchaseNotice').textContent='No se puede consultar el registro de compras por ahora.';
         });
@@ -112,7 +113,9 @@ async function main() {
       try {
         const editor=await import('./public-editor.js?v=2');
         editor.initWishlistPublicEditor('',()=>{
-          void refreshList().then(()=>{state.live=true;}).catch(()=>{
+          state.live=true;
+          void refreshList().catch(()=>{
+            state.live=false;
             $('purchaseNotice').textContent='Guardado en Mi Gran Día. Pendiente de publicación para invitados.';
           });
         },{legacyListId:state.listId,legacyGifts});
