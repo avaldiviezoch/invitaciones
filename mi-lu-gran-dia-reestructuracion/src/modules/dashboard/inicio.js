@@ -1371,7 +1371,7 @@ const MODULES = Object.freeze({
     destroy: 'destroyIdeas'
   },
   wishlist: {
-    load: () => import('../wishlist/index.js?v=8'),
+    load: () => import('../wishlist/index.js?v=9'),
     mount: 'mountWishlist',
     destroy: 'destroyWishlist'
   }
