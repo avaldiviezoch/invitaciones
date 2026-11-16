@@ -1,3 +1,12 @@
+## 2026-11-16 — DEV: edición de Wishlist desde el enlace público sin salir de la página
+
+- Se agregó en wishlist-compartida.html el botón de cuenta y modales de inicio de sesión y edición en el mismo enlace.
+- Nueva integración src/modules/wishlist/public-editor.js: Firebase Auth existente (Google/correo), identificación de boda usando listWeddingContexts y verificación canEdit, lectura y escritura con planner-cloud sobre la misma clave planificador_bodas_wishlist_v1. Agregar, editar y eliminar regalos desde la página pública autenticada mantiene la única lista original de la boda.
+- Los enlaces nuevos se identifican mediante w2 + SHA-256 derivado de weddingId; no exponen directamente el identificador. Los enlaces snapshot anteriores siguen abriendo en modo invitado, pero deben reemplazarse por un enlace nuevo para edición y sincronización pública.
+- Worker nuevo aislado DEV en workers/wishlist-live-dev.js: requiere desplegar migrandia-wishlist-live-dev y configurar KV binding WISHLIST_LIVE. Permite leer lista pública, marcar compra por ID estable, y publicar catálogo público únicamente tras verificar ID token Firebase y membresía activa con permisos de edición. No cambia el Worker de productos, Worker de compras anterior, Firestore Rules ni Firebase Storage.
+- El módulo privado publica al generar el enlace y vuelve a publicar al guardar cambios. Las operaciones de editor externo escriben primero en Firebase; si la publicación pública falla, se informa sin simular sincronización. Invitados no tienen acceso al planificador privado.
+- Migración a PROD no incluida. Validación de sintaxis estática realizada; pendientes despliegue Worker, pruebas reales de CORS/Firestore REST/Auth con cuenta de editor, sincronización entre celulares, compra concurrente, visuales responsive y CI.
+
 ## 2026-11-16 — DEV: marcar regalos comprados desde la vista pública
 
 - En wishlist-compartida.html se añadieron estilos de tarjetas compradas (borde rosa rojizo #bf7b88, contenido ligeramente opaco, insignia COMPRADO). La información y botón Ir al regalo siguen legibles y accesibles.
