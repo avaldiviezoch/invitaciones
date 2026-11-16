@@ -136,7 +136,15 @@ async function persistWishlist(root, previous) {
   renderCards(root);
   try {
     await writePlannerStorageKey(context, STORAGE_KEY, wishlistState.items);
-    if (token === lifecycleToken) setSaveStatus(root, 'Guardado');
+    if (token === lifecycleToken) {
+      setSaveStatus(root, 'Guardado en Mi Gran Día. Actualizando enlace público…');
+      try {
+        await publishWishlistPublic(context, wishlistState.items);
+        if (token === lifecycleToken) setSaveStatus(root, 'Guardado y sincronizado');
+      } catch {
+        if (token === lifecycleToken) setSaveStatus(root, 'Guardado en Mi Gran Día; la lista pública aún no se pudo actualizar.');
+      }
+    }
   } catch (error) {
     if (token === lifecycleToken) {
       wishlistState.items = previous;
