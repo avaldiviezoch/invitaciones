@@ -16,6 +16,14 @@ function element(tag, className = '', text = '') {
   if (text) el.textContent = text;
   return el;
 }
+function createGiftPlaceholder() {
+  const image = document.createElement('img');
+  image.className = 'wishlist-default-image';
+  image.src = 'assets/icons/wishlist.svg';
+  image.alt = 'Imagen genérica de regalo';
+  image.loading = 'lazy';
+  return image;
+}
 function renderCards(root) {
   const container = root.querySelector('[data-wishlist-items]');
   const counter = root.querySelector('[data-wishlist-count]');
@@ -38,9 +46,9 @@ function renderCards(root) {
       img.alt = item.name;
       img.loading = 'lazy';
       img.referrerPolicy = 'no-referrer';
-      img.onerror = () => { img.remove(); media.append(element('span', 'wishlist-image-fallback', '🎁')); };
+      img.onerror = () => { img.remove(); media.append(createGiftPlaceholder()); };
       media.append(img);
-    } else media.append(element('span', 'wishlist-image-fallback', '🎁'));
+    } else media.append(createGiftPlaceholder());
     const body = element('div', 'wishlist-card-body');
     body.append(element('span', 'wishlist-shop', item.shop || 'Tienda por definir'), element('h3', '', item.name));
     if (item.description) body.append(element('p', 'wishlist-description', item.description));
@@ -80,7 +88,7 @@ export function mountWishlist(context) {
           <form data-wishlist-form>
             <label>Enlace del producto <input type="url" name="url" placeholder="https://tienda.com/producto" required></label>
             <button type="button" class="wishlist-submit" data-wishlist-analyze>Analizar enlace <span>↗</span></button>
-            <p class="wishlist-help">Buscaremos la fotografía, el nombre, la tienda y el precio disponible. Si falta algún dato, podrás completarlo.</p>
+            <p class="wishlist-help">Buscaremos nombre, precio, tienda, descripción e imagen. Si la foto no está disponible, se mostrará una imagen genérica de regalo.</p>
             <div data-wishlist-details hidden>
               <div class="wishlist-metadata-status" data-wishlist-status role="status"></div>
               <div class="wishlist-metadata-preview" data-wishlist-preview hidden></div>
@@ -106,7 +114,6 @@ export function mountWishlist(context) {
   const urlInput = form.elements.namedItem('url');
   const editableFields = [
     { key: 'name', title: 'Nombre del regalo', required: true, placeholder: 'Ej. Freidora de aire', max: 110 },
-    { key: 'image', title: 'URL de la fotografía', placeholder: 'https://.../foto.jpg', max: 2000, type: 'url' },
     { key: 'shop', title: 'Tienda', placeholder: 'Ej. Falabella', max: 65 },
     { key: 'price', title: 'Precio referencial', placeholder: 'Ej. S/ 299.00', max: 40 },
     { key: 'description', title: 'Descripción', placeholder: 'Color, modelo o detalle especial', max: 350 }
@@ -193,7 +200,7 @@ export function mountWishlist(context) {
     preview.hidden = !(extracted.name || extracted.image);
     missing.replaceChildren();
     const remaining = editableFields.filter(({ key }) => !extracted[key]);
-    if (remaining.length) missing.append(element('p', 'wishlist-missing-caption', 'Falta completar:'));
+    if (remaining.length) missing.append(element('p', 'wishlist-missing-caption', 'Completa los datos que no se encontraron (la imagen será automática o genérica):'));
     else missing.append(element('p', 'wishlist-missing-caption', 'Los datos principales están listos.'));
     remaining.forEach(({ key, title, required, placeholder, max, type }) => {
       const label = element('label', '', title);
@@ -221,7 +228,6 @@ export function mountWishlist(context) {
       if (!item[key]) item[key] = String(data.get(key) || '').trim().slice(0, max);
     });
     if (!item.name) { showError('Escribe el nombre del regalo.'); return; }
-    if (item.image && !safeUrl(item.image)) { showError('Revisa la URL de la fotografía.'); return; }
     draftsByEvent.set(currentEventId, [{ ...item, id: crypto.randomUUID(), url }, ...(draftsByEvent.get(currentEventId) || [])]);
     form.reset();
     resetAnalysis();
