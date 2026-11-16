@@ -13,7 +13,8 @@
 .wishlist-hero-total span{display:block;color:#89878d;font-size:11px;font-weight:700}
 .wishlist-hero-total strong{display:block;margin-top:8px;color:#af7480;font:400 clamp(44px,4.2vw,64px)/.78 Georgia,serif}
 .wishlist-content{width:min(90.8%,1610px);margin:0 auto;padding:18px 0 60px}
-.wishlist-actions-row{display:flex;align-items:center;justify-content:flex-start;margin-bottom:22px}
+.wishlist-actions-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.wishlist-save-status{color:#89848a;font-size:10px}
 .wishlist-add-button,.wishlist-submit,.wishlist-analyze{min-height:40px;padding:0 16px;border:0;border-radius:12px;background:#7f8962;color:#fff;font:800 10px var(--event-body-font);cursor:pointer}
 .wishlist-add-button:hover,.wishlist-submit:hover{background:#6e7955}
 .wishlist-collection-head{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:15px}
