@@ -110,6 +110,7 @@ export function mountWishlist(context) {
           <div class="wishlist-grid" data-wishlist-items></div>
         </section>
       </div>
+      </div>
       <p class="wishlist-footnote">Los regalos agregados aquí son temporales y se perderán al recargar la página.</p>
     </div>`;
   const form = root.querySelector('[data-wishlist-form]');
