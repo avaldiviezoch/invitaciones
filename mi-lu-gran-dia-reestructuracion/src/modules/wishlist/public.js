@@ -44,7 +44,7 @@ function render() {
 }
 async function refreshList() {
   const endpoint=new URL('/api/list',LIVE_API);endpoint.searchParams.set('list',state.listId);
-  const response=await fetch(endpoint,{cache:'no-store',headers:{Accept:'application/json'}});
+  const response=await fetch(endpoint,{cache:'no-store',headers:{Accept:'application/json'},signal:AbortSignal.timeout(10000)});
   const result=await response.json().catch(()=>({}));
   if(!response.ok||!result.ok||!Array.isArray(result.gifts))throw new Error(result.error||'La lista no está publicada.');
   state.event=String(result.event||'Nuestra celebración');
@@ -53,10 +53,11 @@ async function refreshList() {
 }
 async function refreshLegacy() {
   const endpoint=new URL('/api/status',LEGACY_API);endpoint.searchParams.set('list',state.listId);
-  const response=await fetch(endpoint,{cache:'no-store'});
+  const response=await fetch(endpoint,{cache:'no-store',signal:AbortSignal.timeout(10000)});
   const result=await response.json();
   if(!response.ok||!result.ok)throw new Error('Sin conexión con compras');
   state.purchased=new Set((result.purchased||[]).map(String));state.online=true;render();
+  if($('purchaseNotice').textContent.includes('registro de compras'))$('purchaseNotice').textContent='';
 }
 async function purchase(giftId) {
   if(!state.online||state.purchased.has(giftId))return;
@@ -79,53 +80,74 @@ async function main() {
   state.live=Boolean(id);
   state.listId=id||(await legacyHash(fragment));
   if(id){
-    try{await refreshList();}
-    catch{ $('purchaseNotice').textContent='No se pudo consultar la lista actual. Cuando se publique desde Mi Gran Día aparecerán aquí los regalos.';render(); }
-    try{
-      const editor=await import('./public-editor.js?v=2');
+    // Login and the public list load independently: a broken Worker must NOT
+    // prevent the Firebase button from receiving its click handler.
+    const load=refreshList().catch(()=>{
+      state.online=false;render();
+      $('purchaseNotice').textContent='No se pudo cargar la lista actual. Verifica que el servicio de Wishlist esté activo.';
+    });
+    try {
+      const editor=await import('./public-editor.js?v=3');
       editor.initWishlistPublicEditor(id,()=>{
-        // Refresh public state from backend; never confuse private un-published changes with public state.
-        void refreshList().catch(()=>{ $('purchaseNotice').textContent='Guardado privado: pendiente de sincronización pública.'; });
+        void refreshList().catch(()=>{
+          $('purchaseNotice').textContent='El cambio se guardó en Mi Gran Día; la publicación pública aún no está disponible.';
+        });
       });
-    }catch(error){
-      $('purchaseNotice').textContent='La lista se muestra, pero el acceso de edición no está disponible temporalmente.';
-      console.warn('Wishlist public editor initialization failed',error);
+    } catch(error) {
+      $('purchaseNotice').textContent='El inicio de sesión no se pudo cargar. Actualiza la página e inténtalo de nuevo.';
+      console.warn('Wishlist Firebase initialization failed',error);
     }
+    await load;
   }else{
     let legacyGifts=[];
-    try{
+    try {
       const data=await decodeWishlistShare(fragment);
-      state.event=data.event;state.gifts=data.gifts;legacyGifts=data.gifts;render();
-      try {
-        // Once its owner signs in and publishes, this same old URL becomes live.
-        state.live=true;
-        await refreshList();
-      } catch {
-        state.live=false;
-        await refreshLegacy().catch(()=>{
-          $('purchaseNotice').textContent='No se puede consultar el registro de compras por ahora.';
-        });
-      }
+      state.event=data.event;state.gifts=data.gifts;legacyGifts=data.gifts;
+      state.online=false;render();
     }catch(error){
-      $('error').hidden=false;$('error').textContent=error.message||'Enlace no válido';
+      $('error').hidden=false;
+      $('error').textContent=error.message||'Enlace no válido';
+      return;
     }
+    // Load the Firebase editor immediately without waiting on either Worker.
     if(legacyGifts.length){
       try {
-        const editor=await import('./public-editor.js?v=2');
+        const editor=await import('./public-editor.js?v=3');
         editor.initWishlistPublicEditor('',()=>{
           state.live=true;
           void refreshList().catch(()=>{
             state.live=false;
-            $('purchaseNotice').textContent='Guardado en Mi Gran Día. Pendiente de publicación para invitados.';
+            $('purchaseNotice').textContent='Guardado en Mi Gran Día. La publicación para invitados todavía no está disponible.';
           });
         },{legacyListId:state.listId,legacyGifts});
-      }catch(error){
-        console.warn('Wishlist legacy login initialization failed',error);
-        $('purchaseNotice').textContent='No se pudo habilitar el inicio de sesión en este momento.';
+      } catch(error) {
+        $('purchaseNotice').textContent='El inicio de sesión no se pudo cargar. Actualiza la página e inténtalo de nuevo.';
+        console.warn('Wishlist Firebase legacy login failed',error);
       }
     }
+    // A previous URL may now have a live published alias. Try it without
+    // blocking authentication and preserve its original card data on failure.
+    void (async()=>{
+      try{
+        state.live=true;
+        await refreshList();
+      }catch{
+        state.live=false;
+        state.gifts=legacyGifts;
+        render();
+        try{await refreshLegacy();}
+        catch{
+          state.online=false;render();
+          $('purchaseNotice').textContent='El registro de compras no está conectado. Podrás marcar regalos cuando se active el servicio.';
+        }
+      }
+    })();
   }
-  window.addEventListener('focus',()=>{void (state.live?refreshList():refreshLegacy()).catch(()=>{});});
-  document.addEventListener('visibilitychange',()=>{if(!document.hidden)void(state.live?refreshList():refreshLegacy()).catch(()=>{});});
+  window.addEventListener('focus',()=>{
+    void (state.live?refreshList():refreshLegacy()).catch(()=>{state.online=false;render();});
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if(!document.hidden)void(state.live?refreshList():refreshLegacy()).catch(()=>{state.online=false;render();});
+  });
 }
 void main().catch(error=>{ $('error').hidden=false;$('error').textContent=error.message||'No se pudo abrir la lista.'; });
