@@ -1,5 +1,25 @@
-// Prototipo visual de Wishlist. No escribe en Firebase ni en almacenamiento local.
-const draftsByEvent = new Map();
+import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js';
+import { weddingCapabilities } from '../../core/app/permissions.js';
+const STORAGE_KEY = 'planificador_bodas_wishlist_v1';
+const wishlistState = { items: [], context: null, saving: false };
+let unsubscribeWishlist = () => {};
+let lifecycleToken = 0;
+function normalizeGifts(value) {
+  if (!Array.isArray(value)) return [];
+  return value.map((gift) => ({
+    id: String(gift?.id || crypto.randomUUID()),
+    name: String(gift?.name || '').trim().slice(0, 110),
+    image: safeUrl(gift?.image),
+    shop: String(gift?.shop || '').slice(0, 65),
+    price: String(gift?.price || '').slice(0, 40),
+    description: String(gift?.description || '').slice(0, 350),
+    url: safeUrl(gift?.url)
+  })).filter((gift) => gift.name && gift.url);
+}
+function canEditWishlist() {
+  return weddingCapabilities(wishlistState.context?.role).canEdit;
+}
+
 const wishlistSizes = new Set(['large', 'medium', 'compact', 'mini']);
 let wishlistCardSize = 'large';
 let currentEventId = '';
@@ -30,7 +50,7 @@ function renderCards(root) {
   const container = root.querySelector('[data-wishlist-items]');
   const counter = root.querySelector('[data-wishlist-count]');
   if (!container || !counter) return;
-  const items = draftsByEvent.get(currentEventId) || [];
+  const items = wishlistState.items;
   container.dataset.cardSize = wishlistCardSize;
   root.querySelectorAll('[data-wishlist-size]').forEach((button) => {
     const active = button.dataset.wishlistSize === wishlistCardSize;
@@ -70,17 +90,51 @@ function renderCards(root) {
     link.rel = 'noopener noreferrer';
     const remove = element('button', 'wishlist-remove', 'Quitar');
     remove.type = 'button';
-    remove.addEventListener('click', () => {
-      draftsByEvent.set(currentEventId, (draftsByEvent.get(currentEventId) || []).filter((entry) => entry.id !== item.id));
+    remove.disabled = wishlistState.saving;
+    remove.addEventListener('click', async () => {
+      if (wishlistState.saving || !canEditWishlist()) return;
+      const previous = wishlistState.items;
+      wishlistState.items = previous.filter((entry) => entry.id !== item.id);
       renderCards(root);
+      try { await persistWishlist(root, previous); } catch {}
     });
-    actions.append(link, remove);
+    actions.append(link);
+    if (canEditWishlist()) actions.append(remove);
     body.append(actions);
     card.append(media, body);
     container.append(card);
   });
 }
-export function mountWishlist(context) {
+function setSaveStatus(root, message) {
+  const node = root.querySelector('[data-wishlist-save-status]');
+  if (node) node.textContent = message;
+}
+async function persistWishlist(root, previous) {
+  if (wishlistState.saving) throw new Error('Ya hay un guardado en curso.');
+  if (!canEditWishlist()) throw new Error('Tu acceso es de solo lectura.');
+  const context = wishlistState.context;
+  const token = lifecycleToken;
+  wishlistState.saving = true;
+  setSaveStatus(root, 'Guardando…');
+  renderCards(root);
+  try {
+    await writePlannerStorageKey(context, STORAGE_KEY, wishlistState.items);
+    if (token === lifecycleToken) setSaveStatus(root, 'Guardado');
+  } catch (error) {
+    if (token === lifecycleToken) {
+      wishlistState.items = previous;
+      renderCards(root);
+      setSaveStatus(root, 'No se pudo guardar. Inténtalo nuevamente.');
+    }
+    throw error;
+  } finally {
+    if (token === lifecycleToken) {
+      wishlistState.saving = false;
+      renderCards(root);
+    }
+  }
+}
+export async function mountWishlist(context) {
   const root = document.querySelector(rootSelector);
   if (!root || !context?.id) return false;
   currentEventId = String(context.id);
