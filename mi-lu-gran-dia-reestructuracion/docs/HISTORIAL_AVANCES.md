@@ -1,3 +1,12 @@
+## 2026-11-16 — DEV: marcar regalos comprados desde la vista pública
+
+- En wishlist-compartida.html se añadieron estilos de tarjetas compradas (borde rosa rojizo #bf7b88, contenido ligeramente opaco, insignia COMPRADO). La información y botón Ir al regalo siguen legibles y accesibles.
+- En public.js se incorporaron botones Ir al regalo y Marcar como comprado, con confirmación y actualización de estado al volver a enfocar la pestaña.
+- API propuesta aislada en workers/wishlist-purchases-dev.js: Worker nuevo migrandia-wishlist-gifts-dev, binding Cloudflare KV WISHLIST_PURCHASES. La clave de lista es SHA-256 del fragmento del enlace ya compartido, sin weddingId ni acceso a Firebase.
+- El frontend bloquea la acción cuando el Worker/KV no está disponible para evitar simular compras no guardadas. Despliegue del nuevo Worker y binding KV siguen pendientes del usuario.
+- Estados de compra no reversibles desde invitado. Cada copia de lista compartida constituye un identificador diferente; la nueva lista generada tras actualizar productos no hereda el estado anterior. KV es eventualmente consistente, no apto para reservas estrictamente atómicas.
+- Cambios restringidos a DEV. No se modificaron Firebase Storage, Firestore, otras APIs ni producción. Validación sintáctica JavaScript OK; prueba funcional en varios celulares pendiente.
+
 ## 2026-11-16 — Wishlist DEV: enlace público de solo lectura, adaptable a celular
 
 - Botón Compartir lista dentro del módulo privado: a partir de los regalos ya recuperados de Firebase, genera un snapshot portable de datos públicos del producto (nombre, URL, precio, foto, tienda y descripción) junto con el nombre del evento.
