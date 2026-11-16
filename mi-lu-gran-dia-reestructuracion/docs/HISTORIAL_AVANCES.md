@@ -1,3 +1,12 @@
+## 2026-11-16 — DEV: correcciones reales de Firebase y compras en Wishlist pública
+
+- Se quitó la advertencia que bloqueaba el ingreso desde enlaces de instantánea anteriores. La identificación de una boda desde esos enlaces exige que la cuenta autorizada coincida con todos sus productos originales; no se elige automáticamente si hay coincidencias ambiguas.
+- public.js instala el editor Firebase sin esperar las respuestas de los Workers externos. Las consultas públicas ahora tienen timeout y las fallas no simulan estados de compra exitosos.
+- public-editor.js muestra mensajes de permiso/login en una zona visible de la página; espera authPersistenceReady, maneja errores de autenticación y agrega alternativa de redirect cuando el navegador bloquea popup de Google. Tras guardar, refresca de inmediato la lista administrable.
+- Se aumentaron las versiones de recursos para impedir caché de scripts antiguos. Los archivos JS pasan parseo de sintaxis.
+- **Pendiente externo imprescindible:** desplegar migrandia-wishlist-live-dev con binding KV WISHLIST_LIVE; sin él no se pueden registrar compras ni publicar los cambios para invitados. El Worker legacy de compras también es necesario para marcar compras desde enlaces de instantánea no migrados. No se han probado sesiones autenticadas reales.
+- No se modificaron Firebase Storage, reglas Firestore, datos reales ni producción.
+
 ## 2026-11-16 — DEV: edición de Wishlist desde el enlace público sin salir de la página
 
 - Se agregó en wishlist-compartida.html el botón de cuenta y modales de inicio de sesión y edición en el mismo enlace.
