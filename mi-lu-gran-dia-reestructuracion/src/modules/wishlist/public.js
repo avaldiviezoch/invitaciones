@@ -12,7 +12,18 @@ async function legacyHash(snapshot) {
   const digest=await crypto.subtle.digest('SHA-256',bytes);
   return [...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('');
 }
-let state={live:false,listId:'',event:'',gifts:[],purchased:new Set(),online:false};
+let state={live:false,listId:'',event:'',gifts:[],purchased:new Set(),online:false,privatePreview:false};
+function showFirebaseGifts(gifts, options={}) {
+  if (!Array.isArray(gifts)) return;
+  state.gifts=gifts;
+  state.live=true;
+  state.privatePreview=true;
+  state.online=false;
+  render();
+  $('purchaseNotice').textContent=options.published
+    ? 'Regalos guardados. Verificando la actualización pública…'
+    : 'Regalos guardados en Mi Gran Día. Vista de administración; la sincronización pública está pendiente.';
+}
 function render() {
   const host=$('cards');host.replaceChildren();
   $('eventName').textContent=state.event||'Nuestra celebración';
@@ -48,7 +59,7 @@ async function refreshList() {
   const result=await response.json().catch(()=>({}));
   if(!response.ok||!result.ok||!Array.isArray(result.gifts))throw new Error(result.error||'La lista no está publicada.');
   state.event=String(result.event||'Nuestra celebración');
-  state.gifts=result.gifts;state.purchased=new Set(result.purchased||[]);state.online=true;
+  state.gifts=result.gifts;state.purchased=new Set(result.purchased||[]);state.online=true;state.privatePreview=false;
   render();$('purchaseNotice').textContent='';
 }
 async function refreshLegacy() {
@@ -88,10 +99,13 @@ async function main() {
     });
     try {
       const editor=await import('./public-editor.js?v=4');
-      editor.initWishlistPublicEditor(id,()=>{
-        void refreshList().catch(()=>{
-          $('purchaseNotice').textContent='El cambio se guardó en Mi Gran Día; la publicación pública aún no está disponible.';
-        });
+      editor.initWishlistPublicEditor(id,(gifts,options)=>{
+        showFirebaseGifts(gifts,options);
+        if(options?.published){
+          void refreshList().catch(()=>{
+            $('purchaseNotice').textContent='Guardado en Mi Gran Día, pero no se pudo verificar la publicación pública.';
+          });
+        }
       });
     } catch(error) {
       $('purchaseNotice').textContent='El inicio de sesión no se pudo cargar. Actualiza la página e inténtalo de nuevo.';
@@ -113,12 +127,13 @@ async function main() {
     if(legacyGifts.length){
       try {
         const editor=await import('./public-editor.js?v=4');
-        editor.initWishlistPublicEditor('',()=>{
-          state.live=true;
-          void refreshList().catch(()=>{
-            state.live=false;
-            $('purchaseNotice').textContent='Guardado en Mi Gran Día. La publicación para invitados todavía no está disponible.';
-          });
+        editor.initWishlistPublicEditor('',(gifts,options)=>{
+          showFirebaseGifts(gifts,options);
+          if(options?.published){
+            void refreshList().catch(()=>{
+              $('purchaseNotice').textContent='Guardado en Mi Gran Día, pero no se pudo verificar la publicación pública.';
+            });
+          }
         },{legacyListId:state.listId,legacyGifts});
       } catch(error) {
         $('purchaseNotice').textContent='El inicio de sesión no se pudo cargar. Actualiza la página e inténtalo de nuevo.';
@@ -132,6 +147,7 @@ async function main() {
         state.live=true;
         await refreshList();
       }catch{
+        if(state.privatePreview) return;
         state.live=false;
         state.gifts=legacyGifts;
         render();
