@@ -40,9 +40,27 @@ function ui(message='') {
   }
 }
 function syncMode() {
+  const avatar=$('authAvatar');
+  const user=auth.currentUser;
+  const photo=user?.photoURL;
+  const safePhoto=typeof photo==='string' && /^https:\/\//i.test(photo) ? photo : '';
+  if (avatar) {
+    avatar.replaceChildren();
+    if (safePhoto) {
+      const img=document.createElement('img');
+      img.src=safePhoto;
+      img.alt='Foto de perfil';
+      img.referrerPolicy='no-referrer';
+      img.addEventListener('error',()=>{img.remove();avatar.textContent=(user?.displayName||user?.email||'U').charAt(0).toUpperCase();},{once:true});
+      avatar.append(img);
+    } else {
+      avatar.textContent=user?(user.displayName||user.email||'U').charAt(0).toUpperCase():'👤';
+    }
+  }
   const editor=$('editorTools');
   editor.hidden=!context;
-  $('authAction').textContent=auth.currentUser?'Mi cuenta ✓':'Ingresar';
+  $('authAction').setAttribute('aria-label',user?'Cuenta de '+(user.displayName||user.email||'Mi Gran Día'):'Ingresar a Mi Gran Día');
+  $('authActionLabel').textContent=user?'Mi cuenta':'Ingresar';
   const email=auth.currentUser?.email;
   text('editorIdentity',context ? (email+' · '+context.name) : (email||''));
 }
@@ -50,12 +68,19 @@ async function publish(gifts) {
   if (!context || !auth.currentUser) throw new Error('Inicia sesión.');
   const token=await auth.currentUser.getIdToken();
   const list=await wishlistPublicId(context.id);
-  const res=await fetch(new URL('/api/list',API),{
-    method:'PUT',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
-    body:JSON.stringify({weddingId:context.id,list,event:context.name,gifts,legacyList:legacyListId})
-  });
+  let res;
+  try {
+    res=await fetch(new URL('/api/list',API),{
+      method:'PUT',
+      headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},
+      body:JSON.stringify({weddingId:context.id,list,event:context.name,gifts,legacyList:legacyListId}),
+      signal:AbortSignal.timeout(12000)
+    });
+  }catch(error){
+    throw new Error('Servicio público de Wishlist no disponible. Verifica el Worker DEV y su configuración CORS.');
+  }
   const data=await res.json().catch(()=>({}));
-  if(!res.ok||!data.ok)throw new Error(data.error||'No se pudo sincronizar la lista pública.');
+  if(!res.ok||!data.ok)throw new Error(data.error || 'No se pudo sincronizar la lista pública ('+res.status+').');
 }
 async function save(next) {
   if (!context||busy)return;
@@ -66,10 +91,16 @@ async function save(next) {
     await writePlannerStorageKey(context,STORAGE_KEY,next);
     items=next;
     ui('Guardado en Mi Gran Día. Actualizando el enlace público…');
-    try { await publish(next);ui('Guardado y sincronizado para invitados.'); }
-    catch { ui('Guardado en Mi Gran Día, pero la lista pública no se actualizó. Reintenta sincronizar.'); }
+    let published=false;
+    try {
+      await publish(next);
+      published=true;
+      ui('Guardado en Mi Gran Día y sincronizado para invitados.');
+    } catch(error) {
+      ui('Guardado en Mi Gran Día. '+error.message);
+    }
     renderManage();
-    onUpdated(items);
+    onUpdated(items,{published});
     $('editorForm').reset();
     if ($('editorDialog').open) $('editorDialog').close();
     $('editorItemId').value='';
@@ -134,12 +165,12 @@ async function activate(user) {
     context=matches[0].context;
     items=matches[0].gifts||normalized(await readPlannerStorageKey(context,STORAGE_KEY));
     if(token!==epoch)return;
-    syncMode();renderManage();onUpdated(items);
+    syncMode();renderManage();onUpdated(items,{published:false});
     text('purchaseNotice','');
     ui('Puedes agregar, editar o quitar regalos. Se guardarán en Mi Gran Día.');
     unsubscribe=subscribePlannerStorageKey(context,STORAGE_KEY,value=>{
       if(token!==epoch||busy)return;
-      items=normalized(value);renderManage();onUpdated(items);
+      items=normalized(value);renderManage();onUpdated(items,{published:false});
     },()=>ui('No se pudo sincronizar Mi Gran Día.'));
   }catch(error){if(token===epoch)ui('No se pudo comprobar el acceso: '+(error?.message||'Inténtalo otra vez.'));}
 }
@@ -159,8 +190,8 @@ export function initWishlistPublicEditor(liveId,updated,options={}) {
   $('editorResync').onclick=async()=>{
     if(!context||busy)return;
     ui('Sincronizando lista pública…');
-    try{await publish(items);ui('Enlace público actualizado.');onUpdated(items);}
-    catch(error){ui(error.message||'No se pudo sincronizar.');}
+    try{await publish(items);ui('Enlace público actualizado.');onUpdated(items,{published:true});}
+    catch(error){ui('Guardado en Mi Gran Día. '+(error.message||'No se pudo sincronizar.'));onUpdated(items,{published:false});}
   };
   $('authGoogle').onclick=async()=>{
     await authPersistenceReady;
