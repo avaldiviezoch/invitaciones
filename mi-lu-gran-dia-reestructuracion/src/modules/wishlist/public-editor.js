@@ -4,7 +4,7 @@ import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageK
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { wishlistPublicId } from './share-link.js?v=2';
 import {
-  GoogleAuthProvider, onAuthStateChanged, signInWithPopup,
+  GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signInWithRedirect, getRedirectResult,
   signInWithEmailAndPassword, signOut
 } from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
 
@@ -164,9 +164,26 @@ export function initWishlistPublicEditor(liveId,updated,options={}) {
   };
   $('authGoogle').onclick=async()=>{
     await authPersistenceReady;
-    text('authFeedback','Ingresando…');
-    try{await signInWithPopup(auth,new GoogleAuthProvider());dialog.close();text('authFeedback','');}
-    catch(error){text('authFeedback','No se pudo iniciar sesión: '+(error?.message||'Intenta con correo.'));}
+    text('authFeedback','Ingresando con Google…');
+    try {
+      await signInWithPopup(auth,new GoogleAuthProvider());
+      dialog.close();
+      text('authFeedback','');
+    } catch(error) {
+      if (['auth/popup-blocked','auth/operation-not-supported-in-this-environment'].includes(error?.code)) {
+        text('authFeedback','El navegador bloqueó la ventana. Redirigiendo al ingreso de Google…');
+        try { await signInWithRedirect(auth,new GoogleAuthProvider()); }
+        catch (redirectError) {
+          text('authFeedback','No fue posible iniciar sesión con Google en este navegador. Usa correo y contraseña.');
+        }
+        return;
+      }
+      if (error?.code === 'auth/popup-closed-by-user' || error?.code === 'auth/cancelled-popup-request') {
+        text('authFeedback','Ingreso cancelado. Puedes volver a intentarlo.');
+        return;
+      }
+      text('authFeedback','No se pudo ingresar con Google ('+(error?.code||'error')+'). Comprueba tu cuenta o usa correo y contraseña.');
+    }
   };
   $('authEmailForm').onsubmit=async(e)=>{
     e.preventDefault();
@@ -218,5 +235,10 @@ export function initWishlistPublicEditor(liveId,updated,options={}) {
   authUnsubscribe=onAuthStateChanged(auth,user=>{
     $('authLogout').hidden=!user;
     void activate(user);
+  },error=>{
+    text('authFeedback','Firebase no pudo comprobar tu sesión ('+(error?.code||'error')+'). Actualiza e inténtalo nuevamente.');
+  });
+  void authPersistenceReady.then(()=>getRedirectResult(auth)).catch(error=>{
+    text('authFeedback','No se pudo completar el ingreso con Google ('+(error?.code||'error')+'). Usa correo y contraseña.');
   });
 }
