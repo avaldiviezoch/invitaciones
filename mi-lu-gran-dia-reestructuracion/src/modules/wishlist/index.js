@@ -1,7 +1,23 @@
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { encodeWishlistShare } from './share-link.js?v=1';
+import { encodeWishlistLiveShare, wishlistPublicId } from './share-link.js?v=2';
+import { auth } from '../../services/firebase-client.js';
 const STORAGE_KEY = 'planificador_bodas_wishlist_v1';
+const PUBLIC_API = 'https://migrandia-wishlist-live-dev.avaldiviezoch.workers.dev';
+async function publishWishlistPublic(context, gifts) {
+  const user = auth.currentUser;
+  if (!user || !context?.id || !canEditWishlist()) throw new Error('Se necesita acceso de edición.');
+  const idToken = await user.getIdToken();
+  const list = await wishlistPublicId(context.id);
+  const response = await fetch(new URL('/api/list', PUBLIC_API), {
+    method:'PUT',
+    headers:{ 'Content-Type':'application/json', Authorization:'Bearer ' + idToken },
+    body:JSON.stringify({ weddingId:context.id, list, event:context.name, gifts })
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !result.ok) throw new Error(result.error || 'No se pudo publicar la lista compartida.');
+}
+
 const wishlistState = { items: [], context: null, saving: false };
 let unsubscribeWishlist = () => {};
 let lifecycleToken = 0;
@@ -204,7 +220,9 @@ export async function mountWishlist(context) {
     }
     shareButton.disabled = true;
     try {
-      const fragment = await encodeWishlistShare(wishlistState.items, wishlistState.context?.name);
+      // Publicar únicamente datos propios de Wishlist, después de verificar el usuario.
+      await publishWishlistPublic(wishlistState.context, wishlistState.items);
+      const fragment = await encodeWishlistLiveShare(wishlistState.context.id);
       const target = new URL('wishlist-compartida.html', new URL('../../../', import.meta.url));
       target.hash = fragment;
       const link = target.href;
