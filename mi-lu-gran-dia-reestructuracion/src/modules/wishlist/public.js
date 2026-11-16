@@ -1,139 +1,110 @@
-import { decodeWishlistShare } from './share-link.js?v=1';
+import { decodeWishlistShare, parseWishlistLiveShare } from './share-link.js?v=2';
 
-const API_BASE = 'https://migrandia-wishlist-gifts-dev.avaldiviezoch.workers.dev';
-const byId = (id) => document.getElementById(id);
-const node = (tag, className = '', text = '') => {
-  const el = document.createElement(tag);
-  if (className) el.className = className;
-  if (text) el.textContent = text;
-  return el;
-};
-
-async function listFingerprint(snapshot) {
-  const bytes = new TextEncoder().encode(snapshot);
-  const digest = await crypto.subtle.digest('SHA-256', bytes);
-  return [...new Uint8Array(digest)].map(value => value.toString(16).padStart(2, '0')).join('');
+const LIVE_API='https://migrandia-wishlist-live-dev.avaldiviezoch.workers.dev';
+const LEGACY_API='https://migrandia-wishlist-gifts-dev.avaldiviezoch.workers.dev';
+const $=id=>document.getElementById(id);
+function node(tag,cls='',value=''){
+  const el=document.createElement(tag);if(cls)el.className=cls;
+  if(value)el.textContent=value;return el;
 }
-
-function applyPurchaseState(card, button, purchased) {
-  card.classList.toggle('is-purchased', purchased);
-  button.disabled = purchased;
-  button.textContent = purchased ? '✓ Regalo comprado' : 'Marcar como comprado';
-  button.setAttribute('aria-label', purchased ? 'Este regalo ya fue comprado' : 'Marcar regalo como comprado');
+async function legacyHash(snapshot) {
+  const bytes=new TextEncoder().encode(snapshot);
+  const digest=await crypto.subtle.digest('SHA-256',bytes);
+  return [...new Uint8Array(digest)].map(v=>v.toString(16).padStart(2,'0')).join('');
 }
-
-function renderCard(item, index, listId, apiReady) {
-  const root = node('article', 'gift-card');
-  const media = node('div', 'media');
-  if (item.image) {
-    const image = node('img');
-    image.src = item.image;
-    image.alt = item.name;
-    image.loading = 'lazy';
-    image.referrerPolicy = 'no-referrer';
-    image.addEventListener('error', () => image.replaceWith(node('span', 'placeholder', '♡')), { once: true });
-    media.append(image);
-  } else media.append(node('span', 'placeholder', '♡'));
-
-  const body = node('div', 'body');
-  body.append(node('span', 'shop', item.shop || 'Tienda'), node('h3', '', item.name));
-  if (item.description) body.append(node('div', 'description', item.description));
-  if (item.price) body.append(node('strong', 'price', item.price));
-
-  const actions = node('div', 'gift-actions');
-  const link = node('a', 'link', 'Ir al regalo ↗');
-  link.href = item.url;
-  link.target = '_blank';
-  link.rel = 'noopener noreferrer';
-  const purchased = node('button', 'purchase-button', 'Marcar como comprado');
-  purchased.type = 'button';
-  purchased.disabled = !apiReady;
-  purchased.dataset.giftIndex = String(index);
-  if (!apiReady) purchased.title = 'Comprobando disponibilidad de reservas';
-  actions.append(link, purchased);
-  body.append(actions);
-  root.append(media, body);
-  return { root, purchased, index, listId };
-}
-
-async function fetchStatus(listId) {
-  const url = new URL('/api/status', API_BASE);
-  url.searchParams.set('list', listId);
-  const response = await fetch(url, { headers: { Accept: 'application/json' }, cache: 'no-store' });
-  const payload = await response.json();
-  if (!response.ok || !payload.ok || !Array.isArray(payload.purchased)) {
-    throw new Error('El estado de regalos no está disponible.');
-  }
-  return new Set(payload.purchased.map(Number));
-}
-
-async function markPurchased(listId, index) {
-  const response = await fetch(new URL('/api/purchase', API_BASE), {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-    body: JSON.stringify({ list: listId, index })
+let state={live:false,listId:'',event:'',gifts:[],purchased:new Set(),online:false};
+function render() {
+  const host=$('cards');host.replaceChildren();
+  $('eventName').textContent=state.event||'Nuestra celebración';
+  $('count').textContent=state.gifts.length+(state.gifts.length===1?' regalo':' regalos');
+  document.title='Regalos de '+(state.event||'Nuestra celebración')+' · Mi Gran Día';
+  if(!state.gifts.length){host.append(node('p','empty','Todavía no hay regalos publicados.'));return;}
+  state.gifts.forEach((gift,index)=>{
+    const card=node('article','gift-card');
+    const id=state.live?gift.id:String(index);
+    const isBought=state.purchased.has(id);
+    if(isBought)card.classList.add('is-purchased');
+    const media=node('div','media');
+    if(gift.image){
+      const image=node('img');image.src=gift.image;image.alt=gift.name;image.loading='lazy';image.referrerPolicy='no-referrer';
+      image.addEventListener('error',()=>image.replaceWith(node('span','placeholder','♡')),{once:true});
+      media.append(image);
+    }else media.append(node('span','placeholder','♡'));
+    const body=node('div','body');
+    body.append(node('span','shop',gift.shop||'Tienda'),node('h3','',gift.name));
+    if(gift.description)body.append(node('div','description',gift.description));
+    if(gift.price)body.append(node('strong','price',gift.price));
+    const actions=node('div','gift-actions');
+    const link=node('a','link','Ir al regalo ↗');link.href=gift.url;link.target='_blank';link.rel='noopener noreferrer';
+    const button=node('button','purchase-button',isBought?'✓ Regalo comprado':'Marcar como comprado');
+    button.type='button';button.disabled=isBought||!state.online;
+    button.onclick=()=>void purchase(id);
+    actions.append(link,button);body.append(actions);card.append(media,body);host.append(card);
   });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok || !payload.ok) throw new Error(payload.error || 'No se pudo registrar la compra.');
-  return payload;
 }
-
-async function main() {
-  const snapshot = location.hash.slice(1);
-  const errorNode = byId('error');
-  const notice = byId('purchaseNotice');
+async function refreshList() {
+  const endpoint=new URL('/api/list',LIVE_API);endpoint.searchParams.set('list',state.listId);
+  const response=await fetch(endpoint,{cache:'no-store',headers:{Accept:'application/json'}});
+  const result=await response.json().catch(()=>({}));
+  if(!response.ok||!result.ok||!Array.isArray(result.gifts))throw new Error(result.error||'La lista no está publicada.');
+  state.event=String(result.event||'Nuestra celebración');
+  state.gifts=result.gifts;state.purchased=new Set(result.purchased||[]);state.online=true;
+  render();$('purchaseNotice').textContent='';
+}
+async function refreshLegacy() {
+  const endpoint=new URL('/api/status',LEGACY_API);endpoint.searchParams.set('list',state.listId);
+  const response=await fetch(endpoint,{cache:'no-store'});
+  const result=await response.json();
+  if(!response.ok||!result.ok)throw new Error('Sin conexión con compras');
+  state.purchased=new Set((result.purchased||[]).map(String));state.online=true;render();
+}
+async function purchase(giftId) {
+  if(!state.online||state.purchased.has(giftId))return;
+  if(!confirm('¿Confirmas que ya compraste este regalo? Los demás invitados lo verán como comprado.'))return;
+  state.online=false;render();
+  const endpoint=new URL('/api/purchase',state.live?LIVE_API:LEGACY_API);
+  const body=state.live?{list:state.listId,id:giftId}:{list:state.listId,index:Number(giftId)};
   try {
-    const data = await decodeWishlistShare(snapshot);
-    const listId = await listFingerprint(snapshot);
-    byId('eventName').textContent = data.event;
-    document.title = 'Regalos de ' + data.event + ' · Mi Gran Día';
-    byId('count').textContent = data.gifts.length + (data.gifts.length === 1 ? ' regalo' : ' regalos');
-
-    const views = data.gifts.map((gift, index) => renderCard(gift, index, listId, false));
-    if (views.length) byId('cards').append(...views.map(view => view.root));
-    else byId('cards').append(node('p', 'empty', 'Esta lista todavía no tiene regalos.'));
-
-    let purchased = new Set();
-    let apiReady = false;
-    const refresh = async () => {
-      const latest = await fetchStatus(listId);
-      purchased = latest;
-      apiReady = true;
-      views.forEach(({ root, purchased: button, index }) => applyPurchaseState(root, button, purchased.has(index)));
-      notice.textContent = '';
-    };
-    try {
-      await refresh();
-    } catch {
-      notice.textContent = 'No se pudo conectar con el registro de compras. Los botones estarán disponibles cuando el servicio esté activo.';
-    }
-    for (const view of views) {
-      const { root, purchased: button, index } = view;
-      button.disabled = !apiReady || purchased.has(index);
-      button.addEventListener('click', async () => {
-        if (!apiReady || purchased.has(index)) return;
-        if (!window.confirm('¿Confirmas que ya compraste este regalo? Se marcará como comprado para los demás invitados.')) return;
-        button.disabled = true;
-        button.textContent = 'Registrando compra…';
-        try {
-          const result = await markPurchased(listId, index);
-          purchased.add(index);
-          applyPurchaseState(root, button, true);
-          notice.textContent = result.alreadyPurchased ? 'Este regalo ya había sido marcado como comprado.' : '¡Gracias! Tu compra se ha registrado.';
-        } catch {
-          button.disabled = false;
-          button.textContent = 'Marcar como comprado';
-          notice.textContent = 'No se pudo registrar. Inténtalo nuevamente.';
-        }
-      });
-    }
-    window.addEventListener('focus', () => { void refresh().catch(() => {}); });
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) void refresh().catch(() => {});
-    });
-  } catch (error) {
-    errorNode.hidden = false;
-    errorNode.textContent = error.message || 'No se pudo abrir esta lista.';
-  }
+    const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok||!result.ok)throw new Error(result.error||'Error al registrar');
+    state.purchased.add(giftId);
+    $('purchaseNotice').textContent='¡Gracias! El regalo quedó marcado como comprado.';
+  }catch{ $('purchaseNotice').textContent='No se pudo registrar la compra. Inténtalo de nuevo.'; }
+  finally{state.online=true;render();}
 }
-void main();
+async function main() {
+  const fragment=location.hash.slice(1);
+  const id=parseWishlistLiveShare(fragment);
+  state.live=Boolean(id);
+  state.listId=id||(await legacyHash(fragment));
+  if(id){
+    try{await refreshList();}
+    catch{ $('purchaseNotice').textContent='No se pudo consultar la lista actual. Cuando se publique desde Mi Gran Día aparecerán aquí los regalos.';render(); }
+    try{
+      const editor=await import('./public-editor.js?v=1');
+      editor.initWishlistPublicEditor(id,()=>{
+        // Refresh public state from backend; never confuse private un-published changes with public state.
+        void refreshList().catch(()=>{ $('purchaseNotice').textContent='Guardado privado: pendiente de sincronización pública.'; });
+      });
+    }catch(error){
+      $('purchaseNotice').textContent='La lista se muestra, pero el acceso de edición no está disponible temporalmente.';
+      console.warn('Wishlist public editor initialization failed',error);
+    }
+  }else{
+    try{
+      const data=await decodeWishlistShare(fragment);
+      state.event=data.event;state.gifts=data.gifts;render();
+      await refreshLegacy();
+    }catch(error){
+      if(!state.gifts.length){$('error').hidden=false;$('error').textContent=error.message||'Enlace no válido';}
+      else {$('purchaseNotice').textContent='No se puede consultar el registro de compras por ahora.';}
+    }
+    $('authAction').onclick=()=>{
+      $('purchaseNotice').textContent='Este es un enlace anterior, de copia. Para editar y sincronizar desde aquí, comparte un nuevo enlace desde Wishlist en Mi Gran Día.';
+    };
+  }
+  window.addEventListener('focus',()=>{void (state.live?refreshList():refreshLegacy()).catch(()=>{});});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)void(state.live?refreshList():refreshLegacy()).catch(()=>{});});
+}
+void main().catch(error=>{ $('error').hidden=false;$('error').textContent=error.message||'No se pudo abrir la lista.'; });
