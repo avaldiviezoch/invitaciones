@@ -44,6 +44,33 @@
     .purchase-button:disabled{opacity:.55;cursor:not-allowed}
     .is-purchased .purchase-button:disabled{opacity:1;background:#f8edf1;color:#955869;border-color:#d8aab5}
     .purchase-notice{min-height:20px;margin:0 0 14px;color:#a36373;font-size:12px;line-height:1.5}
+
+    .account-action{position:absolute;right:max(18px,calc((100vw - 1050px)/2));top:18px;display:flex;align-items:center;justify-content:center;gap:7px;min-height:40px;padding:0 13px;border:1px solid #e6d5d9;border-radius:999px;background:#fff;color:#9b6b78;font-size:11px;font-weight:750;cursor:pointer}
+    .auth-dialog,.editor-dialog{width:min(470px,calc(100% - 26px));max-height:90dvh;overflow:auto;padding:0;border:0;border-radius:20px;box-shadow:0 20px 75px #382a3440;background:#fff;color:#34322e}
+    .auth-dialog::backdrop,.editor-dialog::backdrop{background:#29272a91}
+    .dialog-body{padding:22px}
+    .dialog-heading{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:18px}
+    .dialog-heading h2{font:400 25px Georgia,serif;margin:0}
+    .icon-close{width:33px;height:33px;border:0;border-radius:50%;background:#f2efec;color:#696563;font-size:21px;cursor:pointer}
+    .editor-form,.auth-email-form{display:grid;gap:12px}
+    .editor-form label,.auth-email-form label{display:grid;gap:6px;font-size:11px;color:#716b68;font-weight:750}
+    .editor-form input,.editor-form textarea,.auth-email-form input{width:100%;min-width:0;padding:12px;border:1px solid #e6ddda;border-radius:10px;background:#fbfaf9;color:#34322e;font:400 16px Arial,sans-serif}
+    .editor-form textarea{min-height:66px;resize:vertical}
+    .editor-primary,.auth-primary{border:0;border-radius:10px;background:#809069;color:#fff;min-height:42px;padding:11px 14px;font-weight:800;cursor:pointer}
+    .editor-secondary,.auth-secondary{border:1px solid #e6d5d9;border-radius:10px;background:#fcf7f8;color:#9c6877;min-height:40px;padding:9px 13px;font-weight:750;cursor:pointer}
+    .editor-status{font-size:12px;color:#7f7471;line-height:1.45}
+    .editor-tools{padding:0 0 18px}
+    .editor-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+    .editor-top h2{font:400 21px Georgia,serif;margin:0}
+    .editor-item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #e9e2df;font-size:12px}
+    .editor-item span{overflow-wrap:anywhere}
+    .editor-item>div{display:flex;gap:5px;flex:0 0 auto}
+    .editor-item button{border:1px solid #e4dadd;border-radius:8px;padding:7px 8px;background:#fff;color:#916e76;cursor:pointer;font-size:10px}
+    .auth-email-form{margin-top:17px;padding-top:16px;border-top:1px solid #eee8e3}
+    .auth-identity{margin:5px 0 13px;color:#7a7471;font-size:12px}
+    .auth-feedback{font-size:12px;color:#a15665;line-height:1.5;margin-top:10px}
+    [hidden]{display:none}
+    @media(max-width:530px){.account-action{top:10px;right:10px;padding:0 11px;min-height:36px;font-size:10px}.editor-top{align-items:stretch}.editor-top button{flex:1}.dialog-body{padding:18px}}
     .empty{background:#fff;border:1px solid #ece5df;border-radius:16px;text-align:center;padding:34px;color:#817c75}
     .note{text-align:center;padding-top:24px;color:#9a9490;font-size:11px;line-height:1.5}
     .error{margin:40px auto;max-width:530px;text-align:center;line-height:1.6;color:#8b5561;padding:24px;border:1px solid #ead6da;background:#fff;border-radius:14px}
@@ -67,7 +94,7 @@
   </style>
 </head>
 <body>
-  <header><div class="brand">Mi Gran Día · Lista de regalos</div><div class="symbol" aria-hidden="true">♡</div><h1>Nuestros regalos</h1><div class="event" id="eventName"></div><p>Estos son algunos detalles que nos encantaría recibir. Gracias por acompañarnos en un día tan especial.</p></header>
+  <header style="position:relative"><button class="account-action" id="authAction" type="button" aria-label="Ingresar a Mi Gran Día">♙ Ingresar</button><div class="brand">Mi Gran Día · Lista de regalos</div><div class="symbol" aria-hidden="true">♡</div><h1>Nuestros regalos</h1><div class="event" id="eventName"></div><p>Estos son algunos detalles que nos encantaría recibir. Gracias por acompañarnos en un día tan especial.</p></header>
   <main class="wrap">
     <div class="toolbar"><h2>Lista de deseos</h2><span id="count"></span></div>
     <p id="purchaseNotice" class="purchase-notice" role="status" aria-live="polite"></p>
@@ -75,6 +102,46 @@
     <section id="cards" class="cards" aria-label="Regalos disponibles"></section>
     <div class="note">Los regalos corresponden al momento de compartir la lista. El estado de compra se consulta al abrir la página. Los precios pueden cambiar según la tienda.</div>
   </main>
-  <script type="module" src="src/modules/wishlist/public.js?v=2"></script>
+
+  <section id="editorTools" class="editor-tools wrap" hidden>
+    <div class="editor-top"><div><h2>Administrar regalos</h2><p class="auth-identity" id="editorIdentity"></p></div>
+      <button type="button" id="editorAdd" class="editor-primary">＋ Agregar regalo</button>
+      <button type="button" id="editorResync" class="editor-secondary">Sincronizar lista</button>
+    </div>
+    <p id="editorStatus" class="editor-status" role="status"></p>
+    <div id="editorItems" aria-label="Regalos para editar"></div>
+  </section>
+  <dialog id="authDialog" class="auth-dialog" aria-labelledby="authDialogTitle">
+    <div class="dialog-body">
+      <div class="dialog-heading"><h2 id="authDialogTitle">Ingresar a Mi Gran Día</h2><button type="button" class="icon-close" id="authClose" aria-label="Cerrar">×</button></div>
+      <p class="auth-identity">Ingresa con la misma cuenta que utilizas para organizar la boda. Solo los usuarios autorizados podrán modificar regalos.</p>
+      <button type="button" class="auth-primary" id="authGoogle" style="width:100%">Continuar con Google</button>
+      <form id="authEmailForm" class="auth-email-form">
+        <label>Correo electrónico<input name="email" type="email" autocomplete="email" required></label>
+        <label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label>
+        <button type="submit" class="auth-secondary">Ingresar con correo</button>
+      </form>
+      <button type="button" id="authLogout" class="auth-secondary" hidden style="margin-top:14px">Cerrar sesión</button>
+      <p id="authFeedback" class="auth-feedback" role="alert"></p>
+    </div>
+  </dialog>
+  <dialog id="editorDialog" class="editor-dialog" aria-labelledby="editorDialogTitle">
+    <div class="dialog-body">
+      <div class="dialog-heading"><h2 id="editorDialogTitle">Agregar regalo</h2><button type="button" class="icon-close" id="editorDialogClose" aria-label="Cerrar">×</button></div>
+      <form id="editorForm" class="editor-form">
+        <input type="hidden" id="editorItemId" name="id">
+        <label>Enlace del producto<input type="url" name="url" placeholder="https://tienda.com/producto" required></label>
+        <button type="button" id="editorAnalyze" class="editor-secondary">Buscar información automáticamente</button>
+        <label>Nombre del regalo<input name="name" maxlength="110" required></label>
+        <label>Tienda<input name="shop" maxlength="65"></label>
+        <label>Precio referencial<input name="price" maxlength="40"></label>
+        <label>Enlace de la imagen<input name="image" type="url"></label>
+        <label>Descripción<textarea name="description" maxlength="350"></textarea></label>
+        <p id="editorFormFeedback" class="editor-status" role="status"></p>
+        <button type="submit" class="editor-primary">Guardar regalo</button>
+      </form>
+    </div>
+  </dialog>
+  <script type="module" src="src/modules/wishlist/public.js?v=3"></script>
 </body>
 </html>
