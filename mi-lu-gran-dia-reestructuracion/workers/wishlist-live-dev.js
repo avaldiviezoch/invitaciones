@@ -125,8 +125,18 @@ export default {
       if (!allowed) return json({ok:false,error:'Only authorized editors can publish'},403,origin);
       let gifts;
       try { gifts = giftsFrom(body.gifts); } catch { return json({ok:false,error:'Invalid gifts'},400,origin); }
+      const alias = String(body.legacyList || '');
+      if (alias && !HEX.test(alias)) return json({ok:false,error:'Invalid legacy link'},400,origin);
       const value = {event:String(body.event || 'Nuestra celebración').slice(0,100),gifts};
-      try { await env.WISHLIST_LIVE.put('list:' + listId, JSON.stringify(value)); }
+      try {
+        await env.WISHLIST_LIVE.put('list:' + listId, JSON.stringify(value));
+        if (alias && alias !== listId) {
+          const prior = await env.WISHLIST_LIVE.get('alias-owner:' + alias);
+          if (prior && prior !== listId) return json({ok:false,error:'Legacy link belongs to another list'},409,origin);
+          await env.WISHLIST_LIVE.put('alias-owner:' + alias, listId);
+          await env.WISHLIST_LIVE.put('list:' + alias, JSON.stringify(value));
+        }
+      }
       catch { return json({ok:false,error:'Unable to publish list'},503,origin); }
       return json({ok:true,count:gifts.length},200,origin);
     }
