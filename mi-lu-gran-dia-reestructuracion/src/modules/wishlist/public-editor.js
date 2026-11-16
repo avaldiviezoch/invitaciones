@@ -42,6 +42,8 @@ function ui(message='') {
 function syncMode() {
   const avatar=$('authAvatar');
   const user=auth.currentUser;
+  const copyright=$('wishlistCopyright');
+  if(copyright) copyright.hidden=Boolean(user);
   const photo=user?.photoURL;
   const safePhoto=typeof photo==='string' && /^https:\/\//i.test(photo) ? photo : '';
   if (avatar) {
@@ -180,6 +182,7 @@ export function initWishlistPublicEditor(liveId,updated,options={}) {
   legacySnapshot=Array.isArray(options.legacyGifts)?options.legacyGifts:[];
   onUpdated=updated;
   const dialog=$('authDialog');
+  syncMode();
   $('authAction').onclick=()=>{
     if(auth.currentUser){
       // Ya autenticado: "Mi cuenta" lleva a la aplicación principal del dominio.
