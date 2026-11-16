@@ -137,7 +137,11 @@ async function persistWishlist(root, previous) {
 export async function mountWishlist(context) {
   const root = document.querySelector(rootSelector);
   if (!root || !context?.id) return false;
+  if (wishlistState.context?.id === context.id && root.querySelector('.wishlist-shell')) return true;
+  destroyWishlist();
+  const token = ++lifecycleToken;
   currentEventId = String(context.id);
+  wishlistState.context = context;
   root.innerHTML = `
     <div class="wishlist-shell">
       <header class="wishlist-hero">
@@ -151,7 +155,7 @@ export async function mountWishlist(context) {
         <div class="wishlist-hero-total"><span>Regalos en la lista</span><strong data-wishlist-total>0</strong></div>
       </header>
       <main class="wishlist-content">
-        <div class="wishlist-actions-row"><button type="button" class="wishlist-add-button" data-wishlist-open>＋ Agregar regalo</button></div>
+        <div class="wishlist-actions-row"><button type="button" class="wishlist-add-button" data-wishlist-open>＋ Agregar regalo</button><span class="wishlist-save-status" data-wishlist-save-status role="status"></span></div>
         <section class="wishlist-collection" aria-labelledby="wishlist-collection-title">
           <div class="wishlist-collection-head">
             <div><h2 id="wishlist-collection-title">Nuestra lista de regalos</h2><p>Los detalles que nos gustaría recibir.</p></div>
@@ -172,7 +176,6 @@ export async function mountWishlist(context) {
           </div>
           <div class="wishlist-grid" data-wishlist-items></div>
         </section>
-        <p class="wishlist-footnote">Los regalos añadidos en esta prueba son temporales y se perderán al recargar la página.</p>
       </main>
       <dialog class="wishlist-dialog" data-wishlist-dialog aria-labelledby="wishlist-form-title">
         <div class="wishlist-dialog-frame">
@@ -194,7 +197,10 @@ export async function mountWishlist(context) {
     </div>`;
   const dialog = root.querySelector('[data-wishlist-dialog]');
   const form = root.querySelector('[data-wishlist-form]');
-  root.querySelector('[data-wishlist-open]').addEventListener('click', () => {
+  const openButton = root.querySelector('[data-wishlist-open]');
+  openButton.hidden = !canEditWishlist();
+  openButton.addEventListener('click', () => {
+    if (!canEditWishlist() || wishlistState.saving) return;
     form.reset();
     resetAnalysis();
     dialog.showModal();
@@ -327,8 +333,9 @@ export async function mountWishlist(context) {
       missing.append(label);
     });
   });
-  form.addEventListener('submit', (event) => {
+  form.addEventListener('submit', async (event) => {
     event.preventDefault();
+    if (wishlistState.saving || !canEditWishlist()) return;
     const url = safeUrl(urlInput.value);
     if (!extracted || url !== analyzedUrl || details.hidden) {
       showError('Primero analiza el enlace para continuar.');
@@ -340,21 +347,57 @@ export async function mountWishlist(context) {
       if (!item[key]) item[key] = String(data.get(key) || '').trim().slice(0, max);
     });
     if (!item.name) { showError('Escribe el nombre del regalo.'); return; }
-    draftsByEvent.set(currentEventId, [{ ...item, id: crypto.randomUUID(), url }, ...(draftsByEvent.get(currentEventId) || [])]);
-    form.reset();
-    resetAnalysis();
-    dialog.close();
+    const previous = wishlistState.items;
+    wishlistState.items = [{ ...item, id: crypto.randomUUID(), url }, ...previous];
+    const saveButton = form.querySelector('[type="submit"]');
+    saveButton.disabled = true;
     renderCards(root);
+    try {
+      await persistWishlist(root, previous);
+      if (token !== lifecycleToken) return;
+      form.reset();
+      resetAnalysis();
+      dialog.close();
+    } catch {
+      if (token === lifecycleToken) showError('No se pudo guardar el regalo. Inténtalo nuevamente.');
+    } finally {
+      if (token === lifecycleToken) saveButton.disabled = false;
+    }
+  });
+  setSaveStatus(root, 'Cargando regalos…');
+  try {
+    wishlistState.items = normalizeGifts(await readPlannerStorageKey(context, STORAGE_KEY));
+  } catch {
+    if (token === lifecycleToken) {
+      setSaveStatus(root, 'No se pudieron cargar los regalos. Vuelve a abrir Wishlist.');
+      openButton.hidden = true;
+    }
+    return false;
+  }
+  if (token !== lifecycleToken) return false;
+  setSaveStatus(root, '');
+  unsubscribeWishlist = subscribePlannerStorageKey(context, STORAGE_KEY, (value) => {
+    if (token !== lifecycleToken || wishlistState.saving) return;
+    wishlistState.items = normalizeGifts(value);
+    renderCards(root);
+  }, () => {
+    if (token === lifecycleToken) setSaveStatus(root, 'No se pudieron sincronizar los regalos.');
   });
   renderCards(root);
   return true;
 }
 export function destroyWishlist() {
+  lifecycleToken++;
+  unsubscribeWishlist();
+  unsubscribeWishlist = () => {};
   const root = document.querySelector(rootSelector);
   requestEpoch++;
   metadataRequest?.abort();
   metadataRequest = null;
   root?.querySelector('[data-wishlist-dialog]')?.close();
   if (root) root.replaceChildren();
+  wishlistState.items = [];
+  wishlistState.context = null;
+  wishlistState.saving = false;
   currentEventId = '';
 }
