@@ -137,7 +137,7 @@ async function persistWishlist(root, previous) {
 export async function mountWishlist(context) {
   const root = document.querySelector(rootSelector);
   if (!root || !context?.id) return false;
-  if (wishlistState.context?.id === context.id && root.querySelector('.wishlist-shell')) return true;
+  if (wishlistState.context?.id === context.id && root.dataset.wishlistLoaded === 'true') return true;
   destroyWishlist();
   const token = ++lifecycleToken;
   currentEventId = String(context.id);
@@ -198,7 +198,7 @@ export async function mountWishlist(context) {
   const dialog = root.querySelector('[data-wishlist-dialog]');
   const form = root.querySelector('[data-wishlist-form]');
   const openButton = root.querySelector('[data-wishlist-open]');
-  openButton.hidden = !canEditWishlist();
+  openButton.hidden = true;
   openButton.addEventListener('click', () => {
     if (!canEditWishlist() || wishlistState.saving) return;
     form.reset();
@@ -375,7 +375,9 @@ export async function mountWishlist(context) {
     return false;
   }
   if (token !== lifecycleToken) return false;
+  root.dataset.wishlistLoaded = 'true';
   setSaveStatus(root, '');
+  openButton.hidden = !canEditWishlist();
   unsubscribeWishlist = subscribePlannerStorageKey(context, STORAGE_KEY, (value) => {
     if (token !== lifecycleToken || wishlistState.saving) return;
     wishlistState.items = normalizeGifts(value);
@@ -395,7 +397,10 @@ export function destroyWishlist() {
   metadataRequest?.abort();
   metadataRequest = null;
   root?.querySelector('[data-wishlist-dialog]')?.close();
-  if (root) root.replaceChildren();
+  if (root) {
+    root.replaceChildren();
+    delete root.dataset.wishlistLoaded;
+  }
   wishlistState.items = [];
   wishlistState.context = null;
   wishlistState.saving = false;
