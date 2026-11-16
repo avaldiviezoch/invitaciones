@@ -80,3 +80,7 @@ h3{font:500 18px/1.22 Georgia,serif;margin:0;overflow-wrap:anywhere}
   .gift-card.is-purchased::before{font-size:8px;top:8px;right:8px;padding:5px 7px}
 }
 @media(max-width:350px){.cards{grid-template-columns:1fr}}
+
+.public-hero{position:relative}
+#authGoogle{width:100%}
+.auth-logout{margin-top:14px}
