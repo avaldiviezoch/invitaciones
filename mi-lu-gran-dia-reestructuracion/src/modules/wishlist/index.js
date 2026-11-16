@@ -148,20 +148,23 @@ export function mountWishlist(context) {
     metadataRequest = controller;
     analyze.disabled = true;
     analyze.firstChild.textContent = 'Buscando información… ';
-    // Consulta experimental a un servicio público de metadatos. No modifica Firebase.
-    // Si la tienda bloquea el acceso o hay límite de servicio, se habilita completar manualmente.
+    // Extractor universal e independiente en Cloudflare DEV.
+    // No hay lista de tiendas ni acceso a Firebase.
     let data = {};
     let failed = false;
+    let failureReason = '';
     try {
-      const endpoint = 'https://api.microlink.io?data.price=true&url=' + encodeURIComponent(url);
+      const endpoint = new URL('https://migrandia-product-metadata-dev.avaldiviezoch.workers.dev/api/product');
+      endpoint.searchParams.set('url', url);
       const response = await fetch(endpoint, { signal: controller.signal, headers: { Accept: 'application/json' } });
-      if (!response.ok) throw new Error('Metadata unavailable');
       const payload = await response.json();
-      if (payload.status !== 'success') throw new Error('Metadata unavailable');
-      data = payload.data || {};
-    } catch (_) {
+      if (!response.ok || !payload.ok) throw new Error(String(payload.error || 'metadata-unavailable'));
+      data = payload.product || {};
+    } catch (error) {
       if (controller.signal.aborted) return;
       failed = true;
+      failureReason = error?.message || 'metadata-unavailable';
+      console.warn('Wishlist: no se pudieron extraer metadatos del enlace', failureReason);
     }
     if (epoch !== requestEpoch || currentEventId !== String(context.id)) return;
     metadataRequest = null;
@@ -169,21 +172,20 @@ export function mountWishlist(context) {
     analyze.firstChild.textContent = 'Analizar de nuevo ';
     let shop = '';
     try { shop = new URL(url).hostname.replace(/^www\./, ''); } catch (_) {}
-    const image = safeUrl(typeof data.image === 'string' ? data.image : data.image?.url);
-    const price = data.price && typeof data.price === 'object'
-      ? [data.price.currency, data.price.value ?? data.price.amount].filter((v) => v != null && v !== '').join(' ')
-      : typeof data.price === 'string' ? data.price : '';
+    const image = safeUrl(data.image);
+    const price = String(data.price || '').trim();
+    const currency = String(data.currency || '').trim();
     extracted = {
-      name: String(data.title || '').trim().slice(0, 110),
+      name: String(data.name || '').trim().slice(0, 110),
       image,
-      shop: String(data.publisher || shop).slice(0, 65),
-      price: String(price).slice(0, 40),
+      shop: String(data.shop || shop).slice(0, 65),
+      price: (price ? [currency, price].filter(Boolean).join(' ') : '').slice(0, 40),
       description: String(data.description || '').trim().slice(0, 350)
     };
     details.hidden = false;
     status.textContent = failed
-      ? 'No pudimos leer los datos de esta tienda. Puedes completarlos manualmente.'
-      : 'Encontramos información del enlace. Completa únicamente los datos pendientes.';
+      ? 'Esta tienda no entregó los metadatos en este intento. Puedes completar la información disponible manualmente.'
+      : 'Análisis completado. Completa únicamente los datos pendientes.';
     preview.replaceChildren();
     const previewImage = element('img', 'wishlist-preview-image');
     if (extracted.image) {
