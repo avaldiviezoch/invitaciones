@@ -1,4 +1,4 @@
-import { auth } from '../../services/firebase-client.js';
+import { auth, authPersistenceReady } from '../../services/firebase-client.js';
 import { listWeddingContexts } from '../../services/wedding-context.js';
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
@@ -29,7 +29,16 @@ function normalized(raw) {
     price:String(x.price||'').slice(0,40),description:String(x.description||'').slice(0,350),url:validUrl(x.url)
   }));
 }
-function ui(message='') { text('editorStatus',message); }
+function ui(message='') {
+  text('editorStatus',message);
+  // Authentication errors must never be hidden in the editor-only section.
+  if (!context && message) {
+    text('authFeedback',message);
+    text('purchaseNotice',message);
+  } else if (context && message) {
+    text('authFeedback','');
+  }
+}
 function syncMode() {
   const editor=$('editorTools');
   editor.hidden=!context;
@@ -90,7 +99,7 @@ function openForm(item=null) {
 }
 async function activate(user) {
   const token=++epoch;unsubscribe();unsubscribe=()=>{};context=null;items=[];syncMode();
-  if(!user){ui('Inicia sesión para administrar esta lista.');return;}
+  if(!user){text('authFeedback','');return;}
   ui('Comprobando permisos de tu boda…');
   try{
     const contexts=await listWeddingContexts(user);
@@ -121,6 +130,7 @@ async function activate(user) {
     items=matches[0].gifts||normalized(await readPlannerStorageKey(context,STORAGE_KEY));
     if(token!==epoch)return;
     syncMode();renderManage();onUpdated(items);
+    text('purchaseNotice','');
     ui('Puedes agregar, editar o quitar regalos. Se guardarán en Mi Gran Día.');
     unsubscribe=subscribePlannerStorageKey(context,STORAGE_KEY,value=>{
       if(token!==epoch||busy)return;
@@ -148,12 +158,14 @@ export function initWishlistPublicEditor(liveId,updated,options={}) {
     catch(error){ui(error.message||'No se pudo sincronizar.');}
   };
   $('authGoogle').onclick=async()=>{
+    await authPersistenceReady;
     text('authFeedback','Ingresando…');
     try{await signInWithPopup(auth,new GoogleAuthProvider());dialog.close();text('authFeedback','');}
     catch(error){text('authFeedback','No se pudo iniciar sesión: '+(error?.message||'Intenta con correo.'));}
   };
   $('authEmailForm').onsubmit=async(e)=>{
     e.preventDefault();
+    await authPersistenceReady;
     text('authFeedback','Ingresando…');
     const form=e.currentTarget;
     try{
