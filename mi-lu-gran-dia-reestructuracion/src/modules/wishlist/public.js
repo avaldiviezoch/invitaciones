@@ -82,7 +82,7 @@ async function main() {
     try{await refreshList();}
     catch{ $('purchaseNotice').textContent='No se pudo consultar la lista actual. Cuando se publique desde Mi Gran Día aparecerán aquí los regalos.';render(); }
     try{
-      const editor=await import('./public-editor.js?v=1');
+      const editor=await import('./public-editor.js?v=2');
       editor.initWishlistPublicEditor(id,()=>{
         // Refresh public state from backend; never confuse private un-published changes with public state.
         void refreshList().catch(()=>{ $('purchaseNotice').textContent='Guardado privado: pendiente de sincronización pública.'; });
@@ -92,17 +92,35 @@ async function main() {
       console.warn('Wishlist public editor initialization failed',error);
     }
   }else{
+    let legacyGifts=[];
     try{
       const data=await decodeWishlistShare(fragment);
-      state.event=data.event;state.gifts=data.gifts;render();
-      await refreshLegacy();
+      state.event=data.event;state.gifts=data.gifts;legacyGifts=data.gifts;render();
+      try {
+        // Once its owner signs in and publishes, this same old URL becomes live.
+        await refreshList();
+        state.live=true;
+      } catch {
+        await refreshLegacy().catch(()=>{
+          $('purchaseNotice').textContent='No se puede consultar el registro de compras por ahora.';
+        });
+      }
     }catch(error){
-      if(!state.gifts.length){$('error').hidden=false;$('error').textContent=error.message||'Enlace no válido';}
-      else {$('purchaseNotice').textContent='No se puede consultar el registro de compras por ahora.';}
+      $('error').hidden=false;$('error').textContent=error.message||'Enlace no válido';
     }
-    $('authAction').onclick=()=>{
-      $('purchaseNotice').textContent='Este es un enlace anterior, de copia. Para editar y sincronizar desde aquí, comparte un nuevo enlace desde Wishlist en Mi Gran Día.';
-    };
+    if(legacyGifts.length){
+      try {
+        const editor=await import('./public-editor.js?v=2');
+        editor.initWishlistPublicEditor('',()=>{
+          void refreshList().then(()=>{state.live=true;}).catch(()=>{
+            $('purchaseNotice').textContent='Guardado en Mi Gran Día. Pendiente de publicación para invitados.';
+          });
+        },{legacyListId:state.listId,legacyGifts});
+      }catch(error){
+        console.warn('Wishlist legacy login initialization failed',error);
+        $('purchaseNotice').textContent='No se pudo habilitar el inicio de sesión en este momento.';
+      }
+    }
   }
   window.addEventListener('focus',()=>{void (state.live?refreshList():refreshLegacy()).catch(()=>{});});
   document.addEventListener('visibilitychange',()=>{if(!document.hidden)void(state.live?refreshList():refreshLegacy()).catch(()=>{});});
