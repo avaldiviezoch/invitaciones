@@ -1,5 +1,7 @@
 // Prototipo visual de Wishlist. No escribe en Firebase ni en almacenamiento local.
 const draftsByEvent = new Map();
+const wishlistSizes = new Set(['large', 'medium', 'compact', 'mini']);
+let wishlistCardSize = 'large';
 let currentEventId = '';
 let metadataRequest = null;
 let requestEpoch = 0;
@@ -29,6 +31,12 @@ function renderCards(root) {
   const counter = root.querySelector('[data-wishlist-count]');
   if (!container || !counter) return;
   const items = draftsByEvent.get(currentEventId) || [];
+  container.dataset.cardSize = wishlistCardSize;
+  root.querySelectorAll('[data-wishlist-size]').forEach((button) => {
+    const active = button.dataset.wishlistSize === wishlistCardSize;
+    button.classList.toggle('is-active', active);
+    button.setAttribute('aria-pressed', String(active));
+  });
   container.replaceChildren();
   counter.textContent = items.length + (items.length === 1 ? ' regalo' : ' regalos');
   const heroCount = root.querySelector('[data-wishlist-total]');
@@ -91,7 +99,23 @@ export function mountWishlist(context) {
       <main class="wishlist-content">
         <div class="wishlist-actions-row"><button type="button" class="wishlist-add-button" data-wishlist-open>＋ Agregar regalo</button></div>
         <section class="wishlist-collection" aria-labelledby="wishlist-collection-title">
-          <div class="wishlist-collection-head"><div><h2 id="wishlist-collection-title">Nuestra lista de regalos</h2><p>Los detalles que nos gustaría recibir.</p></div><span data-wishlist-count>0 regalos</span></div>
+          <div class="wishlist-collection-head">
+            <div><h2 id="wishlist-collection-title">Nuestra lista de regalos</h2><p>Los detalles que nos gustaría recibir.</p></div>
+            <div class="wishlist-collection-tools">
+              <span data-wishlist-count>0 regalos</span>
+              <details class="wishlist-size-control" data-wishlist-size-control>
+                <summary aria-label="Cambiar tamaño de las tarjetas" title="Tamaño de tarjetas">
+                  <span class="wishlist-size-icon" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+                </summary>
+                <div class="wishlist-size-menu" role="group" aria-label="Tamaño de tarjetas">
+                  <button type="button" data-wishlist-size="large"><span class="wishlist-size-preview is-large" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>Actual</b></button>
+                  <button type="button" data-wishlist-size="medium"><span class="wishlist-size-preview is-medium" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>Medio</b></button>
+                  <button type="button" data-wishlist-size="compact"><span class="wishlist-size-preview is-compact" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>Compacto</b></button>
+                  <button type="button" data-wishlist-size="mini"><span class="wishlist-size-preview is-mini" aria-hidden="true"><i></i><i></i><i></i><i></i></span><b>Miniatura</b></button>
+                </div>
+              </details>
+            </div>
+          </div>
           <div class="wishlist-grid" data-wishlist-items></div>
         </section>
         <p class="wishlist-footnote">Los regalos añadidos en esta prueba son temporales y se perderán al recargar la página.</p>
@@ -135,6 +159,15 @@ export function mountWishlist(context) {
   const status = root.querySelector('[data-wishlist-status]');
   const errorNode = root.querySelector('[data-wishlist-error]');
   const urlInput = form.elements.namedItem('url');
+  root.querySelectorAll('[data-wishlist-size]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const size = String(button.dataset.wishlistSize || '');
+      if (!wishlistSizes.has(size)) return;
+      wishlistCardSize = size;
+      renderCards(root);
+      root.querySelector('[data-wishlist-size-control]').open = false;
+    });
+  });
   const editableFields = [
     { key: 'name', title: 'Nombre del regalo', required: true, placeholder: 'Ej. Freidora de aire', max: 110 },
     { key: 'shop', title: 'Tienda', placeholder: 'Ej. Falabella', max: 65 },
