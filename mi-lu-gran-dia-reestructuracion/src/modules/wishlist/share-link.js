@@ -1,4 +1,4 @@
-// Portable Wishlist snapshots: no wedding ID, auth, or private planner data in public URLs.
+// Legacy snapshots stay readable; new w2 links use a stable SHA-256 identifier derived from weddingId without exposing it.
 const MAX_SHARE_LENGTH = 32000;
 const fields = ['name', 'image', 'shop', 'price', 'description', 'url'];
 function safeLink(value) {
@@ -60,4 +60,20 @@ export async function decodeWishlistShare(fragment) {
   const data = JSON.parse(new TextDecoder().decode(bytes));
   if (data?.v !== 1 || !Array.isArray(data.gifts) || data.gifts.length > 100) throw new Error('Versión de lista no compatible.');
   return { event: String(data.event || 'Nuestra celebración').slice(0, 100), gifts: giftData(data.gifts) };
+}
+
+const LIVE_PREFIX = 'w2.';
+export async function wishlistPublicId(weddingId) {
+  const id = String(weddingId || '').trim();
+  if (!id || id.length > 160) throw new Error('Identificador de boda inválido.');
+  const bytes = new TextEncoder().encode('migrandia:wishlist:live:v1:' + id);
+  const digest = await crypto.subtle.digest('SHA-256', bytes);
+  return Array.from(new Uint8Array(digest), n => n.toString(16).padStart(2, '0')).join('');
+}
+export async function encodeWishlistLiveShare(weddingId) {
+  return LIVE_PREFIX + await wishlistPublicId(weddingId);
+}
+export function parseWishlistLiveShare(fragment) {
+  const match = /^w2\.([a-f0-9]{64})$/.exec(String(fragment || ''));
+  return match ? match[1] : '';
 }
