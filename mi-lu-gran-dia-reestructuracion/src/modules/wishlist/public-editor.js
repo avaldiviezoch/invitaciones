@@ -59,7 +59,7 @@ function syncMode() {
   }
   const editor=$('editorTools');
   editor.hidden=!context;
-  $('authAction').setAttribute('aria-label',user?'Cuenta de '+(user.displayName||user.email||'Mi Gran Día'):'Ingresar a Mi Gran Día');
+  $('authAction').setAttribute('aria-label',user?'Ir a Mi Gran Día · '+(user.displayName||user.email||'Mi cuenta'):'Ingresar a Mi Gran Día');
   $('authActionLabel').textContent=user?'Mi cuenta':'Ingresar';
   const email=auth.currentUser?.email;
   text('editorIdentity',context ? (email+' · '+context.name) : (email||''));
@@ -181,7 +181,11 @@ export function initWishlistPublicEditor(liveId,updated,options={}) {
   onUpdated=updated;
   const dialog=$('authDialog');
   $('authAction').onclick=()=>{
-    if(auth.currentUser){dialog.showModal();return;}
+    if(auth.currentUser){
+      // Ya autenticado: "Mi cuenta" lleva a la aplicación principal del dominio.
+      window.location.assign('https://migrandiapp.com/');
+      return;
+    }
     dialog.showModal();
   };
   $('authClose').onclick=()=>dialog.close();
