@@ -33,6 +33,17 @@
     .description{color:#8a8580;font-size:12px;line-height:1.5;overflow-wrap:anywhere}
     .price{color:#687650;font-size:16px;font-weight:700}
     .link{display:block;text-align:center;margin-top:6px;padding:12px;border-radius:10px;background:#819069;color:#fff;text-decoration:none;font-size:12px;font-weight:700;min-height:42px}
+    .gift-card{position:relative;transition:border-color .2s,box-shadow .2s,background .2s}
+    .gift-card.is-purchased{border:2px solid #bf7b88;background:#fdf8f9;box-shadow:0 8px 25px rgba(158,85,104,.12)}
+    .gift-card.is-purchased .media,.gift-card.is-purchased .shop,.gift-card.is-purchased h3,.gift-card.is-purchased .description,.gift-card.is-purchased .price{opacity:.46}
+    .gift-card.is-purchased::before{content:"COMPRADO";position:absolute;top:12px;right:12px;z-index:1;padding:7px 10px;border:1px solid #bd8994;border-radius:999px;background:rgba(255,247,249,.96);color:#965a69;font-size:10px;font-weight:800;letter-spacing:.07em;pointer-events:none}
+    .gift-actions{display:grid;gap:8px;margin-top:auto}
+    .gift-actions .link{margin:0;background:#809069}
+    .purchase-button{display:block;width:100%;min-height:42px;padding:10px 8px;border:1px solid #e0bbc4;border-radius:10px;background:#fcf2f5;color:#a36373;font-size:12px;font-weight:800;cursor:pointer}
+    .purchase-button:hover:not(:disabled){background:#f8e9ed}
+    .purchase-button:disabled{opacity:.55;cursor:not-allowed}
+    .is-purchased .purchase-button:disabled{opacity:1;background:#f8edf1;color:#955869;border-color:#d8aab5}
+    .purchase-notice{min-height:20px;margin:0 0 14px;color:#a36373;font-size:12px;line-height:1.5}
     .empty{background:#fff;border:1px solid #ece5df;border-radius:16px;text-align:center;padding:34px;color:#817c75}
     .note{text-align:center;padding-top:24px;color:#9a9490;font-size:11px;line-height:1.5}
     .error{margin:40px auto;max-width:530px;text-align:center;line-height:1.6;color:#8b5561;padding:24px;border:1px solid #ead6da;background:#fff;border-radius:14px}
@@ -49,6 +60,8 @@
       .description{font-size:10px}
       .price{font-size:13px}
       .link{padding:11px 5px;font-size:11px}
+      .purchase-button{font-size:11px;padding:9px 5px}
+      .gift-card.is-purchased::before{font-size:8px;top:8px;right:8px;padding:5px 7px}
     }
     @media(max-width:350px){.cards{grid-template-columns:1fr}}
   </style>
@@ -57,10 +70,11 @@
   <header><div class="brand">Mi Gran Día · Lista de regalos</div><div class="symbol" aria-hidden="true">♡</div><h1>Nuestros regalos</h1><div class="event" id="eventName"></div><p>Estos son algunos detalles que nos encantaría recibir. Gracias por acompañarnos en un día tan especial.</p></header>
   <main class="wrap">
     <div class="toolbar"><h2>Lista de deseos</h2><span id="count"></span></div>
+    <p id="purchaseNotice" class="purchase-notice" role="status" aria-live="polite"></p>
     <div id="error" class="error" role="alert" hidden></div>
     <section id="cards" class="cards" aria-label="Regalos disponibles"></section>
-    <div class="note">Esta es una copia de la lista al momento de compartirla. Los precios pueden cambiar según la tienda.</div>
+    <div class="note">Los regalos corresponden al momento de compartir la lista. El estado de compra se consulta al abrir la página. Los precios pueden cambiar según la tienda.</div>
   </main>
-  <script type="module" src="src/modules/wishlist/public.js?v=1"></script>
+  <script type="module" src="src/modules/wishlist/public.js?v=2"></script>
 </body>
 </html>
