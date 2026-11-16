@@ -1,5 +1,6 @@
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
+import { encodeWishlistShare } from './share-link.js?v=1';
 const STORAGE_KEY = 'planificador_bodas_wishlist_v1';
 const wishlistState = { items: [], context: null, saving: false };
 let unsubscribeWishlist = () => {};
@@ -155,7 +156,7 @@ export async function mountWishlist(context) {
         <div class="wishlist-hero-total"><span>Regalos en la lista</span><strong data-wishlist-total>0</strong></div>
       </header>
       <main class="wishlist-content">
-        <div class="wishlist-actions-row"><button type="button" class="wishlist-add-button" data-wishlist-open>＋ Agregar regalo</button><span class="wishlist-save-status" data-wishlist-save-status role="status"></span></div>
+        <div class="wishlist-actions-row"><div class="wishlist-main-actions"><button type="button" class="wishlist-add-button" data-wishlist-open>＋ Agregar regalo</button><button type="button" class="wishlist-share-button" data-wishlist-share>↗ Compartir lista</button></div><span class="wishlist-save-status" data-wishlist-save-status role="status"></span></div>
         <section class="wishlist-collection" aria-labelledby="wishlist-collection-title">
           <div class="wishlist-collection-head">
             <div><h2 id="wishlist-collection-title">Nuestra lista de regalos</h2><p>Los detalles que nos gustaría recibir.</p></div>
@@ -195,6 +196,39 @@ export async function mountWishlist(context) {
         </div>
       </dialog>
     </div>`;
+  const shareButton = root.querySelector('[data-wishlist-share]');
+  shareButton.addEventListener('click', async () => {
+    if (wishlistState.saving) {
+      setSaveStatus(root, 'Espera a que termine el guardado antes de compartir.');
+      return;
+    }
+    shareButton.disabled = true;
+    try {
+      const fragment = await encodeWishlistShare(wishlistState.items, wishlistState.context?.name);
+      const target = new URL('wishlist-compartida.html', new URL('../../../', import.meta.url));
+      target.hash = fragment;
+      const link = target.href;
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: 'Nuestra lista de regalos', url: link });
+          setSaveStatus(root, 'Lista lista para compartir.');
+          return;
+        } catch (error) {
+          if (error?.name === 'AbortError') return;
+        }
+      }
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(link);
+        setSaveStatus(root, 'Enlace copiado. Puedes enviarlo por WhatsApp.');
+      } else {
+        window.prompt('Copia el enlace para compartir la lista:', link);
+      }
+    } catch (error) {
+      setSaveStatus(root, error?.message || 'No se pudo generar el enlace.');
+    } finally {
+      shareButton.disabled = false;
+    }
+  });
   const dialog = root.querySelector('[data-wishlist-dialog]');
   const form = root.querySelector('[data-wishlist-form]');
   const openButton = root.querySelector('[data-wishlist-open]');
