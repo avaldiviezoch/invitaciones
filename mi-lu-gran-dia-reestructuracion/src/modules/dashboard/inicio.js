@@ -78,7 +78,7 @@ let calendarCursor = new Date();
 let homeSummaryEpoch = 0;
 const heroVideo = $('heroVideo');
 const heroSurface = document.querySelector('.app');
-const MODULE_HASHES = new Set(['#checklist', '#presupuesto', '#proveedores', '#invitados', '#distribucion', '#cronograma', '#invitaciones', '#musica', '#ideas']);
+const MODULE_HASHES = new Set(['#checklist', '#presupuesto', '#proveedores', '#invitados', '#distribucion', '#cronograma', '#invitaciones', '#musica', '#ideas', '#wishlist']);
 let heroPlaybackTimer = 0;
 
 function isDirectModuleRoute() {
@@ -1369,6 +1369,11 @@ const MODULES = Object.freeze({
     load: () => import('../ideas/index.js?v=21'),
     mount: 'mountIdeas',
     destroy: 'destroyIdeas'
+  },
+  wishlist: {
+    load: () => import('../wishlist/index.js?v=1'),
+    mount: 'mountWishlist',
+    destroy: 'destroyWishlist'
   }
 });
 
