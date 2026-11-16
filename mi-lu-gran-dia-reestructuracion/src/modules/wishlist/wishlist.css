@@ -14,6 +14,10 @@
 .wishlist-hero-total strong{display:block;margin-top:8px;color:#af7480;font:400 clamp(44px,4.2vw,64px)/.78 Georgia,serif}
 .wishlist-content{width:min(90.8%,1610px);margin:0 auto;padding:18px 0 60px}
 .wishlist-actions-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:22px}
+.wishlist-main-actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+.wishlist-share-button{min-height:40px;padding:0 16px;border:1px solid #e6d5d9;border-radius:12px;background:#fcf7f8;color:#a46f7c;font:800 10px var(--event-body-font);cursor:pointer}
+.wishlist-share-button:hover{background:#f8edf0}
+.wishlist-share-button:disabled{opacity:.55;cursor:wait}
 .wishlist-save-status{color:#89848a;font-size:10px}
 .wishlist-add-button,.wishlist-submit,.wishlist-analyze{min-height:40px;padding:0 16px;border:0;border-radius:12px;background:#7f8962;color:#fff;font:800 10px var(--event-body-font);cursor:pointer}
 .wishlist-add-button:hover,.wishlist-submit:hover{background:#6e7955}
@@ -142,7 +146,8 @@
  .wishlist-hero-total strong{margin-top:5px;font-size:35px}
  .wishlist-content{width:calc(100% - 32px);padding-top:18px}
  .wishlist-actions-row{margin-bottom:19px}
- .wishlist-add-button{width:100%}
+ .wishlist-main-actions{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+ .wishlist-add-button,.wishlist-share-button{width:100%;padding:0 8px}
  .wishlist-card-body{padding:11px}
  .wishlist-card-body h3{font-size:14px}
  .wishlist-dialog-frame{padding:17px}
