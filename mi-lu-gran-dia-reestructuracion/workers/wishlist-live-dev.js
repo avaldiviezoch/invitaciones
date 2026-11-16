@@ -1,5 +1,5 @@
 /**
- * NEW isolated DEV Worker: migrandia-wishlist-live-dev
+ * Shared Wishlist Worker: migrandia-wishlist-live-dev (same deployment for DEV and PROD)
  * Cloudflare KV binding: WISHLIST_LIVE
  * Does NOT change Firebase Storage, Firestore rules, other Workers or collections.
  *
@@ -8,7 +8,7 @@
  * Public read/purchase needs only a shared list id, never a wedding id or login.
  * KV purchase writes are eventually consistent, not an atomic reservation system.
  */
-const ORIGINS = new Set(['https://avaldiviezoch.github.io']);
+const ORIGINS = new Set(['https://avaldiviezoch.github.io', 'https://migrandiapp.com', 'https://www.migrandiapp.com']);
 const FIREBASE_PROJECT = 'migrandia';
 const FIREBASE_WEB_KEY = 'AIzaSyDCRuQgMjnm7KcAN_qo8AHPD3ueyis4-LY'; // public Firebase browser API key
 const HEX = /^[a-f0-9]{64}$/;
