@@ -1,3 +1,12 @@
+## 2026-11-16 — Wishlist DEV: persistencia por boda activa
+
+- Antes Wishlist guardaba únicamente en un Map en memoria; al recargar se perdían todos los regalos.
+- Se sustituyó esa fuente temporal por readPlannerStorageKey / writePlannerStorageKey / subscribePlannerStorageKey, reutilizando el servicio planner-cloud vigente y la clave exclusiva planificador_bodas_wishlist_v1.
+- La lista pertenece a la boda activa (weddingId): los usuarios autorizados de la misma boda comparten los regalos. Escrituras sujetas a weddingCapabilities(context.role).canEdit; viewers y providers solo leen.
+- Se espera recuperar la lectura de Firebase antes de habilitar altas; los errores de lectura bloquean la edición para evitar sobreescrituras, y los errores de escritura revierten cambios de UI.
+- La suscripción se desmonta al cambiar de boda; la extracción Cloudflare DEV y los módulos existentes no cambian. No se modificaron las reglas de Firestore ni la estructura de colecciones.
+- Verificación de sintaxis JavaScript realizada; prueba real de guardado, recarga, lectura entre cuentas y aislamiento entre dos bodas sigue pendiente en navegador autenticado.
+
 ## 2026-10-15 — MGD-021: impedir pérdida de cambios locales al recuperar borradores (DEV)
 
 - PR #209 confirmado fusionado y CI verde tras recuperar revisión vigente antes de editar como colaborador.
