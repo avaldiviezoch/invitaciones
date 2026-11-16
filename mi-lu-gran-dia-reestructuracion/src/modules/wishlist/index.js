@@ -30,7 +30,9 @@ function renderCards(root) {
   if (!container || !counter) return;
   const items = draftsByEvent.get(currentEventId) || [];
   container.replaceChildren();
-  counter.textContent = items.length + (items.length === 1 ? ' regalo de prueba' : ' regalos de prueba');
+  counter.textContent = items.length + (items.length === 1 ? ' regalo' : ' regalos');
+  const heroCount = root.querySelector('[data-wishlist-total]');
+  if (heroCount) heroCount.textContent = String(items.length);
   if (!items.length) {
     const empty = element('div', 'wishlist-empty');
     empty.append(element('span', 'wishlist-empty-icon', '♡'), element('h3', '', 'Tu lista empieza aquí'), element('p', '', 'Pega el enlace de un regalo para intentar recuperar su información automáticamente.'));
@@ -76,19 +78,24 @@ export function mountWishlist(context) {
   currentEventId = String(context.id);
   root.innerHTML = `
     <div class="wishlist-shell">
-      <header class="wishlist-heading">
-        <div><span class="wishlist-eyebrow">PLANIFICACIÓN · MI GRAN DÍA</span><h1>Wishlist <span>♡</span></h1>
-        <p>Reúne los regalos que te gustaría recibir, de cualquier tienda, en una sola lista.</p></div>
-        <span class="wishlist-prototype-tag">Vista de prueba</span>
+      <header class="wishlist-hero">
+        <div>
+          <p class="wishlist-eyebrow">Módulo · Planificación</p>
+          <div class="wishlist-title-row">
+            <div class="wishlist-title-icon" aria-hidden="true"><img src="assets/icons/wishlist.svg" width="34" height="34" alt=""></div>
+            <div><h1>Wishlist</h1><p>Reúne los regalos que te gustaría recibir, de cualquier tienda, en una sola lista.</p></div>
+          </div>
+        </div>
+        <div class="wishlist-hero-total"><span>Regalos en la lista</span><strong data-wishlist-total>0</strong></div>
       </header>
-      <div class="wishlist-note" role="status">Esta primera versión es una maqueta funcional. Los regalos agregados no se guardan en Firebase, no se comparten y se perderán al recargar la página.</div>
+      <div class="wishlist-content">
       <div class="wishlist-layout">
         <section class="wishlist-panel" aria-labelledby="wishlist-form-title">
-          <div class="wishlist-panel-top"><span>01 / AGREGAR</span><h2 id="wishlist-form-title">Nuevo regalo</h2><p>Solo pega el enlace del producto. Intentaremos completar sus datos por ti.</p></div>
+          <div class="wishlist-panel-top"><span>AGREGAR REGALO</span><h2 id="wishlist-form-title">Un detalle para nosotros</h2><p>Pega el enlace de cualquier tienda. Buscaremos sus datos por ti.</p></div>
           <form data-wishlist-form>
             <label>Enlace del producto <input type="url" name="url" placeholder="https://tienda.com/producto" required></label>
             <button type="button" class="wishlist-submit" data-wishlist-analyze>Analizar enlace <span>↗</span></button>
-            <p class="wishlist-help">Buscaremos nombre, precio, tienda, descripción e imagen. Si la foto no está disponible, se mostrará una imagen genérica de regalo.</p>
+            <p class="wishlist-help">Detectaremos nombre, precio e imagen cuando estén disponibles.</p>
             <div data-wishlist-details hidden>
               <div class="wishlist-metadata-status" data-wishlist-status role="status"></div>
               <div class="wishlist-metadata-preview" data-wishlist-preview hidden></div>
@@ -99,10 +106,11 @@ export function mountWishlist(context) {
           </form>
         </section>
         <section class="wishlist-collection" aria-labelledby="wishlist-collection-title">
-          <div class="wishlist-collection-head"><div><span>02 / VISTA PREVIA</span><h2 id="wishlist-collection-title">Nuestra lista de regalos</h2></div><span data-wishlist-count>0 regalos de prueba</span></div>
+          <div class="wishlist-collection-head"><div><span>REGALOS SELECCIONADOS</span><h2 id="wishlist-collection-title">Nuestra lista de regalos</h2></div><span data-wishlist-count>0 regalos</span></div>
           <div class="wishlist-grid" data-wishlist-items></div>
         </section>
       </div>
+      <p class="wishlist-footnote">Los regalos agregados aquí son temporales y se perderán al recargar la página.</p>
     </div>`;
   const form = root.querySelector('[data-wishlist-form]');
   const analyze = root.querySelector('[data-wishlist-analyze]');
