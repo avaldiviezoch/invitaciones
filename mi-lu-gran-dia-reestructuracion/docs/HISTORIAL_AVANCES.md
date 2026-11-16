@@ -1,3 +1,12 @@
+## 2026-11-16 — Wishlist DEV: avatar Firebase y sincronización visible en página compartida
+
+- Se sustituyó el icono genérico de la cabecera por un avatar circular que utiliza auth.currentUser.photoURL, con inicial del usuario cuando no existe foto o no carga, igual al mecanismo del panel.
+- Corrección de flujo de edición en public-editor.js: el guardado en planner-cloud Firebase sigue siendo autoritativo; en caso de fallar el Worker público, muestra el error de publicación concreto y no deshace los datos confirmados por Firebase.
+- public.js muestra inmediatamente a la persona autorizada los regalos que ya se leyeron/guardaron en Firebase en su propia vista de administración, aunque no esté accesible la publicación externa. Los invitados sin sesión NO reciben esa vista ni se inventa una sincronización pública.
+- Ante respuesta satisfactoria de Worker /api/list, la vista vuelve a presentar el catálogo público y estados de compra confirmados. Con Worker inaccesible se bloquea Marcar como comprado para no simular compras.
+- Versiones de recursos actualizadas (public.js?v=6, public-editor.js?v=5 y public.css?v=3). Parseo sintáctico JavaScript OK; prueba de red desde este entorno no pudo resolver dominios Cloudflare, por lo que no puede acreditarse despliegue ni funcionamiento del API en Internet.
+- No hay cambios en Firebase Storage, reglas, otras colecciones, Worker existentes ni PROD.
+
 ## 2026-11-16 — DEV: correcciones reales de Firebase y compras en Wishlist pública
 
 - Se quitó la advertencia que bloqueaba el ingreso desde enlaces de instantánea anteriores. La identificación de una boda desde esos enlaces exige que la cuenta autorizada coincida con todos sus productos originales; no se elige automáticamente si hay coincidencias ambiguas.
