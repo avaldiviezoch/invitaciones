@@ -11,13 +11,13 @@
   <link rel="stylesheet" href="src/modules/wishlist/public.css?v=1">
 </head>
 <body>
-  <header style="position:relative"><button class="account-action" id="authAction" type="button" aria-label="Ingresar a Mi Gran Día">♙ Ingresar</button><div class="brand">Mi Gran Día · Lista de regalos</div><div class="symbol" aria-hidden="true">♡</div><h1>Nuestros regalos</h1><div class="event" id="eventName"></div><p>Estos son algunos detalles que nos encantaría recibir. Gracias por acompañarnos en un día tan especial.</p></header>
+  <header class="public-hero"><button class="account-action" id="authAction" type="button" aria-label="Ingresar a Mi Gran Día">👤 Ingresar</button><div class="brand">Mi Gran Día · Lista de regalos</div><div class="symbol" aria-hidden="true">♡</div><h1>Nuestros regalos</h1><div class="event" id="eventName"></div><p>Estos son algunos detalles que nos encantaría recibir. Gracias por acompañarnos en un día tan especial.</p></header>
   <main class="wrap">
     <div class="toolbar"><h2>Lista de deseos</h2><span id="count"></span></div>
     <p id="purchaseNotice" class="purchase-notice" role="status" aria-live="polite"></p>
     <div id="error" class="error" role="alert" hidden></div>
     <section id="cards" class="cards" aria-label="Regalos disponibles"></section>
-    <div class="note">Los regalos corresponden al momento de compartir la lista. El estado de compra se consulta al abrir la página. Los precios pueden cambiar según la tienda.</div>
+    <div class="note">Los regalos y las compras se actualizan cuando vuelves a abrir esta página. Los precios pueden cambiar según la tienda.</div>
   </main>
 
   <section id="editorTools" class="editor-tools wrap" hidden>
@@ -32,13 +32,13 @@
     <div class="dialog-body">
       <div class="dialog-heading"><h2 id="authDialogTitle">Ingresar a Mi Gran Día</h2><button type="button" class="icon-close" id="authClose" aria-label="Cerrar">×</button></div>
       <p class="auth-identity">Ingresa con la misma cuenta que utilizas para organizar la boda. Solo los usuarios autorizados podrán modificar regalos.</p>
-      <button type="button" class="auth-primary" id="authGoogle" style="width:100%">Continuar con Google</button>
+      <button type="button" class="auth-primary" id="authGoogle">Continuar con Google</button>
       <form id="authEmailForm" class="auth-email-form">
         <label>Correo electrónico<input name="email" type="email" autocomplete="email" required></label>
         <label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label>
         <button type="submit" class="auth-secondary">Ingresar con correo</button>
       </form>
-      <button type="button" id="authLogout" class="auth-secondary" hidden style="margin-top:14px">Cerrar sesión</button>
+      <button type="button" id="authLogout" class="auth-secondary auth-logout" hidden>Cerrar sesión</button>
       <p id="authFeedback" class="auth-feedback" role="alert"></p>
     </div>
   </dialog>
