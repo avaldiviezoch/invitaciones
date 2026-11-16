@@ -87,7 +87,7 @@ async function main() {
       $('purchaseNotice').textContent='No se pudo cargar la lista actual. Verifica que el servicio de Wishlist esté activo.';
     });
     try {
-      const editor=await import('./public-editor.js?v=3');
+      const editor=await import('./public-editor.js?v=4');
       editor.initWishlistPublicEditor(id,()=>{
         void refreshList().catch(()=>{
           $('purchaseNotice').textContent='El cambio se guardó en Mi Gran Día; la publicación pública aún no está disponible.';
@@ -112,7 +112,7 @@ async function main() {
     // Load the Firebase editor immediately without waiting on either Worker.
     if(legacyGifts.length){
       try {
-        const editor=await import('./public-editor.js?v=3');
+        const editor=await import('./public-editor.js?v=4');
         editor.initWishlistPublicEditor('',()=>{
           state.live=true;
           void refreshList().catch(()=>{
