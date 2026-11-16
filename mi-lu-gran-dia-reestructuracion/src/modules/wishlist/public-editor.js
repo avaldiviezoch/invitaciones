@@ -68,10 +68,15 @@ async function save(next) {
     ui('Guardado en Mi Gran Día. Actualizando el enlace público…');
     try { await publish(next);ui('Guardado y sincronizado para invitados.'); }
     catch { ui('Guardado en Mi Gran Día, pero la lista pública no se actualizó. Reintenta sincronizar.'); }
+    renderManage();
     onUpdated(items);
-    $('editorForm').reset();$('editorDialog').close();$('editorItemId').value='';
+    $('editorForm').reset();
+    if ($('editorDialog').open) $('editorDialog').close();
+    $('editorItemId').value='';
   }catch(error){
-    items=previous;ui(error?.message||'No se pudo guardar.');
+    items=previous;
+    renderManage();
+    ui(error?.message||'No se pudo guardar.');
   }finally{busy=false;$('editorAdd').disabled=false;}
 }
 function renderManage() {
