@@ -61,8 +61,18 @@ function syncMode() {
   }
   const editor=$('editorTools');
   editor.hidden=!context;
-  $('authAction').setAttribute('aria-label',user?'Ir a Mi Gran Día · '+(user.displayName||user.email||'Mi cuenta'):'Ingresar a Mi Gran Día');
+  $('authAction').setAttribute('aria-label',user?'Abrir opciones de Mi cuenta':'Ingresar a Mi Gran Día');
   $('authActionLabel').textContent=user?'Mi cuenta':'Ingresar';
+  // El diálogo es el menú de cuenta para usuarios autenticados; para invitados, muestra el inicio de sesión.
+  $('authDialogTitle').textContent=user?'Mi cuenta':'Ingresar a Mi Gran Día';
+  $('authGoogle').hidden=Boolean(user);
+  $('authEmailForm').hidden=Boolean(user);
+  $('authGoApp').hidden=!user;
+  $('authLogout').hidden=!user;
+  const identity=$('authDialog').querySelector('.auth-identity');
+  if(identity) identity.textContent=user
+    ? (user.displayName||user.email||'Sesión iniciada')+' · Elige una opción.'
+    : 'Ingresa con la misma cuenta que utilizas para organizar la boda. Solo los usuarios autorizados podrán modificar regalos.';
   const email=auth.currentUser?.email;
   text('editorIdentity',context ? (email+' · '+context.name) : (email||''));
 }
@@ -184,13 +194,10 @@ export function initWishlistPublicEditor(liveId,updated,options={}) {
   const dialog=$('authDialog');
   syncMode();
   $('authAction').onclick=()=>{
-    if(auth.currentUser){
-      // Ya autenticado: "Mi cuenta" lleva a la aplicación principal del dominio.
-      window.location.assign('https://migrandiapp.com/');
-      return;
-    }
+    syncMode();
     dialog.showModal();
   };
+  $('authGoApp').onclick=()=>window.location.assign('https://migrandiapp.com/');
   $('authClose').onclick=()=>dialog.close();
   $('editorDialogClose').onclick=()=>$('editorDialog').close();
   $('editorAdd').onclick=()=>openForm();
