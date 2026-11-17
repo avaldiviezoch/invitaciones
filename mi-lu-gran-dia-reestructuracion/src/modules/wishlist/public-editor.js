@@ -193,10 +193,15 @@ export function initWishlistPublicEditor(liveId,updated,options={}) {
   onUpdated=updated;
   const dialog=$('authDialog');
   syncMode();
-  $('authAction').onclick=()=>{
+  // Captura el clic antes que cualquier controlador anterior o externo.
+  // Un usuario autenticado debe poder elegir entre ir a la app o cerrar sesión.
+  $('authAction').onclick=null;
+  $('authAction').addEventListener('click',event=>{
+    event.preventDefault();
+    event.stopImmediatePropagation();
     syncMode();
-    dialog.showModal();
-  };
+    if(!dialog.open) dialog.showModal();
+  },{capture:true});
   $('authGoApp').onclick=()=>window.location.assign('https://migrandiapp.com/');
   $('authClose').onclick=()=>dialog.close();
   $('editorDialogClose').onclick=()=>$('editorDialog').close();
