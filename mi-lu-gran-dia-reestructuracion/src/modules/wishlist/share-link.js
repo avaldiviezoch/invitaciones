@@ -77,3 +77,11 @@ export function parseWishlistLiveShare(fragment) {
   const match = /^w2\.([a-f0-9]{64})$/.exec(String(fragment || ''));
   return match ? match[1] : '';
 }
+
+export function wishlistFriendlySlug(eventName, listId) {
+  const id=String(listId||'');
+  if (!/^[a-f0-9]{64}$/.test(id)) throw new Error('Identificador de lista inválido.');
+  const name=String(eventName||'Mi boda').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,64).replace(/-$/,'')||'mi-boda';
+  return name+'-'+id.slice(0,12);
+}
