@@ -62,6 +62,16 @@
       </form>
     </div>
   </dialog>
-  <script type="module" src="src/modules/wishlist/public.js?v=10"></script>
+  <script>
+    // Protección frente a controladores antiguos almacenados en caché.
+    // La foto de perfil solo abre el menú de cuenta, nunca navega por sí misma.
+    document.getElementById('authAction').addEventListener('click', function(event) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      const accountDialog = document.getElementById('authDialog');
+      if (accountDialog && !accountDialog.open) accountDialog.showModal();
+    }, {capture:true});
+  </script>
+  <script type="module" src="src/modules/wishlist/public.js?v=11"></script>
 </body>
 </html>
