@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <base href="../">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#faf8f5">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="referrer" content="no-referrer">
+  <title>Lista de regalos · Mi Gran Día</title>
+  <link rel="stylesheet" href="src/modules/wishlist/public.css?v=4">
+</head>
+<body>
+  <header class="public-hero"><button class="account-action" id="authAction" type="button" aria-label="Ingresar a Mi Gran Día"><span class="account-avatar" id="authAvatar" aria-hidden="true">👤</span><span id="authActionLabel">Ingresar</span></button><div class="brand">Mi Gran Día · Lista de regalos</div><div class="symbol" aria-hidden="true">♡</div><h1>Nuestros regalos</h1><div class="event" id="eventName"></div><p>Estos son algunos detalles que nos encantaría recibir. Gracias por acompañarnos en un día tan especial.</p></header>
+  <main class="wrap">
+    <div class="toolbar"><h2>Lista de deseos</h2><span id="count"></span></div>
+    <p id="purchaseNotice" class="purchase-notice" role="status" aria-live="polite"></p>
+    <div id="error" class="error" role="alert" hidden></div>
+    <section id="cards" class="cards" aria-label="Regalos disponibles"></section>
+    <div class="note">Los regalos y las compras se actualizan cuando vuelves a abrir esta página. Los precios pueden cambiar según la tienda.</div>
+    <p class="wishlist-copyright" id="wishlistCopyright" hidden>© ANTONIO VALDIVIEZO</p>
+  </main>
+
+  <section id="editorTools" class="editor-tools wrap" hidden>
+    <div class="editor-top"><div><h2>Administrar regalos</h2><p class="auth-identity" id="editorIdentity"></p></div>
+      <button type="button" id="editorAdd" class="editor-primary">＋ Agregar regalo</button>
+      <button type="button" id="editorResync" class="editor-secondary">Sincronizar lista</button>
+    </div>
+    <p id="editorStatus" class="editor-status" role="status"></p>
+    <div id="editorItems" aria-label="Regalos para editar"></div>
+  </section>
+  <dialog id="authDialog" class="auth-dialog" aria-labelledby="authDialogTitle">
+    <div class="dialog-body">
+      <div class="dialog-heading"><h2 id="authDialogTitle">Ingresar a Mi Gran Día</h2><button type="button" class="icon-close" id="authClose" aria-label="Cerrar">×</button></div>
+      <p class="auth-identity">Ingresa con la misma cuenta que utilizas para organizar la boda. Solo los usuarios autorizados podrán modificar regalos.</p>
+      <button type="button" class="auth-primary" id="authGoogle">Continuar con Google</button>
+      <form id="authEmailForm" class="auth-email-form">
+        <label>Correo electrónico<input name="email" type="email" autocomplete="email" required></label>
+        <label>Contraseña<input name="password" type="password" autocomplete="current-password" required></label>
+        <button type="submit" class="auth-secondary">Ingresar con correo</button>
+      </form>
+      <button type="button" id="authLogout" class="auth-secondary auth-logout" hidden>Cerrar sesión</button>
+      <p id="authFeedback" class="auth-feedback" role="alert"></p>
+    </div>
+  </dialog>
+  <dialog id="editorDialog" class="editor-dialog" aria-labelledby="editorDialogTitle">
+    <div class="dialog-body">
+      <div class="dialog-heading"><h2 id="editorDialogTitle">Agregar regalo</h2><button type="button" class="icon-close" id="editorDialogClose" aria-label="Cerrar">×</button></div>
+      <form id="editorForm" class="editor-form">
+        <input type="hidden" id="editorItemId" name="id">
+        <label>Enlace del producto<input type="url" name="url" placeholder="https://tienda.com/producto" required></label>
+        <button type="button" id="editorAnalyze" class="editor-secondary">Buscar información automáticamente</button>
+        <label>Nombre del regalo<input name="name" maxlength="110" required></label>
+        <label>Tienda<input name="shop" maxlength="65"></label>
+        <label>Precio referencial<input name="price" maxlength="40"></label>
+        <label>Enlace de la imagen<input name="image" type="url"></label>
+        <label>Descripción<textarea name="description" maxlength="350"></textarea></label>
+        <p id="editorFormFeedback" class="editor-status" role="status"></p>
+        <button type="submit" class="editor-primary">Guardar regalo</button>
+      </form>
+    </div>
+  </dialog>
+  <script type="module" src="src/modules/wishlist/public.js?v=9"></script>
+</body>
+</html>
