@@ -1,4 +1,4 @@
-import { decodeWishlistShare, parseWishlistLiveShare } from './share-link.js?v=2';
+import { decodeWishlistShare, parseWishlistLiveShare } from './share-link.js?v=3';
 
 const LIVE_API='https://migrandia-wishlist-live-dev.avaldiviezoch.workers.dev';
 const LEGACY_API='https://migrandia-wishlist-gifts-dev.avaldiviezoch.workers.dev';
@@ -87,7 +87,15 @@ async function purchase(giftId) {
 }
 async function main() {
   const fragment=location.hash.slice(1);
-  const id=parseWishlistLiveShare(fragment);
+  const friendlySlug=new URLSearchParams(location.search).get('boda')||'';
+  let id=parseWishlistLiveShare(fragment);
+  if(friendlySlug && !fragment){
+    if(!/^[a-z0-9-]{2,90}$/.test(friendlySlug)) throw new Error('El enlace de boda no es válido.');
+    const response=await fetch(new URL('/api/resolve?slug='+encodeURIComponent(friendlySlug),LIVE_API),{headers:{Accept:'application/json'}});
+    const data=await response.json().catch(()=>({}));
+    if(!response.ok||!data.ok||!/^[a-f0-9]{64}$/.test(data.list||'')) throw new Error('No se encontró la lista de regalos. Comprueba que esté publicada.');
+    id=data.list;
+  }
   state.live=Boolean(id);
   state.listId=id||(await legacyHash(fragment));
   if(id){
