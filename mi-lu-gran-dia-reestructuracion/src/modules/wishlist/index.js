@@ -232,8 +232,19 @@ export async function mountWishlist(context) {
       await publishWishlistPublic(wishlistState.context, wishlistState.items);
       const listId = await wishlistPublicId(wishlistState.context.id);
       const slug = wishlistFriendlySlug(wishlistState.context.name, listId);
-      const target = new URL('regalos/', new URL('../../../', import.meta.url));
-      target.searchParams.set('boda', slug);
+      const rootUrl = new URL('../../../', import.meta.url);
+      let target = new URL('wishlist-compartida.html', rootUrl);
+      target.hash = 'w2.' + listId;
+      // Solo distribuir el enlace amigable cuando el Worker pueda resolverlo.
+      try {
+        const check = await fetch(new URL('/api/resolve?slug=' + encodeURIComponent(slug), PUBLIC_API), {
+          headers:{Accept:'application/json'}, signal:AbortSignal.timeout(5000)
+        });
+        if(check.ok && (await check.json()).list === listId){
+          target = new URL('regalos/', rootUrl);
+          target.searchParams.set('boda', slug);
+        }
+      }catch{/* Mantener enlace actual si el nuevo endpoint aún no está desplegado. */}
       const link = target.href;
       if (navigator.share) {
         try {
