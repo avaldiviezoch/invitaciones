@@ -54,6 +54,11 @@ async function publicId(weddingId) {
   const hash = await crypto.subtle.digest('SHA-256', textEncoder.encode('migrandia:wishlist:live:v1:' + weddingId));
   return [...new Uint8Array(hash)].map(n=>n.toString(16).padStart(2,'0')).join('');
 }
+function friendlySlug(eventName, listId) {
+  const name = String(eventName || 'Mi boda').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 64).replace(/-$/g, '') || 'mi-boda';
+  return name + '-' + listId.slice(0, 12);
+}
 async function authorize(request, weddingId) {
   const match = /^Bearer ([A-Za-z0-9_.-]+)$/.exec(request.headers.get('Authorization') || '');
   if (!match || !weddingId || weddingId.length > 160 || !/^[A-Za-z0-9_-]+$/.test(weddingId)) return false;
@@ -87,6 +92,15 @@ export default {
     if (request.method === 'OPTIONS') return json({ ok:true },200,origin);
     if (!env.WISHLIST_LIVE) return json({ ok:false, error:'KV binding missing' },503,origin);
     const url = new URL(request.url);
+    if (path === '/api/resolve' && request.method === 'GET') {
+      const slug = url.searchParams.get('slug') || '';
+      if (!/^[a-z0-9-]{2,90}$/.test(slug)) return json({ok:false,error:'Invalid slug'},400,origin);
+      let id;
+      try { id = await env.WISHLIST_LIVE.get('slug:' + slug); }
+      catch { return json({ok:false,error:'Slug temporarily unavailable'},503,origin); }
+      if (!id || !HEX.test(id)) return json({ok:false,error:'List not found'},404,origin);
+      return json({ok:true,list:id},200,origin);
+    }
     if (path === '/api/list' && request.method === 'GET') {
       const id = url.searchParams.get('list') || '';
       if (!HEX.test(id)) return json({ ok:false, error:'Invalid list id' },400,origin);
@@ -130,6 +144,9 @@ export default {
       const value = {event:String(body.event || 'Nuestra celebración').slice(0,100),gifts};
       try {
         await env.WISHLIST_LIVE.put('list:' + listId, JSON.stringify(value));
+        // El nombre visible viene del campo wedding.name existente.
+        // Las claves anteriores permanecen para mantener enlaces ya enviados.
+        await env.WISHLIST_LIVE.put('slug:' + friendlySlug(value.event, listId), listId);
         if (alias && alias !== listId) {
           const prior = await env.WISHLIST_LIVE.get('alias-owner:' + alias);
           if (prior && prior !== listId) return json({ok:false,error:'Legacy link belongs to another list'},409,origin);
