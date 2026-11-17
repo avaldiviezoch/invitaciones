@@ -1,6 +1,6 @@
 import { readPlannerStorageKey, subscribePlannerStorageKey, writePlannerStorageKey } from '../../services/planner-cloud.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
-import { encodeWishlistLiveShare, wishlistPublicId } from './share-link.js?v=2';
+import { wishlistPublicId, wishlistFriendlySlug } from './share-link.js?v=3';
 import { auth } from '../../services/firebase-client.js';
 const STORAGE_KEY = 'planificador_bodas_wishlist_v1';
 const PUBLIC_API = 'https://migrandia-wishlist-live-dev.avaldiviezoch.workers.dev';
@@ -230,9 +230,10 @@ export async function mountWishlist(context) {
     try {
       // Publicar únicamente datos propios de Wishlist, después de verificar el usuario.
       await publishWishlistPublic(wishlistState.context, wishlistState.items);
-      const fragment = await encodeWishlistLiveShare(wishlistState.context.id);
-      const target = new URL('wishlist-compartida.html', new URL('../../../', import.meta.url));
-      target.hash = fragment;
+      const listId = await wishlistPublicId(wishlistState.context.id);
+      const slug = wishlistFriendlySlug(wishlistState.context.name, listId);
+      const target = new URL('regalos/', new URL('../../../', import.meta.url));
+      target.searchParams.set('boda', slug);
       const link = target.href;
       if (navigator.share) {
         try {
