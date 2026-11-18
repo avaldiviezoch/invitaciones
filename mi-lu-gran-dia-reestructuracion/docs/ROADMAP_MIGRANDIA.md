@@ -698,6 +698,29 @@ Bloqueadores para marcha blanca: MGD-025/027 (permisos/persistencia híbrida), M
 - Preflight autorizado solo de lectura comprueba ahora ID B distinto del A, tarjeta B con etiqueta QA-, tipo Cumpleaños y estado no activo, además de A y los datos propios de Invitados, Presupuesto y Distribución.
 - Impide aprobar accidentalmente un preflight con un segundo evento distinto del fixture esperado. No conmutar ni modificar Firestore; sigue pendiente ejecución real.
 
+## MATRIZ OPERATIVA DE CIERRE — actualización 2026-10-22 (BLOQUE 01)
+
+**Objetivo:** terminar funcionalidades comprobables, no crear PR por cada ajuste. Esta actualización complementa la matriz histórica del 09/10; NO recalifica automáticamente los 50 MGD como cerrados.
+
+**Evidencia reciente:** DEV #221 (puente de Invitaciones desactivado), #226 (recuperación asíncrona), #227 (roles y emulador) fusionados; ambos checks de #227 verdes. Exportaciones #222–#225 en DEV y PR PROD #566 fusionado; el usuario confirmó que aparece el menú en migrandiapp.com y que descarga. Esto cierra el alcance específico de exportaciones, no el módulo entero de Invitados ni el MGD-021.
+
+| Bloque de cierre | Objetivos | Resultado que habilita cierre | Estado actual / impedimento |
+| --- | --- | --- | --- |
+| A · Cierre de baseline y capacidades existentes | 001–017, 025–033 | Revisar evidencia de la matriz histórica, registrar cierre funcional o gate explícito, no repetir implementaciones | 11 operativos según matriz histórica, otros parciales/técnicos; QA condicionado |
+| B · Multievento end-to-end | 018–020, 034–037, 041 | Crear evento de cada tipo, aislar A→B→A, Checklist/Distribución/Presupuesto y paridad visual DEV–PROD | DEV avanzado; falta QA autenticado integral y promoción por alcance |
+| C · Invitaciones utilizables | 021–024, 047 | Crear, editar, recuperar y guardar por evento/colaborador con Rules reales auditadas y autorización | Editor local y emulador verde; guardado colaborativo real BLOQUEADO |
+| D · Seguridad y beta | 003, 008, 026–033, 042, 044, 048 | Auth, reglas, privacidad, datos y QA productivos; aprobación de gates externos | Beta y enforcement no autorizados; pruebas faltantes |
+| E · Lanzamiento y crecimiento | 038–040, 043, 045–046, 049–050 | Landing, SEO, analítica, monetización e i18n según alcance aprobado | Pendiente de bloque posterior; dependencias de beta |
+
+**Reglas de ejecución desde hoy:**
+1. Máximo un PR DEV por bloque funcional completo; correcciones de CI en el mismo PR. No crear PR solamente para cambiar un estado o una frase.
+2. No declarar 100% ni PRODUCCIÓN por CI verde: se exige flujo real y evidencia de usuario/entorno. Marcar gates externos sin simular completitud.
+3. No promover todo DEV a PROD; PR de promoción selectiva, con QA de datos y aprobación. Firebase/Auth/Storage/Rules reales siguen intactos sin autorización específica.
+4. Actualizar esta matriz y el historial dentro del PR funcional de cada bloque; cerrar duplicados solo tras inspección individual.
+5. Prioridad inmediata: cerrar C (MGD-021–024) como flujo completo seguro, después B y D. No añadir características cosméticas durante ese cierre.
+
+---
+
 ## MATRIZ DE CIERRE CONSOLIDADA — lectura prioritaria 2026-10-09
 
 Este encabezado es la interpretación vigente del estado tras verificar GitHub y el historial. Los apartados inferiores conservan decisiones, fechas y notas históricas; sus referencias antiguas a «pendiente de PROD» o «siguiente paso» NO sustituyen esta matriz.
@@ -4249,3 +4272,10 @@ Estado:
 - PR #226 se confirma fusionado. Nueva matriz de Rules de laboratorio: revocar `editor→viewer→inactive` debe cortar escrituras y luego lecturas, sin alterar el documento persistido.
 - Un mismo usuario puede ser editor en evento A y viewer en B, sin heredar permisos de edición entre eventos; se verifica rechazo de accesos indebidos.
 - Pruebas ejecutables únicamente en proyecto de emulador `demo-mgd021-invitation-drafts`; CI pendiente. No se modificaron Rules publicadas, Firebase real, Auth, Storage, UI ni PROD.
+
+
+### 2026-10-22 — Entrega funcional Invitaciones: respaldo offline completo (Bloque C)
+- El editor local incorpora un botón único «Descargar paquete completo (.zip)» con `borrador-editable.json` y `vista-previa.html` autónoma; se conservan las descargas individuales.
+- El archivo ZIP se genera exclusivamente en el navegador, sin CDN, nuevas consultas o escrituras. Se incluye prueba de contenido, formato y cableado del botón.
+- El ZIP permite conservar una copia de trabajo y volver a importarla mediante la función JSON existente. No equivale a guardado colaborativo ni publicación; Firebase real y PROD siguen intactos.
+- Esta entrega se integra en la misma rama de cierre por bloques. CI y QA funcional del navegador por validar.

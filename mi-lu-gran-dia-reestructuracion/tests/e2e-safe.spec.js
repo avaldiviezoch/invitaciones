@@ -3396,3 +3396,27 @@ test('MGD-021: puente aislado rechaza recuperación obsoleta por edición y cier
     expect(apply).toBe(0);
   } finally {globalThis.FormData=previousFormData;}
 });
+
+
+test('MGD-021: paquete completo contiene borrador editable y HTML offline, sin red ni Firebase', async () => {
+  const { makeInvitationPackage } = await import('../src/modules/invitaciones/offline-package.js');
+  const { renderOfflineInvitationDraft } = await import('../src/core/app/invitation-offline-preview.js');
+  const draft={schema:'migrandia-invitation-draft-v1',eventType:'birthday',eventName:'Cumpleaños',
+    date:'',location:'',guestName:'',message:'Invitación local',
+    templateId:'classic-elegant',fontStyle:'serif',colorPalette:'auto'};
+  const blob=makeInvitationPackage({draft,html:renderOfflineInvitationDraft(draft)});
+  const bytes=new Uint8Array(await blob.arrayBuffer()), payload=new TextDecoder().decode(bytes);
+  expect([...bytes.slice(0,4)]).toEqual([80,75,3,4]);
+  expect(blob.type).toBe('application/zip');
+  expect(payload).toContain('borrador-editable.json');
+  expect(payload).toContain('vista-previa.html');
+  expect(payload).toContain('migrandia-invitation-draft-v1');
+  expect(payload).toContain('Cumpleaños');
+  expect(payload).toContain('Borrador sin publicar');
+  const fs=await import('node:fs/promises');
+  const js=await fs.readFile(path.resolve('src/modules/invitaciones/index.js'),'utf8');
+  const html=await fs.readFile(path.resolve('src/modules/invitaciones/index.html'),'utf8');
+  expect(html).toContain('data-invitations-export-package');
+  expect(js).toContain('makeInvitationPackage({draft,html})');
+  expect(js).toContain('updateDraftStatus(false)');
+});
