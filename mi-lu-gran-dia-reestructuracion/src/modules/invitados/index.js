@@ -5,7 +5,7 @@ import { downloadXlsx } from './export-xlsx.js';
 import { downloadGuestImages } from './export-guest-image.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { guestStatus, loadInvitadosSnapshot, saveInvitadosSnapshot } from './invitados-data.js?v=7';
-import { createRsvpController } from './rsvp-controller.js?v=20261123-auto-guest-return';
+import { createRsvpController } from './rsvp-controller.js?v=20261123-free-only';
 import { createTablesController } from './tables-controller.js?v=24';
 
 let activeContext = null;
