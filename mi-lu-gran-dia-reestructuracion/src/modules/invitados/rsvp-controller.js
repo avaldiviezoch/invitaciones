@@ -350,6 +350,11 @@ function createRsvpController(api) {
         .filter((item) => String(item?.responseId || '') !== currentResponseId)
         .flatMap((item) => Array.isArray(item?.linkedGuestIds) ? item.linkedGuestIds.map(String) : [])
     );
+    const existingResponseIds = new Set(state.responses.map((item) => String(item.id)));
+    const orphanedGuests = snapshot.canonical.guests.filter((guest) => {
+      const id = text(guest?.rsvpResponseId);
+      return id && !existingResponseIds.has(id);
+    });
     const availableGuests = snapshot.canonical.guests.filter((guest) => {
       const guestId = String(guest?.id ?? '');
       const canonicalResponseId = text(guest?.rsvpResponseId);
@@ -407,9 +412,12 @@ function createRsvpController(api) {
     const guestNames = new Set(snapshot.canonical.guests.map((guest) => normalizeName(guest.name)));
     const matchedNames = declaredNames.filter((name) => guestNames.has(normalizeName(name)));
     const missingNames = declaredNames.filter((name) => !guestNames.has(normalizeName(name)));
+    const orphanedNames = orphanedGuests.map((guest) => text(guest.name) || String(guest.id));
+    const orphanedMatches = orphanedGuests.filter((guest) => declaredNames.some((name) => normalizeName(name) === normalizeName(guest.name)));
     root.querySelector('[data-rsvp-companion-status]').innerHTML = [
       matchedNames.length ? `<span class="is-ok">${matchedNames.length} nombre${matchedNames.length === 1 ? '' : 's'} encontrado${matchedNames.length === 1 ? '' : 's'} en Invitados</span>` : '',
-      missingNames.length ? `<span class="is-pending">No encontrados: ${esc(missingNames.join(', '))}</span>` : ''
+      missingNames.length ? `<span class="is-pending">No encontrados: ${esc(missingNames.join(', '))}</span>` : '',
+      orphanedGuests.length ? `<div role="alert" class="is-pending">Hay ${orphanedGuests.length} invitado(s) ocultos por una vinculación a una respuesta RSVP que ya no existe: ${esc(orphanedNames.join(', '))}. ${orphanedMatches.length ? 'Entre ellos hay coincidencias con esta confirmación. ' : ''}${api.canEdit() ? '<button type="button" data-rsvp-clean-orphans-from-review>Revisar y liberar vínculos</button>' : 'Solicita a un editor que revise las vinculaciones.'}</div>` : ''
     ].filter(Boolean).join('');
 
     root.querySelector('[data-rsvp-apply]').hidden = !api.canEdit();
@@ -658,12 +666,19 @@ function createRsvpController(api) {
     if (!orphans.length) { window.alert('No se encontraron vínculos RSVP huérfanos.'); return true; }
     if (!window.confirm('Se encontraron '+orphans.length+' invitados con respuestas RSVP eliminadas:\\n\\n'+orphans.map(g=>g.name||g.id).join('\\n')+'\\n\\n¿Limpiar las referencias huérfanas sin eliminar invitados ni mesas?')) return true;
     const status = api.getRoot()?.querySelector('[data-rsvp-state]');
+    const dialog = api.getRoot()?.querySelector('[data-rsvp-dialog]');
+    const reviewedResponseId = dialog?.open ? String(dialog.querySelector('[name="responseId"]')?.value || '') : '';
     api.setSaving(true);
     try {
       const result = await cleanOrphanedRsvpLinks(context, orphans.map(g => String(g.id)));
+      if (dialog?.open) closeReview();
       await api.reloadGuests();
       await load(context);
       api.renderMain();
+      if (reviewedResponseId) {
+        const updatedResponse = findResponse(reviewedResponseId);
+        if (updatedResponse) openReview(updatedResponse);
+      }
       const notice = api.getRoot()?.querySelector('[data-rsvp-state]');
       if (notice) notice.textContent = 'Se limpiaron '+result.cleanedGuestIds.length+' vínculos huérfanos.';
       api.emitDataChange('rsvp-orphans-cleaned');
@@ -690,7 +705,7 @@ function createRsvpController(api) {
     }
     const deleteButton = event.target.closest('[data-rsvp-delete]');
     if (deleteButton) return deleteResponse(deleteButton.dataset.responseId);
-    if (event.target.closest('[data-rsvp-clean-orphans]')) return cleanOrphansFromApp();
+    if (event.target.closest('[data-rsvp-clean-orphans],[data-rsvp-clean-orphans-from-review]')) return cleanOrphansFromApp();
     const unlinkButton = event.target.closest('[data-rsvp-unlink]');
     if (unlinkButton) {
       await unlink(unlinkButton.dataset.responseId);
