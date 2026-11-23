@@ -1,3 +1,12 @@
+## 2026-11-23 — DEV: selección automática de invitados tras borrar RSVP
+
+- Se confirmó en captura móvil que «Revisar vínculos huérfanos» exigía reparación manual para Marcelino Alvarado y Lucy Chaupis tras eliminar la respuesta anterior; además se mostraban secuencias literales `\\n` en el mensaje.
+- Corrección en la página principal de Invitados → Confirmaciones: la lista muestra todos los invitados canónicos; los que conservan un `rsvpResponseId` cuya respuesta ya no existe se muestran **disponibles** y son seleccionables directamente. Los invitados vinculados a respuestas vigentes siguen bloqueados para evitar vínculos duplicados.
+- Al aplicar una confirmación, el servicio `verifyRsvpGuestAvailability` comprueba boda/token/RSVP actual, existencia de fichas, respuestas anteriores y relaciones administrativas vigentes antes de guardar. El flujo `applyResponseLocally` sustituye el vínculo anterior por el nuevo únicamente para las personas elegidas. No se escriben datos al abrir la pantalla ni se elimina información de otros invitados.
+- Se retiró el botón y diálogo de limpieza manual de vínculos huérfanos de la pantalla principal. Se conservó el borrado excepcional con confirmación `ELIMINAR` y limpieza de los vínculos reales asociados a la respuesta borrada.
+- Se actualizaron las rutas versionadas de importación y se replicaron los archivos en la rama candidata de PROD `Wedding/fix-rsvp-guest-links-2026-11-23` (PR borrador #573), sin merge a `Wedding/main`.
+- Validación actual: parseo sintáctico JavaScript y revisión estática de rutas/guardas. Pendientes pruebas autenticadas con Firebase, concurrencia, varias bodas y aprobación del pase. No se ejecutaron escrituras sobre datos reales.
+
 ## 2026-11-23 — DEV: invitados ocultos por RSVP eliminado en selector principal
 
 - Caso reportado: al volver a enviar RSVP de Marcelino Alvarado y Lucy Emilia, sus registros canónicos no aparecen en la lista de vinculación de `Invitados → Confirmaciones`.
