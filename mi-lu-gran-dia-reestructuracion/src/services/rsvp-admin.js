@@ -248,6 +248,51 @@ function withoutOrphanRsvpLink(guest) {
   return next;
 }
 
+async function verifyRsvpGuestAvailability(context, token, responseId, guestIds = []) {
+  requireEditor(context);
+  const safeToken = cleanText(token, 160);
+  const targetId = cleanText(responseId, 180);
+  const ids = [...new Set(guestIds.map(id => cleanText(id, 180)).filter(Boolean))];
+  if (!safeToken || !targetId || !ids.length || ids.length > 40) {
+    throw new Error('La selección de invitados RSVP no es válida.');
+  }
+  const [config, snapshot, target] = await Promise.all([
+    getDoc(doc(db, 'weddings', context.id, 'rsvpConfig', 'main')),
+    loadInvitadosSnapshot(context),
+    getDoc(doc(db, 'publicRsvp', safeToken, 'responses', targetId))
+  ]);
+  if (!config.exists() || cleanText(config.data()?.token, 160) !== safeToken || !target.exists()) {
+    throw new Error('La configuración o respuesta RSVP cambió. Actualiza las confirmaciones.');
+  }
+  const guests = new Map(snapshot.canonical.guests.map(g => [String(g.id), g]));
+  const oldIds = new Set();
+  for (const id of ids) {
+    const guest = guests.get(id);
+    if (!guest) throw new Error('La lista de invitados cambió. Actualízala antes de vincular.');
+    const oldId = cleanText(guest.rsvpResponseId, 180);
+    if (oldId && oldId !== targetId) oldIds.add(oldId);
+  }
+  const existing = await Promise.all([...oldIds].map(id =>
+    getDoc(doc(db, 'publicRsvp', safeToken, 'responses', id))
+  ));
+  if (existing.some(item => item.exists())) {
+    throw new Error('Alguno de los invitados está vinculado a una confirmación vigente. No se modificó ningún vínculo.');
+  }
+  const management = await getDocs(collection(db, 'weddings', context.id, 'rsvpManagement'));
+  const activeOwners = management.docs.map(item => item.data() || {})
+    .filter(item => item.token === safeToken && String(item.responseId || '') !== targetId
+      && Array.isArray(item.linkedGuestIds) && item.linkedGuestIds.some(id => ids.includes(String(id))));
+  if (activeOwners.length) {
+    const active = await Promise.all(activeOwners.map(item =>
+      getDoc(doc(db, 'publicRsvp', safeToken, 'responses', String(item.responseId)))
+    ));
+    if (active.some(item => item.exists())) {
+      throw new Error('Alguno de los invitados sigue vinculado a otra respuesta vigente.');
+    }
+  }
+  return { availableGuestIds: ids };
+}
+
 async function releaseOrphanedRsvpGuest(context, guestId, expectedResponseId) {
   requireEditor(context);
   const id = cleanText(guestId, 180);
@@ -305,4 +350,4 @@ async function cleanOrphanedRsvpLinks(context, expectedGuestIds = []) {
   return { cleanedGuestIds: orphans.map((guest) => String(guest.id)) };
 }
 
-export { loadRsvpAdminSnapshot, saveRsvpMusicConfig, saveRsvpManagement, deleteRsvpManagement, restoreRsvpManagement, deleteRsvpResponseExceptional, cleanOrphanedRsvpLinks, releaseOrphanedRsvpGuest };
+export { loadRsvpAdminSnapshot, saveRsvpMusicConfig, saveRsvpManagement, deleteRsvpManagement, restoreRsvpManagement, deleteRsvpResponseExceptional, cleanOrphanedRsvpLinks, releaseOrphanedRsvpGuest, verifyRsvpGuestAvailability };
