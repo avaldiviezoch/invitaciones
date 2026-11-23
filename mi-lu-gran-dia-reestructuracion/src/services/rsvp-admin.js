@@ -1,5 +1,6 @@
 import { db } from './firebase-client.js';
 import { weddingCapabilities } from '../core/app/permissions.js';
+import { loadInvitadosSnapshot, saveInvitadosSnapshot, guestStatus } from '../modules/invitados/invitados-data.js';
 import {
   collection,
   deleteDoc,
@@ -164,16 +165,103 @@ async function restoreRsvpManagement(context, token, responseId, previous) {
   await deleteDoc(ref);
 }
 
+// Gestionar el vínculo con los datos canónicos de Invitados, no con la vista de diagnóstico.
+function withoutRsvpLink(guest, responseId, attendance = '') {
+  if (String(guest?.rsvpResponseId || '') !== String(responseId)) return { ...guest };
+  const updated = { ...guest };
+  const expectedStatus = attendance === 'confirmed' ? 'confirmed'
+    : attendance === 'declined' ? 'declined'
+    : attendance === 'tentative' ? 'tentative' : '';
+  // Solo revertir el estado que coincide con la respuesta anulada.
+  // No convertir a pendiente un estado manual diferente al RSVP original.
+  if (expectedStatus && guestStatus(updated) === expectedStatus) updated.status = 'pending';
+  for (const key of ['rsvpResponseId', 'rsvpResponseName', 'rsvpGroup', 'rsvpFamilyLabel', 'rsvpTags', 'rsvpLinkedAt']) {
+    delete updated[key];
+  }
+  updated.notes = String(updated.notes || '').split('\n')
+    .filter((line) => !line.trim().startsWith('[RSVP]')).join('\n').trim();
+  return updated;
+}
+
+function canonicalCopy(snapshot) {
+  const original = snapshot?.canonical;
+  if (!original || !Array.isArray(original.guests)) throw new Error('No se pudo leer la lista canónica de invitados.');
+  return { ...original, guests: original.guests.map((guest) => ({ ...guest })) };
+}
+
 async function deleteRsvpResponseExceptional(context, token, responseId) {
   requireEditor(context);
   const safeToken = cleanText(token, 160);
   const safeResponseId = cleanText(responseId, 180);
   if (!safeToken || !safeResponseId) throw new Error('No se pudo identificar la respuesta RSVP a eliminar.');
-
-  const batch = writeBatch(db);
-  batch.delete(doc(db, 'publicRsvp', safeToken, 'responses', safeResponseId));
-  batch.delete(doc(db, 'weddings', context.id, 'rsvpManagement', managementDocId(safeToken, safeResponseId)));
-  await batch.commit();
+  const responseRef = doc(db, 'publicRsvp', safeToken, 'responses', safeResponseId);
+  const managementRef = doc(db, 'weddings', context.id, 'rsvpManagement', managementDocId(safeToken, safeResponseId));
+  const [responseSnap, managementSnap, guestSnapshot] = await Promise.all([
+    getDoc(responseRef), getDoc(managementRef), loadInvitadosSnapshot(context)
+  ]);
+  if (!responseSnap.exists()) throw new Error('La respuesta RSVP ya no existe. Actualiza el diagnóstico.');
+  const original = canonicalCopy(guestSnapshot);
+  const changed = canonicalCopy(guestSnapshot);
+  const attendance = cleanText(responseSnap.data()?.attendance, 30);
+  const linkedIds = new Set(Array.isArray(managementSnap.data()?.linkedGuestIds)
+    ? managementSnap.data().linkedGuestIds.map(String) : []);
+  const affected = changed.guests.filter((guest) => String(guest.rsvpResponseId || '') === safeResponseId);
+  // Un vínculo administrativo sin metadata canónica no autoriza cambiar un estado manual.
+  changed.guests = changed.guests.map((guest) =>
+    String(guest.rsvpResponseId || '') === safeResponseId
+      ? withoutRsvpLink(guest, safeResponseId, attendance) : guest
+  );
+  let guestSaved = false;
+  try {
+    if (affected.length) {
+      await saveInvitadosSnapshot(context, changed);
+      guestSaved = true;
+    }
+    const batch = writeBatch(db);
+    batch.delete(responseRef);
+    batch.delete(managementRef);
+    await batch.commit();
+  } catch (error) {
+    if (guestSaved) {
+      try {
+        await saveInvitadosSnapshot(context, original);
+      } catch (rollbackError) {
+        throw new Error('No se pudo completar la eliminación y la restauración automática de Invitados falló. Detén las modificaciones y revisa los datos. ' + (rollbackError?.message || ''));
+      }
+    }
+    throw error;
+  }
+  return { unlinkedGuestIds: affected.map((guest) => String(guest.id)), managementLinkedIds: [...linkedIds] };
 }
 
-export { loadRsvpAdminSnapshot, saveRsvpMusicConfig, saveRsvpManagement, deleteRsvpManagement, restoreRsvpManagement, deleteRsvpResponseExceptional };
+async function cleanOrphanedRsvpLinks(context) {
+  requireEditor(context);
+  const [guestSnapshot, rsvpSnapshot] = await Promise.all([
+    loadInvitadosSnapshot(context), loadRsvpAdminSnapshot(context)
+  ]);
+  const activeResponseIds = new Set(rsvpSnapshot.responses.map((response) => String(response.id)));
+  const original = canonicalCopy(guestSnapshot);
+  const orphans = original.guests.filter((guest) => {
+    const responseId = String(guest.rsvpResponseId || '').trim();
+    return responseId && !activeResponseIds.has(responseId);
+  });
+  if (!orphans.length) return { cleanedGuestIds: [] };
+  // Las respuestas históricas ya eliminadas no permiten demostrar qué estado
+  // fue asignado por RSVP: evitar degradar confirmaciones manuales sin evidencia.
+  const changed = canonicalCopy(guestSnapshot);
+  changed.guests = changed.guests.map((guest) => {
+    const id = String(guest.rsvpResponseId || '').trim();
+    if (!id || activeResponseIds.has(id)) return guest;
+    const next = { ...guest };
+    const hasRsvpEvidence = Boolean(guest.rsvpLinkedAt)
+      || String(guest.notes || '').split('\n').some((line) => line.trim().startsWith('[RSVP]'));
+    if (hasRsvpEvidence && guestStatus(next) === 'confirmed') next.status = 'pending';
+    for (const key of ['rsvpResponseId', 'rsvpResponseName', 'rsvpGroup', 'rsvpFamilyLabel', 'rsvpTags', 'rsvpLinkedAt']) delete next[key];
+    next.notes = String(next.notes || '').split('\n').filter((line) => !line.trim().startsWith('[RSVP]')).join('\n').trim();
+    return next;
+  });
+  await saveInvitadosSnapshot(context, changed);
+  return { cleanedGuestIds: orphans.map((guest) => String(guest.id)) };
+}
+
+export { loadRsvpAdminSnapshot, saveRsvpMusicConfig, saveRsvpManagement, deleteRsvpManagement, restoreRsvpManagement, deleteRsvpResponseExceptional, cleanOrphanedRsvpLinks };
