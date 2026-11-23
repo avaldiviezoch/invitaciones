@@ -238,6 +238,41 @@ async function deleteRsvpResponseExceptional(context, token, responseId) {
   return { unlinkedGuestIds: affected.map((guest) => String(guest.id)), managementLinkedIds: [...linkedIds] };
 }
 
+function withoutOrphanRsvpLink(guest) {
+  const next = { ...guest };
+  const hasRsvpEvidence = Boolean(guest.rsvpLinkedAt)
+    || String(guest.notes || '').split('\n').some((line) => line.trim().startsWith('[RSVP]'));
+  if (hasRsvpEvidence && guestStatus(next) === 'confirmed') next.status = 'pending';
+  for (const key of ['rsvpResponseId', 'rsvpResponseName', 'rsvpGroup', 'rsvpFamilyLabel', 'rsvpTags', 'rsvpLinkedAt']) delete next[key];
+  next.notes = String(next.notes || '').split('\n').filter((line) => !line.trim().startsWith('[RSVP]')).join('\n').trim();
+  return next;
+}
+
+async function releaseOrphanedRsvpGuest(context, guestId, expectedResponseId) {
+  requireEditor(context);
+  const id = cleanText(guestId, 180);
+  const oldId = cleanText(expectedResponseId, 180);
+  if (!id || !oldId) throw new Error('Selecciona un invitado con una referencia RSVP antigua.');
+  const [snapshot, config] = await Promise.all([
+    loadInvitadosSnapshot(context),
+    getDoc(doc(db, 'weddings', context.id, 'rsvpConfig', 'main'))
+  ]);
+  const token = cleanText(config.data()?.token, 160);
+  if (!config.exists() || !token) throw new Error('No se pudo verificar la configuración RSVP activa.');
+  const guest = snapshot.canonical.guests.find(item => String(item.id) === id);
+  if (!guest || String(guest.rsvpResponseId || '') !== oldId) {
+    throw new Error('La vinculación del invitado cambió. Actualiza y comprueba de nuevo.');
+  }
+  const oldResponse = await getDoc(doc(db, 'publicRsvp', token, 'responses', oldId));
+  if (oldResponse.exists()) {
+    throw new Error('Esta respuesta RSVP todavía existe. No puede liberarse como huérfana; desvincúlala desde su confirmación.');
+  }
+  const canonical = canonicalCopy(snapshot);
+  canonical.guests = canonical.guests.map(item => String(item.id) === id ? withoutOrphanRsvpLink(item) : item);
+  await saveInvitadosSnapshot(context, canonical);
+  return { releasedGuestId: id };
+}
+
 async function cleanOrphanedRsvpLinks(context, expectedGuestIds = []) {
   requireEditor(context);
   const [guestSnapshot, rsvpSnapshot] = await Promise.all([
@@ -264,16 +299,10 @@ async function cleanOrphanedRsvpLinks(context, expectedGuestIds = []) {
   changed.guests = changed.guests.map((guest) => {
     const id = String(guest.rsvpResponseId || '').trim();
     if (!id || activeResponseIds.has(id)) return guest;
-    const next = { ...guest };
-    const hasRsvpEvidence = Boolean(guest.rsvpLinkedAt)
-      || String(guest.notes || '').split('\n').some((line) => line.trim().startsWith('[RSVP]'));
-    if (hasRsvpEvidence && guestStatus(next) === 'confirmed') next.status = 'pending';
-    for (const key of ['rsvpResponseId', 'rsvpResponseName', 'rsvpGroup', 'rsvpFamilyLabel', 'rsvpTags', 'rsvpLinkedAt']) delete next[key];
-    next.notes = String(next.notes || '').split('\n').filter((line) => !line.trim().startsWith('[RSVP]')).join('\n').trim();
-    return next;
+    return withoutOrphanRsvpLink(guest);
   });
   await saveInvitadosSnapshot(context, changed);
   return { cleanedGuestIds: orphans.map((guest) => String(guest.id)) };
 }
 
-export { loadRsvpAdminSnapshot, saveRsvpMusicConfig, saveRsvpManagement, deleteRsvpManagement, restoreRsvpManagement, deleteRsvpResponseExceptional, cleanOrphanedRsvpLinks };
+export { loadRsvpAdminSnapshot, saveRsvpMusicConfig, saveRsvpManagement, deleteRsvpManagement, restoreRsvpManagement, deleteRsvpResponseExceptional, cleanOrphanedRsvpLinks, releaseOrphanedRsvpGuest };
