@@ -234,7 +234,7 @@ async function deleteRsvpResponseExceptional(context, token, responseId) {
   return { unlinkedGuestIds: affected.map((guest) => String(guest.id)), managementLinkedIds: [...linkedIds] };
 }
 
-async function cleanOrphanedRsvpLinks(context) {
+async function cleanOrphanedRsvpLinks(context, expectedGuestIds = []) {
   requireEditor(context);
   const [guestSnapshot, rsvpSnapshot] = await Promise.all([
     loadInvitadosSnapshot(context), loadRsvpAdminSnapshot(context)
@@ -245,6 +245,11 @@ async function cleanOrphanedRsvpLinks(context) {
     const responseId = String(guest.rsvpResponseId || '').trim();
     return responseId && !activeResponseIds.has(responseId);
   });
+  const expected = [...new Set(expectedGuestIds.map(String))].sort();
+  const actual = orphans.map((guest) => String(guest.id)).sort();
+  if (expected.length !== actual.length || expected.some((id, index) => id !== actual[index])) {
+    throw new Error('El diagnóstico cambió desde la última revisión. Actualiza la lista y vuelve a comprobar los nombres.');
+  }
   if (!orphans.length) return { cleanedGuestIds: [] };
   // Las respuestas históricas ya eliminadas no permiten demostrar qué estado
   // fue asignado por RSVP: evitar degradar confirmaciones manuales sin evidencia.
