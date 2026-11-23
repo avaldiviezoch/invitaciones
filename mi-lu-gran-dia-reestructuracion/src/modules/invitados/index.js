@@ -548,7 +548,7 @@ async function mountInvitados(context) {
 
   try {
     const [template, loaded] = await Promise.all([
-      fetch(new URL('./index.html?v=20261123-main-rsvp-integrity', import.meta.url)).then((response) => {
+      fetch(new URL('./index.html?v=20261123-auto-guest-return', import.meta.url)).then((response) => {
         if (!response.ok) throw new Error('No se pudo cargar la interfaz de Invitados.');
         return response.text();
       }),
