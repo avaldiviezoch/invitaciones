@@ -50,6 +50,18 @@ button.danger{min-width:104px;padding:10px 12px;font-size:11px;border-radius:11p
 .link-line button:hover:not(:disabled){filter:brightness(.975)}
 @media(min-width:1300px){.summary{grid-template-columns:repeat(6,minmax(0,1fr))}}
 @media(max-width:800px){main{width:calc(100% - 20px);margin:12px auto 36px}header,section{padding:17px;border-radius:16px}h1{font-size:27px}.summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.summary article{padding:13px}.table-wrap{max-height:none}section h2{font-size:21px}}
+
+/* Vista RSVP compacta: una línea por invitado, controles pequeños */
+.link-editor{display:flex!important;flex-direction:column!important;gap:3px!important;min-width:0!important;width:100%!important}
+.link-line.compact-row{display:grid!important;grid-template-columns:minmax(100px,1fr) 150px auto auto;align-items:center!important;gap:5px!important;flex-wrap:nowrap!important;padding:3px 0!important;border:0!important;background:transparent!important;min-height:29px}
+.link-line.compact-row .link-name{font-size:11px!important;font-weight:600!important;line-height:1.2!important;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:none!important}
+.link-line.compact-row select{width:150px!important;min-width:0!important;max-width:150px!important;flex:none!important;height:27px!important;padding:3px 5px!important;font-size:10px!important;border-radius:6px!important}
+.link-line.compact-row button{width:auto!important;min-width:0!important;padding:5px 7px!important;font-size:10px!important;line-height:1.1!important;height:27px!important;border-radius:6px!important;white-space:nowrap}
+.link-line.compact-add{margin-top:2px;border-top:1px dashed #e4ddd4!important;padding-top:5px!important}
+.link-line.compact-add .link-name{color:#657751}
+table{min-width:1140px!important}th,td{padding:9px 10px!important}td:nth-child(7){min-width:430px;width:35%}
+button.danger{padding:6px 8px!important;min-width:0!important;font-size:10px!important;border-radius:7px!important}
+@media(max-width:800px){td:nth-child(7){min-width:395px}.link-line.compact-row{grid-template-columns:minmax(85px,1fr) 120px auto auto}.link-line.compact-row select{width:120px!important;max-width:120px!important}}
 </style></head>
 <body><main>
 <header><span class="eyebrow">DIAGNÓSTICO · CONSISTENCIA RSVP</span><h1>RSVP vs Invitados</h1><p>Compara cada persona vinculada a un RSVP confirmado contra la lista canónica de Invitados.</p><div class="actions"><button id="reload">Actualizar diagnóstico</button><button id="repair" disabled>Reparar discrepancias</button></div></header>
@@ -110,11 +122,11 @@ function linkEditor(response,meta,guests,management,byId){
  const choices=guests.filter(g=>!owned.has(String(g.id))&&(!g.rsvpResponseId||String(g.rsvpResponseId)===String(response.id)));
  const options=choices.slice().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'es')).map(g=>'<option value="'+esc(g.id)+'">'+esc(g.name||g.id)+'</option>').join('');
  const rows=linked.map(id=>{
-  const person=byId.get(id);
-  return '<div class="link-card current"><div class="link-card-head"><div class="link-name">'+esc(person?.name||id+' (no encontrado)')+'</div><div class="link-meta">Vínculo actual</div></div><div class="link-line"><select aria-label="Reasignar '+esc(person?.name||id)+'" data-link-select="'+esc(response.id)+'" data-old-id="'+esc(id)+'"><option value="">Elegir reemplazo…</option>'+options+'</select><button type="button" data-link-action="replace" data-response-id="'+esc(response.id)+'" data-old-id="'+esc(id)+'">Reasignar</button><button type="button" data-link-action="unlink" data-response-id="'+esc(response.id)+'" data-old-id="'+esc(id)+'">Quitar vínculo</button></div></div>';
+  const person=byId.get(id),name=person?.name||id+' (no encontrado)';
+  return '<div class="link-line compact-row"><span class="link-name" title="'+esc(name)+'">'+esc(name)+'</span><select aria-label="Elegir reemplazo para '+esc(name)+'" data-link-select="'+esc(response.id)+'" data-old-id="'+esc(id)+'"><option value="">Reemplazar por…</option>'+options+'</select><button type="button" data-link-action="replace" data-response-id="'+esc(response.id)+'" data-old-id="'+esc(id)+'" title="Reasignar vínculo">Cambiar</button><button type="button" data-link-action="unlink" data-response-id="'+esc(response.id)+'" data-old-id="'+esc(id)+'" title="Quitar vínculo">Quitar</button></div>';
  }).join('');
- const add='<div class="link-card add"><div class="link-card-head"><div class="link-name">Agregar nuevo vínculo</div><div class="link-meta">Asociar esta respuesta a un invitado</div></div><div class="link-line"><select aria-label="Vincular invitado" data-link-select="'+esc(response.id)+'" data-old-id=""><option value="">Seleccionar invitado…</option>'+options+'</select><button type="button" data-link-action="add" data-response-id="'+esc(response.id)+'" data-old-id="">Vincular</button></div></div>';
- return '<div class="link-editor"><div class="link-group">'+(rows||'<span class="muted">Sin vínculos actuales</span>')+'</div>'+add+'</div>';
+ const add='<div class="link-line compact-row compact-add"><span class="link-name">+ Vincular</span><select aria-label="Vincular invitado" data-link-select="'+esc(response.id)+'" data-old-id=""><option value="">Elegir invitado…</option>'+options+'</select><button type="button" data-link-action="add" data-response-id="'+esc(response.id)+'" data-old-id="" title="Agregar vínculo">Añadir</button></div>';
+ return '<div class="link-editor">'+(rows||'<span class="muted">Sin vínculos</span>')+add+'</div>';
 }
 async function run(){
  if(!currentUser){$('state').textContent='No hay sesión iniciada. Abre primero Mi Gran Día e inicia sesión.';return}
