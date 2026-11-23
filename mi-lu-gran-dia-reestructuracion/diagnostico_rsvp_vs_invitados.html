@@ -13,6 +13,43 @@ table{width:100%;border-collapse:collapse;min-width:1100px}th,td{padding:10px 11
 .badrow{background:#fff0f3}.okrow{background:#fbfcf8}.missing{background:#fff7e8}.code{font-family:Consolas,monospace;font-size:9px;word-break:break-all}.badge{display:inline-block;padding:4px 7px;border-radius:999px;font-size:8px;font-weight:700}.badge.ok{background:#edf3e8;color:#63734c}.badge.bad{background:#f8e3e7;color:#a15161}
 .empty{padding:22px;text-align:center;color:#958e88}.actions{margin-top:12px}.actions button{padding:9px 12px;border:1px solid #dcd3cd;border-radius:10px;background:#fff;cursor:pointer}button.danger{padding:8px 10px;border:1px solid #e5bcc4;border-radius:9px;background:#fff5f7;color:#9f4f5e;font-weight:800;cursor:pointer}.danger:disabled{opacity:.45;cursor:not-allowed}.link-editor{display:grid;gap:7px;min-width:220px}.link-line{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.link-line select{max-width:240px;min-width:160px;padding:7px;border:1px solid #ddd1c7;border-radius:8px;background:#fff;font-size:11px}.link-line button{padding:7px 9px;border:1px solid #c6d1bb;background:#f3f8ef;color:#4b6645;border-radius:8px;font-weight:700;cursor:pointer}.link-line button.unlink{border-color:#e5c9a5;background:#fffaf0;color:#875e30}.link-line button:disabled{opacity:.5;cursor:not-allowed}.link-note{font-size:10px;color:#81756e}.muted{color:#9a938d}.nowrap{white-space:nowrap}
 @media(max-width:800px){.summary{grid-template-columns:1fr 1fr}.summary article:last-child{grid-column:1/-1}}
+
+/* 2026-11-23: presentación editorial de diagnóstico y vínculos */
+:root{--olive:#667650;--paper:#f7f4f0;--stroke:#e7dfd8;--ink:#37322e}
+body{background:linear-gradient(180deg,#faf8f5,#f3efea);color:var(--ink);font-family:Arial,sans-serif}
+main{width:min(96%,1550px);margin:28px auto 64px}
+header,section,.state,.summary article{box-shadow:0 8px 28px rgba(66,51,37,.045);border-color:var(--stroke)}
+header{padding:26px 29px;border-radius:22px}h1{font-size:34px;color:#302a26}
+header p,section p{font-size:13px;line-height:1.6;color:#79716a}
+section{padding:22px;border-radius:22px}section h2{font-size:24px;margin-bottom:8px}
+.summary{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.summary article{min-height:105px;border-radius:17px;padding:17px}
+.summary span,.summary small{font-size:11px}.summary strong{font-size:29px}
+.state{padding:14px 17px;overflow-wrap:anywhere}
+.table-wrap{border-radius:15px;max-height:76vh;overflow:auto}
+table{min-width:1240px;border-collapse:separate;border-spacing:0}
+th,td{padding:14px 12px;font-size:12px;line-height:1.45;vertical-align:top}
+th{position:sticky;top:0;z-index:3;background:#fbf9f6;font-size:10px;white-space:nowrap}
+tbody tr:hover{background:#fdfbf8}
+.code{color:#81766e;font-size:10px}.response-name{font-size:13px;font-weight:800;line-height:1.4;color:#302b27}
+.badge{font-size:10px;padding:5px 9px}
+.actions button{padding:10px 14px;border-radius:11px;font-weight:700}.actions button:disabled{opacity:.5}
+button.danger{min-width:104px;padding:10px 12px;font-size:11px;border-radius:11px}
+.link-editor{display:grid;gap:10px;min-width:330px}
+.link-group{display:grid;gap:8px}
+.link-card{border:1px solid #e9e0d8;background:#fdfbf9;padding:11px 12px;border-radius:13px}
+.link-card.add{background:#f5f9f2;border:1px dashed #bdcdb3}
+.link-card-head{margin-bottom:8px}
+.link-name{font-size:12px;font-weight:800;color:#37312d}
+.link-meta{color:#90847b;font-size:10px;margin-top:3px}
+.link-line{display:flex;flex-wrap:wrap;align-items:center;gap:7px}
+.link-line select{flex:1 1 190px;min-width:150px;max-width:100%;padding:10px;border-radius:10px;font-size:11px;border:1px solid #dbd1c8;background:#fff}
+.link-line select:focus{outline:2px solid #b9c9ac;outline-offset:1px}
+.link-line button{font-size:11px;padding:9px 11px;border-radius:9px;font-weight:800}
+.link-line button[data-link-action="replace"],.link-line button[data-link-action="add"]{background:#edf3e8;color:#526742;border:1px solid #c9d8bd}
+.link-line button[data-link-action="unlink"]{background:#fff8ed;color:#986c30;border:1px solid #e8d0ac}
+.link-line button:hover:not(:disabled){filter:brightness(.975)}
+@media(min-width:1300px){.summary{grid-template-columns:repeat(6,minmax(0,1fr))}}
+@media(max-width:800px){main{width:calc(100% - 20px);margin:12px auto 36px}header,section{padding:17px;border-radius:16px}h1{font-size:27px}.summary{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.summary article{padding:13px}.table-wrap{max-height:none}section h2{font-size:21px}}
 </style></head>
 <body><main>
 <header><span class="eyebrow">DIAGNÓSTICO · CONSISTENCIA RSVP</span><h1>RSVP vs Invitados</h1><p>Compara cada persona vinculada a un RSVP confirmado contra la lista canónica de Invitados.</p><div class="actions"><button id="reload">Actualizar diagnóstico</button><button id="repair" disabled>Reparar discrepancias</button></div></header>
@@ -71,14 +108,13 @@ function linkEditor(response,meta,guests,management,byId){
  const linked=[...new Set(Array.isArray(meta?.linkedGuestIds)?meta.linkedGuestIds.map(String):[])];
  const owned=new Set(management.filter(m=>String(m.responseId)!==String(response.id)).flatMap(m=>Array.isArray(m.linkedGuestIds)?m.linkedGuestIds.map(String):[]));
  const choices=guests.filter(g=>!owned.has(String(g.id))&&(!g.rsvpResponseId||String(g.rsvpResponseId)===String(response.id)));
- const options=choices.slice().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'es'))
-  .map(g=>'<option value="'+esc(g.id)+'">'+esc(g.name||g.id)+'</option>').join('');
+ const options=choices.slice().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'es')).map(g=>'<option value="'+esc(g.id)+'">'+esc(g.name||g.id)+'</option>').join('');
  const rows=linked.map(id=>{
   const person=byId.get(id);
-  return '<div class="link-line"><b>'+esc(person?.name||id+' (no encontrado)')+'</b><select aria-label="Reasignar '+esc(person?.name||id)+'" data-link-select="'+esc(response.id)+'" data-old-id="'+esc(id)+'"><option value="">Elegir reemplazo…</option>'+options+'</select><button type="button" data-link-action="replace" data-response-id="'+esc(response.id)+'" data-old-id="'+esc(id)+'">Reasignar</button><button type="button" class="unlink" data-link-action="unlink" data-response-id="'+esc(response.id)+'" data-old-id="'+esc(id)+'">Quitar vínculo</button></div>';
+  return '<div class="link-card current"><div class="link-card-head"><div class="link-name">'+esc(person?.name||id+' (no encontrado)')+'</div><div class="link-meta">Vínculo actual</div></div><div class="link-line"><select aria-label="Reasignar '+esc(person?.name||id)+'" data-link-select="'+esc(response.id)+'" data-old-id="'+esc(id)+'"><option value="">Elegir reemplazo…</option>'+options+'</select><button type="button" data-link-action="replace" data-response-id="'+esc(response.id)+'" data-old-id="'+esc(id)+'">Reasignar</button><button type="button" data-link-action="unlink" data-response-id="'+esc(response.id)+'" data-old-id="'+esc(id)+'">Quitar vínculo</button></div></div>';
  }).join('');
- const add='<div class="link-line"><select aria-label="Vincular invitado" data-link-select="'+esc(response.id)+'" data-old-id=""><option value="">Seleccionar invitado…</option>'+options+'</select><button type="button" data-link-action="add" data-response-id="'+esc(response.id)+'" data-old-id="">Vincular</button></div>';
- return '<div class="link-editor">'+(rows||'<span class="muted">Sin vínculos</span>')+add+'</div>';
+ const add='<div class="link-card add"><div class="link-card-head"><div class="link-name">Agregar nuevo vínculo</div><div class="link-meta">Asociar esta respuesta a un invitado</div></div><div class="link-line"><select aria-label="Vincular invitado" data-link-select="'+esc(response.id)+'" data-old-id=""><option value="">Seleccionar invitado…</option>'+options+'</select><button type="button" data-link-action="add" data-response-id="'+esc(response.id)+'" data-old-id="">Vincular</button></div></div>';
+ return '<div class="link-editor"><div class="link-group">'+(rows||'<span class="muted">Sin vínculos actuales</span>')+'</div>'+add+'</div>';
 }
 async function run(){
  if(!currentUser){$('state').textContent='No hay sesión iniciada. Abre primero Mi Gran Día e inicia sesión.';return}
