@@ -1,3 +1,12 @@
+## 2026-11-23 — DEV: eliminación RSVP desde la página principal de Invitados
+
+- Se corrigió el alcance: la operación importante es `Inicio → Invitados → Confirmaciones`, no la utilidad de diagnóstico.
+- En la pantalla principal `src/modules/invitados/index.html` y `rsvp-controller.js` se incorporaron «Eliminar RSVP» (prompt obligatorio ELIMINAR) y «Revisar vínculos huérfanos». El controlador utiliza el servicio `rsvp-admin.js` y vuelve a leer la lista canónica de invitados después de eliminar o limpiar.
+- `src/modules/invitados/index.js` facilita una recarga de Invitados controlada por contexto; `src/modules/dashboard/inicio.js` y los imports internos actualizan sus versiones para evitar carga de módulos antiguos.
+- La operación excepcional exige capacidad `canEdit`, `weddingId` activo y coincidencia del token RSVP de la boda antes de escribir. No se crean colecciones, no se modifican reglas de Firebase y no se ejecutan borrados reales en esta intervención.
+- Para producción se preparó la rama aislada `Wedding/fix-rsvp-guest-links-2026-11-23` y el **PR borrador #573**, sin merge sobre producción. Se revisaron los cinco archivos afectados y se adaptaron solo las rutas/caché; no se copió completo el `inicio.js` divergente.
+- Pendiente: pruebas con Firebase autenticado y datos ficticios de QA; regresiones recarga, A→B→A, logout/login, dos pestañas, móvil/escritorio y CI; aprobación del pase y despliegue de producción. No se declara la corrección desplegada en PROD.
+
 ## 2026-11-23 — DEV: integridad al eliminar RSVP y limpiar vínculos huérfanos
 
 - Causa raíz: el diagnóstico eliminaba la respuesta en `publicRsvp/{token}/responses/{responseId}` y el registro en `weddings/{weddingId}/rsvpManagement`, pero no retiraba la referencia `rsvpResponseId` ni el estado de RSVP del invitado canónico; así quedaron invitados confirmados tras borrar la respuesta.
