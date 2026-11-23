@@ -194,6 +194,10 @@ async function deleteRsvpResponseExceptional(context, token, responseId) {
   const safeToken = cleanText(token, 160);
   const safeResponseId = cleanText(responseId, 180);
   if (!safeToken || !safeResponseId) throw new Error('No se pudo identificar la respuesta RSVP a eliminar.');
+  const activeConfig = await getDoc(doc(db, 'weddings', context.id, 'rsvpConfig', 'main'));
+  if (!activeConfig.exists() || cleanText(activeConfig.data()?.token, 160) !== safeToken) {
+    throw new Error('El token RSVP no pertenece a la boda activa. Actualiza las confirmaciones antes de eliminar.');
+  }
   const responseRef = doc(db, 'publicRsvp', safeToken, 'responses', safeResponseId);
   const managementRef = doc(db, 'weddings', context.id, 'rsvpManagement', managementDocId(safeToken, safeResponseId));
   const [responseSnap, managementSnap, guestSnapshot] = await Promise.all([
@@ -239,6 +243,9 @@ async function cleanOrphanedRsvpLinks(context, expectedGuestIds = []) {
   const [guestSnapshot, rsvpSnapshot] = await Promise.all([
     loadInvitadosSnapshot(context), loadRsvpAdminSnapshot(context)
   ]);
+  if (!rsvpSnapshot.token || !rsvpSnapshot.config) {
+    throw new Error('No hay configuración RSVP activa comprobable. No se modificaron invitados.');
+  }
   const activeResponseIds = new Set(rsvpSnapshot.responses.map((response) => String(response.id)));
   const original = canonicalCopy(guestSnapshot);
   const orphans = original.guests.filter((guest) => {
