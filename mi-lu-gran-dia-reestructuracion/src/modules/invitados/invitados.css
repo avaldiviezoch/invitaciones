@@ -99,9 +99,9 @@
 .rsvp-link-head span{display:block;margin-top:4px;color:#918b86;font-size:8px}
 .rsvp-link-head small{color:#ad7480;font-size:8px;font-weight:700}
 .rsvp-guest-picker{max-height:290px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;overflow:auto;padding:2px}
-.rsvp-guest-option{display:grid;grid-template-columns:auto 38px minmax(0,1fr);align-items:center;gap:9px;padding:9px 10px;border:1px solid #e5dfda;border-radius:12px;background:#fff;cursor:pointer}
+.rsvp-guest-option{display:grid;grid-template-columns:auto 38px minmax(0,1fr) auto;align-items:center;gap:9px;padding:9px 10px;border:1px solid #e5dfda;border-radius:12px;background:#fff}
 .rsvp-guest-option.is-suggested{border-color:#bd8994;background:#f7ecef}
-.rsvp-guest-option input{width:16px;height:16px;margin:0}
+.rsvp-guest-option input{width:16px;height:16px;margin:0}.rsvp-guest-option[hidden]{display:none}.rsvp-guest-option [data-rsvp-release-guest]{padding:6px 9px;border:1px solid #c8d5bb;border-radius:8px;background:#f0f5eb;color:#526746;font-size:11px;font-weight:700;cursor:pointer}
 .rsvp-guest-option .guest-avatar{width:38px;height:38px}
 .rsvp-guest-option strong{display:block;overflow:hidden;color:#4f4c48;font-size:9px;text-overflow:ellipsis;white-space:nowrap}
 .rsvp-guest-option small{display:block;margin-top:3px;color:#938d87;font-size:7px}
