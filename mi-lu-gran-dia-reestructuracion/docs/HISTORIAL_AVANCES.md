@@ -1,3 +1,12 @@
+## 2026-11-23 — DEV: invitados ocultos por RSVP eliminado en selector principal
+
+- Caso reportado: al volver a enviar RSVP de Marcelino Alvarado y Lucy Emilia, sus registros canónicos no aparecen en la lista de vinculación de `Invitados → Confirmaciones`.
+- Causa en código: `openReview` excluye invitados con `rsvpResponseId` de otra respuesta, aunque ese ID ya no figure entre las respuestas vigentes. No se ha accedido a Firebase autenticado para afirmar los IDs reales específicos.
+- Corrección UX puntual: el selector identifica vínculos huérfanos, presenta los nombres excluidos y ofrece `Revisar y liberar vínculos` dentro del mismo diálogo. La acción requiere confirmación explícita y usa `cleanOrphanedRsvpLinks`, que revalida IDs contra Firebase antes de guardar; la lista de invitados se recarga y el formulario se reabre con los candidatos disponibles.
+- Se conservaron las restricciones para vínculos RSVP todavía vigentes. No se permitió reasignar automáticamente un vínculo antiguo ni se modificaron datos reales de usuarios.
+- Se actualizaron las versiones de importación de `rsvp-controller.js` y `invitados/index.js` para evitar caché obsoleta.
+- Cambio replicado solamente en rama candidata `Wedding/fix-rsvp-guest-links-2026-11-23` (PR borrador #573), sin merge a producción. La pantalla de carga prolongada queda como incidencia distinta por investigar, sin soluciones superficiales.
+
 ## 2026-11-23 — DEV: eliminación RSVP desde la página principal de Invitados
 
 - Se corrigió el alcance: la operación importante es `Inicio → Invitados → Confirmaciones`, no la utilidad de diagnóstico.
