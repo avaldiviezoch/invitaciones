@@ -388,6 +388,8 @@ function createRsvpController(api) {
       ${Array.isArray(response.companions) && response.companions.length ? `<small>Acompañantes: ${esc(response.companions.map(text).filter(Boolean).join(', '))}</small>` : ''}
     `;
 
+    const guestSearch = root.querySelector('[data-rsvp-guest-search]');
+    if (guestSearch) guestSearch.value = '';
     const picker = root.querySelector('[data-rsvp-guest-picker]');
     picker.innerHTML = candidates.length
       ? candidates.map((guest) => {
@@ -399,7 +401,7 @@ function createRsvpController(api) {
           ? canonicalResponseId
           : managedResponseId && existingResponses.has(managedResponseId) ? managedResponseId : '';
         const orphaned = isOrphan(guest) && !activeOtherId;
-        const occupied = Boolean(activeOtherId || (canonicalResponseId && canonicalResponseId !== currentResponseId) || managedResponseId);
+        const occupied = Boolean(activeOtherId || (canonicalResponseId && canonicalResponseId !== currentResponseId));
         const canSelect = !occupied;
         const origin = existingResponses.get(activeOtherId);
         const detail = activeOtherId
@@ -773,6 +775,14 @@ function createRsvpController(api) {
   }
 
   function handleInput(event) {
+    const guestSearch = event.target.closest('[data-rsvp-guest-search]');
+    if (guestSearch) {
+      const query = normalizeName(guestSearch.value);
+      api.getRoot()?.querySelectorAll('[data-rsvp-guest-row]').forEach((row) => {
+        row.hidden = Boolean(query && !normalizeName(row.dataset.rsvpSearchName).includes(query));
+      });
+      return true;
+    }
     const musicSearch = event.target.closest('[data-guest-music-search]');
     if (musicSearch) {
       musicUi.search = musicSearch.value;
