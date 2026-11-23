@@ -1345,7 +1345,7 @@ const MODULES = Object.freeze({
     mount: 'mountProveedores'
   },
   invitados: {
-    load: () => import('../invitados/index.js?v=20261123-auto-guest-return'),
+    load: () => import('../invitados/index.js?v=20261123-free-only'),
     mount: 'mountInvitados'
   },
   distribucion: {
