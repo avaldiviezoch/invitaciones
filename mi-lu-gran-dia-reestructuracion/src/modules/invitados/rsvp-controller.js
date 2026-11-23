@@ -5,7 +5,7 @@ import {
   restoreRsvpManagement,
   deleteRsvpResponseExceptional,
   cleanOrphanedRsvpLinks
-} from '../../services/rsvp-admin.js?v=5';
+} from '../../services/rsvp-admin.js?v=20261123-main-rsvp-integrity';
 import { saveInvitadosSnapshot } from './invitados-data.js?v=3';
 import { searchMusicCatalog } from '../../services/music-catalog.js';
 
