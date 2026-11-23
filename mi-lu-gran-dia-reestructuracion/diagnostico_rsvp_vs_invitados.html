@@ -11,7 +11,7 @@ h1{margin:7px 0 0;font:500 30px Georgia,serif}header p,section p{color:#8b8580;f
 section{margin-top:16px;padding:18px;border-radius:18px}section h2{margin:0;font:500 20px Georgia,serif}.table-wrap{overflow:auto;border:1px solid #ece5df;border-radius:13px}
 table{width:100%;border-collapse:collapse;min-width:1100px}th,td{padding:10px 11px;border-bottom:1px solid #eee7e2;text-align:left;vertical-align:top;font-size:10px}th{background:#faf8f5;color:#716a64;font-size:8px;text-transform:uppercase;letter-spacing:.08em}
 .badrow{background:#fff0f3}.okrow{background:#fbfcf8}.missing{background:#fff7e8}.code{font-family:Consolas,monospace;font-size:9px;word-break:break-all}.badge{display:inline-block;padding:4px 7px;border-radius:999px;font-size:8px;font-weight:700}.badge.ok{background:#edf3e8;color:#63734c}.badge.bad{background:#f8e3e7;color:#a15161}
-.empty{padding:22px;text-align:center;color:#958e88}.actions{margin-top:12px}.actions button{padding:9px 12px;border:1px solid #dcd3cd;border-radius:10px;background:#fff;cursor:pointer}button.danger{padding:8px 10px;border:1px solid #e5bcc4;border-radius:9px;background:#fff5f7;color:#9f4f5e;font-weight:800;cursor:pointer}.danger:disabled{opacity:.45;cursor:not-allowed}.muted{color:#9a938d}.nowrap{white-space:nowrap}
+.empty{padding:22px;text-align:center;color:#958e88}.actions{margin-top:12px}.actions button{padding:9px 12px;border:1px solid #dcd3cd;border-radius:10px;background:#fff;cursor:pointer}button.danger{padding:8px 10px;border:1px solid #e5bcc4;border-radius:9px;background:#fff5f7;color:#9f4f5e;font-weight:800;cursor:pointer}.danger:disabled{opacity:.45;cursor:not-allowed}.link-editor{display:grid;gap:7px;min-width:220px}.link-line{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.link-line select{max-width:240px;min-width:160px;padding:7px;border:1px solid #ddd1c7;border-radius:8px;background:#fff;font-size:11px}.link-line button{padding:7px 9px;border:1px solid #c6d1bb;background:#f3f8ef;color:#4b6645;border-radius:8px;font-weight:700;cursor:pointer}.link-line button.unlink{border-color:#e5c9a5;background:#fffaf0;color:#875e30}.link-line button:disabled{opacity:.5;cursor:not-allowed}.link-note{font-size:10px;color:#81756e}.muted{color:#9a938d}.nowrap{white-space:nowrap}
 @media(max-width:800px){.summary{grid-template-columns:1fr 1fr}.summary article:last-child{grid-column:1/-1}}
 </style></head>
 <body><main>
@@ -25,7 +25,7 @@ table{width:100%;border-collapse:collapse;min-width:1100px}th,td{padding:10px 11
 <article class="warn"><span>Vinculados pero no confirmados</span><strong id="sMismatch">—</strong><small>posible causa del 40 vs 38</small></article>
 <article><span>Confirmados sin RSVP confirmado</span><strong id="sExtra">—</strong><small>manuales u otra fuente</small></article>
 </div>
-<section><h2>Todas las confirmaciones recibidas</h2><p>Vista QA completa. La eliminación es extraordinaria: borra únicamente la respuesta RSVP y su registro administrativo asociado. No elimina la cuenta Auth ni el invitado canónico.</p><div class="table-wrap"><table><thead><tr><th>#</th><th>responseId</th><th>Nombre</th><th>Asistencia</th><th>Cantidad</th><th>Fecha</th><th>Invitados vinculados</th><th>Revisado</th><th>Acción extraordinaria</th></tr></thead><tbody id="allResponsesBody"><tr><td colspan="9" class="empty">Cargando…</td></tr></tbody></table></div></section>
+<section><h2>Todas las confirmaciones recibidas</h2><p>Vista QA completa. En «Invitados vinculados» puedes reasignar, añadir o quitar vínculos sin borrar la respuesta RSVP. Solo «Eliminar RSVP» exige escribir ELIMINAR. La eliminación es extraordinaria: borra únicamente la respuesta RSVP y su registro administrativo asociado. No elimina la cuenta Auth ni el invitado canónico.</p><div class="table-wrap"><table><thead><tr><th>#</th><th>responseId</th><th>Nombre</th><th>Asistencia</th><th>Cantidad</th><th>Fecha</th><th>Invitados vinculados</th><th>Revisado</th><th>Acción extraordinaria</th></tr></thead><tbody id="allResponsesBody"><tr><td colspan="9" class="empty">Cargando…</td></tr></tbody></table></div></section>
 <section><h2>Versus persona por persona</h2><p>Las filas rosadas son las discrepancias.</p><div class="table-wrap"><table><thead><tr><th>#</th><th>guestId</th><th>Invitado</th><th>Estado canónico</th><th>responseId</th><th>Respuesta RSVP</th><th>Cantidad RSVP</th><th>Asistencia</th><th>Resultado</th></tr></thead><tbody id="versusBody"><tr><td colspan="9" class="empty">Cargando…</td></tr></tbody></table></div></section>
 <section><h2>Confirmados canónicos sin RSVP confirmado</h2><p>Para detectar confirmaciones manuales o datos que compensen la diferencia.</p><div class="table-wrap"><table><thead><tr><th>#</th><th>guestId</th><th>Nombre</th><th>Estado</th><th>rsvpResponseId guardado</th></tr></thead><tbody id="extraBody"><tr><td colspan="5" class="empty">Cargando…</td></tr></tbody></table></div></section>
 </main>
@@ -34,7 +34,7 @@ import {auth,authPersistenceReady} from './src/services/firebase-client.js';
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
 import {loadActiveWeddingContext} from './src/services/wedding-context.js';
 import {loadInvitadosSnapshot,saveInvitadosSnapshot,guestStatus} from './src/modules/invitados/invitados-data.js?v=10';
-import {loadRsvpAdminSnapshot,deleteRsvpResponseExceptional} from './src/services/rsvp-admin.js?v=6';
+import {loadRsvpAdminSnapshot,saveRsvpManagement,deleteRsvpManagement,restoreRsvpManagement,deleteRsvpResponseExceptional} from './src/services/rsvp-admin.js?v=6';
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
 let currentUser=null;
@@ -42,6 +42,44 @@ let currentContext=null;
 let currentGuestSnapshot=null;
 let currentRsvpSnapshot=null;
 let currentMismatchIds=[];
+let linkSaveBusy=false;
+function dropRsvpMetadata(guest,responseId,attendance){
+ if(String(guest.rsvpResponseId||'')!==String(responseId)) return {...guest};
+ const next={...guest};
+ const matchingStatus=attendance==='confirmed'?'confirmed':attendance==='declined'?'declined':'pending';
+ if(guestStatus(next)===matchingStatus)next.status='pending';
+ for(const key of ['rsvpResponseId','rsvpResponseName','rsvpGroup','rsvpFamilyLabel','rsvpTags','rsvpLinkedAt'])delete next[key];
+ next.notes=String(next.notes||'').split('\n').filter(x=>!x.trim().startsWith('[RSVP]')).join('\n').trim();
+ return next;
+}
+function assignRsvpMetadata(guest,response,meta){
+ const next={...guest};
+ const groupLabels={familia:'Familia',amigos:'Amigos',trabajo:'Trabajo',otros:'Otros'};
+ const sideLabels={novio:'Del novio',novia:'De la novia',ambos:'De ambos'};
+ const tags=[response.attendance==='confirmed'?'Confirmado':response.attendance==='declined'?'No asistirá':'Por confirmar',groupLabels[meta.group],sideLabels[meta.side],meta.familyLabel].filter(Boolean);
+ next.status=response.attendance==='confirmed'?'confirmed':response.attendance==='declined'?'declined':'pending';
+ if(meta.side)next.side=meta.side;
+ next.rsvpResponseId=String(response.id);next.rsvpResponseName=String(response.name||'').slice(0,120);
+ next.rsvpGroup=meta.group||'';next.rsvpFamilyLabel=meta.familyLabel||'';next.rsvpTags=[...new Set(tags)];
+ next.rsvpLinkedAt=new Date().toISOString();
+ if(meta.familyLabel&&!String(next.relation||'').trim())next.relation=meta.familyLabel;
+ const notes=String(next.notes||'').split('\n').filter(x=>!x.trim().startsWith('[RSVP]')).join('\n').trim();
+ next.notes=[notes,'[RSVP] '+tags.join(' · ')+' · respuesta de '+String(response.name||'').slice(0,120)].filter(Boolean).join('\n');
+ return next;
+}
+function linkEditor(response,meta,guests,management,byId){
+ const linked=[...new Set(Array.isArray(meta?.linkedGuestIds)?meta.linkedGuestIds.map(String):[])];
+ const owned=new Set(management.filter(m=>String(m.responseId)!==String(response.id)).flatMap(m=>Array.isArray(m.linkedGuestIds)?m.linkedGuestIds.map(String):[]));
+ const choices=guests.filter(g=>!owned.has(String(g.id))&&(!g.rsvpResponseId||String(g.rsvpResponseId)===String(response.id)));
+ const options=choices.slice().sort((a,b)=>String(a.name||'').localeCompare(String(b.name||''),'es'))
+  .map(g=>'<option value="'+esc(g.id)+'">'+esc(g.name||g.id)+'</option>').join('');
+ const rows=linked.map(id=>{
+  const person=byId.get(id);
+  return '<div class="link-line"><b>'+esc(person?.name||id+' (no encontrado)')+'</b><select aria-label="Reasignar '+esc(person?.name||id)+'" data-link-select="'+esc(response.id)+'" data-old-id="'+esc(id)+'"><option value="">Elegir reemplazo…</option>'+options+'</select><button type="button" data-link-action="replace" data-response-id="'+esc(response.id)+'" data-old-id="'+esc(id)+'">Reasignar</button><button type="button" class="unlink" data-link-action="unlink" data-response-id="'+esc(response.id)+'" data-old-id="'+esc(id)+'">Quitar vínculo</button></div>';
+ }).join('');
+ const add='<div class="link-line"><select aria-label="Vincular invitado" data-link-select="'+esc(response.id)+'" data-old-id=""><option value="">Seleccionar invitado…</option>'+options+'</select><button type="button" data-link-action="add" data-response-id="'+esc(response.id)+'" data-old-id="">Vincular</button></div>';
+ return '<div class="link-editor">'+(rows||'<span class="muted">Sin vínculos</span>')+add+'</div>';
+}
 async function run(){
  if(!currentUser){$('state').textContent='No hay sesión iniciada. Abre primero Mi Gran Día e inicia sesión.';return}
  $('state').textContent='Leyendo datos reales…';
@@ -79,9 +117,9 @@ async function run(){
   $('allResponsesBody').innerHTML=responses.map((r,i)=>{
     const m=managementByResponse.get(String(r.id));
     const linkedIds=Array.isArray(m?.linkedGuestIds)?m.linkedGuestIds.map(String):[];
-    const linkedNames=linkedIds.map(id=>byId.get(id)?.name||id);
+    
     const attendance=r.attendance==='confirmed'?'Confirmó':r.attendance==='declined'?'No asistirá':(r.attendance||'Sin respuesta');
-    return '<tr><td>'+(i+1)+'</td><td class="code">'+esc(r.id)+'</td><td><b>'+esc(r.name||'Sin nombre')+'</b></td><td><span class="badge '+(r.attendance==='confirmed'?'ok':'bad')+'">'+esc(attendance)+'</span></td><td>'+esc(r.quantity||1)+'</td><td class="nowrap">'+esc(fmtDate(r))+'</td><td>'+(linkedNames.length?linkedNames.map(esc).join('<br>'):'<span class="muted">Sin vínculos</span>')+'</td><td>'+(m?.reviewed?'<span class="badge ok">Sí</span>':'<span class="muted">No</span>')+'</td><td><button type="button" class="danger" data-delete-rsvp="'+esc(r.id)+'" data-delete-name="'+esc(r.name||'Sin nombre')+'">Eliminar RSVP</button></td></tr>';
+    return '<tr><td>'+(i+1)+'</td><td class="code">'+esc(r.id)+'</td><td><b>'+esc(r.name||'Sin nombre')+'</b></td><td><span class="badge '+(r.attendance==='confirmed'?'ok':'bad')+'">'+esc(attendance)+'</span></td><td>'+esc(r.quantity||1)+'</td><td class="nowrap">'+esc(fmtDate(r))+'</td><td>'+linkEditor(r,m,guests,management,byId)+'</td><td>'+(m?.reviewed?'<span class="badge ok">Sí</span>':'<span class="muted">No</span>')+'</td><td><button type="button" class="danger" data-delete-rsvp="'+esc(r.id)+'" data-delete-name="'+esc(r.name||'Sin nombre')+'">Eliminar RSVP</button></td></tr>';
   }).join('')||'<tr><td colspan="9" class="empty">No hay confirmaciones registradas.</td></tr>';
   $('state').innerHTML='Boda activa: <b>'+esc(context.name)+'</b> · ID <span class="code">'+esc(context.id)+'</span> · '+new Date().toLocaleString('es-PE');
   rows.sort((a,b)=>(a.status==='confirmed')-(b.status==='confirmed')||String(a.guest?.name||'').localeCompare(String(b.guest?.name||''),'es'));
@@ -93,6 +131,58 @@ async function run(){
  }catch(e){$('state').textContent=e?.message||'No se pudo cargar el diagnóstico.'}
 }
 $('reload').addEventListener('click',run);
+$('allResponsesBody').addEventListener('click',async(event)=>{
+ const control=event.target.closest('[data-link-action]');
+ if(!control)return;
+ if(linkSaveBusy||!currentContext||!currentGuestSnapshot||!currentRsvpSnapshot)return;
+ const responseId=control.dataset.responseId,oldId=control.dataset.oldId||'',action=control.dataset.linkAction;
+ const response=currentRsvpSnapshot.responses.find(r=>String(r.id)===responseId);
+ if(!response) { $('state').textContent='La respuesta RSVP ya no está disponible. Actualiza el diagnóstico.';return; }
+ const selected=control.parentElement.querySelector('select');
+ const newId=(selected?.value||'').trim();
+ if(action!=='unlink'&&!newId){window.alert('Selecciona primero el invitado de la lista.');return;}
+ if(action==='replace'&&newId===oldId){window.alert('Selecciona una persona distinta para reasignar.');return;}
+ const guests=currentGuestSnapshot.canonical.guests;
+ const dest=guests.find(g=>String(g.id)===newId);
+ if(action!=='unlink'&&!dest){window.alert('El invitado seleccionado ya no existe.');return;}
+ const previous=currentRsvpSnapshot.management.find(m=>String(m.responseId)===responseId)||null;
+ const before=[...new Set(Array.isArray(previous?.linkedGuestIds)?previous.linkedGuestIds.map(String):[])];
+ if(action!=='add'&&!before.includes(oldId)){window.alert('El vínculo cambió. Actualiza el diagnóstico.');return;}
+ const conflicts=currentRsvpSnapshot.management.some(m=>String(m.responseId)!==responseId&&Array.isArray(m.linkedGuestIds)&&m.linkedGuestIds.map(String).includes(newId));
+ if(action!=='unlink'&&(conflicts||(dest.rsvpResponseId&&String(dest.rsvpResponseId)!==responseId))){window.alert('Ese invitado ya pertenece a otra respuesta RSVP. Primero desvincúlalo de ella.');return;}
+ if(action==='add'&&before.includes(newId)){window.alert('El invitado ya está vinculado a esta respuesta.');return;}
+ const after=action==='add'?[...before,newId]:action==='replace'?before.map(id=>id===oldId?newId:id):before.filter(id=>id!==oldId);
+ const finalIds=[...new Set(after)];
+ const oldName=guests.find(g=>String(g.id)===oldId)?.name||oldId;
+ const message=action==='unlink'?'¿Quitar la vinculación de '+oldName+'? La confirmación RSVP, el invitado y su mesa se conservarán.':action==='replace'?'¿Reasignar el vínculo de '+oldName+' a '+dest.name+'? No se borrarán invitados ni respuestas RSVP.':'¿Vincular a '+dest.name+' con esta respuesta RSVP?';
+ if(!window.confirm(message))return;
+ linkSaveBusy=true;control.disabled=true;const oldLabel=control.textContent;control.textContent='Guardando…';
+ const previousCanonical=currentGuestSnapshot.canonical;
+ const canonical={...previousCanonical,guests:previousCanonical.guests.map(g=>({...g}))};
+ const metadata={side:previous?.side||'',group:previous?.group||'',familyLabel:previous?.familyLabel||'',linkedGuestIds:finalIds};
+ let managementSaved=false;
+ try{
+  const prevSet=new Set(before),nextSet=new Set(finalIds);
+  canonical.guests=canonical.guests.map(g=>{
+   const id=String(g.id);
+   if(prevSet.has(id)&&!nextSet.has(id))return dropRsvpMetadata(g,responseId,response.attendance);
+   if(nextSet.has(id)&&!prevSet.has(id))return assignRsvpMetadata(g,response,metadata);
+   return g;
+  });
+  if(finalIds.length)await saveRsvpManagement(currentContext,currentRsvpSnapshot.token,responseId,metadata);
+  else await deleteRsvpManagement(currentContext,currentRsvpSnapshot.token,responseId);
+  managementSaved=true;
+  await saveInvitadosSnapshot(currentContext,canonical);
+  $('state').textContent='Vinculación actualizada. Comprobando datos…';
+  await run();
+ }catch(error){
+  if(managementSaved){
+   try{await restoreRsvpManagement(currentContext,currentRsvpSnapshot.token,responseId,previous)}
+   catch(rollbackError){$('state').textContent='ATENCIÓN: fallo al revertir el vínculo. Actualiza y verifica manualmente antes de continuar. '+(rollbackError?.message||'');return;}
+  }
+  $('state').textContent=error?.message||'No se pudo guardar el vínculo.';
+ }finally{linkSaveBusy=false;control.disabled=false;control.textContent=oldLabel;}
+});
 $('allResponsesBody').addEventListener('click',async(event)=>{
  const button=event.target.closest('[data-delete-rsvp]');
  if(!button||!currentContext||!currentRsvpSnapshot) return;
