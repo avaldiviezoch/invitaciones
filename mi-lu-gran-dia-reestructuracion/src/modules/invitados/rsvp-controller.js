@@ -2,7 +2,9 @@ import {
   loadRsvpAdminSnapshot,
   saveRsvpManagement,
   deleteRsvpManagement,
-  restoreRsvpManagement
+  restoreRsvpManagement,
+  deleteRsvpResponseExceptional,
+  cleanOrphanedRsvpLinks
 } from '../../services/rsvp-admin.js?v=5';
 import { saveInvitadosSnapshot } from './invitados-data.js?v=3';
 import { searchMusicCatalog } from '../../services/music-catalog.js';
@@ -267,6 +269,8 @@ function createRsvpController(api) {
     if (unreviewedEl) unreviewedEl.textContent = String(unreviewed);
     if (declinedEl) declinedEl.textContent = String(declined);
 
+    const orphanButton = root.querySelector('[data-rsvp-clean-orphans]');
+    if (orphanButton) orphanButton.hidden = !api.canEdit();
     const list = root.querySelector('[data-rsvp-list]');
     if (!list) return;
     if (loading) {
@@ -410,6 +414,8 @@ function createRsvpController(api) {
 
     root.querySelector('[data-rsvp-apply]').hidden = !api.canEdit();
     const unlinkButton = root.querySelector('[data-rsvp-unlink]');
+    const deleteButton = root.querySelector('[data-rsvp-delete]');
+    if (deleteButton) { deleteButton.hidden = !api.canEdit(); deleteButton.dataset.responseId = String(response.id); }
     unlinkButton.hidden = !api.canEdit() || !management || !Array.isArray(management.linkedGuestIds) || !management.linkedGuestIds.length;
     unlinkButton.dataset.responseId = String(response.id);
     dialog.showModal();
@@ -615,6 +621,58 @@ function createRsvpController(api) {
     return true;
   }
 
+  async function deleteResponse(responseId) {
+    if (!api.canEdit() || api.isSaving() || !state.token) return true;
+    const response = findResponse(responseId);
+    if (!response) return true;
+    const answer = window.prompt('Se eliminará la respuesta RSVP de '+(response.name || 'este invitado')+' y se limpiarán sus vínculos. Los invitados y sus mesas se conservan.\\n\\nEscribe ELIMINAR para continuar:');
+    if (answer !== 'ELIMINAR') return true;
+    if (!window.confirm('¿Eliminar definitivamente esta respuesta RSVP?')) return true;
+    const context = api.getContext();
+    const root = api.getRoot();
+    const notice = root?.querySelector('[data-rsvp-state]');
+    api.setSaving(true);
+    if (notice) notice.textContent = 'Eliminando respuesta y limpiando vínculos…';
+    try {
+      const result = await deleteRsvpResponseExceptional(context, state.token, responseId);
+      closeReview();
+      await api.reloadGuests();
+      await load(context);
+      api.renderMain();
+      const status = api.getRoot()?.querySelector('[data-rsvp-state]');
+      if (status) status.textContent = 'RSVP eliminado. Se desvincularon '+result.unlinkedGuestIds.length+' invitado(s); las personas y mesas permanecen.';
+      api.emitDataChange('rsvp-deleted');
+    } catch (error) {
+      if (notice) notice.textContent = error?.message || 'No se pudo eliminar el RSVP.';
+    } finally { api.setSaving(false); }
+    return true;
+  }
+
+  async function cleanOrphansFromApp() {
+    if (!api.canEdit() || api.isSaving()) return true;
+    const context = api.getContext();
+    const snapshot = api.getSnapshot();
+    if (!snapshot?.canonical?.guests) return true;
+    const known = new Set(state.responses.map(r => String(r.id)));
+    const orphans = snapshot.canonical.guests.filter(g => text(g.rsvpResponseId) && !known.has(String(g.rsvpResponseId)));
+    if (!orphans.length) { window.alert('No se encontraron vínculos RSVP huérfanos.'); return true; }
+    if (!window.confirm('Se encontraron '+orphans.length+' invitados con respuestas RSVP eliminadas:\\n\\n'+orphans.map(g=>g.name||g.id).join('\\n')+'\\n\\n¿Limpiar las referencias huérfanas sin eliminar invitados ni mesas?')) return true;
+    const status = api.getRoot()?.querySelector('[data-rsvp-state]');
+    api.setSaving(true);
+    try {
+      const result = await cleanOrphanedRsvpLinks(context, orphans.map(g => String(g.id)));
+      await api.reloadGuests();
+      await load(context);
+      api.renderMain();
+      const notice = api.getRoot()?.querySelector('[data-rsvp-state]');
+      if (notice) notice.textContent = 'Se limpiaron '+result.cleanedGuestIds.length+' vínculos huérfanos.';
+      api.emitDataChange('rsvp-orphans-cleaned');
+    } catch (error) {
+      if (status) status.textContent = error?.message || 'No se pudieron limpiar vínculos huérfanos.';
+    } finally { api.setSaving(false); }
+    return true;
+  }
+
   async function handleClick(event) {
     const musicFilter = event.target.closest('[data-music-filter]');
     if (musicFilter) {
@@ -630,6 +688,9 @@ function createRsvpController(api) {
       await load(api.getContext(), { announce: true });
       return true;
     }
+    const deleteButton = event.target.closest('[data-rsvp-delete]');
+    if (deleteButton) return deleteResponse(deleteButton.dataset.responseId);
+    if (event.target.closest('[data-rsvp-clean-orphans]')) return cleanOrphansFromApp();
     const unlinkButton = event.target.closest('[data-rsvp-unlink]');
     if (unlinkButton) {
       await unlink(unlinkButton.dataset.responseId);
