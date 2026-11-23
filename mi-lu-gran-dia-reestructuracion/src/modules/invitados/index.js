@@ -5,7 +5,7 @@ import { downloadXlsx } from './export-xlsx.js';
 import { downloadGuestImages } from './export-guest-image.js';
 import { weddingCapabilities } from '../../core/app/permissions.js';
 import { guestStatus, loadInvitadosSnapshot, saveInvitadosSnapshot } from './invitados-data.js?v=7';
-import { createRsvpController } from './rsvp-controller.js?v=17-20261004';
+import { createRsvpController } from './rsvp-controller.js?v=20261123-main-rsvp-integrity';
 import { createTablesController } from './tables-controller.js?v=24';
 
 let activeContext = null;
@@ -145,6 +145,14 @@ function ensureRsvpController() {
     isSaving: () => saving,
     setSaving: (value) => { saving = Boolean(value); },
     renderMain: render,
+    reloadGuests: async () => {
+      const id = activeContext?.id;
+      if (!id) throw new Error('La boda activa ya no está disponible.');
+      const loaded = await loadInvitadosSnapshot(activeContext);
+      if (activeContext?.id !== id) throw new Error('La boda cambió durante la actualización.');
+      snapshot = loaded;
+      render();
+    },
     emitDataChange
   });
   return rsvpController;
@@ -540,7 +548,7 @@ async function mountInvitados(context) {
 
   try {
     const [template, loaded] = await Promise.all([
-      fetch(new URL('./index.html?v=24-20261002', import.meta.url)).then((response) => {
+      fetch(new URL('./index.html?v=20261123-main-rsvp-integrity', import.meta.url)).then((response) => {
         if (!response.ok) throw new Error('No se pudo cargar la interfaz de Invitados.');
         return response.text();
       }),
