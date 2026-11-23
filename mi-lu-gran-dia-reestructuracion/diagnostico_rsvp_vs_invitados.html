@@ -83,7 +83,7 @@ import {auth,authPersistenceReady} from './src/services/firebase-client.js';
 import {onAuthStateChanged} from 'https://www.gstatic.com/firebasejs/12.17.1/firebase-auth.js';
 import {loadActiveWeddingContext} from './src/services/wedding-context.js';
 import {loadInvitadosSnapshot,saveInvitadosSnapshot,guestStatus} from './src/modules/invitados/invitados-data.js?v=10';
-import {loadRsvpAdminSnapshot,saveRsvpManagement,deleteRsvpManagement,restoreRsvpManagement,deleteRsvpResponseExceptional,cleanOrphanedRsvpLinks} from './src/services/rsvp-admin.js?v=6';
+import {loadRsvpAdminSnapshot,saveRsvpManagement,deleteRsvpManagement,restoreRsvpManagement,deleteRsvpResponseExceptional,cleanOrphanedRsvpLinks} from './src/services/rsvp-admin.js?v=20261123-rsvp-delete-integrity';
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;').replaceAll('"','&quot;').replaceAll("'","&#039;");
 let currentUser=null;
@@ -262,7 +262,7 @@ $('cleanOrphans').addEventListener('click',async()=>{
  if(!window.confirm('Se detectaron '+affected.length+' invitado(s) con respuestas RSVP inexistentes:\\n\\n'+names.join('\\n')+'\\n\\nSe quitarán las referencias huérfanas; el estado solo volverá a Pendiente si existe evidencia de vinculación RSVP. Se conservarán personas y mesas. ¿Continuar?'))return;
  const button=$('cleanOrphans');destructiveBusy=true;button.disabled=true;button.textContent='Limpiando…';
  try{
-  const result=await cleanOrphanedRsvpLinks(currentContext);
+  const result=await cleanOrphanedRsvpLinks(currentContext,orphanGuestIds);
   await run();
   $('state').textContent='Se limpiaron '+result.cleanedGuestIds.length+' vinculaciones huérfanas.';
  }catch(error){$('state').textContent=error?.message||'No se pudo limpiar los vínculos huérfanos.';}
