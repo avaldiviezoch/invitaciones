@@ -1345,7 +1345,7 @@ const MODULES = Object.freeze({
     mount: 'mountProveedores'
   },
   invitados: {
-    load: () => import('../invitados/index.js?v=20261123-orphan-picker'),
+    load: () => import('../invitados/index.js?v=20261123-auto-guest-return'),
     mount: 'mountInvitados'
   },
   distribucion: {
