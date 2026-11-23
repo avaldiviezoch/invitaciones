@@ -1,3 +1,13 @@
+## 2026-11-23 — DEV: integridad al eliminar RSVP y limpiar vínculos huérfanos
+
+- Causa raíz: el diagnóstico eliminaba la respuesta en `publicRsvp/{token}/responses/{responseId}` y el registro en `weddings/{weddingId}/rsvpManagement`, pero no retiraba la referencia `rsvpResponseId` ni el estado de RSVP del invitado canónico; así quedaron invitados confirmados tras borrar la respuesta.
+- Corrección en `src/services/rsvp-admin.js`: `deleteRsvpResponseExceptional` exige `canEdit` y boda activa, lee la respuesta y los invitados, desvincula únicamente los invitados cuyo `rsvpResponseId` coincide, preserva nombre/mesa/notas no RSVP y luego elimina respuesta y gestión mediante batch. Si falla el borrado, intenta restaurar el snapshot previo; si falla la restauración, muestra error explícito y detiene la operación.
+- Para evitar falsos cambios de confirmaciones manuales, solo se revierte a `pending` cuando el estado coincide con la asistencia de la respuesta eliminada. Un vínculo administrativo que no aparece en la ficha canónica no autoriza modificar el estado del invitado.
+- `cleanOrphanedRsvpLinks` revalida las referencias huérfanas contra respuestas existentes y exige que los `guestId` aún coincidan exactamente con la lista confirmada visualmente antes de escribir. Una limpieza histórica solo restablece `confirmed → pending` si existe evidencia de origen RSVP (`rsvpLinkedAt` o nota `[RSVP]`); en otros casos deja el estado intacto.
+- `diagnostico_rsvp_vs_invitados.html` delega eliminación y reparación al servicio, conserva confirmación fuerte `ELIMINAR` y los controles compactos existentes.
+- Pruebas de regresión de código incorporadas en `tests/rsvp-deletion-integrity.test.mjs`. Comando previsto: `node --test tests/rsvp-deletion-integrity.test.mjs`. **Sin ejecución autenticada en Firebase ni validación real de persistencia en esta intervención**; pendiente ejecutar pruebas de desarrollo, comprobar recarga/cambio de sesión/dispositivo y autorizar el pase de DEV a PROD conforme `docs/FLUJO_DESARROLLO_PRODUCCION.md`.
+- Sin cambios en Firestore Rules, Auth, configuración Firebase, colecciones, datos de usuarios ni `Wedding/app_integral` (PROD). No se ha ejecutado ningún borrado real.
+
 ## 2026-11-16 — Wishlist DEV: avatar Firebase y sincronización visible en página compartida
 
 - Se sustituyó el icono genérico de la cabecera por un avatar circular que utiliza auth.currentUser.photoURL, con inicial del usuario cuando no existe foto o no carga, igual al mecanismo del panel.
