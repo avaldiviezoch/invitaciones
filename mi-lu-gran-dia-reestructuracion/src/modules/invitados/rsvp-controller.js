@@ -5,7 +5,7 @@ import {
   restoreRsvpManagement,
   deleteRsvpResponseExceptional,
   verifyRsvpGuestAvailability
-} from '../../services/rsvp-admin.js?v=20261123-main-rsvp-integrity';
+} from '../../services/rsvp-admin.js?v=20261123-auto-guest-return';
 import { saveInvitadosSnapshot } from './invitados-data.js?v=3';
 import { searchMusicCatalog } from '../../services/music-catalog.js';
 
