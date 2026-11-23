@@ -64,7 +64,7 @@ button.danger{padding:6px 8px!important;min-width:0!important;font-size:10px!imp
 @media(max-width:800px){td:nth-child(7){min-width:395px}.link-line.compact-row{grid-template-columns:minmax(85px,1fr) 120px auto auto}.link-line.compact-row select{width:120px!important;max-width:120px!important}}
 </style></head>
 <body><main>
-<header><span class="eyebrow">DIAGNÓSTICO · CONSISTENCIA RSVP</span><h1>RSVP vs Invitados</h1><p>Compara cada persona vinculada a un RSVP confirmado contra la lista canónica de Invitados.</p><div class="actions"><button id="reload">Actualizar diagnóstico</button><button id="repair" disabled>Reparar discrepancias</button></div></header>
+<header><span class="eyebrow">DIAGNÓSTICO · CONSISTENCIA RSVP</span><h1>RSVP vs Invitados</h1><p>Compara cada persona vinculada a un RSVP confirmado contra la lista canónica de Invitados.</p><div class="actions"><button id="reload">Actualizar diagnóstico</button><button id="cleanOrphans" disabled title="Corregir vínculos de RSVP que ya no existen">Limpiar vínculos huérfanos</button><button id="repair" disabled>Reparar discrepancias</button></div></header>
 <div class="state" id="state">Esperando sesión activa…</div>
 <div class="summary">
 <article><span>Total de respuestas</span><strong id="sAllResponses">—</strong><small>formularios RSVP recibidos</small></article>
@@ -92,6 +92,20 @@ let currentGuestSnapshot=null;
 let currentRsvpSnapshot=null;
 let currentMismatchIds=[];
 let linkSaveBusy=false;
+let orphanGuestIds=[];
+let destructiveBusy=false;
+function copyCanonical(snapshot){
+ const source=snapshot?.canonical;
+ if(!source||!Array.isArray(source.guests))throw new Error('La lista de invitados no está disponible.');
+ return {...source,guests:source.guests.map(g=>({...g}))};
+}
+function removeDeletedRsvp(guest,responseId,attendance=''){
+ const next=dropRsvpMetadata(guest,responseId,attendance);
+ // Las confirmaciones eliminadas ya no deben contar como asistencia.
+ // Si la asistencia provenía del RSVP, restablecer el estado a pendiente.
+ if(String(guest.rsvpResponseId||'')===String(responseId) && ['confirmed','declined','tentative'].includes(guestStatus(guest)))next.status='pending';
+ return next;
+}
 function dropRsvpMetadata(guest,responseId,attendance){
  if(String(guest.rsvpResponseId||'')!==String(responseId)) return {...guest};
  const next={...guest};
@@ -139,6 +153,10 @@ async function run(){
   currentRsvpSnapshot=rsvpSnap;
   const guests=guestSnap?.canonical?.guests||[], byId=new Map(guests.map(g=>[String(g.id),g]));
   const responses=rsvpSnap.responses||[], management=rsvpSnap.management||[], responseById=new Map(responses.map(r=>[String(r.id),r]));
+  // Vínculos en Invitados cuyo documento RSVP ya fue eliminado.
+  orphanGuestIds=guests.filter(g=>String(g.rsvpResponseId||'').trim()&&!responseById.has(String(g.rsvpResponseId))).map(g=>String(g.id));
+  $('cleanOrphans').disabled=!orphanGuestIds.length;
+  $('cleanOrphans').textContent=orphanGuestIds.length?'Limpiar '+orphanGuestIds.length+' vínculo'+(orphanGuestIds.length===1?' huérfano':'s huérfanos'):'Sin vínculos huérfanos';
   const managementByResponse=new Map(management.map(m=>[String(m.responseId),m]));
   const confirmedResponses=responses.filter(r=>r.attendance==='confirmed'), confirmedIds=new Set(confirmedResponses.map(r=>String(r.id)));
   const rows=[];
@@ -182,7 +200,7 @@ $('reload').addEventListener('click',run);
 $('allResponsesBody').addEventListener('click',async(event)=>{
  const control=event.target.closest('[data-link-action]');
  if(!control)return;
- if(linkSaveBusy||!currentContext||!currentGuestSnapshot||!currentRsvpSnapshot)return;
+ if(linkSaveBusy||destructiveBusy||!currentContext||!currentGuestSnapshot||!currentRsvpSnapshot)return;
  const responseId=control.dataset.responseId,oldId=control.dataset.oldId||'',action=control.dataset.linkAction;
  const response=currentRsvpSnapshot.responses.find(r=>String(r.id)===responseId);
  if(!response) { $('state').textContent='La respuesta RSVP ya no está disponible. Actualiza el diagnóstico.';return; }
@@ -233,24 +251,71 @@ $('allResponsesBody').addEventListener('click',async(event)=>{
 });
 $('allResponsesBody').addEventListener('click',async(event)=>{
  const button=event.target.closest('[data-delete-rsvp]');
- if(!button||!currentContext||!currentRsvpSnapshot) return;
- const responseId=button.dataset.deleteRsvp;
- const name=button.dataset.deleteName||responseId;
- const typed=window.prompt('ELIMINACIÓN EXTRAORDINARIA\n\nSe eliminará únicamente la respuesta RSVP de "'+name+'" y su registro administrativo asociado. El invitado canónico y la cuenta Auth NO se eliminarán.\n\nEscribe ELIMINAR para continuar:');
- if(typed!=='ELIMINAR') return;
- if(!window.confirm('Última confirmación: ¿eliminar definitivamente esta respuesta RSVP?')) return;
- button.disabled=true;
- button.textContent='Eliminando…';
+ if(!button||destructiveBusy||linkSaveBusy||!currentContext||!currentRsvpSnapshot||!currentGuestSnapshot)return;
+ const responseId=String(button.dataset.deleteRsvp||'');
+ const response=currentRsvpSnapshot.responses.find(r=>String(r.id)===responseId);
+ if(!response){$('state').textContent='Respuesta no encontrada. Actualiza el diagnóstico.';return;}
+ const management=currentRsvpSnapshot.management.find(m=>String(m.responseId)===responseId);
+ const linkedIds=new Set(Array.isArray(management?.linkedGuestIds)?management.linkedGuestIds.map(String):[]);
+ const affected=currentGuestSnapshot.canonical.guests.filter(g=>String(g.rsvpResponseId||'')===responseId||linkedIds.has(String(g.id)));
+ const names=affected.map(g=>String(g.name||g.id));
+ const typed=window.prompt('ELIMINACIÓN EXTRAORDINARIA\n\nSe eliminará la respuesta RSVP de "'+String(response.name||responseId)+'" y su registro administrativo. También se desvincularán '+affected.length+' invitado(s), restableciendo a Pendiente los estados derivados del RSVP. Sus personas y mesas se conservan.\n\nEscribe ELIMINAR para continuar:');
+ if(typed!=='ELIMINAR')return;
+ if(!window.confirm('Última confirmación: ¿Eliminar RSVP y desvincular a '+(names.join(', ')||'los invitados asociados')+'?'))return;
+ destructiveBusy=true;button.disabled=true;button.textContent='Eliminando…';
+ const backup=copyCanonical(currentGuestSnapshot);
+ const modified=copyCanonical(currentGuestSnapshot);
+ let guestSaved=false;
  try{
-   await deleteRsvpResponseExceptional(currentContext,currentRsvpSnapshot.token,responseId);
-   $('state').textContent='Respuesta RSVP eliminada. Actualizando diagnóstico…';
-   await run();
+  modified.guests=modified.guests.map(g=>{
+   const id=String(g.id),hasReference=String(g.rsvpResponseId||'')===responseId;
+   if(hasReference)return removeDeletedRsvp(g,responseId,response.attendance);
+   // Si un registro antiguo solo conservaba linkedGuestIds, no se toca un estado manual.
+   if(linkedIds.has(id)&&!String(g.rsvpResponseId||''))return {...g};
+   return g;
+  });
+  if(affected.some(g=>String(g.rsvpResponseId||'')===responseId)){
+   await saveInvitadosSnapshot(currentContext,modified);guestSaved=true;
+  }
+  await deleteRsvpResponseExceptional(currentContext,currentRsvpSnapshot.token,responseId);
+  $('state').textContent='RSVP eliminado y vínculos actualizados. Verificando datos…';
+  await run();
  }catch(e){
-   $('state').textContent=e?.message||'No se pudo eliminar la respuesta RSVP.';
-   button.disabled=false;
-   button.textContent='Eliminar RSVP';
- }
+  if(guestSaved){
+   try{await saveInvitadosSnapshot(currentContext,backup);}
+   catch(rollbackError){
+    $('state').textContent='ATENCIÓN: falló la eliminación y no se pudo restaurar el estado previo de invitados. Revisa los vínculos antes de continuar. '+(rollbackError?.message||'');
+    destructiveBusy=false;button.disabled=false;button.textContent='Eliminar RSVP';return;
+   }
+  }
+  $('state').textContent=e?.message||'No se pudo completar la eliminación. Se conservaron los datos anteriores.';
+ }finally{destructiveBusy=false;button.disabled=false;button.textContent='Eliminar RSVP';}
 });
+$('cleanOrphans').addEventListener('click',async()=>{
+ if(destructiveBusy||linkSaveBusy||!currentContext||!currentGuestSnapshot||!currentRsvpSnapshot||!orphanGuestIds.length)return;
+ const ids=new Set(orphanGuestIds);
+ const affected=currentGuestSnapshot.canonical.guests.filter(g=>ids.has(String(g.id)));
+ const names=affected.map(g=>String(g.name||g.id));
+ if(!window.confirm('Se detectaron '+affected.length+' invitados con referencias RSVP que ya no existen:\n\n'+names.join('\n')+'\n\nSe quitarán esas referencias y sus estados derivados pasarán a Pendiente. No se eliminarán personas, mesas ni respuestas RSVP. ¿Continuar?'))return;
+ const button=$('cleanOrphans');destructiveBusy=true;button.disabled=true;button.textContent='Limpiando…';
+ try{
+  const fresh=await Promise.all([loadInvitadosSnapshot(currentContext),loadRsvpAdminSnapshot(currentContext)]);
+  const liveSnapshot=fresh[0],liveRsvp=fresh[1],liveResponseIds=new Set(liveRsvp.responses.map(r=>String(r.id)));
+  const liveOrphans=liveSnapshot.canonical.guests.filter(g=>String(g.rsvpResponseId||'').trim()&&!liveResponseIds.has(String(g.rsvpResponseId)));
+  const liveIds=new Set(liveOrphans.map(g=>String(g.id)));
+  if(!liveIds.size){$('state').textContent='No quedan referencias RSVP huérfanas.';await run();return;}
+  if(liveOrphans.length!==affected.length||liveOrphans.some(g=>!ids.has(String(g.id)))){
+   $('state').textContent='La lista cambió. Actualiza el diagnóstico y revisa antes de limpiar.';await run();return;
+  }
+  const next=copyCanonical(liveSnapshot);
+  next.guests=next.guests.map(g=>liveIds.has(String(g.id))?removeDeletedRsvp(g,String(g.rsvpResponseId||'')):g);
+  await saveInvitadosSnapshot(currentContext,next);
+  $('state').textContent='Vínculos huérfanos limpiados. Verificando…';
+  await run();
+ }catch(e){$('state').textContent=e?.message||'No se pudo limpiar los vínculos huérfanos.';}
+ finally{destructiveBusy=false;button.disabled=false;}
+});
+
 $('repair').addEventListener('click',async()=>{
  if(!currentContext||!currentGuestSnapshot||!currentMismatchIds.length) return;
  const names=currentGuestSnapshot.canonical.guests
