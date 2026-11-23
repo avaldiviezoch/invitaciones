@@ -356,8 +356,16 @@ function createRsvpController(api) {
       const id = text(guest?.rsvpResponseId);
       return Boolean(id && !existingResponses.has(id));
     };
-    const orphanedGuests = snapshot.canonical.guests.filter(isOrphan);
-    const candidates = snapshot.canonical.guests.slice().sort((a, b) => {
+    // Solo listar invitados disponibles: libres, de esta misma respuesta o con
+    // referencia huérfana. Los vinculados a otra respuesta vigente quedan ocultos.
+    const candidates = snapshot.canonical.guests.filter((guest) => {
+      const guestId = String(guest.id ?? '');
+      const canonicalId = text(guest.rsvpResponseId);
+      const managementId = linkedToOtherResponse.get(guestId) || '';
+      const canonicalBusy = canonicalId && canonicalId !== currentResponseId && existingResponses.has(canonicalId);
+      const managementBusy = managementId && existingResponses.has(managementId);
+      return !canonicalBusy && !managementBusy;
+    }).sort((a, b) => {
       const suggested = new Set(suggestedGuestIds(response));
       return Number(suggested.has(String(b.id))) - Number(suggested.has(String(a.id)))
         || text(a.name).localeCompare(text(b.name), 'es');
